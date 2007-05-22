@@ -17,6 +17,15 @@ namespace nuts {
 namespace nuts {
 	class DeviceManager : public QObject {
 		Q_OBJECT
+		protected slots:
+			friend class HardwareManager;
+			
+			bool addHardwareManager(HardwareManager* hwm);
+			
+			void gotCarrier(int ifIndex);
+			void lostCarrier(int ifIndex);
+			
+			
 	};
 	
 	class Device : public QObject {
