@@ -1,0 +1,92 @@
+device "eth0";
+
+device "eth0" {
+	no-dhcp;
+	environment "dhcp" {
+		select user;
+		dhcp {
+			label-index 2;
+		};
+	}
+	environment "user" {
+		static user;
+	};
+	environment "user" {
+		static {
+			ip user;
+			label-index auto;
+		};
+	};
+	environment "home" {
+		select {
+			user;
+		};
+		dhcp;
+		static {
+			ip 10.0.0.50/24;
+			gateway 10.0.0.1;
+			dns-server 10.0.0.1;
+			dns-server 10.0.0.2;
+			label-index 3;
+		};
+	};
+}
+
+device "eth0" {
+	environment "default" {
+		dhcp {
+			default gateway 192.168.0.1;
+		}; /* Force dhcp */
+	};
+	
+	environment "uni" {
+		select {
+			arp 129.69.220.254;
+			arp 129.69.220.254 00:00:0C:07:AC:00;
+		};
+		static {
+			ip 10.0.0.50/24;
+			gateway 10.0.0.1;
+			dns-server 10.0.0.1;
+			dns-server 10.0.0.2;
+		};
+	}
+};
+
+device "eth1" {
+	wlan {
+		/* mode "default" */ wpa-config "/etc/nut/wpa_eth1.config";
+		mode "infeap" {
+			wpa-config "/etc/nut/wpa_eth1.infeap.config";
+		};
+		mode "infvpn" wpa-config "/etc/nut/wpa_eth1.infvpn.config";
+		mode "user" wpa-config user;
+	};
+	environment "inf" {
+		select {
+			essid "infvpn";
+			essid "infeap";
+		}
+		dhcp;
+	};
+};
+
+
+----------------------
+
+
+/etc/nut/eth0/env-down/*
+/etc/nut/eth0/env-up/*
+/etc/nut/eth0/up/*
+/etc/nut/eth0/pre-down/*
+/etc/nut/eth0/post-down/*
+
+/etc/nut/eth0/up/samba-stop:
+#!/bin/bash
+
+if [ $ENVIRONMENT -eq "home" ]
+then
+	/etc/init.d/samba start
+else
+	/etc/init.d/samba stop
+fi

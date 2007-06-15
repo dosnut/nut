@@ -2,3 +2,6 @@ build
 Makefile
 moc*
 nuts
+configparser_lex.cpp
+configparser_yacc.cpp
+configparser_yacc.h

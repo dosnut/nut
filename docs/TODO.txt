@@ -1,0 +1,19 @@
+N(etwork)Ut(il): nut
+	- Server: nuts
+	- KDE: knut
+	- Commandline: nut
+
+nuts: siehe config.example
+knut:
+ - events von nuts
+ - bekommt config-daten vom server
+ - kann aktuellen zustand lesen
+ - kann environments je nach config auswählen
+ - kann modes für wlan wählen
+
+
+nuts:
+ - select syntax (AND/OR)
+
+nut:
+ - wie knut
