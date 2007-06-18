@@ -26,7 +26,7 @@ namespace qnut {
         switch (reason) {
             case Trigger:
                 if (mainwin->isVisible())
-                    mainwin->close();
+                    mainwin->hide();
                 else
                     mainwin->show();
                 break;
