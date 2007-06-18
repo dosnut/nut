@@ -109,7 +109,7 @@ namespace nuts {
 		
 		public:
 			Interface_IPv4(IPv4Config *config);
-			virtual ~Intercace_IPv4();
+			virtual ~Interface_IPv4();
 			void start();
 			
 			QHostAddress ip, netmask, gateway;

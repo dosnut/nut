@@ -3,13 +3,22 @@
 #include <QMutableListIterator>
 
 namespace nuts {
+	DeviceManager::DeviceManager(const QString &configFile)
+	: config(new Config(configFile)) {
+	}
+	
+	DeviceManager::~DeviceManager() {
+		delete config;
+	}
+	
 	void DeviceManager::gotCarrier(int) {
 	}
 	void DeviceManager::lostCarrier(int) {
 	}
 	
-	Device::Device(const QString &name, int interfaceIndex)
-	: name(name), interfaceIndex(interfaceIndex) { }
+	Device::Device(const QString &name, int interfaceIndex, DeviceConfig *config)
+	: name(name), interfaceIndex(interfaceIndex), config(config) {
+	}
 	
 	Device::~Device() {
 		QMutableListIterator<Environment*> i(envs);
@@ -42,8 +51,8 @@ namespace nuts {
 		enabled = b;
 	}
 	
-	Environment::Environment(Device *device)
-	: device(device) { }
+	Environment::Environment(Device *device, EnvironmentConfig *config)
+	: device(device), config(config) { }
 	Environment::~Environment() {
 		QMutableListIterator<Interface*> i(ifs);
 		while (i.hasNext()) {
@@ -62,4 +71,17 @@ namespace nuts {
 	
 	Interface::Interface() { }
 	Interface::~Interface() { }
+	
+	Interface_IPv4::Interface_IPv4(IPv4Config *config)
+	: config(config) {
+	}
+	
+	Interface_IPv4::~Interface_IPv4() {
+	}
+
+	void Interface_IPv4::start() {
+	}
+	
+	MacAddress::MacAddress(const QString &str) {
+	}
 };

@@ -9,6 +9,10 @@ extern "C" {
 void configparserparse(nuts::Config* config);
 extern FILE *configparserin;
 
+/* sub configuration structures will
+ * be deleted by ~Config() !
+ */
+
 namespace nuts {
 	Config::Config(const QString &configFile)
 	: configFile(configFile) {
