@@ -1,20 +1,41 @@
 #include "trayicon.h"
+#include <iostream>
+using namespace std;
 
-CTrayIcon::CTrayIcon(QObject * parent) : QSystemTrayIcon(parent) {
-    //Kontextmenü erstellen
-    devicesMenu.setTitle(tr("&Network Devices"));
-    devicesMenu.addAction(tr("empty..."));
-    
-    trayMenu.setTitle("KNut");
-    trayMenu.addAction(tr("open Connection &Manager"), this, SLOT(nothingHere()));
-    
-    trayMenu.addMenu(&devicesMenu);
-    trayMenu.addSeparator();
-    trayMenu.addAction(tr("&Quit"), qApp, SLOT(quit()));
+namespace qnut {
+    CTrayIcon::CTrayIcon(QObject * parent) : QSystemTrayIcon(parent) {
+        //Kontextmenü erstellen
+        devicesMenu.setTitle(tr("&Network Devices"));
+        devicesMenu.addAction(tr("empty..."));
+        
+        trayMenu.setTitle("KNut");
+        trayMenu.addAction(tr("open Connection &Manager"), parent, SLOT(show()));
+        
+        trayMenu.addMenu(&devicesMenu);
+        trayMenu.addSeparator();
+        trayMenu.addAction(tr("&Quit"), qApp, SLOT(quit()));
+        
+        setContextMenu(&trayMenu);
+        
+        connect(this, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+                this, SLOT(handleClicks(QSystemTrayIcon::ActivationReason)));
+    }
 
-    setContextMenu(&trayMenu);
-}
+    void CTrayIcon::handleClicks(QSystemTrayIcon::ActivationReason reason) {
+        QWidget * mainwin = (QWidget *)(parent());
+        switch (reason) {
+            case Trigger:
+                if (mainwin->isVisible())
+                    mainwin->close();
+                else
+                    mainwin->show();
+                break;
+            default:
+                break;
+        }
+    }
 
-void CTrayIcon::nothingHere() {
-    showMessage(tr("no Function here"), tr("This Funktion is not implemented yet"));
-}
+    void CTrayIcon::nothingHere() {
+        showMessage(tr("no Function here"), tr("This Funktion is not implemented yet"));
+    }
+};
