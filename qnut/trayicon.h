@@ -18,9 +18,6 @@ namespace qnut {
     public slots:
         void nothingHere();
         void handleClicks(QSystemTrayIcon::ActivationReason reason);
-    
-//    signals:
-//        void activated(ActivationReason reason);
     };
 };
 

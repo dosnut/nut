@@ -1,6 +1,7 @@
 build
 Makefile
-moc*
+ui_*
+moc_*
 *.qm
 fp
 qnut
