@@ -1,7 +1,9 @@
 #include <QtGui>
 #include <QTranslator>
 
-#include "trayicon.h"
+#include "connman.h"
+
+using namespace qnut;
 
 int main(int argc, char * argv[])
 {
@@ -13,8 +15,8 @@ int main(int argc, char * argv[])
     translator.load(QString("qnut_") + locale);
     app.installTranslator(&translator);
 
-    CTrayIcon mainwin;
+    CConnectionManager mainwin;
 
-    mainwin.show();
+    mainwin.trayicon.show();
     return app.exec();
 }

@@ -1,42 +1,86 @@
 <ui version="4.0" >
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow" >
+ <author>Oliver Groß</author>
+ <class>ConnMan</class>
+ <widget class="QMainWindow" name="ConnMan" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>489</width>
-    <height>334</height>
+    <width>457</width>
+    <height>357</height>
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>MainWindow</string>
+   <string>Connection Manager</string>
   </property>
-  <widget class="QWidget" name="centralwidget" />
+  <widget class="QWidget" name="centralwidget" >
+   <layout class="QGridLayout" >
+    <property name="margin" >
+     <number>3</number>
+    </property>
+    <property name="spacing" >
+     <number>4</number>
+    </property>
+    <item row="0" column="0" >
+     <widget class="QListWidget" name="listDevices" />
+    </item>
+   </layout>
+  </widget>
   <widget class="QMenuBar" name="menubar" >
    <property name="geometry" >
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>489</width>
+     <width>457</width>
      <height>29</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_File" >
+   <widget class="QMenu" name="menuFile" >
     <property name="title" >
      <string>&amp;File</string>
     </property>
-    <addaction name="action_Quit" />
+    <addaction name="actionClose" />
    </widget>
-   <addaction name="menu_File" />
+   <widget class="QMenu" name="menuDevice" >
+    <property name="title" >
+     <string>&amp;Device</string>
+    </property>
+    <widget class="QMenu" name="menuEnvironments" >
+     <property name="title" >
+      <string>&amp;Environments</string>
+     </property>
+     <addaction name="actionDefault" />
+    </widget>
+    <addaction name="actionRefresh" />
+    <addaction name="separator" />
+    <addaction name="menuEnvironments" />
+   </widget>
+   <addaction name="menuFile" />
+   <addaction name="menuDevice" />
   </widget>
-  <widget class="QStatusBar" name="statusbar" />
-  <action name="action_Quit" >
+  <widget class="QStatusBar" name="statusBar" >
+   <property name="sizeGripEnabled" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <action name="actionRefresh" >
    <property name="text" >
-    <string>&amp;Quit</string>
+    <string>&amp;Refresh</string>
+   </property>
+  </action>
+  <action name="actionClose" >
+   <property name="text" >
+    <string>&amp;Close</string>
+   </property>
+  </action>
+  <action name="actionDefault" >
+   <property name="text" >
+    <string>&amp;default</string>
    </property>
   </action>
  </widget>
+ <layoutdefault spacing="4" margin="4" />
+ <includes/>
  <resources/>
  <connections/>
 </ui>
