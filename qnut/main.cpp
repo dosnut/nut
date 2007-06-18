@@ -14,6 +14,7 @@ int main(int argc, char * argv[])
 
     translator.load(QString("qnut_") + locale);
     app.installTranslator(&translator);
+    app.setQuitOnLastWindowClosed(false);
 
     CConnectionManager mainwin;
 
