@@ -4,6 +4,7 @@
 #include <QtGui>
 #include "ui_connman.h"
 #include "trayicon.h"
+#include "common.h"
 
 namespace qnut {
     class CConnectionManager : public QMainWindow {
@@ -13,6 +14,8 @@ namespace qnut {
     public:
         CTrayIcon trayicon;
         CConnectionManager(QWidget * parent = 0);
+        
+        CDeviceList Devices;
     };
 };
 

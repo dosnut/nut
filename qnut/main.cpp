@@ -18,6 +18,5 @@ int main(int argc, char * argv[])
 
     CConnectionManager mainwin;
 
-    mainwin.trayicon.show();
     return app.exec();
 }

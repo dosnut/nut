@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>457</width>
-    <height>357</height>
+    <width>400</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -31,16 +31,10 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>457</width>
+     <width>400</width>
      <height>29</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile" >
-    <property name="title" >
-     <string>&amp;File</string>
-    </property>
-    <addaction name="actionClose" />
-   </widget>
    <widget class="QMenu" name="menuDevice" >
     <property name="title" >
      <string>&amp;Device</string>
@@ -54,6 +48,12 @@
     <addaction name="actionRefresh" />
     <addaction name="separator" />
     <addaction name="menuEnvironments" />
+   </widget>
+   <widget class="QMenu" name="menuFile" >
+    <property name="title" >
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionClose" />
    </widget>
    <addaction name="menuFile" />
    <addaction name="menuDevice" />
@@ -80,7 +80,23 @@
   </action>
  </widget>
  <layoutdefault spacing="4" margin="4" />
- <includes/>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionClose</sender>
+   <signal>triggered()</signal>
+   <receiver>ConnMan</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>228</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
