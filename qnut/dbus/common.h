@@ -5,6 +5,8 @@
 #include <QList>
 
 namespace qnut {
+    class CDeviceManager;
+
     class CDevice;
     class CEnvironment;
     class CInterface;
@@ -15,6 +17,15 @@ namespace qnut {
 };
 
 namespace qnut {
+    class CDeviceManager : public QObject {
+        Q_OBJECT
+    public:
+        CDeviceList Devices;
+    signals:
+        void deviceAdded(QString name);
+        void deviceRemoved(QString name);
+    };
+
     class CDevice : public QObject {
         Q_OBJECT
     //private:
@@ -24,9 +35,9 @@ namespace qnut {
         bool enabled;
         CEnvironmentList environments;
     signals:
-        void changedCurrentEnvironment(int Index);
-        void addedEnvironment();
-        void deletedEnvironment();
+        void environmentChangedActive(int Index);
+        void environmentAdded();
+        void environmentRemoved();
     };
     
     class CEnvironment : public QObject {
