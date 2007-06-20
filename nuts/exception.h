@@ -32,6 +32,20 @@ namespace nuts {
 				return msg.toUtf8().constData();
 			}
 	};
+	
+	class NetlinkInitException : public Exception {
+		public:
+			NetlinkInitException(const QString &msg) : Exception(msg) { }
+	};
+
+	class EthtoolException : public Exception {
+		public:
+			EthtoolException(const QString &msg) : Exception(msg) { }
+	};
+	class EthtoolInitException : public EthtoolException {
+		public:
+			EthtoolInitException(const QString &msg) : EthtoolException(msg) { }
+	};
 };
 
 

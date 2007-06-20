@@ -41,6 +41,8 @@ namespace nuts {
 		Q_PROPERTY(int current READ getCurrent WRITE setCurrent)
 		Q_PROPERTY(bool enabled READ getEnabled WRITE setEnabled)
 		protected:
+			friend class Environment;
+			
 			QString name;
 			int interfaceIndex;
 			int activeEnv;
@@ -73,6 +75,8 @@ namespace nuts {
 		Q_PROPERTY(Device* device READ getDevice)
 		
 		protected:
+			friend class Device;
+			
 			Device *device;
 			QList<Interface*> ifs;
 			

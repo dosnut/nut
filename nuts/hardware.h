@@ -5,10 +5,11 @@
 #include <QObject>
 #include <QString>
 #include <QList>
-#include <QBitArray>
+#include <QVector>
 
 extern "C" {
 	struct nl_handle;
+	struct ifreq;
 };
 
 namespace nuts {
@@ -21,20 +22,24 @@ namespace nuts {
 		private:
 			int netlink_fd, ethtool_fd;
 			struct nl_handle *nlh;
-			QBitArray ifMonitor;
+			struct ifstate {
+				bool active, carrier;
+				ifstate() : active(false), carrier(false) { }
+				ifstate(bool active) : active(active), carrier(false) { }
+			};
+			QVector<struct ifstate> ifStates;
 			
 			bool init_netlink();
 			void free_netlink(); 
 			bool init_ethtool();
 			void free_ethtool();
 			
-			bool ifup(const QString &ifname);
+			bool ifup(const QString &ifname, bool force = false);
 			bool ifdown(const QString &ifname);
 			
-			QString ifIndex2Name(int ifIndex);
-			int ifName2Index(const QString &ifName);
+			bool isControlled(int ifIndex);
 			
-			bool isMonitored(int ifIndex);
+			bool ifreq_init(struct ifreq &ifr, const QString &ifname);
 			
 		private slots:
 			void read_netlinkmsgs();
@@ -42,8 +47,11 @@ namespace nuts {
 			HardwareManager();
 			virtual ~HardwareManager();
 			
-			void setMonitor(int ifIndex);
-			void clearMonitor(int ifIndex);
+			bool controlOn(int ifIndex, bool force = false);
+			bool controlOff(int ifIndex);
+			
+			QString ifIndex2Name(int ifIndex);
+			int ifName2Index(const QString &ifName);
 			
 		signals:
 			void gotCarrier(int ifIndex);

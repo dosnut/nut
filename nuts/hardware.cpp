@@ -12,6 +12,7 @@
 
 #include "hardware.h"
 #include "exception.h"
+#include "log.h"
 
 extern "C" {
 #include <asm/types.h>
@@ -28,6 +29,7 @@ extern "C" {
 #include <arpa/inet.h>
 #include <linux/if.h>
 #include <linux/ethtool.h>
+#include <linux/sysctl.h>
 // hardware_ext.c
 extern struct nla_policy ifla_policy[IFLA_MAX+1];
 extern struct nla_policy ifa_ipv4_policy[IFA_MAX+1];
@@ -35,21 +37,16 @@ extern struct nla_policy ifa_ipv4_policy[IFA_MAX+1];
 
 #include <QSocketNotifier>
 #include <QApplication>
-#include <iostream>
 
 namespace nuts {
 	HardwareManager::HardwareManager()
 	: netlink_fd(-1), ethtool_fd(-1) {
 		if (!init_netlink()) {
-			std::cerr << "Couldn't init netlink" << std::endl;
-			QApplication::exit(-1);
-			return;
+			throw NetlinkInitException("HardwareManager: Couldn't init netlink");
 		}
 		if (!init_ethtool()) {
 			free_netlink();
-			std::cerr << "Couldn't init ethtool" << std::endl;
-			QApplication::exit(-1);
-			return;
+			throw EthtoolInitException("HardwareManager: Couldn't init ethtool");
 		}
 		fcntl(netlink_fd, F_SETFD, FD_CLOEXEC);
 		fcntl(ethtool_fd, F_SETFD, FD_CLOEXEC);
@@ -62,16 +59,22 @@ namespace nuts {
 		free_netlink();
 	}
 	
-	void HardwareManager::setMonitor(int ifIndex) {
-		if (ifIndex < 0) return;
-		if (ifIndex >= ifMonitor.size())
-			ifMonitor.resize(ifIndex+1);
-		ifMonitor.setBit(ifIndex);
+	bool HardwareManager::controlOn(int ifIndex, bool force) {
+		if (ifIndex < 0) return false;
+		if (!ifup(ifIndex2Name(ifIndex), force))
+			return false;
+		if (ifIndex >= ifStates.size())
+			ifStates.resize(ifIndex+1);
+		ifStates[ifIndex] = ifstate(true);
+		return true;
 	}
-	void HardwareManager::clearMonitor(int ifIndex) {
-		if (ifIndex < 0) return;
-		if (ifIndex < ifMonitor.size())
-			ifMonitor.clearBit(ifIndex);
+	bool HardwareManager::controlOff(int ifIndex) {
+		if (ifIndex < 0) return false;
+		if (ifIndex < ifStates.size() && ifStates[ifIndex].active) {
+			ifStates[ifIndex].active = false;
+			ifdown(ifIndex2Name(ifIndex));
+		}
+		return true;
 	}
 	
 	bool HardwareManager::init_netlink() {
@@ -110,8 +113,51 @@ namespace nuts {
 		close(ethtool_fd);
 	}
 	
+	bool HardwareManager::ifup(const QString &ifname, bool force) {
+		struct ifreq ifr;
+		if (!ifreq_init(ifr, ifname)) {
+			err << QString("Interface name too long") << endl;
+			return false;
+		}
+		if (ioctl(ethtool_fd, SIOCGIFFLAGS, &ifr) < 0) {
+			err << QString("Couldn't get flags for interface '%1'").arg(ifname) << endl;
+			return false;
+		}
+		if (ifr.ifr_flags & IFF_UP) {
+			if (!force) return false;
+	        // "restart" interface to get carrier event
+			ifr.ifr_flags &= ~IFF_UP;
+			if (ioctl(ethtool_fd, SIOCSIFFLAGS, &ifr) < 0) {
+				err << QString("Couldn't set flags for interface '%1'").arg(ifname);
+				return false;
+			}
+		}
+		ifr.ifr_flags |= IFF_UP;
+		if (ioctl(ethtool_fd, SIOCSIFFLAGS, &ifr) < 0) {
+			err << QString("Couldn't set flags for interface '%1'").arg(ifname);
+			return false;
+		}
+		return true;
+	}
+	bool HardwareManager::ifdown(const QString &ifname) {
+		return true;
+	}
+	QString HardwareManager::ifIndex2Name(int ifIndex) {
+		return "";
+	}
+	int HardwareManager::ifName2Index(const QString &ifName) {
+		return 0;
+	}
+	
+	bool HardwareManager::ifreq_init(struct ifreq &ifr, const QString &ifname) {
+		QByteArray buf = ifname.toUtf8();
+		if (buf.size() >= IFNAMSIZ) return false;
+		memset((char*) &ifr, 0, sizeof(ifr));
+		strncpy (ifr.ifr_name, buf.constData(), sizeof(ifr.ifr_name)-1);
+		return true;
+	}
+	
 	void HardwareManager::read_netlinkmsgs() {
-		printf("Netlink message\n");
 		struct sockaddr_nl peer;
 		unsigned char *msg;
 		int n;
@@ -119,7 +165,7 @@ namespace nuts {
 		
 		n = nl_recv(nlh, &peer, &msg, 0);
 		for (hdr = (struct nlmsghdr*) msg; nlmsg_ok(hdr, n); hdr = (struct nlmsghdr*) nlmsg_next(hdr, &n)) {
-			printf("Message type 0x%x\n", hdr->nlmsg_type);
+			log << QString("Message type 0x%1").arg(hdr->nlmsg_type, 0, 16) << endl;
 			switch (hdr->nlmsg_type) {
 				case RTM_NEWLINK:
 					struct ifinfomsg *ifm = (struct ifinfomsg*) nlmsg_data(hdr);
@@ -127,23 +173,26 @@ namespace nuts {
 					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
 						break;
 					}
-					if (!isMonitored(ifm->ifi_index))
+					if (!isControlled(ifm->ifi_index))
 						break;
-					printf("RTM_NEWLINK: %s (%i)\n",
-						   tb[IFLA_IFNAME] ? (char*) nla_data(tb[IFLA_IFNAME]) : "<unknown>", ifm->ifi_index);
-
-					int carrier = (ifm->ifi_flags & IFF_LOWER_UP) > 0;
-					if (carrier)
-						emit gotCarrier(ifm->ifi_index);
-					else
-						emit lostCarrier(ifm->ifi_index);
+					log << QString("RTM_NEWLINK: %1 (%2)\n")
+							.arg(tb[IFLA_IFNAME] ? (char*) nla_data(tb[IFLA_IFNAME]) : "<unknown>")
+							.arg(ifm->ifi_index);
+					bool carrier = (ifm->ifi_flags & IFF_LOWER_UP) > 0;
+					if (carrier != ifStates[ifm->ifi_index].carrier) {
+						ifStates[ifm->ifi_index].carrier = carrier;
+						if (carrier)
+							emit gotCarrier(ifm->ifi_index);
+						else
+							emit lostCarrier(ifm->ifi_index);
+					}
 					break;
 			}
 		}
 	}
-	bool HardwareManager::isMonitored(int ifIndex) {
+	bool HardwareManager::isControlled(int ifIndex) {
 		if (ifIndex < 0) return false;
-		if (ifIndex >= ifMonitor.size()) return false;
-		return ifMonitor[ifIndex];
+		if (ifIndex >= ifStates.size()) return false;
+		return ifStates[ifIndex].active;
 	}
 };
