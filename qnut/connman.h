@@ -7,20 +7,6 @@
 #include "common.h"
 
 namespace qnut {
-    class CuiDevice : public QListWidgetItem {
-        Q_OBJECT
-    public slots:
-        void uiEnvironmentAdd();
-        void uiEnvironmentRemove();
-    };
-    
-    class CuiEnvironment : public QListWidgetItem {
-        Q_OBJECT
-    public slots:
-        void uiInterfaceAdd();
-        void uiInterfacePemove();
-    };
-
     class CConnectionManager : public QMainWindow {
         Q_OBJECT
     private:
@@ -31,8 +17,7 @@ namespace qnut {
         
         CConnectionManager(QWidget * parent = 0);
     public slots:
-        void uiDeviceAdd(QString name);
-        void uiDeviceRemove(QString name);
+        void uiUpdateDevices(QStringList * names)
     };
 };
 

@@ -5,25 +5,25 @@
 #include <QList>
 
 namespace qnut {
+    typedef char IPAddress [4];
+
     class CDeviceManager;
 
     class CDevice;
     class CEnvironment;
-    class CInterface;
 
     typedef QList<CDevice> CDeviceList;
     typedef QList<CEnvironment> CEnvironmentList;
-    typedef QList<CInterface> CInterfaceList;
+    typedef QList<IPAddress> CInterfaceList;
 };
 
 namespace qnut {
     class CDeviceManager : public QObject {
         Q_OBJECT
     public:
-        CDeviceList Devices;
+        CDeviceList devices;
     signals:
-        void deviceAdded(QString name);
-        void deviceRemoved(QString name);
+        void devicesUpdated(QStringList * names);
     };
 
     class CDevice : public QObject {
@@ -36,8 +36,7 @@ namespace qnut {
         CEnvironmentList environments;
     signals:
         void environmentChangedActive(int Index);
-        void environmentAdded();
-        void environmentRemoved();
+        void environmentsUpdated(QStringList * names);
     };
     
     class CEnvironment : public QObject {
@@ -46,15 +45,7 @@ namespace qnut {
     public:
         CInterfaceList interfaces;
     signals:
-        void up();
-        void down();
-    };
-    
-    class CInterface : public QObject {
-        Q_OBJECT
-    //private:
-    //public:
-    signals:
+        void interfacesUpdated(CInterfaceList * ip);
         void up();
         void down();
     };
