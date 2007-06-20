@@ -17,7 +17,7 @@ namespace qnut {
         
         CConnectionManager(QWidget * parent = 0);
     public slots:
-        void uiUpdateDevices(QStringList * names)
+        void uiUpdateDevices(QStringList * names);
     };
 };
 

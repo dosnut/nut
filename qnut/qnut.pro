@@ -1,12 +1,12 @@
 TEMPLATE = app
 INCLUDEPATH += .
 CONFIG += qt
+QT += network
 
 CODECFORSRC = UTF-8
 CODECFORTR = ISO-8859-1
 
 OBJECTS_DIR = build
-DESTDIR = build
 
 FORMS = connman.ui
 TRANSLATIONS = qnut_de.ts

@@ -7,7 +7,11 @@ namespace qnut {
         trayicon.show();
     }
     
-    void CConnectionManager::uiDevicesUpdate(QString name) {
-        ui.
+    void CConnectionManager::uiUpdateDevices(QStringList * names) {
+        QStringList::const_iterator i;
+        QListWidgetItem * newItem;
+        for (i = names->begin(); i != names->end(); i++) {
+            newItem = new QListWidgetItem(*i, ui.devicesWidget);
+        }
     }
 };

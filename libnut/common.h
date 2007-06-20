@@ -3,10 +3,9 @@
 
 #include <QObject>
 #include <QList>
+#include <QHostAddress>
 
 namespace qnut {
-    typedef char IPAddress [4];
-
     class CDeviceManager;
 
     class CDevice;
@@ -14,7 +13,7 @@ namespace qnut {
 
     typedef QList<CDevice> CDeviceList;
     typedef QList<CEnvironment> CEnvironmentList;
-    typedef QList<IPAddress> CInterfaceList;
+    typedef QList<QHostAddress> CInterfaceList;
 };
 
 namespace qnut {

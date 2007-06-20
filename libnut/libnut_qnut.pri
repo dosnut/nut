@@ -1,2 +1,2 @@
-HEADERS += dbus/common.h
-SOURCES += dbus/common.cpp
+HEADERS += ../libnut/common.h
+SOURCES += ../libnut/common.cpp
