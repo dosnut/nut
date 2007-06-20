@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>457</width>
-    <height>357</height>
+    <width>394</width>
+    <height>273</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -15,14 +15,95 @@
   </property>
   <widget class="QWidget" name="centralwidget" >
    <layout class="QGridLayout" >
-    <property name="margin" >
-     <number>3</number>
+    <property name="leftMargin" >
+     <number>4</number>
     </property>
-    <property name="spacing" >
+    <property name="topMargin" >
+     <number>4</number>
+    </property>
+    <property name="rightMargin" >
+     <number>4</number>
+    </property>
+    <property name="bottomMargin" >
+     <number>4</number>
+    </property>
+    <property name="horizontalSpacing" >
+     <number>4</number>
+    </property>
+    <property name="verticalSpacing" >
      <number>4</number>
     </property>
     <item row="0" column="0" >
-     <widget class="QListWidget" name="listDevices" />
+     <widget class="QSplitter" name="splitter" >
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="childrenCollapsible" >
+       <bool>false</bool>
+      </property>
+      <widget class="QWidget" name="verticalLayout" >
+       <layout class="QVBoxLayout" >
+        <item>
+         <widget class="QLabel" name="devicesLabel" >
+          <property name="text" >
+           <string>Devices:</string>
+          </property>
+          <property name="textFormat" >
+           <enum>Qt::AutoText</enum>
+          </property>
+          <property name="buddy" >
+           <cstring>devicesWidget</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListWidget" name="devicesWidget" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Expanding" hsizetype="Ignored" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize" >
+           <size>
+            <width>120</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="" >
+       <layout class="QVBoxLayout" >
+        <item>
+         <widget class="QLabel" name="propertiesLabel" >
+          <property name="text" >
+           <string>Properties:</string>
+          </property>
+          <property name="buddy" >
+           <cstring>propertiesWidget</cstring>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="propertiesWidget" >
+          <property name="minimumSize" >
+           <size>
+            <width>120</width>
+            <height>0</height>
+           </size>
+          </property>
+          <column>
+           <property name="text" >
+            <string>1</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -31,16 +112,10 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>457</width>
-     <height>29</height>
+     <width>394</width>
+     <height>25</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile" >
-    <property name="title" >
-     <string>&amp;File</string>
-    </property>
-    <addaction name="actionClose" />
-   </widget>
    <widget class="QMenu" name="menuDevice" >
     <property name="title" >
      <string>&amp;Device</string>
@@ -54,6 +129,12 @@
     <addaction name="actionRefresh" />
     <addaction name="separator" />
     <addaction name="menuEnvironments" />
+   </widget>
+   <widget class="QMenu" name="menuFile" >
+    <property name="title" >
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionClose" />
    </widget>
    <addaction name="menuFile" />
    <addaction name="menuDevice" />
@@ -80,7 +161,27 @@
   </action>
  </widget>
  <layoutdefault spacing="4" margin="4" />
- <includes/>
+ <tabstops>
+  <tabstop>devicesWidget</tabstop>
+  <tabstop>propertiesWidget</tabstop>
+ </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionClose</sender>
+   <signal>triggered()</signal>
+   <receiver>ConnMan</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>228</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

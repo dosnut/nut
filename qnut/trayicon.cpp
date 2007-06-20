@@ -3,8 +3,7 @@
 using namespace std;
 
 namespace qnut {
-    CTrayIcon::CTrayIcon(QObject * parent) : QSystemTrayIcon(parent) {
-        //Kontextmenü erstellen
+    CTrayIcon::CTrayIcon(QObject * parent) : QSystemTrayIcon(QIcon("res/network.svg"), parent) {
         devicesMenu.setTitle(tr("&Network Devices"));
         devicesMenu.addAction(tr("empty..."));
         
@@ -26,7 +25,7 @@ namespace qnut {
         switch (reason) {
             case Trigger:
                 if (mainwin->isVisible())
-                    mainwin->hide();
+                    mainwin->close();
                 else
                     mainwin->show();
                 break;
