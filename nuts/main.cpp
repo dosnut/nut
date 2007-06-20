@@ -14,29 +14,26 @@ int main(int argc, char* argv[]) {
 	QApplication app(argc, argv);
 	SigHandler *sighandler;
 	DeviceManager *devManager;
-	HardwareManager *hwManager;
 	try {
 		sighandler = new SigHandler();
 		devManager = new DeviceManager("test.config");
-		hwManager = new HardwareManager();
 	} catch (Exception &e) {
 		err << "Initialize failed:" << endl
-		          << "    " << e.what() << endl;
+		          << "    " << e.msg() << endl;
 		return -1;
 	}
 	try {
 		app.exec();
 	} catch (Exception &e) {
-		err << e.what() << endl;
+		err << e.msg() << endl;
 		return -2;
 	}
 	try {
-		delete hwManager;
 		delete devManager;
 		delete sighandler;
 	} catch (Exception &e) {
-		std::cerr << "Cleanup failed:" << std::endl
-		          << "    " << e.what() << std::endl;
+		err << "Cleanup failed:" << endl
+				<< "    " << e.msg() << endl;
 		return -3;
 	}
 	return 0;

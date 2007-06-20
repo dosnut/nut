@@ -17,7 +17,8 @@ namespace nuts {
 
 namespace nuts {
 	class Config {
-		private:
+		protected:
+			friend class DeviceManager;
 			QString configFile;
 			QHash<QString, DeviceConfig*> devices;
 		
@@ -31,15 +32,17 @@ namespace nuts {
 	};
 	
 	class DeviceConfig {
+		protected:
+			QList<EnvironmentConfig*> environments;
+			EnvironmentConfig *defEnv;
+		
 		public:
 			DeviceConfig();
 			virtual ~DeviceConfig();
-			QList<EnvironmentConfig*> environments;
 			
 			EnvironmentConfig* getDefaultEnv();
 			EnvironmentConfig* createEnvironment();
 			
-			EnvironmentConfig *defEnv;
 			bool canUserEnable;
 	};
 	

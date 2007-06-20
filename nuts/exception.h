@@ -24,12 +24,15 @@ namespace nuts {
 namespace nuts {
 	class Exception : public std::exception {
 		private:
-			QString msg;
+			QString _msg;
 		public:
-			Exception(const QString &msg) : msg(msg) { }
+			Exception(const QString &msg) : _msg(msg) { }
 			virtual ~Exception() throw() { }
 			virtual const char* what() const throw() {
-				return msg.toUtf8().constData();
+				return _msg.toUtf8().constData();
+			}
+			virtual const QString& msg() const throw() {
+				return _msg;
 			}
 	};
 	

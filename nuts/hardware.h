@@ -40,6 +40,7 @@ namespace nuts {
 			bool isControlled(int ifIndex);
 			
 			bool ifreq_init(struct ifreq &ifr, const QString &ifname);
+			void ifreq_init(struct ifreq &ifr);
 			
 		private slots:
 			void read_netlinkmsgs();
@@ -49,6 +50,8 @@ namespace nuts {
 			
 			bool controlOn(int ifIndex, bool force = false);
 			bool controlOff(int ifIndex);
+			bool controlOn(const QString &ifName, bool force = false);
+			bool controlOff(const QString &ifName);
 			
 			QString ifIndex2Name(int ifIndex);
 			int ifName2Index(const QString &ifName);

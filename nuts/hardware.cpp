@@ -76,6 +76,26 @@ namespace nuts {
 		}
 		return true;
 	}
+	bool HardwareManager::controlOn(const QString &ifName, bool force) {
+		int ifIndex = ifName2Index(ifName);
+		if (ifIndex < 0) return false;
+		if (!ifup(ifName, force))
+			return false;
+		if (ifIndex >= ifStates.size())
+			ifStates.resize(ifIndex+1);
+		ifStates[ifIndex] = ifstate(true);
+		log << "activated interface " << ifIndex << endl;
+		return isControlled(ifIndex);
+	}
+	bool HardwareManager::controlOff(const QString &ifName) {
+		int ifIndex = ifName2Index(ifName);
+		if (ifIndex < 0) return false;
+		if (ifIndex < ifStates.size() && ifStates[ifIndex].active) {
+			ifStates[ifIndex].active = false;
+			ifdown(ifName);
+		}
+		return true;
+	}
 	
 	bool HardwareManager::init_netlink() {
 		nlh = nl_handle_alloc();
@@ -128,33 +148,70 @@ namespace nuts {
 	        // "restart" interface to get carrier event
 			ifr.ifr_flags &= ~IFF_UP;
 			if (ioctl(ethtool_fd, SIOCSIFFLAGS, &ifr) < 0) {
-				err << QString("Couldn't set flags for interface '%1'").arg(ifname);
+				err << QString("Couldn't set flags for interface '%1'").arg(ifname) << endl;
 				return false;
 			}
 		}
 		ifr.ifr_flags |= IFF_UP;
 		if (ioctl(ethtool_fd, SIOCSIFFLAGS, &ifr) < 0) {
-			err << QString("Couldn't set flags for interface '%1'").arg(ifname);
+			err << QString("Couldn't set flags for interface '%1'").arg(ifname) << endl;
 			return false;
 		}
 		return true;
 	}
 	bool HardwareManager::ifdown(const QString &ifname) {
+		struct ifreq ifr;
+		if (!ifreq_init(ifr, ifname)) {
+			err << QString("Interface name too long") << endl;
+			return false;
+		}
+		if (ioctl(ethtool_fd, SIOCGIFFLAGS, &ifr) < 0) {
+			err << QString("Couldn't get flags for interface '%1'").arg(ifname) << endl;
+			return false;
+		}
+		if (!(ifr.ifr_flags & IFF_UP)) {
+			err << QString("Interface '%1' is not up").arg(ifname) << endl;
+			return false;
+		}
+		ifr.ifr_flags &= ~IFF_UP;
+		if (ioctl(ethtool_fd, SIOCSIFFLAGS, &ifr) < 0) {
+			err << QString("Couldn't set flags for interface '%1'").arg(ifname) << endl;
+			return false;
+		}
 		return true;
 	}
 	QString HardwareManager::ifIndex2Name(int ifIndex) {
-		return "";
+		struct ifreq ifr;
+		ifreq_init(ifr);
+		ifr.ifr_ifindex = ifIndex;
+		if (ioctl(ethtool_fd, SIOCGIFNAME, &ifr) < 0) {
+			err << QString("Couldn't get interface name for device %1").arg(ifIndex) << endl;
+			return QString();
+		}
+		return QString::fromUtf8(ifr.ifr_name, qstrnlen(ifr.ifr_name, IFNAMSIZ));
 	}
 	int HardwareManager::ifName2Index(const QString &ifName) {
-		return 0;
+		struct ifreq ifr;
+		if (!ifreq_init(ifr, ifName)) {
+			err << QString("Interface name too long") << endl;
+			return -1;
+		}
+		if (ioctl(ethtool_fd, SIOCGIFINDEX, &ifr) < 0) {
+			err << QString("Couldn't get interface index of '%1'").arg(ifName) << endl;
+			return -1;
+		}
+		return ifr.ifr_ifindex;
 	}
 	
 	bool HardwareManager::ifreq_init(struct ifreq &ifr, const QString &ifname) {
 		QByteArray buf = ifname.toUtf8();
 		if (buf.size() >= IFNAMSIZ) return false;
-		memset((char*) &ifr, 0, sizeof(ifr));
-		strncpy (ifr.ifr_name, buf.constData(), sizeof(ifr.ifr_name)-1);
+		ifreq_init(ifr);
+		strncpy (ifr.ifr_name, buf.constData(), buf.size());
 		return true;
+	}
+	void HardwareManager::ifreq_init(struct ifreq &ifr) {
+		memset((char*) &ifr, 0, sizeof(ifr));
 	}
 	
 	void HardwareManager::read_netlinkmsgs() {
@@ -180,6 +237,7 @@ namespace nuts {
 							.arg(ifm->ifi_index);
 					bool carrier = (ifm->ifi_flags & IFF_LOWER_UP) > 0;
 					if (carrier != ifStates[ifm->ifi_index].carrier) {
+						log << QString("Carrier change to %1").arg(carrier) << endl;
 						ifStates[ifm->ifi_index].carrier = carrier;
 						if (carrier)
 							emit gotCarrier(ifm->ifi_index);

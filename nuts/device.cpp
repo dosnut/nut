@@ -1,23 +1,35 @@
 
 #include "device.h"
+#include "log.h"
 #include <QMutableListIterator>
 
 namespace nuts {
 	DeviceManager::DeviceManager(const QString &configFile)
 	: config(new Config(configFile)) {
+		QHashIterator<QString, DeviceConfig*> i(config->devices);
+		while (i.hasNext()) {
+			i.next();
+			Device *d = new Device(i.key(), i.value());
+			devices.insert(i.key(), d);
+		}
 	}
 	
 	DeviceManager::~DeviceManager() {
 		delete config;
+		foreach (Device* d, devices)
+			delete d;
+		devices.clear();
 	}
 	
-	void DeviceManager::gotCarrier(int) {
+	void DeviceManager::gotCarrier(const QString &ifName, int ifIndex) {
+		devices[ifName]->gotCarrier(ifIndex);
 	}
-	void DeviceManager::lostCarrier(int) {
+	void DeviceManager::lostCarrier(const QString &ifName) {
+		devices[ifName]->lostCarrier();
 	}
 	
-	Device::Device(const QString &name, int interfaceIndex, DeviceConfig *config)
-	: name(name), interfaceIndex(interfaceIndex), config(config) {
+	Device::Device(const QString &name, DeviceConfig *config)
+	: name(name), interfaceIndex(-1), config(config) {
 	}
 	
 	Device::~Device() {
@@ -32,7 +44,15 @@ namespace nuts {
 	}
 	void Device::envDown(Environment*) {
 	}
-	
+	void Device::gotCarrier(int ifIndex) {
+		interfaceIndex = ifIndex;
+		log << "Device(" << name << ") gotCarrier" << endl;
+	}
+	void Device::lostCarrier() {
+		log << "Device(" << name << ") lostCarrier" << endl;
+		interfaceIndex = -1;
+	}
+
 	QString Device::getName() {
 		return name;
 	}

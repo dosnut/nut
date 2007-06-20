@@ -17,19 +17,21 @@ namespace nuts {
 };
 
 #include "config.h"
+#include "hardware.h"
 
 namespace nuts {
 	class DeviceManager : public QObject {
 		Q_OBJECT
 		protected:
 			Config *config;
+			HardwareManager hwman;
 			
-			QList<Device*> devices;
+			QHash<QString, Device*> devices;
 			
 			friend class HardwareManager;
 			
-			void gotCarrier(int ifIndex);
-			void lostCarrier(int ifIndex);
+			void gotCarrier(const QString &ifName, int ifIndex);
+			void lostCarrier(const QString &ifName);
 		public:
 			DeviceManager(const QString &configFile);
 			virtual ~DeviceManager();
@@ -41,6 +43,7 @@ namespace nuts {
 		Q_PROPERTY(int current READ getCurrent WRITE setCurrent)
 		Q_PROPERTY(bool enabled READ getEnabled WRITE setEnabled)
 		protected:
+			friend class DeviceManager;
 			friend class Environment;
 			
 			QString name;
@@ -54,8 +57,10 @@ namespace nuts {
 			void envUp(Environment*);
 			void envDown(Environment*);
 			
+			void gotCarrier(int ifIndex);
+			void lostCarrier();
 		public:
-			Device(const QString &name, int interfaceIndex, DeviceConfig *config);
+			Device(const QString &name, DeviceConfig *config);
 			virtual ~Device();
 			
 			// Properties
