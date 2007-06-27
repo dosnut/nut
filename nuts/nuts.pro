@@ -9,11 +9,13 @@ SOURCES += main.cpp device.cpp config.cpp \
 hardware.cpp \
 sighandler.cpp \
 hardware_ext.c \
-log.cpp
+log.cpp \
+dhcppacket.cpp
 HEADERS += common.h device.h   config.h   hardware.h \
 exception.h \
 sighandler.h \
-log.h
+log.h \
+dhcppacket.h
 YACCSOURCES += configparser.y
 LEXSOURCES += configparser.l
 
