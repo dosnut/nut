@@ -203,6 +203,10 @@ namespace nuts {
 		return ifr.ifr_ifindex;
 	}
 	
+	struct nl_handle *HardwareManager::getNLHandle() {
+		return nlh;
+	}
+	
 	bool HardwareManager::ifreq_init(struct ifreq &ifr, const QString &ifname) {
 		QByteArray buf = ifname.toUtf8();
 		if (buf.size() >= IFNAMSIZ) return false;
@@ -222,7 +226,7 @@ namespace nuts {
 		
 		n = nl_recv(nlh, &peer, &msg, 0);
 		for (hdr = (struct nlmsghdr*) msg; nlmsg_ok(hdr, n); hdr = (struct nlmsghdr*) nlmsg_next(hdr, &n)) {
-			log << QString("Message type 0x%1").arg(hdr->nlmsg_type, 0, 16) << endl;
+//			log << QString("Message type 0x%1").arg(hdr->nlmsg_type, 0, 16) << endl;
 			switch (hdr->nlmsg_type) {
 				case RTM_NEWLINK:
 					struct ifinfomsg *ifm = (struct ifinfomsg*) nlmsg_data(hdr);
@@ -230,19 +234,20 @@ namespace nuts {
 					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
 						break;
 					}
-					if (!isControlled(ifm->ifi_index))
+					int ifindex = ifm->ifi_index;
+					if (!isControlled(ifindex))
 						break;
-					log << QString("RTM_NEWLINK: %1 (%2)\n")
-							.arg(tb[IFLA_IFNAME] ? (char*) nla_data(tb[IFLA_IFNAME]) : "<unknown>")
-							.arg(ifm->ifi_index);
+					QString ifname = ifIndex2Name(ifindex);
+//					log << QString("RTM_NEWLINK: %1 (%2)")
+//							.arg(ifname).arg(ifindex)
+//						<< endl;
 					bool carrier = (ifm->ifi_flags & IFF_LOWER_UP) > 0;
-					if (carrier != ifStates[ifm->ifi_index].carrier) {
-						log << QString("Carrier change to %1").arg(carrier) << endl;
-						ifStates[ifm->ifi_index].carrier = carrier;
+					if (carrier != ifStates[ifindex].carrier) {
+						ifStates[ifindex].carrier = carrier;
 						if (carrier)
-							emit gotCarrier(ifm->ifi_index);
+							emit gotCarrier(ifname, ifindex);
 						else
-							emit lostCarrier(ifm->ifi_index);
+							emit lostCarrier(ifname);
 					}
 					break;
 			}

@@ -41,11 +41,12 @@ input:
 	| input device
 ;
 
-device: DEVICE STRING { curdevconfig = curconfig->createDevice(*$2); } deviceconfig ';'
+device: DEVICE STRING { curdevconfig = curconfig->createDevice(*$2); } deviceconfig
 ;
 
-deviceconfig:
+deviceconfig: ';'
 	| '{' deviceoptions '}'
+	| '{' deviceoptions '}' ';'
 	| deviceoption
 ;
 
@@ -57,11 +58,12 @@ deviceoption: { curenvconfig = curdevconfig->getDefaultEnv(); } environmentoptio
 	| environment
 ;
 
-environment: ENVIRONMENT { curenvconfig = curdevconfig->createEnvironment(); } environmentconfig ';'
+environment: ENVIRONMENT { curenvconfig = curdevconfig->createEnvironment(); } environmentconfig
 ;
 
-environmentconfig:
+environmentconfig: ';'
 	| '{' environmentoptions '}'
+	| '{' environmentoptions '}' ';'
 	| environmentoption
 ;
 
@@ -70,11 +72,29 @@ environmentoptions:
 ;
 
 environmentoption: dhcpconfig
+	| static
 ;
 
 dhcpconfig: DHCP ';' { curenvconfig->doDHCP(); }
 ;
 
+static: STATIC { curipv4config = curenvconfig->createStatic();  } staticconfig
+;
+
+staticconfig: '{' staticoptions '}'
+	|  '{' staticoptions '}' ';'
+	| staticoption_ip
+;
+
+staticoptions:
+	| staticoptions staticoption
+;
+
+staticoption: staticoption_ip
+;
+
+staticoption_ip: IP IPv4_VAL ';' { curipv4config->static_ip = *$2; }
+;
 %%
 
 void configparsererror (Config *, char*) {

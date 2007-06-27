@@ -56,9 +56,11 @@ namespace nuts {
 			QString ifIndex2Name(int ifIndex);
 			int ifName2Index(const QString &ifName);
 			
+			struct nl_handle *getNLHandle();
+			
 		signals:
-			void gotCarrier(int ifIndex);
-			void lostCarrier(int ifIndex);
+			void gotCarrier(const QString &ifName, int ifIndex);
+			void lostCarrier(const QString &ifName);
 	};
 };
 

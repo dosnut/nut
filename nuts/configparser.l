@@ -44,9 +44,9 @@ mode        return MODE;
 wpa-config  return WPACONFIG;
 
 ([[:digit:]]{1,3}\.){3}[[:digit:]]{1,3} {
-            yylval.addr = new QHostAddress(QString(yytext)); return IPv4_VAL; }
+            yylval.addr = new QHostAddress(QString(yytext)); printf("parsed yytest('%s') to '%s'\n", yytext, yylval.addr->toString().toUtf8().constData()); return IPv4_VAL; }
 
--?[[:blank:]]*[[:digit:]]+ {
+(-[[:blank:]]*)?[[:digit:]]+ {
             yylval.i = atoi(yytext); return INTEGER; }
 
 \"         yylval.str = new QString(); BEGIN(String);
@@ -54,7 +54,7 @@ wpa-config  return WPACONFIG;
 
 \n         ++line_num;
 "//".*\n   ++line_num;
-[a-zA-Z]+  printf("Unexpected keyword, ignoring\n");
+[a-zA-Z0-9]+  printf("Unexpected keyword, ignoring\n");
 [{};/]     return yytext[0];
 .          /* ignore */
 

@@ -33,6 +33,7 @@ namespace nuts {
 	
 	class DeviceConfig {
 		protected:
+			friend class Device;
 			QList<EnvironmentConfig*> environments;
 			EnvironmentConfig *defEnv;
 		
@@ -47,6 +48,8 @@ namespace nuts {
 	};
 	
 	class EnvironmentConfig {
+		protected:
+			friend class Environment;
 		public:
 			EnvironmentConfig();
 			virtual ~EnvironmentConfig();
@@ -56,9 +59,12 @@ namespace nuts {
 			IPv4Config *dhcp, *zeroconf;
 			
 			IPv4Config *doDHCP();
+			IPv4Config *createStatic();
 	};
 	
 	class IPv4Config {
+		protected:
+			friend class Interface_IPv4;
 		public:
 			typedef enum {
 				DO_DHCP      = 1,

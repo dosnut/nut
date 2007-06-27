@@ -45,12 +45,12 @@ namespace nuts {
 
 	DeviceConfig::DeviceConfig()
 	: defEnv(new EnvironmentConfig()), canUserEnable(false) {
+		environments.push_back(defEnv);
 	}
 	DeviceConfig::~DeviceConfig() {
 		foreach(EnvironmentConfig* ec, environments)
 			delete ec;
 		environments.clear();
-		delete defEnv;
 	}
 	
 	EnvironmentConfig* DeviceConfig::getDefaultEnv() {
@@ -73,6 +73,11 @@ namespace nuts {
 		if (!dhcp)
 			dhcp = new IPv4Config(IPv4Config::DO_DHCP | IPv4Config::DO_ZEROCONF, 0);
 		return dhcp;
+	}
+	IPv4Config *EnvironmentConfig::createStatic() {
+		IPv4Config* ic = new IPv4Config(IPv4Config::DO_STATIC, 0);
+		ipv4Interfaces.push_back(ic);
+		return ic;
 	}
 	
 	IPv4Config::IPv4Config(int flags, int overwriteFlags)

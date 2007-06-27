@@ -6,6 +6,7 @@
 #include <QString>
 #include <QList>
 #include <QHostAddress>
+#include <QBitArray>
 
 namespace nuts {
 	class DeviceManager;
@@ -29,7 +30,11 @@ namespace nuts {
 			QHash<QString, Device*> devices;
 			
 			friend class HardwareManager;
+			friend class Device;
+			friend class Environment;
+			friend class Interface_IPv4;
 			
+		protected slots:
 			void gotCarrier(const QString &ifName, int ifIndex);
 			void lostCarrier(const QString &ifName);
 		public:
@@ -45,14 +50,16 @@ namespace nuts {
 		protected:
 			friend class DeviceManager;
 			friend class Environment;
+			friend class Interface_IPv4;
 			
+			DeviceManager *dm;
 			QString name;
 			int interfaceIndex;
-			int activeEnv;
+			DeviceConfig *config;
+			int activeEnv, nextEnv;
 			bool enabled;
 			QList<Environment*> envs;
 			
-			DeviceConfig *config;
 		
 			void envUp(Environment*);
 			void envDown(Environment*);
@@ -60,7 +67,7 @@ namespace nuts {
 			void gotCarrier(int ifIndex);
 			void lostCarrier();
 		public:
-			Device(const QString &name, DeviceConfig *config);
+			Device(DeviceManager* dm, const QString &name, DeviceConfig *config);
 			virtual ~Device();
 			
 			// Properties
@@ -70,9 +77,12 @@ namespace nuts {
 			void setCurrent(int i);
 			
 			bool getEnabled();
-			void setEnabled(bool b);
+			void setEnabled(bool b, bool force = false);
 			
 			const QList<Environment*>& getEnvironments();
+		signals:
+			void deviceUp();
+			void deviceDown();
 	};
 	
 	class Environment : public QObject {
@@ -81,11 +91,17 @@ namespace nuts {
 		
 		protected:
 			friend class Device;
+			friend class Interface;
+			friend class Interface_IPv4;
 			
 			Device *device;
 			QList<Interface*> ifs;
 			
 			EnvironmentConfig *config;
+			QBitArray ifUpStatus;
+			bool envIsUp, envStart;
+			
+			void checkStatus();
 			
 			void start();
 			void stop();
@@ -104,22 +120,36 @@ namespace nuts {
 	
 	class Interface : public QObject {
 		Q_OBJECT
+		protected:
+			friend class Environment;
+			int index;
+			
 		public:
-			Interface();
+			Interface(int index);
 			virtual ~Interface();
+			
+			virtual void start() = 0;
+			virtual void stop() = 0;
 	};
 	
 	class Interface_IPv4 : public Interface {
 		Q_OBJECT
 		protected:
+			Environment *env;
+			DeviceManager *dm;
+			
 			void startDHCP();
 			void startZeroconf();
 			void startStatic();
+			
+			void systemUp();
+			void systemDown();
 		
 		public:
-			Interface_IPv4(IPv4Config *config);
+			Interface_IPv4(Environment *env, int index, IPv4Config *config);
 			virtual ~Interface_IPv4();
-			void start();
+			virtual void start();
+			virtual void stop();
 			
 			QHostAddress ip, netmask, gateway;
 			QList<QHostAddress> dnsserver;
