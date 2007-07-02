@@ -13,6 +13,7 @@
 #include "hardware.h"
 #include "exception.h"
 #include "log.h"
+#include "device.h"
 
 extern "C" {
 #include <asm/types.h>
@@ -26,6 +27,7 @@ extern "C" {
 
 #include <netlink/netlink.h>
 #include <netlink/msg.h>
+#include <netlink/route/link.h>
 #include <arpa/inet.h>
 #include <linux/if.h>
 #include <linux/ethtool.h>
@@ -107,6 +109,7 @@ namespace nuts {
 		if (nl_join_group(nlh, RTNLGRP_IPV4_IFADDR) != 0) goto cleanup;
 		
 		netlink_fd = nl_handle_get_fd(nlh);
+		nlcache = rtnl_link_alloc_cache(nlh);
 		return true;
 	cleanup:
 		free_netlink();
@@ -134,6 +137,15 @@ namespace nuts {
 	}
 	
 	bool HardwareManager::ifup(const QString &ifname, bool force) {
+/*		nl_cache_update(nlh, nlcache);
+		struct rtnl_link *request = rtnl_link_alloc();
+		rtnl_link_set_flags(request, rtnl_link_str2flags("up"));
+		QByteArray buf = ifname.toUtf8();
+		struct rtnl_link *old = rtnl_link_get_by_name(nlcache, buf.constData());
+		rtnl_link_change(nlh, old, request, 0);
+		rtnl_link_put(old);
+		rtnl_link_put(request);
+*/
 		struct ifreq ifr;
 		if (!ifreq_init(ifr, ifname)) {
 			err << QString("Interface name too long") << endl;
@@ -205,6 +217,17 @@ namespace nuts {
 	
 	struct nl_handle *HardwareManager::getNLHandle() {
 		return nlh;
+	}
+	
+	MacAddress HardwareManager::getMacAddress(int ifIndex) {
+//		nl_cache_update(nlh, nlcache);
+		struct rtnl_link *link = rtnl_link_get(nlcache, ifIndex);
+		struct nl_addr *addr = rtnl_link_get_addr(link);
+		if (nl_addr_get_len (addr) != 6) {
+			return MacAddress("");
+		} else {
+			return MacAddress((quint8*) nl_addr_get_binary_addr(addr));
+		}
 	}
 	
 	bool HardwareManager::ifreq_init(struct ifreq &ifr, const QString &ifname) {

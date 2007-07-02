@@ -12,6 +12,9 @@
 #ifndef _NUTS_DHCPPACKET_H
 #define _NUTS_DHCPPACKET_H
 
+#include <netinet/udp.h>
+#include <netinet/ip.h>
+
 namespace nuts {
 	class DHCPPacket;
 };
@@ -90,15 +93,23 @@ namespace nuts {
 				quint32 ciaddr, yiaddr, siaddr, giaddr;
 				quint8  chaddr[16], sname[64], file[128];
 				quint32 cookie;
-				quint8  options[308];
+				// 308 byte options
 			} __attribute__ ((__packed__));
-			
+			struct udp_dhcp_packet {
+				struct iphdr ip;
+				struct udphdr udp;
+			} __attribute__ ((__packed__));
 			struct dhcp_msg msg;
+			struct udp_dhcp_packet headers;
 			QHash< quint8, QVector<quint8> > options;
+			QByteArray msgdata;
 			
 		public:
+			DHCPPacket(QDataStream &in);
 			DHCPPacket(bool client);
 			virtual ~DHCPPacket();
+			
+			static DHCPPacket* parseRaw(QByteArray &buf);
 			
 			bool check();
 			
@@ -113,6 +124,7 @@ namespace nuts {
 				setOption(op, (quint8*) &data, sizeof(data));
 			}
 			
+			MacAddress getClientMac();
 			inline quint32 getXID() {
 				return msg.xid;
 			}
@@ -155,16 +167,23 @@ namespace nuts {
 			inline quint32 getDHCPServerID() {
 				return getOptionData<quint32>(DHCP_SERVER_ID, -1);
 			}
+			
+			inline void send(Interface_IPv4 *iface) {
+				iface->env->device->sendDHCPClientPacket(this);
+			}
 	};
 	
 	class DHCPClientPacket : public DHCPPacket {
+			Interface_IPv4 *iface;
+		
 		public:
-			DHCPClientPacket();
+			DHCPClientPacket(Interface_IPv4 *iface);
 			
 			void doDHCPDiscover();
 			void doDHCPRequest(const DHCPPacket &reply);
 			
 			void requestIP(const QHostAddress &ip);
+			void send();
 	};
 }
 

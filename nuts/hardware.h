@@ -9,11 +9,13 @@
 
 extern "C" {
 	struct nl_handle;
+	struct nl_cache;
 	struct ifreq;
 };
 
 namespace nuts {
 	class HardwareManager;
+	class MacAddress;
 };
 
 namespace nuts {
@@ -22,6 +24,7 @@ namespace nuts {
 		private:
 			int netlink_fd, ethtool_fd;
 			struct nl_handle *nlh;
+			struct nl_cache *nlcache;
 			struct ifstate {
 				bool active, carrier;
 				ifstate() : active(false), carrier(false) { }
@@ -57,6 +60,8 @@ namespace nuts {
 			int ifName2Index(const QString &ifName);
 			
 			struct nl_handle *getNLHandle();
+			
+			MacAddress getMacAddress(int ifIndex);
 			
 		signals:
 			void gotCarrier(const QString &ifName, int ifIndex);

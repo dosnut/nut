@@ -11,6 +11,7 @@
 //
 
 #include "dhcppacket.h"
+#include "log.h"
 
 #include <netinet/in.h>
 #include <stdlib.h>
@@ -28,6 +29,36 @@
 #include <QDataStream>
 
 namespace nuts {
+	/* Copied from udhcp */
+	quint16 checksum(char *addr, int count)
+	{
+    /* Compute Internet Checksum for "count" bytes
+		*         beginning at location "addr".
+	*/
+		register qint32 sum = 0;
+		quint16 *source = (quint16*) addr;
+
+		while (count > 1)  {
+			/*  This is the inner loop */
+			sum += *source++;
+			count -= 2;
+		}
+
+		/*  Add left-over byte, if any */
+		if (count > 0) {
+        /* Make sure that the left-over byte is added correctly both
+		* with little and big endian hosts */
+			quint16 tmp = 0;
+			*(quint8 *) (&tmp) = * (quint8 *) source;
+			sum += tmp;
+		}
+		/*  Fold 32-bit sum to 16 bits */
+		while (sum >> 16)
+			sum = (sum & 0xffff) + (sum >> 16);
+
+		return (quint16) ~sum;
+	}
+	
 	static quint32 get_rand() {
 		static bool initialized = false;
 		if (!initialized) {
@@ -47,32 +78,126 @@ namespace nuts {
 	
 	DHCPPacket::DHCPPacket(bool client) {
 		memset(&msg, 0, sizeof(msg));
+		memset(&headers, 0, sizeof(headers));
+		headers.ip.protocol = IPPROTO_UDP;
+		headers.ip.daddr = (quint32) -1;
 		if (client) {
+			headers.udp.source = htons(68);
+			headers.udp.dest = htons(67);
 			msg.op    = BOOT_REQUEST;
 			msg.htype = ARPHRD_ETHER;
 			msg.hlen  = ETH_ALEN;
 			msg.cookie = htonl(DHCP_MAGIC);
-			msg.options[0] = DHCP_END;
+		} else {
+			headers.udp.source = htons(67);
+			headers.udp.dest = htons(68);
+			msg.op    = BOOT_REPLY;
+			msg.htype = ARPHRD_ETHER;
+			msg.hlen  = ETH_ALEN;
+			msg.cookie = htonl(DHCP_MAGIC);
+		}
+	}
+	
+	DHCPPacket::DHCPPacket(QDataStream &in) {
+		memset(&msg, 0, sizeof(msg));
+		if (in.readRawData((char*) &msg, sizeof(msg)) != sizeof(msg))
+			return;
+		while (!in.atEnd()) {
+			quint8 k, size;
+			in >> k;
+			// return on end option (0xff)
+			if (k == DHCP_END)
+				return;
+			// continue on pad (0x00)
+			if (k == DHCP_PADDING)
+				continue;
+			if (in.atEnd()) return;
+			in >> size;
+			QVector<quint8> buf(size);
+			// unexpected end of stream
+			if (in.readRawData((char*) buf.data(), size) != size)
+				return;
+			options.insert(k, buf);
 		}
 	}
 	
 	DHCPPacket::~DHCPPacket() {
 	}
+		
+	DHCPPacket* DHCPPacket::parseRaw(QByteArray &buf) {
+		// Packet big enough?
+		if (buf.size() < (int) (sizeof(struct dhcp_msg) + sizeof(struct udp_dhcp_packet)))
+			return 0;
+		struct udp_dhcp_packet *h = (struct udp_dhcp_packet*) buf.data();
+		struct dhcp_msg *msg = (struct dhcp_msg*) (sizeof(struct udp_dhcp_packet) + (char*) h);
+		// check ip version
+		if (h->ip.ihl != (sizeof(h->ip) >> 2) || h->ip.version != IPVERSION)
+			return 0;
+		// udp?
+		if (h->ip.protocol != IPPROTO_UDP)
+			return 0;
+		// correct source/dest port?
+		if (h->udp.source != htons(67) || h->udp.dest != htons(68))
+			return 0;
+		// check "magic" header values
+		if (msg->op != BOOT_REPLY || msg->htype != ARPHRD_ETHER
+		   || msg->hlen != ETH_ALEN || msg->cookie != htonl(DHCP_MAGIC))
+			return 0;
+		// check size headers
+		if (h->ip.tot_len != htons(buf.size()) || h->udp.len != htons(buf.size() - sizeof(h->ip)))
+			return 0;
+		// ignore checksum!
+		QDataStream in(buf);
+		in.skipRawData(sizeof(*h));
+		return new DHCPPacket(in);
+	}
 	
 	bool DHCPPacket::check() {
-		QByteArray buf;
-		QDataStream s(&buf, QIODevice::WriteOnly);
+		msgdata.clear();
+//		msgdata.fill(0, sizeof(headers) + sizeof(msg) + 308);
+		QDataStream s(&msgdata, QIODevice::WriteOnly);
 		QHashIterator< quint8, QVector<quint8> > i(options);
+		s.writeRawData((const char*) &headers, sizeof(headers));
+		s.writeRawData((const char*) &msg, sizeof(msg));
 		while (i.hasNext()) {
 			i.next();
-			s << i.key() << ((quint8) (quint32) i.value().size());
-			s.writeRawData((const char*) i.value().constData(), i.value().size());
+			quint8 k = i.key();
+			// Drop end/pad options (0xff/0x00)
+			if (k != DHCP_END && k != DHCP_PADDING) {
+				s << k;
+				// clip size to 255 max.
+				quint8 size = (quint8) qMin(255, i.value().size());
+				s << size;
+				s.writeRawData((const char*) i.value().constData(), size);
+			}
 		}
-		return false;
+		s << (quint8) 255;
+		s.device()->close();
+		s.unsetDevice();
+//		int padlen = (sizeof(headers) + sizeof(msg) + 308) - msgdata.size();
+		struct udp_dhcp_packet *h;
+		h = (struct udp_dhcp_packet*) msgdata.data();
+		h->udp.len = htons(msgdata.size() - sizeof(h->ip));
+		h->ip.tot_len = h->udp.len;
+		h->udp.check = checksum((char*) h, msgdata.size());
+		h->ip.tot_len = htons(msgdata.size());
+		h->ip.ihl = sizeof(headers.ip) >> 2;
+		h->ip.version = IPVERSION;
+		h->ip.ttl = IPDEFTTL;
+		h->ip.check = checksum((char*) &h->ip, sizeof(h->ip));
+		return true;
+	}
+	
+	MacAddress DHCPPacket::getClientMac() {
+		return MacAddress(msg.chaddr);
 	}
 	
 	void DHCPPacket::setClientMac(const MacAddress &chaddr) {
 		memcpy(msg.chaddr, chaddr.data, 6);
+		quint8 clid[7];
+		memcpy(&clid[1], chaddr.data, 6);
+		clid[0] = ARPHRD_ETHER;
+		setOption(DHCP_CLIENT_ID, clid, sizeof(clid));
 	}
 	
 	void DHCPPacket::setXID(quint32 xid) {
@@ -105,13 +230,21 @@ namespace nuts {
 		options.insert(op, p.options.value(op));
 	}
 	
-	DHCPClientPacket::DHCPClientPacket()
-	: DHCPPacket(true) {
+	DHCPClientPacket::DHCPClientPacket(Interface_IPv4 *iface)
+	: DHCPPacket(true), iface(iface) {
+		setClientMac(iface->env->device->getMacAddress());
+		setOptionString(DHCP_VENDOR, "nuts-0.0");
 	}
 	
 	void DHCPClientPacket::doDHCPDiscover() {
-		setXID(get_rand());
+		quint32 xid = get_rand();
+		while (!iface->env->device->registerXID(xid, iface)) xid++;
+		setXID(xid);
 		setMessageType(DHCP_DISCOVER);
+		quint8 parameter_request[] = {
+			0x01, 0x03, 0x06, 0x0c, 0x0f, 0x11, 0x1c, 0x28, 0x29, 0x2a
+		};
+		setOption(DHCP_PARAM_REQ, parameter_request, sizeof(parameter_request));
 	}
 	
 	void DHCPClientPacket::doDHCPRequest(const DHCPPacket &reply) {
@@ -128,4 +261,7 @@ namespace nuts {
 		setOption(DHCP_REQUESTED_IP, a, 4);
 	}
 
+	void DHCPClientPacket::send() {
+		DHCPPacket::send(iface);
+	}
 }

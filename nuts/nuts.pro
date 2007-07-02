@@ -5,17 +5,12 @@ CONFIG += debug qt warn_on dbus \
 exceptions
 QT += network
 
-SOURCES += main.cpp device.cpp config.cpp \
-hardware.cpp \
-sighandler.cpp \
-hardware_ext.c \
-log.cpp \
-dhcppacket.cpp
-HEADERS += common.h device.h   config.h   hardware.h \
-exception.h \
-sighandler.h \
-log.h \
-dhcppacket.h
+SOURCES += main.cpp device.cpp config.cpp hardware.cpp hardware_ext.c
+HEADERS += common.h device.h   config.h   hardware.h
+
+SOURCES += sighandler.cpp log.cpp dhcppacket.cpp
+HEADERS += sighandler.h   log.h   dhcppacket.h   exception.h
+
 YACCSOURCES += configparser.y
 LEXSOURCES += configparser.l
 

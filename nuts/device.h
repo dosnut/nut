@@ -7,6 +7,9 @@
 #include <QList>
 #include <QHostAddress>
 #include <QBitArray>
+#include <QSocketNotifier>
+#include <QLinkedList>
+#include <QTimer>
 
 namespace nuts {
 	class DeviceManager;
@@ -15,17 +18,51 @@ namespace nuts {
 	class Interface;
 	class Interface_IPv4;
 	class MacAddress;
+	
+	class DHCPPacket;
+	class DHCPClientPacket;
 };
 
 #include "config.h"
 #include "hardware.h"
 
 namespace nuts {
+	class MacAddress {
+		public:
+			MacAddress();
+			MacAddress(const QString &str);
+			MacAddress(const quint8 *d);
+			quint8 data[6];
+			
+			inline bool operator==(const MacAddress &ma) {
+				for (int i = 0; i < 6; i++)
+					if (data[i] != ma.data[i])
+						return false;
+				return true;
+			}
+			inline bool operator!=(const MacAddress &ma) {
+				return !(*this == ma);
+			}
+			inline QString toString() {
+				char buf[sizeof("00:00:00:00:00:00")];
+				sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
+					data[0],data[1],data[2],data[3],data[4],data[5]);
+				return QString(buf);
+			}
+	};
+	
 	class DeviceManager : public QObject {
 		Q_OBJECT
 		protected:
 			Config *config;
 			HardwareManager hwman;
+			QTimer carrier_timer;
+			struct ca_evt {
+				QString ifName;
+				int ifIndex;
+				bool up;
+			};
+			QLinkedList<struct ca_evt> ca_evts;
 			
 			QHash<QString, Device*> devices;
 			
@@ -34,6 +71,8 @@ namespace nuts {
 			friend class Environment;
 			friend class Interface_IPv4;
 			
+		private slots:
+			void ca_timer();
 		protected slots:
 			void gotCarrier(const QString &ifName, int ifIndex);
 			void lostCarrier(const QString &ifName);
@@ -51,6 +90,8 @@ namespace nuts {
 			friend class DeviceManager;
 			friend class Environment;
 			friend class Interface_IPv4;
+			friend class DHCPPacket;
+			friend class DHCPClientPacket;
 			
 			DeviceManager *dm;
 			QString name;
@@ -59,13 +100,31 @@ namespace nuts {
 			int activeEnv, nextEnv;
 			bool enabled;
 			QList<Environment*> envs;
-			
+			QHash< quint32, Interface_IPv4* > dhcp_xid_iface;
+			int dhcp_client_socket;
+			QSocketNotifier *dhcp_read_nf, *dhcp_write_nf;
+			QLinkedList< QByteArray > dhcp_write_buf;
+			MacAddress macAddress;
 		
 			void envUp(Environment*);
 			void envDown(Environment*);
 			
 			void gotCarrier(int ifIndex);
 			void lostCarrier();
+			
+			bool registerXID(quint32 xid, Interface_IPv4 *iface);
+			void unregisterXID(quint32 xid);
+			void sendDHCPClientPacket(DHCPPacket *packet);
+			void setupDHCPClientSocket();
+			void closeDHCPClientSocket();
+		
+		public slots:
+			void readDHCPClientSocket();
+			void writeDHCPClientSocket();
+			
+		protected:
+			MacAddress getMacAddress();
+			
 		public:
 			Device(DeviceManager* dm, const QString &name, DeviceConfig *config);
 			virtual ~Device();
@@ -93,6 +152,8 @@ namespace nuts {
 			friend class Device;
 			friend class Interface;
 			friend class Interface_IPv4;
+			friend class DHCPPacket;
+			friend class DHCPClientPacket;
 			
 			Device *device;
 			QList<Interface*> ifs;
@@ -137,6 +198,7 @@ namespace nuts {
 		protected:
 			Environment *env;
 			DeviceManager *dm;
+			quint32 dhcp_xid;
 			
 			void startDHCP();
 			void startZeroconf();
@@ -144,6 +206,14 @@ namespace nuts {
 			
 			void systemUp();
 			void systemDown();
+			
+			bool registerXID(quint32 xid);
+			void dhcpReceived(DHCPPacket *packet);
+			
+			friend class DHCPPacket;
+			friend class DHCPClientPacket;
+			friend class Environment;
+			friend class Device;
 		
 		public:
 			Interface_IPv4(Environment *env, int index, IPv4Config *config);
@@ -155,12 +225,6 @@ namespace nuts {
 			QList<QHostAddress> dnsserver;
 			
 			IPv4Config *config;
-	};
-
-	class MacAddress {
-		public:
-			MacAddress(const QString &str);
-			quint8 data[6];
 	};
 };
 
