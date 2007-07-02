@@ -1,9 +1,10 @@
 #include "trayicon.h"
-#include <iostream>
+#include "constants.h"
+
 using namespace std;
 
 namespace qnut {
-    CTrayIcon::CTrayIcon(QObject * parent) : QSystemTrayIcon(QIcon("res/network.svg"), parent) {
+    CTrayIcon::CTrayIcon(QObject * parent) : QSystemTrayIcon(QIcon(UI_ICON_SYSTRAY), parent) {
         devicesMenu.setTitle(tr("&Network Devices"));
         devicesMenu.addAction(tr("empty..."));
         
