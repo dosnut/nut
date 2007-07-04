@@ -146,6 +146,23 @@ namespace nuts {
 				return def;
 			}
 			
+			inline QHostAddress getOptionAddress(quint8 op) {
+				if (options.contains(op))
+					return QHostAddress(ntohl(getOptionData<quint32>(op,0)));
+				return QHostAddress();
+			}
+			
+			inline QList<QHostAddress> getOptionAddresses(quint8 op) {
+				QList<QHostAddress> l;
+				QVector<quint8> data = getOption(op);
+				quint32 *d = (quint32*) data.data();
+				int size = data.size() / sizeof(*d);
+				for (int i = 0; i < size; i++) {
+					l.push_back(QHostAddress(ntohl(d[i])));
+				}
+				return l;
+			}
+			
 			inline void setBootOp(enum bootp_op bop) {
 				msg.op = bop;
 			}
@@ -166,6 +183,11 @@ namespace nuts {
 			}
 			inline quint32 getDHCPServerID() {
 				return getOptionData<quint32>(DHCP_SERVER_ID, -1);
+			}
+			
+			// This is the client ip address returned from the server
+			inline QHostAddress getYourIP() {
+				return QHostAddress(ntohl(msg.yiaddr));
 			}
 			
 			inline void send(Interface_IPv4 *iface) {

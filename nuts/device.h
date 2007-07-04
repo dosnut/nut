@@ -196,9 +196,28 @@ namespace nuts {
 	class Interface_IPv4 : public Interface {
 		Q_OBJECT
 		protected:
+			enum dhcp_state {
+				DHCPS_OFF, DHCPS_FAILED,
+				DHCPS_INIT,        // Discover all
+	 			DHCPS_SELECTING,   // Waiting for offer; request a offer -> requesting
+				DHCPS_REQUESTING,  // Requested a offer, waiting for ack -> bound, nak -> init
+				DHCPS_BOUND,       // bound, on timeout request -> renew
+				DHCPS_RENEWING,    // wait for ack -> bound, on timeout request -> rebind, on nak -> init
+				DHCPS_REBINDING,   // wait for ack -> bound, timeout/nak -> init
+				DHCPS_INITREBOOT,  // request last ip -> rebooting
+				DHCPS_REBOOTING    // wait for ack -> bound, timeout/nak -> init
+			};
 			Environment *env;
 			DeviceManager *dm;
 			quint32 dhcp_xid;
+			dhcp_state dhcpstate;
+			QVector<quint8> dhcp_server_identifier;
+			quint32 dhcp_lease_time;
+			
+			void dhcp_send_discover();
+			void dhcp_send_request(DHCPPacket *offer);
+			void dhcp_setup_interface(DHCPPacket *ack);
+			void dhcpAction(DHCPPacket *source = 0);
 			
 			void startDHCP();
 			void startZeroconf();

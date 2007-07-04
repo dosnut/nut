@@ -38,7 +38,6 @@ extern struct nla_policy ifa_ipv4_policy[IFA_MAX+1];
 };
 
 #include <QSocketNotifier>
-#include <QApplication>
 
 namespace nuts {
 	HardwareManager::HardwareManager()
@@ -121,6 +120,7 @@ namespace nuts {
 	}
 	bool HardwareManager::init_ethtool() {
 		ethtool_fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
+		//ethtool_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
 		if (ethtool_fd >= 0) return true;
 /*
 		ethtool_fd = socket(PF_INET, SOCK_DGRAM, 0);

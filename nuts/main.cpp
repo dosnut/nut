@@ -5,13 +5,13 @@
 #include "exception.h"
 #include "log.h"
 
-#include <QApplication>
+#include <QCoreApplication>
 #include <iostream>
 
 using namespace nuts;
 
 int main(int argc, char* argv[]) {
-	QApplication app(argc, argv);
+	QCoreApplication app(argc, argv);
 	SigHandler *sighandler;
 	DeviceManager *devManager;
 	try {

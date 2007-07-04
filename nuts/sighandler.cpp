@@ -24,7 +24,7 @@ extern "C" {
 #include <iostream>
 
 #include <QSocketNotifier>
-#include <QApplication>
+#include <QCoreApplication>
 
 namespace nuts {
 	static int pipefd[2];
@@ -61,7 +61,7 @@ namespace nuts {
 				case SIGTERM:
 				case SIGINT:
 					if (quitOnSignal)
-						QApplication::quit();
+						QCoreApplication::quit();
 			}
 		}
 	}

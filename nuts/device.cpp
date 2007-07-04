@@ -23,6 +23,7 @@ extern "C" {
 #include <linux/if_ether.h>
 #include <linux/ethtool.h>
 #include <linux/sysctl.h>
+#include <linux/route.h>
 };
 
 
@@ -371,13 +372,87 @@ namespace nuts {
 	Interface::~Interface() { }
 	
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, IPv4Config *config)
-	: Interface(index), env(env), dm(env->device->dm), config(config) {
+	: Interface(index), env(env), dm(env->device->dm), dhcpstate(DHCPS_OFF), config(config) {
 	}
 	
 	Interface_IPv4::~Interface_IPv4() {
 		if (dhcp_xid) {
 			env->device->unregisterXID(dhcp_xid);
 			dhcp_xid = 0;
+		}
+	}
+	
+	void Interface_IPv4::dhcp_send_discover() {
+		// send discover
+		DHCPClientPacket cp(this);
+		cp.doDHCPDiscover();
+		cp.check();
+		cp.send();
+	}
+	
+	void Interface_IPv4::dhcp_send_request(DHCPPacket *offer) {
+		DHCPClientPacket cp(this);
+		cp.doDHCPRequest(*offer);
+		cp.check();
+		cp.send();
+	}
+	
+	void Interface_IPv4::dhcp_setup_interface(DHCPPacket *ack) {
+		ip = ack->getYourIP();
+		netmask = ack->getOptionAddress(DHCP_SUBNET);
+		gateway = ack->getOptionAddress(DHCP_ROUTER);
+		dnsserver = ack->getOptionAddresses(DHCP_NAME_SERVER);
+		dhcp_server_identifier = ack->getOption(DHCP_SERVER_ID);
+		dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
+		systemUp();
+		env->ifUp(this);
+	}
+	
+	void Interface_IPv4::dhcpAction(DHCPPacket *source) {
+		for (;;) {
+			switch (dhcpstate) {
+				case DHCPS_OFF:
+				case DHCPS_FAILED:
+					return;
+				case DHCPS_INIT:
+					dhcp_send_discover();
+					dhcpstate = DHCPS_SELECTING;
+					break;
+				case DHCPS_SELECTING:
+					if (source) {
+						if (source->getMessageType() == DHCP_OFFER)  {
+							dhcp_send_request(source);
+							dhcpstate = DHCPS_REQUESTING;
+						}
+					} else {
+						// TODO: setup timeout
+						return;
+					}
+				case DHCPS_REQUESTING:
+					if (source) {
+						switch (source->getMessageType()) {
+							case DHCP_ACK:
+								dhcp_setup_interface(source);
+								dhcpstate = DHCPS_BOUND;
+								break;
+							case DHCP_NAK:
+								dhcpstate = DHCPS_INIT;
+								break;
+							default:
+								break;
+						}
+					} else {
+						// TODO: setup timeout
+					}
+					return;
+				case DHCPS_BOUND:
+					// TODO: setup timeout
+					return;
+				default:
+					log << "Unhandled dhcp state" << endl;
+					return;
+			}
+			source = 0;
 		}
 	}
 	
@@ -417,28 +492,73 @@ namespace nuts {
 		env->ifDown(this);
 	}
 	
-	struct nl_addr* getNLAddr(const QHostAddress &addr) {
+	inline int getPrefixLen(const QHostAddress &netmask) {
+		quint32 val = netmask.toIPv4Address();
+		int i = 32;
+		while (val && !(val & 0x1)) {
+			i--;
+			val >>= 1;
+		}
+		return i;
+	}
+	
+	inline struct nl_addr* getNLAddr(const QHostAddress &addr) {
 		quint32 i = htonl(addr.toIPv4Address());
 		return nl_addr_build(AF_INET, &i, sizeof(i));
-//		QByteArray buf = addr.toString().toUtf8();
-//		return nl_addr_parse(buf.constData(), AF_INET);
+	}
+	
+	inline struct nl_addr* getNLAddr(const QHostAddress &addr, const QHostAddress &netmask) {
+		quint32 i = htonl(addr.toIPv4Address());
+		struct nl_addr* a = nl_addr_build(AF_INET, &i, sizeof(i));
+		if (!netmask.isNull())
+			nl_addr_set_prefixlen(a, getPrefixLen(netmask));
+		return a;
 	}
 	
 	void Interface_IPv4::systemUp() {
-		struct nl_addr *local = getNLAddr(ip);
+		struct nl_addr *local = getNLAddr(ip, netmask);
 		char buf[32];
 		log << nl_addr2str (local, buf, 32) << endl;
 		struct rtnl_addr *addr = rtnl_addr_alloc();
 		rtnl_addr_set_ifindex(addr, env->device->interfaceIndex);
 		rtnl_addr_set_family(addr, AF_INET);
-		log << env->device->interfaceIndex << endl;
-		log << rtnl_addr_set_local(addr, local) << endl;
+		rtnl_addr_set_local(addr, local);
 		log << "systemUp: addr_add = " << rtnl_addr_add(dm->hwman.getNLHandle(), addr, 0) << endl;
 		rtnl_addr_put(addr);
 		nl_addr_put(local);
+		if (!gateway.isNull()) {
+			log << "Try setting gateway" << endl;
+			struct rtentry rt;
+			memset(&rt, 0, sizeof(rt));
+			rt.rt_flags = RTF_UP | RTF_GATEWAY;
+			rt.rt_dst.sa_family = AF_INET;
+			rt.rt_gateway.sa_family = AF_INET;
+			*((quint32*)rt.rt_gateway.sa_data) = ntohl(gateway.toIPv4Address());
+			rt.rt_genmask.sa_family = AF_INET;
+			QByteArray buf = env->device->name.toUtf8();
+			rt.rt_dev = buf.data();
+			int skfd = socket(AF_INET, SOCK_DGRAM, 0);
+			write(3, &rt, sizeof(rt));
+			ioctl(skfd, SIOCADDRT, &rt);
+			close(skfd);
+		}
 	}
 	void Interface_IPv4::systemDown() {
-		struct nl_addr *local = getNLAddr(ip);
+		if (!gateway.isNull()) {
+			struct rtentry rt;
+			memset(&rt, 0, sizeof(rt));
+			rt.rt_flags = RTF_UP | RTF_GATEWAY;
+			rt.rt_dst.sa_family = AF_INET;
+			rt.rt_gateway.sa_family = AF_INET;
+			*((quint32*)rt.rt_gateway.sa_data) = ntohl(gateway.toIPv4Address());
+			rt.rt_genmask.sa_family = AF_INET;
+			QByteArray buf = env->device->name.toUtf8();
+			rt.rt_dev = buf.data();
+			int skfd = socket(AF_INET, SOCK_DGRAM, 0);
+			ioctl(skfd, SIOCDELRT, &rt);
+			close(skfd);
+		}
+		struct nl_addr *local = getNLAddr(ip, netmask);
 		char buf[32];
 		log << nl_addr2str (local, buf, 32) << endl;
 		struct rtnl_addr *addr = rtnl_addr_alloc();

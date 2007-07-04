@@ -91,10 +91,23 @@ staticoptions:
 ;
 
 staticoption: staticoption_ip
+	| staticoption_netmask
+	| staticoption_gateway
+	| staticoption_dns
 ;
 
 staticoption_ip: IP IPv4_VAL ';' { curipv4config->static_ip = *$2; }
 ;
+
+staticoption_netmask: NETMASK IPv4_VAL ';' { curipv4config->static_netmask = *$2; }
+;
+
+staticoption_gateway: GATEWAY IPv4_VAL ';' { curipv4config->static_gateway = *$2; }
+;
+
+staticoption_dns: DNSSERVER IPv4_VAL ';' { curipv4config->static_dnsservers.push_back(*$2); }
+;
+
 %%
 
 void configparsererror (Config *, char*) {

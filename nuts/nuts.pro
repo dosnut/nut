@@ -1,8 +1,8 @@
 
 TEMPLATE = app
 
-CONFIG += debug qt warn_on dbus \
-exceptions
+CONFIG += debug qt warn_on dbus exceptions
+QT -= gui
 QT += network
 
 SOURCES += main.cpp device.cpp config.cpp hardware.cpp hardware_ext.c
