@@ -1,7 +1,7 @@
 #include <QtGui>
 #include <QTranslator>
 
-#include "connman.h"
+#include "connectionmanager.h"
 
 using namespace qnut;
 

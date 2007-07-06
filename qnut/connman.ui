@@ -39,25 +39,33 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <property name="childrenCollapsible" >
-       <bool>false</bool>
+       <bool>true</bool>
       </property>
       <widget class="QWidget" name="verticalLayout" >
        <layout class="QVBoxLayout" >
         <item>
-         <widget class="QLabel" name="devicesLabel" >
-          <property name="text" >
-           <string>Devices:</string>
+         <widget class="QTreeWidget" name="overviewWidget" >
+          <property name="columnCount" >
+           <number>0</number>
           </property>
-          <property name="textFormat" >
-           <enum>Qt::AutoText</enum>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="layoutWidget" >
+       <layout class="QVBoxLayout" >
+        <item>
+         <widget class="QLabel" name="interfacesLabel" >
+          <property name="text" >
+           <string>Interfaces:</string>
           </property>
           <property name="buddy" >
-           <cstring>devicesWidget</cstring>
+           <cstring>interfacesWidget</cstring>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="devicesWidget" >
+         <widget class="QTreeWidget" name="interfacesWidget" >
           <property name="sizePolicy" >
            <sizepolicy vsizetype="Expanding" hsizetype="Ignored" >
             <horstretch>0</horstretch>
@@ -70,35 +78,9 @@
             <height>0</height>
            </size>
           </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="" >
-       <layout class="QVBoxLayout" >
-        <item>
-         <widget class="QLabel" name="propertiesLabel" >
-          <property name="text" >
-           <string>Properties:</string>
+          <property name="columnCount" >
+           <number>0</number>
           </property>
-          <property name="buddy" >
-           <cstring>propertiesWidget</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QTreeWidget" name="propertiesWidget" >
-          <property name="minimumSize" >
-           <size>
-            <width>120</width>
-            <height>0</height>
-           </size>
-          </property>
-          <column>
-           <property name="text" >
-            <string>1</string>
-           </property>
-          </column>
          </widget>
         </item>
        </layout>
@@ -113,7 +95,7 @@
      <x>0</x>
      <y>0</y>
      <width>394</width>
-     <height>25</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuDevice" >
@@ -162,8 +144,7 @@
  </widget>
  <layoutdefault spacing="4" margin="4" />
  <tabstops>
-  <tabstop>devicesWidget</tabstop>
-  <tabstop>propertiesWidget</tabstop>
+  <tabstop>interfacesWidget</tabstop>
  </tabstops>
  <resources/>
  <connections>
