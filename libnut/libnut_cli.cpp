@@ -1,4 +1,4 @@
-#include "common.h"
+#include "libnut_cli.h"
 
 namespace qnut {
     CDeviceManager::CDeviceManager(QObject * parent) : QObject(parent) {}

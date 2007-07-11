@@ -5,4 +5,5 @@ moc_*
 *.qm
 fp
 qnut
+qnut.kde*
 Doxyfile
