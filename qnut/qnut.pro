@@ -17,4 +17,4 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp
 
 #dbus zeugs
 INCLUDEPATH += ../libnut
-include(../libnut/libnut_qnut.pri)
+include(../libnut/libnut_cli.pri)
