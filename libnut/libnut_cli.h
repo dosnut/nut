@@ -4,6 +4,12 @@
 #include <QObject>
 #include <QList>
 #include <QHostAddress>
+/*
+Benötigte Informationen:
+device liste : /device_name/
+    environment_liste
+        
+*/
 
 namespace qnut {
     class CDeviceManager;
@@ -25,7 +31,8 @@ namespace qnut {
         
         CDeviceManager(QObject * parent);
     signals:
-        void devicesUpdated();
+        void deviceAdded(CDevice * device);
+        void deviceRemoved(CDevice * device);
     };
 
     class CDevice : public QObject {
@@ -38,8 +45,6 @@ namespace qnut {
         
         CDevice(QObject * parent);
     public slots:
-        void setActiveEnvironment(int index);
-//        void setEnabled(bool value);
         void enable();
         void disable();
 
@@ -85,7 +90,6 @@ namespace qnut {
         
         CInterface(QObject * parent);
     public slots:
-        void setActive(bool value);
         void activate();
         void deactivate();
         void setIP(QHostAddress * address);
