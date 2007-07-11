@@ -5,6 +5,8 @@ CONFIG += debug qt warn_on dbus exceptions
 QT -= gui
 QT += network
 
+CODECFORSRC = UTF-8
+
 SOURCES += main.cpp device.cpp config.cpp hardware.cpp hardware_ext.c
 HEADERS += common.h device.h   config.h   hardware.h
 

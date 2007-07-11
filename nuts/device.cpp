@@ -409,7 +409,7 @@ namespace nuts {
 		ip = ack->getYourIP();
 		netmask = ack->getOptionAddress(DHCP_SUBNET);
 		gateway = ack->getOptionAddress(DHCP_ROUTER);
-		dnsserver = ack->getOptionAddresses(DHCP_NAME_SERVER);
+		dnsserver = ack->getOptionAddresses(DHCP_DNS_SERVER);
 		localdomain = ack->getOptionString(DHCP_DOMAIN_NAME);
 		dhcp_server_identifier = ack->getOption(DHCP_SERVER_ID);
 		dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
@@ -548,7 +548,7 @@ namespace nuts {
 		if (!dnsserver.empty()) {
 			QProcess *proc = new QProcess();
 			QStringList arguments;
-			arguments << "-a" << env->device->name + "_" + index;
+			arguments << "-a" << QString("%1_%2").arg(env->device->name).arg(index);
 			proc->start("/sbin/resolvconf", arguments);
 			QTextStream ts(proc);
 			if (!localdomain.isEmpty())
@@ -557,6 +557,7 @@ namespace nuts {
 				ts << "nameserver " << ha.toString() << endl;
 			}
 			proc->closeWriteChannel();
+			proc->waitForFinished(-1);
 			delete proc; // waits for process
 		}
 	}
@@ -564,8 +565,10 @@ namespace nuts {
 		// Resolvconf
 		QProcess *proc = new QProcess();
 		QStringList arguments;
-		arguments << "-d" << env->device->name + "_" + index;
+		arguments << "-d" << QString("%1_%2").arg(env->device->name).arg(index);
 		proc->start("/sbin/resolvconf", arguments);
+		proc->closeWriteChannel();
+		proc->waitForFinished(-1);
 		delete proc; // waits for process
 		// Gateway
 		if (!gateway.isNull()) {
