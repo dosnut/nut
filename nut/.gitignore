@@ -2,5 +2,5 @@ build
 Makefile
 moc_*
 nut
-nut.kdev*
+nut.kde*
 Doxyfile

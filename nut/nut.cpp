@@ -1,10 +1,10 @@
 #include <QCoreApplication>
 #include <QList>
 #include <iostream>
-#include <"common.h">
+#include <"../libnut/libnut_cli.h">
 #include <"nutdbus.h">
 #include <QDBusConnectionInterface>
-
+#include <QDBus>
 
 
 typedef int (*Tcommand_function)(QStringList argv) ;
