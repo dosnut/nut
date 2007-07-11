@@ -241,6 +241,7 @@ namespace nuts {
 			virtual void stop();
 			
 			QHostAddress ip, netmask, gateway;
+			QString localdomain;
 			QList<QHostAddress> dnsserver;
 			
 			IPv4Config *config;

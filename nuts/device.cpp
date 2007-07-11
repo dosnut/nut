@@ -2,6 +2,8 @@
 #include "device.h"
 #include "log.h"
 #include <QMutableListIterator>
+#include <QProcess>
+#include <QStringList>
 #include "dhcppacket.h"
 
 extern "C" {
@@ -26,6 +28,12 @@ extern "C" {
 #include <linux/route.h>
 };
 
+static inline void setSockaddrIPv4(struct sockaddr &s, quint32 host = 0, quint16 port = 0) {
+	struct sockaddr_in *sin = (struct sockaddr_in *) &s;
+	sin->sin_family = AF_INET;
+	sin->sin_port = htons(port);
+	sin->sin_addr.s_addr = htonl(host);
+}
 
 namespace nuts {
 	DeviceManager::DeviceManager(const QString &configFile)
@@ -402,6 +410,7 @@ namespace nuts {
 		netmask = ack->getOptionAddress(DHCP_SUBNET);
 		gateway = ack->getOptionAddress(DHCP_ROUTER);
 		dnsserver = ack->getOptionAddresses(DHCP_NAME_SERVER);
+		localdomain = ack->getOptionString(DHCP_DOMAIN_NAME);
 		dhcp_server_identifier = ack->getOption(DHCP_SERVER_ID);
 		dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
 		systemUp();
@@ -457,15 +466,8 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::startDHCP() {
-		log << "waiting (work around kernel bug)" << endl;
-//		sleep(1);
-		log << "start dhcp" << endl;
-		DHCPClientPacket cp(this);
-		cp.doDHCPDiscover();
-		cp.check();
-		log << "send dhcp" << endl;
-		cp.send();
-		log << "sent dhcp" << endl;
+		dhcpstate = DHCPS_INIT;
+		dhcpAction();
 	}
 	void Interface_IPv4::startZeroconf() {
 	}
@@ -526,15 +528,15 @@ namespace nuts {
 		log << "systemUp: addr_add = " << rtnl_addr_add(dm->hwman.getNLHandle(), addr, 0) << endl;
 		rtnl_addr_put(addr);
 		nl_addr_put(local);
+		// Gateway
 		if (!gateway.isNull()) {
 			log << "Try setting gateway" << endl;
 			struct rtentry rt;
 			memset(&rt, 0, sizeof(rt));
 			rt.rt_flags = RTF_UP | RTF_GATEWAY;
-			rt.rt_dst.sa_family = AF_INET;
-			rt.rt_gateway.sa_family = AF_INET;
-			*((quint32*)rt.rt_gateway.sa_data) = ntohl(gateway.toIPv4Address());
-			rt.rt_genmask.sa_family = AF_INET;
+			setSockaddrIPv4(rt.rt_dst);
+			setSockaddrIPv4(rt.rt_gateway, gateway.toIPv4Address());
+			setSockaddrIPv4(rt.rt_genmask);
 			QByteArray buf = env->device->name.toUtf8();
 			rt.rt_dev = buf.data();
 			int skfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -542,16 +544,37 @@ namespace nuts {
 			ioctl(skfd, SIOCADDRT, &rt);
 			close(skfd);
 		}
+		// Resolvconf
+		if (!dnsserver.empty()) {
+			QProcess *proc = new QProcess();
+			QStringList arguments;
+			arguments << "-a" << env->device->name + "_" + index;
+			proc->start("/sbin/resolvconf", arguments);
+			QTextStream ts(proc);
+			if (!localdomain.isEmpty())
+				ts << "domain " << localdomain << endl;
+			foreach(QHostAddress ha, dnsserver) {
+				ts << "nameserver " << ha.toString() << endl;
+			}
+			proc->closeWriteChannel();
+			delete proc; // waits for process
+		}
 	}
 	void Interface_IPv4::systemDown() {
+		// Resolvconf
+		QProcess *proc = new QProcess();
+		QStringList arguments;
+		arguments << "-d" << env->device->name + "_" + index;
+		proc->start("/sbin/resolvconf", arguments);
+		delete proc; // waits for process
+		// Gateway
 		if (!gateway.isNull()) {
 			struct rtentry rt;
 			memset(&rt, 0, sizeof(rt));
 			rt.rt_flags = RTF_UP | RTF_GATEWAY;
-			rt.rt_dst.sa_family = AF_INET;
-			rt.rt_gateway.sa_family = AF_INET;
-			*((quint32*)rt.rt_gateway.sa_data) = ntohl(gateway.toIPv4Address());
-			rt.rt_genmask.sa_family = AF_INET;
+			setSockaddrIPv4(rt.rt_dst);
+			setSockaddrIPv4(rt.rt_gateway, gateway.toIPv4Address());
+			setSockaddrIPv4(rt.rt_genmask);
 			QByteArray buf = env->device->name.toUtf8();
 			rt.rt_dev = buf.data();
 			int skfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -583,16 +606,7 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::dhcpReceived(DHCPPacket *packet) {
-		switch (packet->getMessageType()) {
-			case DHCP_OFFER:
-				log << "dhcpReceived: DHCP OFFER" << endl;
-				break;
-			case DHCP_ACK:
-				log << "dhcpReceived: DHCP ACK" << endl;
-				break;
-			default:
-				log << "dhcpReceived: unexpected dhcp message type" << endl;
-		}
+		dhcpAction(packet);
 	}
 
 	

@@ -131,7 +131,7 @@
       <inlineSet>true</inlineSet>
     </creategettersetter>
     <splitheadersource>
-      <enabled>true</enabled>
+      <enabled>false</enabled>
       <synchronize>true</synchronize>
       <orientation>Horizontal</orientation>
     </splitheadersource>

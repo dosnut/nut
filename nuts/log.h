@@ -18,6 +18,7 @@ namespace nuts {
 	class Log;
 };
 
+#include <QObject>
 #include <QTextStream>
 #include <QFile>
 
@@ -25,14 +26,8 @@ namespace nuts {
 	/**
 		@author Stefan Bühler <stbuehler@web.de>
 	*/
-	class Log : public QTextStream {
-		private:
-			QFile *file;
-		public:
-			Log(int fd);
-			virtual ~Log();
-	};
-	extern Log err, log;
+	void Log_Init(QTextStream &s, int fd);
+	extern QTextStream err, log;
 };
 
 #endif

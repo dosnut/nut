@@ -12,14 +12,11 @@
 #include "log.h"
 
 namespace nuts {
-	Log::Log(int fd) {
-		file = new QFile();
-		file->open(fd, QIODevice::Append);
-		setDevice(file);
+	void Log_Init(QTextStream &s, int fd) {
+		QFile* file = new QFile();
+		file->open(fd, QIODevice::WriteOnly);
+		s.setDevice(file);
 	}
-	Log::~Log() {
-		delete file;
-	}
-	
-	Log err(2), log(1);
+
+	QTextStream err, log;
 };

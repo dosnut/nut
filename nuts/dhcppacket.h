@@ -132,6 +132,7 @@ namespace nuts {
 				return options.value(op);
 			}
 			inline QString getOptionString(quint8 op) {
+				if (!options.contains(op)) return QString();
 				const QVector<quint8> &buf(getOption(op));
 				const char *s = (char*) buf.data();
 				return QString::fromUtf8(s, qstrnlen(s, buf.size()));
