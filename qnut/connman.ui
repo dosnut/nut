@@ -34,51 +34,27 @@
      <number>4</number>
     </property>
     <item row="0" column="0" >
-     <widget class="QSplitter" name="splitter" >
-      <property name="orientation" >
-       <enum>Qt::Horizontal</enum>
+     <widget class="QTabWidget" name="tabWidget" >
+      <property name="tabPosition" >
+       <enum>QTabWidget::North</enum>
       </property>
-      <property name="childrenCollapsible" >
-       <bool>true</bool>
+      <property name="tabShape" >
+       <enum>QTabWidget::Rounded</enum>
       </property>
-      <widget class="QWidget" name="verticalLayout" >
-       <layout class="QVBoxLayout" >
-        <item>
-         <widget class="QTreeWidget" name="overviewWidget" >
-          <property name="columnCount" >
-           <number>0</number>
+      <property name="currentIndex" >
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="overViewTab" >
+       <attribute name="title" >
+        <string>Overview</string>
+       </attribute>
+       <layout class="QGridLayout" >
+        <item row="0" column="0" >
+         <widget class="QListView" name="overViewList" >
+          <property name="viewMode" >
+           <enum>QListView::ListMode</enum>
           </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="layoutWidget" >
-       <layout class="QVBoxLayout" >
-        <item>
-         <widget class="QLabel" name="interfacesLabel" >
-          <property name="text" >
-           <string>Interfaces:</string>
-          </property>
-          <property name="buddy" >
-           <cstring>interfacesWidget</cstring>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QTreeWidget" name="interfacesWidget" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Expanding" hsizetype="Ignored" >
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize" >
-           <size>
-            <width>120</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="columnCount" >
+          <property name="modelColumn" >
            <number>0</number>
           </property>
          </widget>
@@ -126,6 +102,17 @@
     <bool>false</bool>
    </property>
   </widget>
+  <widget class="QToolBar" name="toolBar" >
+   <property name="windowTitle" >
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea" >
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak" >
+    <bool>false</bool>
+   </attribute>
+  </widget>
   <action name="actionRefresh" >
    <property name="text" >
     <string>&amp;Refresh</string>
@@ -143,9 +130,6 @@
   </action>
  </widget>
  <layoutdefault spacing="4" margin="4" />
- <tabstops>
-  <tabstop>interfacesWidget</tabstop>
- </tabstops>
  <resources/>
  <connections>
   <connection>
