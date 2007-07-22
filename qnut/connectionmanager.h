@@ -17,7 +17,8 @@ namespace qnut {
     public:
         CDeviceManager deviceManager;
         
-        QAction * toggleDeviceAction;
+        QAction * enableDeviceAction;
+        QAction * disableDeviceAction;
         QAction * toggleEnvironmentAction;
         QAction * toggleInterfaceAction;
         
@@ -25,6 +26,7 @@ namespace qnut {
         QMenu deviceOptionsMenu;
         CTrayIcon trayicon;
         COverViewListModel overViewListModel;
+        //QItemSelectionModel overViewListSelModel;
         QHash<QString, QTreeView *> deviceOptionsTabs;
 
         CConnectionManager(QWidget * parent = 0);
@@ -33,8 +35,8 @@ namespace qnut {
         void uiRemovedDevice(CDevice * dev);
         //void uiShowOverViewPopup(const QPoint & pos);
         //void uiShowDeviceOptionsPopup(const QPoint & pos);
-        void uiTabChanged(int index);
-        //void uiChangeDeviceState();
+        void uiCurrentTabChanged(int index);
+        void uiCurrentDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected);
     };
 };
 
