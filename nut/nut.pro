@@ -14,7 +14,18 @@ TARGET = build/nut
 INCLUDEPATH += ../libnut
 include(../libnut/libnut_cli.pri)
 
-SOURCES += nut.cpp
+SOURCES += nut.cpp \
+ ../libnut/libnut_types.cpp \
+ nut_library.cpp \
+ nut_interactive.cpp \
+ nut_commandline.cpp
 
-HEADERS += servertest.h
+HEADERS += servertest.h \
+ ../libnut/libnut_types.h \
+ nut_library.h \
+ nut_interactive.h \
+ nut_commandline.h \
+ ../libnut/libnut_server.h
+
+DISTFILES += ../libnut/libnut_server.xml
 

@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QHostAddress>
+#include "libnut_types.h"
 /*
 Benötigte Informationen:
 device liste : /device_name/
@@ -51,12 +52,13 @@ namespace qnut {
     signals:
         void environmentChangedActive(int previous);
         void environmentsUpdated(CDevice * device);
+        void stateChanged();
     };
     
     class CEnvironment : public QObject {
         Q_OBJECT
     public:
-        enum SelectType {user, arp, essid};
+        enum SelectType {user=0, arp=1, essid=2};
         
         struct SelectConfig {
             SelectType type;
@@ -68,6 +70,7 @@ namespace qnut {
         
         bool active;
         QString name;
+        SelectConfig currentSelection;
         QList<SelectConfig> selectStatements;
         CInterfaceList interfaces;  //darf nie leer sein
         

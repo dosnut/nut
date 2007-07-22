@@ -1,14 +1,7 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="2" >
-  <Doc0 NumberOfViews="1" URL="file:///home/oliver/Studium/SoPra/nut/qnut/connectionmanager.h" >
-   <View0 Encoding="" line="6" Type="Source" />
-  </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/oliver/Studium/SoPra/nut/qnut/connectionmanager.cpp" >
-   <View0 Encoding="UTF-8" line="15" Type="Source" />
-  </Doc1>
- </DocsAndViews>
+ <DocsAndViews NumberOfDocuments="0" />
  <pluginList>
   <kdevdebugger>
    <breakpointList/>
