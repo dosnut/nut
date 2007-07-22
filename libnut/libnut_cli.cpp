@@ -3,7 +3,6 @@
 namespace qnut {
     CDeviceManager::CDeviceManager(QObject * parent) : QObject(parent) {}
 
-    void CDevice::setActiveEnvironment(int index) {}
 //    void CDevice::setEnabled(bool value) {}
     void CDevice::enable() {}
     void CDevice::disable() {}
@@ -12,7 +11,6 @@ namespace qnut {
     void CEnvironment::activate() {}
     CEnvironment::CEnvironment(CDevice * parent) : QObject(parent) {}
     
-    void CInterface::setActive(bool value) {}
     void CInterface::activate() {}
     void CInterface::deactivate() {}
     void CInterface::setIP(QHostAddress * address) {}

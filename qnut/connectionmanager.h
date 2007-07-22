@@ -2,43 +2,41 @@
 #define QNUT_CONNECTIONMANAGER_H
 
 #include <QtGui>
+#include <QHash>
 #include "ui_connman.h"
 #include "trayicon.h"
-#include "common.h"
+#include "overviewlistmodel.h"
+#include "deviceoptionsmodel.h"
+#include "libnut_cli.h"
 
 namespace qnut {
-    class CuiDevice : public QTreeWidgetItem {
-    public:
-        CDevice * device;
-        CuiDevice(QTreeWidget * parent) : QTreeWidgetItem(parent) {};
-    };
-    
-    class CuiEnvironment : public QTreeWidgetItem {
-    public:
-        CEnvironment * environment;
-        CuiEnvironment(QTreeWidgetItem * parent) : QTreeWidgetItem(parent) {};
-    };
-    
-    class CuiInterface : public QTreeWidgetItem {
-    public:
-        CInterface * interface;
-        CuiInterface(QTreeWidget * parent) : QTreeWidgetItem(parent) {};
-    };
-    
     class CConnectionManager : public QMainWindow {
         Q_OBJECT
     private:
         Ui::ConnMan ui;
     public:
-        CTrayIcon trayicon;
-        QMenu overviewMenu;
         CDeviceManager deviceManager;
         
+        QAction * enableDeviceAction;
+        QAction * disableDeviceAction;
+        QAction * toggleEnvironmentAction;
+        QAction * toggleInterfaceAction;
+        
+        QMenu overViewMenu;
+        QMenu deviceOptionsMenu;
+        CTrayIcon trayicon;
+        COverViewListModel overViewListModel;
+        //QItemSelectionModel overViewListSelModel;
+        QHash<QString, QTreeView *> deviceOptionsTabs;
+
         CConnectionManager(QWidget * parent = 0);
     public slots:
-        void uiShowOverviewPopup(const QPoint & pos);
-        void uiUpdateDevices();
-        void uiUpdateInterfaces();
+        void uiAddedDevice(CDevice * dev);
+        void uiRemovedDevice(CDevice * dev);
+        //void uiShowOverViewPopup(const QPoint & pos);
+        //void uiShowDeviceOptionsPopup(const QPoint & pos);
+        void uiCurrentTabChanged(int index);
+        void uiCurrentDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected);
     };
 };
 
