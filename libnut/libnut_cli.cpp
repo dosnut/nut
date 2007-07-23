@@ -1,6 +1,6 @@
 #include "libnut_cli.h"
 
-namespace qnut {
+namespace libnut {
     CDeviceManager::CDeviceManager(QObject * parent) : QObject(parent) {}
 
 //    void CDevice::setEnabled(bool value) {}

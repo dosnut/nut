@@ -6,8 +6,8 @@ namespace qnut {
     //CConnectionManager
     CConnectionManager::CConnectionManager(QWidget * parent) :
         QMainWindow(parent),
-        trayicon(this),
         deviceManager(this),
+        trayicon(this),
         overViewListModel(&(deviceManager.devices))
     {
         deviceOptionsTabs.reserve(16);
@@ -53,6 +53,10 @@ namespace qnut {
         trayicon.show();
     }
     
+    void CConnectionManager::uiShowDeviceOptions(CDevice * dev) {
+        ui.tabWidget->setCurrentWidget(deviceOptionsTabs[dev->name]);
+    }
+    
     void CConnectionManager::uiAddedDevice(CDevice * dev) {
         QTreeView * newDeviceOptions;
         
@@ -60,7 +64,7 @@ namespace qnut {
         newDeviceOptions->setModel(new CDeviceOptionsModel(dev));
         deviceOptionsTabs.insert(dev->name, newDeviceOptions);
         ui.tabWidget->addTab(newDeviceOptions, QIcon(UI_ICON_DEVICE), dev->name);
-        connect(dev, SIGNAL(stateChanged()), ui.overViewList, SLOT(repaint())); //stateChanged fehlt
+        connect(dev, SIGNAL(stateChanged()), ui.overViewList, SLOT(repaint()));
         
         ui.overViewList->repaint();
     }
@@ -80,6 +84,45 @@ namespace qnut {
         ui.overViewList->repaint();
     }
     
+    void CConnectionManager::uiCurrentTabChanged(int index) {
+        if (index > 0) {
+            CDevice * currentDevice = deviceManager.devices[index-1];
+            
+            disconnect(enableDeviceAction, SIGNAL(triggerd()), 0, 0);
+            disconnect(disableDeviceAction, SIGNAL(triggerd()), 0, 0);
+            connect(enableDeviceAction, SIGNAL(triggerd()), currentDevice, SLOT(enable()));
+            connect(disableDeviceAction, SIGNAL(triggerd()), currentDevice, SLOT(enable()));
+        }
+        
+        enableDeviceAction->setEnabled((index > 0) or (ui.overViewList->selectionModel()->hasSelection()));
+        disableDeviceAction->setEnabled((index > 0) or (ui.overViewList->selectionModel()->hasSelection()));
+    }
+    
+    void CConnectionManager::uiCurrentDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected) {
+        CDevice * currentDevice;
+        QModelIndexList::iterator i, iEnd;
+        
+        disconnect(enableDeviceAction, SIGNAL(triggerd()), 0, 0);
+        disconnect(disableDeviceAction, SIGNAL(triggerd()), 0, 0);
+        
+        bool enableable = (!selected.indexes().isEmpty());
+        bool disableable = false;
+        
+        iEnd = selected.indexes().end();
+        for (i = selected.indexes().begin(); i != iEnd; i++) {
+            currentDevice = (CDevice *)(i->internalPointer());
+            
+            enableable = enableable and currentDevice->enabled;
+            disableable = disableable or currentDevice->enabled;
+            
+            connect(enableDeviceAction, SIGNAL(triggerd()), currentDevice, SLOT(enable()));
+            connect(disableDeviceAction, SIGNAL(triggerd()), currentDevice, SLOT(disable()));
+        }
+        
+        enableDeviceAction->setEnabled(enableable);
+        disableDeviceAction->setEnabled(disableable);
+    }
+
 /*    void CConnectionManager::uiShowOverViewPopup(const QPoint & pos) {
         QModelIndex currentIndex = ui.overViewList->currentIndex();
         
@@ -108,33 +151,5 @@ namespace qnut {
     void CConnectionManager::uiShowDeviceOptionsPopup(const QPoint & pos) {
         QTreeView * currentDeviceOptions = (QTreeView *)(ui.tabWidget->currentWidget());
         
-        
     }*/
-    
-    void CConnectionManager::uiCurrentTabChanged(int index) {
-        enableDeviceAction->setEnabled((index > 0) or (ui.overViewList->selectionModel()->hasSelection()));
-        disableDeviceAction->setEnabled((index > 0) or (ui.overViewList->selectionModel()->hasSelection()));
-    }
-    
-    void CConnectionManager::uiCurrentDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected) {
-        CDevice * currentDevice;
-        QModelIndexList::iterator i, iEnd;
-        
-        iEnd = deselected.indexes().end();
-        for (i = deselected.indexes().begin(); i != iEnd; i++) {
-            currentDevice = (CDevice *)(i->internalPointer());
-            disconnect(enableDeviceAction, SIGNAL(triggerd()), currentDevice, SLOT(enable()));
-            disconnect(disableDeviceAction, SIGNAL(triggerd()), currentDevice, SLOT(disable()));
-        }
-        
-        iEnd = selected.indexes().end();
-        for (i = selected.indexes().begin(); i != iEnd; i++) {
-            currentDevice = (CDevice *)(i->internalPointer());
-            connect(enableDeviceAction, SIGNAL(triggerd()), currentDevice, SLOT(enable()));
-            connect(disableDeviceAction, SIGNAL(triggerd()), currentDevice, SLOT(disable()));
-        }
-        
-        enableDeviceAction->setEnabled(selected.indexes().count() > 0);
-        disableDeviceAction->setEnabled(selected.indexes().count() > 0);
-    }
 };

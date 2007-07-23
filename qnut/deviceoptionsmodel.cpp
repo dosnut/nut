@@ -128,4 +128,8 @@ namespace qnut {
         else
             return 1;
     }
+    
+    CDevice * CDeviceOptionsModel::getDevice() const {
+        return device;
+    }
 };

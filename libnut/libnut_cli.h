@@ -1,10 +1,10 @@
-#ifndef QNUT_COMMON_H
-#define QNUT_COMMON_H
+#ifndef LIBNUT_LIBNUT_CLI_H
+#define LIBNUT_LIBNUT_CLI_H
 
 #include <QObject>
 #include <QList>
 #include <QHostAddress>
-#include "libnut_types.h"
+//#include "libnut_types.h"
 /*
 Benötigte Informationen:
 device liste : /device_name/
@@ -12,7 +12,7 @@ device liste : /device_name/
         
 */
 
-namespace qnut {
+namespace libnut {
     class CDeviceManager;
 
     class CDevice;
@@ -24,7 +24,7 @@ namespace qnut {
     typedef QList<CInterface *> CInterfaceList;
 };
 
-namespace qnut {
+namespace libnut {
     class CDeviceManager : public QObject {
         Q_OBJECT
     public:
@@ -33,7 +33,7 @@ namespace qnut {
         CDeviceManager(QObject * parent);
     signals:
         void deviceAdded(CDevice * device);
-        void deviceRemoved(CDevice * device);
+        void deviceRemoved(CDevice * device); //nach entfernen aus der liste aber vor dem löschen
     };
 
     class CDevice : public QObject {
