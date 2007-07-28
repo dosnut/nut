@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QHostAddress>
-//#include "libnut_types.h"
+#include "libnut_types.h"
 /*
 Benötigte Informationen:
 device liste : /device_name/
@@ -39,9 +39,7 @@ namespace libnut {
     class CDevice : public QObject {
         Q_OBJECT
     public:
-        QString name;
-        int activeEnvironment;
-        bool enabled;
+        libnut::libnut_DeviceProperties properties;
         CEnvironmentList environments;  //darf nie leer sein
         
         CDevice(QObject * parent);
@@ -58,20 +56,9 @@ namespace libnut {
     class CEnvironment : public QObject {
         Q_OBJECT
     public:
-        enum SelectType {user=0, arp=1, essid=2};
-        
-        struct SelectConfig {
-            SelectType type;
-            bool useMAC;
-            //fillin mac-member here
-            QHostAddress arpIP;
-            QString essid;
-        };
-        
-        bool active;
-        QString name;
-        SelectConfig currentSelection;
-        QList<SelectConfig> selectStatements;
+        libnut_EnvironmentProperties properties;
+        libnut_SelectConfig currentSelection;
+        QList<libnut_SelectConfig> selectStatements;
         CInterfaceList interfaces;  //darf nie leer sein
         
         CEnvironment(CDevice * parent);
@@ -84,13 +71,7 @@ namespace libnut {
     class CInterface : public QObject {
         Q_OBJECT
     public:
-        bool isStatic;
-        bool active;
-        bool userDefineable;
-        QHostAddress ip;
-        QHostAddress netmask;
-        QHostAddress gateway;
-        
+        libnut_InterfaceProperties properties;
         CInterface(QObject * parent);
     public slots:
         void activate();

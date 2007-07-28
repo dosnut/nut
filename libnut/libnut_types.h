@@ -1,10 +1,11 @@
 #include <QString>
 #include <QDBusArgument>
 #include <QHostAddress>
+namespace libnut {
 
 enum libnut_SelectType {user=0, arp=1, essid=2};
 struct libnut_SelectConfig {
-    SelectType type;
+    libnut_SelectType type;
     bool useMAC;
     QHostAddress arpIP;
     QString essid;
@@ -46,3 +47,5 @@ struct libnut_InterfaceProperties {
 QT_DECLARE_METATYPE(libnut_InterfaceProperties)
 QDBusArgument &operator<< (QDBusArgument &argument, const libnut_InterfaceProperties &ifprop);
 const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_InterfaceProperties &ifprop);
+
+}
