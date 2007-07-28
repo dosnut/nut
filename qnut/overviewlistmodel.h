@@ -17,6 +17,7 @@
 #include "libnut_cli.h"
 
 namespace qnut {
+    using namespace libnut;
 
     class COverViewListModel : public QAbstractListModel {
         Q_OBJECT

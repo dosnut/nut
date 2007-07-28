@@ -10,6 +10,8 @@
 #include "libnut_cli.h"
 
 namespace qnut {
+    using namespace libnut;
+
     class CConnectionManager : public QMainWindow {
         Q_OBJECT
     private:
@@ -21,22 +23,22 @@ namespace qnut {
         QAction * disableDeviceAction;
         QAction * toggleEnvironmentAction;
         QAction * toggleInterfaceAction;
+        QAction * showDeviceOptionsAction;
         
-        QMenu overViewMenu;
-        QMenu deviceOptionsMenu;
+//        QMenu overViewMenu;
         CTrayIcon trayicon;
         COverViewListModel overViewListModel;
-        //QItemSelectionModel overViewListSelModel;
         QHash<QString, QTreeView *> deviceOptionsTabs;
 
         CConnectionManager(QWidget * parent = 0);
     public slots:
+        void uiShowDeviceOptions(CDevice * dev);
         void uiAddedDevice(CDevice * dev);
         void uiRemovedDevice(CDevice * dev);
-        //void uiShowOverViewPopup(const QPoint & pos);
-        //void uiShowDeviceOptionsPopup(const QPoint & pos);
         void uiCurrentTabChanged(int index);
         void uiCurrentDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected);
+        //void uiShowOverViewPopup(const QPoint & pos);
+        //void uiShowDeviceOptionsPopup(const QPoint & pos);
     };
 };
 

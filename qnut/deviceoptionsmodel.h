@@ -16,6 +16,8 @@
 #include "libnut_cli.h"
 
 namespace qnut {
+    using namespace libnut;
+
     class CDeviceOptionsModel : public QAbstractItemModel {
         Q_OBJECT
     public:
@@ -29,6 +31,8 @@ namespace qnut {
         QModelIndex parent(const QModelIndex & index) const;
         int rowCount(const QModelIndex & parent = QModelIndex()) const;
         int columnCount(const QModelIndex & parent = QModelIndex()) const;
+        
+        CDevice * getDevice() const;
     private:
         CDevice * device;
     };
