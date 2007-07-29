@@ -10,15 +10,25 @@
 //
 //
 #include "overviewlistmodel.h"
+#include "constants.h"
+#include <QIcon>
 
 namespace qnut {
     COverViewListModel::COverViewListModel(CDeviceList * deviceList, QObject * parent) : QAbstractListModel(parent) {
         devices = deviceList;
+        
         // vllt sollte hier die deviceliste gefüllt werden wenn nicht vorher getan
     }
     
     COverViewListModel::~COverViewListModel() {
         devices = NULL;
+    }
+    
+    QModelIndex COverViewListModel::index(int row, int column, const QModelIndex & parent) const {
+        if ((devices != NULL) && (row < devices->count()))
+            return createIndex(row, column, (void *)(devices->at(row)));
+        else
+            return QModelIndex();
     }
     
     int COverViewListModel::rowCount(const QModelIndex & parent) const {
@@ -38,15 +48,23 @@ namespace qnut {
         if (index.row() >= devices->size())
             return QVariant();
         
-        if (role != Qt::DisplayRole)
+        if (role == Qt::DisplayRole) {
+            if (index.column() == 0)
+                return devices->value(index.row())->properties.name;
+            else if (index.column() == 1)
+                return devices->value(index.row())->properties.enabled ? tr("enabled") : tr("disabled");
+            else
+                return QVariant();
+        }
+        else if (role == Qt::DecorationRole) {
+            if (index.column() == 0)
+                return QIcon(UI_ICON_DEVICE_32);
+            else
+                return QVariant();
+        }
+        else {
             return QVariant();
-        
-        if (index.column() == 0)
-            return QVariant(devices->value(index.row())->name);
-        else if (index.column() == 1)
-            return QVariant(devices->value(index.row())->enabled ? tr("enabled") : tr("disabled") );
-        else
-            return QVariant();
+        }
     }
     
     QVariant COverViewListModel::headerData(int section, Qt::Orientation orientation, int role) const {

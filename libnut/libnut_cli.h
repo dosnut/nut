@@ -50,7 +50,7 @@ namespace libnut {
     signals:
         void environmentChangedActive(int previous);
         void environmentsUpdated(CDevice * device);
-        void stateChanged();
+        void stateChanged(bool state);
     };
     
     class CEnvironment : public QObject {

@@ -49,6 +49,18 @@
         <string>Overview</string>
        </attribute>
        <layout class="QGridLayout" >
+        <property name="leftMargin" >
+         <number>0</number>
+        </property>
+        <property name="topMargin" >
+         <number>0</number>
+        </property>
+        <property name="rightMargin" >
+         <number>0</number>
+        </property>
+        <property name="bottomMargin" >
+         <number>0</number>
+        </property>
         <item row="0" column="0" >
          <widget class="QListView" name="overViewList" >
           <property name="viewMode" >
@@ -74,20 +86,6 @@
      <height>29</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuDevice" >
-    <property name="title" >
-     <string>&amp;Device</string>
-    </property>
-    <widget class="QMenu" name="menuEnvironments" >
-     <property name="title" >
-      <string>&amp;Environments</string>
-     </property>
-     <addaction name="actionDefault" />
-    </widget>
-    <addaction name="actionRefresh" />
-    <addaction name="separator" />
-    <addaction name="menuEnvironments" />
-   </widget>
    <widget class="QMenu" name="menuFile" >
     <property name="title" >
      <string>&amp;File</string>
@@ -95,7 +93,6 @@
     <addaction name="actionClose" />
    </widget>
    <addaction name="menuFile" />
-   <addaction name="menuDevice" />
   </widget>
   <widget class="QStatusBar" name="statusBar" >
    <property name="sizeGripEnabled" >

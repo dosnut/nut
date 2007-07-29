@@ -3,6 +3,7 @@
 
 #define UI_ICON_SYSTRAY             "res/network.png"
 #define UI_ICON_DEVICE              "res/device.png"
+#define UI_ICON_DEVICE_32           "res/device32.png"
 #define UI_ICON_ENVIRONMENT         "res/environment.png"
 #define UI_ICON_INTERFACE           "res/interface.png"
 #define UI_ICON_ENABLE_DEVICE       "res/enabledevice.png"

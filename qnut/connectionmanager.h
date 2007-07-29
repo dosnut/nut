@@ -12,6 +12,14 @@
 namespace qnut {
     using namespace libnut;
 
+    struct DeviceOptions {
+        QTreeView * environmentsTree;
+        QMenu * contextMenu;
+        QAction * enableAction;
+        QAction * disableAction;
+        //QAction * showTreeAction;
+    };
+
     class CConnectionManager : public QMainWindow {
         Q_OBJECT
     private:
@@ -19,26 +27,25 @@ namespace qnut {
     public:
         CDeviceManager deviceManager;
         
-        QAction * enableDeviceAction;
-        QAction * disableDeviceAction;
-        QAction * toggleEnvironmentAction;
-        QAction * toggleInterfaceAction;
-        QAction * showDeviceOptionsAction;
+        //QAction * enableDeviceAction;
+        //QAction * disableDeviceAction;
+        //QAction * toggleEnvironmentAction;
+        //QAction * toggleInterfaceAction;
+        //QAction * showEnvironmentsTreeAction;
+        //QMenu overViewMenu;
         
-//        QMenu overViewMenu;
         CTrayIcon trayicon;
         COverViewListModel overViewListModel;
-        QHash<QString, QTreeView *> deviceOptionsTabs;
+        QHash<QString, DeviceOptions> deviceOptions;
 
         CConnectionManager(QWidget * parent = 0);
     public slots:
-        void uiShowDeviceOptions(CDevice * dev);
         void uiAddedDevice(CDevice * dev);
         void uiRemovedDevice(CDevice * dev);
-        void uiCurrentTabChanged(int index);
-        void uiCurrentDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected);
-        //void uiShowOverViewPopup(const QPoint & pos);
-        //void uiShowDeviceOptionsPopup(const QPoint & pos);
+        //void uiCurrentTabChanged(int index);
+        //void uiCurrentDeviceChanged();
+        void uiShowOverViewPopup(const QPoint & pos);
+        //void uiShowEnvironmentsTree();
     };
 };
 

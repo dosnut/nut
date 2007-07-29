@@ -21,5 +21,5 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  deviceoptionsmodel.cpp
 
 #dbus zeugs
-INCLUDEPATH += ../libnut
+#INCLUDEPATH += ../libnut
 include(../libnut/libnut_cli.pri)

@@ -17,6 +17,14 @@ int main(int argc, char * argv[])
     app.setQuitOnLastWindowClosed(false);
 
     CConnectionManager mainwin;
-
+    
+    //testing
+    CDevice * testdev = new CDevice(NULL);
+    testdev->properties.name = "eth0";
+    testdev->properties.enabled = false;
+    mainwin.deviceManager.devices.append(testdev);
+    mainwin.uiAddedDevice(testdev);
+    //testing
+    
     return app.exec();
 }

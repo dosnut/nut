@@ -25,6 +25,7 @@ namespace qnut {
         COverViewListModel(CDeviceList * deviceList, QObject * parent = 0);
         ~COverViewListModel();
         
+        virtual QModelIndex index(int row, int column = 0, const QModelIndex & parent = QModelIndex()) const;
         int rowCount(const QModelIndex &parent = QModelIndex()) const;
         QVariant data(const QModelIndex &index, int role) const;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;

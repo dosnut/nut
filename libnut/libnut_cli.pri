@@ -1,3 +1,4 @@
 CONFIG += qdbus
-HEADERS += ../libnut/libnut_cli.h
+INCLUDEPATH += ../libnut
+HEADERS += ../libnut/libnut_cli.h ../libnut/libnut_types.h
 SOURCES += ../libnut/libnut_cli.cpp

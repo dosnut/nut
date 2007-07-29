@@ -32,15 +32,15 @@ namespace qnut {
         
         switch (index.column()) {
             case 0:
-                return QVariant(((CEnvironment *)(index.internalPointer()))->name);
+                return QVariant(((CEnvironment *)(index.internalPointer()))->properties.name);
             case 1:
-                return QVariant(((CInterface *)(index.internalPointer()))->ip.toString());
+                return QVariant(((CInterface *)(index.internalPointer()))->properties.ip.toString());
             case 2:
                 switch (index.row()) {
                 case 0:
-                    return QVariant(tr("Netmask: ") + ((CInterface *)(index.internalPointer()))->netmask.toString());
+                    return QVariant(tr("Netmask: ") + ((CInterface *)(index.internalPointer()))->properties.netmask.toString());
                 case 1:
-                    return QVariant(tr("Gateway: ") + ((CInterface *)(index.internalPointer()))->gateway.toString());
+                    return QVariant(tr("Gateway: ") + ((CInterface *)(index.internalPointer()))->properties.gateway.toString());
                 default:
                     return QVariant();
                 }
@@ -127,9 +127,5 @@ namespace qnut {
             return 0;
         else
             return 1;
-    }
-    
-    CDevice * CDeviceOptionsModel::getDevice() const {
-        return device;
     }
 };
