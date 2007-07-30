@@ -1,3 +1,7 @@
+#include "libnut_types.h"
+
+namespace libnut {
+
 QDBusArgument &operator<< (QDBusArgument &argument, const libnut_SelectConfig & selconf) {
     argument.beginStructure();
     argument << selconf.type << selconf.useMAC << selconf.essid << selconf.arpIP.toIPv4Address();
@@ -62,3 +66,9 @@ const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_Interface
     argument.endStructure();
     return argument;
 }
+};
+
+Q_DECLARE_METATYPE(libnut::libnut_SelectConfig)
+Q_DECLARE_METATYPE(libnut::libnut_DeviceProperties)
+Q_DECLARE_METATYPE(libnut::libnut_EnvironmentProperties)
+Q_DECLARE_METATYPE(libnut::libnut_InterfaceProperties)

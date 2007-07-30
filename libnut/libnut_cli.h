@@ -39,7 +39,7 @@ namespace libnut {
     class CDevice : public QObject {
         Q_OBJECT
     public:
-        libnut::libnut_DeviceProperties properties;
+        libnut_DeviceProperties properties;
         CEnvironmentList environments;  //darf nie leer sein
         
         CDevice(QObject * parent);
