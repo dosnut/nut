@@ -1,16 +1,24 @@
+#ifndef libnut_libnut_server
+#define libnut_libnut_server
+
 #include <QObject>
 #include <QList>
 #include <QStringList>
 #include "../nuts/device.h"
 #include "libnut_types.h"
+#include "libnut_server_adaptor.h"
+
+namespace libnut {
 
 //Verwaltet die unterene Klassen, sorgt für die kommunikation zwischen DBUS und den anderen objekten (im server teil)
 class CNutsDBusConnection: public QObject {
     Q_OBJECT;
     private:
         QList<CNutsDBusDevice> devices;
+        DeviceManager * devmgr;
     public:
-        CNutsDBusConnection(DeviceManager * devmgr);
+        CNutsDBusConnection(DeviceManager * indevmgr);
+        QDBusConnection connection;
     public slots:
         //Funktionen, falls sich etwas ändert (mit serverteil verbinden)
     signals:
@@ -19,6 +27,9 @@ class CNutsDBusConnection: public QObject {
 class CNutsDBusDeviceManager: public QObject {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "NUT_DBUS_URL.DeviceManager")
+    private:
+        DeviceManagerAdaptor * devmgr_adaptor;
+        QDBusConnection * connection;
     public:
         CNutsDBusDeviceManager(QObject * parent);
     public Q_SLOTS:
@@ -30,7 +41,13 @@ class CNutsDBusDeviceManager: public QObject {
 class CNutsDBusDevice: public QObject {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "NUT_DBUS_URL.Device")
-    CNutsDBusDevice(QObject * parent);
+    private:
+        DeviceAdaptor * dev_adaptor;
+        QDBusConnection * connection;
+        QString devObjectPath;
+        libnut_DeviceProperties properties;
+    public:
+        CNutsDBusDevice(QString deviceName, QObject * parent);
     public Q_SLOTS:
         Q_SCRIPTABLE libnut_DeviceProperties getProperties();
         Q_SCRIPTABLE QList<QDBusObjectPath> getEnvironments();
@@ -45,6 +62,15 @@ class CNutsDBusDevice: public QObject {
 class CNutsDBusEnvironment: public QObject {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "NUT_DBUS_URL.Environment")
+    private:
+        EnvironmentAdaptor * env_adaptor;
+        QDBusConnection * connection;
+        QString deviceName;
+        QString envObjectPath;
+        int env_id;
+        libnut_EnvironmentProperties properties;
+    public:
+        CNutsDBusEnvironment(int env_id, QObject * parent);
     public Q_SLOTS:
         //Geht noch nicht wirklich. muss mit Q_DECLARE_METATYPE berkannt gemacht werden+ and dbus
         //oder aber QList of QVariant und dann jeweils in 4er parsen
@@ -61,6 +87,14 @@ class CNutsDBusEnvironment: public QObject {
 class CNutsDBusInterface: public QOBject {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "NUT_DBUS_URL.Interface")
+    private:
+        InterfaceAdaptor * if_adaptor;
+        QDBusConnection * connection;
+        int env_id;
+        int if_id;
+        QString ifObjectPath;
+    public:
+        CNutsDBusInterface(int if_id, int env_id, QObject * parent);
     public Q_SLOTS:
         //top to down: see libnut_cli.h::CINterface public variables
         Q_SCRIPTABLE libnut_InterfaceProperties getProperties();
@@ -73,3 +107,5 @@ class CNutsDBusInterface: public QOBject {
     Q_SIGNALS:
         Q_SCRIPTABLE void activeStateChanged();
 };
+}
+#endif
