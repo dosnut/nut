@@ -75,7 +75,7 @@ const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_Interface
     argument.endStructure();
     return argument;
 }
-};
+}
 
 Q_DECLARE_METATYPE(libnut::libnut_SelectConfig)
 Q_DECLARE_METATYPE(libnut::libnut_DeviceProperties)

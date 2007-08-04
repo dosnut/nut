@@ -1,6 +1,6 @@
 #include "libnut_server.h"
 namespace libnut {
-CNutsDBusConnection::CNutsDBusConnection(DeviceManager * indevmgr) {
+CNutsDBusConnection::CNutsDBusConnection(DeviceManager * devmgr) : devmgr(devmgr) {
     //DBus systemConnection herstellen und Service regististrieren
     QDBusConnection connection = QDBusConnection::systemBus();
     connection.registerService(QLatin1String("NUT_DBUS_URL"));
@@ -9,7 +9,6 @@ CNutsDBusConnection::CNutsDBusConnection(DeviceManager * indevmgr) {
     qDBusRegisterMetaType<libnut_SelectConfig>();
     qDBusRegisterMetaType<libnut_EnvironmentProperties>();
     qDBusRegisterMetaType<libnut_InterfaceProperties>();
-    devmgr = indevmgr;
 }
 CNutsDBusConnection::~CNutsDBusConnection() {
     connection.unregisterService(QLatin1String("NUT_DBUS_URL"));

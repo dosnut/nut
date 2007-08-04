@@ -59,6 +59,7 @@ public Q_SLOTS: // METHODS
     bool disable();
     bool enable();
     QList<QDBusObjectPath> getEnvironments();
+    libnut_DeviceProperties getProperties();
 Q_SIGNALS: // SIGNALS
     void environmentChangedActive(const QString &previous);
     void environmentsUpdated(const QDBusObjectPath &device);
@@ -118,6 +119,9 @@ public:
 
 public: // PROPERTIES
 public Q_SLOTS: // METHODS
+    QList<libnut_SelectType> getSelectConfig();
+    libnut_SelectType getCurrentSelection();
+    libnut_EnvironmentProperties getProperties();
     QList<QDBusObjectPath> getInterfaces();
 Q_SIGNALS: // SIGNALS
     void interfacesUpdated();
@@ -197,7 +201,11 @@ QList<QDBusObjectPath> DeviceAdaptor::getEnvironments()
     QMetaObject::invokeMethod(parent(), "getEnvironments", Q_RETURN_ARG(QList<QDBusObjectPath>, out0));
     return out0;
 }
-
+libnut_DeviceProperties DeviceAdaptor::getProperties() {
+    libnut_DeviceProperties out0;
+    QMetaObject::invokeMethod(parent(), "getProperties", Q_RETURN_ARG(libnut_DeviceProperties, out0));
+    return out0;
+}
 /*
  * Implementation of adaptor class DeviceManagerAdaptor
  */
@@ -237,6 +245,22 @@ EnvironmentAdaptor::~EnvironmentAdaptor()
 {
     // destructor
 }
+QList<libnut_SelectType> getSelectConfig() {
+    QList<libnut_SelectType> out0;
+    QMetaObject::invokeMethod(parent(), "getSelectConfig", Q_RETURN_ARG(QList<libnut_SelectType>, out0));
+    return out0;
+}
+libnut_SelectType getCurrentSelection() {
+    libnut_SelectType out0;
+    QMetaObject::invokeMethod(parent(), "getCurrentSelection", Q_RETURN_ARG(libnut_SelectType, out0));
+    return out0;
+}
+libnut_EnvironmentProperties getProperties() {
+    libnut_EnvironmentProperties out0;
+    QMetaObject::invokeMethod(parent(), "getProperties", Q_RETURN_ARG(libnut_EnvironmentProperties, out0));
+    return out0;
+}
+
 
 QList<QDBusObjectPath> EnvironmentAdaptor::getInterfaces()
 {

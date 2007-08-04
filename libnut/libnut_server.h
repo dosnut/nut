@@ -17,7 +17,7 @@ class CNutsDBusConnection: public QObject {
         QList<CNutsDBusDevice> devices;
         DeviceManager * devmgr;
     public:
-        CNutsDBusConnection(DeviceManager * indevmgr);
+        CNutsDBusConnection(DeviceManager * devmgr);
         QDBusConnection connection;
     public slots:
         //Funktionen, falls sich etwas ändert (mit serverteil verbinden)
