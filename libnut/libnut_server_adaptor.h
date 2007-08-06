@@ -22,6 +22,7 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
+#include "libnut_types.h"
 
 /*
  * Adaptor class for interface NUT_DBUS_URL.Device
@@ -119,8 +120,8 @@ public:
 
 public: // PROPERTIES
 public Q_SLOTS: // METHODS
-    QList<libnut_SelectType> getSelectConfig();
-    libnut_SelectType getCurrentSelection();
+    QList<libnut_SelectConfig> getSelectConfig();
+    libnut_SelectConfig getCurrentSelection();
     libnut_EnvironmentProperties getProperties();
     QList<QDBusObjectPath> getInterfaces();
 Q_SIGNALS: // SIGNALS
@@ -155,6 +156,7 @@ public: // PROPERTIES
 public Q_SLOTS: // METHODS
     void activate();
     void deactivate();
+    void setIP(uint HostAddress);
     void setGateway(uint Gateway);
     void setNetmask(uint Netmask);
 Q_SIGNALS: // SIGNALS
@@ -245,14 +247,14 @@ EnvironmentAdaptor::~EnvironmentAdaptor()
 {
     // destructor
 }
-QList<libnut_SelectType> getSelectConfig() {
-    QList<libnut_SelectType> out0;
-    QMetaObject::invokeMethod(parent(), "getSelectConfig", Q_RETURN_ARG(QList<libnut_SelectType>, out0));
+QList<libnut_SelectConfig> getSelectConfig() {
+    QList<libnut_SelectConfig> out0;
+    QMetaObject::invokeMethod(parent(), "getSelectConfig", Q_RETURN_ARG(QList<libnut_SelectConfig>, out0));
     return out0;
 }
-libnut_SelectType getCurrentSelection() {
-    libnut_SelectType out0;
-    QMetaObject::invokeMethod(parent(), "getCurrentSelection", Q_RETURN_ARG(libnut_SelectType, out0));
+libnut_SelectConfig getCurrentSelection() {
+    libnut_SelectConfig out0;
+    QMetaObject::invokeMethod(parent(), "getCurrentSelection", Q_RETURN_ARG(libnut_SelectConfig, out0));
     return out0;
 }
 libnut_EnvironmentProperties getProperties() {
@@ -302,6 +304,12 @@ void InterfaceAdaptor::setGateway(uint Gateway)
 {
     // handle method call NUT_DBUS_URL.Interface.setGateway
     QMetaObject::invokeMethod(parent(), "setGateway", Q_ARG(uint, Gateway));
+}
+
+void InterfaceAdaptor::setIP(uint HostAddress)
+{
+    // handle method call NUT_DBUS_URL.Interface.setGateway
+    QMetaObject::invokeMethod(parent(), "setIP", Q_ARG(uint, HostAddress));
 }
 
 void InterfaceAdaptor::setNetmask(uint Netmask)
