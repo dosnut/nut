@@ -63,6 +63,12 @@
         </property>
         <item row="0" column="0" >
          <widget class="QListView" name="overViewList" >
+          <property name="iconSize" >
+           <size>
+            <width>32</width>
+            <height>32</height>
+           </size>
+          </property>
           <property name="viewMode" >
            <enum>QListView::ListMode</enum>
           </property>

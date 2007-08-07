@@ -15,10 +15,12 @@ TRANSLATIONS = qnut_de.ts
 HEADERS += connectionmanager.h trayicon.h \
  constants.h \
  overviewlistmodel.h \
- deviceoptionsmodel.h
+ deviceoptionsmodel.h \
+ deviceoptions.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  overviewlistmodel.cpp \
- deviceoptionsmodel.cpp
+ deviceoptionsmodel.cpp \
+ deviceoptions.cpp
 
 #dbus zeugs
 #INCLUDEPATH += ../libnut

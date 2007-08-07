@@ -58,7 +58,7 @@ namespace qnut {
         }
         else if (role == Qt::DecorationRole) {
             if (index.column() == 0)
-                return QIcon(UI_ICON_DEVICE_32);
+                return QIcon(UI_ICON_DEVICE);
             else
                 return QVariant();
         }
