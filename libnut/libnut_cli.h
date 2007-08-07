@@ -41,7 +41,7 @@ namespace libnut {
         Q_OBJECT
     public:
         libnut_DeviceProperties properties;
-        CEnvironmentList environments;  //darf nie leer sein
+        CEnvironmentList environments;
         
         CDevice(QObject * parent);
     public slots:
@@ -49,8 +49,8 @@ namespace libnut {
         void disable();
 
     signals:
-        void environmentChangedActive(int previous);
-        void environmentsUpdated(CDevice * device);
+        void environmentChangedActive(int current, int previous); //parameter current hinzugefügt
+        void environmentsUpdated(); //parameter device entfernt
         void stateChanged(bool state);
     };
     
@@ -60,12 +60,13 @@ namespace libnut {
         libnut_EnvironmentProperties properties;
         libnut_SelectConfig currentSelection;
         QList<libnut_SelectConfig> selectStatements;
-        CInterfaceList interfaces;  //darf nie leer sein
+        CInterfaceList interfaces;
         
         CEnvironment(CDevice * parent);
     public slots:
-        void activate();
+        void enter(); //zuvor activate()
     signals:
+        void stateChanged(bool state); //hinzugefügt
         void interfacesUpdated();
     };
     
@@ -81,7 +82,7 @@ namespace libnut {
         void setNetmask(QHostAddress * address);
         void setGateway(QHostAddress * address);
     signals:
-        void activeStateChanged();
+        void stateChanged(bool state); //zuvor activeStateChanged()
     };
 };
 
