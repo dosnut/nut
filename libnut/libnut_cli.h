@@ -5,7 +5,7 @@
 #include <QList>
 #include <QHostAddress>
 #include "libnut_types.h"
-//#include "libnut_server_proxy.cpp"
+#include "libnut_server_proxy.h"
 /*
 Benötigte Informationen:
 device liste : /device_name/

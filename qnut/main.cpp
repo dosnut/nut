@@ -18,11 +18,11 @@ int main(int argc, char * argv[])
     CConnectionManager mainwin;
     
     //testing
-    CDevice * testdev = new CDevice(NULL);
+/*    CDevice * testdev = new CDevice(NULL);
     testdev->properties.name = "eth0";
     testdev->properties.enabled = false;
     mainwin.deviceManager.devices.append(testdev);
-    mainwin.uiAddedDevice(testdev);
+    mainwin.uiAddedDevice(testdev);*/
     //testing
     
     return app.exec();
