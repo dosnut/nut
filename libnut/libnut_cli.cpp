@@ -8,7 +8,7 @@ namespace libnut {
     void CDevice::disable() {}
     CDevice::CDevice(QObject * parent) : QObject(parent) {}
     
-    void CEnvironment::activate() {}
+    void CEnvironment::enter() {}
     CEnvironment::CEnvironment(CDevice * parent) : QObject(parent) {}
     
     void CInterface::activate() {}
@@ -16,5 +16,6 @@ namespace libnut {
     void CInterface::setIP(QHostAddress * address) {}
     void CInterface::setNetmask(QHostAddress * address) {}
     void CInterface::setGateway(QHostAddress * address) {}
+
     CInterface::CInterface(QObject * parent) : QObject(parent) {}
 };

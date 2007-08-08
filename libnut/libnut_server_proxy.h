@@ -60,10 +60,15 @@ public Q_SLOTS: // METHODS
         QList<QVariant> argumentList;
         return callWithArgumentList(QDBus::Block, QLatin1String("getProperties"), argumentList);
     }
+    inline QDBusReply<void> setEnvironment(QDBusObjectPath envpath) {
+        QList<QVariant> argumentList;
+        argumentList << qVariantFromValue(envpath);
+        return callWithArgumentList(QDBus::Block, QLatin1String("setEnvironment"), argumentList);
+    }
 
 Q_SIGNALS: // SIGNALS
-    void environmentChangedActive(const QString &previous);
-    void environmentsUpdated(const QDBusObjectPath &device);
+    void environmentChangedActive(const QDBusObjectPath &newenv);
+    void environmentsUpdated();
     void stateChanged();
 };
 
@@ -193,7 +198,7 @@ public Q_SLOTS: // METHODS
     }
 
 Q_SIGNALS: // SIGNALS
-    void activeStateChanged();
+    void StateChanged(const bool &state);
 };
 
 namespace NUT_DBUS_URL {

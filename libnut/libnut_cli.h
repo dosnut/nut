@@ -49,8 +49,8 @@ namespace libnut {
         void disable();
 
     signals:
-        void environmentChangedActive(int current, int previous); //parameter current hinzugefügt
-        void environmentsUpdated(); //parameter device entfernt
+        void environmentChangedActive(int current, int previous);
+        void environmentsUpdated();
         void stateChanged(bool state);
     };
     
@@ -64,9 +64,9 @@ namespace libnut {
         
         CEnvironment(CDevice * parent);
     public slots:
-        void enter(); //zuvor activate()
+        void enter();
     signals:
-        void stateChanged(bool state); //hinzugefügt
+        void stateChanged(bool state);
         void interfacesUpdated();
     };
     

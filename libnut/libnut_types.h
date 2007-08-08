@@ -26,10 +26,12 @@ const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_SelectCon
 //QDBusArgument &operator<< (QDBusArgument &argument, const QList<libnut_InterfaceProperties> &selconflist);
 //const QDBusArgument &operator>> (const QDBusArgument &argument, QList<libnut_InterfaceProperties> &selconflist);
 
+enum libnut_DeviceType {ethernet=0, wlan=1, ppp=2};
 struct libnut_DeviceProperties {
     QString name;
     bool activeEnvironment;
     bool enabled;
+    int type;
 };
 
 QDBusArgument &operator<< (QDBusArgument &argument, const libnut_DeviceProperties &devprop);

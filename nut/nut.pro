@@ -19,7 +19,8 @@ SOURCES += nut.cpp \
  nut_library.cpp \
  nut_interactive.cpp \
  nut_commandline.cpp \
- ../libnut/libnut_server.cpp
+ ../libnut/libnut_server.cpp \
+ ../libnut/libnut_server_adaptor.cpp
 
 HEADERS += servertest.h \
  ../libnut/libnut_types.h \

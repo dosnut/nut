@@ -19,13 +19,13 @@ const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_SelectCon
 
 QDBusArgument &operator<< (QDBusArgument &argument, const libnut_DeviceProperties & devprop) {
     argument.beginStructure();
-    argument << devprop.name << devprop.activeEnvironment << devprop.enabled;
+    argument << devprop.name << devprop.activeEnvironment << devprop.enabled << devprop.type;
     argument.endStructure();
     return argument;
 }
 const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_DeviceProperties &devprop) {
     argument.beginStructure();
-    argument >> devprop.name >> devprop.activeEnvironment >> devprop.enabled;
+    argument >> devprop.name >> devprop.activeEnvironment >> devprop.enabled >> devprop.type;
     argument.endStructure();
     return argument;
 }
