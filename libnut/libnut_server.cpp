@@ -2,10 +2,8 @@
 namespace libnut {
 
 
-CNutsDBusConnection::CNutsDBusConnection(nuts::DeviceManager * devmgr) : devmgr(devmgr) {
+CNutsDBusConnection::CNutsDBusConnection(nuts::DeviceManager * devmgr) : devmgr(devmgr), connection(QDBusConnection::sessionBus()) {
     //DBus systemConnection herstellen und Service regististrieren
-    QDBusConnection connection; //QDBusConnection::systemBus();
-    QDBusConnection dbus = QDBusConnection::sessionBus();
     connection.registerService(QLatin1String("NUT_DBUS_URL"));
     //QDBus Metatypen regististrieren
     qDBusRegisterMetaType<libnut_DeviceProperties>();
@@ -18,22 +16,22 @@ CNutsDBusConnection::~CNutsDBusConnection() {
 }
 
 CNutsDBusDeviceManager::CNutsDBusDeviceManager(QObject * parent) : QObject(parent) {
-    real_parent = (CNutsDBusConnection) parent;
+    real_parent = (CNutsDBusConnection *) parent;
     connection = &(real_parent->connection);
     //DBus initialisieren
     new DeviceManagerAdaptor(this);
     connection->registerObject(QLatin1String("DeviceManager"),this);
 }
 
-CNutsDBusDeviceManager::CNutsDBusDeviceManager() {
+CNutsDBusDeviceManager::~CNutsDBusDeviceManager() {
     connection->unregisterObject(QLatin1String("/DeviceManager"));
 }
 
 CNutsDBusDevice::CNutsDBusDevice(QString deviceName, QObject * parent) : QObject(parent) {
-    real_parent = (CNutsDBusDeviceManager) parent;
+    real_parent = (CNutsDBusDeviceManager *) parent;
     connection = real_parent->connection;
     properties.name = deviceName;
-    devObjectPath = "/Devices/" + devicename;
+    devObjectPath = "/Devices/" + deviceName;
     //DBus Initialisieren
     new DeviceAdaptor(this);
     connection->registerObject(QLatin1String(devObjectPath),this);
@@ -44,7 +42,7 @@ CNutsDBusDevice::~CNutsDBusDevice() {
 
 CNutsDBusEnvironment::CNutsDBusEnvironment(int env_id, QObject * parent) : QObject(parent), env_id(env_id) {
     //DBus initialisieren
-    real_parent = (CNutsDBusDevice) parent;
+    real_parent = (CNutsDBusDevice *) parent;
     connection = real_parent->connection;
     deviceName = real_parent->properties.name;
     envObjectPath = "/Environments/" + deviceName + "/" + QString(env_id);
@@ -56,10 +54,10 @@ CNutsDBusEnvironment::~CNutsDBusEnvironment() {
     connection->unregisterObject(QLatin1String(envObjectPath));
 }
 
-CNutsDBusInterface::CNutsDBusInterface(int if_id, intenv_id, QObject * parent) :
+CNutsDBusInterface::CNutsDBusInterface(int if_id, int env_id, QObject * parent) :
     QObject(parent), if_id(if_id), env_id(env_id) {
-    real_parent = (CNutsDBusEnvironment) parent;
-    connection = parent->connection;
+    real_parent = (CNutsDBusEnvironment *) parent;
+    connection = real_parent->connection;
     ifObjectPath = "/Interfaces/" + QString(env_id) + "/" + QString(if_id);
     //DBus initialisieren:
     new InterfaceAdaptor(this);

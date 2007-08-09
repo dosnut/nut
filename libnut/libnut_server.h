@@ -44,9 +44,9 @@ class CNutsDBusDeviceManager: public QObject {
     Q_CLASSINFO("D-Bus Interface", "NUT_DBUS_URL.DeviceManager")
     private:
         DeviceManagerAdaptor * devmgr_adaptor;
-        QDBusConnection * connection;
         CNutsDBusConnection * real_parent;
     public:
+        QDBusConnection * connection;
         CNutsDBusDeviceManager(QObject * parent);
         ~CNutsDBusDeviceManager();
     public slots:
@@ -60,11 +60,11 @@ class CNutsDBusDevice: public QObject {
     Q_CLASSINFO("D-Bus Interface", "NUT_DBUS_URL.Device")
     private:
         DeviceAdaptor * dev_adaptor;
-        QDBusConnection * connection;
         QString devObjectPath;
-        libnut_DeviceProperties properties;
         CNutsDBusDeviceManager * real_parent;
     public:
+        libnut_DeviceProperties properties;
+        QDBusConnection * connection;
         CNutsDBusDevice(QString deviceName, QObject * parent);
         ~CNutsDBusDevice();
     public slots:
