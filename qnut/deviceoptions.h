@@ -27,14 +27,21 @@ namespace qnut {
     public:
         CDevice * device;
         QMenu * deviceMenu;
+        QMenu * environmentsMenu;
         QAction * enableDeviceAction;
         QAction * disableDeviceAction;
+        QAction * enterEnvironmentAction;
+        QAction * activateInterfaceAction;
+        QAction * deactivateInterfaceAction;
+
         QAction * showAction;
     
         CDeviceOptions(CDevice * parentDevice, QTabWidget * parentTabWidget, QWidget * parent = 0);
         ~CDeviceOptions();
     public slots:
         void showThisTab();
+        void selectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+        void showPopup(const QPoint & pos);
     };
 };
 

@@ -9,6 +9,13 @@
 #include "deviceoptions.h"
 #include "libnut_cli.h"
 
+/*
+    TODO deviceoptions popup
+    TODO environment actions
+    TODO interface actions
+    TODO dialoge für benutzereigaben
+*/
+
 namespace qnut {
     using namespace libnut;
 
@@ -21,10 +28,6 @@ namespace qnut {
         
         QAction * enableDeviceAction;
         QAction * disableDeviceAction;
-        QAction * activateEnvironmentAction;
-        QAction * deactivateEnvironmentAction;
-        QAction * activateInterfaceAction;
-        QAction * deactivateInterfaceAction;
         
         QMenu overViewMenu;
         CTrayIcon trayicon;

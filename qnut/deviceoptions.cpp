@@ -24,13 +24,30 @@ namespace qnut {
         deviceMenu->addSeparator();
         showAction = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(showThisTab()));
         
+        environmentsMenu = new QMenu(this);
+        enterEnvironmentAction    = environmentsMenu->addAction(QIcon(UI_ICON_ENTER_ENVIRONMENT), tr("Enter environment"));
+        environmentsMenu->addSeparator();
+        activateInterfaceAction   = environmentsMenu->addAction(QIcon(UI_ICON_ACTIVATE_INTERFACE), tr("Activate interface"));
+        deactivateInterfaceAction = environmentsMenu->addAction(QIcon(UI_ICON_DEACTIVATE_INTERFACE), tr("Deactivate interface"));
+        
+        enterEnvironmentAction->setEnabled(false);
+        activateInterfaceAction->setEnabled(false);
+        deactivateInterfaceAction->setEnabled(false);
+        
         enableDeviceAction->setDisabled(device->properties.enabled);
         disableDeviceAction->setEnabled(device->properties.enabled);
         setEnabled(device->properties.enabled);
         
+        setContextMenuPolicy(Qt::CustomContextMenu);
+        
         connect(device, SIGNAL(stateChanged(bool)), enableDeviceAction , SLOT(setDisabled(bool)));
         connect(device, SIGNAL(stateChanged(bool)), disableDeviceAction, SLOT(setEnabled(bool)));
         connect(device, SIGNAL(stateChanged(bool)), this, SLOT(setEnabled(bool)));
+        connect(device, SIGNAL(environmentsUpdated()), this, SLOT(repaint()));
+        
+        connect(selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+                this            , SLOT(selectionChanged(const QItemSelection &, const QItemSelection &)));
+        connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showPopup(const QPoint &)));
     }
     
     CDeviceOptions::~CDeviceOptions() {
@@ -41,10 +58,65 @@ namespace qnut {
 //        CDeviceOptionsModel * targetTreeModel = (CDeviceOptionsModel *)targetDeviceOptions.environmentsTree->model();
 //        targetDeviceOptions.environmentsTree->setModel(NULL);
 //        delete targetTreeModel;
+        //delete environmentsMenu;
         delete deviceMenu;
     }
     
     void CDeviceOptions::showThisTab() {
         tabWidget->setCurrentWidget(this);
+    }
+    
+    void CDeviceOptions::selectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
+        QModelIndexList deselectedIndexes = deselected.indexes();
+        QModelIndexList selectedIndexes = selected.indexes();
+        
+        if (!deselectedIndexes.isEmpty()) {
+            QModelIndex targetIndex = deselectedIndexes[0];
+            if (targetIndex.column() == 0) {
+                CEnvironment * target = (CEnvironment *)(targetIndex.internalPointer());
+                disconnect(target, SIGNAL(stateChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
+                disconnect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT());
+            }
+            else {
+                CInterface * target = (CInterface *)(targetIndex.internalPointer());
+                disconnect(target, SIGNAL(stateChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
+                disconnect(target, SIGNAL(stateChanged(bool)), deactivateInterfaceAction, SLOT(setEnabled(bool)));
+                disconnect(activateInterfaceAction, SIGNAL(triggered()), target, SLOT(activate()));
+                disconnect(deactivateInterfaceAction, SIGNAL(triggered()), target, SLOT(deactivate()));
+            }
+        }
+        
+        if (!selectedIndexes.isEmpty()) {
+            QModelIndex targetIndex = selectedIndexes[0];
+            if (targetIndex.column() == 0) {
+                CEnvironment * target = (CEnvironment *)(targetIndex.internalPointer());
+                connect(target, SIGNAL(stateChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
+                connect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT());
+                
+                enterEnvironmentAction->setDisabled(target->properties.active);
+                activateInterfaceAction->setEnabled(false);
+                deactivateInterfaceAction->setEnabled(false);
+            }
+            else {
+                CInterface * target = (CInterface *)(targetIndex.internalPointer());
+                connect(target, SIGNAL(stateChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
+                connect(target, SIGNAL(stateChanged(bool)), deactivateInterfaceAction, SLOT(setEnabled(bool)));
+                connect(activateInterfaceAction, SIGNAL(triggered()), target, SLOT(activate()));
+                connect(deactivateInterfaceAction, SIGNAL(triggered()), target, SLOT(deactivate()));
+                
+                enterEnvironmentAction->setEnabled(false);
+                activateInterfaceAction->setDisabled(target->properties.active);
+                deactivateInterfaceAction->setEnabled(target->properties.active);
+            }
+        }
+        else {
+            enterEnvironmentAction->setEnabled(false);
+            activateInterfaceAction->setEnabled(false);
+            deactivateInterfaceAction->setEnabled(false);
+        }
+    }
+    
+    void CDeviceOptions::showPopup(const QPoint & pos) {
+        environmentsMenu->exec(mapToGlobal(pos));
     }
 };

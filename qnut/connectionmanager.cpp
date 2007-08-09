@@ -59,12 +59,11 @@ namespace qnut {
         disconnect(dev, SIGNAL(stateChanged(bool)), ui.overViewList, SLOT(repaint()));
         
         ui.tabWidget->removeTab(ui.tabWidget->indexOf(target));
-        deviceOptions.remove(dev);
+        ui.overViewList->repaint();
         
         trayicon.devicesMenu.removeAction(target->deviceMenu->menuAction());
+        deviceOptions.remove(dev);
         delete target;
-        
-        ui.overViewList->repaint();
     }
     
     void CConnectionManager::uiCurrentTabChanged(int index) {
@@ -80,12 +79,13 @@ namespace qnut {
             //current device actions
             ui.toolBar->addAction(current->enableDeviceAction);
             ui.toolBar->addAction(current->disableDeviceAction);
+            ui.toolBar->addSeparator();
             //environment actions
-            //ui.toolBar->addAction(activateEnvironmentAction);
-            //ui.toolBar->addAction(deactivateEnvironmentAction);
+            ui.toolBar->addAction(current->enterEnvironmentAction);
+            ui.toolBar->addSeparator();
             //interface actions
-            //ui.toolBar->addAction(activateInterfaceAction);
-            //ui.toolBar->addAction(deactivateInterfaceAction);
+            ui.toolBar->addAction(current->activateInterfaceAction);
+            ui.toolBar->addAction(current->deactivateInterfaceAction);
         }
         ui.toolBar->setUpdatesEnabled(true);
     }

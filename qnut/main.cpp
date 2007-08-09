@@ -20,7 +20,7 @@ int main(int argc, char * argv[])
     //testing
 /*    CDevice * testdev = new CDevice(NULL);
     testdev->properties.name = "eth0";
-    testdev->properties.enabled = false;
+    testdev->properties.enabled = true;
     mainwin.deviceManager.devices.append(testdev);
     mainwin.uiAddedDevice(testdev);*/
     //testing
