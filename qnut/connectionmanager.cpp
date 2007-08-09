@@ -26,6 +26,7 @@ namespace qnut {
         overViewMenu.addAction(enableDeviceAction);
         overViewMenu.addAction(disableDeviceAction);
         
+        
         connect(ui.overViewList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
                 this                             , SLOT(uiSelectedDeviceChanged(const QItemSelection &, const QItemSelection &)));
         connect(ui.tabWidget, SIGNAL(currentChanged(int)),

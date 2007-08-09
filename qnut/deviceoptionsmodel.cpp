@@ -79,7 +79,7 @@ namespace qnut {
         else
             return QModelIndex();
     }
-    //hier weiter!!
+    
     QModelIndex CDeviceOptionsModel::parent(const QModelIndex & index) const {
         if (device == NULL)
             return QModelIndex();

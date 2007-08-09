@@ -14,7 +14,7 @@
 #include <QIcon>
 
 namespace qnut {
-    COverViewListModel::COverViewListModel(CDeviceList * deviceList, QObject * parent) : QAbstractListModel(parent) {
+    COverViewListModel::COverViewListModel(CDeviceList * deviceList, QObject * parent) : QAbstractItemModel(parent) {
         devices = deviceList;
         
         // vllt sollte hier die deviceliste gefüllt werden wenn nicht vorher getan
@@ -24,8 +24,32 @@ namespace qnut {
         devices = NULL;
     }
     
+    Qt::ItemFlags COverViewListModel::flags(const QModelIndex & index) const {
+        if (devices == NULL)
+            return 0;
+        
+        if (!index.isValid())
+            return 0;
+        
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    }
+    
+    QModelIndex COverViewListModel::parent(const QModelIndex & index) const {
+        return QModelIndex();
+    }
+    
+    int COverViewListModel::columnCount(const QModelIndex & parent) const {
+        if (devices == NULL)
+            return 0;
+            
+        if (parent.isValid())
+            return 0;
+        
+        return 2;
+    }
+    
     QModelIndex COverViewListModel::index(int row, int column, const QModelIndex & parent) const {
-        if ((devices != NULL) && (row < devices->count()))
+        if ((devices != NULL) && (row < devices->count()) && (!parent.isValid()))
             return createIndex(row, column, (void *)(devices->at(row)));
         else
             return QModelIndex();
@@ -34,8 +58,11 @@ namespace qnut {
     int COverViewListModel::rowCount(const QModelIndex & parent) const {
         if (devices == NULL)
             return 0;
-        else
+        
+        if (!parent.isValid())
             return devices->count();
+        
+        return 0;
     }
     
     QVariant COverViewListModel::data(const QModelIndex & index, int role) const {
@@ -50,9 +77,9 @@ namespace qnut {
         
         if (role == Qt::DisplayRole) {
             if (index.column() == 0)
-                return devices->value(index.row())->properties.name;
+                return ((CDevice *)(index.internalPointer()))->properties.name;
             else if (index.column() == 1)
-                return devices->value(index.row())->properties.enabled ? tr("enabled") : tr("disabled");
+                return ((CDevice *)(index.internalPointer()))->properties.enabled ? tr("enabled") : tr("disabled");
             else
                 return QVariant();
         }
@@ -77,9 +104,11 @@ namespace qnut {
         if (orientation == Qt::Horizontal)
             switch (section) {
                 case 0:
-                    return QVariant(tr("Name"));
+                    return tr("Name");
                 case 1:
-                    return QVariant(tr("status"));
+                    return tr("Status");
+                case 2:
+                    return tr("Type");
                 default:
                     return QVariant();
             }

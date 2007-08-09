@@ -12,20 +12,24 @@
 #ifndef QNUT_OVERVIEWLISTMODEL_H
 #define QNUT_OVERVIEWLISTMODEL_H
 
-#include <QAbstractListModel>
+#include <QAbstractItemModel>
 #include <QVariant>
 #include "libnut_cli.h"
 
 namespace qnut {
     using namespace libnut;
 
-    class COverViewListModel : public QAbstractListModel {
+    class COverViewListModel : public QAbstractItemModel {
         Q_OBJECT
     public:
         COverViewListModel(CDeviceList * deviceList, QObject * parent = 0);
         ~COverViewListModel();
         
-        virtual QModelIndex index(int row, int column = 0, const QModelIndex & parent = QModelIndex()) const;
+        Qt::ItemFlags flags(const QModelIndex & index) const;
+        QModelIndex parent(const QModelIndex & index) const;
+        int columnCount(const QModelIndex & parent = QModelIndex()) const;
+        
+        QModelIndex index(int row, int column = 0, const QModelIndex & parent = QModelIndex()) const;
         int rowCount(const QModelIndex &parent = QModelIndex()) const;
         QVariant data(const QModelIndex &index, int role) const;
         QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
