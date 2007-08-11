@@ -46,13 +46,13 @@ const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_wlanScanr
 QDBusArgument &operator<< (QDBusArgument &argument, const libnut_wlanNetworkProperties &wlanprop) {
     argument.beginStructure();
     argument << wlanprop.scanresult << wlanprop.password << wlanprop.proto << wlanprop.key_mgmt;
-    endStructure();
+    argument.endStructure();
     return argument;
 }
 const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_wlanNetworkProperties &wlanprop) {
     argument.beginStructure();
     argument >> wlanprop.scanresult >> wlanprop.password >> wlanprop.proto >> wlanprop.key_mgmt;
-    endStructure();
+    argument.endStructure();
     return argument;
 }
 
@@ -95,8 +95,27 @@ const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_Interface
     argument.endStructure();
     return argument;
 }
+
+libnut_metatype_id_storage::libnut_metatype_id_storage() {
+    int metatype_id_libnut_DeviceProperties = -1;
+    int metatype_id_libnut_SelectConfig = -1;
+    int metatype_id_libnut_EnvironmentProperties = -1;
+    int metatype_id_libnut_InterfaceProperties = -1;
+    int metatype_id_libnut_SelectConfigList = -1;
+    int metatype_id_libnut_wlanScanresult = -1;
+    int metatype_id_libnut_wlanScanresultList = -1;
+    int metatype_id_libnut_wlanNetworkProperties = -1;
 }
-void libnut_register_all_metatypes() {
+int libnut_metatype_id_storage::metatype_id_libnut_DeviceProperties = -1;
+int libnut_metatype_id_storage::metatype_id_libnut_SelectConfig;
+int libnut_metatype_id_storage::metatype_id_libnut_EnvironmentProperties;
+int libnut_metatype_id_storage::metatype_id_libnut_InterfaceProperties;
+int libnut_metatype_id_storage::metatype_id_libnut_SelectConfigList;
+int libnut_metatype_id_storage::metatype_id_libnut_wlanScanresult;
+int libnut_metatype_id_storage::metatype_id_libnut_wlanScanresultList;
+int libnut_metatype_id_storage::metatype_id_libnut_wlanNetworkProperties = -1;
+
+void libnut_metatype_id_storage::libnut_register_all_metatypes() {
 int metatype_id_libnut_DeviceProperties = qRegisterMetaType<libnut::libnut_DeviceProperties>("libnut_DeviceProperties");
 int metatype_id_libnut_SelectConfig = qRegisterMetaType<libnut::libnut_SelectConfig>("libnut_SelectConfig");
 
@@ -112,3 +131,5 @@ int metatype_id_libnut_wlanScanresultList = qRegisterMetaType<QList<libnut::libn
 
 int metatype_id_libnut_wlanNetworkProperties = qRegisterMetaType<libnut::libnut_wlanNetworkProperties>("libnut_wlanNetworkProperties");
 }
+}
+

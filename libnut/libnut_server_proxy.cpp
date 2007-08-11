@@ -1,4 +1,5 @@
 #include "libnut_server_proxy.h"
+namespace libnut {
 /*
  * Implementation of interface class NUT_DBUS_URLDeviceInterface
  */
@@ -49,4 +50,5 @@ NUT_DBUS_URLInterfaceInterface::NUT_DBUS_URLInterfaceInterface(const QString &se
 
 NUT_DBUS_URLInterfaceInterface::~NUT_DBUS_URLInterfaceInterface()
 {
+}
 }

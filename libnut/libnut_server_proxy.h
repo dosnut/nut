@@ -22,7 +22,7 @@
 #include <QtDBus/QtDBus>
 #include "libnut_types.h"
 #include <QMetaType>
-
+namespace libnut {
 /*
  * Proxy class for interface NUT_DBUS_URL.Device
  */
@@ -70,7 +70,7 @@ public Q_SLOTS: // METHODS
         return callWithArgumentList(QDBus::Block, QLatin1String("getwlanScan"), argumentList);
     }
     inline QDBusReply<QDBusObjectPath> addwlanEnvironment(libnut_wlanNetworkProperties netprops) {
-        QList<Qvariant> argumentList;
+        QList<QVariant> argumentList;
         argumentList << qVariantFromValue(netprops);
         return callWithArgumentList(QDBus::Block, QLatin1String("addwlanEnvironment"), argumentList);
     }
@@ -214,11 +214,12 @@ public Q_SLOTS: // METHODS
 Q_SIGNALS: // SIGNALS
     void StateChanged(const bool &state);
 };
-
+/*
 namespace NUT_DBUS_URL {
   typedef ::NUT_DBUS_URLDeviceInterface Device;
-  typedef ::NUT_DBUS_URLDeviceManagerInterface DeviceManager;
-  typedef ::NUT_DBUS_URLEnvironmentInterface Environment;
-  typedef ::NUT_DBUS_URLInterfaceInterface Interface;
+  typedef NUT_DBUS_URL::NUT_DBUS_URLDeviceManagerInterface DeviceManager;
+  typedef NUT_DBUS_URL::NUT_DBUS_URLEnvironmentInterface Environment;
+  typedef NUT_DBUS_URL::NUT_DBUS_URLInterfaceInterface Interface;
+}*/
 }
 #endif

@@ -7,6 +7,7 @@ namespace libnut {
     void CDevice::enable() {}
     void CDevice::disable() {}
     CDevice::CDevice(QObject * parent) : QObject(parent) {}
+    void CDeviceManager::refreshAll() {}
     
     void CEnvironment::enter() {}
     CEnvironment::CEnvironment(CDevice * parent) : QObject(parent) {}

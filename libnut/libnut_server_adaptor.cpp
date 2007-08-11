@@ -40,7 +40,7 @@ QList<QDBusObjectPath> DeviceAdaptor::getEnvironments()
     return out0;
 }
 QList<libnut_wlanScanresult> DeviceAdaptor::getwlanScan() {
-    libnut_wlanScanresult out0;
+    QList<libnut_wlanScanresult> out0;
     QMetaObject::invokeMethod(parent(), "getwlanScan", Q_RETURN_ARG(QList<libnut_wlanScanresult>, out0));
     return out0;
 }
