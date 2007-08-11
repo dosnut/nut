@@ -37,11 +37,11 @@ struct libnut_DeviceProperties {
 QDBusArgument &operator<< (QDBusArgument &argument, const libnut_DeviceProperties &devprop);
 const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_DeviceProperties &devprop);
 
-enum libnut_wlanEncryptionType {wep=0, wpa1=1, wpa2=2, other=3};
+enum libnut_wlanEncryptionType {none=0, wep=1, wpa1=2, wpa2=3, other=4};
 struct libnut_wlanScanresult {
     QString essid;
     int channel;
-    QChar bssid;
+    char bssid[6];
     int flags;
     int signallevel;
     int encryption;
@@ -86,14 +86,15 @@ int metatype_id_libnut_EnvironmentProperties = qRegisterMetaType<libnut::libnut_
 int metatype_id_libnut_InterfaceProperties = qRegisterMetaType<libnut::libnut_InterfaceProperties>("libnut_InterfaceProperties");
 */
 }
-
+void libnut_register_all_metatypes();
 Q_DECLARE_METATYPE(libnut::libnut_SelectConfig)
+Q_DECLARE_METATYPE(QList<libnut::libnut_SelectConfig>)
 Q_DECLARE_METATYPE(libnut::libnut_DeviceProperties)
 Q_DECLARE_METATYPE(libnut::libnut_wlanScanresult)
 Q_DECLARE_METATYPE(QList<libnut::libnut_wlanScanresult>)
 Q_DECLARE_METATYPE(libnut::libnut_wlanNetworkProperties)
 Q_DECLARE_METATYPE(libnut::libnut_EnvironmentProperties)
 Q_DECLARE_METATYPE(libnut::libnut_InterfaceProperties)
-Q_DECLARE_METATYPE(QList<libnut::libnut_SelectConfig>)
+
 
 #endif

@@ -28,7 +28,8 @@ HEADERS += servertest.h \
  nut_interactive.h \
  nut_commandline.h \
  ../libnut/libnut_server.h \
- ../libnut/libnut_server_proxy.h
+ ../libnut/libnut_server_proxy.h \
+ ../libnut/libnut_exceptions.h
 
 DISTFILES += ../libnut/libnut_server.xml
 

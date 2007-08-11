@@ -7,6 +7,7 @@
 #include <QLatin1String>
 
 #include <QStringList>
+#include <QHostAddress>
 //QDBUS
 #include <QDBusConnection>
 #include <QDBusObjectPath>
@@ -14,8 +15,7 @@
 #include <QMetaType>
 
 #include "../nuts/device.h"
-#include "libnut_types.h"
-#include "libnut_server_adaptor.h"
+#include "libnut_types.h"#include "libnut_server_adaptor.h"
 
 namespace libnut {
     class CNutsDBusConnection;
@@ -48,10 +48,14 @@ class CNutsDBusDeviceManager: public QObject {
     private:
         DeviceManagerAdaptor * devmgr_adaptor;
         CNutsDBusConnection * real_parent;
+        QList<QDBusObjectPath> deviceObjectPathList;
+        QList<CNutsDBusDevice *> deviceList;
     public:
         QDBusConnection * connection;
         CNutsDBusDeviceManager(QObject * parent);
         ~CNutsDBusDeviceManager();
+
+    //DBUS SLOTS and SIGNALS
     public slots:
         QList<QDBusObjectPath> getDeviceList();
     signals:
@@ -70,6 +74,8 @@ class CNutsDBusDevice: public QObject {
         QDBusConnection * connection;
         CNutsDBusDevice(QString deviceName, QObject * parent);
         ~CNutsDBusDevice();
+
+    //DBUS SLOTS and SIGNALS
     public slots:
         libnut_DeviceProperties getProperties();
         QList<libnut_wlanScanresult> getwlanScan(); //
@@ -78,7 +84,6 @@ class CNutsDBusDevice: public QObject {
         void setEnvironment(QDBusObjectPath envpath);
         bool enable();
         bool disable();
-
     signals:
         void environmentChangedActive(QDBusObjectPath newenv);
         void environmentsUpdated();
@@ -99,7 +104,8 @@ class CNutsDBusEnvironment: public QObject {
         CNutsDBusEnvironment(int env_id, QObject * parent);
         ~CNutsDBusEnvironment();
         QDBusConnection * connection;
-    //DBus Slots and signals
+
+    //DBUS SLOTS and SIGNALS
     public slots:
         QList<libnut_SelectConfig> getSelectConfig();
         libnut_SelectConfig getCurrentSelection();
@@ -125,8 +131,9 @@ class CNutsDBusInterface: public QObject {
         CNutsDBusInterface(int if_id, int env_id, QObject * parent);
         ~CNutsDBusInterface();
         QDBusConnection * connection;
+
+    //DBUS SLOTS and SIGNALS
     public slots:
-        //top to down: see libnut_cli.h::CINterface public variables
         libnut_InterfaceProperties getProperties();
         void setIP(quint32 HostAddress);
         void setNetmask(quint32 Netmask);
