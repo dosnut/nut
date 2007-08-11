@@ -32,6 +32,8 @@ namespace libnut {
         CDeviceList devices;
         
         CDeviceManager(QObject * parent);
+    public slots:
+        void refreshAll();
     signals:
         void deviceAdded(CDevice * device);
         void deviceRemoved(CDevice * device); //nach entfernen aus der liste aber vor dem löschen

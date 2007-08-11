@@ -39,6 +39,16 @@ QList<QDBusObjectPath> DeviceAdaptor::getEnvironments()
     QMetaObject::invokeMethod(parent(), "getEnvironments", Q_RETURN_ARG(QList<QDBusObjectPath>, out0));
     return out0;
 }
+QList<libnut_wlanScanresult> DeviceAdaptor::getwlanScan() {
+    libnut_wlanScanresult out0;
+    QMetaObject::invokeMethod(parent(), "getwlanScan", Q_RETURN_ARG(QList<libnut_wlanScanresult>, out0));
+    return out0;
+}
+QDBusObjectPath DeviceAdaptor::addwlanEnvironment(libnut_wlanNetworkProperties netprops) {
+    QDBusObjectPath out0;
+    QMetaObject::invokeMethod(parent(), "addwlanEnvironment", Q_RETURN_ARG(QDBusObjectPath, out0), Q_ARG(libnut_wlanNetworkProperties, netprops));
+    return out0;
+}
 libnut_DeviceProperties DeviceAdaptor::getProperties() {
     libnut_DeviceProperties out0;
     QMetaObject::invokeMethod(parent(), "getProperties", Q_RETURN_ARG(libnut_DeviceProperties, out0));
@@ -108,6 +118,11 @@ QList<QDBusObjectPath> EnvironmentAdaptor::getInterfaces()
     // handle method call NUT_DBUS_URL.Environment.getInterfaces
     QList<QDBusObjectPath> out0;
     QMetaObject::invokeMethod(parent(), "getInterfaces", Q_RETURN_ARG(QList<QDBusObjectPath>, out0));
+    return out0;
+}
+QDBusObjectPath EnvironmentAdaptor::addInterface(libnut_InterfaceProperties prop, bool state) {
+    QDBusObjectPath out0;
+    QMetaObject::invokeMethod(parent(), "addInterface", Q_RETURN_ARG(QDBusObjectPath, out0), Q_ARG(libnut_InterfaceProperties, prop), Q_ARG(bool, state));
     return out0;
 }
 

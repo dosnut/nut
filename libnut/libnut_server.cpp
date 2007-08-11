@@ -20,7 +20,7 @@ CNutsDBusDeviceManager::CNutsDBusDeviceManager(QObject * parent) : QObject(paren
     connection = &(real_parent->connection);
     //DBus initialisieren
     new DeviceManagerAdaptor(this);
-    connection->registerObject(QLatin1String("DeviceManager"),this);
+    connection->registerObject(QLatin1String("/DeviceManager"),this);
 }
 
 CNutsDBusDeviceManager::~CNutsDBusDeviceManager() {
@@ -34,10 +34,10 @@ CNutsDBusDevice::CNutsDBusDevice(QString deviceName, QObject * parent) : QObject
     devObjectPath = "/Devices/" + deviceName;
     //DBus Initialisieren
     new DeviceAdaptor(this);
-    connection->registerObject(QLatin1String(devObjectPath),this);
+    connection->registerObject(QLatin1String(devObjectPath.toLatin1()),this);
 };
 CNutsDBusDevice::~CNutsDBusDevice() {
-    connection->unregisterObject(QLatin1String(devObjectPath));
+    connection->unregisterObject(QLatin1String(devObjectPath.toLatin1()));
 }
 
 CNutsDBusEnvironment::CNutsDBusEnvironment(int env_id, QObject * parent) : QObject(parent), env_id(env_id) {
@@ -47,11 +47,11 @@ CNutsDBusEnvironment::CNutsDBusEnvironment(int env_id, QObject * parent) : QObje
     deviceName = real_parent->properties.name;
     envObjectPath = "/Environments/" + deviceName + "/" + QString(env_id);
     new EnvironmentAdaptor(this);
-    connection->registerObject(QLatin1String(envObjectPath),this);
+    connection->registerObject(QLatin1String(envObjectPath.toLatin1()),this);
     //Es fehlt: vieles
 }
 CNutsDBusEnvironment::~CNutsDBusEnvironment() {
-    connection->unregisterObject(QLatin1String(envObjectPath));
+    connection->unregisterObject(QLatin1String(envObjectPath.toLatin1()));
 }
 
 CNutsDBusInterface::CNutsDBusInterface(int if_id, int env_id, QObject * parent) :
@@ -61,10 +61,10 @@ CNutsDBusInterface::CNutsDBusInterface(int if_id, int env_id, QObject * parent) 
     ifObjectPath = "/Interfaces/" + QString(env_id) + "/" + QString(if_id);
     //DBus initialisieren:
     new InterfaceAdaptor(this);
-    connection->registerObject(QLatin1String(ifObjectPath),this);
+    connection->registerObject(QLatin1String(ifObjectPath.toLatin1()),this);
 }
 CNutsDBusInterface::~CNutsDBusInterface() {
-    connection->unregisterObject(QLatin1String(ifObjectPath));
+    connection->unregisterObject(QLatin1String(ifObjectPath.toLatin1()));
 }
 
 }

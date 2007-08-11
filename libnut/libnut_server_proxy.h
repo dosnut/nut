@@ -65,6 +65,15 @@ public Q_SLOTS: // METHODS
         argumentList << qVariantFromValue(envpath);
         return callWithArgumentList(QDBus::Block, QLatin1String("setEnvironment"), argumentList);
     }
+    inline QDBusReply<QList<libnut_wlanScanresult> > getwlanScan() {
+        QList<QVariant> argumentList;
+        return callWithArgumentList(QDBus::Block, QLatin1String("getwlanScan"), argumentList);
+    }
+    inline QDBusReply<QDBusObjectPath> addwlanEnvironment(libnut_wlanNetworkProperties netprops) {
+        QList<Qvariant> argumentList;
+        argumentList << qVariantFromValue(netprops);
+        return callWithArgumentList(QDBus::Block, QLatin1String("addwlanEnvironment"), argumentList);
+    }
 
 Q_SIGNALS: // SIGNALS
     void environmentChangedActive(const QDBusObjectPath &newenv);
@@ -136,6 +145,11 @@ public Q_SLOTS: // METHODS
     {
         QList<QVariant> argumentList;
         return callWithArgumentList(QDBus::Block, QLatin1String("getProperties"), argumentList);
+    }
+    inline QDBusReply<QDBusObjectPath> addInterface(libnut_InterfaceProperties prop, bool state) {
+        QList<QVariant> argumentList;
+        argumentList << qVariantFromValue(prop) << qVariantFromValue(state);
+        return callWithArgumentList(QDBus::Block, QLatin1String("addInterface"), argumentList);
     }
 
 Q_SIGNALS: // SIGNALS

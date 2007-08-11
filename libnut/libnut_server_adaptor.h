@@ -62,6 +62,8 @@ public Q_SLOTS: // METHODS
     bool enable();
     QList<QDBusObjectPath> getEnvironments();
     libnut_DeviceProperties getProperties();
+    QList<libnut_wlanScanresult> getwlanScan();
+    QDBusObjectPath addwlanEnvironment(libnut_wlanNetworkProperties netprops);
     void setEnvironment(QDBusObjectPath envpath);
 Q_SIGNALS: // SIGNALS
     void environmentChangedActive(const QDBusObjectPath &newenv);
@@ -126,6 +128,7 @@ public Q_SLOTS: // METHODS
     libnut_SelectConfig getCurrentSelection();
     libnut_EnvironmentProperties getProperties();
     QList<QDBusObjectPath> getInterfaces();
+    QDBusObjectPath addInterface(libnut_InterfaceProperties prop, bool state);
 Q_SIGNALS: // SIGNALS
     void interfacesUpdated();
     void stateChanged(const bool &state);

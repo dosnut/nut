@@ -30,6 +30,32 @@ const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_DevicePro
     return argument;
 }
 
+QDBusArgument &operator<< (QDBusArgument &argument, const libnut_wlanScanresult &scanres) {
+    argument.beginStructure();
+    argument << scanres.essid << scanres.channel << scanres.bssid << scanres.flags << scanres.signallevel << scanres.encryption;
+    argument.endStructure();
+    return argument;
+}
+const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_wlanScanresult &scanres) {
+    argument.beginStructure();
+    argument >> scanres.essid >> scanres.channel >> scanres.bssid >> scanres.flags >> scanres.signallevel >> scanres.encryption;
+    argument.endStructure();
+    return argument;
+}
+
+QDBusArgument &operator<< (QDBusArgument &argument, const libnut_wlanNetworkProperties &wlanprop) {
+    argument.beginStructure();
+    argument << wlanprop.scanresult << wlanprop.password << wlanprop.proto << wlanprop.key_mgmt;
+    endStructure();
+    return argument;
+}
+const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_wlanNetworkProperties &wlanprop) {
+    argument.beginStructure();
+    argument >> wlanprop.scanresult >> wlanprop.password >> wlanprop.proto >> wlanprop.key_mgmt;
+    endStructure();
+    return argument;
+}
+
 QDBusArgument &operator<< (QDBusArgument &argument, const libnut_EnvironmentProperties &envprop) {
     argument.beginStructure();
     argument << envprop.active << envprop.name;

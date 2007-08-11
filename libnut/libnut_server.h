@@ -3,6 +3,9 @@
 
 #include <QObject>
 #include <QList>
+#include <QString>
+#include <QLatin1String>
+
 #include <QStringList>
 //QDBUS
 #include <QDBusConnection>
@@ -69,6 +72,8 @@ class CNutsDBusDevice: public QObject {
         ~CNutsDBusDevice();
     public slots:
         libnut_DeviceProperties getProperties();
+        QList<libnut_wlanScanresult> getwlanScan(); //
+        QDBusObjectPath addwlanEnvironment(libnut_wlanNetworkProperties netprops);//
         QList<QDBusObjectPath> getEnvironments();
         void setEnvironment(QDBusObjectPath envpath);
         bool enable();
@@ -85,7 +90,6 @@ class CNutsDBusEnvironment: public QObject {
     Q_CLASSINFO("D-Bus Interface", "NUT_DBUS_URL.Environment")
     private:
         EnvironmentAdaptor * env_adaptor;
-        QDBusConnection * connection;
         QString deviceName;
         QString envObjectPath;
         int env_id;
@@ -94,11 +98,14 @@ class CNutsDBusEnvironment: public QObject {
     public:
         CNutsDBusEnvironment(int env_id, QObject * parent);
         ~CNutsDBusEnvironment();
+        QDBusConnection * connection;
+    //DBus Slots and signals
     public slots:
         QList<libnut_SelectConfig> getSelectConfig();
         libnut_SelectConfig getCurrentSelection();
         libnut_EnvironmentProperties getProperties();
         QList<QDBusObjectPath> getInterfaces();
+        QDBusObjectPath addInterface(libnut_InterfaceProperties prop, bool state); //dazu
     signals:
         void interfacesUpdated();
         void stateChanged(bool state);
@@ -110,14 +117,14 @@ class CNutsDBusInterface: public QObject {
     Q_CLASSINFO("D-Bus Interface", "NUT_DBUS_URL.Interface")
     private:
         InterfaceAdaptor * if_adaptor;
-        QDBusConnection * connection;
-        int env_id;
         int if_id;
+        int env_id;
         QString ifObjectPath;
         CNutsDBusEnvironment * real_parent;
     public:
         CNutsDBusInterface(int if_id, int env_id, QObject * parent);
         ~CNutsDBusInterface();
+        QDBusConnection * connection;
     public slots:
         //top to down: see libnut_cli.h::CINterface public variables
         libnut_InterfaceProperties getProperties();
