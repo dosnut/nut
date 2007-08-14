@@ -9,18 +9,21 @@ CODECFORTR = ISO-8859-1
 OBJECTS_DIR = build
 TARGET = build/qnut
 
-FORMS = connman.ui
+FORMS = connman.ui \
+ ipconf.ui
 TRANSLATIONS = qnut_de.ts
 
 HEADERS += connectionmanager.h trayicon.h \
  constants.h \
  overviewlistmodel.h \
  deviceoptionsmodel.h \
- deviceoptions.h
+ deviceoptions.h \
+ ipconfiguration.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  overviewlistmodel.cpp \
  deviceoptionsmodel.cpp \
- deviceoptions.cpp
+ deviceoptions.cpp \
+ ipconfiguration.cpp
 
 #dbus zeugs
 #INCLUDEPATH += ../libnut

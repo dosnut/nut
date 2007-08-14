@@ -45,8 +45,20 @@ namespace qnut {
     void CConnectionManager::uiAddedDevice(CDevice * dev) {
         CDeviceOptions * newDeviceOptions = new CDeviceOptions(dev, ui.tabWidget);
         
+        switch (dev->properties.type) {
+            case 0:
+                ui.tabWidget->addTab(newDeviceOptions, QIcon(UI_ICON_DEVICE), dev->properties.name);
+                break;
+            case 1:
+                ui.tabWidget->addTab(newDeviceOptions, QIcon(UI_ICON_DEVICE_AIR), dev->properties.name);
+                break;
+            case 2:
+                ui.tabWidget->addTab(newDeviceOptions, QIcon(UI_ICON_DEVICE_PPP), dev->properties.name);
+                break;
+            default:
+                break;
+        }
         deviceOptions.insert(dev, newDeviceOptions);
-        ui.tabWidget->addTab(newDeviceOptions, QIcon(UI_ICON_DEVICE), dev->properties.name);
         trayicon.devicesMenu.addMenu(newDeviceOptions->deviceMenu);
         
         ui.overViewList->repaint();

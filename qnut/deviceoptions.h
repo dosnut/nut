@@ -33,6 +33,7 @@ namespace qnut {
         QAction * enterEnvironmentAction;
         QAction * activateInterfaceAction;
         QAction * deactivateInterfaceAction;
+        QAction * editInterfaceAction;
 
         QAction * showAction;
     
@@ -42,6 +43,7 @@ namespace qnut {
         void showThisTab();
         void selectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
         void showPopup(const QPoint & pos);
+        void changeIPConfiguration();
     };
 };
 

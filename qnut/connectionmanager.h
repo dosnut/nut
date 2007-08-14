@@ -9,20 +9,13 @@
 #include "deviceoptions.h"
 #include "libnut_cli.h"
 
-/*
-    TODO deviceoptions popup
-    TODO environment actions
-    TODO interface actions
-    TODO dialoge für benutzereigaben
-*/
-
 namespace qnut {
     using namespace libnut;
 
     class CConnectionManager : public QMainWindow {
         Q_OBJECT
     private:
-        Ui::ConnMan ui;
+        Ui::connMan ui;
     public:
         CDeviceManager deviceManager;
         

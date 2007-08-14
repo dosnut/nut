@@ -1,7 +1,7 @@
 <ui version="4.0" >
  <author>Oliver Groß</author>
- <class>ConnMan</class>
- <widget class="QMainWindow" name="ConnMan" >
+ <class>connMan</class>
+ <widget class="QMainWindow" name="connMan" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -141,7 +141,7 @@
   <connection>
    <sender>actionClose</sender>
    <signal>triggered()</signal>
-   <receiver>ConnMan</receiver>
+   <receiver>connMan</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel" >

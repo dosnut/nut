@@ -45,7 +45,7 @@ namespace qnut {
         if (parent.isValid())
             return 0;
         
-        return 2;
+        return 3;
     }
     
     QModelIndex COverViewListModel::index(int row, int column, const QModelIndex & parent) const {
@@ -76,22 +76,41 @@ namespace qnut {
             return QVariant();
         
         if (role == Qt::DisplayRole) {
-            if (index.column() == 0)
-                return ((CDevice *)(index.internalPointer()))->properties.name;
-            else if (index.column() == 1)
-                return ((CDevice *)(index.internalPointer()))->properties.enabled ? tr("enabled") : tr("disabled");
-            else
-                return QVariant();
+            switch (index.column()) {
+                case 0:
+                    return ((CDevice *)(index.internalPointer()))->properties.name;
+                case 1:
+                    return ((CDevice *)(index.internalPointer()))->properties.enabled ? tr("enabled") : tr("disabled");
+                case 2:
+                    switch (((CDevice *)(index.internalPointer()))->properties.type) {
+                        case 0:
+                            return tr("Ethernet");
+                        case 1:
+                            return tr("Wireless");
+                        case 2:
+                            return tr("PPP");
+                        default:
+                            break;
+                    }
+                default:
+                    break;
+            }
         }
         else if (role == Qt::DecorationRole) {
-            if (index.column() == 0)
-                return QIcon(UI_ICON_DEVICE);
-            else
-                return QVariant();
+            if (index.column() == 0) {
+                switch (((CDevice *)(index.internalPointer()))->properties.type) {
+                    case 0:
+                        return QIcon(UI_ICON_DEVICE);
+                    case 1:
+                        return QIcon(UI_ICON_DEVICE_AIR);
+                    case 2:
+                        return QIcon(UI_ICON_DEVICE_PPP);
+                    default:
+                        break;
+                }
+            }
         }
-        else {
-            return QVariant();
-        }
+        return QVariant();
     }
     
     QVariant COverViewListModel::headerData(int section, Qt::Orientation orientation, int role) const {
@@ -101,7 +120,7 @@ namespace qnut {
         if (role != Qt::DisplayRole)
             return QVariant();
         
-        if (orientation == Qt::Horizontal)
+        if (orientation == Qt::Horizontal) {
             switch (section) {
                 case 0:
                     return tr("Name");
@@ -110,9 +129,9 @@ namespace qnut {
                 case 2:
                     return tr("Type");
                 default:
-                    return QVariant();
+                    break;
             }
-        else
-            return QVariant();
+        }
+        return QVariant();
     }
 };

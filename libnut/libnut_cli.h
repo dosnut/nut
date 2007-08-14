@@ -80,9 +80,9 @@ namespace libnut {
     public slots:
         void activate();
         void deactivate();
-        void setIP(QHostAddress * address);
-        void setNetmask(QHostAddress * address);
-        void setGateway(QHostAddress * address);
+        void setIP(QHostAddress & address); //zuvor pointer
+        void setNetmask(QHostAddress & address); //zuvor pointer
+        void setGateway(QHostAddress & address); //zuvor pointer
     signals:
         void stateChanged(bool state); //zuvor activeStateChanged()
     };

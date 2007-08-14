@@ -11,6 +11,7 @@
 //
 #include "deviceoptions.h"
 #include "deviceoptionsmodel.h"
+#include "ipconfiguration.h"
 #include "constants.h"
 
 namespace qnut {
@@ -29,10 +30,13 @@ namespace qnut {
         environmentsMenu->addSeparator();
         activateInterfaceAction   = environmentsMenu->addAction(QIcon(UI_ICON_ACTIVATE_INTERFACE), tr("Activate interface"));
         deactivateInterfaceAction = environmentsMenu->addAction(QIcon(UI_ICON_DEACTIVATE_INTERFACE), tr("Deactivate interface"));
+        editInterfaceAction       = environmentsMenu->addAction(QIcon(UI_ICON_EDIT), tr("Edit IP Configuration..."),
+                                    this, SLOT(changeIPConfiguration()));
         
         enterEnvironmentAction->setEnabled(false);
         activateInterfaceAction->setEnabled(false);
         deactivateInterfaceAction->setEnabled(false);
+        editInterfaceAction->setEnabled(false);
         
         enableDeviceAction->setDisabled(device->properties.enabled);
         disableDeviceAction->setEnabled(device->properties.enabled);
@@ -96,8 +100,9 @@ namespace qnut {
                 enterEnvironmentAction->setDisabled(target->properties.active);
                 activateInterfaceAction->setEnabled(false);
                 deactivateInterfaceAction->setEnabled(false);
+                editInterfaceAction->setEnabled(false);
             }
-            else {
+            else if (targetIndex.column() > 0) {
                 CInterface * target = (CInterface *)(targetIndex.internalPointer());
                 connect(target, SIGNAL(stateChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
                 connect(target, SIGNAL(stateChanged(bool)), deactivateInterfaceAction, SLOT(setEnabled(bool)));
@@ -107,16 +112,24 @@ namespace qnut {
                 enterEnvironmentAction->setEnabled(false);
                 activateInterfaceAction->setDisabled(target->properties.active);
                 deactivateInterfaceAction->setEnabled(target->properties.active);
+                editInterfaceAction->setEnabled(true);
             }
         }
         else {
             enterEnvironmentAction->setEnabled(false);
             activateInterfaceAction->setEnabled(false);
             deactivateInterfaceAction->setEnabled(false);
+            editInterfaceAction->setEnabled(false);
         }
     }
     
     void CDeviceOptions::showPopup(const QPoint & pos) {
         environmentsMenu->exec(mapToGlobal(pos));
+    }
+    
+    void CDeviceOptions::changeIPConfiguration() {
+        CIPConfiguration dialog(this);
+        QModelIndex selectedIndex = (selectionModel()->selection().indexes())[0];
+        dialog.execute((CInterface *)(selectedIndex.internalPointer()));
     }
 };
