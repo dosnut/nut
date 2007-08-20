@@ -10,7 +10,7 @@
 //
 //
 #include "overviewlistmodel.h"
-#include "constants.h"
+#include "common.h"
 #include <QIcon>
 
 namespace qnut {
@@ -75,14 +75,16 @@ namespace qnut {
         if (index.row() >= devices->size())
             return QVariant();
         
+        CDevice * data = (CDevice *)(index.internalPointer());
+        
         if (role == Qt::DisplayRole) {
             switch (index.column()) {
                 case 0:
-                    return ((CDevice *)(index.internalPointer()))->properties.name;
+                    return data->properties.name;
                 case 1:
-                    return ((CDevice *)(index.internalPointer()))->properties.enabled ? tr("enabled") : tr("disabled");
+                    return data->properties.enabled ? tr("enabled") : tr("disabled");
                 case 2:
-                    switch (((CDevice *)(index.internalPointer()))->properties.type) {
+                    switch (data->properties.type) {
                         case 0:
                             return tr("Ethernet");
                         case 1:
@@ -98,16 +100,7 @@ namespace qnut {
         }
         else if (role == Qt::DecorationRole) {
             if (index.column() == 0) {
-                switch (((CDevice *)(index.internalPointer()))->properties.type) {
-                    case 0:
-                        return QIcon(UI_ICON_DEVICE);
-                    case 1:
-                        return QIcon(UI_ICON_DEVICE_AIR);
-                    case 2:
-                        return QIcon(UI_ICON_DEVICE_PPP);
-                    default:
-                        break;
-                }
+                return QIcon(getDeviceIcon(data));
             }
         }
         return QVariant();

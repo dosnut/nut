@@ -25,7 +25,7 @@ namespace qnut {
         QMenu overViewMenu;
         CTrayIcon trayicon;
         COverViewListModel overViewListModel;
-        QHash<CDevice *, CDeviceOptions *> deviceOptions;
+        CDeviceOptionsHash deviceOptions;
 
         CConnectionManager(QWidget * parent = 0);
     public slots:
@@ -34,7 +34,7 @@ namespace qnut {
         void uiCurrentTabChanged(int index);
         void uiSelectedDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected);
         void uiShowOverViewPopup(const QPoint & pos);
-        //void uiShowEnvironmentsTree();
+        void uiShowUserInputMessage();
     };
 };
 

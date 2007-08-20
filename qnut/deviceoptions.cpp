@@ -12,7 +12,8 @@
 #include "deviceoptions.h"
 #include "deviceoptionsmodel.h"
 #include "ipconfiguration.h"
-#include "constants.h"
+#include "common.h"
+#include <QHeaderView>
 
 namespace qnut {
     CDeviceOptions::CDeviceOptions(CDevice * parentDevice, QTabWidget * parentTabWidget, QWidget * parent) : QTreeView(parent) {
@@ -20,6 +21,7 @@ namespace qnut {
         tabWidget = parentTabWidget;
         setModel(new CDeviceOptionsModel(device));
         deviceMenu = new QMenu(device->properties.name, NULL);
+        
         enableDeviceAction  = deviceMenu->addAction(QIcon(UI_ICON_ENABLE_DEVICE) , tr("Enable device") , device, SLOT(enable()));
         disableDeviceAction = deviceMenu->addAction(QIcon(UI_ICON_DISABLE_DEVICE), tr("Disable device"), device, SLOT(disable()));
         deviceMenu->addSeparator();
@@ -37,16 +39,23 @@ namespace qnut {
         activateInterfaceAction->setEnabled(false);
         deactivateInterfaceAction->setEnabled(false);
         editInterfaceAction->setEnabled(false);
+        setAllColumnsShowFocus(true);
         
         enableDeviceAction->setDisabled(device->properties.enabled);
         disableDeviceAction->setEnabled(device->properties.enabled);
         setEnabled(device->properties.enabled);
         
         setContextMenuPolicy(Qt::CustomContextMenu);
+        setAllColumnsShowFocus(true);
+        setAlternatingRowColors(true);
+        setIconSize(QSize(18, 18));
+        
+        header()->setResizeMode(QHeaderView::ResizeToContents);
         
         connect(device, SIGNAL(stateChanged(bool)), enableDeviceAction , SLOT(setDisabled(bool)));
         connect(device, SIGNAL(stateChanged(bool)), disableDeviceAction, SLOT(setEnabled(bool)));
         connect(device, SIGNAL(stateChanged(bool)), this, SLOT(setEnabled(bool)));
+        connect(device, SIGNAL(stateChanged(bool)), this, SLOT(updateDeviceIcons()));
         connect(device, SIGNAL(environmentsUpdated()), this, SLOT(repaint()));
         
         connect(selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
@@ -70,16 +79,21 @@ namespace qnut {
         tabWidget->setCurrentWidget(this);
     }
     
+    void CDeviceOptions::updateDeviceIcons() {
+        tabWidget->setTabIcon(tabWidget->indexOf(this), QIcon(getDeviceIcon(device)));
+        deviceMenu->setIcon(QIcon(getDeviceIcon(device)));
+    }
+    
     void CDeviceOptions::selectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
         QModelIndexList deselectedIndexes = deselected.indexes();
         QModelIndexList selectedIndexes = selected.indexes();
         
         if (!deselectedIndexes.isEmpty()) {
             QModelIndex targetIndex = deselectedIndexes[0];
-            if (targetIndex.column() == 0) {
+            if (!targetIndex.parent().isValid()) {
                 CEnvironment * target = (CEnvironment *)(targetIndex.internalPointer());
                 disconnect(target, SIGNAL(stateChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
-                disconnect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT());
+                disconnect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
             }
             else {
                 CInterface * target = (CInterface *)(targetIndex.internalPointer());
@@ -92,17 +106,17 @@ namespace qnut {
         
         if (!selectedIndexes.isEmpty()) {
             QModelIndex targetIndex = selectedIndexes[0];
-            if (targetIndex.column() == 0) {
+            if (!targetIndex.parent().isValid()) {
                 CEnvironment * target = (CEnvironment *)(targetIndex.internalPointer());
                 connect(target, SIGNAL(stateChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
-                connect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT());
+                connect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
                 
                 enterEnvironmentAction->setDisabled(target->properties.active);
                 activateInterfaceAction->setEnabled(false);
                 deactivateInterfaceAction->setEnabled(false);
                 editInterfaceAction->setEnabled(false);
             }
-            else if (targetIndex.column() > 0) {
+            else {
                 CInterface * target = (CInterface *)(targetIndex.internalPointer());
                 connect(target, SIGNAL(stateChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
                 connect(target, SIGNAL(stateChanged(bool)), deactivateInterfaceAction, SLOT(setEnabled(bool)));

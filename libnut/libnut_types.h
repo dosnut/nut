@@ -29,7 +29,7 @@ const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_SelectCon
 enum libnut_DeviceType {ethernet=0, wlan=1, ppp=2};
 struct libnut_DeviceProperties {
     QString name;
-    bool activeEnvironment;
+    int activeEnvironment;
     bool enabled;
     int type;
 };

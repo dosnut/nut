@@ -26,7 +26,10 @@ namespace qnut {
         overViewMenu.addAction(enableDeviceAction);
         overViewMenu.addAction(disableDeviceAction);
         
-        
+        connect(&trayicon, SIGNAL(messageClicked()),
+                this     , SLOT(show()));
+        connect(ui.actionAboutQt, SIGNAL(triggered()),
+                qApp            , SLOT(aboutQt()));
         connect(ui.overViewList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
                 this                             , SLOT(uiSelectedDeviceChanged(const QItemSelection &, const QItemSelection &)));
         connect(ui.tabWidget, SIGNAL(currentChanged(int)),
@@ -45,21 +48,12 @@ namespace qnut {
     void CConnectionManager::uiAddedDevice(CDevice * dev) {
         CDeviceOptions * newDeviceOptions = new CDeviceOptions(dev, ui.tabWidget);
         
-        switch (dev->properties.type) {
-            case 0:
-                ui.tabWidget->addTab(newDeviceOptions, QIcon(UI_ICON_DEVICE), dev->properties.name);
-                break;
-            case 1:
-                ui.tabWidget->addTab(newDeviceOptions, QIcon(UI_ICON_DEVICE_AIR), dev->properties.name);
-                break;
-            case 2:
-                ui.tabWidget->addTab(newDeviceOptions, QIcon(UI_ICON_DEVICE_PPP), dev->properties.name);
-                break;
-            default:
-                break;
-        }
+        ui.tabWidget->addTab(newDeviceOptions, dev->properties.name);
+        newDeviceOptions->updateDeviceIcons();
+        
         deviceOptions.insert(dev, newDeviceOptions);
         trayicon.devicesMenu.addMenu(newDeviceOptions->deviceMenu);
+        trayicon.devicesMenu.setEnabled(true);
         
         ui.overViewList->repaint();
         connect(dev, SIGNAL(stateChanged(bool)), ui.overViewList, SLOT(repaint()));
@@ -75,30 +69,47 @@ namespace qnut {
         ui.overViewList->repaint();
         
         trayicon.devicesMenu.removeAction(target->deviceMenu->menuAction());
+        trayicon.devicesMenu.setDisabled(deviceManager.devices.isEmpty());
         deviceOptions.remove(dev);
         delete target;
     }
     
     void CConnectionManager::uiCurrentTabChanged(int index) {
+        ui.menuDevice->clear();
+        ui.menuEnvironment->clear();
+        ui.menuInterface->clear();
         ui.toolBar->setUpdatesEnabled(false);
         ui.toolBar->clear();
         if (index == 0) {
+            ui.menuEnvironment->setEnabled(false);
+            ui.menuInterface->setEnabled(false);
+            
             //general device actions
             ui.toolBar->addAction(enableDeviceAction);
             ui.toolBar->addAction(disableDeviceAction);
+            ui.menuDevice->addAction(enableDeviceAction);
+            ui.menuDevice->addAction(disableDeviceAction);
         }
         else {
+            ui.menuEnvironment->setEnabled(true);
+            ui.menuInterface->setEnabled(true);
+            
             CDeviceOptions * current = (CDeviceOptions *)(ui.tabWidget->currentWidget());
             //current device actions
             ui.toolBar->addAction(current->enableDeviceAction);
             ui.toolBar->addAction(current->disableDeviceAction);
+            ui.menuDevice->addAction(current->enableDeviceAction);
+            ui.menuDevice->addAction(current->disableDeviceAction);
             ui.toolBar->addSeparator();
             //environment actions
             ui.toolBar->addAction(current->enterEnvironmentAction);
+            ui.menuEnvironment->addAction(current->enterEnvironmentAction);
             ui.toolBar->addSeparator();
             //interface actions
             ui.toolBar->addAction(current->activateInterfaceAction);
             ui.toolBar->addAction(current->deactivateInterfaceAction);
+            ui.menuInterface->addAction(current->activateInterfaceAction);
+            ui.menuInterface->addAction(current->deactivateInterfaceAction);
         }
         ui.toolBar->setUpdatesEnabled(true);
     }
@@ -134,7 +145,11 @@ namespace qnut {
     void CConnectionManager::uiShowOverViewPopup(const QPoint & pos) {
         overViewMenu.exec(ui.overViewList->mapToGlobal(pos));
     }
-
+    
+    void CConnectionManager::uiShowUserInputMessage() {
+        trayicon.showMessage(tr("User defined environment entered"), tr("A device entered an environment, that needs to be configured in order to be active.\n\n Click here to open the connection manager."));
+    }
+    
 /*    void CConnectionManager::uiShowEnvironmentsTree() {
         QModelIndex currentIndex = ui.overViewList->selectionModel()->selectedIndexes()[0];
         CDevice * currentDevice = deviceManager.devices[currentIndex.row()];

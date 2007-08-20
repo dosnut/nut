@@ -18,12 +18,14 @@ HEADERS += connectionmanager.h trayicon.h \
  overviewlistmodel.h \
  deviceoptionsmodel.h \
  deviceoptions.h \
- ipconfiguration.h
+ ipconfiguration.h \
+ common.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  overviewlistmodel.cpp \
  deviceoptionsmodel.cpp \
  deviceoptions.cpp \
- ipconfiguration.cpp
+ ipconfiguration.cpp \
+ common.cpp
 
 #dbus zeugs
 #INCLUDEPATH += ../libnut

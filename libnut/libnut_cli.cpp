@@ -17,6 +17,7 @@ namespace libnut {
     void CInterface::setIP(QHostAddress & address) {}
     void CInterface::setNetmask(QHostAddress & address) {}
     void CInterface::setGateway(QHostAddress & address) {}
-
+    void CInterface::setStatic(bool state) {}
+    
     CInterface::CInterface(QObject * parent) : QObject(parent) {}
 };

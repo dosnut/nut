@@ -19,13 +19,19 @@
 
 namespace qnut {
     using namespace libnut;
-
+    
+    class CDeviceOptions;
+    typedef QHash<CDevice *, CDeviceOptions *> CDeviceOptionsHash;
+    
     class CDeviceOptions : public QTreeView {
         Q_OBJECT
     protected:
         QTabWidget * tabWidget;
     public:
         CDevice * device;
+        
+        //bool undefined;
+        
         QMenu * deviceMenu;
         QMenu * environmentsMenu;
         QAction * enableDeviceAction;
@@ -34,13 +40,14 @@ namespace qnut {
         QAction * activateInterfaceAction;
         QAction * deactivateInterfaceAction;
         QAction * editInterfaceAction;
-
+        
         QAction * showAction;
-    
+        
         CDeviceOptions(CDevice * parentDevice, QTabWidget * parentTabWidget, QWidget * parent = 0);
         ~CDeviceOptions();
     public slots:
         void showThisTab();
+        void updateDeviceIcons();
         void selectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
         void showPopup(const QPoint & pos);
         void changeIPConfiguration();

@@ -83,6 +83,7 @@ namespace libnut {
         void setIP(QHostAddress & address); //zuvor pointer
         void setNetmask(QHostAddress & address); //zuvor pointer
         void setGateway(QHostAddress & address); //zuvor pointer
+        void setStatic(bool state); // war zuvor nicht da
     signals:
         void stateChanged(bool state); //zuvor activeStateChanged()
     };

@@ -28,6 +28,8 @@ namespace qnut {
             
             tempAddr.setAddress(ui.netmaskEdit->text());
             interface->setNetmask(tempAddr);
+            
+            interface->setStatic(ui.staticRadio->isChecked());
             return true;
         }
         else {

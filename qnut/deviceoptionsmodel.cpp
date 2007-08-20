@@ -10,6 +10,8 @@
 //
 //
 #include "deviceoptionsmodel.h"
+#include "constants.h"
+#include <QIcon>
 
 namespace qnut {
     CDeviceOptionsModel::CDeviceOptionsModel(CDevice * data, QObject * parent) : QAbstractItemModel(parent) {
@@ -20,6 +22,29 @@ namespace qnut {
         device = NULL;
     }
     
+    int CDeviceOptionsModel::columnCount(const QModelIndex & parent) const {
+        if (device == NULL)
+            return 0;
+        else
+            return 3;
+    }
+
+    
+    int CDeviceOptionsModel::rowCount(const QModelIndex & parent) const {
+        if (device == NULL)
+            return 0;
+        
+        if (!parent.isValid())
+            return device->environments.count();
+        else {
+            QObject * parentData = (QObject *)(parent.internalPointer());
+            if (parentData->parent() == device)
+                return ((CEnvironment *)parentData)->interfaces.count();
+            else
+                return 0;
+        }
+    }
+    
     QVariant CDeviceOptionsModel::data(const QModelIndex & index, int role) const {
         if (device == NULL)
             return QVariant();
@@ -27,26 +52,68 @@ namespace qnut {
         if (!index.isValid())
             return QVariant();
         
-        if (role != Qt::DisplayRole)
-            return QVariant();
-        
+        QObject * data = (QObject *)(index.internalPointer());
         switch (index.column()) {
             case 0:
-                return QVariant(((CEnvironment *)(index.internalPointer()))->properties.name);
-            case 1:
-                return QVariant(((CInterface *)(index.internalPointer()))->properties.ip.toString());
-            case 2:
-                switch (index.row()) {
-                case 0:
-                    return QVariant(tr("Netmask: ") + ((CInterface *)(index.internalPointer()))->properties.netmask.toString());
-                case 1:
-                    return QVariant(tr("Gateway: ") + ((CInterface *)(index.internalPointer()))->properties.gateway.toString());
-                default:
-                    return QVariant();
+                if (data->parent() == device) {
+                    switch (role) {
+                        case Qt::DisplayRole:
+                            return ((CEnvironment *)data)->properties.name;
+                        case Qt::DecorationRole:
+                            return QIcon(UI_ICON_ENVIRONMENT);
+                        default:
+                            break;
+                    }
                 }
+                
+                if (data->parent()->parent() == device) {
+                    switch (role) {
+                        case Qt::DisplayRole:
+                            return tr("IP-Address") + ": " +((CInterface *)data)->properties.ip.toString() + "\n" +
+                                tr("Netmask") + ": " + ((CInterface *)data)->properties.netmask.toString() + "\n" +
+                                tr("Gateway") + ": " + ((CInterface *)data)->properties.gateway.toString();
+                        case Qt::DecorationRole:
+                            return QIcon(UI_ICON_INTERFACE);
+                        default:
+                            break;
+                    }
+                }
+                break;
+            case 1:
+                if (role == Qt::DisplayRole) {
+                    if (data->parent() == device) {
+                        return ((CEnvironment *)data)->properties.active ? tr("active") : QVariant();//tr("inactive");
+                    }
+                    
+                    if (data->parent()->parent() == device) {
+                        return ((CInterface *)data)->properties.active ? tr("enabled") : tr("disabled");
+                    }
+                }
+                break;
+            case 2:
+                if (role == Qt::DisplayRole) {
+                    if (data->parent() == device) {
+                        switch (((CEnvironment *)data)->properties.currentSelection.type) {
+                            case 0:
+                                return tr("selected by user");
+                            case 1:
+                                return tr("selected by ARP");
+                            case 2:
+                                return tr("selected by ESSID");
+                            default:
+                                break;
+                        }
+                    }
+                    if (data->parent()->parent() == device) {
+                        return ((CInterface *)data)->properties.isStatic ? tr("static") : tr("dynamic");
+                    }
+                }
+                break;
             default:
-                return QVariant();
+                break;
         }
+        
+        return QVariant();
     }
     
     Qt::ItemFlags CDeviceOptionsModel::flags(const QModelIndex & index) const {
@@ -60,24 +127,46 @@ namespace qnut {
     }
     
     QVariant CDeviceOptionsModel::headerData(int section, Qt::Orientation orientation, int role) const {
+        if (device == NULL)
+            return QVariant();
+        
+        if (role != Qt::DisplayRole)
+            return QVariant();
+        
+        if (orientation == Qt::Horizontal) {
+            switch (section) {
+                case 0:
+                    return tr("Item");
+                case 1:
+                    return tr("Status");
+                case 2:
+                    return tr("Config");
+                default:
+                    break;
+            }
+        }
         return QVariant();
     }
     
     QModelIndex CDeviceOptionsModel::index(int row, int column, const QModelIndex & parent) const {
         if (device == NULL)
             return QModelIndex();
-    
+        
         if (!hasIndex(row, column, parent))
             return QModelIndex();
         
-        if ((column == 0) && (row < device->environments.count()))
-            return createIndex(row, column, device->environments[row]);
-        else if ((column == 1) && (row < ((CEnvironment *)(parent.internalPointer()))->interfaces.count()))
-            return createIndex(row, column, ((CEnvironment *)(parent.internalPointer()))->interfaces[row]);
-        else if ((column == 2) && (row < 2))
-            return createIndex(row, column, parent.internalPointer());
-        else
-            return QModelIndex();
+        
+        if (!parent.isValid()) {
+            if (row < device->environments.count())
+                return createIndex(row, column, device->environments[row]);
+        }
+        else {
+            QObject * parentData = (QObject *)(parent.internalPointer());
+            if ((parentData->parent() == device) && (row < ((CEnvironment *)(parentData))->interfaces.count()))
+                return createIndex(row, column, ((CEnvironment *)(parent.internalPointer()))->interfaces[row]);
+        }
+        
+        return QModelIndex();
     }
     
     QModelIndex CDeviceOptionsModel::parent(const QModelIndex & index) const {
@@ -87,45 +176,15 @@ namespace qnut {
         if (!index.isValid())
             return QModelIndex();
         
-        switch (index.column()) {
-            case 1: {
-                CInterface * currentInterface = (CInterface *)(index.internalPointer());
-                CEnvironment * parentEnvironment = (CEnvironment *)(currentInterface->parent());
-                
-                return createIndex(device->environments.indexOf(parentEnvironment), 0, (void *)parentEnvironment);
-            }
-            case 2: {
-                CInterface * parentInterface = (CInterface *)(index.internalPointer());
-                CEnvironment * parentEnvironment = (CEnvironment *)(parentInterface->parent());
-                
-                return createIndex(parentEnvironment->interfaces.indexOf(parentInterface), 1, (void *)parentInterface);
-            }
-        default:
+        if (index.internalPointer() == NULL)
             return QModelIndex();
-        }
-    }
-    
-    int CDeviceOptionsModel::rowCount(const QModelIndex & parent) const {
-        if (device == NULL)
-            return 0;
         
-        if (!parent.isValid())
-            return device->environments.count();
+        QObject * parentData = ((QObject *)(index.internalPointer()))->parent();
         
-        switch (parent.column()) {
-            case 0:
-                return ((CEnvironment *)(parent.internalPointer()))->interfaces.count();
-            case 1:
-                return 2;
-            default:
-                return 0;
-        }
-    }
-    
-    int CDeviceOptionsModel::columnCount(const QModelIndex & parent) const {
-        if ((device == NULL) || (!parent.isValid()))
-            return 0;
+        if (parentData->parent() == device)
+            return createIndex(device->environments.indexOf((CEnvironment *)(parentData)), 0, (void *)(parentData));
         else
-            return 1;
+            return QModelIndex();
+        
     }
 };
