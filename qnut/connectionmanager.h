@@ -19,6 +19,7 @@ namespace qnut {
     public:
         CDeviceManager deviceManager;
         
+        QAction * refreshAllAction; //todo
         QAction * enableDeviceAction;
         QAction * disableDeviceAction;
         
