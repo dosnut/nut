@@ -171,4 +171,10 @@ void InterfaceAdaptor::setNetmask(uint Netmask)
     // handle method call NUT_DBUS_URL.Interface.setNetmask
     QMetaObject::invokeMethod(parent(), "setNetmask", Q_ARG(uint, Netmask));
 }
+
+void InterfaceAdaptor::setDynamic()
+{
+    // handle method call NUT_DBUS_URL.Interface.setNetmask
+    QMetaObject::invokeMethod(parent(), "setDynamic");
+}
 }

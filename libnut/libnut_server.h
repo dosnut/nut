@@ -138,6 +138,7 @@ class CNutsDBusInterface: public QObject {
         void setIP(quint32 HostAddress);
         void setNetmask(quint32 Netmask);
         void setGateway(quint32 Gateway);
+        void setDynamic();
         //folgende womöglich woanders rein:
         void activate();
         void deactivate();

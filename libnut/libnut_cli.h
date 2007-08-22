@@ -6,6 +6,9 @@
 #include <QHostAddress>
 #include "libnut_types.h"
 #include "libnut_server_proxy.h"
+#include "libnut_exceptions.h"
+#include <QDBusConnectionInterface>
+#include <QDBusReply>
 /*
 Benötigte Informationen:
 device liste : /device_name/
@@ -28,6 +31,12 @@ namespace libnut {
 namespace libnut {
     class CDeviceManager : public QObject {
         Q_OBJECT
+    private:
+        DBusDeviceManagerInterface * dbusDevmgr;
+        QDBusConnectionInterface dbusConnectionInterface;
+        QDBusConnection * dbusConnection;
+        void CDeviceManager::serviceCheck();
+        QList<QDBusObjectPath> dbusDeviceList;
     public:
         CDeviceList devices;
         

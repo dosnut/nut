@@ -252,6 +252,17 @@ void CNutsDBusInterface::setGateway(quint32 Gateway) {
 
     #endif
 }
+
+void CNutsDBusInterface::setDynamic() {
+    #ifdef INTERFACE_TEST
+
+    #endif
+    #ifndef INTERFACE_TEST
+
+    #endif
+}
+
+
 //folgende womöglich woanders rein:
 void CNutsDBusInterface::activate() {
     #ifdef INTERFACE_TEST

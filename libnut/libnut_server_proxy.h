@@ -24,9 +24,9 @@
 #include <QMetaType>
 namespace libnut {
 /*
- * Proxy class for interface NUT_DBUS_URL.Device
+ * Proxy class for interface DBus.Device
  */
-class NUT_DBUS_URLDeviceInterface: public QDBusAbstractInterface
+class DBusDeviceInterface: public QDBusAbstractInterface
 {
     Q_OBJECT
 public:
@@ -34,9 +34,9 @@ public:
     { return "NUT_DBUS_URL.Device"; }
 
 public:
-    NUT_DBUS_URLDeviceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
+    DBusDeviceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
 
-    ~NUT_DBUS_URLDeviceInterface();
+    ~DBusDeviceInterface();
 
 public Q_SLOTS: // METHODS
     inline QDBusReply<bool> disable()
@@ -82,9 +82,9 @@ Q_SIGNALS: // SIGNALS
 };
 
 /*
- * Proxy class for interface NUT_DBUS_URL.DeviceManager
+ * Proxy class for interface DBus.DeviceManager
  */
-class NUT_DBUS_URLDeviceManagerInterface: public QDBusAbstractInterface
+class DBusDeviceManagerInterface: public QDBusAbstractInterface
 {
     Q_OBJECT
 public:
@@ -92,9 +92,9 @@ public:
     { return "NUT_DBUS_URL.DeviceManager"; }
 
 public:
-    NUT_DBUS_URLDeviceManagerInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
+    DBusDeviceManagerInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
 
-    ~NUT_DBUS_URLDeviceManagerInterface();
+    ~DBusDeviceManagerInterface();
 
 public Q_SLOTS: // METHODS
     inline QDBusReply<QList<QDBusObjectPath> > getDeviceList()
@@ -109,9 +109,9 @@ Q_SIGNALS: // SIGNALS
 };
 
 /*
- * Proxy class for interface NUT_DBUS_URL.Environment
+ * Proxy class for interface DBus.Environment
  */
-class NUT_DBUS_URLEnvironmentInterface: public QDBusAbstractInterface
+class DBusEnvironmentInterface: public QDBusAbstractInterface
 {
     Q_OBJECT
 public:
@@ -119,9 +119,9 @@ public:
     { return "NUT_DBUS_URL.Environment"; }
 
 public:
-    NUT_DBUS_URLEnvironmentInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
+    DBusEnvironmentInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
 
-    ~NUT_DBUS_URLEnvironmentInterface();
+    ~DBusEnvironmentInterface();
 
 public Q_SLOTS: // METHODS
     inline QDBusReply<QList<QDBusObjectPath> > getInterfaces()
@@ -157,9 +157,9 @@ Q_SIGNALS: // SIGNALS
 };
 
 /*
- * Proxy class for interface NUT_DBUS_URL.Interface
+ * Proxy class for interface DBus.Interface
  */
-class NUT_DBUS_URLInterfaceInterface: public QDBusAbstractInterface
+class DBusInterfaceInterface: public QDBusAbstractInterface
 {
     Q_OBJECT
 public:
@@ -167,9 +167,9 @@ public:
     { return "NUT_DBUS_URL.Interface"; }
 
 public:
-    NUT_DBUS_URLInterfaceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
+    DBusInterfaceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
 
-    ~NUT_DBUS_URLInterfaceInterface();
+    ~DBusInterfaceInterface();
 
 public Q_SLOTS: // METHODS
     inline QDBusReply<void> activate()
@@ -211,15 +211,21 @@ public Q_SLOTS: // METHODS
         return callWithArgumentList(QDBus::Block, QLatin1String("setNetmask"), argumentList);
     }
 
+    inline QDBusReply<void> setNetmask()
+    {
+        QList<QVariant> argumentList;
+        return callWithArgumentList(QDBus::Block, QLatin1String("setDynamic"));
+    }
+
 Q_SIGNALS: // SIGNALS
     void StateChanged(const bool &state);
 };
 /*
-namespace NUT_DBUS_URL {
-  typedef ::NUT_DBUS_URLDeviceInterface Device;
-  typedef NUT_DBUS_URL::NUT_DBUS_URLDeviceManagerInterface DeviceManager;
-  typedef NUT_DBUS_URL::NUT_DBUS_URLEnvironmentInterface Environment;
-  typedef NUT_DBUS_URL::NUT_DBUS_URLInterfaceInterface Interface;
+namespace DBus {
+  typedef ::DBusDeviceInterface Device;
+  typedef DBus::DBusDeviceManagerInterface DeviceManager;
+  typedef DBus::DBusEnvironmentInterface Environment;
+  typedef DBus::DBusInterfaceInterface Interface;
 }*/
 }
 #endif

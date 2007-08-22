@@ -1,54 +1,54 @@
 #include "libnut_server_proxy.h"
 namespace libnut {
 /*
- * Implementation of interface class NUT_DBUS_URLDeviceInterface
+ * Implementation of interface class DBusDeviceInterface
  */
 
-NUT_DBUS_URLDeviceInterface::NUT_DBUS_URLDeviceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
+DBusDeviceInterface::DBusDeviceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
     : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
 {
 }
 
-NUT_DBUS_URLDeviceInterface::~NUT_DBUS_URLDeviceInterface()
+DBusDeviceInterface::~DBusDeviceInterface()
 {
 }
 
 /*
- * Implementation of interface class NUT_DBUS_URLDeviceManagerInterface
+ * Implementation of interface class DBusDeviceManagerInterface
  */
 
-NUT_DBUS_URLDeviceManagerInterface::NUT_DBUS_URLDeviceManagerInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
+DBusDeviceManagerInterface::DBusDeviceManagerInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
     : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
 {
 }
 
-NUT_DBUS_URLDeviceManagerInterface::~NUT_DBUS_URLDeviceManagerInterface()
+DBusDeviceManagerInterface::~DBusDeviceManagerInterface()
 {
 }
 
 /*
- * Implementation of interface class NUT_DBUS_URLEnvironmentInterface
+ * Implementation of interface class DBusEnvironmentInterface
  */
 
-NUT_DBUS_URLEnvironmentInterface::NUT_DBUS_URLEnvironmentInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
+DBusEnvironmentInterface::DBusEnvironmentInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
     : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
 {
 }
 
-NUT_DBUS_URLEnvironmentInterface::~NUT_DBUS_URLEnvironmentInterface()
+DBusEnvironmentInterface::~DBusEnvironmentInterface()
 {
 }
 
 /*
- * Implementation of interface class NUT_DBUS_URLInterfaceInterface
+ * Implementation of interface class DBusInterfaceInterface
  */
 
-NUT_DBUS_URLInterfaceInterface::NUT_DBUS_URLInterfaceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
+DBusInterfaceInterface::DBusInterfaceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
     : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
 {
 }
 
-NUT_DBUS_URLInterfaceInterface::~NUT_DBUS_URLInterfaceInterface()
+DBusInterfaceInterface::~DBusInterfaceInterface()
 {
 }
 }

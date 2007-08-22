@@ -165,6 +165,7 @@ public Q_SLOTS: // METHODS
     void setIP(uint HostAddress);
     void setGateway(uint Gateway);
     void setNetmask(uint Netmask);
+    void setDynamic();
 Q_SIGNALS: // SIGNALS
     void stateChanged(const bool &state);
 };
