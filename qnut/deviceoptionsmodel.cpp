@@ -58,7 +58,7 @@ namespace qnut {
                 if (data->parent() == device) {
                     switch (role) {
                         case Qt::DisplayRole:
-                            return ((CEnvironment *)data)->properties.name;
+                            return ((CEnvironment *)data)->name;
                         case Qt::DecorationRole:
                             return QIcon(UI_ICON_ENVIRONMENT);
                         default:
@@ -69,9 +69,9 @@ namespace qnut {
                 if (data->parent()->parent() == device) {
                     switch (role) {
                         case Qt::DisplayRole:
-                            return tr("IP-Address") + ": " +((CInterface *)data)->properties.ip.toString() + "\n" +
-                                tr("Netmask") + ": " + ((CInterface *)data)->properties.netmask.toString() + "\n" +
-                                tr("Gateway") + ": " + ((CInterface *)data)->properties.gateway.toString();
+                            return tr("IP-Address") + ": " +((CInterface *)data)->ip.toString() + "\n" +
+                                tr("Netmask") + ": " + ((CInterface *)data)->netmask.toString() + "\n" +
+                                tr("Gateway") + ": " + ((CInterface *)data)->gateway.toString();
                         case Qt::DecorationRole:
                             return QIcon(UI_ICON_INTERFACE);
                         default:
@@ -82,30 +82,45 @@ namespace qnut {
             case 1:
                 if (role == Qt::DisplayRole) {
                     if (data->parent() == device) {
-                        return ((CEnvironment *)data)->properties.active ? tr("active") : QVariant();//tr("inactive");
+                        return ((CEnvironment *)data)->active ? tr("active") : QVariant();//tr("inactive");
                     }
                     
                     if (data->parent()->parent() == device) {
-                        return ((CInterface *)data)->properties.active ? tr("enabled") : tr("disabled");
+                        return ((CInterface *)data)->active ? tr("enabled") : tr("disabled");
                     }
                 }
                 break;
             case 2:
                 if (role == Qt::DisplayRole) {
                     if (data->parent() == device) {
-                        switch (((CEnvironment *)data)->properties.currentSelection.type) {
-                            case 0:
-                                return tr("selected by user");
-                            case 1:
-                                return tr("selected by ARP");
+                        int configFlags = 0;
+                        bool configUseMac = false;
+                        foreach(libnut_SelectConfig config, ((CEnvironment *)data)->selectStatements) {
+                            if (config.selected) {
+                                configFlags = configFlags || config.flags;
+                                configUseMac = configUseMac || config.useMac;
+                            }
+                        }
+                        
+                        QString result = tr("selected by") + " ";
+                        switch (configFlags) {
+                            case 3:
+                                result += tr("essid") + ", " + tr("arp");
+                                break;
                             case 2:
-                                return tr("selected by ESSID");
+                                result += tr("essid");
+                                break;
+                            case 1:
+                                result += tr("arp");
+                                break;
                             default:
+                                result += tr("user");
                                 break;
                         }
+                        return result + " " + (configUseMac ? tr("and MAC-Address") : "");
                     }
                     if (data->parent()->parent() == device) {
-                        return ((CInterface *)data)->properties.isStatic ? tr("static") : tr("dynamic");
+                        return ((CInterface *)data)->isStatic ? tr("static") : tr("dynamic");
                     }
                 }
                 break;

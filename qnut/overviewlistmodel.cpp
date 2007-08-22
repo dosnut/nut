@@ -80,11 +80,11 @@ namespace qnut {
         if (role == Qt::DisplayRole) {
             switch (index.column()) {
                 case 0:
-                    return data->properties.name;
+                    return data->name;
                 case 1:
-                    return data->properties.enabled ? tr("enabled") : tr("disabled");
+                    return data->enabled ? tr("enabled") : tr("disabled");
                 case 2:
-                    switch (data->properties.type) {
+                    switch (data->type) {
                         case 0:
                             return tr("Ethernet");
                         case 1:

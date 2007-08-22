@@ -51,8 +51,12 @@ namespace libnut {
     class CDevice : public QObject {
         Q_OBJECT
     public:
-        libnut_DeviceProperties properties;
         CEnvironmentList environments;
+        
+        QString name;
+        bool enabled;
+        int type;
+        CEnvironment * activeEnvironment;
         
         CDevice(QObject * parent);
     public slots:
@@ -68,8 +72,8 @@ namespace libnut {
     class CEnvironment : public QObject {
         Q_OBJECT
     public:
-        libnut_EnvironmentProperties properties;
-        libnut_SelectConfig currentSelection;
+        bool active;
+        QString name;
         QList<libnut_SelectConfig> selectStatements;
         CInterfaceList interfaces;
         
@@ -84,7 +88,13 @@ namespace libnut {
     class CInterface : public QObject {
         Q_OBJECT
     public:
-        libnut_InterfaceProperties properties;
+        bool isStatic;
+        bool active;
+        bool userDefineable;
+        QHostAddress ip;
+        QHostAddress netmask;
+        QHostAddress gateway;
+
         CInterface(QObject * parent);
     public slots:
         void activate();
