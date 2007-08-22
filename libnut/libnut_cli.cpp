@@ -38,6 +38,7 @@ CDeviceManager::~CDeviceManager() {
         delete devices.takeFirst();
     }
 }
+//Check if service up
 CDeviceManager::serviceCheck() {
     QDBusReply<bool> reply = dbusConnectionInterface.isServiceRegistered("NUT_DBUS_URL");
     if (reply.isValid()) {

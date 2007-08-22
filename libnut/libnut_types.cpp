@@ -56,15 +56,14 @@ namespace libnut {
     
     QDBusArgument &operator<< (QDBusArgument &argument, const libnut_SelectConfig & selconf) {
         argument.beginStructure();
-        argument << selconf.type << selconf.useMAC << selconf.essid << selconf.arpIP.toIPv4Address();
+        argument << selconf.selected << selconf.flags << selconf.useMAC << selconf.macAddress.toQByteArray << selconf.arpIP << selconf.essid;
         argument.endStructure();
         return argument;
     }
     const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_SelectConfig &selconf) {
         quint32 hostaddress;
         argument.beginStructure();
-        argument >> selconf.type >> selconf.useMAC >> selconf.essid >> hostaddress;
-        selconf.arpIP = QHostAddress::QHostAddress(hostaddress);
+        argument >> selconf.selected >> selconf.flags >> selconf.useMAC >> selconf.macAddress.toQByteArray >> selconf.arpIP >> selconf.essid;
         argument.endStructure();
         return argument;
     }
@@ -111,8 +110,6 @@ namespace libnut {
     QDBusArgument &operator<< (QDBusArgument &argument, const libnut_EnvironmentProperties &envprop) {
         argument.beginStructure();
         argument << envprop.active << envprop.name;
-        argument << envprop.currentSelection.type << envprop.currentSelection.useMAC;
-        argument << envprop.currentSelection.arpIP.toIPv4Address() << envprop.currentSelection.essid;
         argument.endStructure();
         return argument;
     };
@@ -120,11 +117,6 @@ namespace libnut {
         quint32 hostaddress;
         argument.beginStructure();
         argument >> envprop.active >> envprop.name;
-        argument >> envprop.currentSelection.type >> envprop.currentSelection.useMAC;
-        argument >> hostaddress;
-        envprop.currentSelection.arpIP = QHostAddress::QHostAddress(hostaddress);
-        argument >> envprop.currentSelection.essid;
-        argument.endStructure();
         return argument;
     }
     QDBusArgument &operator<< (QDBusArgument &argument, const libnut_InterfaceProperties &ifprop) {

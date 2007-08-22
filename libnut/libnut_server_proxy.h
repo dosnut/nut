@@ -214,7 +214,7 @@ public Q_SLOTS: // METHODS
     inline QDBusReply<void> setNetmask()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("setDynamic"));
+        return callWithArgumentList(QDBus::Block, QLatin1String("setDynamic"), argumentList);
     }
 
 Q_SIGNALS: // SIGNALS

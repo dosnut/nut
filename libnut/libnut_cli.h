@@ -35,12 +35,12 @@ namespace libnut {
         DBusDeviceManagerInterface * dbusDevmgr;
         QDBusConnectionInterface dbusConnectionInterface;
         QDBusConnection * dbusConnection;
-        void CDeviceManager::serviceCheck();
+        void serviceCheck();
         QList<QDBusObjectPath> dbusDeviceList;
     public:
         CDeviceList devices;
-        
         CDeviceManager(QObject * parent);
+        ~CDeviceManager();
     public slots:
         void refreshAll();
     signals:

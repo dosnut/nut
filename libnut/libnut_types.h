@@ -30,6 +30,9 @@ namespace libnut {
                 sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X", data[0],data[1],data[2],data[3],data[4],data[5]);
                 return QString(buf);
             }
+            inline QByteArray toQByteArray() {
+                return QByteArray((char*) data,6);
+            }
     };
     
     enum libnut_SelectFlags {user=0, arp=1, essid=2};
@@ -53,7 +56,7 @@ namespace libnut {
     enum libnut_DeviceType {ethernet=0, wlan=1, ppp=2};
     struct libnut_DeviceProperties {
         QString name;
-        int activeEnvironment;
+        QDBusObjectPath activeEnvironment;
         bool enabled;
         int type;
     };
@@ -61,7 +64,7 @@ namespace libnut {
     QDBusArgument &operator<< (QDBusArgument &argument, const libnut_DeviceProperties &devprop);
     const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_DeviceProperties &devprop);
     
-    enum libnut_wlanEncryptionType {none=0, wep=1, wpa1=2, wpa2=3, other=4};
+    enum libnut_wlanEncryptionType {none=0, wep=2, wpa1=4, wpa2=8, other=16};
     struct libnut_wlanScanresult {
         QString essid;
         int channel;
