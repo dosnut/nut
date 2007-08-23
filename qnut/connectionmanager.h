@@ -19,6 +19,8 @@ namespace qnut {
     public:
         CDeviceManager deviceManager;
         
+        QFile logFile;
+        
         QAction * enableDeviceAction;
         QAction * disableDeviceAction;
         

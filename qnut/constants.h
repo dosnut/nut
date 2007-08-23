@@ -1,6 +1,8 @@
 #ifndef QNUT_CONSTANTS_H
 #define QNUT_CONSTANTS_H
 
+#define UI_FILE_LOG                     "qnut.log"
+#define UI_FILE_CONFIG                  "qnut.conf"
 #define UI_ICON_SYSTRAY                 "res/network.png"
 #define UI_ICON_ETH_ENABLED             "res/ethenabled.png"
 #define UI_ICON_AIR_ENABLED             "res/airenabled.png"
@@ -19,6 +21,6 @@
 #define UI_ICON_ACTIVATE_INTERFACE      "res/activateinterface.png"
 #define UI_ICON_DEACTIVATE_INTERFACE    "res/deactivateinterface.png"
 #define UI_ICON_EDIT                    "res/edit.png"
-#define UI_ICON_REFRESH                 ""
+#define UI_ICON_REFRESH                 "res/refresh.png"
 
 #endif

@@ -1,16 +1,23 @@
 #include "connectionmanager.h"
 #include "constants.h"
 #include <iostream>
+#include <QDate>
 
 namespace qnut {
     CConnectionManager::CConnectionManager(QWidget * parent) :
         QMainWindow(parent),
         deviceManager(this),
+        logFile(UI_FILE_LOG),
         trayicon(this),
         overViewListModel(&(deviceManager.devices))
     {
         deviceOptions.reserve(10);
         ui.setupUi(this);
+        if (!logFile.open(QIODevice::ReadOnly | QIODevice::Text | QIODevice::Append))
+            uiPrintToLog(tr("ERROR:") + " " + tr("Cannot create/open log file."));
+        
+        uiPrintToLog(tr("Network UTility (NUT) client QNUT started."));
+        uiPrintToLog(QDateTime::currentDateTime().toString());
         
         try {
             deviceManager.init();
@@ -50,7 +57,7 @@ namespace qnut {
     void CConnectionManager::uiAddedDevice(CDevice * dev) {
         CDeviceOptions * newDeviceOptions = new CDeviceOptions(dev, ui.tabWidget);
         
-        ui.tabWidget->addTab(newDeviceOptions, dev->name);
+        ui.tabWidget->insertTab(ui.tabWidget->count()-1, newDeviceOptions, dev->name);
         newDeviceOptions->updateDeviceIcons();
         
         deviceOptions.insert(dev, newDeviceOptions);
@@ -60,12 +67,13 @@ namespace qnut {
         ui.overViewList->repaint();
         connect(dev, SIGNAL(stateChanged(bool)), ui.overViewList, SLOT(repaint()));
         connect(newDeviceOptions->showAction, SIGNAL(triggered()), this, SLOT(show()));
+        connect(dev, SIGNAL(printToLog(QString)), this, SLOT(uiPrintToLog(QString)));
     }
     
     void CConnectionManager::uiRemovedDevice(CDevice * dev) {
         CDeviceOptions * target = deviceOptions[dev];
         
-        disconnect(dev, SIGNAL(stateChanged(bool)), ui.overViewList, SLOT(repaint()));
+        //disconnect(dev, SIGNAL(stateChanged(bool)), ui.overViewList, SLOT(repaint())); nicht nötig?
         
         ui.tabWidget->removeTab(ui.tabWidget->indexOf(target));
         ui.overViewList->repaint();
@@ -155,12 +163,9 @@ namespace qnut {
     
     void CConnectionManager::uiPrintToLog(QString output) {
         ui.logEdit->append(output + "\n");
-        //todo in datei schreiben
+        if (logFile.error() == QFile::NoError) {
+            QTextStream outStream(&logFile);
+            outStream << output << endl;
+        }
     }
-    
-/*    void CConnectionManager::uiShowEnvironmentsTree() {
-        QModelIndex currentIndex = ui.overViewList->selectionModel()->selectedIndexes()[0];
-        CDevice * currentDevice = deviceManager.devices[currentIndex.row()];
-        ui.tabWidget->setCurrentWidget(deviceOptionsTabs[currentDevice->name]);
-    }*/
 };
