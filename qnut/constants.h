@@ -19,5 +19,6 @@
 #define UI_ICON_ACTIVATE_INTERFACE      "res/activateinterface.png"
 #define UI_ICON_DEACTIVATE_INTERFACE    "res/deactivateinterface.png"
 #define UI_ICON_EDIT                    "res/edit.png"
+#define UI_ICON_REFRESH                 ""
 
 #endif

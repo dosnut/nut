@@ -1,7 +1,7 @@
+//#define QNUT_TESTING
 #include <QtGui>
 #include <QTranslator>
 #include "connectionmanager.h"
-#define QNUT_TESTING
 
 using namespace qnut;
 
@@ -16,9 +16,8 @@ int main(int argc, char * argv[])
     app.installTranslator(&translator);
     app.setQuitOnLastWindowClosed(false);
 
-    CConnectionManager mainwin;
-#ifdef QNUT_TESTING
-    CDevice * testdev0 = new CDevice(NULL);
+//#ifdef QNUT_TESTING
+/*    CDevice * testdev0 = new CDevice(NULL);
     testdev0->name = "eth0";
     testdev0->enabled = false;
     testdev0->type = ethernet;
@@ -51,20 +50,21 @@ int main(int argc, char * argv[])
     testif0->netmask = QHostAddress("255.255.255.0");
     testif0->gateway = QHostAddress("192.168.0.1");
     testenv0->interfaces.append(testif0);
-    mainwin.uiAddedDevice(testdev1);
+    mainwin.uiAddedDevice(testdev1);*/
     
-    int exitcode = app.exec();
+    //int exitcode = app.exec();
     
 /*    mainwin.deviceManager.devices.removeAll(testdev0);
     mainwin.uiRemovedDevice(testdev0);
     delete testdev0;*/
     
-    mainwin.deviceManager.devices.removeAll(testdev1);
+/*    mainwin.deviceManager.devices.removeAll(testdev1);
     mainwin.uiRemovedDevice(testdev1);
-    delete testdev1;
+    delete testdev1;*/
     
-    return exitcode;
-#else
+    //return exitcode;
+//#else
+    CConnectionManager mainwin;
     return app.exec();
-#endif
+//#endif
 }

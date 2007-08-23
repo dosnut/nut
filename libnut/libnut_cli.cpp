@@ -3,22 +3,33 @@ namespace libnut {
 ////////////////
 //CDeviceManager
 ///////////////
-CDeviceManager::CDeviceManager(QObject * parent) : QObject(parent) {
+CDeviceManager::CDeviceManager(QObject * parent) : QObject(parent), dbusConnection(QDBusConnection::systemBus()) {
+}
+CDeviceManager::~CDeviceManager() {
+//Cleanup action: delete entire devicelist
+    while (!devices.isEmpty()) {
+        delete devices.takeFirst();
+    }
+}
+
+void CDeviceManager::init() {
+    //setup dbus connections
+    dbusConnectionInterface = dbusConnection.interface();
     //Check if service is running
     try {
-        serviceCheck();
+        serviceCheck(dbusConnectionInterface);
     }
     catch (CLI_ConnectionInitException& e) {
-        QDBusReply<void> reply = dbusConnectionInterface.startService("NUT_DBUS_URL");
-        serviceCheck();
+        QDBusReply<void> reply = dbusConnectionInterface->startService("NUT_DBUS_URL");
+        serviceCheck(dbusConnectionInterface);
     }
     //Attach to DbusDevicemanager
-    dbusConnection = new QDBusConnection::systemBus();
-    dbusDevmgr = new DBusDeviceManagerInterface("NUT_DBUS_URL", "/DeviceManager",*dbusConnection, this);
+    dbusDevmgr = new DBusDeviceManagerInterface("NUT_DBUS_URL", "/DeviceManager",dbusConnection, this);
     //get devicelist etc.
-    QDBusReply<QList<QDBusObjectPath>> reply = dbusDevmgr->getDeviceList();
+    QDBusReply<QList<QDBusObjectPath> > reply;
+    reply = dbusDevmgr->getDeviceList();
     if (reply.isValid()) {
-        dbusDeviceList = QDBusreply.value();
+        dbusDeviceList = reply.value();
     }
     else {
         throw CLI_ConnectionException(tr("failed to get DeviceList"));
@@ -30,19 +41,13 @@ CDeviceManager::CDeviceManager(QObject * parent) : QObject(parent) {
         devices.append(device);
         emit(deviceAdded(device));
     }
-    
 }
-CDeviceManager::~CDeviceManager() {
-//Cleanup action: delete entire devicelist
-    while (!devices.isEmpty()) {
-        delete devices.takeFirst();
-    }
-}
+
 //Check if service up
-CDeviceManager::serviceCheck() {
-    QDBusReply<bool> reply = dbusConnectionInterface.isServiceRegistered("NUT_DBUS_URL");
+void CDeviceManager::serviceCheck(QDBusConnectionInterface * interface) {
+    QDBusReply<bool> reply = interface->isServiceRegistered("NUT_DBUS_URL");
     if (reply.isValid()) {
-        if (!reply.Value()) {
+        if (!reply.value()) {
             throw CLI_ConnectionInitException(tr("Please start NUTS"));
         }
     }
@@ -54,8 +59,8 @@ CDeviceManager::serviceCheck() {
 
 //CDeviceManager SLOTS
 void CDeviceManager::refreshAll() {
-    for (CDeviceList::iterator i=devices.begin(); i != devices.end(); ++i) {
-        *i->refreshAll();
+    foreach(CDevice * i, devices) {
+        i->refreshAll();
     }
 }
 
@@ -63,12 +68,15 @@ void CDeviceManager::refreshAll() {
 /////////
 //CDevice
 /////////
-CDevice::CDevice(QObject * parent, QDBusObjectPath dbuspath) : QObject(parent) {
+CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath) : QObject(parent) {
 
 }
-CDevice::CDevice() {
+CDevice::~CDevice() {
 
 }
+
+//
+void CDevice::refreshAll() {}
 
 //CDevice SLOTS
 void CDevice::enable() {
@@ -79,7 +87,7 @@ void CDevice::disable() {
 //CEnvironment
 //////////////
 
-CEnvironment::CEnvironment() {
+CEnvironment::CEnvironment(CDevice * parent) : QObject(parent) {
 
 }
 CEnvironment::~CEnvironment() {
@@ -93,7 +101,7 @@ void CEnvironment::enter() {
 ////////////
 //CInterface
 ////////////
-CInterface::CInterface() {
+CInterface::CInterface(CEnvironment * parent) : QObject(parent) {
 
 }
 CInterface::~CInterface() {

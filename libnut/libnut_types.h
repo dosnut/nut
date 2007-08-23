@@ -25,7 +25,7 @@ namespace libnut {
             inline bool operator!=(const libnut_MacAddress &ma) {
                 return !(*this == ma);
             }
-            inline QString toString() {
+            inline QString toString() const {
                 char buf[sizeof("00:00:00:00:00:00")];
                 sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X", data[0],data[1],data[2],data[3],data[4],data[5]);
                 return QString(buf);

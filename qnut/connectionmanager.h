@@ -19,7 +19,6 @@ namespace qnut {
     public:
         CDeviceManager deviceManager;
         
-        QAction * refreshAllAction; //todo
         QAction * enableDeviceAction;
         QAction * disableDeviceAction;
         
@@ -36,6 +35,7 @@ namespace qnut {
         void uiSelectedDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected);
         void uiShowOverViewPopup(const QPoint & pos);
         void uiShowUserInputMessage();
+        void uiPrintToLog(QString output);
     };
 };
 

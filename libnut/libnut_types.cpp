@@ -56,14 +56,20 @@ namespace libnut {
     
     QDBusArgument &operator<< (QDBusArgument &argument, const libnut_SelectConfig & selconf) {
         argument.beginStructure();
-        argument << selconf.selected << selconf.flags << selconf.useMAC << selconf.macAddress.toQByteArray << selconf.arpIP << selconf.essid;
+        argument << selconf.selected << selconf.flags << selconf.useMac << selconf.macAddress.toString() << selconf.arpIP.toIPv4Address() << selconf.essid;
         argument.endStructure();
         return argument;
     }
     const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_SelectConfig &selconf) {
-        quint32 hostaddress;
         argument.beginStructure();
-        argument >> selconf.selected >> selconf.flags >> selconf.useMAC >> selconf.macAddress.toQByteArray >> selconf.arpIP >> selconf.essid;
+        QString mac;
+        quint32 ip;
+        argument >> selconf.selected >> selconf.flags >> selconf.useMac;
+        argument >> mac;
+        selconf.macAddress = libnut_MacAddress(mac);
+        argument >> ip;
+        selconf.arpIP = QHostAddress(ip);
+        argument >> selconf.essid;
         argument.endStructure();
         return argument;
     }

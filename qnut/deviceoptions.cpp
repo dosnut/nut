@@ -20,7 +20,7 @@ namespace qnut {
         device = parentDevice;
         tabWidget = parentTabWidget;
         setModel(new CDeviceOptionsModel(device));
-        deviceMenu = new QMenu(device->properties.name, NULL);
+        deviceMenu = new QMenu(device->name, NULL);
         
         enableDeviceAction  = deviceMenu->addAction(QIcon(UI_ICON_ENABLE_DEVICE) , tr("Enable device") , device, SLOT(enable()));
         disableDeviceAction = deviceMenu->addAction(QIcon(UI_ICON_DISABLE_DEVICE), tr("Disable device"), device, SLOT(disable()));
@@ -41,9 +41,9 @@ namespace qnut {
         editInterfaceAction->setEnabled(false);
         setAllColumnsShowFocus(true);
         
-        enableDeviceAction->setDisabled(device->properties.enabled);
-        disableDeviceAction->setEnabled(device->properties.enabled);
-        setEnabled(device->properties.enabled);
+        enableDeviceAction->setDisabled(device->enabled);
+        disableDeviceAction->setEnabled(device->enabled);
+        setEnabled(device->enabled);
         
         setContextMenuPolicy(Qt::CustomContextMenu);
         setAllColumnsShowFocus(true);
@@ -111,7 +111,7 @@ namespace qnut {
                 connect(target, SIGNAL(stateChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
                 connect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
                 
-                enterEnvironmentAction->setDisabled(target->properties.active);
+                enterEnvironmentAction->setDisabled(target->active);
                 activateInterfaceAction->setEnabled(false);
                 deactivateInterfaceAction->setEnabled(false);
                 editInterfaceAction->setEnabled(false);
@@ -124,8 +124,8 @@ namespace qnut {
                 connect(deactivateInterfaceAction, SIGNAL(triggered()), target, SLOT(deactivate()));
                 
                 enterEnvironmentAction->setEnabled(false);
-                activateInterfaceAction->setDisabled(target->properties.active);
-                deactivateInterfaceAction->setEnabled(target->properties.active);
+                activateInterfaceAction->setDisabled(target->active);
+                deactivateInterfaceAction->setEnabled(target->active);
                 editInterfaceAction->setEnabled(true);
             }
         }

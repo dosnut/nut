@@ -76,6 +76,32 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="logTab" >
+       <attribute name="title" >
+        <string>Log</string>
+       </attribute>
+       <layout class="QGridLayout" >
+        <property name="leftMargin" >
+         <number>0</number>
+        </property>
+        <property name="topMargin" >
+         <number>0</number>
+        </property>
+        <property name="rightMargin" >
+         <number>0</number>
+        </property>
+        <property name="bottomMargin" >
+         <number>0</number>
+        </property>
+        <item row="0" column="0" >
+         <widget class="QTextEdit" name="logEdit" >
+          <property name="readOnly" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -95,9 +121,19 @@
     </property>
     <addaction name="actionClose" />
    </widget>
-   <widget class="QMenu" name="menuDevice" >
+   <widget class="QMenu" name="menuHelp" >
     <property name="title" >
-     <string>&amp;Device</string>
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="actionAboutQNUT" />
+    <addaction name="actionAboutQt" />
+   </widget>
+   <widget class="QMenu" name="menuInterface" >
+    <property name="enabled" >
+     <bool>false</bool>
+    </property>
+    <property name="title" >
+     <string>&amp;Interface</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuEnvironment" >
@@ -108,20 +144,10 @@
      <string>&amp;Environment</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuInterface" >
-    <property name="enabled" >
-     <bool>false</bool>
-    </property>
+   <widget class="QMenu" name="menuDevice" >
     <property name="title" >
-     <string>&amp;Interface</string>
+     <string>&amp;Device</string>
     </property>
-   </widget>
-   <widget class="QMenu" name="menuHelp" >
-    <property name="title" >
-     <string>&amp;Help</string>
-    </property>
-    <addaction name="actionAboutQNUT" />
-    <addaction name="actionAboutQt" />
    </widget>
    <addaction name="menuFile" />
    <addaction name="menuDevice" />

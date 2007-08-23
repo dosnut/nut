@@ -14,9 +14,9 @@
 namespace qnut {
 
     bool CIPConfiguration::execute(CInterface * interface) {
-        ui.ipEdit->setText(interface->properties.ip.toString());
-        ui.gatewayEdit->setText(interface->properties.gateway.toString());
-        ui.netmaskEdit->setText(interface->properties.netmask.toString());
+        ui.ipEdit->setText(interface->ip.toString());
+        ui.gatewayEdit->setText(interface->gateway.toString());
+        ui.netmaskEdit->setText(interface->netmask.toString());
         if (exec() == QDialog::Accepted) {
             QHostAddress tempAddr;
             
