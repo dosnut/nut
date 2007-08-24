@@ -7,29 +7,32 @@ namespace qnut {
     CConnectionManager::CConnectionManager(QWidget * parent) :
         QMainWindow(parent),
         deviceManager(this),
-        logFile(UI_FILE_LOG),
+        logFile(this, UI_FILE_LOG),
         trayicon(this),
         overViewListModel(&(deviceManager.devices))
     {
         deviceOptions.reserve(10);
         ui.setupUi(this);
-        if (!logFile.open(QIODevice::ReadOnly | QIODevice::Text | QIODevice::Append))
-            uiPrintToLog(tr("ERROR:") + " " + tr("Cannot create/open log file."));
         
-        uiPrintToLog(tr("Network UTility (NUT) client QNUT started."));
-        uiPrintToLog(QDateTime::currentDateTime().toString());
+        connect(&logFile, SIGNAL(printed(const QString &)), ui.logEdit, SLOT(append(const QString &)));
+        
+        if (logFile.error() != QFile::NoError)
+            ui.logEdit->append(tr("ERROR:") + " " + tr("Cannot create/open log file."));
+        
+        logFile << tr("Network UTility (NUT) client QNUT started.");
+        logFile << QDateTime::currentDateTime().toString();
         
         try {
-            deviceManager.init();
+            deviceManager.init(&logFile);
         }
         catch (Exception & e) {
-            uiPrintToLog(tr("ERROR:") + " " + QString(e.what()));
+            logFile << tr("ERROR:") + " " + QString(e.what());
         }
         
         ui.overViewList->setContextMenuPolicy(Qt::CustomContextMenu);
         ui.overViewList->setModel(&overViewListModel);
         
-        overViewMenu.addAction(QIcon(UI_ICON_REFRESH), tr("Refresh devices"), &deviceManager, SLOT(refreshAll()));
+        refreshDevicesAction = overViewMenu.addAction(QIcon(UI_ICON_REFRESH), tr("Refresh devices"), &deviceManager, SLOT(refreshAll()));
         
         overViewMenu.addSeparator();
         
@@ -99,6 +102,8 @@ namespace qnut {
             ui.menuDevice->addActions(overViewMenu.actions());
         }
         else if (index == ui.tabWidget->count()-1) {
+            ui.toolBar->addAction(refreshDevicesAction);
+            ui.menuDevice->addAction(refreshDevicesAction);
         }
         else {
             ui.menuEnvironment->setEnabled(true);
@@ -159,13 +164,5 @@ namespace qnut {
     
     void CConnectionManager::uiShowUserInputMessage() {
         trayicon.showMessage(tr("User defined environment entered"), tr("A device entered an environment, that needs to be configured in order to be active.\n\n Click here to open the connection manager."));
-    }
-    
-    void CConnectionManager::uiPrintToLog(QString output) {
-        ui.logEdit->append(output + "\n");
-        if (logFile.error() == QFile::NoError) {
-            QTextStream outStream(&logFile);
-            outStream << output << endl;
-        }
     }
 };

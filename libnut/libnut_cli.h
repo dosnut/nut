@@ -9,6 +9,8 @@
 #include "libnut_exceptions.h"
 #include <QDBusConnectionInterface>
 #include <QDBusReply>
+#include <QFile>
+#include <QTextStream>
 /*
 Benötigte Informationen:
 device liste : /device_name/
@@ -19,6 +21,7 @@ device liste : /device_name/
 namespace libnut {
     class CDeviceManager;
 
+    class CLog;
     class CDevice;
     class CEnvironment;
     class CInterface;
@@ -29,6 +32,28 @@ namespace libnut {
 };
 
 namespace libnut {
+    class CLog : public QObject {
+        Q_OBJECT
+    private:
+        QFile file;
+        QTextStream outStream;
+        bool fileLoggingEnabled;
+    public:
+        CLog(QObject * parent, QString fileName);
+        inline QFile::FileError error() const {
+            return file.error();
+        }
+        inline bool getFileLoggingEnabled() const {
+            return fileLoggingEnabled;
+        }
+        inline void setFileLoggingEnabled(bool isEnabled) {
+            fileLoggingEnabled = isEnabled && (file.error() == QFile::NoError);
+        }
+        void operator<<(QString text);
+    signals:
+        void printed(const QString & line);
+    };
+
     class CDeviceManager : public QObject {
         Q_OBJECT
         friend class CDevice;
@@ -43,14 +68,13 @@ namespace libnut {
     public:
         CDeviceList devices;
         
-        void init();
+        void init(CLog * log);
         
         CDeviceManager(QObject * parent);
         ~CDeviceManager();
     public slots:
         void refreshAll();
     signals:
-        void printToLog(QString output);
         void deviceAdded(CDevice * device);
         void deviceRemoved(CDevice * device); //nach entfernen aus der liste aber vor dem löschen
     };
@@ -78,7 +102,6 @@ namespace libnut {
         void disable();
 
     signals:
-        void printToLog(QString output);
         void environmentChangedActive(int current, int previous);
         void environmentsUpdated();
         void stateChanged(bool state);
@@ -100,7 +123,6 @@ namespace libnut {
     public slots:
         void enter();
     signals:
-        void printToLog(QString output);
         void stateChanged(bool state);
         void interfacesUpdated();
     };
@@ -128,7 +150,6 @@ namespace libnut {
         void setGateway(QHostAddress & address); //zuvor pointer
         void setStatic(bool state); // war zuvor nicht da
     signals:
-        void printToLog(QString output);
         void stateChanged(bool state); //zuvor activeStateChanged()
     };
 };

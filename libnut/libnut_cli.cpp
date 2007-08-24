@@ -1,6 +1,24 @@
 #include "libnut_cli.h"
 namespace libnut {
 ////////////////
+//CLog
+///////////////
+CLog::CLog(QObject * parent, QString fileName) : QObject(parent), file(fileName) {
+    fileLoggingEnabled = file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append);
+    
+    if (fileLoggingEnabled)
+        outStream.setDevice(&file);
+}
+
+void CLog::operator<<(QString text) {
+    emit printed(text);
+    
+    if (fileLoggingEnabled) {
+        outStream << text << endl;
+    }
+}
+
+////////////////
 //CDeviceManager
 ///////////////
 CDeviceManager::CDeviceManager(QObject * parent) : QObject(parent), dbusConnection(QDBusConnection::systemBus()) {
@@ -12,7 +30,7 @@ CDeviceManager::~CDeviceManager() {
     }
 }
 
-void CDeviceManager::init() {
+void CDeviceManager::init(CLog * log) {
     //setup dbus connections
     dbusConnectionInterface = dbusConnection.interface();
     //Check if service is running
