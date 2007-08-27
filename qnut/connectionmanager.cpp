@@ -71,6 +71,7 @@ namespace qnut {
         connect(dev, SIGNAL(stateChanged(bool)), ui.overViewList, SLOT(repaint()));
         connect(newDeviceOptions->showAction, SIGNAL(triggered()), this, SLOT(show()));
         connect(dev, SIGNAL(printToLog(QString)), this, SLOT(uiPrintToLog(QString)));
+        connect(newDeviceOptions, SIGNAL(showMessage(QString, QString)), this, SLOT(uiShowMessage(QString, QString)));
     }
     
     void CConnectionManager::uiRemovedDevice(CDevice * dev) {
@@ -162,7 +163,7 @@ namespace qnut {
         overViewMenu.exec(ui.overViewList->mapToGlobal(pos));
     }
     
-    void CConnectionManager::uiShowUserInputMessage() {
-        trayicon.showMessage(tr("User defined environment entered"), tr("A device entered an environment, that needs to be configured in order to be active.\n\n Click here to open the connection manager."));
+    void CConnectionManager::uiShowMessage(QString title, QString message) {
+        trayicon.showMessage(title, message);
     }
 };

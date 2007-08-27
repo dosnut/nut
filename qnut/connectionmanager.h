@@ -37,7 +37,7 @@ namespace qnut {
         void uiCurrentTabChanged(int index);
         void uiSelectedDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected);
         void uiShowOverViewPopup(const QPoint & pos);
-        void uiShowUserInputMessage();
+        void uiShowMessage(QString title, QString message);
     };
 };
 
