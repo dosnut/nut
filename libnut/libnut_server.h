@@ -82,8 +82,8 @@ class CNutsDBusDevice: public QObject {
         QDBusObjectPath addwlanEnvironment(libnut_wlanNetworkProperties netprops);//
         QList<QDBusObjectPath> getEnvironments();
         void setEnvironment(QDBusObjectPath envpath);
-        bool enable();
-        bool disable();
+        bool enable(); //no need to return state!
+        bool disable(); //no need to return state!
     signals:
         void environmentChangedActive(QDBusObjectPath newenv);
         void environmentsUpdated();
