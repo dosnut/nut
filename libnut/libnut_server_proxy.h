@@ -77,8 +77,8 @@ public Q_SLOTS: // METHODS
 
 Q_SIGNALS: // SIGNALS
     void environmentChangedActive(const QDBusObjectPath &newenv);
-    void environmentsUpdated();
-    void stateChanged();
+    void environmentsUpdated(); //change: signal: env added, env removed
+    void stateChanged(); //change: send change
 };
 
 /*
