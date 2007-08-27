@@ -45,12 +45,17 @@ namespace qnut {
         
         CDeviceOptions(CDevice * parentDevice, QTabWidget * parentTabWidget, QWidget * parent = 0);
         ~CDeviceOptions();
+        
     public slots:
         void showThisTab();
         void updateDeviceIcons();
         void selectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
         void showPopup(const QPoint & pos);
         void changeIPConfiguration();
+        void handleEnvironmentChange(CEnvironment * current, CEnvironment * previous); //todo
+        
+    signals:
+        void showMessage(QString title, QString message);
     };
 };
 

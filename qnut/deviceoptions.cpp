@@ -52,10 +52,10 @@ namespace qnut {
         
         header()->setResizeMode(QHeaderView::ResizeToContents);
         
-        connect(device, SIGNAL(stateChanged(bool)), enableDeviceAction , SLOT(setDisabled(bool)));
-        connect(device, SIGNAL(stateChanged(bool)), disableDeviceAction, SLOT(setEnabled(bool)));
-        connect(device, SIGNAL(stateChanged(bool)), this, SLOT(setEnabled(bool)));
-        connect(device, SIGNAL(stateChanged(bool)), this, SLOT(updateDeviceIcons()));
+        connect(device, SIGNAL(enabledChanged(bool)), enableDeviceAction , SLOT(setDisabled(bool)));
+        connect(device, SIGNAL(enabledChanged(bool)), disableDeviceAction, SLOT(setEnabled(bool)));
+        connect(device, SIGNAL(enabledChanged(bool)), this, SLOT(setEnabled(bool)));
+        connect(device, SIGNAL(enabledChanged(bool)), this, SLOT(updateDeviceIcons()));
         connect(device, SIGNAL(environmentsUpdated()), this, SLOT(repaint()));
         
         connect(selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
@@ -92,13 +92,13 @@ namespace qnut {
             QModelIndex targetIndex = deselectedIndexes[0];
             if (!targetIndex.parent().isValid()) {
                 CEnvironment * target = (CEnvironment *)(targetIndex.internalPointer());
-                disconnect(target, SIGNAL(stateChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
+                disconnect(target, SIGNAL(activeChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
                 disconnect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
             }
             else {
                 CInterface * target = (CInterface *)(targetIndex.internalPointer());
-                disconnect(target, SIGNAL(stateChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
-                disconnect(target, SIGNAL(stateChanged(bool)), deactivateInterfaceAction, SLOT(setEnabled(bool)));
+                disconnect(target, SIGNAL(activeChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
+                disconnect(target, SIGNAL(activeChanged(bool)), deactivateInterfaceAction, SLOT(setEnabled(bool)));
                 disconnect(activateInterfaceAction, SIGNAL(triggered()), target, SLOT(activate()));
                 disconnect(deactivateInterfaceAction, SIGNAL(triggered()), target, SLOT(deactivate()));
             }
@@ -108,7 +108,7 @@ namespace qnut {
             QModelIndex targetIndex = selectedIndexes[0];
             if (!targetIndex.parent().isValid()) {
                 CEnvironment * target = (CEnvironment *)(targetIndex.internalPointer());
-                connect(target, SIGNAL(stateChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
+                connect(target, SIGNAL(activeChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
                 connect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
                 
                 enterEnvironmentAction->setDisabled(target->active);
@@ -118,8 +118,8 @@ namespace qnut {
             }
             else {
                 CInterface * target = (CInterface *)(targetIndex.internalPointer());
-                connect(target, SIGNAL(stateChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
-                connect(target, SIGNAL(stateChanged(bool)), deactivateInterfaceAction, SLOT(setEnabled(bool)));
+                connect(target, SIGNAL(activeChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
+                connect(target, SIGNAL(activeChanged(bool)), deactivateInterfaceAction, SLOT(setEnabled(bool)));
                 connect(activateInterfaceAction, SIGNAL(triggered()), target, SLOT(activate()));
                 connect(deactivateInterfaceAction, SIGNAL(triggered()), target, SLOT(deactivate()));
                 
@@ -145,5 +145,10 @@ namespace qnut {
         CIPConfiguration dialog(this);
         QModelIndex selectedIndex = (selectionModel()->selection().indexes())[0];
         dialog.execute((CInterface *)(selectedIndex.internalPointer()));
+    }
+    
+    void CDeviceOptions::handleEnvironmentChange(CEnvironment * current, CEnvironment * previous) {
+        if ((current) && (current->interfaces.isEmpty()))
+            emit showMessage(tr("User defined environment entered"), device->name + ' ' + tr("entered an environment, that needs to be configured in order to be active.\n\n Click here to open the connection manager."));
     }
 };

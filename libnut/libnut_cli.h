@@ -100,11 +100,13 @@ namespace libnut {
     public slots:
         void enable();
         void disable();
-
+        CEnvironment * addEnvironment(QString name);
+        void removeEnvironment(CEnvironment * environment);
+        
     signals:
-        void environmentChangedActive(int current, int previous);
+        void environmentChangedActive(CEnvironment * current, CEnvironment * previous);
         void environmentsUpdated();
-        void stateChanged(bool state);
+        void enabledChanged(bool enabed);
     };
     
     class CEnvironment : public QObject {
@@ -122,8 +124,11 @@ namespace libnut {
         ~CEnvironment();
     public slots:
         void enter();
+        void addInterface(bool isStatic, QHostAddress ip, QHostAddress netmask, QHostAddress gateway);
+        void removeInterface(CInterface * interface);
+        
     signals:
-        void stateChanged(bool state);
+        void activeChanged(bool active);
         void interfacesUpdated();
     };
     
@@ -149,8 +154,10 @@ namespace libnut {
         void setNetmask(QHostAddress & address); //zuvor pointer
         void setGateway(QHostAddress & address); //zuvor pointer
         void setStatic(bool state); // war zuvor nicht da
+        
     signals:
-        void stateChanged(bool state); //zuvor activeStateChanged()
+        void activeChanged(bool active); //zuvor activeStateChanged()
+        void ipconfigChanged(bool isStatic, QHostAddress ip, QHostAddress netmask, QHostAddress gateway);
     };
 };
 
