@@ -236,9 +236,32 @@ CDevice::~CDevice() {
     }
 }
 
-//
-void CDevice::refreshAll() {
+//CDevice private functions
 
+/**
+ * Refreshes Device properties and environment as well as their properties
+ * Will NOT send any signals! Invoked by DeviceManager::refreshAll()!
+ */
+void CDevice::refreshAll() {
+    //refresh environments
+    foreach(CEnvironment * i, environments) {
+        i->refreshAll();
+    }
+    //Refresh device:
+    QDBusReply<libnut_DeviceProperties> replyprop = dbusDevice->getProperties();
+    if (replyprop.isValid()) {
+        name = replyprop.value().name;
+        enabled = replyprop.value().enabled;
+        type = replyprop.value().type;
+        //find active Environment:
+        dbusActiveEnvironment = replyprop.value().activeEnvironment;
+        foreach(CEnvironment * i, environments) {
+            if (i->dbusPath.path() == dbusActiveEnvironment.path()) {
+                activeEnvironment = i;
+                break;
+            }
+        }
+    }
 }
 
 //CDevice SLOTS
@@ -260,6 +283,9 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 }
 CEnvironment::~CEnvironment() {
 
+}
+
+void CEnvironment::refreshAll() {
 }
 
 //CEnvironment SLOTS

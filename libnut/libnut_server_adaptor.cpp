@@ -16,20 +16,16 @@ DeviceAdaptor::~DeviceAdaptor()
     // destructor
 }
 
-bool DeviceAdaptor::disable()
+void DeviceAdaptor::disable()
 {
     // handle method call NUT_DBUS_URL.Device.disable
-    bool out0;
-    QMetaObject::invokeMethod(parent(), "disable", Q_RETURN_ARG(bool, out0));
-    return out0;
+    QMetaObject::invokeMethod(parent(), "disable");
 }
 
-bool DeviceAdaptor::enable()
+void DeviceAdaptor::enable()
 {
     // handle method call NUT_DBUS_URL.Device.enable
-    bool out0;
-    QMetaObject::invokeMethod(parent(), "enable", Q_RETURN_ARG(bool, out0));
-    return out0;
+    QMetaObject::invokeMethod(parent(), "enable");
 }
 
 QList<QDBusObjectPath> DeviceAdaptor::getEnvironments()
