@@ -12,12 +12,6 @@
 #include <QDBusObjectPath>
 #include <QFile>
 #include <QTextStream>
-/*
-Benötigte Informationen:
-device liste : /device_name/
-    environment_liste
-        
-*/
 
 namespace libnut {
     class CDeviceManager;
@@ -71,7 +65,6 @@ namespace libnut {
             const QDBusObjectPath & operator[] ( int i ) const;
             */
     };
-
 
     class CLibNut : public QObject {
         Q_OBJECT
