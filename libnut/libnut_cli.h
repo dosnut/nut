@@ -153,6 +153,8 @@ namespace libnut {
     private:
         CDevice * parent;
         QDBusObjectPath dbusPath;
+        
+        void refreshAll();
     public:
         bool active;
         QString name;
