@@ -79,8 +79,7 @@ Q_SIGNALS: // SIGNALS
     void environmentChangedActive(const QDBusObjectPath &newenv);
     void environmentAdded(const QDBusObjectPath &path);
     void environmentRemoved(const QDBusObjectPath &path);
-    void environmentsUpdated(); //change: signal: env added, env removed
-    void stateChanged(); //change: send change
+    void stateChanged(const bool &state);
 };
 
 /*
