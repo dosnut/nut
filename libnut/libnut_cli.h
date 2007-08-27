@@ -137,7 +137,7 @@ namespace libnut {
         void enable();
         void disable();
         CEnvironment * addEnvironment(QString name);
-        void removeEnvironment(CEnvironment * environment);
+        void removeEnvironment(CEnvironment * environment); //only user defineable
         
     signals:
         void environmentChangedActive(CEnvironment * current, CEnvironment * previous);
