@@ -1,6 +1,8 @@
 #ifndef QNUT_CONSTANTS_H
 #define QNUT_CONSTANTS_H
 
+#define UI_NAME                         tr("Network UTility (NUT) client for Qt")
+
 #define UI_FILE_LOG                     "qnut.log"
 #define UI_FILE_CONFIG                  "qnut.conf"
 #define UI_ICON_SYSTRAY                 "res/network.png"

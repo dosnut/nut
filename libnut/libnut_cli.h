@@ -74,6 +74,7 @@ namespace libnut {
 
 
     class CLibNut : public QObject {
+        Q_OBJECT
         protected:
             QDBusConnectionInterface * dbusConnectionInterface;
             QDBusConnection * dbusConnection;

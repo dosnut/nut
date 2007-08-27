@@ -19,7 +19,7 @@ namespace qnut {
         if (logFile.error() != QFile::NoError)
             ui.logEdit->append(tr("ERROR:") + " " + tr("Cannot create/open log file."));
         
-        logFile << tr("Network UTility (NUT) client QNUT started.");
+        logFile << UI_NAME + ' ' + tr("started");
         logFile << QDateTime::currentDateTime().toString();
         
         try {
@@ -46,6 +46,7 @@ namespace qnut {
         ui.menuDevice->addActions(overViewMenu.actions());
         
         connect(ui.actionAboutQt, SIGNAL(triggered()), qApp , SLOT(aboutQt()));
+        connect(ui.actionAboutQNUT, SIGNAL(triggered()), this , SLOT(uiShowAbout()));
         connect(ui.overViewList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
                 this                             , SLOT(uiSelectedDeviceChanged(const QItemSelection &, const QItemSelection &)));
         connect(ui.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(uiCurrentTabChanged(int)));
@@ -165,5 +166,9 @@ namespace qnut {
     
     void CConnectionManager::uiShowMessage(QString title, QString message) {
         trayicon.showMessage(title, message);
+    }
+    
+    void CConnectionManager::uiShowAbout() {
+        QMessageBox::about(this, tr("About QNUT"), "QNUT: " + UI_NAME);
     }
 };
