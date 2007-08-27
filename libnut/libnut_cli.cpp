@@ -246,6 +246,12 @@ void CDevice::enable() {
 }
 void CDevice::disable() {
 }
+CEnvironment * CDevice::addEnvironment(QString name) {
+    return 0;
+}
+void CDevice::removeEnvironment(CEnvironment * environment) {
+}
+
 //////////////
 //CEnvironment
 //////////////
@@ -258,6 +264,10 @@ CEnvironment::~CEnvironment() {
 
 //CEnvironment SLOTS
 void CEnvironment::enter() {
+}
+void CEnvironment::addInterface(bool isStatic, QHostAddress ip, QHostAddress netmask, QHostAddress gateway) {
+}
+void CEnvironment::removeInterface(CInterface * interface) {
 }
 
 ////////////

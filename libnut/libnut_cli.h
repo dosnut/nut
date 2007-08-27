@@ -67,6 +67,7 @@ namespace libnut {
     };
 
     class CLibNut : public QObject {
+        Q_OBJECT
         protected:
             QDBusConnectionInterface * dbusConnectionInterface;
             QDBusConnection * dbusConnection;
@@ -136,7 +137,7 @@ namespace libnut {
         void enable();
         void disable();
         CEnvironment * addEnvironment(QString name);
-        void removeEnvironment(CEnvironment * environment);
+        void removeEnvironment(CEnvironment * environment); //only user defineable
         
     signals:
         void environmentChangedActive(CEnvironment * current, CEnvironment * previous);
