@@ -6,7 +6,10 @@ QT += network
 CODECFORSRC = UTF-8
 CODECFORTR = ISO-8859-1
 
-OBJECTS_DIR = build
+OBJECTS_DIR = build/
+MOC_DIR = build/
+UI_DIR = build/
+RCC_DIR = build/
 TARGET = build/qnut
 
 FORMS = connman.ui \
@@ -26,12 +29,13 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  deviceoptions.cpp \
  ipconfiguration.cpp \
  common.cpp
+RESOURCES += res/qnut.qrc
 DESTDIR = .
 
 INCLUDEPATH += ..
 
 LIBS += ../common/libnutcommon.a \
 -L../libnut \
--llibnut
+-lnut
 TARGETDEPS += ../common/libnutcommon.a \
-../libnut/liblibnut.so
+../libnut/libnut.so

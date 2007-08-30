@@ -13,7 +13,7 @@
 #define QNUTIPCONF_H
 
 #include <QDialog>
-#include "ui_ipconf.h"
+#include "build/ui_ipconf.h"
 #include <libnut/libnut_cli.h>
 
 namespace qnut {
