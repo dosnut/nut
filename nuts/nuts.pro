@@ -28,3 +28,7 @@ INCLUDEPATH += ../
 LIBS +=  -lnl ../common/libnutcommon.a
 TARGETDEPS += ../common/libnutcommon.a
 
+TARGET = nuts
+nuts.path = /usr/sbin
+nuts.files = nuts
+INSTALLS += nuts

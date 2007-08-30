@@ -10,7 +10,7 @@ OBJECTS_DIR = build/
 MOC_DIR = build/
 UI_DIR = build/
 RCC_DIR = build/
-TARGET = build/qnut
+TARGET = qnut
 
 FORMS = connman.ui \
  ipconf.ui
@@ -39,3 +39,7 @@ LIBS += ../common/libnutcommon.a \
 -lnut
 TARGETDEPS += ../common/libnutcommon.a \
 ../libnut/libnut.so
+
+qnut.path = /usr/bin
+qnut.files = qnut
+INSTALLS += qnut

@@ -22,3 +22,6 @@ INCLUDEPATH += ../
 LIBS += ../common/libnutcommon.a
 TARGETDEPS += ../common/libnutcommon.a
 
+libnut.path = /usr/lib/
+libnut.files = libnut.so.$$VERSION
+INSTALLS += libnut
