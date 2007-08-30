@@ -40,6 +40,5 @@ LIBS += ../common/libnutcommon.a \
 TARGETDEPS += ../common/libnutcommon.a \
 ../libnut/libnut.so
 
-qnut.path = /usr/bin
-qnut.files = qnut
-INSTALLS += qnut
+target.path = /usr/bin/
+INSTALLS += target
