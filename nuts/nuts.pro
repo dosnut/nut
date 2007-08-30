@@ -30,4 +30,6 @@ TARGETDEPS += ../common/libnutcommon.a
 
 TARGET = nuts
 target.path = /usr/sbin/
-INSTALLS += target
+config.path = /etc/nuts/
+config.files = nuts.config
+INSTALLS += target config
