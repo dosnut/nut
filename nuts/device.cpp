@@ -26,6 +26,7 @@ extern "C" {
 #include <linux/ethtool.h>
 #include <linux/sysctl.h>
 #include <linux/route.h>
+void perror(const char *s); 
 };
 
 static inline void setSockaddrIPv4(struct sockaddr &s, quint32 host = 0, quint16 port = 0) {
@@ -122,8 +123,9 @@ namespace nuts {
 	
 	Device::Device(DeviceManager* dm, const QString &name, DeviceConfig *config)
 	: dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), enabled(false), dhcp_client_socket(-1) {
+		int i = 0;
 		foreach(EnvironmentConfig *ec, config->environments)
-			envs.push_back(new Environment(this, ec));
+			envs.push_back(new Environment(this, ec, i++));
 	}
 	
 	Device::~Device() {
@@ -226,15 +228,19 @@ namespace nuts {
 		quint32 xid;
 		Interface_IPv4 * iface;
 		QByteArray buf;
-		int read, msgsize = 256 + 1;
+		int nread, msgsize = 256 + 1;
 		do {
 			msgsize = (msgsize << 1) - 1;
 			buf.resize(msgsize);
-			read = recvfrom(dhcp_client_socket, buf.data(), msgsize, MSG_PEEK, (struct sockaddr *)&sock, &slen);
-			if (read == 0) return;
-		} while (read == msgsize);
-		buf.resize(read);
-		recvfrom(dhcp_client_socket, buf.data(), read, 0, (struct sockaddr *)&sock, &slen);
+			nread = recvfrom(dhcp_client_socket, buf.data(), msgsize, MSG_PEEK, (struct sockaddr *)&sock, &slen);
+			if (nread < 0) {
+//				perror("Device::readDHCPClientSocket: recvfrom");
+				closeDHCPClientSocket();
+			}
+			if (nread == 0) return;
+		} while (nread == msgsize);
+		buf.resize(nread);
+		recvfrom(dhcp_client_socket, buf.data(), nread, 0, (struct sockaddr *)&sock, &slen);
 		DHCPPacket *packet = DHCPPacket::parseRaw(buf);
 		if (!packet) return;
 		// check mac
@@ -268,7 +274,7 @@ namespace nuts {
 		dhcp_write_nf->setEnabled(!dhcp_write_buf.empty());
 	}
 	
-	MacAddress Device::getMacAddress() {
+	nut::MacAddress Device::getMacAddress() {
 		return macAddress;
 	}
 
@@ -304,19 +310,19 @@ namespace nuts {
 			if ((enabled = b) == true) {
 				dm->hwman.controlOn(name, force);
 			} else {
-				dm->hwman.controlOff(name);
 				nextEnv = -1;
 				if (activeEnv != -1) {
 					envs[activeEnv]->stop();
 					activeEnv = -1;
 				}
 				interfaceIndex = -1;
+				dm->hwman.controlOff(name);
 			}
 		}
 	}
 	
-	Environment::Environment(Device *device, EnvironmentConfig *config)
-	: device(device), config(config), envIsUp(false), envStart(false) {
+	Environment::Environment(Device *device, EnvironmentConfig *config, int id)
+	: device(device), config(config), envIsUp(false), envStart(false), m_id(id) {
 		if (config->dhcp)
 			ifs.push_back(new Interface_IPv4(this, ifs.size(), config->dhcp));
 		if (config->zeroconf)
@@ -368,15 +374,15 @@ namespace nuts {
 	}
 	
 	void Environment::ifUp(Interface* i) {
-		ifUpStatus[i->index] = true;
+		ifUpStatus[i->m_index] = true;
 		checkStatus();
 	}
 	void Environment::ifDown(Interface* i) {
-		ifUpStatus[i->index] = false;
+		ifUpStatus[i->m_index] = false;
 		checkStatus();
 	}
 	
-	Interface::Interface(int index) : index(index) { }
+	Interface::Interface(int index) : m_index(index) { }
 	Interface::~Interface() { }
 	
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, IPv4Config *config)
@@ -548,7 +554,7 @@ namespace nuts {
 		if (!dnsserver.empty()) {
 			QProcess *proc = new QProcess();
 			QStringList arguments;
-			arguments << "-a" << QString("%1_%2").arg(env->device->name).arg(index);
+			arguments << "-a" << QString("%1_%2").arg(env->device->name).arg(m_index);
 			proc->start("/sbin/resolvconf", arguments);
 			QTextStream ts(proc);
 			if (!localdomain.isEmpty())
@@ -565,7 +571,7 @@ namespace nuts {
 		// Resolvconf
 		QProcess *proc = new QProcess();
 		QStringList arguments;
-		arguments << "-d" << QString("%1_%2").arg(env->device->name).arg(index);
+		arguments << "-d" << QString("%1_%2").arg(env->device->name).arg(m_index);
 		proc->start("/sbin/resolvconf", arguments);
 		proc->closeWriteChannel();
 		proc->waitForFinished(-1);
@@ -610,59 +616,5 @@ namespace nuts {
 	
 	void Interface_IPv4::dhcpReceived(DHCPPacket *packet) {
 		dhcpAction(packet);
-	}
-
-	
-	inline int read_hexdigit(char c) {
-		if ('0' <= c && c <= '9')
-			return c - '0';
-		if ('a' <= c && c <= 'f')
-			return c - 'a' + 10;
-		if ('A' <= c && c <= 'F')
-			return c - 'A' + 10;
-		return -1;
-	}
-	
-	inline char* hex2quint8(char* msg, quint8 &val) {
-		int i;
-		val = 0;
-		if (!msg || !*msg) return msg;
-		if ((i = read_hexdigit(*msg)) == -1)
-			return msg;
-		msg++;
-		if (!*msg) return msg;
-		val = ((quint8) i) << 4;
-		if ((i = read_hexdigit(*msg)) == -1)
-			return msg;
-		msg++;
-		val |= i;
-		return msg;
-	}
-	
-	MacAddress::MacAddress() {
-		for (int i = 0; i < 6; i++)
-			data[i] = 0;
-	}
-	MacAddress::MacAddress(const QString &str) {
-		QByteArray buf = str.toUtf8();
-		char *s = buf.data();
-		quint8 val;
-		char *s2;
-		for (int i = 0; i < 6; i++) {
-			if (!*s) return;
-			if ((s2 = hex2quint8(s, val)) == s) return;
-			s = s2;
-			if (*s && *s != ':') return;
-			data[i] = val;
-		}
-	}
-	
-	MacAddress::MacAddress(const quint8 *d) {
-		if (d == 0) {
-			MacAddress();
-		} else {
-			for (int i = 0; i < 6; i++)
-				data[i] = d[i];
-		}
 	}
 }

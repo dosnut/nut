@@ -7,3 +7,4 @@ configparser_yacc.cpp
 configparser_yacc.h
 nuts.kdevelop.pcs
 nuts.kdevses
+test.config

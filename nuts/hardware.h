@@ -7,6 +7,8 @@
 #include <QList>
 #include <QVector>
 
+#include <common/macaddress.h>
+
 extern "C" {
 	struct nl_handle;
 	struct nl_cache;
@@ -15,7 +17,6 @@ extern "C" {
 
 namespace nuts {
 	class HardwareManager;
-	class MacAddress;
 };
 
 namespace nuts {
@@ -61,7 +62,7 @@ namespace nuts {
 			
 			struct nl_handle *getNLHandle();
 			
-			MacAddress getMacAddress(int ifIndex);
+			nut::MacAddress getMacAddress(int ifIndex);
 			
 		signals:
 			void gotCarrier(const QString &ifName, int ifIndex);
