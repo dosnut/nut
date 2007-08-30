@@ -7,7 +7,7 @@
 #include "trayicon.h"
 #include "overviewlistmodel.h"
 #include "deviceoptions.h"
-#include "libnut_cli.h"
+#include <libnut/libnut_cli.h>
 
 namespace qnut {
     using namespace libnut;

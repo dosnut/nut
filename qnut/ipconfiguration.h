@@ -14,7 +14,7 @@
 
 #include <QDialog>
 #include "ui_ipconf.h"
-#include "libnut_cli.h"
+#include <libnut/libnut_cli.h>
 
 namespace qnut {
     using namespace libnut;

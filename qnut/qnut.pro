@@ -1,6 +1,6 @@
+
 TEMPLATE = app
-INCLUDEPATH += .
-CONFIG += qt
+CONFIG += qt qdbus
 QT += network
 
 CODECFORSRC = UTF-8
@@ -26,7 +26,12 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  deviceoptions.cpp \
  ipconfiguration.cpp \
  common.cpp
+DESTDIR = .
 
-#dbus zeugs
-#INCLUDEPATH += ../libnut
-include(../libnut/libnut_cli.pri)
+INCLUDEPATH += ..
+
+LIBS += ../common/libnutcommon.a \
+-L../libnut \
+-llibnut
+TARGETDEPS += ../common/libnutcommon.a \
+../libnut/liblibnut.so
