@@ -20,7 +20,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
 #include <QtDBus/QtDBus>
-#include "libnut_types.h"
+#include <common/types.h>
 #include <QMetaType>
 namespace libnut {
 /*

@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QHostAddress>
-#include "libnut_types.h"
+#include <common/types.h>
 #include "libnut_server_proxy.h"
 #include "libnut_exceptions.h"
 #include <QDBusConnectionInterface>
