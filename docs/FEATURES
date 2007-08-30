@@ -1,0 +1,8 @@
+ - Netzwerkmanager, der als Daemon die Interfaces verwaltet
+ - DBUS-Interface
+ - KDE-Client
+ - Unterstützung von WPA (voraussichtlich Konfiguration durch wpa_supplicant)
+ - Unterstützung von DHCP/Zeroconf/Static IP
+ - Erkennung von Hardware Zustandsänderungen (Kabel einstecken/Verfügaberkeit von WLAN Netzen)
+ - Unterstützung von mehreren  IPs pro Interface
+ - Eventgesteuerte Ausführung von Skripten für zusäztliche Aktionen.
