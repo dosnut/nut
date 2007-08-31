@@ -5,8 +5,10 @@
 #include <QObject>
 #include <QString>
 #include <QList>
+#include <QVector>
 #include <QHostAddress>
 #include <QHash>
+#include <common/macaddress.h>
 
 namespace nuts {
 	class Config;
@@ -47,6 +49,35 @@ namespace nuts {
 			bool canUserEnable;
 	};
 	
+	class SelectFilter {
+		public:
+			typedef enum { SEL_USER, SEL_ARP, SEL_ESSID, SEL_BLOCK } SelectType;
+			
+			SelectFilter() : selType(SEL_USER) { }
+			SelectFilter(const nut::MacAddress &macAddr) : selType(SEL_ARP), macAddr(macAddr) { }
+			SelectFilter(const nut::MacAddress &macAddr, const QHostAddress &ipAddr) : selType(SEL_ARP), macAddr(macAddr), ipAddr(ipAddr) { }
+			SelectFilter(const QString &essid) : selType(SEL_ESSID), essid(essid) { }
+			SelectFilter(size_t block) : selType(SEL_BLOCK), block(block) { }
+			
+			SelectType selType;
+			size_t block;
+			QString essid;
+			nut::MacAddress macAddr;
+			QHostAddress ipAddr;
+	};
+	
+	class SelectConfig {
+		public:
+			SelectConfig() { }
+			
+			// List of filters
+			QVector<SelectFilter> filters;
+			// List of blocks: each block contains at the first position the type:
+			//  0 = AND, 1 = OR
+			// followed by the list of filter ids for the block.
+			QVector< QVector<size_t> > blocks;
+	};
+	
 	class EnvironmentConfig {
 		protected:
 			friend class Environment;
@@ -57,6 +88,7 @@ namespace nuts {
 			bool noDefaultDHCP, noDefaultZeroconf;
 			QList<IPv4Config*> ipv4Interfaces;
 			IPv4Config *dhcp, *zeroconf;
+			SelectConfig *select;
 			
 			IPv4Config *doDHCP();
 			IPv4Config *createStatic();

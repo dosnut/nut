@@ -12,11 +12,29 @@
 #include "log.h"
 
 namespace nuts {
-	void Log_Init(QTextStream &s, int fd) {
-		QFile* file = new QFile();
-		file->open(fd, QIODevice::WriteOnly);
-		s.setDevice(file);
-	}
+	QTextStream err;
+	QTextStream log;
 
-	QTextStream err, log;
+	class LogInit {
+		public:
+			LogInit() {
+				int fd1 = dup(1), fd2 = dup(2);
+				close(fd1); close(fd2);
+				if (fd1 == -1 || fd2 == -1) {
+					QFile *f = new QFile("/var/log/nuts.log");
+					f->open(QIODevice::Append);
+					dup2(f->handle(), 2);
+					dup2(f->handle(), 1);
+					err.setDevice(f);
+					log.setDevice(f);
+				} else {
+					QFile *ferr = new QFile(); ferr->open(2, QIODevice::WriteOnly);
+					err.setDevice(ferr);
+					QFile *fout = new QFile(); fout->open(1, QIODevice::WriteOnly);
+					log.setDevice(fout);
+				}
+			}
+	};
+	
+	static LogInit loginit;
 };

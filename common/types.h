@@ -9,7 +9,12 @@
 
 #include "macaddress.h"
 
+namespace common {
+	void init();
+}
+
 namespace libnut {
+
     enum libnut_SelectFlags {user=0, arp=1, essid=2};
     struct libnut_SelectConfig {
         bool selected;
@@ -31,7 +36,7 @@ namespace libnut {
     enum libnut_DeviceType {ethernet=0, wlan=1, ppp=2};
     struct libnut_DeviceProperties {
         QString name;
-        QDBusObjectPath activeEnvironment;
+        int activeEnvironment;
         bool enabled;
         int type;
     };

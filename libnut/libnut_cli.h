@@ -113,7 +113,6 @@ namespace libnut {
     private:
         CDeviceManager * parent;
         QDBusObjectPath dbusPath;
-        QDBusObjectPath dbusActiveEnvironment;
         QDBusObjectPathList dbusEnvironmentList;
         CLog * log;
 
@@ -128,6 +127,7 @@ namespace libnut {
         QString name;
         bool enabled;
         int type;
+        int actEnv;
         CEnvironment * activeEnvironment;
         
         CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);

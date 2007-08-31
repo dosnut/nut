@@ -1,4 +1,5 @@
 #include "libnut_cli.h"
+#include <common/dbus.h>
 namespace libnut {
 ////////////////
 //CLog
@@ -48,7 +49,7 @@ return * ( (QDBusObjectPathList*) &( QList<QDBusObjectPath>::operator=(other) ) 
 ///////////////
 //Check if service up
 void CLibNut::serviceCheck(QDBusConnectionInterface * interface) {
-    QDBusReply<bool> reply = interface->isServiceRegistered("NUT_DBUS_URL");
+    QDBusReply<bool> reply = interface->isServiceRegistered(NUT_DBUS_URL);
     if (reply.isValid()) {
         if (!reply.value()) {
             throw CLI_ConnectionInitException(tr("Please start NUTS"));
@@ -85,11 +86,11 @@ void CDeviceManager::init(CLog * inlog) {
         serviceCheck(dbusConnectionInterface);
     }
     catch (CLI_ConnectionInitException& e) {
-        QDBusReply<void> reply = dbusConnectionInterface->startService("NUT_DBUS_URL");
+        QDBusReply<void> reply = dbusConnectionInterface->startService(NUT_DBUS_URL);
         serviceCheck(dbusConnectionInterface);
     }
     //Attach to DbusDevicemanager
-    dbusDevmgr = new DBusDeviceManagerInterface("NUT_DBUS_URL", "/DeviceManager",dbusConnection, this);
+    dbusDevmgr = new DBusDeviceManagerInterface(NUT_DBUS_URL, "/manager",dbusConnection, this);
     //get devicelist etc.
     QDBusReply<QList<QDBusObjectPath> > reply;
     reply = dbusDevmgr->getDeviceList();
@@ -114,8 +115,8 @@ void CDeviceManager::init(CLog * inlog) {
         emit(deviceAdded(device));
     }
     //Connect dbus-signals to own slots:
-    connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath &objectpath)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath &objectpath)));
-    connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath &objectpath)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath &objectpath)));
+    connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
+    connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
 }
 //CDeviceManager DBUS-SLOTS:
 void CDeviceManager::dbusDeviceAdded(const QDBusObjectPath &objectpath) {
@@ -170,7 +171,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
     //Service check
     serviceCheck(dbusConnectionInterface);
     //connect to dbus-object
-    dbusDevice = new DBusDeviceInterface("NUT_DBUS_URL", dbusPath.path(),*dbusConnection, this);
+    dbusDevice = new DBusDeviceInterface(NUT_DBUS_URL, dbusPath.path(),*dbusConnection, this);
     
     //get properties
     *log << (tr("Getting device properties at: ") + dbusPath.path());
@@ -179,15 +180,16 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
         name = replyProp.value().name;
         type = replyProp.value().type;
         enabled = replyProp.value().enabled;
-        dbusActiveEnvironment = replyProp.value().activeEnvironment;
+        actEnv = replyProp.value().activeEnvironment;
+        activeEnvironment = actEnv >= 0 ? environments[actEnv] : 0;
         *log << (tr("Device properties fetched:"));
         *log << (tr("Name: ") + QString(name));
         *log << (tr("Type: ") + QString(type));
         *log << (tr("State: ") + QString(enabled));
-        *log << (tr("Active Environement: ") + dbusPath.path());
+        *log << (tr("Active Environement: ") + actEnv);
     }
     else {
-        throw CLI_DevConnectionException(tr("Error while retieving dbus' device information"));
+        throw CLI_DevConnectionException(tr("Error while retrieving dbus' device information"));
     }
     //get Environment list
     //set activeEnv to NULL
@@ -223,8 +225,8 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
         throw CLI_DevConnectionException(tr("Error while retrieving environment list"));
     }
     //connect signals to slots
-    connect(dbusDevice, SIGNAL(environmentChangedActive(const QDBusObjectPath &newenv)),
-            this, SIGNAL(environmentChangedActive(const QDBusObjectPath &newenv)));
+    connect(dbusDevice, SIGNAL(environmentChangedActive(const QDBusObjectPath &)),
+            this, SIGNAL(environmentChangedActive(const QDBusObjectPath &)));
     //MISSING!!!: env added, env removed, state changed with change!!!!
 }
 CDevice::~CDevice() {
@@ -254,13 +256,8 @@ void CDevice::refreshAll() {
         enabled = replyprop.value().enabled;
         type = replyprop.value().type;
         //find active Environment:
-        dbusActiveEnvironment = replyprop.value().activeEnvironment;
-        foreach(CEnvironment * i, environments) {
-            if (i->dbusPath.path() == dbusActiveEnvironment.path()) {
-                activeEnvironment = i;
-                break;
-            }
-        }
+        actEnv = replyprop.value().activeEnvironment;
+        activeEnvironment = actEnv >= 0 ? environments[actEnv] : 0;
     }
 }
 
