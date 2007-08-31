@@ -16,12 +16,16 @@ namespace qnut {
         Q_OBJECT
     private:
         Ui::connMan ui;
+        
+        void createActions();
+        void distributeActions(int mode = 0);
     public:
         CDeviceManager deviceManager;
         
         CLog logFile;
         
         QAction * refreshDevicesAction;
+        
         QAction * enableDeviceAction;
         QAction * disableDeviceAction;
         

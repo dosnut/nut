@@ -25,6 +25,7 @@ namespace qnut {
         Ui::ipconf ui;
     public:
         bool execute(CInterface * interface);
+        bool execute(bool & isStatic, QHostAddress & ip, QHostAddress & netmask, QHostAddress & gateway);
         
         CIPConfiguration(QWidget * parent = 0);
         ~CIPConfiguration();

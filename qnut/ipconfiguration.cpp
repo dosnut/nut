@@ -36,6 +36,19 @@ namespace qnut {
             return false;
         }
     }
+    
+    bool CIPConfiguration::execute(bool & isStatic, QHostAddress & ip, QHostAddress & netmask, QHostAddress & gateway) {
+        if (exec() == QDialog::Accepted) {
+            ip.setAddress(ui.ipEdit->text());
+            gateway.setAddress(ui.gatewayEdit->text());
+            netmask.setAddress(ui.netmaskEdit->text());
+            isStatic = ui.staticRadio->isChecked();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
     CIPConfiguration::CIPConfiguration(QWidget * parent) : QDialog(parent) {
         ui.setupUi(this);
@@ -43,5 +56,4 @@ namespace qnut {
     
     CIPConfiguration::~CIPConfiguration() {
     }
-
 };

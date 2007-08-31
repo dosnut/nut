@@ -14,31 +14,44 @@
 #include "ipconfiguration.h"
 #include "common.h"
 #include <QHeaderView>
+#include <QInputDialog>
 
 namespace qnut {
     CDeviceOptions::CDeviceOptions(CDevice * parentDevice, QTabWidget * parentTabWidget, QWidget * parent) : QTreeView(parent) {
         device = parentDevice;
         tabWidget = parentTabWidget;
         setModel(new CDeviceOptionsModel(device));
-        deviceMenu = new QMenu(device->name, NULL);
         
+        deviceMenu = new QMenu(device->name, NULL);
         enableDeviceAction  = deviceMenu->addAction(QIcon(UI_ICON_ENABLE_DEVICE) , tr("Enable device") , device, SLOT(enable()));
         disableDeviceAction = deviceMenu->addAction(QIcon(UI_ICON_DISABLE_DEVICE), tr("Disable device"), device, SLOT(disable()));
         deviceMenu->addSeparator();
-        showAction = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(showThisTab()));
+        showAction = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."),
+                                 this, SLOT(uiShowThisTab()));
         
         environmentsMenu = new QMenu(this);
         enterEnvironmentAction    = environmentsMenu->addAction(QIcon(UI_ICON_ENTER_ENVIRONMENT), tr("Enter environment"));
         environmentsMenu->addSeparator();
+        addEnvironmentAction      = environmentsMenu->addAction(QIcon(UI_ICON_ADD_ENVIRONMENT), tr("Add environment"),
+                                    this, SLOT(uiAddEnvironment()));
+        removeEnvironmentAction   = environmentsMenu->addAction(QIcon(UI_ICON_REMOVE_ENVIRONMENT), tr("Remove environment"),
+                                    this, SLOT(uiRemoveEnvironment()));
+        environmentsMenu->addSeparator();
         activateInterfaceAction   = environmentsMenu->addAction(QIcon(UI_ICON_ACTIVATE_INTERFACE), tr("Activate interface"));
         deactivateInterfaceAction = environmentsMenu->addAction(QIcon(UI_ICON_DEACTIVATE_INTERFACE), tr("Deactivate interface"));
+        environmentsMenu->addSeparator();
         editInterfaceAction       = environmentsMenu->addAction(QIcon(UI_ICON_EDIT), tr("Edit IP Configuration..."),
-                                    this, SLOT(changeIPConfiguration()));
+                                    this, SLOT(uiChangeIPConfiguration()));
+        environmentsMenu->addSeparator();
+        addInterfaceAction        = environmentsMenu->addAction(QIcon(UI_ICON_ADD_INTERFACE), tr("Add interface"),
+                                    this, SLOT(uiAddInterface()));
+        removeInterfaceAction     = environmentsMenu->addAction(QIcon(UI_ICON_REMOVE_INTERFACE), tr("Remove interface"),
+                                    this, SLOT(uiRemoveInterface()));
         
-        enterEnvironmentAction->setEnabled(false);
-        activateInterfaceAction->setEnabled(false);
-        deactivateInterfaceAction->setEnabled(false);
-        editInterfaceAction->setEnabled(false);
+        foreach(QAction * i, environmentsMenu->actions()) {
+            i->setEnabled(false);
+        }
+        
         setAllColumnsShowFocus(true);
         
         enableDeviceAction->setDisabled(device->enabled);
@@ -71,20 +84,20 @@ namespace qnut {
 //        CDeviceOptionsModel * targetTreeModel = (CDeviceOptionsModel *)targetDeviceOptions.environmentsTree->model();
 //        targetDeviceOptions.environmentsTree->setModel(NULL);
 //        delete targetTreeModel;
-        //delete environmentsMenu;
+        delete environmentsMenu;
         delete deviceMenu;
     }
     
-    void CDeviceOptions::showThisTab() {
+    void CDeviceOptions::uiShowThisTab() {
         tabWidget->setCurrentWidget(this);
     }
     
-    void CDeviceOptions::updateDeviceIcons() {
+    void CDeviceOptions::uiUpdateDeviceIcons() {
         tabWidget->setTabIcon(tabWidget->indexOf(this), QIcon(getDeviceIcon(device)));
         deviceMenu->setIcon(QIcon(getDeviceIcon(device)));
     }
     
-    void CDeviceOptions::selectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
+    void CDeviceOptions::uiSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
         QModelIndexList deselectedIndexes = deselected.indexes();
         QModelIndexList selectedIndexes = selected.indexes();
         
@@ -137,18 +150,41 @@ namespace qnut {
         }
     }
     
-    void CDeviceOptions::showPopup(const QPoint & pos) {
+    void CDeviceOptions::uiShowPopup(const QPoint & pos) {
         environmentsMenu->exec(mapToGlobal(pos));
     }
     
-    void CDeviceOptions::changeIPConfiguration() {
-        CIPConfiguration dialog(this);
-        QModelIndex selectedIndex = (selectionModel()->selection().indexes())[0];
-        dialog.execute((CInterface *)(selectedIndex.internalPointer()));
-    }
-    
-    void CDeviceOptions::handleEnvironmentChange(CEnvironment * current, CEnvironment * previous) {
+    void CDeviceOptions::uiHandleEnvironmentChange(CEnvironment * current, CEnvironment * previous) {
         if ((current) && (current->interfaces.isEmpty()))
             emit showMessage(tr("User defined environment entered"), device->name + ' ' + tr("entered an environment, that needs to be configured in order to be active.\n\n Click here to open the connection manager."));
+    }
+    
+    void CDeviceOptions::uiChangeIPConfiguration() {
+        CIPConfiguration dialog(this);
+        QModelIndex selectedIndex = (selectionModel()->selection().indexes())[0];
+        
+        dialog.execute((CInterface *)(selectedIndex.internalPointer()));
+    }
+    void CDeviceOptions::uiAddEnvironment() {
+        QString newName;
+        newName = QInputDialog::getText(this, tr("New environment"), tr("Please enter a unique name for the new environment."));
+        //hier weiter!!
+    }
+    
+    void CDeviceOptions::uiRemoveEnvironment() {
+    
+    }
+    void CDeviceOptions::uiAddInterface() {
+        QModelIndex selectedIndex = (selectionModel()->selection().indexes())[0];
+        CIPConfiguration dialog(this);
+        bool isStatic;
+        QHostAddress ip, netmask, gateway;
+        
+        dialog.execute(isStatic, ip, netmask, gateway);
+        ((CEnvironment *)(selectedIndex.internalPointer()))->addInterface(isStatic, ip, netmask, gateway);
+    }
+    
+    void CDeviceOptions::uiRemoveInterface() {
+    
     }
 };

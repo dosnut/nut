@@ -40,6 +40,10 @@ namespace qnut {
         QAction * activateInterfaceAction;
         QAction * deactivateInterfaceAction;
         QAction * editInterfaceAction;
+        QAction * addEnvironmentAction;
+        QAction * removeEnvironmentAction;
+        QAction * addInterfaceAction;
+        QAction * removeInterfaceAction;
         
         QAction * showAction;
         
@@ -47,12 +51,16 @@ namespace qnut {
         ~CDeviceOptions();
         
     public slots:
-        void showThisTab();
-        void updateDeviceIcons();
-        void selectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-        void showPopup(const QPoint & pos);
-        void changeIPConfiguration();
-        void handleEnvironmentChange(CEnvironment * current, CEnvironment * previous); //todo
+        void uiShowThisTab();
+        void uiUpdateDeviceIcons();
+        void uiSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+        void uiShowPopup(const QPoint & pos);
+        void uiHandleEnvironmentChange(CEnvironment * current, CEnvironment * previous);
+        void uiChangeIPConfiguration();
+        void uiAddEnvironment();
+        void uiRemoveEnvironment();
+        void uiAddInterface();
+        void uiRemoveInterface();
         
     signals:
         void showMessage(QString title, QString message);
