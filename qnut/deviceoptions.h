@@ -15,7 +15,7 @@
 #include <QTreeView>
 #include <QMenu>
 #include <QTabWidget>
-#include "libnut_cli.h"
+#include <libnut/libnut_cli.h>
 
 namespace qnut {
     using namespace libnut;

@@ -56,5 +56,4 @@ namespace qnut {
     
     CIPConfiguration::~CIPConfiguration() {
     }
-
 };

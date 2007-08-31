@@ -11,13 +11,14 @@
 #include <QLinkedList>
 #include <QTimer>
 
+#include <common/macaddress.h>
+
 namespace nuts {
 	class DeviceManager;
 	class Device;
 	class Environment;
 	class Interface;
 	class Interface_IPv4;
-	class MacAddress;
 	
 	class DHCPPacket;
 	class DHCPClientPacket;
@@ -27,30 +28,6 @@ namespace nuts {
 #include "hardware.h"
 
 namespace nuts {
-	class MacAddress {
-		public:
-			MacAddress();
-			MacAddress(const QString &str);
-			MacAddress(const quint8 *d);
-			quint8 data[6];
-			
-			inline bool operator==(const MacAddress &ma) {
-				for (int i = 0; i < 6; i++)
-					if (data[i] != ma.data[i])
-						return false;
-				return true;
-			}
-			inline bool operator!=(const MacAddress &ma) {
-				return !(*this == ma);
-			}
-			inline QString toString() {
-				char buf[sizeof("00:00:00:00:00:00")];
-				sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
-					data[0],data[1],data[2],data[3],data[4],data[5]);
-				return QString(buf);
-			}
-	};
-	
 	class DeviceManager : public QObject {
 		Q_OBJECT
 		protected:
@@ -76,9 +53,16 @@ namespace nuts {
 		protected slots:
 			void gotCarrier(const QString &ifName, int ifIndex);
 			void lostCarrier(const QString &ifName);
+		
 		public:
 			DeviceManager(const QString &configFile);
 			virtual ~DeviceManager();
+			
+			const QHash<QString, Device*>& getDevices() { return devices; }
+		
+		signals:
+			void deviceAdded(QString devName, Device *dev);
+			void deviceRemoved(QString devName, Device *dev);
 	};
 	
 	class Device : public QObject {
@@ -104,7 +88,7 @@ namespace nuts {
 			int dhcp_client_socket;
 			QSocketNotifier *dhcp_read_nf, *dhcp_write_nf;
 			QLinkedList< QByteArray > dhcp_write_buf;
-			MacAddress macAddress;
+			nut::MacAddress macAddress;
 		
 			void envUp(Environment*);
 			void envDown(Environment*);
@@ -123,7 +107,7 @@ namespace nuts {
 			void writeDHCPClientSocket();
 			
 		protected:
-			MacAddress getMacAddress();
+			nut::MacAddress getMacAddress();
 			
 		public:
 			Device(DeviceManager* dm, const QString &name, DeviceConfig *config);
@@ -136,10 +120,14 @@ namespace nuts {
 			void setCurrent(int i);
 			
 			bool getEnabled();
+			// setEnabled(true, true) forces the use of an interface, even if it is already up.
 			void setEnabled(bool b, bool force = false);
 			
-			const QList<Environment*>& getEnvironments();
+			const QList<Environment*>& getEnvironments() { return envs; }
+		
 		signals:
+			void deviceEnabled();
+			void deviceDisabled();
 			void deviceUp();
 			void deviceDown();
 	};
@@ -162,6 +150,8 @@ namespace nuts {
 			QBitArray ifUpStatus;
 			bool envIsUp, envStart;
 			
+			int m_id;
+			
 			void checkStatus();
 			
 			void start();
@@ -171,19 +161,20 @@ namespace nuts {
 			void ifDown(Interface*);
 			
 		public:
-			Environment(Device *device, EnvironmentConfig *config);
+			Environment(Device *device, EnvironmentConfig *config, int id);
 			virtual ~Environment();
 			
 			Device* getDevice();
 			
 			const QList<Interface*>& getInterfaces();
+			int getID() { return m_id; }
 	};
 	
 	class Interface : public QObject {
 		Q_OBJECT
 		protected:
 			friend class Environment;
-			int index;
+			int m_index;
 			
 		public:
 			Interface(int index);
@@ -191,6 +182,8 @@ namespace nuts {
 			
 			virtual void start() = 0;
 			virtual void stop() = 0;
+			
+			int getIndex() { return m_index; }
 	};
 	
 	class Interface_IPv4 : public Interface {

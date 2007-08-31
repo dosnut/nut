@@ -1,0 +1,20 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource>
+<file>activateinterface.png</file>
+<file>airdisabled.png</file>
+<file>airenabled.png</file>
+<file>airundefined.png</file>
+<file>deactivateinterface.png</file>
+<file>disabledevice.png</file>
+<file>edit.png</file>
+<file>enabledevice.png</file>
+<file>enterenvironment.png</file>
+<file>environment.png</file>
+<file>ethdisabled.png</file>
+<file>ethenabled.png</file>
+<file>ethundefined.png</file>
+<file>network.png</file>
+<file>refresh.png</file>
+</qresource>
+</RCC>

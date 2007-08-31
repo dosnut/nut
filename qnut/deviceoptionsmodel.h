@@ -13,7 +13,7 @@
 #define QNUTDEVICEOPTIONSMODEL_H
 
 #include <QAbstractItemModel>
-#include "libnut_cli.h"
+#include <libnut/libnut_cli.h>
 
 namespace qnut {
     using namespace libnut;

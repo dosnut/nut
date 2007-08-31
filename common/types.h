@@ -6,41 +6,16 @@
 #include <QHostAddress>
 #include <QtDBus>
 #include <QMetaType>
-//#define NUT_DBUS_URL de_unistg_nut
+
+#include "macaddress.h"
 
 namespace libnut {
-    class libnut_MacAddress {
-        public:
-            libnut_MacAddress();
-            libnut_MacAddress(const QString &str);
-            libnut_MacAddress(const quint8 *d);
-            quint8 data[6];
-            
-            inline bool operator==(const libnut_MacAddress &ma) {
-                for (int i = 0; i < 6; i++)
-                    if (data[i] != ma.data[i])
-                        return false;
-                return true;
-            }
-            inline bool operator!=(const libnut_MacAddress &ma) {
-                return !(*this == ma);
-            }
-            inline QString toString() const {
-                char buf[sizeof("00:00:00:00:00:00")];
-                sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X", data[0],data[1],data[2],data[3],data[4],data[5]);
-                return QString(buf);
-            }
-            inline QByteArray toQByteArray() {
-                return QByteArray((char*) data,6);
-            }
-    };
-    
     enum libnut_SelectFlags {user=0, arp=1, essid=2};
     struct libnut_SelectConfig {
         bool selected;
         int flags;
         bool useMac;
-        libnut_MacAddress macAddress;
+        nut::MacAddress macAddress;
         QHostAddress arpIP;
         QString essid;
     };
@@ -104,28 +79,6 @@ namespace libnut {
     
     QDBusArgument &operator<< (QDBusArgument &argument, const libnut_InterfaceProperties &ifprop);
     const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_InterfaceProperties &ifprop);
-    
-    //Registerd Ids
-    
-    
-    /*
-    int metatype_id_libnut_DeviceProperties = qRegisterMetaType<libnut::libnut_DeviceProperties>("libnut_DeviceProperties");
-    int metatype_id_libnut_SelectConfig = qRegisterMetaType<libnut::libnut_SelectConfig>("libnut_SelectConfig");
-    int metatype_id_libnut_EnvironmentProperties = qRegisterMetaType<libnut::libnut_EnvironmentProperties>("libnut_EnvironmentProperties");
-    int metatype_id_libnut_InterfaceProperties = qRegisterMetaType<libnut::libnut_InterfaceProperties>("libnut_InterfaceProperties");
-    */
-    class libnut_metatype_id_storage {
-    public:
-        static int metatype_id_libnut_DeviceProperties;
-        static int metatype_id_libnut_SelectConfig;
-        static int metatype_id_libnut_EnvironmentProperties;
-        static int metatype_id_libnut_InterfaceProperties;
-        static int metatype_id_libnut_SelectConfigList;
-        static int metatype_id_libnut_wlanScanresult;
-        static int metatype_id_libnut_wlanScanresultList;
-        static int metatype_id_libnut_wlanNetworkProperties;
-        static void libnut_register_all_metatypes();
-    };
 };
 
 Q_DECLARE_METATYPE(libnut::libnut_SelectConfig)
@@ -136,6 +89,5 @@ Q_DECLARE_METATYPE(QList<libnut::libnut_wlanScanresult>)
 Q_DECLARE_METATYPE(libnut::libnut_wlanNetworkProperties)
 Q_DECLARE_METATYPE(libnut::libnut_EnvironmentProperties)
 Q_DECLARE_METATYPE(libnut::libnut_InterfaceProperties)
-
 
 #endif

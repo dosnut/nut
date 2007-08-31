@@ -1,8 +1,7 @@
 #include <QCoreApplication>
 #include <QList>
 #include <iostream>
-#include "../libnut/libnut_cli.h"
-#include <"nutdbus.h">
+#include <libnut/libnut_cli.h>
 #include <QDBusConnectionInterface>
 #include <QDBus>
 #include "nut_commandline.h"

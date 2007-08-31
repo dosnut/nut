@@ -1,6 +1,5 @@
 TEMPLATE = app
-INCLUDEPATH += .
-CONFIG += qt qdbus console
+CONFIG += qt qdbus
 CONFIG -= gui
 QT += network
 
@@ -9,27 +8,23 @@ CODECFORSRC = UTF-8
 OBJECTS_DIR = build
 TARGET = build/nut
 
-#HEADERS +=
-
-INCLUDEPATH += ../libnut
-include(../libnut/libnut_cli.pri)
-
 SOURCES += nut.cpp \
- ../libnut/libnut_types.cpp \
  nut_library.cpp \
  nut_interactive.cpp \
  nut_commandline.cpp \
- ../libnut/libnut_server.cpp \
- ../libnut/libnut_server_adaptor.cpp
 
-HEADERS += servertest.h \
- ../libnut/libnut_types.h \
- nut_library.h \
+HEADERS += nut_library.h \
  nut_interactive.h \
- nut_commandline.h \
- ../libnut/libnut_server.h \
- ../libnut/libnut_server_proxy.h \
- ../libnut/libnut_exceptions.h
+ nut_commandline.h
 
-DISTFILES += ../libnut/libnut_server.xml
+#DISTFILES += ../libnut/libnut_server.xml
 
+DESTDIR = .
+
+INCLUDEPATH += ..
+
+LIBS += ../common/libnutcommon.a \
+-L../libnut \
+-lnut
+TARGETDEPS += ../common/libnutcommon.a \
+../libnut/libnut.so

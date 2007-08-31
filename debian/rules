@@ -1,0 +1,9 @@
+#!/usr/bin/make -f
+  
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/qmake.mk
+
+QMAKE=qmake-qt4
+
+DEB_INSTALL_MANPAGES_nuts=debian/nuts.1
+DEB_INSTALL_MANPAGES_qnut=debian/qnut.1

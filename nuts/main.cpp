@@ -4,6 +4,7 @@
 #include "sighandler.h"
 #include "exception.h"
 #include "log.h"
+#include "dbus.h"
 
 #include <QCoreApplication>
 #include <iostream>
@@ -16,9 +17,11 @@ int main(int argc, char* argv[]) {
 	QCoreApplication app(argc, argv);
 	SigHandler *sighandler;
 	DeviceManager *devManager;
+	
 	try {
 		sighandler = new SigHandler();
-		devManager = new DeviceManager("test.config");
+		devManager = new DeviceManager(argc > 1 ? argv[1] : "/etc/nuts/nuts.config");
+		new DBusDeviceManager(devManager);
 	} catch (Exception &e) {
 		err << "Initialize failed:" << endl
 		          << "    " << e.msg() << endl;
