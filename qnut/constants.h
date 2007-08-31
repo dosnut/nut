@@ -19,8 +19,7 @@
 #define UI_ICON_ETH_UNDEFINED           ":/res/ethundefined.png"
 #define UI_ICON_AIR_UNDEFINED           ":/res/airundefined.png"
 #define UI_ICON_PPP_UNDEFINED           ":/res/pppundefined.png"
-#define UI_ICON_ENVIRONMENT             ":/res/environment.png"
-#define UI_ICON_INTERFACE               ":/res/activateinterface.png"
+
 #define UI_ICON_ENABLE_DEVICE           ":/res/enabledevice.png"
 #define UI_ICON_DISABLE_DEVICE          ":/res/disabledevice.png"
 
