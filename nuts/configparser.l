@@ -38,6 +38,8 @@ select      return SELECT;
 user        return USER;
 arp         return ARP;
 essid       return ESSID;
+and         return AND;
+or          return OR;
 
 wlan        return WLAN;
 mode        return MODE;
@@ -45,6 +47,9 @@ wpa-config  return WPACONFIG;
 
 ([[:digit:]]{1,3}\.){3}[[:digit:]]{1,3} {
             yylval.addr = new QHostAddress(QString(yytext)); return IPv4_VAL; }
+
+([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2} {
+            yylval.macAddr = new nut::MacAddress(QString(yytext)); return MACADDR; }
 
 (-[[:blank:]]*)?[[:digit:]]+ {
             yylval.i = atoi(yytext); return INTEGER; }
