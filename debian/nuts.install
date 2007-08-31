@@ -1,0 +1,3 @@
+debian/tmp/usr/sbin/nuts
+debian/tmp/etc/nuts/nuts.config
+debian/dbus-nuts.conf /etc/dbus-1/nuts.conf

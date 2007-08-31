@@ -1,0 +1,8 @@
+libnut0
+nuts
+qnut
+tmp
+stamp-makefile-build
+*.debhelper
+*.substvars
+files
