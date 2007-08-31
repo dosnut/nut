@@ -91,29 +91,32 @@ namespace libnut {
         argument.endStructure();
         return argument;
     }
+	
+	static void init() {
+		static int done = 0;
+		if (done) return;
+		done = 1;
+		qRegisterMetaType<libnut_DeviceProperties>("libnut_DeviceProperties");
+		qRegisterMetaType<libnut_SelectConfig>("libnut_SelectConfig");
+		qRegisterMetaType<libnut_EnvironmentProperties>("libnut_EnvironmentProperties");
+		qRegisterMetaType<libnut_InterfaceProperties>("libnut_InterfaceProperties");
+//		qRegisterMetaType<QList<libnut_SelectConfig> >("libnut_SelectConfigList");
+		qRegisterMetaType<libnut_wlanScanresult>("libnut_wlanScanresult");
+//		qRegisterMetaType<QList<libnut_wlanScanresult> >("libnut_wlanScanresultList");
+		qRegisterMetaType<libnut_wlanNetworkProperties>("libnut_wlanNetworkProperties");
+	
+		qDBusRegisterMetaType<libnut_DeviceProperties>();
+		qDBusRegisterMetaType<libnut_SelectConfig>();
+		qDBusRegisterMetaType<libnut_EnvironmentProperties>();
+		qDBusRegisterMetaType<libnut_InterfaceProperties>();
+//		qDBusRegisterMetaType<QList<libnut_SelectConfig> >();
+		qDBusRegisterMetaType<libnut_wlanScanresult>();
+//		qDBusRegisterMetaType<QList<libnut_wlanScanresult> >();
+		qDBusRegisterMetaType<libnut_wlanNetworkProperties>();
+	}
+}
 
-	class libnut_types_init {
-		public:
-			libnut_types_init() {
-				qRegisterMetaType<libnut::libnut_DeviceProperties>("libnut::libnut_DeviceProperties");
-				qRegisterMetaType<libnut::libnut_SelectConfig>("libnut::libnut_SelectConfig");
-				qRegisterMetaType<libnut::libnut_EnvironmentProperties>("libnut::libnut_EnvironmentProperties");
-				qRegisterMetaType<libnut::libnut_InterfaceProperties>("libnut::libnut_InterfaceProperties");
-				qRegisterMetaType<QList<libnut::libnut_SelectConfig> >("libnut::libnut_SelectConfigList");
-				qRegisterMetaType<libnut::libnut_wlanScanresult>("libnut::libnut_wlanScanresult");
-				qRegisterMetaType<QList<libnut::libnut_wlanScanresult> >("libnut::libnut_wlanScanresultList");
-				qRegisterMetaType<libnut::libnut_wlanNetworkProperties>("libnut::libnut_wlanNetworkProperties");
-			
-				qDBusRegisterMetaType<libnut::libnut_DeviceProperties>();
-				qDBusRegisterMetaType<libnut::libnut_SelectConfig>();
-				qDBusRegisterMetaType<libnut::libnut_EnvironmentProperties>();
-				qDBusRegisterMetaType<libnut::libnut_InterfaceProperties>();
-				qDBusRegisterMetaType<QList<libnut::libnut_SelectConfig> >();
-				qDBusRegisterMetaType<libnut::libnut_wlanScanresult>();
-				qDBusRegisterMetaType<QList<libnut::libnut_wlanScanresult> >();
-				qDBusRegisterMetaType<libnut::libnut_wlanNetworkProperties>();
-			}
-	};
-	static libnut_types_init lt_init;
+namespace common {
+	void init() { libnut::init(); }
 }
 

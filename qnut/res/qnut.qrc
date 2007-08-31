@@ -1,6 +1,6 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
-<qresource>
+<qresource prefix="/res">
 <file>activateinterface.png</file>
 <file>airdisabled.png</file>
 <file>airenabled.png</file>
