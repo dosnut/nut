@@ -12,8 +12,7 @@
 using namespace nuts;
 
 int main(int argc, char* argv[]) {
-	Log_Init(log, 1);
-	Log_Init(err, 2);
+	common::init();
 	QCoreApplication app(argc, argv);
 	SigHandler *sighandler;
 	DeviceManager *devManager;
