@@ -23,7 +23,7 @@ namespace qnut {
     class COverViewListModel : public QAbstractItemModel {
         Q_OBJECT
     public:
-        COverViewListModel(CDeviceList * deviceList/*, CDeviceOptionsHash * deviceOptionsHash*/, QObject * parent = 0);
+        COverViewListModel(CDeviceList * deviceList, QObject * parent = 0);
         ~COverViewListModel();
         
         QVariant data(const QModelIndex & index, int role) const;
@@ -35,7 +35,6 @@ namespace qnut {
         int columnCount(const QModelIndex & parent = QModelIndex()) const;
     private:
         CDeviceList * devices;
-        //CDeviceOptionsHash * deviceOptions;
     };
 
 };

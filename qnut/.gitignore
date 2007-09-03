@@ -1,6 +1,6 @@
 build
 Makefile
-ui_*
+ui
 moc_*
 *.qm
 fp

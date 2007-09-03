@@ -5,37 +5,38 @@
 #define UI_VERSION                      "0.0.01"
 #define UI_NAME                         tr("Network UTility (NUT) client for Qt")
 
-#define UI_FILE_LOG                     "qnut.log"
-#define UI_FILE_CONFIG                  "qnut.conf"
+//#define UI_DIR_RESOURCE                 "/usr/share/qnut/"
+#define UI_DIR_RESOURCE                 "res/"
+#define UI_DIR_USER                     "~/.qnut/"
 
-#define UI_ICON_SYSTRAY                 ":/res/network.png"
+#define UI_FILE_LOG                     UI_DIR_USER "qnut.log"
+#define UI_FILE_CONFIG                  UI_DIR_USER "qnut.conf"
 
-#define UI_ICON_ETH_ENABLED             ":/res/ethenabled.png"
-#define UI_ICON_AIR_ENABLED             ":/res/airenabled.png"
-#define UI_ICON_PPP_ENABLED             ":/res/pppenabled.png"
-#define UI_ICON_ETH_DISABLED            ":/res/ethdisabled.png"
-#define UI_ICON_AIR_DISABLED            ":/res/airdisabled.png"
-#define UI_ICON_PPP_DISABLED            ":/res/pppdisabled.png"
-#define UI_ICON_ETH_UNDEFINED           ":/res/ethundefined.png"
-#define UI_ICON_AIR_UNDEFINED           ":/res/airundefined.png"
-#define UI_ICON_PPP_UNDEFINED           ":/res/pppundefined.png"
-#define UI_ICON_ENVIRONMENT             ":/res/environment.png"
-#define UI_ICON_INTERFACE               ":/res/activateinterface.png"
-#define UI_ICON_ENABLE_DEVICE           ":/res/enabledevice.png"
-#define UI_ICON_DISABLE_DEVICE          ":/res/disabledevice.png"
+#define UI_ICON_SYSTRAY                 UI_DIR_RESOURCE "network.png"
 
-#define UI_ICON_ENVIRONMENT             ":/res/environment.png"
-#define UI_ICON_ADD_ENVIRONMENT         ":/res/addenvironment.png"
-#define UI_ICON_REMOVE_ENVIRONMENT      ":/res/removeenvironment.png"
-#define UI_ICON_ENTER_ENVIRONMENT       ":/res/enterenvironment.png"
+#define UI_ICON_ETH_UP                  UI_DIR_RESOURCE "eth_up.png"
+#define UI_ICON_ETH_UNCONFIGURED        UI_DIR_RESOURCE "eth_unconfigured.png"
+#define UI_ICON_ETH_CARRIER             UI_DIR_RESOURCE "eth_carrier.png"
+#define UI_ICON_ETH_ACTIVATED           UI_DIR_RESOURCE "eth_activated.png"
+#define UI_ICON_ETH_DEACTIVATED         UI_DIR_RESOURCE "eth_deactivated.png"
 
-#define UI_ICON_INTERFACE               ":/res/activateinterface.png"
-#define UI_ICON_ACTIVATE_INTERFACE      ":/res/activateinterface.png"
-#define UI_ICON_DEACTIVATE_INTERFACE    ":/res/deactivateinterface.png"
-#define UI_ICON_ADD_INTERFACE           ":/res/addinterface.png"
-#define UI_ICON_REMOVE_INTERFACE        ":/res/removeinterface.png"
+#define UI_ICON_AIR_UP                  UI_DIR_RESOURCE "air_up.png"
+#define UI_ICON_AIR_UNCONFIGURED        UI_DIR_RESOURCE "air_unconfigured.png"
+#define UI_ICON_AIR_CARRIER             UI_DIR_RESOURCE "air_carrier.png"
+#define UI_ICON_AIR_ACTIVATED           UI_DIR_RESOURCE "air_activated.png"
+#define UI_ICON_AIR_DEACTIVATED         UI_DIR_RESOURCE "air_deactived.png"
 
-#define UI_ICON_EDIT                    ":/res/edit.png"
-#define UI_ICON_REFRESH                 ":/res/refresh.png"
+#define UI_ICON_ENABLE_DEVICE           UI_DIR_RESOURCE "dev_enable.png"
+#define UI_ICON_DISABLE_DEVICE          UI_DIR_RESOURCE "dev_disable.png"
+
+#define UI_ICON_ENVIRONMENT             UI_DIR_RESOURCE "environment.png"
+#define UI_ICON_ENTER_ENVIRONMENT       UI_DIR_RESOURCE "enterenvironment.png"
+
+#define UI_ICON_INTERFACE               UI_DIR_RESOURCE "activateinterface.png"
+#define UI_ICON_ACTIVATE_INTERFACE      UI_DIR_RESOURCE "activateinterface.png"
+#define UI_ICON_DEACTIVATE_INTERFACE    UI_DIR_RESOURCE "deactivateinterface.png"
+
+#define UI_ICON_EDIT                    UI_DIR_RESOURCE "edit.png"
+#define UI_ICON_REFRESH                 UI_DIR_RESOURCE "refresh.png"
 
 #endif

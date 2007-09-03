@@ -3,11 +3,11 @@
 
 #include <QtGui>
 #include <QHash>
-#include "build/ui_connman.h"
+#include <libnut/libnut_cli.h>
+#include "ui/ui_connman.h"
 #include "trayicon.h"
 #include "overviewlistmodel.h"
 #include "deviceoptions.h"
-#include <libnut/libnut_cli.h>
 
 namespace qnut {
     using namespace libnut;

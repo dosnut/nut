@@ -8,7 +8,7 @@ CODECFORTR = ISO-8859-1
 
 OBJECTS_DIR = build/
 MOC_DIR = build/
-UI_DIR = build/
+UI_DIR = ui/
 RCC_DIR = build/
 TARGET = qnut
 
@@ -29,13 +29,15 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  deviceoptions.cpp \
  ipconfiguration.cpp \
  common.cpp
-RESOURCES += res/qnut.qrc
 DESTDIR = .
 
 
 
 target.path = /usr/bin/
+restarget.path = /usr/share/qnut
+restarget.files = res/*.png
 INSTALLS += target
+INSTALLS += restarget
 INCLUDEPATH += ..
 
 LIBS += ../common/libnutcommon.a \
