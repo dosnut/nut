@@ -14,7 +14,7 @@
 
 #include <QAbstractItemModel>
 #include <QVariant>
-#include "libnut_cli.h"
+#include <libnut/libnut_cli.h>
 #include "deviceoptions.h"
 
 namespace qnut {

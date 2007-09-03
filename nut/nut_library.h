@@ -4,8 +4,7 @@
 #include <QStringList>
 #include <QVariant>
 #include <iostream>
-#include <"../libnut/libnut_cli.h">
-#include <"nutdbus.h">
+#include <libnut/libnut_cli.h>
 #include <QDBusConnectionInterface>
 #include <QDBus>
 

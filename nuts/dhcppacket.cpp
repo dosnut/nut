@@ -188,11 +188,11 @@ namespace nuts {
 		return true;
 	}
 	
-	MacAddress DHCPPacket::getClientMac() {
-		return MacAddress(msg.chaddr);
+	nut::MacAddress DHCPPacket::getClientMac() {
+		return nut::MacAddress(msg.chaddr);
 	}
 	
-	void DHCPPacket::setClientMac(const MacAddress &chaddr) {
+	void DHCPPacket::setClientMac(const nut::MacAddress &chaddr) {
 		memcpy(msg.chaddr, chaddr.data, 6);
 		quint8 clid[7];
 		memcpy(&clid[1], chaddr.data, 6);

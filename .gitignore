@@ -1,0 +1,5 @@
+Makefile
+Doxyfile
+*.kdevelop
+*.kdevelop.pcs
+*.kdevses

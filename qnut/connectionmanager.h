@@ -3,11 +3,11 @@
 
 #include <QtGui>
 #include <QHash>
-#include "ui_connman.h"
+#include "build/ui_connman.h"
 #include "trayicon.h"
 #include "overviewlistmodel.h"
 #include "deviceoptions.h"
-#include "libnut_cli.h"
+#include <libnut/libnut_cli.h>
 
 namespace qnut {
     using namespace libnut;
@@ -16,12 +16,16 @@ namespace qnut {
         Q_OBJECT
     private:
         Ui::connMan ui;
+        
+        void createActions();
+        void distributeActions(int mode = 0);
     public:
         CDeviceManager deviceManager;
         
         CLog logFile;
         
         QAction * refreshDevicesAction;
+        
         QAction * enableDeviceAction;
         QAction * disableDeviceAction;
         

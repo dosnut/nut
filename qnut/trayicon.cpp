@@ -12,6 +12,7 @@ namespace qnut {
         trayMenu.addAction(tr("open Connection &Manager"), parent, SLOT(show()));
         
         trayMenu.addMenu(&devicesMenu);
+        devicesMenu.setEnabled(false);
         trayMenu.addSeparator();
         trayMenu.addAction(tr("&Quit"), qApp, SLOT(quit()));
         

@@ -13,8 +13,8 @@
 #define QNUTIPCONF_H
 
 #include <QDialog>
-#include "ui_ipconf.h"
-#include "libnut_cli.h"
+#include "build/ui_ipconf.h"
+#include <libnut/libnut_cli.h>
 
 namespace qnut {
     using namespace libnut;
@@ -25,6 +25,7 @@ namespace qnut {
         Ui::ipconf ui;
     public:
         bool execute(CInterface * interface);
+        bool execute(bool & isStatic, QHostAddress & ip, QHostAddress & netmask, QHostAddress & gateway);
         
         CIPConfiguration(QWidget * parent = 0);
         ~CIPConfiguration();

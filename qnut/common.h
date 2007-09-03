@@ -2,7 +2,7 @@
 #define QNUT_COMMON_H
 
 #include "constants.h"
-#include "libnut_cli.h"
+#include <libnut/libnut_cli.h>
 #include <QString>
 
 namespace qnut {

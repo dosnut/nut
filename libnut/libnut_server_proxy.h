@@ -20,7 +20,8 @@
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
 #include <QtDBus/QtDBus>
-#include "libnut_types.h"
+#include <common/dbus.h>
+#include <common/types.h>
 #include <QMetaType>
 namespace libnut {
 /*
@@ -31,7 +32,7 @@ class DBusDeviceInterface: public QDBusAbstractInterface
     Q_OBJECT
 public:
     static inline const char *staticInterfaceName()
-    { return "NUT_DBUS_URL.Device"; }
+    { return NUT_DBUS_URL ".Device"; }
 
 public:
     DBusDeviceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
@@ -100,7 +101,7 @@ class DBusDeviceManagerInterface: public QDBusAbstractInterface
     Q_OBJECT
 public:
     static inline const char *staticInterfaceName()
-    { return "NUT_DBUS_URL.DeviceManager"; }
+    { return NUT_DBUS_URL ".DeviceManager"; }
 
 public:
     DBusDeviceManagerInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
@@ -127,7 +128,7 @@ class DBusEnvironmentInterface: public QDBusAbstractInterface
     Q_OBJECT
 public:
     static inline const char *staticInterfaceName()
-    { return "NUT_DBUS_URL.Environment"; }
+    { return NUT_DBUS_URL ".Environment"; }
 
 public:
     DBusEnvironmentInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
@@ -177,7 +178,7 @@ class DBusInterfaceInterface: public QDBusAbstractInterface
     Q_OBJECT
 public:
     static inline const char *staticInterfaceName()
-    { return "NUT_DBUS_URL.Interface"; }
+    { return NUT_DBUS_URL ".Interface"; }
 
 public:
     DBusInterfaceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);

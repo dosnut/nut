@@ -1,0 +1,7 @@
+build
+Makefile
+libnut.so*
+libnut.prl
+libnut_server_adaptor.cpp
+libnut_server_adaptor.h
+libnut_server.h
