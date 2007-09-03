@@ -30,8 +30,6 @@ namespace qnut {
     public:
         CDevice * device;
         
-        //bool undefined;
-        
         QMenu * deviceMenu;
         QMenu * environmentsMenu;
         QAction * enableDeviceAction;
@@ -40,10 +38,6 @@ namespace qnut {
         QAction * activateInterfaceAction;
         QAction * deactivateInterfaceAction;
         QAction * editInterfaceAction;
-        QAction * addEnvironmentAction;
-        QAction * removeEnvironmentAction;
-        QAction * addInterfaceAction;
-        QAction * removeInterfaceAction;
         
         QAction * showAction;
         

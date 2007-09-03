@@ -16,8 +16,6 @@
 namespace qnut {
     COverViewListModel::COverViewListModel(CDeviceList * deviceList, QObject * parent) : QAbstractItemModel(parent) {
         devices = deviceList;
-        
-        // vllt sollte hier die deviceliste gefüllt werden wenn nicht vorher getan
     }
     
     COverViewListModel::~COverViewListModel() {
@@ -85,14 +83,9 @@ namespace qnut {
                     return data->enabled ? tr("enabled") : tr("disabled");
                 case 2:
                     switch (data->type) {
-                        case 0:
-                            return tr("Ethernet");
-                        case 1:
-                            return tr("Wireless");
-                        case 2:
-                            return tr("PPP");
-                        default:
-                            break;
+                        case DT_ETH: return tr("Ethernet");
+                        case DT_AIR: return tr("Wireless");
+                        default:     break;
                     }
                 default:
                     break;
