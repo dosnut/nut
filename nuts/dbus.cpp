@@ -57,10 +57,14 @@ namespace nuts {
 
 	DBusDevice::DBusDevice(Device *dev, QDBusConnection *connection, const QString &path)
 	: QDBusAbstractAdaptor(dev), m_dev(dev), m_connection(connection) {
-		m_properties.activeEnvironment = dev->getCurrent();
-		m_properties.type = libnut::ethernet;
+		int env = dev->getEnvironment();
+		if (env >= 0)
+			m_properties.activeEnvironment = m_envs[env]->getPath();
+		else
+			m_properties.activeEnvironment = "";
+		m_properties.type = libnut::DT_ETH;
 		m_properties.name = dev->getName();
-		m_properties.enabled = dev->getEnabled();
+		m_properties.state = dev->getState();
 	
 		m_dbusPath = path + '/' + dev->getName();
 		m_connection->registerObject(m_dbusPath, dev);
@@ -95,10 +99,10 @@ namespace nuts {
 	}
 	
 	void DBusDevice::enable() {
-		m_dev->setEnabled(true);
+		m_dev->enable();
 	}
 	void DBusDevice::disable() {
-		m_dev->setEnabled(false);
+		m_dev->disable();
 	}
 
 	DBusEnvironment::DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path)
