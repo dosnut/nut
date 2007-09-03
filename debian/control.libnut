@@ -22,3 +22,13 @@ Description: Network UTility (substitute for ifupdown)
  which the clients use to control the server.
  .
  This package contains the Qt client.
+
+Package: libnut0
+Architecture: any
+Depends: ${shlibs:Depends}
+Recommends: nuts (= ${binary:Version})
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the client library.

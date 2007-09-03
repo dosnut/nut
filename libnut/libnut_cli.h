@@ -12,6 +12,7 @@
 #include <QDBusObjectPath>
 #include <QFile>
 #include <QTextStream>
+#include <QHash>
 
 namespace libnut {
     class CDeviceManager;
@@ -27,6 +28,7 @@ namespace libnut {
 };
 
 namespace libnut {
+
     class CLog : public QObject {
         Q_OBJECT
     private:
@@ -86,9 +88,10 @@ namespace libnut {
         friend class DBusDeviceManagerInterface;
     private:
         DBusDeviceManagerInterface * dbusDevmgr;
-        QDBusObjectPathList dbusDeviceList;
+        QHash<QDBusObjectPath, CDevice* > dbusDevices;
         QDBusConnection dbusConnection;
         CLog * log;
+        void rebuild(QList<QDBusObjectPath> paths);
     private slots:
         void dbusDeviceAdded(const QDBusObjectPath &objectpath);
         void dbusDeviceRemoved(const QDBusObjectPath &objectpath);
@@ -110,17 +113,29 @@ namespace libnut {
         friend class CDeviceManager;
         friend class CEnvironment;
         friend class CInterface;
+        friend class DBusDeviceInterface;
     private:
         CDeviceManager * parent;
         QDBusObjectPath dbusPath;
+<<<<<<< HEAD:libnut/libnut_cli.h
         QDBusObjectPathList dbusEnvironmentList;
+=======
+        QDBusObjectPath dbusActiveEnvironment;
+        QHash<QDBusObjectPath, CEnvironment*> dbusEnvironments;
+>>>>>>> 9d47a2155179bd9b06b700f0ddeaf5e2b4f3cc00:libnut/libnut_cli.h
         CLog * log;
 
 
         DBusDeviceInterface * dbusDevice;
         void refreshAll();
         void setActiveEnvironment(CEnvironment * env, QDBusObjectPath dbusPath);
+        void rebuild(QList<QDBusObjectPath> paths);
+
+    private slots:
         void environmentChangedActive(const QDBusObjectPath &newenv);
+        void environmentAdded(const QDBusObjectPath &path);
+        void environmentRemoved(const QDBusObjectPath &path);
+        void stateChanged(const bool &state);
     public:
         CEnvironmentList environments;
         
@@ -136,12 +151,15 @@ namespace libnut {
     public slots:
         void enable();
         void disable();
-        CEnvironment * addEnvironment(QString name);
+        void addEnvironment(QString name);
         void removeEnvironment(CEnvironment * environment); //only user defineable
+        void setEnvironment(CEnvironment * environment);
         
     signals:
         void environmentChangedActive(CEnvironment * current, CEnvironment * previous);
         void environmentsUpdated();
+        void environmentAdded(CEnvironment * environment);
+        void environmentRemoved(CEnvironment * environment);
         void enabledChanged(bool enabed);
     };
     
@@ -150,11 +168,20 @@ namespace libnut {
         friend class CDeviceManager;
         friend class CDevice;
         friend class CInterface;
+        friend class DBusEnvironmentInterface;
     private:
         CDevice * parent;
         QDBusObjectPath dbusPath;
+        CLog * log;
+        QHash<QDBusObjectPath, CInterface *> dbusInterfaces;
+        DBusEnvironmentInterface * dbusEnvironment;
         
         void refreshAll();
+        void rebuild(const QList<QDBusObjectPath> &paths);
+    private slots:
+        void dbusinterfaceAdded(const QDBusObjectPath &path);
+        void dbusinterfaceRemoved(const QDBusObjectPath &path);
+        void dbusstateChanged(const bool &state);
     public:
         bool active;
         QString name;
@@ -165,12 +192,14 @@ namespace libnut {
         ~CEnvironment();
     public slots:
         void enter();
-        void addInterface(bool isStatic, QHostAddress ip, QHostAddress netmask, QHostAddress gateway);
+        void addInterface(bool isStatic, QHostAddress ip, QHostAddress netmask, QHostAddress gateway, bool active);
         void removeInterface(CInterface * interface);
         
     signals:
         void activeChanged(bool active);
         void interfacesUpdated();
+        void interfaceAdded(CInterface * interface);
+        void interfaceRemoved(CInterface * interface);
     };
     
     class CInterface : public CLibNut {
@@ -178,9 +207,15 @@ namespace libnut {
         friend class CDeviceManager;
         friend class CDevice;
         friend class CEnvironment;
+        friend class DBusInterfaceInterface;
     private:
         CEnvironment * parent;
         QDBusObjectPath dbusPath;
+        CLog * log;
+        DBusInterfaceInterface * dbusInterface;
+        void refreshAll();
+    private slots:
+        void dbusstateChanged(const libnut_InterfaceProperties &properties);
     public:
         bool isStatic;
         bool active;
@@ -197,7 +232,8 @@ namespace libnut {
         void setIP(QHostAddress & address); //zuvor pointer
         void setNetmask(QHostAddress & address); //zuvor pointer
         void setGateway(QHostAddress & address); //zuvor pointer
-        void setStatic(bool state); // war zuvor nicht da
+        void setDynamic(); // war zuvor nicht da
+        inline void setStatic(bool state) {} //wird entfernt
         
     signals:
         void activeChanged(bool active); //zuvor activeStateChanged()

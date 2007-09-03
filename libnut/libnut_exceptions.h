@@ -35,6 +35,11 @@ namespace libnut {
         public:
             CLI_EnvConnectionException(const QString &msg) : CLI_ConnectionException(msg) {}
     };
+    class CLI_IfConnectionException : public CLI_ConnectionException {
+        public:
+            CLI_IfConnectionException(const QString &msg) : CLI_ConnectionException(msg) {}
+    };
+
 
 }
 #endif
