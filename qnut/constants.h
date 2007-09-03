@@ -26,15 +26,15 @@
 #define UI_ICON_AIR_ACTIVATED           UI_DIR_RESOURCE "air_activated.png"
 #define UI_ICON_AIR_DEACTIVATED         UI_DIR_RESOURCE "air_deactived.png"
 
-#define UI_ICON_ENABLE_DEVICE           UI_DIR_RESOURCE "dev_enable.png"
-#define UI_ICON_DISABLE_DEVICE          UI_DIR_RESOURCE "dev_disable.png"
+#define UI_ICON_DEVICE_ENABLE           UI_DIR_RESOURCE "device_enable.png"
+#define UI_ICON_DEVICE_DISABLE          UI_DIR_RESOURCE "device_disable.png"
 
 #define UI_ICON_ENVIRONMENT             UI_DIR_RESOURCE "environment.png"
-#define UI_ICON_ENTER_ENVIRONMENT       UI_DIR_RESOURCE "enterenvironment.png"
+#define UI_ICON_ENVIRONMENT_ENTER       UI_DIR_RESOURCE "environment_enter.png"
 
-#define UI_ICON_INTERFACE               UI_DIR_RESOURCE "activateinterface.png"
-#define UI_ICON_ACTIVATE_INTERFACE      UI_DIR_RESOURCE "activateinterface.png"
-#define UI_ICON_DEACTIVATE_INTERFACE    UI_DIR_RESOURCE "deactivateinterface.png"
+#define UI_ICON_INTERFACE               UI_DIR_RESOURCE "interface.png"
+#define UI_ICON_INTERFACE_ACTIVATE      UI_DIR_RESOURCE "interface_activate.png"
+#define UI_ICON_INTERFACE_DEACTIVATE    UI_DIR_RESOURCE "interface_deactivate.png"
 
 #define UI_ICON_EDIT                    UI_DIR_RESOURCE "edit.png"
 #define UI_ICON_REFRESH                 UI_DIR_RESOURCE "refresh.png"
