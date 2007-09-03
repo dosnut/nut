@@ -26,30 +26,6 @@ void CLog::operator<<(QString text) {
         outStream << text << endl;
     }
 }
-/////////////////////
-//QDBusObjectPathList
-/////////////////////
-int QDBusObjectPathList::removeAll(const QDBusObjectPath &path) {
-    int count = 0;
-    for(QList<QDBusObjectPath>::iterator i = begin(); i != end(); i++) {
-        if ((*i).path() == path.path()) {
-            count++;
-            erase(i);
-        }
-    }
-    return count;
-}
-//The following is VERY ugly (don't try this at home):
-QDBusObjectPathList & QDBusObjectPathList::operator= ( const QDBusObjectPathList & other ) {
-    //First: get pointer to base class of other (that's QList<QDBusObjectPath>)
-    QList<QDBusObjectPath> * base = (QList<QDBusObjectPath>*) &other;
-    //"QList<QDBusObjectPath>::operator=(*base)" returns base class
-    //Then get the address in order to typecast with pointer
-    return * ( (QDBusObjectPathList*) &( QList<QDBusObjectPath>::operator=(*base) ) );
-}
-QDBusObjectPathList & QDBusObjectPathList::operator= ( const QList<QDBusObjectPath> & other ) {
-return * ( (QDBusObjectPathList*) &( QList<QDBusObjectPath>::operator=(other) ) );
-}
 
 ////////////////
 //CLibNut
