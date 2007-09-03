@@ -51,10 +51,6 @@ namespace qnut {
         void uiShowPopup(const QPoint & pos);
         void uiHandleEnvironmentChange(CEnvironment * current, CEnvironment * previous);
         void uiChangeIPConfiguration();
-        void uiAddEnvironment();
-        void uiRemoveEnvironment();
-        void uiAddInterface();
-        void uiRemoveInterface();
         
     signals:
         void showMessage(QString title, QString message);

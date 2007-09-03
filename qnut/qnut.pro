@@ -38,6 +38,7 @@ restarget.path = /usr/share/qnut
 restarget.files = res/*.png
 INSTALLS += target
 INSTALLS += restarget
+
 INCLUDEPATH += ..
 
 LIBS += ../common/libnutcommon.a \

@@ -32,21 +32,11 @@ namespace qnut {
         environmentsMenu = new QMenu(this);
         enterEnvironmentAction    = environmentsMenu->addAction(QIcon(UI_ICON_ENTER_ENVIRONMENT), tr("Enter environment"));
         environmentsMenu->addSeparator();
-        addEnvironmentAction      = environmentsMenu->addAction(QIcon(UI_ICON_ADD_ENVIRONMENT), tr("Add environment"),
-                                    this, SLOT(uiAddEnvironment()));
-        removeEnvironmentAction   = environmentsMenu->addAction(QIcon(UI_ICON_REMOVE_ENVIRONMENT), tr("Remove environment"),
-                                    this, SLOT(uiRemoveEnvironment()));
-        environmentsMenu->addSeparator();
         activateInterfaceAction   = environmentsMenu->addAction(QIcon(UI_ICON_ACTIVATE_INTERFACE), tr("Activate interface"));
         deactivateInterfaceAction = environmentsMenu->addAction(QIcon(UI_ICON_DEACTIVATE_INTERFACE), tr("Deactivate interface"));
         environmentsMenu->addSeparator();
         editInterfaceAction       = environmentsMenu->addAction(QIcon(UI_ICON_EDIT), tr("Edit IP Configuration..."),
                                     this, SLOT(uiChangeIPConfiguration()));
-        environmentsMenu->addSeparator();
-        addInterfaceAction        = environmentsMenu->addAction(QIcon(UI_ICON_ADD_INTERFACE), tr("Add interface"),
-                                    this, SLOT(uiAddInterface()));
-        removeInterfaceAction     = environmentsMenu->addAction(QIcon(UI_ICON_REMOVE_INTERFACE), tr("Remove interface"),
-                                    this, SLOT(uiRemoveInterface()));
         
         foreach(QAction * i, environmentsMenu->actions()) {
             i->setEnabled(false);
@@ -54,9 +44,9 @@ namespace qnut {
         
         setAllColumnsShowFocus(true);
         
-        enableDeviceAction->setDisabled(device->enabled);
-        disableDeviceAction->setEnabled(device->enabled);
-        setEnabled(device->enabled);
+        enableDeviceAction->setDisabled(device->state == DS_UP);
+        disableDeviceAction->setEnabled(device->state == DS_UP);
+        setDisabled(device->state == DS_DEACTIVATED);
         
         setContextMenuPolicy(Qt::CustomContextMenu);
         setAllColumnsShowFocus(true);
@@ -164,27 +154,5 @@ namespace qnut {
         QModelIndex selectedIndex = (selectionModel()->selection().indexes())[0];
         
         dialog.execute((CInterface *)(selectedIndex.internalPointer()));
-    }
-    void CDeviceOptions::uiAddEnvironment() {
-        QString newName;
-        newName = QInputDialog::getText(this, tr("New environment"), tr("Please enter a unique name for the new environment."));
-        //hier weiter!!
-    }
-    
-    void CDeviceOptions::uiRemoveEnvironment() {
-    
-    }
-    void CDeviceOptions::uiAddInterface() {
-        QModelIndex selectedIndex = (selectionModel()->selection().indexes())[0];
-        CIPConfiguration dialog(this);
-        bool isStatic;
-        QHostAddress ip, netmask, gateway;
-        
-        dialog.execute(isStatic, ip, netmask, gateway);
-        ((CEnvironment *)(selectedIndex.internalPointer()))->addInterface(isStatic, ip, netmask, gateway);
-    }
-    
-    void CDeviceOptions::uiRemoveInterface() {
-    
     }
 };
