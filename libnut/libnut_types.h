@@ -8,6 +8,16 @@
 #include <QMetaType>
 //#define NUT_DBUS_URL de_unistg_nut
 
+//Functions that need to be defined outside of own namespace:
+
+//This function is needed as QDBusObjectPath does not define any comparison operator (QString is inherited private)
+inline bool operator== (const QDBusObjectPath &p1, const QDBusObjectPath &p2){
+    return (p1.path() == p2.path());
+}
+inline uint qHash(const QDBusObjectPath &key) {
+    return qHash(key.path());
+}
+
 namespace libnut {
     class libnut_MacAddress {
         public:

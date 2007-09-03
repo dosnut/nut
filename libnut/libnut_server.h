@@ -79,7 +79,9 @@ class CNutsDBusDevice: public QObject {
     public slots:
         libnut_DeviceProperties getProperties();
         QList<libnut_wlanScanresult> getwlanScan(); //
-        QDBusObjectPath addwlanEnvironment(libnut_wlanNetworkProperties netprops);//
+        void addwlanEnvironment(libnut_wlanNetworkProperties netprops);//
+        void addEnvironment(libnut_EnvironmentProperties envprops); //add in dbus
+        void removeEnvironment(QDBusObjectPath path); //add in dbus
         QList<QDBusObjectPath> getEnvironments();
         void setEnvironment(QDBusObjectPath envpath);
         void enable(); //no need to return state!
@@ -109,13 +111,15 @@ class CNutsDBusEnvironment: public QObject {
     //DBUS SLOTS and SIGNALS
     public slots:
         QList<libnut_SelectConfig> getSelectConfig();
-        libnut_SelectConfig getCurrentSelection();
         libnut_EnvironmentProperties getProperties();
         QList<QDBusObjectPath> getInterfaces();
-        QDBusObjectPath addInterface(libnut_InterfaceProperties prop, bool state); //dazu
+        void addInterface(libnut_InterfaceProperties prop); //dazu
+        void removeInterface(QDBusObjectPath path); //fehlt noch im adaptor
     signals:
-        void interfacesUpdated();
+        void interfaceAdded(QDBusObjetPath path);
+        void interfaceRemoved(QDBusObjectPath path);
         void stateChanged(bool state);
+        
     
 };
 
@@ -144,7 +148,7 @@ class CNutsDBusInterface: public QObject {
         void activate();
         void deactivate();
     signals:
-        void stateChanged(bool state);
+        void stateChanged(libnut_InterfaceProperties properties);
 };
 }
 #endif

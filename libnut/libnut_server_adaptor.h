@@ -63,7 +63,8 @@ public Q_SLOTS: // METHODS
     QList<QDBusObjectPath> getEnvironments();
     libnut_DeviceProperties getProperties();
     QList<libnut_wlanScanresult> getwlanScan();
-    QDBusObjectPath addwlanEnvironment(libnut_wlanNetworkProperties netprops);
+    addwlanEnvironment(libnut_wlanNetworkProperties netprops);
+    addEnvironment(libnut_EnvironmentProperties envprops);
     void setEnvironment(QDBusObjectPath envpath);
 Q_SIGNALS: // SIGNALS
     void environmentChangedActive(const QDBusObjectPath &newenv);
@@ -126,12 +127,13 @@ public:
 public: // PROPERTIES
 public Q_SLOTS: // METHODS
     QList<libnut_SelectConfig> getSelectConfig();
-    libnut_SelectConfig getCurrentSelection();
     libnut_EnvironmentProperties getProperties();
     QList<QDBusObjectPath> getInterfaces();
-    QDBusObjectPath addInterface(libnut_InterfaceProperties prop, bool state);
+    void addInterface(libnut_InterfaceProperties prop;
+    void removeInterface(QDBusObjectPath path);
 Q_SIGNALS: // SIGNALS
-    void interfacesUpdated();
+    void interfaceAdded(const QDBusObjetPath &path);
+    void interfaceRemoved(const QDBusObjectPath &path);
     void stateChanged(const bool &state);
 };
 
@@ -168,7 +170,7 @@ public Q_SLOTS: // METHODS
     void setNetmask(uint Netmask);
     void setDynamic();
 Q_SIGNALS: // SIGNALS
-    void stateChanged(const bool &state);
+    void stateChanged(const libnut_InterfaceProperties &properties);
 };
 }
 #endif

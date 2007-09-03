@@ -120,7 +120,6 @@ namespace libnut {
         return argument;
     };
     const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_EnvironmentProperties &envprop) {
-        quint32 hostaddress;
         argument.beginStructure();
         argument >> envprop.active >> envprop.name;
         return argument;
