@@ -210,9 +210,12 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
         name = replyProp.value().name;
         type = replyProp.value().type;
         state = (DeviceState) replyProp.value().state;
-        dbusActiveEnvironment = replyProp.value().activeEnvironment;
-        activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment);
-        emit(environmentChangedActive(activeEnvironment, 0));
+        activeEnvironment = 0;
+        if (!replyProp.value().activeEnvironment.isEmpty()) {
+            dbusActiveEnvironment = QDBusObjectPath(replyProp.value().activeEnvironment);
+            activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment);
+            emit(environmentChangedActive(activeEnvironment, 0));
+        }
         *log << (tr("Device properties fetched:"));
         *log << (tr("Name: ") + QString(name));
         *log << (tr("Type: ") + QString(type));
@@ -295,14 +298,17 @@ void CDevice::refreshAll() {
     else {
         *log << tr("Could not refresh environments");
     }
+    activeEnvironment = 0;
     //now refresh the rest of our device properties:
     QDBusReply<libnut_DeviceProperties> replyprop = dbusDevice->getProperties();
     if (replyprop.isValid()) {
-        dbusActiveEnvironment = replyprop.value().activeEnvironment;
+        if (!replyprop.value().activeEnvironment.isEmpty()) {
+            dbusActiveEnvironment = QDBusObjectPath(replyprop.value().activeEnvironment);
+            activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment);
+        }
         state = (DeviceState) replyprop.value().state;
         type = replyprop.value().type;
         name = replyprop.value().name;
-        activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment);
     }
     else {
         *log << tr("Could not refresh device properties");
