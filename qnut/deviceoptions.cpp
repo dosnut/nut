@@ -23,17 +23,17 @@ namespace qnut {
         setModel(new CDeviceOptionsModel(device));
         
         deviceMenu = new QMenu(device->name, NULL);
-        enableDeviceAction  = deviceMenu->addAction(QIcon(UI_ICON_ENABLE_DEVICE) , tr("Enable device") , device, SLOT(enable()));
-        disableDeviceAction = deviceMenu->addAction(QIcon(UI_ICON_DISABLE_DEVICE), tr("Disable device"), device, SLOT(disable()));
+        enableDeviceAction  = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_ENABLE) , tr("Enable device") , device, SLOT(enable()));
+        disableDeviceAction = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"), device, SLOT(disable()));
         deviceMenu->addSeparator();
         showAction = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."),
                                  this, SLOT(uiShowThisTab()));
         
         environmentsMenu = new QMenu(this);
-        enterEnvironmentAction    = environmentsMenu->addAction(QIcon(UI_ICON_ENTER_ENVIRONMENT), tr("Enter environment"));
+        enterEnvironmentAction    = environmentsMenu->addAction(QIcon(UI_ICON_ENVIRONMENT_ENTER), tr("Enter environment"));
         environmentsMenu->addSeparator();
-        activateInterfaceAction   = environmentsMenu->addAction(QIcon(UI_ICON_ACTIVATE_INTERFACE), tr("Activate interface"));
-        deactivateInterfaceAction = environmentsMenu->addAction(QIcon(UI_ICON_DEACTIVATE_INTERFACE), tr("Deactivate interface"));
+        activateInterfaceAction   = environmentsMenu->addAction(QIcon(UI_ICON_INTERFACE_ACTIVATE), tr("Activate interface"));
+        deactivateInterfaceAction = environmentsMenu->addAction(QIcon(UI_ICON_INTERFACE_DEACTIVATE), tr("Deactivate interface"));
         environmentsMenu->addSeparator();
         editInterfaceAction       = environmentsMenu->addAction(QIcon(UI_ICON_EDIT), tr("Edit IP Configuration..."),
                                     this, SLOT(uiChangeIPConfiguration()));

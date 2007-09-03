@@ -1,6 +1,6 @@
+#include <QDate>
 #include "connectionmanager.h"
 #include "constants.h"
-#include <QDate>
 
 namespace qnut {
     CConnectionManager::CConnectionManager(QWidget * parent) :
@@ -22,17 +22,19 @@ namespace qnut {
         logFile << UI_NAME + " (v" + QString(UI_VERSION) + ") " + tr("started");
         logFile << QDateTime::currentDateTime().toString();
         
+        createActions();
+        
         try {
             deviceManager.init(&logFile);
         }
         catch (Exception & e) {
             logFile << tr("ERROR:") + " " + QString(e.what());
+            refreshDevicesAction->setEnabled(false);
         }
         
         ui.overViewList->setContextMenuPolicy(Qt::CustomContextMenu);
         ui.overViewList->setModel(&overViewListModel);
         
-        createActions();
         distributeActions();
         
         ui.toolBar->addActions(overViewMenu.actions());
@@ -56,16 +58,11 @@ namespace qnut {
         //overViewMenu Actions
         refreshDevicesAction    = overViewMenu.addAction(QIcon(UI_ICON_REFRESH), tr("Refresh devices"), &deviceManager, SLOT(refreshAll()));
         overViewMenu.addSeparator();
-        enableDeviceAction      = overViewMenu.addAction(QIcon(UI_ICON_ENABLE_DEVICE), tr("Enable device"));
-        disableDeviceAction     = overViewMenu.addAction(QIcon(UI_ICON_DISABLE_DEVICE), tr("Disable device"));
-/*        overViewMenu.addSeparator();
-        addEnvironmentAction    = overViewMenu.addAction(QIcon(UI_ICON_ADD_ENVIRONMENT), tr("Add environment"));
-        removeEnvironmentAction = overViewMenu.addAction(QIcon(UI_ICON_REMOVE_ENVIRONMENT), tr("Remove environment"));*/
+        enableDeviceAction      = overViewMenu.addAction(QIcon(UI_ICON_DEVICE_ENABLE), tr("Enable device"));
+        disableDeviceAction     = overViewMenu.addAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"));
         
         enableDeviceAction->setEnabled(false);
         disableDeviceAction->setEnabled(false);
-/*        addEnvironmentAction->setEnabled(false);
-        removeEnvironmentAction->setEnabled(false);*/
     }
     
     void CConnectionManager::distributeActions(int mode) {
