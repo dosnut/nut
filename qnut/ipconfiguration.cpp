@@ -29,7 +29,8 @@ namespace qnut {
             tempAddr.setAddress(ui.netmaskEdit->text());
             interface->setNetmask(tempAddr);
             
-            interface->setStatic(ui.staticRadio->isChecked());
+            if (ui.dynamicRadio->isChecked())
+                interface->setDynamic();
             return true;
         }
         else {
@@ -37,19 +38,6 @@ namespace qnut {
         }
     }
     
-    bool CIPConfiguration::execute(bool & isStatic, QHostAddress & ip, QHostAddress & netmask, QHostAddress & gateway) {
-        if (exec() == QDialog::Accepted) {
-            ip.setAddress(ui.ipEdit->text());
-            gateway.setAddress(ui.gatewayEdit->text());
-            netmask.setAddress(ui.netmaskEdit->text());
-            isStatic = ui.staticRadio->isChecked();
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
     CIPConfiguration::CIPConfiguration(QWidget * parent) : QDialog(parent) {
         ui.setupUi(this);
     }

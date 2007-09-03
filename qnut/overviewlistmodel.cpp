@@ -9,9 +9,9 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
+#include <QIcon>
 #include "overviewlistmodel.h"
 #include "common.h"
-#include <QIcon>
 
 namespace qnut {
     COverViewListModel::COverViewListModel(CDeviceList * deviceList, QObject * parent) : QAbstractItemModel(parent) {

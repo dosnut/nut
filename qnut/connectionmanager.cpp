@@ -1,6 +1,5 @@
 #include "connectionmanager.h"
 #include "constants.h"
-#include <iostream>
 #include <QDate>
 
 namespace qnut {
