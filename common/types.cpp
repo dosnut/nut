@@ -62,13 +62,13 @@ namespace libnut {
     
     QDBusArgument &operator<< (QDBusArgument &argument, const libnut_EnvironmentProperties &envprop) {
         argument.beginStructure();
-        argument << envprop.active << envprop.name;
+        argument << envprop.name;
         argument.endStructure();
         return argument;
     };
     const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_EnvironmentProperties &envprop) {
         argument.beginStructure();
-        argument >> envprop.active >> envprop.name;
+        argument >> envprop.name;
         return argument;
     }
     QDBusArgument &operator<< (QDBusArgument &argument, const libnut_InterfaceProperties &ifprop) {

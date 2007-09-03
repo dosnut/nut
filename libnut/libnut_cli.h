@@ -117,12 +117,8 @@ namespace libnut {
     private:
         CDeviceManager * parent;
         QDBusObjectPath dbusPath;
-<<<<<<< HEAD:libnut/libnut_cli.h
-        QDBusObjectPathList dbusEnvironmentList;
-=======
         QDBusObjectPath dbusActiveEnvironment;
         QHash<QDBusObjectPath, CEnvironment*> dbusEnvironments;
->>>>>>> 9d47a2155179bd9b06b700f0ddeaf5e2b4f3cc00:libnut/libnut_cli.h
         CLog * log;
 
 
@@ -135,14 +131,13 @@ namespace libnut {
         void environmentChangedActive(const QDBusObjectPath &newenv);
         void environmentAdded(const QDBusObjectPath &path);
         void environmentRemoved(const QDBusObjectPath &path);
-        void stateChanged(const bool &state);
+        void stateChanged(int instate);
     public:
         CEnvironmentList environments;
         
         QString name;
-        bool enabled;
+        DeviceState state;
         int type;
-        int actEnv;
         CEnvironment * activeEnvironment;
         
         CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);
@@ -160,7 +155,7 @@ namespace libnut {
         void environmentsUpdated();
         void environmentAdded(CEnvironment * environment);
         void environmentRemoved(CEnvironment * environment);
-        void enabledChanged(bool enabed);
+        void stateChanged(DeviceState state);
     };
     
     class CEnvironment : public CLibNut {
@@ -181,7 +176,7 @@ namespace libnut {
     private slots:
         void dbusinterfaceAdded(const QDBusObjectPath &path);
         void dbusinterfaceRemoved(const QDBusObjectPath &path);
-        void dbusstateChanged(const bool &state);
+        void dbusstateChanged(bool state);
     public:
         bool active;
         QString name;
@@ -233,7 +228,6 @@ namespace libnut {
         void setNetmask(QHostAddress & address); //zuvor pointer
         void setGateway(QHostAddress & address); //zuvor pointer
         void setDynamic(); // war zuvor nicht da
-        inline void setStatic(bool state) {} //wird entfernt
         
     signals:
         void activeChanged(bool active); //zuvor activeStateChanged()
