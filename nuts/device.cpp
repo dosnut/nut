@@ -55,7 +55,7 @@ namespace nuts {
 			i.next();
 			Device *d = new Device(this, i.key(), i.value());
 			devices.insert(i.key(), d);
-			d->setEnabled(true, true);
+			d->enable(true);
 		}
 	}
 	
@@ -122,14 +122,14 @@ namespace nuts {
 	}
 	
 	Device::Device(DeviceManager* dm, const QString &name, DeviceConfig *config)
-	: dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), enabled(false), dhcp_client_socket(-1) {
+	: dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_state(libnut::DS_DEACTIVATED), dhcp_client_socket(-1) {
 		int i = 0;
 		foreach(EnvironmentConfig *ec, config->environments)
 			envs.push_back(new Environment(this, ec, i++));
 	}
 	
 	Device::~Device() {
-		if (enabled) setEnabled(false);
+		disable();
 		QMutableListIterator<Environment*> i(envs);
 		while (i.hasNext()) {
 			delete i.next();
@@ -139,14 +139,20 @@ namespace nuts {
 			closeDHCPClientSocket();
 	}
 	
+	void Device::setState(libnut::DeviceState state) {
+		libnut::DeviceState ostate = m_state;
+		m_state = state;
+		emit stateChanged(m_state, ostate);
+	}
+	
 	void Device::envUp(Environment* env) {
 		if (envs[activeEnv] != env) return;
-		emit deviceUp();
+		setState(libnut::DS_UP);
 		log << "Device(" << name << ") is up!" << endl;
 	}
 	void Device::envDown(Environment* env) {
 		if (envs[activeEnv] != env) return;
-		emit deviceDown();
+		setState(libnut::DS_CARRIER);
 		log << "Device(" << name << ") is down!" << endl;
 		activeEnv = nextEnv;
 		nextEnv = -1;
@@ -158,6 +164,7 @@ namespace nuts {
 		macAddress = dm->hwman.getMacAddress(interfaceIndex);
 		log << "Device(" << name << ") gotCarrier" << endl;
 		activeEnv = 0;
+		setState(libnut::DS_CARRIER);
 		envs[activeEnv]->start();
 	}
 	void Device::lostCarrier() {
@@ -168,6 +175,7 @@ namespace nuts {
 			activeEnv = -1;
 		}
 		interfaceIndex = -1;
+		setState(libnut::DS_ACTIVATED);
 	}
 	bool Device::registerXID(quint32 xid, Interface_IPv4 *iface) {
 		if (!xid) return false;
@@ -282,42 +290,42 @@ namespace nuts {
 		return name;
 	}
 	
-	int Device::getCurrent() {
+	int Device::getEnvironment() {
 		return activeEnv;
 	}
-	void Device::setCurrent(int i) {
-		if (i < 0 || i >= envs.size()) {
-			err << QString("Device::setCurrent: environment %1 does not exist.")
-					.arg(i)
+	void Device::setEnvironment(int env) {
+		if (env < 0 || env >= envs.size()) {
+			err << QString("Device::setEnvironment: environment %1 does not exist.")
+					.arg(env)
 				<< endl;
 			return;
 		}
 		if (activeEnv == -1) {
-			activeEnv = i;
-			envs[i]->start();
+			activeEnv = env;
+			envs[env]->start();
 		} else {
 			if (nextEnv == -1)
 				envs[activeEnv]->stop();
-			nextEnv = i;
+			nextEnv = env;
 		}
 	}
 	
-	bool Device::getEnabled() {
-		return enabled;
+	void Device::enable(bool force) {
+		if (m_state == libnut::DS_DEACTIVATED) {
+			setState(libnut::DS_ACTIVATED);
+			dm->hwman.controlOn(name, force);
+		}
 	}
-	void Device::setEnabled(bool b, bool force) {
-		if (enabled != b) {
-			if ((enabled = b) == true) {
-				dm->hwman.controlOn(name, force);
-			} else {
-				nextEnv = -1;
-				if (activeEnv != -1) {
-					envs[activeEnv]->stop();
-					activeEnv = -1;
-				}
-				interfaceIndex = -1;
-				dm->hwman.controlOff(name);
+	void Device::disable() {
+		if (m_state != libnut::DS_DEACTIVATED) {
+			nextEnv = -1;
+			if (activeEnv != -1) {
+				envs[activeEnv]->stop();
+				activeEnv = -1;
 			}
+			interfaceIndex = -1;
+			dm->hwman.controlOff(name);
+			setState(libnut::DS_DEACTIVATED);
 		}
 	}
 	

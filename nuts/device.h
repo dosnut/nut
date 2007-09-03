@@ -12,6 +12,7 @@
 #include <QTimer>
 
 #include <common/macaddress.h>
+#include <common/types.h>
 
 namespace nuts {
 	class DeviceManager;
@@ -68,8 +69,11 @@ namespace nuts {
 	class Device : public QObject {
 		Q_OBJECT
 		Q_PROPERTY(QString name READ getName)
-		Q_PROPERTY(int current READ getCurrent WRITE setCurrent)
-		Q_PROPERTY(bool enabled READ getEnabled WRITE setEnabled)
+		Q_PROPERTY(int environment READ getEnvironment WRITE setEnvironment)
+		Q_PROPERTY(bool state READ getState)
+		private:
+			void setState(libnut::DeviceState state);
+			
 		protected:
 			friend class DeviceManager;
 			friend class Environment;
@@ -82,7 +86,7 @@ namespace nuts {
 			int interfaceIndex;
 			DeviceConfig *config;
 			int activeEnv, nextEnv;
-			bool enabled;
+			libnut::DeviceState m_state;
 			QList<Environment*> envs;
 			QHash< quint32, Interface_IPv4* > dhcp_xid_iface;
 			int dhcp_client_socket;
@@ -96,15 +100,20 @@ namespace nuts {
 			void gotCarrier(int ifIndex);
 			void lostCarrier();
 			
+			// DHCP
 			bool registerXID(quint32 xid, Interface_IPv4 *iface);
 			void unregisterXID(quint32 xid);
 			void sendDHCPClientPacket(DHCPPacket *packet);
 			void setupDHCPClientSocket();
 			void closeDHCPClientSocket();
 		
-		public slots:
+		private slots:
 			void readDHCPClientSocket();
 			void writeDHCPClientSocket();
+			
+		protected:
+		private slots:
+			// ARP
 			
 		protected:
 			nut::MacAddress getMacAddress();
@@ -113,23 +122,24 @@ namespace nuts {
 			Device(DeviceManager* dm, const QString &name, DeviceConfig *config);
 			virtual ~Device();
 			
+		public slots:
 			// Properties
 			QString getName();
 			
-			int getCurrent();
-			void setCurrent(int i);
+			int getEnvironment();
+			void setEnvironment(int env);
 			
-			bool getEnabled();
-			// setEnabled(true, true) forces the use of an interface, even if it is already up.
-			void setEnabled(bool b, bool force = false);
+			libnut::DeviceState getState() { return m_state; }
+			
+			// enable(true) forces the use of an interface, even if it is already up.
+			void enable(bool force = false);
+			void disable();
 			
 			const QList<Environment*>& getEnvironments() { return envs; }
 		
 		signals:
-			void deviceEnabled();
-			void deviceDisabled();
-			void deviceUp();
-			void deviceDown();
+			void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState);
+			void environmentChanged(int newEnv, int oldEnv);
 	};
 	
 	class Environment : public QObject {
