@@ -1,9 +1,9 @@
 #ifndef QNUT_COMMON_H
 #define QNUT_COMMON_H
 
-#include "constants.h"
 #include <libnut/libnut_cli.h>
 #include <QString>
+#include "constants.h"
 
 namespace qnut {
     using namespace libnut;
