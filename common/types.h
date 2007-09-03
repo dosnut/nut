@@ -43,12 +43,12 @@ namespace libnut {
     //Sollte eigtl. von Qt gemacht werden, da libnut_* als Metatyp bekannt.
     //QDBusArgument &operator<< (QDBusArgument &argument, const QList<libnut_InterfaceProperties> &selconflist);
     //const QDBusArgument &operator>> (const QDBusArgument &argument, QList<libnut_InterfaceProperties> &selconflist);
-    
-    enum libnut_DeviceType {ethernet=0, wlan=1, ppp=2};
+    enum DeviceState  { DS_DEACTIVATED, DS_ACTIVATED, DS_CARRIER, DS_UNCONFIGURED, DS_UP };
+    enum libnut_DeviceType {DT_ETH=0, DT_AIR=1, DT_PPP=2};
     struct libnut_DeviceProperties {
         QString name;
         QDBusObjectPath activeEnvironment;
-        bool enabled;
+        int state;
         int type;
     };
     
@@ -77,7 +77,6 @@ namespace libnut {
     const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_wlanNetworkProperties &wlanprop);
     
     struct libnut_EnvironmentProperties {
-        bool active;
         QString name;
     };
     

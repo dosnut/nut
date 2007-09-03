@@ -1,7 +1,5 @@
 #include "libnut_cli.h"
-<<<<<<< HEAD:libnut/libnut_cli.cpp
 #include <common/dbus.h>
-=======
 
 //things that may need to be changed:
 //-Check if dev/env/if is already in list (maybe refresh then)
@@ -9,7 +7,6 @@
 //-When refreshing: send Changesignals?
 //-wlan sach
 //-more debugging output
->>>>>>> 9d47a2155179bd9b06b700f0ddeaf5e2b4f3cc00:libnut/libnut_cli.cpp
 namespace libnut {
 ////////////////
 //CLog
@@ -236,28 +233,27 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
     if (replyProp.isValid()) {
         name = replyProp.value().name;
         type = replyProp.value().type;
-        enabled = replyProp.value().enabled;
-        actEnv = replyProp.value().activeEnvironment;
-        activeEnvironment = actEnv >= 0 ? environments[actEnv] : 0;
+        state = (DeviceState) replyProp.value().state;
+        dbusActiveEnvironment = replyProp.value().activeEnvironment;
+        activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment);
+        emit(environmentChangedActive(activeEnvironment, 0));
         *log << (tr("Device properties fetched:"));
         *log << (tr("Name: ") + QString(name));
         *log << (tr("Type: ") + QString(type));
-        *log << (tr("State: ") + QString(enabled));
-        *log << (tr("Active Environement: ") + actEnv);
+        *log << (tr("State: ") + QString(state));
+        *log << (tr("Active Environement: ") + dbusActiveEnvironment.path());
     }
     else {
         throw CLI_DevConnectionException(tr("Error while retrieving dbus' device information"));
     }
     //get Environment list
     //set activeEnv to NULL
-    activeEnvironment = 0;
     QDBusReply<QList<QDBusObjectPath> > replyEnv = dbusDevice->getEnvironments();
     if (!replyEnv.isValid()) {
         throw CLI_DevConnectionException(tr("Error while trying to get environment list"));
     }
     //poppulate own Environmentlist
     CEnvironment * env;
-    CEnvironment * activeenv;
     foreach(QDBusObjectPath i, replyEnv.value()) {
         *log << (tr("Adding Environment at: ") + i.path());
         try {
@@ -269,21 +265,10 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
         }
         dbusEnvironments.insert(i,env);
         environments.append(env);
-        //set active Environment
-        if (env->active) {
-            activeenv = activeEnvironment;
-            activeEnvironment = env;
-            emit(environmentChangedActive(env, activeenv));
-        }
         //Maybe we need to send signal environmentsUpdated?
         emit(environmentsUpdated());
     }
     //connect signals to slots
-<<<<<<< HEAD:libnut/libnut_cli.cpp
-    connect(dbusDevice, SIGNAL(environmentChangedActive(const QDBusObjectPath &)),
-            this, SIGNAL(environmentChangedActive(const QDBusObjectPath &)));
-    //MISSING!!!: env added, env removed, state changed with change!!!!
-=======
     connect(dbusDevice, SIGNAL(environmentChangedActive(const QDBusObjectPath &newenv)),
             this, SLOT(environmentChangedActive(const QDBusObjectPath &newenv)));
 
@@ -293,11 +278,8 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
     connect(dbusDevice, SIGNAL(environmentAdded(const QDBusObjectPath &path)),
             this, SLOT(environmentAdded(const QDBusObjectPath &path)));
 
-    connect(dbusDevice, SIGNAL(stateChanged(const bool &state)),
-            this, SLOT(stateChanged(const bool &state)));
-    //connect(this,SLOT(enable()),dbusDevice,SLOT(enable()));
-    //connect(this,SLOT(disable()),dbusDevice,SLOT(disable()));
->>>>>>> 9d47a2155179bd9b06b700f0ddeaf5e2b4f3cc00:libnut/libnut_cli.cpp
+    connect(dbusDevice, SIGNAL(stateChanged(int state)),
+            this, SLOT(stateChanged(int instate)));
 }
 CDevice::~CDevice() {
     CEnvironment * env;
@@ -341,13 +323,8 @@ void CDevice::refreshAll() {
     QDBusReply<libnut_DeviceProperties> replyprop = dbusDevice->getProperties();
     if (replyprop.isValid()) {
         dbusActiveEnvironment = replyprop.value().activeEnvironment;
-        enabled = replyprop.value().enabled;
+        state = (DeviceState) replyprop.value().state;
         type = replyprop.value().type;
-<<<<<<< HEAD:libnut/libnut_cli.cpp
-        //find active Environment:
-        actEnv = replyprop.value().activeEnvironment;
-        activeEnvironment = actEnv >= 0 ? environments[actEnv] : 0;
-=======
         name = replyprop.value().name;
         activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment);
     }
@@ -376,7 +353,6 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
         }
         dbusEnvironments.insert(i,env);
         environments.append(env);
->>>>>>> 9d47a2155179bd9b06b700f0ddeaf5e2b4f3cc00:libnut/libnut_cli.cpp
     }
 }
 
@@ -417,9 +393,9 @@ void CDevice::environmentRemoved(const QDBusObjectPath &path) {
         *log << tr("Tried to remove non-existing environment");
     }
 }
-void CDevice::stateChanged(const bool &state) {
-    enabled = state;
-    emit(enabledChanged(state));
+void CDevice::stateChanged(int instate) {
+    state = (DeviceState) instate;
+    emit(stateChanged(state));
 }
 
 
@@ -435,7 +411,6 @@ void CDevice::setEnvironment(CEnvironment * environment) {
 }
 void CDevice::addEnvironment(QString name) {
     libnut_EnvironmentProperties props;
-    props.active = false;
     props.name = name;
     dbusDevice->addEnvironment(props);
 }
@@ -458,7 +433,6 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
     //Retrieve dbus information:
     QDBusReply<libnut_EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
     if (replyprop.isValid()) {
-        active = replyprop.value().active;
         name = replyprop.value().name;
     }
     else {
@@ -491,7 +465,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
     }
     connect(dbusEnvironment, SIGNAL(interfaceAdded(const QDBusObjectPath &path)), this, SLOT(dbusinterfaceAdded(const QDBusObjectPath &path)));
     connect(dbusEnvironment, SIGNAL(interfaceRemoved(const QDBusObjectPath &path)), this, SLOT(dbusinterfaceRemoved(const QDBusObjectPath &path)));
-    connect(dbusEnvironment, SIGNAL(stateChanged(const bool &state)), this, SLOT(dbusstateChanged(const bool &state)));
+    connect(dbusEnvironment, SIGNAL(stateChanged(bool state)), this, SLOT(dbusstateChanged(bool state)));
 }
 CEnvironment::~CEnvironment() {
     CInterface * interface;
@@ -509,7 +483,6 @@ void CEnvironment::refreshAll() {
     //Retrieve properties and select config, then interfaces:
     QDBusReply<libnut_EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
     if (replyprop.isValid()) {
-        active = replyprop.value().active;
         name = replyprop.value().name;
     }
     else {
@@ -606,7 +579,7 @@ void CEnvironment::dbusinterfaceRemoved(const QDBusObjectPath &path) {
         *log << tr("Tried to remove non-existing interface");
     }
 }
-void CEnvironment::dbusstateChanged(const bool &state) {
+void CEnvironment::dbusstateChanged(bool state) {
     active = state;
     emit(activeChanged(state));
 }
