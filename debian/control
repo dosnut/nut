@@ -16,7 +16,7 @@ Description: Network UTility (substitute for ifupdown)
 
 Package: qnut
 Architecture: any
-Depends: ${shlibs:Depends}, libnut0 (= ${binary:Version})
+Depends: ${shlibs:Depends}
 Description: Network UTility (substitute for ifupdown)
  Manages your network cards; the server has an DBus Interface,
  which the clients use to control the server.
