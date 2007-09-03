@@ -47,7 +47,7 @@ namespace libnut {
     enum libnut_DeviceType {DT_ETH=0, DT_AIR=1, DT_PPP=2};
     struct libnut_DeviceProperties {
         QString name;
-        QDBusObjectPath activeEnvironment;
+        QString activeEnvironment;
         int state;
         int type;
     };
