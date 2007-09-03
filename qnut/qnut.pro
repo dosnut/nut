@@ -32,13 +32,13 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
 RESOURCES += res/qnut.qrc
 DESTDIR = .
 
-INCLUDEPATH += ..
 
-LIBS += ../common/libnutcommon.a \
--L../libnut \
--lnut
-TARGETDEPS += ../common/libnutcommon.a \
-../libnut/libnut.so
 
 target.path = /usr/bin/
 INSTALLS += target
+INCLUDEPATH += ..
+
+LIBS += ../common/libnutcommon.a \
+../libnut/libnut.a
+TARGETDEPS += ../common/libnutcommon.a \
+../libnut/libnut.a
