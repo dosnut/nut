@@ -50,23 +50,6 @@ namespace libnut {
     signals:
         void printed(const QString & line);
     };
-    class QDBusObjectPathList : public QList<QDBusObjectPath> {
-        public:
-            int removeAll(const QDBusObjectPath &path);
-            /*bool operator!= ( const QList<QDBusObjectPath> & other ) const;
-            QList<QDBusObjectPath> operator+ ( const QList<QDBusObjectPath> & other ) const;
-            QList<QDBusObjectPath> & operator+= ( const QList<QDBusObjectPath> & other );
-            QList<QDBusObjectPath> & operator+= ( const QDBusObjectPath & value );
-            QList<QDBusObjectPath> & operator<< ( const QList<QDBusObjectPath> & other );
-            QList<QDBusObjectPath> & operator<< ( const QDBusObjectPath & value );
-            */
-            QDBusObjectPathList & operator= ( const QDBusObjectPathList & other );
-            QDBusObjectPathList & operator= ( const QList<QDBusObjectPath> & other );
-            /*bool operator== ( const QList<QDBusObjectPath> & other ) const;
-            QDBusObjectPath & operator[] ( int i );
-            const QDBusObjectPath & operator[] ( int i ) const;
-            */
-    };
 
     class CLibNut : public QObject {
         Q_OBJECT

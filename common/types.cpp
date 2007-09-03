@@ -23,13 +23,13 @@ namespace libnut {
     
     QDBusArgument &operator<< (QDBusArgument &argument, const libnut_DeviceProperties & devprop) {
         argument.beginStructure();
-        argument << devprop.name << devprop.activeEnvironment << devprop.enabled << devprop.type;
+        argument << devprop.name << devprop.activeEnvironment << devprop.state << devprop.type;
         argument.endStructure();
         return argument;
     }
     const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_DeviceProperties &devprop) {
         argument.beginStructure();
-        argument >> devprop.name >> devprop.activeEnvironment >> devprop.enabled >> devprop.type;
+        argument >> devprop.name >> devprop.activeEnvironment >> devprop.state >> devprop.type;
         argument.endStructure();
         return argument;
     }
