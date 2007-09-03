@@ -80,7 +80,14 @@ namespace qnut {
                 case 0:
                     return data->name;
                 case 1:
-                    return data->enabled ? tr("enabled") : tr("disabled");
+                    switch (data->state) {
+                        case DS_UP:             return tr("up");
+                        case DS_UNCONFIGURED:   return tr("unconfigured");
+                        case DS_CARRIER:        return tr("got carrier");
+                        case DS_ACTIVATED:      return tr("activated");
+                        case DS_DEACTIVATED:    return tr("deactivated");
+                        default:                break;
+                    }
                 case 2:
                     switch (data->type) {
                         case DT_ETH: return tr("Ethernet");

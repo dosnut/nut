@@ -174,8 +174,8 @@ namespace qnut {
             connect(enableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(enable()));
             connect(disableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(disable()));
             
-            enableDeviceAction->setDisabled(selectedDevice->enabled);
-            disableDeviceAction->setEnabled(selectedDevice->enabled);
+            enableDeviceAction->setDisabled(selectedDevice->state == DS_UP);
+            disableDeviceAction->setEnabled(selectedDevice->state == DS_UP);
         }
         else {
             enableDeviceAction->setEnabled(false);
