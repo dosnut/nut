@@ -9,6 +9,17 @@
 
 #include "macaddress.h"
 
+
+//Functions that need to be defined outside of own namespace:
+
+//This function is needed as QDBusObjectPath does not define any comparison operator (QString is inherited private)
+inline bool operator== (const QDBusObjectPath &p1, const QDBusObjectPath &p2){
+    return (p1.path() == p2.path());
+}
+inline uint qHash(const QDBusObjectPath &key) {
+    return qHash(key.path());
+}
+
 namespace common {
 	void init();
 }
@@ -36,7 +47,7 @@ namespace libnut {
     enum libnut_DeviceType {ethernet=0, wlan=1, ppp=2};
     struct libnut_DeviceProperties {
         QString name;
-        int activeEnvironment;
+        QDBusObjectPath activeEnvironment;
         bool enabled;
         int type;
     };

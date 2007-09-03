@@ -2,3 +2,9 @@ build
 Makefile
 libnut.so*
 libnut.prl
+<<<<<<< HEAD:libnut/.gitignore
+=======
+libnut_server_adaptor.cpp
+libnut_server_adaptor.h
+libnut_server.h
+>>>>>>> 9d47a2155179bd9b06b700f0ddeaf5e2b4f3cc00:libnut/.gitignore
