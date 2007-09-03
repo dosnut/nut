@@ -1,6 +1,6 @@
 
 TEMPLATE = lib
-CONFIG += dll create_prl
+CONFIG += static create_prl
 TARGET = nut
 VERSION = 0.1.0
 
