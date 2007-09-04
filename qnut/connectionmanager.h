@@ -43,6 +43,7 @@ namespace qnut {
         void uiShowOverViewPopup(const QPoint & pos);
         void uiShowMessage(QString title, QString message);
         void uiShowAbout();
+        void uiHandleDeviceStateChanged(DeviceState state);
     };
 };
 

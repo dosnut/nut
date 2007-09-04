@@ -41,16 +41,18 @@ namespace qnut {
         
         QAction * showAction;
         
+        void updateDeviceIcons();
+        
         CDeviceOptions(CDevice * parentDevice, QTabWidget * parentTabWidget, QWidget * parent = 0);
         ~CDeviceOptions();
         
     public slots:
         void uiShowThisTab();
-        void uiUpdateDeviceIcons();
         void uiSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
         void uiShowPopup(const QPoint & pos);
         void uiHandleEnvironmentChange(CEnvironment * current, CEnvironment * previous);
         void uiChangeIPConfiguration();
+        void uiHandleStateChange(DeviceState state);
         
     signals:
         void showMessage(QString title, QString message);
