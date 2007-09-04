@@ -617,6 +617,7 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	dbusConnection = parent->dbusConnection;
 	dbusConnectionInterface = parent->dbusConnectionInterface;
 	dbusInterface = new DBusInterfaceInterface_IPv4(NUT_DBUS_URL, dbusPath.path(), *dbusConnection, this);
+	//dbusInterface = new DBusInterfaceInterface(NUT_DBUS_URL, dbusPath.path(), *dbusConnection, this);
 	serviceCheck(dbusConnectionInterface);
 	//Get properties:
 	QDBusReply<InterfaceProperties> replyprops = dbusInterface->getProperties();
