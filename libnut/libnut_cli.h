@@ -114,7 +114,7 @@ namespace libnut {
 		void environmentChangedActive(const QDBusObjectPath &newenv);
 		void environmentAdded(const QDBusObjectPath &path);
 		void environmentRemoved(const QDBusObjectPath &path);
-		void dbusstateChanged(DeviceState newstate, DeviceState oldstate);
+		void dbusstateChanged(int newState, int oldState);
 	public:
 		CEnvironmentList environments;
 		

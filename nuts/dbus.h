@@ -50,7 +50,12 @@ namespace nuts {
 			QDBusConnection *m_connection;
 			QList<DBusEnvironment*> m_envs;
 			QString m_dbusPath;
-			libnut::libnut_DeviceProperties m_properties;
+			libnut::DeviceProperties m_properties;
+		
+		private slots:
+			inline void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState) {
+				emit(stateChanged((int) newState, (int) oldState));
+			}
 		
 		public:
 			DBusDevice(Device *dev, QDBusConnection *connection, const QString &path);
@@ -59,14 +64,14 @@ namespace nuts {
 			QString getPath();
 	
 		public slots:
-			libnut::libnut_DeviceProperties getProperties();
-			QList<libnut::libnut_wlanScanresult> getwlanScan();
+			libnut::DeviceProperties getProperties();
+			QList<libnut::WlanScanresult> getwlanScan();
 			QList<QDBusObjectPath> getEnvironments();
 			void enable();
 			void disable();
 		
 		signals:
-			void stateChanged(libnut::DeviceState newstate, libnut::DeviceState oldstate);
+			void stateChanged(int newState, int oldState);
 			void environmentChangedActive(const QDBusObjectPath &objectpath);
 			
 	};
@@ -79,7 +84,7 @@ namespace nuts {
 			QDBusConnection *m_connection;
 			QList<QObject*> m_ifaces;
 			QString m_dbusPath;
-			libnut::libnut_EnvironmentProperties m_properties;
+			libnut::EnvironmentProperties m_properties;
 		
 		public:
 			DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path);
@@ -88,8 +93,8 @@ namespace nuts {
 			QString getPath();
 	
 		public slots:
-//			QList<libnut::libnut_SelectConfig> getSelectConfig();
-			libnut::libnut_EnvironmentProperties getProperties();
+//			QList<libnut::SelectConfig> getSelectConfig();
+			libnut::EnvironmentProperties getProperties();
 			
 			QList<QDBusObjectPath> getInterfaces();
 		signals:
@@ -102,7 +107,7 @@ namespace nuts {
 			Interface_IPv4 *m_iface;
 			QDBusConnection *m_connection;
 			QString m_dbusPath;
-			libnut::libnut_InterfaceProperties m_properties;
+			libnut::InterfaceProperties m_properties;
 		
 		public:
 			DBusInterface_IPv4(Interface_IPv4 *iface, QDBusConnection *connection, const QString &path);
@@ -111,7 +116,7 @@ namespace nuts {
 			QString getPath();
 		
 		public slots:
-			libnut::libnut_InterfaceProperties getProperties();
+			libnut::InterfaceProperties getProperties();
 			void setIP(quint32 HostAddress);
 			void setNetmask(quint32 Netmask);
 			void setGateway(quint32 Gateway);

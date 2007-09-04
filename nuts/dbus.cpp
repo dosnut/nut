@@ -72,6 +72,7 @@ namespace nuts {
 			DBusEnvironment *denv = new DBusEnvironment(env, m_connection, m_dbusPath);
 			m_envs.append(denv);
 		}
+		connect(m_dev,SIGNAL(stateChanged(libnut::DeviceState , libnut::DeviceState )),this,SLOT(stateChanged(libnut::DeviceState, libnut::DeviceState)));
 		setAutoRelaySignals(true);
 	}
 	
@@ -82,12 +83,12 @@ namespace nuts {
 		return m_dbusPath;
 	}
 
-	libnut::libnut_DeviceProperties DBusDevice::getProperties() {
+	libnut::DeviceProperties DBusDevice::getProperties() {
 		return m_properties;
 	}
 	
-	QList<libnut::libnut_wlanScanresult> DBusDevice::getwlanScan() {
-		return QList<libnut::libnut_wlanScanresult>();
+	QList<libnut::WlanScanresult> DBusDevice::getwlanScan() {
+		return QList<libnut::WlanScanresult>();
 	}
 	
 	QList<QDBusObjectPath> DBusDevice::getEnvironments() {
@@ -126,7 +127,7 @@ namespace nuts {
 		return m_dbusPath;
 	}
 	
-	libnut::libnut_EnvironmentProperties DBusEnvironment::getProperties() {
+	libnut::EnvironmentProperties DBusEnvironment::getProperties() {
 		return m_properties;
 	}
 	
@@ -153,7 +154,7 @@ namespace nuts {
 		return m_dbusPath;
 	}
 
-	libnut::libnut_InterfaceProperties DBusInterface_IPv4::getProperties() {
+	libnut::InterfaceProperties DBusInterface_IPv4::getProperties() {
 		return m_properties;
 	}
 	void DBusInterface_IPv4::setIP(quint32 HostAddress) {

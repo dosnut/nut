@@ -248,17 +248,17 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		emit(environmentsUpdated());
 	}
 	//connect signals to slots
-	connect(dbusDevice, SIGNAL(environmentChangedActive(const QDBusObjectPath &newenv)),
-			this, SLOT(environmentChangedActive(const QDBusObjectPath &newenv)));
+	connect(dbusDevice, SIGNAL(environmentChangedActive(const QDBusObjectPath &)),
+			this, SLOT(environmentChangedActive(const QDBusObjectPath &)));
 
-	connect(dbusDevice, SIGNAL(environmentRemoved(const QDBusObjectPath &path)),
-			this, SLOT(environmentRemoved(const QDBusObjectPath &path)));
+	connect(dbusDevice, SIGNAL(environmentRemoved(const QDBusObjectPath &)),
+			this, SLOT(environmentRemoved(const QDBusObjectPath &)));
 
-	connect(dbusDevice, SIGNAL(environmentAdded(const QDBusObjectPath &path)),
-			this, SLOT(environmentAdded(const QDBusObjectPath &path)));
+	connect(dbusDevice, SIGNAL(environmentAdded(const QDBusObjectPath &)),
+			this, SLOT(environmentAdded(const QDBusObjectPath &)));
 
-	connect(dbusDevice, SIGNAL(stateChanged(DeviceState newstate, DeviceState oldtstate)),
-			this, SLOT(dbusstateChanged(DeviceState newstate, DeviceState oldstate)));
+	connect(dbusDevice, SIGNAL(stateChanged(DeviceState , DeviceState )),
+			this, SLOT(dbusstateChanged(DeviceState , DeviceState )));
 }
 CDevice::~CDevice() {
 	CEnvironment * env;
@@ -375,8 +375,8 @@ void CDevice::environmentRemoved(const QDBusObjectPath &path) {
 		*log << tr("Tried to remove non-existing environment");
 	}
 }
-void CDevice::dbusstateChanged(DeviceState newstate, DeviceState oldstate) {
-	state = newstate;
+void CDevice::dbusstateChanged(int newState, int oldState) {
+	state = (DeviceState) newState;
 	emit(stateChanged(state));
 }
 
@@ -445,9 +445,9 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	else {
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment's interfaces"));
 	}
-	connect(dbusEnvironment, SIGNAL(interfaceAdded(const QDBusObjectPath &path)), this, SLOT(dbusinterfaceAdded(const QDBusObjectPath &path)));
-	connect(dbusEnvironment, SIGNAL(interfaceRemoved(const QDBusObjectPath &path)), this, SLOT(dbusinterfaceRemoved(const QDBusObjectPath &path)));
-	connect(dbusEnvironment, SIGNAL(stateChanged(bool state)), this, SLOT(dbusstateChanged(bool state)));
+	connect(dbusEnvironment, SIGNAL(interfaceAdded(const QDBusObjectPath &)), this, SLOT(dbusinterfaceAdded(const QDBusObjectPath &)));
+	connect(dbusEnvironment, SIGNAL(interfaceRemoved(const QDBusObjectPath &)), this, SLOT(dbusinterfaceRemoved(const QDBusObjectPath &)));
+	connect(dbusEnvironment, SIGNAL(stateChanged(bool )), this, SLOT(dbusstateChanged(bool )));
 }
 CEnvironment::~CEnvironment() {
 	CInterface * interface;
@@ -625,7 +625,7 @@ void CInterface::refreshAll() {
 	else {
 		*log << (tr("Error while refreshing interface at: ") + dbusPath.path());
 	}
-	connect(dbusInterface, SIGNAL(stateChanged(const InterfaceProperties &properties)), this, SLOT(dbusstateChanged(const InterfaceProperties &properties)));
+	connect(dbusInterface, SIGNAL(stateChanged(const InterfaceProperties &)), this, SLOT(dbusstateChanged(const InterfaceProperties &)));
 }
 //CInterface private slots
 void CInterface::dbusstateChanged(const InterfaceProperties &properties) {

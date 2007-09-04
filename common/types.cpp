@@ -20,27 +20,6 @@ namespace libnut {
 		argument.endStructure();
 		return argument;
 	}
-	
-	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceState &devstate) {
-		argument << (int) devstate;
-		return argument;
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceState &devstate) {
-		int state;
-		argument >> state;
-		devstate = (DeviceState) state;
-		return argument;
-	}
-	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceType &devtype) {
-		argument << (int) devtype;
-		return argument;
-	}
-    const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceType &devtype) {
-		int type;
-		argument >> type;
-		devtype = (DeviceType) type;
-		return argument;
-    }
 
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceProperties & devprop) {
 		argument.beginStructure();
@@ -58,27 +37,18 @@ namespace libnut {
 		argument.endStructure();
 		return argument;
 	}
-
-	QDBusArgument &operator<< (QDBusArgument &argument, const WlanEncryptionType &enctype) {
-		argument << (int) enctype;
-		return argument;
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanEncryptionType &enctype) {
-		int type;
-		argument >> type;
-		enctype = (WlanEncryptionType) type;
-		return argument;
-	}
 	
 	QDBusArgument &operator<< (QDBusArgument &argument, const WlanScanresult &scanres) {
 		argument.beginStructure();
-		argument << scanres.essid << scanres.channel << scanres.bssid << scanres.flags << scanres.signallevel << scanres.encryption;
+		argument << scanres.essid << scanres.channel << scanres.bssid << scanres.flags << scanres.signallevel << (int) scanres.encryption;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanScanresult &scanres) {
+		int tmp;
 		argument.beginStructure();
-		argument >> scanres.essid >> scanres.channel >> scanres.bssid >> scanres.flags >> scanres.signallevel >> scanres.encryption;
+		argument >> scanres.essid >> scanres.channel >> scanres.bssid >> scanres.flags >> scanres.signallevel >> tmp;
+		scanres.encryption = (WlanEncryptionType) tmp;
 		argument.endStructure();
 		return argument;
 	}

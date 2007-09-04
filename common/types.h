@@ -52,12 +52,6 @@ namespace libnut {
 		DeviceType type;
 	};
 	
-// 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceState &devstate);
-// 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceState &devstate);
-
-// 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceType &devtype);
-// 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceState &devtype);
-
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceProperties &devprop);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceProperties &devprop);
 	
@@ -71,8 +65,6 @@ namespace libnut {
 		WlanEncryptionType encryption;
 	};
 
-// 	QDBusArgument &operator<< (QDBusArgument &argument, const WlanEncryptionType &enctype);
-// 	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanEncryptionType &enctype);
 
 	QDBusArgument &operator<< (QDBusArgument &argument, const WlanScanresult &scanres);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanScanresult &scanres);
