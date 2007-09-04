@@ -143,7 +143,7 @@ namespace qnut {
     }
     
     void CConnectionManager::uiRemovedDevice(CDevice * dev) {
-/*        disconnect(dev, SIGNAL(stateChanged(bool)), &overView, SLOT(repaint())); //nicht nötig?
+        disconnect(dev, SIGNAL(stateChanged(bool)), &overView, SLOT(repaint())); //nicht nötig?
         CDeviceOptions * target = deviceOptions[dev];
         
         tabWidget.removeTab(tabWidget.indexOf(target));
@@ -152,7 +152,7 @@ namespace qnut {
         trayicon.devicesMenu.removeAction(target->deviceMenu->menuAction());
         trayicon.devicesMenu.setDisabled(deviceManager.devices.isEmpty());
         deviceOptions.remove(dev);
-        delete target;*/
+        delete target;
     }
     
     void CConnectionManager::uiCurrentTabChanged(int index) {
