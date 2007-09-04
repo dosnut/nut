@@ -20,12 +20,20 @@ inline bool operator== (const QDBusObjectPath &p1, const QDBusObjectPath &p2){
 inline uint qHash(const QDBusObjectPath &key) {
 	return qHash(key.path());
 }
+//QT need them
+// QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress & adr);
+// const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &adr);
 
 namespace common {
 	void init();
 }
 
 namespace libnut {
+
+
+
+// 	QDBusArgument &operator<< (QDBusArgument &argument, const QList<QHostAddress> & adr);
+// 	const QDBusArgument &operator>> (const QDBusArgument &argument, QList<QHostAddress> &adr);
 
 	enum SelectFlags {SF_USER=0, SF_ARP=1, SF_ESSID=2};
 	struct SelectConfig {
@@ -95,12 +103,14 @@ namespace libnut {
 		QHostAddress ip;
 		QHostAddress netmask;
 		QHostAddress gateway;
+		QHostAddress dns;
 	};
 	
 	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceProperties &ifprop);
 };
-
+// Q_DECLARE_METATYPE(QHostAddress)
+// Q_DECLARE_METATYPE(QList<QHostAddress>)
 Q_DECLARE_METATYPE(libnut::SelectConfig)
 Q_DECLARE_METATYPE(QList<libnut::SelectConfig>)
 Q_DECLARE_METATYPE(libnut::DeviceProperties)

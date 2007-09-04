@@ -1,16 +1,25 @@
 #include "types.h"
 
+// QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress &adr) {
+// 	argument << adr.toString();
+// 	return argument;
+// }
+// const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &adr) {
+// 	argument >> adr;
+// 	return argument;
+// }
+
 namespace libnut {
 	QDBusArgument &operator<< (QDBusArgument &argument, const SelectConfig & selconf) {
 		argument.beginStructure();
-		argument << selconf.selected << selconf.flags << selconf.useMac << selconf.macAddress.toString() << selconf.arpIP.toIPv4Address() << selconf.essid;
+		argument << selconf.selected << selconf.flags << selconf.useMac << selconf.macAddress.toString() << selconf.arpIP.toString() << selconf.essid;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectConfig &selconf) {
 		argument.beginStructure();
 		QString mac;
-		quint32 ip;
+		QString ip;
 		argument >> selconf.selected >> selconf.flags >> selconf.useMac;
 		argument >> mac;
 		selconf.macAddress = nut::MacAddress(mac);
@@ -80,20 +89,22 @@ namespace libnut {
 	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop) {
 		argument.beginStructure();
 		argument << ifprop.active << ifprop.userDefineable << ifprop.isStatic;
-		argument << ifprop.ip.toIPv4Address() << ifprop.netmask.toIPv4Address() << ifprop.gateway.toIPv4Address();
+		argument << ifprop.ip.toString() << ifprop.netmask.toString() << ifprop.gateway.toString() << ifprop.dns.toString();
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceProperties &ifprop) {
-		quint32 hostaddress;
 		argument.beginStructure();
+		QString ip;
 		argument >> ifprop.active >> ifprop.userDefineable >> ifprop.isStatic;
-		argument >> hostaddress;
-		ifprop.ip = QHostAddress::QHostAddress(hostaddress);
-		argument >> hostaddress;
-		ifprop.netmask = QHostAddress::QHostAddress(hostaddress);
-		argument >> hostaddress;
-		ifprop.gateway = QHostAddress::QHostAddress(hostaddress);
+		argument >> ip;
+		ifprop.ip = QHostAddress(ip);
+		argument >> ip;
+		ifprop.netmask = QHostAddress(ip);
+		argument >> ip;
+		ifprop.gateway = QHostAddress(ip);
+		argument >> ip;
+		ifprop.dns = QHostAddress(ip);
 		argument.endStructure();
 		return argument;
 	}
@@ -102,26 +113,26 @@ namespace libnut {
 		static int done = 0;
 		if (done) return;
 		done = 1;
+// 		qRegisterMetaType<QHostAddress>("QHostAddress");
+// 		qRegisterMetaType<QList<QHostAddress> >("QHostAddressList");
 		qRegisterMetaType<DeviceProperties>("DeviceProperties");
 		qRegisterMetaType<SelectConfig>("SelectConfig");
 		qRegisterMetaType<QList<SelectConfig> >("SelectConfigList");
 		qRegisterMetaType<EnvironmentProperties>("EnvironmentProperties");
 		qRegisterMetaType<InterfaceProperties>("InterfaceProperties");
-//		qRegisterMetaType<QList<SelectConfig> >("SelectConfigList");
 		qRegisterMetaType<WlanScanresult>("WlanScanresult");
 		qRegisterMetaType<QList<libnut::WlanScanresult> >("WlanScanresultList");
-//		qRegisterMetaType<QList<WlanScanresult> >("WlanScanresultList");
 		qRegisterMetaType<WlanNetworkProperties>("WlanNetworkProperties");
-	
+		
+// 		qDBusRegisterMetaType<QHostAddress>();
+// 		qDBusRegisterMetaType<QList<QHostAddress> >();
 		qDBusRegisterMetaType<DeviceProperties>();
 		qDBusRegisterMetaType<SelectConfig>();
 		qDBusRegisterMetaType<QList<SelectConfig> >();
 		qDBusRegisterMetaType<EnvironmentProperties>();
 		qDBusRegisterMetaType<InterfaceProperties>();
-//		qDBusRegisterMetaType<QList<SelectConfig> >();
 		qDBusRegisterMetaType<WlanScanresult>();
 		qDBusRegisterMetaType<QList<libnut::WlanScanresult> >();
-//		qDBusRegisterMetaType<QList<WlanScanresult> >();
 		qDBusRegisterMetaType<WlanNetworkProperties>();
 	}
 }

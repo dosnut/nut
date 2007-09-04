@@ -4,6 +4,7 @@
 #include <QDBusConnection>
 #include <QDBusAbstractAdaptor>
 #include <QDBusObjectPath>
+#include <QHostAddress>
 
 #include <common/types.h>
 #include <common/dbus.h>
@@ -73,7 +74,8 @@ namespace nuts {
 		signals:
 			void stateChanged(int newState, int oldState);
 			void environmentChangedActive(const QDBusObjectPath &objectpath);
-			
+			void environmentRemoved(const QDBusObjectPath &objectpath);
+			void environmentAdded(const QDBusObjectPath &objectpath);
 	};
 	
 	class DBusEnvironment: public QDBusAbstractAdaptor {
@@ -119,7 +121,10 @@ namespace nuts {
 			void setIP(quint32 HostAddress);
 			void setNetmask(quint32 Netmask);
 			void setGateway(quint32 Gateway);
+// 			void setDNS(QList<QHostAddress> dns);
+			void setDynamic();
 		signals:
+			void stateChanged(const libnut::InterfaceProperties &properties);
 	};
 
 }

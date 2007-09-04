@@ -167,6 +167,13 @@ namespace nuts {
 	}
 
 	libnut::InterfaceProperties DBusInterface_IPv4::getProperties() {
+		m_properties.active = true;
+		m_properties.ip = m_iface->ip;
+		m_properties.gateway = m_iface->gateway;
+		m_properties.netmask = m_iface->netmask;
+		m_properties.userDefineable = false;
+		m_properties.isStatic = false;
+		//m_properties.dns = m_iface->dnsserver.first();
 		return m_properties;
 	}
 	void DBusInterface_IPv4::setIP(quint32 HostAddress) {
@@ -174,5 +181,9 @@ namespace nuts {
 	void DBusInterface_IPv4::setNetmask(quint32 Netmask) {
 	}
 	void DBusInterface_IPv4::setGateway(quint32 Gateway) {
+	}
+// 	void DBusInterface_IPv4::setDNS(QList<QHostAddress> dns) {
+// 	}
+	void DBusInterface_IPv4::setDynamic() {
 	}
 }
