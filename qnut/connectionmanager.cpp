@@ -1,6 +1,7 @@
 #include <QDate>
 #include "connectionmanager.h"
 #include "constants.h"
+#include <iostream>
 
 namespace qnut {
     CConnectionManager::CConnectionManager(QWidget * parent) :
@@ -23,6 +24,9 @@ namespace qnut {
         logFile << QDateTime::currentDateTime().toString();
         
         createActions();
+        
+        connect(&deviceManager, SIGNAL(deviceAdded(CDevice *)), this, SLOT(uiAddedDevice(CDevice *)));
+        connect(&deviceManager, SIGNAL(deviceRemoved(CDevice *)), this, SLOT(uiRemovedDevice(CDevice *)));
         
         try {
             deviceManager.init(&logFile);
@@ -48,8 +52,6 @@ namespace qnut {
         connect(ui.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(uiCurrentTabChanged(int)));
         connect(ui.overViewList, SIGNAL(customContextMenuRequested(const QPoint)), this, SLOT(uiShowOverViewPopup(const QPoint)));
         connect(&trayicon, SIGNAL(messageClicked()), this, SLOT(show()));
-        connect(&deviceManager, SIGNAL(deviceAdded(CDevice *)), this, SLOT(uiAddedDevice(CDevice *)));
-        connect(&deviceManager, SIGNAL(deviceRemoved(CDevice *)), this, SLOT(uiRemovedDevice(CDevice *)));
         
         trayicon.show();
     }
@@ -107,7 +109,8 @@ namespace qnut {
     void CConnectionManager::uiAddedDevice(CDevice * dev) {
         CDeviceOptions * newDeviceOptions = new CDeviceOptions(dev, ui.tabWidget);
         
-        ui.tabWidget->insertTab(ui.tabWidget->count(), newDeviceOptions, dev->name);
+        //ui.tabWidget->addTab(newDeviceOptions, dev->name);
+        ui.tabWidget->insertTab(ui.tabWidget->count()-1, newDeviceOptions, dev->name);
         newDeviceOptions->updateDeviceIcons();
         
         deviceOptions.insert(dev, newDeviceOptions);
