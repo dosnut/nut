@@ -52,6 +52,9 @@ namespace libnut {
         int type;
     };
     
+    QDBusArgument &operator<< (QDBusArgument &argument, const DeviceState &devstate);
+    const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceState &devstate);
+
     QDBusArgument &operator<< (QDBusArgument &argument, const libnut_DeviceProperties &devprop);
     const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_DeviceProperties &devprop);
     
@@ -99,6 +102,7 @@ namespace libnut {
 Q_DECLARE_METATYPE(libnut::libnut_SelectConfig)
 Q_DECLARE_METATYPE(QList<libnut::libnut_SelectConfig>)
 Q_DECLARE_METATYPE(libnut::libnut_DeviceProperties)
+Q_DECLARE_METATYPE(libnut::DeviceState)
 Q_DECLARE_METATYPE(libnut::libnut_wlanScanresult)
 Q_DECLARE_METATYPE(QList<libnut::libnut_wlanScanresult>)
 Q_DECLARE_METATYPE(libnut::libnut_wlanNetworkProperties)
