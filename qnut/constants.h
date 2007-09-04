@@ -2,7 +2,7 @@
 #define QNUT_CONSTANTS_H
 
 //Clientversionsschlüssel: main.minor.features version
-#define UI_VERSION                      "0.0.01"
+#define UI_VERSION                      "0.1.0"
 #define UI_NAME                         tr("Network UTility (NUT) client for Qt")
 
 //#define UI_DIR_RESOURCE                 "/usr/share/qnut/"

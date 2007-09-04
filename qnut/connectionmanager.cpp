@@ -108,14 +108,14 @@ namespace qnut {
         CDeviceOptions * newDeviceOptions = new CDeviceOptions(dev, ui.tabWidget);
         
         ui.tabWidget->insertTab(ui.tabWidget->count()-1, newDeviceOptions, dev->name);
-        newDeviceOptions->uiUpdateDeviceIcons();
+        newDeviceOptions->updateDeviceIcons();
         
         deviceOptions.insert(dev, newDeviceOptions);
         trayicon.devicesMenu.addMenu(newDeviceOptions->deviceMenu);
         trayicon.devicesMenu.setEnabled(true);
         
         ui.overViewList->repaint();
-        connect(dev, SIGNAL(stateChanged(bool)), ui.overViewList, SLOT(repaint()));
+        connect(dev, SIGNAL(stateChanged(DeviceState)), ui.overViewList, SLOT(repaint()));
         connect(newDeviceOptions->showAction, SIGNAL(triggered()), this, SLOT(show()));
         connect(newDeviceOptions, SIGNAL(showMessage(QString, QString)), this, SLOT(uiShowMessage(QString, QString)));
     }
@@ -154,25 +154,23 @@ namespace qnut {
     
     void CConnectionManager::uiSelectedDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected) {
         QModelIndexList selectedIndexes = selected.indexes();
-        QModelIndexList deselectedIndexes = selected.indexes();
+        QModelIndexList deselectedIndexes = deselected.indexes();
         
         if (!deselectedIndexes.isEmpty()) {
             CDevice * deselectedDevice = (CDevice *)(deselectedIndexes[0].internalPointer());
-            disconnect(deselectedDevice, SIGNAL(stateChanged(bool)), enableDeviceAction, SLOT(setDisabled(bool)));
-            disconnect(deselectedDevice, SIGNAL(stateChanged(bool)), disableDeviceAction, SLOT(setEnabled(bool)));
+            disconnect(deselectedDevice, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleDeviceStateChanged(DeviceState)));
             disconnect(enableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(enable()));
             disconnect(disableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(disable()));
         }
         
         if (!selectedIndexes.isEmpty()) {
             CDevice * selectedDevice = (CDevice *)(selectedIndexes[0].internalPointer());
-            connect(selectedDevice, SIGNAL(stateChanged(bool)), enableDeviceAction, SLOT(setDisabled(bool)));
-            connect(selectedDevice, SIGNAL(stateChanged(bool)), disableDeviceAction, SLOT(setEnabled(bool)));
+            connect(selectedDevice, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleDeviceStateChanged(DeviceState)));
             connect(enableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(enable()));
             connect(disableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(disable()));
             
             enableDeviceAction->setDisabled(selectedDevice->state == DS_UP);
-            disableDeviceAction->setEnabled(selectedDevice->state == DS_UP);
+            disableDeviceAction->setDisabled(selectedDevice->state == DS_DEACTIVATED);
         }
         else {
             enableDeviceAction->setEnabled(false);
@@ -190,5 +188,10 @@ namespace qnut {
     
     void CConnectionManager::uiShowAbout() {
         QMessageBox::about(this, tr("About QNUT"), UI_NAME + "\nv" + QString(UI_VERSION));
+    }
+    
+    void CConnectionManager::uiHandleDeviceStateChanged(DeviceState state) {
+        enableDeviceAction->setDisabled(state == DS_UP);
+        disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
     }
 };

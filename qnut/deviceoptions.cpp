@@ -55,10 +55,7 @@ namespace qnut {
         
         header()->setResizeMode(QHeaderView::ResizeToContents);
         
-        connect(device, SIGNAL(enabledChanged(bool)), enableDeviceAction , SLOT(setDisabled(bool)));
-        connect(device, SIGNAL(enabledChanged(bool)), disableDeviceAction, SLOT(setEnabled(bool)));
-        connect(device, SIGNAL(enabledChanged(bool)), this, SLOT(setEnabled(bool)));
-        connect(device, SIGNAL(enabledChanged(bool)), this, SLOT(updateDeviceIcons()));
+        connect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
         connect(device, SIGNAL(environmentsUpdated()), this, SLOT(repaint()));
         
         connect(selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
@@ -78,13 +75,13 @@ namespace qnut {
         delete deviceMenu;
     }
     
-    void CDeviceOptions::uiShowThisTab() {
-        tabWidget->setCurrentWidget(this);
-    }
-    
-    void CDeviceOptions::uiUpdateDeviceIcons() {
+    void CDeviceOptions::updateDeviceIcons() {
         tabWidget->setTabIcon(tabWidget->indexOf(this), QIcon(getDeviceIcon(device)));
         deviceMenu->setIcon(QIcon(getDeviceIcon(device)));
+    }
+    
+    void CDeviceOptions::uiShowThisTab() {
+        tabWidget->setCurrentWidget(this);
     }
     
     void CDeviceOptions::uiSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
@@ -145,8 +142,8 @@ namespace qnut {
     }
     
     void CDeviceOptions::uiHandleEnvironmentChange(CEnvironment * current, CEnvironment * previous) {
-        if ((current) && (current->interfaces.isEmpty()))
-            emit showMessage(tr("User defined environment entered"), device->name + ' ' + tr("entered an environment, that needs to be configured in order to be active.\n\n Click here to open the connection manager."));
+/*        if ((current) && (current->interfaces.isEmpty()))
+            emit showMessage(tr("User defined environment entered"), device->name + ' ' + tr("entered an environment, that needs to be configured in order to be active.\n\n Click here to open the connection manager."));*/
     }
     
     void CDeviceOptions::uiChangeIPConfiguration() {
@@ -154,5 +151,12 @@ namespace qnut {
         QModelIndex selectedIndex = (selectionModel()->selection().indexes())[0];
         
         dialog.execute((CInterface *)(selectedIndex.internalPointer()));
+    }
+    
+    void CDeviceOptions::uiHandleStateChange(DeviceState state) {
+        updateDeviceIcons();
+        setDisabled(state == DS_DEACTIVATED);
+        enableDeviceAction->setDisabled(state == DS_UP);
+        disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
     }
 };
