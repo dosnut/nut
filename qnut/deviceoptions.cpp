@@ -44,9 +44,9 @@ namespace qnut {
         
         setAllColumnsShowFocus(true);
         
-        enableDeviceAction->setDisabled(device->state == DS_UP);
-        disableDeviceAction->setEnabled(device->state == DS_UP);
-        setDisabled(device->state == DS_DEACTIVATED);
+        setDisabled(state == DS_DEACTIVATED);
+        enableDeviceAction->setDisabled(state == DS_UP);
+        disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
         
         setContextMenuPolicy(Qt::CustomContextMenu);
         setAllColumnsShowFocus(true);
@@ -60,7 +60,7 @@ namespace qnut {
         
         connect(selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
                 this            , SLOT(selectionChanged(const QItemSelection &, const QItemSelection &)));
-        connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showPopup(const QPoint &)));
+        connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(uiShowPopup(const QPoint &)));
     }
     
     CDeviceOptions::~CDeviceOptions() {
