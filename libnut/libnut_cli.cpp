@@ -8,6 +8,26 @@
 //-wlan sach
 //-more debugging output
 namespace libnut {
+
+QString toString(DeviceState state) {
+	switch (state) {
+		case DS_UP:             return QObject::tr("up");
+		case DS_UNCONFIGURED:   return QObject::tr("unconfigured");
+		case DS_CARRIER:        return QObject::tr("got carrier");
+		case DS_ACTIVATED:      return QObject::tr("activated");
+		case DS_DEACTIVATED:    return QObject::tr("deactivated");
+		default:                return QString();
+	}
+}
+QString toString(DeviceType type) {
+	switch (type) {
+		case DT_ETH: return QObject::tr("Ethernet");
+		case DT_AIR: return QObject::tr("Wireless");
+		case DT_PPP: return QObject::tr("PPP");
+		default:     return QString();
+	}
+}
+
 ////////////////
 //CLog
 ///////////////
@@ -216,11 +236,11 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 			activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment);
 			emit(environmentChangedActive(activeEnvironment, 0));
 		}
-		*log << (tr("Device properties fetched:"));
-		*log << (tr("Name: ") + QString(name));
-		*log << (tr("Type: ") + QString(type));
-		*log << (tr("State: ") + QString(state));
-		*log << (tr("Active Environement: ") + dbusActiveEnvironment.path());
+		*log << (tr("Device properties fetched"));
+		*log << (tr("Name") + ": " + QString(name));
+		*log << (tr("Type") + ": " + toString(type));
+		*log << (tr("State") + ": " + toString(state));
+		*log << (tr("Active Environement") + ": " + dbusActiveEnvironment.path());
 	}
 	else {
 		throw CLI_DevConnectionException(tr("Error while retrieving dbus' device information"));
@@ -257,8 +277,8 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	connect(dbusDevice, SIGNAL(environmentAdded(const QDBusObjectPath &)),
 			this, SLOT(environmentAdded(const QDBusObjectPath &)));
 
-	connect(dbusDevice, SIGNAL(stateChanged(DeviceState , DeviceState )),
-			this, SLOT(dbusstateChanged(DeviceState , DeviceState )));
+	connect(dbusDevice, SIGNAL(stateChanged(int , int)),
+			this, SLOT(dbusstateChanged(int, int)));
 }
 CDevice::~CDevice() {
 	CEnvironment * env;

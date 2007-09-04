@@ -29,6 +29,9 @@ namespace libnut {
 
 namespace libnut {
 
+	QString toString(DeviceState state);
+	QString toString(DeviceType type);
+
 	class CLog : public QObject {
 		Q_OBJECT
 	private:

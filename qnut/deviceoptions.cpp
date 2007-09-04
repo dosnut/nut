@@ -44,9 +44,9 @@ namespace qnut {
         
         setAllColumnsShowFocus(true);
         
-        setDisabled(state == DS_DEACTIVATED);
-        enableDeviceAction->setDisabled(state == DS_UP);
-        disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
+        setDisabled(device->state == DS_DEACTIVATED);
+        enableDeviceAction->setDisabled(device->state == DS_UP);
+        disableDeviceAction->setDisabled(device->state == DS_DEACTIVATED);
         
         setContextMenuPolicy(Qt::CustomContextMenu);
         setAllColumnsShowFocus(true);

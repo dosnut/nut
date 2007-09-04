@@ -2,6 +2,7 @@
 #define libnut_libnut_types
 
 #include <QString>
+#include <QTranslator>
 #include <QDBusArgument>
 #include <QHostAddress>
 #include <QtDBus>
@@ -52,6 +53,8 @@ namespace libnut {
 		DeviceType type;
 	};
 	
+
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceProperties &devprop);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceProperties &devprop);
 	
