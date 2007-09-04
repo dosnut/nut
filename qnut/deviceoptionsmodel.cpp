@@ -57,25 +57,25 @@ namespace qnut {
             case 0:
                 if (data->parent() == device) {
                     switch (role) {
-                        case Qt::DisplayRole:
-                            return ((CEnvironment *)data)->name;
-                        case Qt::DecorationRole:
-                            return QIcon(UI_ICON_ENVIRONMENT);
-                        default:
-                            break;
+                    case Qt::DisplayRole:
+                        return ((CEnvironment *)data)->name;
+                    case Qt::DecorationRole:
+                        return QIcon(UI_ICON_ENVIRONMENT);
+                    default:
+                        break;
                     }
                 }
                 
                 if (data->parent()->parent() == device) {
                     switch (role) {
-                        case Qt::DisplayRole:
-                            return tr("IP-Address") + ": " +((CInterface *)data)->ip.toString() + "\n" +
-                                tr("Netmask") + ": " + ((CInterface *)data)->netmask.toString() + "\n" +
-                                tr("Gateway") + ": " + ((CInterface *)data)->gateway.toString();
-                        case Qt::DecorationRole:
-                            return QIcon(UI_ICON_INTERFACE);
-                        default:
-                            break;
+                    case Qt::DisplayRole:
+                        return tr("IP-Address") + ": " +((CInterface *)data)->ip.toString() + "\n" +
+                            tr("Netmask") + ": " + ((CInterface *)data)->netmask.toString() + "\n" +
+                            tr("Gateway") + ": " + ((CInterface *)data)->gateway.toString();
+                    case Qt::DecorationRole:
+                        return QIcon(UI_ICON_INTERFACE);
+                    default:
+                        break;
                     }
                 }
                 break;
@@ -104,18 +104,18 @@ namespace qnut {
                         
                         QString result = tr("selected by") + " ";
                         switch (configFlags) {
-                            case 3:
-                                result += tr("essid") + ", " + tr("arp");
-                                break;
-                            case 2:
-                                result += tr("essid");
-                                break;
-                            case 1:
-                                result += tr("arp");
-                                break;
-                            default:
-                                result += tr("user");
-                                break;
+                        case 3:
+                            result += tr("essid") + ", " + tr("arp");
+                            break;
+                        case 2:
+                            result += tr("essid");
+                            break;
+                        case 1:
+                            result += tr("arp");
+                            break;
+                        default:
+                            result += tr("user");
+                            break;
                         }
                         return result + " " + (configUseMac ? tr("and MAC-Address") : "");
                     }
@@ -150,14 +150,14 @@ namespace qnut {
         
         if (orientation == Qt::Horizontal) {
             switch (section) {
-                case 0:
-                    return tr("Item");
-                case 1:
-                    return tr("Status");
-                case 2:
-                    return tr("Config");
-                default:
-                    break;
+            case 0:
+                return tr("Item");
+            case 1:
+                return tr("Status");
+            case 2:
+                return tr("Config");
+            default:
+                break;
             }
         }
         return QVariant();

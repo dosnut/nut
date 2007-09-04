@@ -1,6 +1,7 @@
 #include <QDate>
 #include "connectionmanager.h"
-#include "constants.h"
+#include "common.h"
+#include <iostream>
 
 namespace qnut {
     CConnectionManager::CConnectionManager(QWidget * parent) :
@@ -55,73 +56,68 @@ namespace qnut {
         ui.menuDevice->addActions(overView.actions());
         
         connect(refreshDevicesAction, SIGNAL(triggered()), &deviceManager, SLOT(refreshAll()));
-        connect(refreshDevicesAction, SIGNAL(triggered()), &overView, SLOT(repaint()));
+        connect(refreshDevicesAction, SIGNAL(triggered()), &overView, SLOT(reset()));
         connect(ui.actionAboutQt, SIGNAL(triggered()), qApp , SLOT(aboutQt()));
         connect(ui.actionAboutQNUT, SIGNAL(triggered()), this , SLOT(uiShowAbout()));
         connect(overView.selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
                 this                     , SLOT(uiSelectedDeviceChanged(const QItemSelection &, const QItemSelection &)));
         connect(&tabWidget, SIGNAL(currentChanged(int)), this, SLOT(uiCurrentTabChanged(int)));
-//        connect(ui.overViewList, SIGNAL(customContextMenuRequested(const QPoint)), this, SLOT(uiShowOverViewPopup(const QPoint)));
         connect(&trayicon, SIGNAL(messageClicked()), this, SLOT(show()));
         
         trayicon.show();
     }
     
     void CConnectionManager::createActions() {
-        QAction * separator;
-        
         //overViewMenu Actions
-        separator            = new QAction(&overView);
         refreshDevicesAction = new QAction(QIcon(UI_ICON_REFRESH), tr("Refresh devices"), &overView);
         enableDeviceAction   = new QAction(QIcon(UI_ICON_DEVICE_ENABLE), tr("Enable device"), &overView);
         disableDeviceAction  = new QAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"), &overView);
         
-        separator->setSeparator(true);
         enableDeviceAction->setEnabled(false);
         disableDeviceAction->setEnabled(false);
         
         overView.addAction(refreshDevicesAction);
-        overView.addAction(separator);
+        overView.addAction(getSeparator(&overView));
         overView.addAction(enableDeviceAction);
         overView.addAction(disableDeviceAction);
     }
     
     void CConnectionManager::distributeActions(int mode) {
         switch (mode) {
-            case 0:
-                ui.menuEnvironment->setEnabled(false);
-                ui.menuInterface->setEnabled(false);
-                
-                //general device actions
-                ui.toolBar->addActions(overView.actions());
-                ui.menuDevice->addActions(overView.actions());
-                break;
-            case 1:
-                ui.toolBar->addAction(refreshDevicesAction);
-                ui.menuDevice->addAction(refreshDevicesAction);
-                break;
-            case 2:
-                ui.menuEnvironment->setEnabled(true);
-                ui.menuInterface->setEnabled(true);
-                
-                CDeviceOptions * current = (CDeviceOptions *)(tabWidget.currentWidget());
-                
-                //current device actions
-                ui.toolBar->addAction(current->enableDeviceAction);
-                ui.toolBar->addAction(current->disableDeviceAction);
-                ui.menuDevice->addAction(current->enableDeviceAction);
-                ui.menuDevice->addAction(current->disableDeviceAction);
-                ui.toolBar->addSeparator();
-                //environment actions
-                ui.toolBar->addAction(current->enterEnvironmentAction);
-                ui.menuEnvironment->addAction(current->enterEnvironmentAction);
-                ui.toolBar->addSeparator();
-                //interface actions
-                ui.toolBar->addAction(current->activateInterfaceAction);
-                ui.toolBar->addAction(current->deactivateInterfaceAction);
-                ui.menuInterface->addAction(current->activateInterfaceAction);
-                ui.menuInterface->addAction(current->deactivateInterfaceAction);
-                break;
+        case 0:
+            ui.menuEnvironment->setEnabled(false);
+            ui.menuInterface->setEnabled(false);
+            
+            //general device actions
+            ui.toolBar->addActions(overView.actions());
+            ui.menuDevice->addActions(overView.actions());
+            break;
+        case 1:
+            ui.toolBar->addAction(refreshDevicesAction);
+            ui.menuDevice->addAction(refreshDevicesAction);
+            break;
+        case 2:
+            ui.menuEnvironment->setEnabled(true);
+            ui.menuInterface->setEnabled(true);
+            
+            CDeviceOptions * current = (CDeviceOptions *)(tabWidget.currentWidget());
+            
+            //current device actions
+            ui.toolBar->addAction(current->enableDeviceAction);
+            ui.toolBar->addAction(current->disableDeviceAction);
+            ui.menuDevice->addAction(current->enableDeviceAction);
+            ui.menuDevice->addAction(current->disableDeviceAction);
+            ui.toolBar->addSeparator();
+            //environment actions
+            ui.toolBar->addAction(current->enterEnvironmentAction);
+            ui.menuEnvironment->addAction(current->enterEnvironmentAction);
+            ui.toolBar->addSeparator();
+            //interface actions
+            ui.toolBar->addAction(current->activateInterfaceAction);
+            ui.toolBar->addAction(current->deactivateInterfaceAction);
+            ui.menuInterface->addAction(current->activateInterfaceAction);
+            ui.menuInterface->addAction(current->deactivateInterfaceAction);
+            break;
         }
     }
     
@@ -136,18 +132,18 @@ namespace qnut {
         trayicon.devicesMenu.addMenu(newDeviceOptions->deviceMenu);
         trayicon.devicesMenu.setEnabled(true);
         
-        connect(dev, SIGNAL(stateChanged(DeviceState)), &overView, SLOT(repaint()));
+        connect(dev, SIGNAL(stateChanged(DeviceState)), &overView, SLOT(reset()));
         connect(newDeviceOptions->showAction, SIGNAL(triggered()), this, SLOT(show()));
         connect(newDeviceOptions, SIGNAL(showMessage(QString, QString)), this, SLOT(uiShowMessage(QString, QString)));
-        overView.repaint();
+        overView.reset();
     }
     
     void CConnectionManager::uiRemovedDevice(CDevice * dev) {
-        disconnect(dev, SIGNAL(stateChanged(bool)), &overView, SLOT(repaint())); //nicht nötig?
+        overView.reset();
+        disconnect(dev, SIGNAL(stateChanged(DeviceState)), &overView, SLOT(reset())); //nicht nötig?
         CDeviceOptions * target = deviceOptions[dev];
         
         tabWidget.removeTab(tabWidget.indexOf(target));
-        overView.repaint();
         
         trayicon.devicesMenu.removeAction(target->deviceMenu->menuAction());
         trayicon.devicesMenu.setDisabled(deviceManager.devices.isEmpty());

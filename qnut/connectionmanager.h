@@ -42,7 +42,6 @@ namespace qnut {
         void uiRemovedDevice(CDevice * dev);
         void uiCurrentTabChanged(int index);
         void uiSelectedDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected);
-        //void uiShowOverViewPopup(const QPoint & pos);
         void uiShowMessage(QString title, QString message);
         void uiShowAbout();
         void uiHandleDeviceStateChanged(DeviceState state);

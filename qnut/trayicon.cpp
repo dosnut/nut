@@ -25,14 +25,14 @@ namespace qnut {
     void CTrayIcon::handleClicks(QSystemTrayIcon::ActivationReason reason) {
         QWidget * mainwin = (QWidget *)(parent());
         switch (reason) {
-            case Trigger:
-                if (mainwin->isVisible())
-                    mainwin->close();
-                else
-                    mainwin->show();
-                break;
-            default:
-                break;
+        case Trigger:
+            if (mainwin->isVisible())
+                mainwin->close();
+            else
+                mainwin->show();
+            break;
+        default:
+            break;
         }
     }
 

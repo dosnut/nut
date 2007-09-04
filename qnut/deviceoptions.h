@@ -31,7 +31,6 @@ namespace qnut {
         CDevice * device;
         
         QMenu * deviceMenu;
-        QMenu * environmentsMenu;
         QAction * enableDeviceAction;
         QAction * disableDeviceAction;
         QAction * enterEnvironmentAction;
@@ -49,7 +48,6 @@ namespace qnut {
     public slots:
         void uiShowThisTab();
         void uiSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-//         void uiShowPopup(const QPoint & pos);
         void uiHandleEnvironmentChange(CEnvironment * current, CEnvironment * previous);
         void uiChangeIPConfiguration();
         void uiHandleStateChange(DeviceState state);

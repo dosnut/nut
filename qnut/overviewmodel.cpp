@@ -77,25 +77,25 @@ namespace qnut {
         
         if (role == Qt::DisplayRole) {
             switch (index.column()) {
-                case 0:
-                    return data->name;
-                case 1:
-                    switch (data->state) {
-                        case DS_UP:             return tr("up");
-                        case DS_UNCONFIGURED:   return tr("unconfigured");
-                        case DS_CARRIER:        return tr("got carrier");
-                        case DS_ACTIVATED:      return tr("activated");
-                        case DS_DEACTIVATED:    return tr("deactivated");
-                        default:                break;
-                    }
-                case 2:
-                    switch (data->type) {
-                        case DT_ETH: return tr("Ethernet");
-                        case DT_AIR: return tr("Wireless");
-                        default:     break;
-                    }
-                default:
-                    break;
+            case 0:
+                return data->name;
+            case 1:
+                switch (data->state) {
+                case DS_UP:             return tr("up");
+                case DS_UNCONFIGURED:   return tr("unconfigured");
+                case DS_CARRIER:        return tr("got carrier");
+                case DS_ACTIVATED:      return tr("activated");
+                case DS_DEACTIVATED:    return tr("deactivated");
+                default:                break;
+                }
+            case 2:
+                switch (data->type) {
+                case DT_ETH: return tr("Ethernet");
+                case DT_AIR: return tr("Wireless");
+                default:     break;
+                }
+            default:
+                break;
             }
         }
         else if (role == Qt::DecorationRole) {
@@ -115,14 +115,14 @@ namespace qnut {
         
         if (orientation == Qt::Horizontal) {
             switch (section) {
-                case 0:
-                    return tr("Name");
-                case 1:
-                    return tr("Status");
-                case 2:
-                    return tr("Type");
-                default:
-                    break;
+            case 0:
+                return tr("Name");
+            case 1:
+                return tr("Status");
+            case 2:
+                return tr("Type");
+            default:
+                break;
             }
         }
         return QVariant();
