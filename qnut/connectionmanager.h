@@ -6,7 +6,7 @@
 #include <libnut/libnut_cli.h>
 #include "ui/ui_connman.h"
 #include "trayicon.h"
-#include "overviewlistmodel.h"
+#include "overviewmodel.h"
 #include "deviceoptions.h"
 
 namespace qnut {
@@ -17,30 +17,32 @@ namespace qnut {
     private:
         Ui::connMan ui;
         
-        void createActions();
-        void distributeActions(int mode = 0);
-    public:
         CDeviceManager deviceManager;
-        
         CLog logFile;
+        CDeviceOptionsHash deviceOptions;
+        
+        CTrayIcon trayicon;
         
         QAction * refreshDevicesAction;
-        
         QAction * enableDeviceAction;
         QAction * disableDeviceAction;
         
-        QMenu overViewMenu;
-        CTrayIcon trayicon;
-        COverViewListModel overViewListModel;
-        CDeviceOptionsHash deviceOptions;
-
+        QTabWidget tabWidget;
+        QTreeView overView;
+        QTextEdit logEdit;
+        
+        void createActions();
+        void distributeActions(int mode = 0);
+        
+    public:
         CConnectionManager(QWidget * parent = 0);
+        
     public slots:
         void uiAddedDevice(CDevice * dev);
         void uiRemovedDevice(CDevice * dev);
         void uiCurrentTabChanged(int index);
         void uiSelectedDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected);
-        void uiShowOverViewPopup(const QPoint & pos);
+        //void uiShowOverViewPopup(const QPoint & pos);
         void uiShowMessage(QString title, QString message);
         void uiShowAbout();
         void uiHandleDeviceStateChanged(DeviceState state);

@@ -9,8 +9,8 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#ifndef QNUT_OVERVIEWLISTMODEL_H
-#define QNUT_OVERVIEWLISTMODEL_H
+#ifndef QNUT_OVERVIEWMODEL_H
+#define QNUT_OVERVIEWMODEL_H
 
 #include <QAbstractItemModel>
 #include <QVariant>
@@ -20,11 +20,11 @@
 namespace qnut {
     using namespace libnut;
 
-    class COverViewListModel : public QAbstractItemModel {
+    class COverViewModel : public QAbstractItemModel {
         Q_OBJECT
     public:
-        COverViewListModel(CDeviceList * deviceList, QObject * parent = 0);
-        ~COverViewListModel();
+        COverViewModel(CDeviceList * deviceList, QObject * parent = 0);
+        ~COverViewModel();
         
         QVariant data(const QModelIndex & index, int role) const;
         Qt::ItemFlags flags(const QModelIndex & index) const;

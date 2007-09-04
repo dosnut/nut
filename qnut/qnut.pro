@@ -18,13 +18,13 @@ TRANSLATIONS = qnut_de.ts
 
 HEADERS += connectionmanager.h trayicon.h \
  constants.h \
- overviewlistmodel.h \
+ overviewmodel.h \
  deviceoptionsmodel.h \
  deviceoptions.h \
  ipconfiguration.h \
  common.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
- overviewlistmodel.cpp \
+ overviewmodel.cpp \
  deviceoptionsmodel.cpp \
  deviceoptions.cpp \
  ipconfiguration.cpp \
