@@ -1,6 +1,6 @@
 #ifndef LIBNUT_LIBNUT_CLI_H
 #define LIBNUT_LIBNUT_CLI_H
-
+#include <iostream>
 #include <QObject>
 #include <QList>
 #include <QHostAddress>

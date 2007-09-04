@@ -206,6 +206,7 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 		}
 		dbusDevices.insert(i, device);
 		devices.append(device);
+		emit(deviceAdded(device));
 	}
 }
 
@@ -292,7 +293,7 @@ CDevice::~CDevice() {
 //CDevice private functions
 
 void CDevice::refreshAll() {
-	//Refresh environment list:
+	//Refresh environment list
 	QDBusReply<QList<QDBusObjectPath> > replyenvs = dbusDevice->getEnvironments();
 	if (replyenvs.isValid()) {
 		//Compare local with remote list:
@@ -342,7 +343,6 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 	while ( !environments.isEmpty() ) {
 		env = environments.takeFirst();
 		emit(environmentRemoved(env));
-		emit(environmentsUpdated());
 		delete env;
 	}
 	//now rebuild:
@@ -352,10 +352,12 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 		}
 		catch (CLI_ConnectionException &e) {
 			*log << e.what();
+			continue;
 		}
 		dbusEnvironments.insert(i,env);
 		environments.append(env);
 	}
+	emit(environmentsUpdated());
 }
 
 //CDevice private slots:
