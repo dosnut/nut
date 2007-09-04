@@ -173,7 +173,7 @@ namespace nuts {
 		m_properties.netmask = m_iface->netmask;
 		m_properties.userDefineable = false;
 		m_properties.isStatic = false;
-		//m_properties.dns = m_iface->dnsserver.first();
+		m_properties.dns = m_iface->dnsserver.first();
 		return m_properties;
 	}
 	void DBusInterface_IPv4::setIP(quint32 HostAddress) {

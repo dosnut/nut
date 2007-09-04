@@ -49,9 +49,6 @@ namespace libnut {
 	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectConfig &selconf);
 	
 	
-	//Sollte eigtl. von Qt gemacht werden, da libnut_* als Metatyp bekannt.
-	//QDBusArgument &operator<< (QDBusArgument &argument, const QList<InterfaceProperties> &selconflist);
-	//const QDBusArgument &operator>> (const QDBusArgument &argument, QList<InterfaceProperties> &selconflist);
 	enum DeviceState  { DS_DEACTIVATED, DS_ACTIVATED, DS_CARRIER, DS_UNCONFIGURED, DS_UP };
 	enum DeviceType {DT_ETH=0, DT_AIR=1, DT_PPP=2};
 	struct DeviceProperties {
