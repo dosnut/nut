@@ -449,24 +449,25 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	else {
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment select config"));
 	}
-	QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnvironment->getInterfaces();
-	if (replyifs.isValid()) {
-		CInterface * interface;
-		foreach(QDBusObjectPath i, replyifs.value()) {
-			try {
-				interface = new CInterface(this,i);
-			}
-			catch (CLI_ConnectionException &e) {
-				*log << e.what();
-				continue;
-			}
-			dbusInterfaces.insert(i,interface);
-			interfaces.append(interface);
-		}
-	}
-	else {
-		throw CLI_EnvConnectionException(tr("Error while retrieving environment's interfaces"));
-	}
+	
+// 	QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnvironment->getInterfaces();
+// 	if (replyifs.isValid()) {
+// 		CInterface * interface;
+// 		foreach(QDBusObjectPath i, replyifs.value()) {
+// 			try {
+// 				interface = new CInterface(this,i);
+// 			}
+// 			catch (CLI_ConnectionException &e) {
+// 				*log << e.what();
+// 				continue;
+// 			}
+// 			dbusInterfaces.insert(i,interface);
+// 			interfaces.append(interface);
+// 		}
+// 	}
+// 	else {
+// 		throw CLI_EnvConnectionException(tr("Error while retrieving environment's interfaces"));
+// 	}
 	connect(dbusEnvironment, SIGNAL(interfaceAdded(const QDBusObjectPath &)), this, SLOT(dbusinterfaceAdded(const QDBusObjectPath &)));
 	connect(dbusEnvironment, SIGNAL(interfaceRemoved(const QDBusObjectPath &)), this, SLOT(dbusinterfaceRemoved(const QDBusObjectPath &)));
 	connect(dbusEnvironment, SIGNAL(stateChanged(bool )), this, SLOT(dbusstateChanged(bool )));
@@ -615,7 +616,7 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	//Attach to dbus
 	dbusConnection = parent->dbusConnection;
 	dbusConnectionInterface = parent->dbusConnectionInterface;
-	dbusInterface = new DBusInterfaceInterface("NUT_DBUS_URL", dbusPath.path(), *dbusConnection, this);
+	dbusInterface = new DBusInterfaceInterface(NUT_DBUS_URL, dbusPath.path(), *dbusConnection, this);
 	serviceCheck(dbusConnectionInterface);
 	//Get properties:
 	QDBusReply<InterfaceProperties> replyprops = dbusInterface->getProperties();

@@ -84,6 +84,7 @@ namespace nuts {
 	}
 
 	libnut::DeviceProperties DBusDevice::getProperties() {
+		m_properties.state = m_dev->getState();
 		return m_properties;
 	}
 	
@@ -129,6 +130,17 @@ namespace nuts {
 	
 	libnut::EnvironmentProperties DBusEnvironment::getProperties() {
 		return m_properties;
+	}
+	QList<libnut::SelectConfig> DBusEnvironment::getSelectConfig() {
+		libnut::SelectConfig tmp;
+		tmp.useMac = false;
+		tmp.selected = true;
+		tmp.flags = libnut::SF_USER;
+		tmp.arpIP = QHostAddress("127.0.0.1");
+		tmp.essid = "ipvs";
+		QList<libnut::SelectConfig> tmpl;
+		tmpl.append(tmp);
+		return tmpl;
 	}
 	
 	QList<QDBusObjectPath> DBusEnvironment::getInterfaces() {

@@ -104,19 +104,23 @@ namespace libnut {
 		done = 1;
 		qRegisterMetaType<DeviceProperties>("DeviceProperties");
 		qRegisterMetaType<SelectConfig>("SelectConfig");
+		qRegisterMetaType<QList<SelectConfig> >("SelectConfigList");
 		qRegisterMetaType<EnvironmentProperties>("EnvironmentProperties");
 		qRegisterMetaType<InterfaceProperties>("InterfaceProperties");
 //		qRegisterMetaType<QList<SelectConfig> >("SelectConfigList");
 		qRegisterMetaType<WlanScanresult>("WlanScanresult");
+		qRegisterMetaType<QList<libnut::WlanScanresult> >("WlanScanresultList");
 //		qRegisterMetaType<QList<WlanScanresult> >("WlanScanresultList");
 		qRegisterMetaType<WlanNetworkProperties>("WlanNetworkProperties");
 	
 		qDBusRegisterMetaType<DeviceProperties>();
 		qDBusRegisterMetaType<SelectConfig>();
+		qDBusRegisterMetaType<QList<SelectConfig> >();
 		qDBusRegisterMetaType<EnvironmentProperties>();
 		qDBusRegisterMetaType<InterfaceProperties>();
 //		qDBusRegisterMetaType<QList<SelectConfig> >();
 		qDBusRegisterMetaType<WlanScanresult>();
+		qDBusRegisterMetaType<QList<libnut::WlanScanresult> >();
 //		qDBusRegisterMetaType<QList<WlanScanresult> >();
 		qDBusRegisterMetaType<WlanNetworkProperties>();
 	}
