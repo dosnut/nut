@@ -29,18 +29,25 @@ namespace qnut {
         showAction = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."),
                                  this, SLOT(uiShowThisTab()));
         
-        environmentsMenu = new QMenu(this);
-        enterEnvironmentAction    = environmentsMenu->addAction(QIcon(UI_ICON_ENVIRONMENT_ENTER), tr("Enter environment"));
-        environmentsMenu->addSeparator();
-        activateInterfaceAction   = environmentsMenu->addAction(QIcon(UI_ICON_INTERFACE_ACTIVATE), tr("Activate interface"));
-        deactivateInterfaceAction = environmentsMenu->addAction(QIcon(UI_ICON_INTERFACE_DEACTIVATE), tr("Deactivate interface"));
-        environmentsMenu->addSeparator();
-        editInterfaceAction       = environmentsMenu->addAction(QIcon(UI_ICON_EDIT), tr("Edit IP Configuration..."),
-                                    this, SLOT(uiChangeIPConfiguration()));
+        //environmentsMenu = new QMenu(this);
+        QAction * separator;
+        separator                 = new QAction(this);
+        enterEnvironmentAction    = new QAction(QIcon(UI_ICON_ENVIRONMENT_ENTER), tr("Enter environment"), this);
+        activateInterfaceAction   = new QAction(QIcon(UI_ICON_INTERFACE_ACTIVATE), tr("Activate interface"), this);
+        deactivateInterfaceAction = new QAction(QIcon(UI_ICON_INTERFACE_DEACTIVATE), tr("Deactivate interface"), this);
+        editInterfaceAction       = new QAction(QIcon(UI_ICON_EDIT), tr("Edit IP Configuration..."), this);
         
         foreach(QAction * i, environmentsMenu->actions()) {
             i->setEnabled(false);
         }
+        separator->setSeparator(true);
+        
+        addAction(enterEnvironmentAction);
+        addAction(separator);
+        addAction(activateInterfaceAction);
+        addAction(deactivateInterfaceAction);
+        addAction(separator);
+        addAction(editInterfaceAction);
         
         setAllColumnsShowFocus(true);
         
@@ -48,13 +55,14 @@ namespace qnut {
         enableDeviceAction->setDisabled(device->state == DS_UP);
         disableDeviceAction->setDisabled(device->state == DS_DEACTIVATED);
         
-        setContextMenuPolicy(Qt::CustomContextMenu);
+        setContextMenuPolicy(Qt::ActionsContextMenu);
         setAllColumnsShowFocus(true);
         setAlternatingRowColors(true);
         setIconSize(QSize(18, 18));
         
         header()->setResizeMode(QHeaderView::ResizeToContents);
         
+        connect(editInterfaceAction, SIGNAL(triggered()), this, SLOT(uiChangeIPConfiguration()));
         connect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
         connect(device, SIGNAL(environmentsUpdated()), this, SLOT(repaint()));
         
@@ -65,9 +73,9 @@ namespace qnut {
     
     CDeviceOptions::~CDeviceOptions() {
 //nicht nötig?
-//        disconnect(device, SIGNAL(stateChanged(bool)), enableDeviceAction , SLOT(setDisabled(bool)));
-//        disconnect(device, SIGNAL(stateChanged(bool)), disableDeviceAction, SLOT(setEnabled(bool)));
-//        disconnect(device, SIGNAL(stateChanged(bool)), this, SLOT(setEnabled(bool)));
+       disconnect(device, SIGNAL(stateChanged(bool)), enableDeviceAction , SLOT(setDisabled(bool)));
+       disconnect(device, SIGNAL(stateChanged(bool)), disableDeviceAction, SLOT(setEnabled(bool)));
+       disconnect(device, SIGNAL(stateChanged(bool)), this, SLOT(setEnabled(bool)));
 //        CDeviceOptionsModel * targetTreeModel = (CDeviceOptionsModel *)targetDeviceOptions.environmentsTree->model();
 //        targetDeviceOptions.environmentsTree->setModel(NULL);
 //        delete targetTreeModel;
@@ -137,9 +145,9 @@ namespace qnut {
         }
     }
     
-    void CDeviceOptions::uiShowPopup(const QPoint & pos) {
+/*    void CDeviceOptions::uiShowPopup(const QPoint & pos) {
         environmentsMenu->exec(mapToGlobal(pos));
-    }
+    }*/
     
     void CDeviceOptions::uiHandleEnvironmentChange(CEnvironment * current, CEnvironment * previous) {
 /*        if ((current) && (current->interfaces.isEmpty()))

@@ -616,7 +616,11 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	//Attach to dbus
 	dbusConnection = parent->dbusConnection;
 	dbusConnectionInterface = parent->dbusConnectionInterface;
+<<<<<<< HEAD:libnut/libnut_cli.cpp
 	dbusInterface = new DBusInterfaceInterface_IPv4(NUT_DBUS_URL, dbusPath.path(), *dbusConnection, this);
+=======
+	dbusInterface = new DBusInterfaceInterface(NUT_DBUS_URL, dbusPath.path(), *dbusConnection, this);
+>>>>>>> 9e958d39c68db61381ac6aad055c2eec25b977ed:libnut/libnut_cli.cpp
 	serviceCheck(dbusConnectionInterface);
 	//Get properties:
 	QDBusReply<InterfaceProperties> replyprops = dbusInterface->getProperties();

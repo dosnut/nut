@@ -10,19 +10,19 @@
 //
 //
 #include <QIcon>
-#include "overviewlistmodel.h"
+#include "overviewmodel.h"
 #include "common.h"
 
 namespace qnut {
-    COverViewListModel::COverViewListModel(CDeviceList * deviceList, QObject * parent) : QAbstractItemModel(parent) {
+    COverViewModel::COverViewModel(CDeviceList * deviceList, QObject * parent) : QAbstractItemModel(parent) {
         devices = deviceList;
     }
     
-    COverViewListModel::~COverViewListModel() {
+    COverViewModel::~COverViewModel() {
         devices = NULL;
     }
     
-    Qt::ItemFlags COverViewListModel::flags(const QModelIndex & index) const {
+    Qt::ItemFlags COverViewModel::flags(const QModelIndex & index) const {
         if (devices == NULL)
             return 0;
         
@@ -32,11 +32,11 @@ namespace qnut {
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
     }
     
-    QModelIndex COverViewListModel::parent(const QModelIndex & index) const {
+    QModelIndex COverViewModel::parent(const QModelIndex & index) const {
         return QModelIndex();
     }
     
-    int COverViewListModel::columnCount(const QModelIndex & parent) const {
+    int COverViewModel::columnCount(const QModelIndex & parent) const {
         if (devices == NULL)
             return 0;
             
@@ -46,14 +46,14 @@ namespace qnut {
         return 3;
     }
     
-    QModelIndex COverViewListModel::index(int row, int column, const QModelIndex & parent) const {
+    QModelIndex COverViewModel::index(int row, int column, const QModelIndex & parent) const {
         if ((devices != NULL) && (row < devices->count()) && (!parent.isValid()))
             return createIndex(row, column, (void *)(devices->at(row)));
         else
             return QModelIndex();
     }
     
-    int COverViewListModel::rowCount(const QModelIndex & parent) const {
+    int COverViewModel::rowCount(const QModelIndex & parent) const {
         if (devices == NULL)
             return 0;
         
@@ -63,7 +63,7 @@ namespace qnut {
         return 0;
     }
     
-    QVariant COverViewListModel::data(const QModelIndex & index, int role) const {
+    QVariant COverViewModel::data(const QModelIndex & index, int role) const {
         if (devices == NULL)
             return QVariant();
         
@@ -106,7 +106,7 @@ namespace qnut {
         return QVariant();
     }
     
-    QVariant COverViewListModel::headerData(int section, Qt::Orientation orientation, int role) const {
+    QVariant COverViewModel::headerData(int section, Qt::Orientation orientation, int role) const {
         if (devices == NULL)
             return QVariant();
         
