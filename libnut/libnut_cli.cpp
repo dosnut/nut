@@ -84,16 +84,17 @@ void CDeviceManager::init(CLog * inlog) {
     }
     //Let's populate our own DeviceList
     CDevice * device;
-    for (QList<QDBusObjectPath>::iterator i=replydevs.value().begin(); i != replydevs.value().end(); ++i) {
+    foreach (QDBusObjectPath i, replydevs.value()) {
+//    for (QList<QDBusObjectPath>::iterator i=replydevs.value().begin(); i != replydevs.value().end(); ++i) {
         try {
-            device = new CDevice(this,*i);
+            device = new CDevice(this, i);
         }
         catch (CLI_DevConnectionException e) {
             *log << e.msg();
             continue;
         }
         devices.append(device);
-        dbusDevices.insert(*i,device);
+        dbusDevices.insert(i, device);
         emit(deviceAdded(device));
     }
     //Connect dbus-signals to own slots:
@@ -409,9 +410,9 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
     log = parent->log;
     //First attach to dbus
     dbusConnection = parent->dbusConnection;
-    dbusConnectionInterface = dbusConnectionInterface;
+    dbusConnectionInterface = parent->dbusConnectionInterface;
     serviceCheck(dbusConnectionInterface);
-    dbusEnvironment = new DBusEnvironmentInterface("NUT_DBUS_URL", dbusPath.path(),*dbusConnection,this);
+    dbusEnvironment = new DBusEnvironmentInterface(NUT_DBUS_URL, dbusPath.path(),*dbusConnection,this);
     //Retrieve dbus information:
     QDBusReply<libnut_EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
     if (replyprop.isValid()) {
