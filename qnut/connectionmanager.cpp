@@ -153,6 +153,7 @@ namespace qnut {
             distributeActions(2);
         }
         ui.toolBar->setUpdatesEnabled(true);
+        ui.toolBar->repaint();
     }
     
     void CConnectionManager::uiSelectedDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected) {
