@@ -258,8 +258,8 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
     connect(dbusDevice, SIGNAL(environmentAdded(const QDBusObjectPath &path)),
             this, SLOT(environmentAdded(const QDBusObjectPath &path)));
 
-    connect(dbusDevice, SIGNAL(stateChanged(int state)),
-            this, SLOT(stateChanged(int instate)));
+    connect(dbusDevice, SIGNAL(stateChanged(DeviceState newstate, DeviceState oldtstate)),
+            this, SLOT(dbusstateChanged(DeviceState newstate, DeviceState oldstate)));
 }
 CDevice::~CDevice() {
     CEnvironment * env;
@@ -376,8 +376,8 @@ void CDevice::environmentRemoved(const QDBusObjectPath &path) {
         *log << tr("Tried to remove non-existing environment");
     }
 }
-void CDevice::stateChanged(int instate) {
-    state = (DeviceState) instate;
+void CDevice::dbusstateChanged(DeviceState newstate, DeviceState oldstate) {
+    state = newstate;
     emit(stateChanged(state));
 }
 
