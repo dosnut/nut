@@ -7,8 +7,7 @@ namespace qnut {
         QMainWindow(parent),
         deviceManager(this),
         logFile(this, UI_FILE_LOG),
-        trayicon(this),
-        tabWidget(centralWidget())
+        trayicon(this)
     {
         setWindowIcon(trayicon.icon());
         deviceOptions.reserve(10);
@@ -26,6 +25,8 @@ namespace qnut {
         
         tabWidget.addTab(&overView, tr("Overview"));
         tabWidget.addTab(&logEdit, tr("Log"));
+        
+        ui.centralwidget->layout()->addWidget(&tabWidget);
         
         connect(&logFile, SIGNAL(printed(const QString &)), &logEdit, SLOT(append(const QString &)));
         connect(&deviceManager, SIGNAL(deviceAdded(CDevice *)), this, SLOT(uiAddedDevice(CDevice *)));
