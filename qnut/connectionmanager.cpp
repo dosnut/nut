@@ -107,7 +107,7 @@ namespace qnut {
     void CConnectionManager::uiAddedDevice(CDevice * dev) {
         CDeviceOptions * newDeviceOptions = new CDeviceOptions(dev, ui.tabWidget);
         
-        ui.tabWidget->insertTab(ui.tabWidget->count()-1, newDeviceOptions, dev->name);
+        ui.tabWidget->insertTab(ui.tabWidget->count(), newDeviceOptions, dev->name);
         newDeviceOptions->updateDeviceIcons();
         
         deviceOptions.insert(dev, newDeviceOptions);
