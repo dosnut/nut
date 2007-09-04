@@ -40,15 +40,15 @@ DBusEnvironmentInterface::~DBusEnvironmentInterface()
 }
 
 /*
- * Implementation of interface class DBusInterfaceInterface
+ * Implementation of interface class DBusInterfaceInterface_IPv4
  */
 
-DBusInterfaceInterface::DBusInterfaceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
+DBusInterfaceInterface_IPv4::DBusInterfaceInterface_IPv4(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
     : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
 {
 }
 
-DBusInterfaceInterface::~DBusInterfaceInterface()
+DBusInterfaceInterface_IPv4::~DBusInterfaceInterface_IPv4()
 {
 }
 }

@@ -188,12 +188,12 @@ namespace libnut {
 		friend class CDeviceManager;
 		friend class CDevice;
 		friend class CEnvironment;
-		friend class DBusInterfaceInterface;
+		friend class DBusInterfaceInterface_IPv4;
 	private:
 		CEnvironment * parent;
 		QDBusObjectPath dbusPath;
 		CLog * log;
-		DBusInterfaceInterface * dbusInterface;
+		DBusInterfaceInterface_IPv4 * dbusInterface;
 		void refreshAll();
 	private slots:
 		void dbusstateChanged(const InterfaceProperties &properties);
@@ -204,6 +204,7 @@ namespace libnut {
 		QHostAddress ip;
 		QHostAddress netmask;
 		QHostAddress gateway;
+		QHostAddress dnsserver;
 
 		CInterface(CEnvironment * parent, QDBusObjectPath dbusPath);
 		~CInterface();

@@ -450,24 +450,24 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment select config"));
 	}
 	
-// 	QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnvironment->getInterfaces();
-// 	if (replyifs.isValid()) {
-// 		CInterface * interface;
-// 		foreach(QDBusObjectPath i, replyifs.value()) {
-// 			try {
-// 				interface = new CInterface(this,i);
-// 			}
-// 			catch (CLI_ConnectionException &e) {
-// 				*log << e.what();
-// 				continue;
-// 			}
-// 			dbusInterfaces.insert(i,interface);
-// 			interfaces.append(interface);
-// 		}
-// 	}
-// 	else {
-// 		throw CLI_EnvConnectionException(tr("Error while retrieving environment's interfaces"));
-// 	}
+ 	QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnvironment->getInterfaces();
+	if (replyifs.isValid()) {
+		CInterface * interface;
+		foreach(QDBusObjectPath i, replyifs.value()) {
+			try {
+				interface = new CInterface(this,i);
+			}
+			catch (CLI_ConnectionException &e) {
+				*log << e.what();
+				continue;
+			}
+			dbusInterfaces.insert(i,interface);
+			interfaces.append(interface);
+		}
+	}
+	else {
+		throw CLI_EnvConnectionException(tr("Error while retrieving environment's interfaces"));
+	}
 	connect(dbusEnvironment, SIGNAL(interfaceAdded(const QDBusObjectPath &)), this, SLOT(dbusinterfaceAdded(const QDBusObjectPath &)));
 	connect(dbusEnvironment, SIGNAL(interfaceRemoved(const QDBusObjectPath &)), this, SLOT(dbusinterfaceRemoved(const QDBusObjectPath &)));
 	connect(dbusEnvironment, SIGNAL(stateChanged(bool )), this, SLOT(dbusstateChanged(bool )));
@@ -627,10 +627,13 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 		ip = replyprops.value().ip;
 		netmask = replyprops.value().netmask;
 		gateway = replyprops.value().gateway;
+		dnsserver = replyprops.value().dns;
 	}
 	else {
-		throw CLI_IfConnectionException(tr("Error while retrieving interface properties"));
+		throw CLI_IfConnectionException(tr("Error while retrieving interface properties") + replyprops.error().name());
 	}
+
+	connect(dbusInterface, SIGNAL(stateChanged(const InterfaceProperties &)), this, SLOT(dbusstateChanged(const InterfaceProperties &)));
 }
 CInterface::~CInterface() {
 }
@@ -644,11 +647,11 @@ void CInterface::refreshAll() {
 		ip = replyprops.value().ip;
 		netmask = replyprops.value().netmask;
 		gateway = replyprops.value().gateway;
+		dnsserver = replyprops.value().dns;
 	}
 	else {
 		*log << (tr("Error while refreshing interface at: ") + dbusPath.path());
 	}
-	connect(dbusInterface, SIGNAL(stateChanged(const InterfaceProperties &)), this, SLOT(dbusstateChanged(const InterfaceProperties &)));
 }
 //CInterface private slots
 void CInterface::dbusstateChanged(const InterfaceProperties &properties) {
@@ -657,7 +660,7 @@ void CInterface::dbusstateChanged(const InterfaceProperties &properties) {
 		active = properties.active;
 		emit(activeChanged(active));
 	}
-	bool equal = ( (isStatic == properties.isStatic) && (userDefineable == properties.userDefineable) && (ip == properties.ip) && (netmask == properties.netmask) && (gateway == properties.gateway) );
+	bool equal = ( (isStatic == properties.isStatic) && (userDefineable == properties.userDefineable) && (ip == properties.ip) && (netmask == properties.netmask) && (gateway == properties.gateway) && (dnsserver == properties.dns));
 	if (!equal) {
 		isStatic = properties.isStatic;
 		userDefineable = properties.userDefineable;

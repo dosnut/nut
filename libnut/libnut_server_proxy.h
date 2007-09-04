@@ -43,13 +43,13 @@ public Q_SLOTS: // METHODS
     inline QDBusReply<void> disable()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("disable"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("disable"), argumentList);
     }
 
     inline QDBusReply<void> enable()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("enable"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("enable"), argumentList);
     }
 
     inline QDBusReply<QList<QDBusObjectPath> > getEnvironments()
@@ -64,7 +64,7 @@ public Q_SLOTS: // METHODS
     inline QDBusReply<void> setEnvironment(QDBusObjectPath envpath) {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(envpath);
-        return callWithArgumentList(QDBus::Block, QLatin1String("setEnvironment"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("setEnvironment"), argumentList);
     }
     inline QDBusReply<QList<WlanScanresult> > getwlanScan() {
         QList<QVariant> argumentList;
@@ -73,23 +73,23 @@ public Q_SLOTS: // METHODS
     inline QDBusReply<void> addwlanEnvironment(WlanNetworkProperties netprops) {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(netprops);
-        return callWithArgumentList(QDBus::Block, QLatin1String("addwlanEnvironment"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("addwlanEnvironment"), argumentList);
     }
     inline QDBusReply<void> addEnvironment(EnvironmentProperties envprops) {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(envprops);
-        return callWithArgumentList(QDBus::Block, QLatin1String("addEnvironment"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("addEnvironment"), argumentList);
     }
     inline QDBusReply<void> removeEnvironment(QDBusObjectPath path) {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(path);
-        return callWithArgumentList(QDBus::Block, QLatin1String("removeEnvironment"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("removeEnvironment"), argumentList);
     }
 
 Q_SIGNALS: // SIGNALS
     void environmentChangedActive(const QDBusObjectPath &newenv);
-    //void environmentAdded(const QDBusObjectPath &path);
-    //void environmentRemoved(const QDBusObjectPath &path);
+    void environmentAdded(const QDBusObjectPath &path);
+    void environmentRemoved(const QDBusObjectPath &path);
     void stateChanged(int newState, int oldState);
 };
 
@@ -156,12 +156,12 @@ public Q_SLOTS: // METHODS
     inline QDBusReply<void> addInterface(InterfaceProperties prop) {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(prop);
-        return callWithArgumentList(QDBus::Block, QLatin1String("addInterface"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("addInterface"), argumentList);
     }
     inline QDBusReply<void> removeInterface(QDBusObjectPath path) {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(path);
-        return callWithArgumentList(QDBus::Block, QLatin1String("removeInterface"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("removeInterface"), argumentList);
     }
 
 Q_SIGNALS: // SIGNALS
@@ -173,29 +173,29 @@ Q_SIGNALS: // SIGNALS
 /*
  * Proxy class for interface DBus.Interface
  */
-class DBusInterfaceInterface: public QDBusAbstractInterface
+class DBusInterfaceInterface_IPv4: public QDBusAbstractInterface
 {
     Q_OBJECT
 public:
     static inline const char *staticInterfaceName()
-    { return NUT_DBUS_URL ".Interface"; }
+    { return NUT_DBUS_URL ".Interface_IPv4"; }
 
 public:
-    DBusInterfaceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
+    DBusInterfaceInterface_IPv4(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
 
-    ~DBusInterfaceInterface();
+    ~DBusInterfaceInterface_IPv4();
 
 public Q_SLOTS: // METHODS
     inline QDBusReply<void> activate()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("activate"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("activate"), argumentList);
     }
 
     inline QDBusReply<void> deactivate()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("deactivate"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("deactivate"), argumentList);
     }
 
     inline QDBusReply<libnut::InterfaceProperties> getProperties()
@@ -208,32 +208,33 @@ public Q_SLOTS: // METHODS
     {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(HostAddress);
-        return callWithArgumentList(QDBus::Block, QLatin1String("setIP"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("setIP"), argumentList);
     }
 
     inline QDBusReply<void> setGateway(uint Gateway)
     {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(Gateway);
-        return callWithArgumentList(QDBus::Block, QLatin1String("setGateway"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("setGateway"), argumentList);
     }
 
     inline QDBusReply<void> setNetmask(uint Netmask)
     {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(Netmask);
-        return callWithArgumentList(QDBus::Block, QLatin1String("setNetmask"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("setNetmask"), argumentList);
     }
+// 	inline QDBusReply<void> setDNS(QList<QHostAddress> dns)
+// 	{
+// 		QList<QVariant> argumentList;
+// 		argumentList << qVariantFromValue(dns);
+// 		return callWithArgumentList(QDBus::NoBlock, QLatin1String("setDNS"), argumentList);
+// 	}
 
-    inline QDBusReply<void> setNetmask()
-    {
-        QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("setDynamic"), argumentList);
-    }
     inline QDBusReply<void> setDynamic()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("setDynamic"), argumentList);
+        return callWithArgumentList(QDBus::NoBlock, QLatin1String("setDynamic"), argumentList);
     }
 
 Q_SIGNALS: // SIGNALS
@@ -244,7 +245,7 @@ namespace DBus {
   typedef ::DBusDeviceInterface Device;
   typedef DBus::DBusDeviceManagerInterface DeviceManager;
   typedef DBus::DBusEnvironmentInterface Environment;
-  typedef DBus::DBusInterfaceInterface Interface;
+  typedef DBus::DBusInterfaceInterface_IPv4 Interface;
 }*/
 }
 #endif
