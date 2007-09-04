@@ -66,10 +66,9 @@ namespace nuts {
 			void disable();
 		
 		signals:
-			void deviceEnabled();
-			void deviceDisabled();
-			void deviceUp();
-			void deviceDown();
+			void stateChanged(libnut::DeviceState newstate, libnut::DeviceState oldstate);
+			void environmentChangedActive(const QDBusObjectPath &objectpath);
+			
 	};
 	
 	class DBusEnvironment: public QDBusAbstractAdaptor {
