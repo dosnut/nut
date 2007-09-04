@@ -93,9 +93,8 @@ namespace nuts {
 			QString getPath();
 	
 		public slots:
-//			QList<libnut::SelectConfig> getSelectConfig();
 			libnut::EnvironmentProperties getProperties();
-			
+			QList<libnut::SelectConfig> getSelectConfig();
 			QList<QDBusObjectPath> getInterfaces();
 		signals:
 	};

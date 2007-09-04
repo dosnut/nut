@@ -442,13 +442,13 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	else {
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment properties"));
 	}
-	QDBusReply<QList<SelectConfig> > replyselconfs = dbusEnvironment->getSelectConfig();
-	if (replyselconfs.isValid()) {
-		selectStatements = replyselconfs.value();
-	}
-	else {
-		throw CLI_EnvConnectionException(tr("Error while retrieving environment select config"));
-	}
+// 	QDBusReply<QList<SelectConfig> > replyselconfs = dbusEnvironment->getSelectConfig();
+// 	if (replyselconfs.isValid()) {
+// 		selectStatements = replyselconfs.value();
+// 	}
+// 	else {
+// 		throw CLI_EnvConnectionException(tr("Error while retrieving environment select config"));
+// 	}
 	QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnvironment->getInterfaces();
 	if (replyifs.isValid()) {
 		CInterface * interface;
