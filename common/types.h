@@ -27,7 +27,7 @@ namespace common {
 
 namespace libnut {
 
-	enum SelectFlags {user=0, arp=1, essid=2};
+	enum SelectFlags {SF_USER=0, SF_ARP=1, SF_ESSID=2};
 	struct SelectConfig {
 		bool selected;
 		int flags;
