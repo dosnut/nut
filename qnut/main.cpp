@@ -27,7 +27,7 @@ int main(int argc, char * argv[])
     CEnvironment * testenv1 = new CEnvironment(testdev0);
     testenv1->name = "default";
     testenv1->active = false;
-    libnut_SelectConfig testconf;
+    SelectConfig testconf;
     testconf.flags = user;
     testenv1->selectStatements.append(testconf);
     testdev0->environments.append(testenv1);

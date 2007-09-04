@@ -26,8 +26,8 @@ namespace common {
 
 namespace libnut {
 
-	enum libnut_SelectFlags {user=0, arp=1, essid=2};
-	struct libnut_SelectConfig {
+	enum SelectFlags {user=0, arp=1, essid=2};
+	struct SelectConfig {
 		bool selected;
 		int flags;
 		bool useMac;
@@ -36,60 +36,64 @@ namespace libnut {
 		QString essid;
 	};
 	
-	QDBusArgument &operator<< (QDBusArgument &argument, const libnut_SelectConfig & selconf);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_SelectConfig &selconf);
+	QDBusArgument &operator<< (QDBusArgument &argument, const SelectConfig & selconf);
+	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectConfig &selconf);
 	
 	
 	//Sollte eigtl. von Qt gemacht werden, da libnut_* als Metatyp bekannt.
-	//QDBusArgument &operator<< (QDBusArgument &argument, const QList<libnut_InterfaceProperties> &selconflist);
-	//const QDBusArgument &operator>> (const QDBusArgument &argument, QList<libnut_InterfaceProperties> &selconflist);
+	//QDBusArgument &operator<< (QDBusArgument &argument, const QList<InterfaceProperties> &selconflist);
+	//const QDBusArgument &operator>> (const QDBusArgument &argument, QList<InterfaceProperties> &selconflist);
 	enum DeviceState  { DS_DEACTIVATED, DS_ACTIVATED, DS_CARRIER, DS_UNCONFIGURED, DS_UP };
 	enum DeviceType {DT_ETH=0, DT_AIR=1, DT_PPP=2};
-	struct libnut_DeviceProperties {
+	struct DeviceProperties {
 		QString name;
 		QString activeEnvironment;
 		DeviceState state;
 		DeviceType type;
 	};
 	
-	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceState &devstate);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceState &devstate);
+// 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceState &devstate);
+// 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceState &devstate);
 
-	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceType &devtype);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceState &devtype);
+// 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceType &devtype);
+// 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceState &devtype);
 
-	QDBusArgument &operator<< (QDBusArgument &argument, const libnut_DeviceProperties &devprop);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_DeviceProperties &devprop);
+	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceProperties &devprop);
+	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceProperties &devprop);
 	
-	enum libnut_wlanEncryptionType {none=0, wep=2, wpa1=4, wpa2=8, other=16};
-	struct libnut_wlanScanresult {
+	enum WlanEncryptionType {none=0, wep=2, wpa1=4, wpa2=8, other=16};
+	struct WlanScanresult {
 		QString essid;
 		int channel;
 		QByteArray bssid;
 		int flags;
 		int signallevel;
-		int encryption;
+		WlanEncryptionType encryption;
 	};
-	QDBusArgument &operator<< (QDBusArgument &argument, const libnut_wlanEncryptionType &scanres);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_wlanEncryptionType &scanres);
+
+// 	QDBusArgument &operator<< (QDBusArgument &argument, const WlanEncryptionType &enctype);
+// 	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanEncryptionType &enctype);
+
+	QDBusArgument &operator<< (QDBusArgument &argument, const WlanScanresult &scanres);
+	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanScanresult &scanres);
 	
-	struct libnut_wlanNetworkProperties {
-		libnut_wlanScanresult scanresult;
+	struct WlanNetworkProperties {
+		WlanScanresult scanresult;
 		QString password;
 		QString proto;
 		QString key_mgmt;
 	};
-	QDBusArgument &operator<< (QDBusArgument &argument, const libnut_wlanNetworkProperties &wlanprop);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_wlanNetworkProperties &wlanprop);
+	QDBusArgument &operator<< (QDBusArgument &argument, const WlanNetworkProperties &wlanprop);
+	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanNetworkProperties &wlanprop);
 	
-	struct libnut_EnvironmentProperties {
+	struct EnvironmentProperties {
 		QString name;
 	};
 	
-	QDBusArgument &operator<< (QDBusArgument &argument, const libnut_EnvironmentProperties &envprop);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_EnvironmentProperties &envprop);
+	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentProperties &envprop);
+	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentProperties &envprop);
 	
-	struct libnut_InterfaceProperties {
+	struct InterfaceProperties {
 		bool isStatic;
 		bool active;
 		bool userDefineable;
@@ -98,18 +102,18 @@ namespace libnut {
 		QHostAddress gateway;
 	};
 	
-	QDBusArgument &operator<< (QDBusArgument &argument, const libnut_InterfaceProperties &ifprop);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_InterfaceProperties &ifprop);
+	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop);
+	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceProperties &ifprop);
 };
 
-Q_DECLARE_METATYPE(libnut::libnut_SelectConfig)
-Q_DECLARE_METATYPE(QList<libnut::libnut_SelectConfig>)
-Q_DECLARE_METATYPE(libnut::libnut_DeviceProperties)
+Q_DECLARE_METATYPE(libnut::SelectConfig)
+Q_DECLARE_METATYPE(QList<libnut::SelectConfig>)
+Q_DECLARE_METATYPE(libnut::DeviceProperties)
 Q_DECLARE_METATYPE(libnut::DeviceState)
-Q_DECLARE_METATYPE(libnut::libnut_wlanScanresult)
-Q_DECLARE_METATYPE(QList<libnut::libnut_wlanScanresult>)
-Q_DECLARE_METATYPE(libnut::libnut_wlanNetworkProperties)
-Q_DECLARE_METATYPE(libnut::libnut_EnvironmentProperties)
-Q_DECLARE_METATYPE(libnut::libnut_InterfaceProperties)
+Q_DECLARE_METATYPE(libnut::WlanScanresult)
+Q_DECLARE_METATYPE(QList<libnut::WlanScanresult>)
+Q_DECLARE_METATYPE(libnut::WlanNetworkProperties)
+Q_DECLARE_METATYPE(libnut::EnvironmentProperties)
+Q_DECLARE_METATYPE(libnut::InterfaceProperties)
 
 #endif

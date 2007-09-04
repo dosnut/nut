@@ -163,7 +163,7 @@ namespace libnut {
 	public:
 		bool active;
 		QString name;
-		QList<libnut_SelectConfig> selectStatements;
+		QList<SelectConfig> selectStatements;
 		CInterfaceList interfaces;
 		
 		CEnvironment(CDevice * parent, QDBusObjectPath dbusPath);
@@ -193,7 +193,7 @@ namespace libnut {
 		DBusInterfaceInterface * dbusInterface;
 		void refreshAll();
 	private slots:
-		void dbusstateChanged(const libnut_InterfaceProperties &properties);
+		void dbusstateChanged(const InterfaceProperties &properties);
 	public:
 		bool isStatic;
 		bool active;

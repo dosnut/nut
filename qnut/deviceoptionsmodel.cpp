@@ -95,7 +95,7 @@ namespace qnut {
                     if (data->parent() == device) {
                         int configFlags = 0;
                         bool configUseMac = false;
-                        foreach(libnut_SelectConfig config, ((CEnvironment *)data)->selectStatements) {
+                        foreach(SelectConfig config, ((CEnvironment *)data)->selectStatements) {
                             if (config.selected) {
                                 configFlags = configFlags || config.flags;
                                 configUseMac = configUseMac || config.useMac;

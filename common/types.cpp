@@ -1,13 +1,13 @@
 #include "types.h"
 
 namespace libnut {
-	QDBusArgument &operator<< (QDBusArgument &argument, const libnut_SelectConfig & selconf) {
+	QDBusArgument &operator<< (QDBusArgument &argument, const SelectConfig & selconf) {
 		argument.beginStructure();
 		argument << selconf.selected << selconf.flags << selconf.useMac << selconf.macAddress.toString() << selconf.arpIP.toIPv4Address() << selconf.essid;
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_SelectConfig &selconf) {
+	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectConfig &selconf) {
 		argument.beginStructure();
 		QString mac;
 		quint32 ip;
@@ -42,64 +42,79 @@ namespace libnut {
 		return argument;
     }
 
-	QDBusArgument &operator<< (QDBusArgument &argument, const libnut_DeviceProperties & devprop) {
+	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceProperties & devprop) {
 		argument.beginStructure();
-		argument << devprop.name << devprop.activeEnvironment << devprop.state << devprop.type;
+		argument << devprop.name << devprop.activeEnvironment << (int) devprop.state << (int) devprop.type;
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_DeviceProperties &devprop) {
+	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceProperties &devprop) {
+		int tmp;
 		argument.beginStructure();
-		argument >> devprop.name >> devprop.activeEnvironment >> devprop.state >> devprop.type;
+		argument >> devprop.name >> devprop.activeEnvironment >> tmp;
+		devprop.state = (DeviceState) tmp;
+		argument >> tmp;
+		devprop.type = (DeviceType) tmp;
 		argument.endStructure();
+		return argument;
+	}
+
+	QDBusArgument &operator<< (QDBusArgument &argument, const WlanEncryptionType &enctype) {
+		argument << (int) enctype;
+		return argument;
+	}
+	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanEncryptionType &enctype) {
+		int type;
+		argument >> type;
+		enctype = (WlanEncryptionType) type;
 		return argument;
 	}
 	
-	QDBusArgument &operator<< (QDBusArgument &argument, const libnut_wlanScanresult &scanres) {
+	QDBusArgument &operator<< (QDBusArgument &argument, const WlanScanresult &scanres) {
 		argument.beginStructure();
 		argument << scanres.essid << scanres.channel << scanres.bssid << scanres.flags << scanres.signallevel << scanres.encryption;
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_wlanScanresult &scanres) {
+	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanScanresult &scanres) {
 		argument.beginStructure();
 		argument >> scanres.essid >> scanres.channel >> scanres.bssid >> scanres.flags >> scanres.signallevel >> scanres.encryption;
 		argument.endStructure();
 		return argument;
 	}
 	
-	QDBusArgument &operator<< (QDBusArgument &argument, const libnut_wlanNetworkProperties &wlanprop) {
+	QDBusArgument &operator<< (QDBusArgument &argument, const WlanNetworkProperties &wlanprop) {
 		argument.beginStructure();
 		argument << wlanprop.scanresult << wlanprop.password << wlanprop.proto << wlanprop.key_mgmt;
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_wlanNetworkProperties &wlanprop) {
+	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanNetworkProperties &wlanprop) {
 		argument.beginStructure();
 		argument >> wlanprop.scanresult >> wlanprop.password >> wlanprop.proto >> wlanprop.key_mgmt;
 		argument.endStructure();
 		return argument;
 	}
 	
-	QDBusArgument &operator<< (QDBusArgument &argument, const libnut_EnvironmentProperties &envprop) {
+	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentProperties &envprop) {
 		argument.beginStructure();
 		argument << envprop.name;
 		argument.endStructure();
 		return argument;
 	};
-	const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_EnvironmentProperties &envprop) {
+	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentProperties &envprop) {
 		argument.beginStructure();
 		argument >> envprop.name;
 		return argument;
 	}
-	QDBusArgument &operator<< (QDBusArgument &argument, const libnut_InterfaceProperties &ifprop) {
+	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop) {
 		argument.beginStructure();
 		argument << ifprop.active << ifprop.userDefineable << ifprop.isStatic;
 		argument << ifprop.ip.toIPv4Address() << ifprop.netmask.toIPv4Address() << ifprop.gateway.toIPv4Address();
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, libnut_InterfaceProperties &ifprop) {
+	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceProperties &ifprop) {
 		quint32 hostaddress;
 		argument.beginStructure();
 		argument >> ifprop.active >> ifprop.userDefineable >> ifprop.isStatic;
@@ -117,25 +132,23 @@ namespace libnut {
 		static int done = 0;
 		if (done) return;
 		done = 1;
-		qRegisterMetaType<libnut_DeviceProperties>("libnut_DeviceProperties");
-		qRegisterMetaType<DeviceState>("DeviceState");
-		qRegisterMetaType<libnut_SelectConfig>("libnut_SelectConfig");
-		qRegisterMetaType<libnut_EnvironmentProperties>("libnut_EnvironmentProperties");
-		qRegisterMetaType<libnut_InterfaceProperties>("libnut_InterfaceProperties");
-//		qRegisterMetaType<QList<libnut_SelectConfig> >("libnut_SelectConfigList");
-		qRegisterMetaType<libnut_wlanScanresult>("libnut_wlanScanresult");
-//		qRegisterMetaType<QList<libnut_wlanScanresult> >("libnut_wlanScanresultList");
-		qRegisterMetaType<libnut_wlanNetworkProperties>("libnut_wlanNetworkProperties");
+		qRegisterMetaType<DeviceProperties>("DeviceProperties");
+		qRegisterMetaType<SelectConfig>("SelectConfig");
+		qRegisterMetaType<EnvironmentProperties>("EnvironmentProperties");
+		qRegisterMetaType<InterfaceProperties>("InterfaceProperties");
+//		qRegisterMetaType<QList<SelectConfig> >("SelectConfigList");
+		qRegisterMetaType<WlanScanresult>("WlanScanresult");
+//		qRegisterMetaType<QList<WlanScanresult> >("WlanScanresultList");
+		qRegisterMetaType<WlanNetworkProperties>("WlanNetworkProperties");
 	
-		qDBusRegisterMetaType<libnut_DeviceProperties>();
-		qDBusRegisterMetaType<DeviceState>();
-		qDBusRegisterMetaType<libnut_SelectConfig>();
-		qDBusRegisterMetaType<libnut_EnvironmentProperties>();
-		qDBusRegisterMetaType<libnut_InterfaceProperties>();
-//		qDBusRegisterMetaType<QList<libnut_SelectConfig> >();
-		qDBusRegisterMetaType<libnut_wlanScanresult>();
-//		qDBusRegisterMetaType<QList<libnut_wlanScanresult> >();
-		qDBusRegisterMetaType<libnut_wlanNetworkProperties>();
+		qDBusRegisterMetaType<DeviceProperties>();
+		qDBusRegisterMetaType<SelectConfig>();
+		qDBusRegisterMetaType<EnvironmentProperties>();
+		qDBusRegisterMetaType<InterfaceProperties>();
+//		qDBusRegisterMetaType<QList<SelectConfig> >();
+		qDBusRegisterMetaType<WlanScanresult>();
+//		qDBusRegisterMetaType<QList<WlanScanresult> >();
+		qDBusRegisterMetaType<WlanNetworkProperties>();
 	}
 }
 

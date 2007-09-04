@@ -57,7 +57,6 @@ CDeviceManager::~CDeviceManager() {
 	CDevice * device;
 	while (!devices.isEmpty()) {
 		device = devices.takeFirst();
-		emit(deviceRemoved(device)); //maybe comment out, depends on client
 		delete device;
 	}
 }
@@ -206,7 +205,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	
 	//get properties
 	*log << (tr("Getting device properties at: ") + dbusPath.path());
-	QDBusReply<libnut_DeviceProperties> replyProp = dbusDevice->getProperties();
+	QDBusReply<DeviceProperties> replyProp = dbusDevice->getProperties();
 	if (replyProp.isValid()) {
 		name = replyProp.value().name;
 		type = replyProp.value().type;
@@ -301,7 +300,7 @@ void CDevice::refreshAll() {
 	}
 	activeEnvironment = 0;
 	//now refresh the rest of our device properties:
-	QDBusReply<libnut_DeviceProperties> replyprop = dbusDevice->getProperties();
+	QDBusReply<DeviceProperties> replyprop = dbusDevice->getProperties();
 	if (replyprop.isValid()) {
 		if (!replyprop.value().activeEnvironment.isEmpty()) {
 			dbusActiveEnvironment = QDBusObjectPath(replyprop.value().activeEnvironment);
@@ -393,7 +392,7 @@ void CDevice::setEnvironment(CEnvironment * environment) {
 	dbusDevice->setEnvironment(dbusEnvironments.key(environment));
 }
 void CDevice::addEnvironment(QString name) {
-	libnut_EnvironmentProperties props;
+	EnvironmentProperties props;
 	props.name = name;
 	dbusDevice->addEnvironment(props);
 }
@@ -414,14 +413,14 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	serviceCheck(dbusConnectionInterface);
 	dbusEnvironment = new DBusEnvironmentInterface(NUT_DBUS_URL, dbusPath.path(),*dbusConnection,this);
 	//Retrieve dbus information:
-	QDBusReply<libnut_EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
+	QDBusReply<EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
 	if (replyprop.isValid()) {
 		name = replyprop.value().name;
 	}
 	else {
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment properties"));
 	}
-	QDBusReply<QList<libnut_SelectConfig> > replyselconfs = dbusEnvironment->getSelectConfig();
+	QDBusReply<QList<SelectConfig> > replyselconfs = dbusEnvironment->getSelectConfig();
 	if (replyselconfs.isValid()) {
 		selectStatements = replyselconfs.value();
 	}
@@ -464,14 +463,14 @@ CEnvironment::~CEnvironment() {
 
 void CEnvironment::refreshAll() {
 	//Retrieve properties and select config, then interfaces:
-	QDBusReply<libnut_EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
+	QDBusReply<EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
 	if (replyprop.isValid()) {
 		name = replyprop.value().name;
 	}
 	else {
 		*log << tr("Error while refreshing environment properties");
 	}
-	QDBusReply<QList<libnut_SelectConfig> > replyselconfs = dbusEnvironment->getSelectConfig();
+	QDBusReply<QList<SelectConfig> > replyselconfs = dbusEnvironment->getSelectConfig();
 	if (replyselconfs.isValid()) {
 		selectStatements = replyselconfs.value();
 	}
@@ -573,7 +572,7 @@ void CEnvironment::enter() {
 	parent->setEnvironment(this);
 }
 void CEnvironment::addInterface(bool isStatic, QHostAddress ip, QHostAddress netmask, QHostAddress gateway, bool active=true) {
-	libnut_InterfaceProperties ifprops;
+	InterfaceProperties ifprops;
 	ifprops.isStatic = isStatic;
 	ifprops.active = active;
 	ifprops.userDefineable = true;
@@ -597,7 +596,7 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	dbusInterface = new DBusInterfaceInterface("NUT_DBUS_URL", dbusPath.path(), *dbusConnection, this);
 	serviceCheck(dbusConnectionInterface);
 	//Get properties:
-	QDBusReply<libnut_InterfaceProperties> replyprops = dbusInterface->getProperties();
+	QDBusReply<InterfaceProperties> replyprops = dbusInterface->getProperties();
 	if (replyprops.isValid()) {
 		isStatic = replyprops.value().isStatic;
 		active = replyprops.value().active;
@@ -614,7 +613,7 @@ CInterface::~CInterface() {
 }
 //CInterface private functions:
 void CInterface::refreshAll() {
-	QDBusReply<libnut_InterfaceProperties> replyprops = dbusInterface->getProperties();
+	QDBusReply<InterfaceProperties> replyprops = dbusInterface->getProperties();
 	if (replyprops.isValid()) {
 		isStatic = replyprops.value().isStatic;
 		active = replyprops.value().active;
@@ -626,10 +625,10 @@ void CInterface::refreshAll() {
 	else {
 		*log << (tr("Error while refreshing interface at: ") + dbusPath.path());
 	}
-	connect(dbusInterface, SIGNAL(stateChanged(const libnut_InterfaceProperties &properties)), this, SLOT(dbusstateChanged(const libnut_InterfaceProperties &properties)));
+	connect(dbusInterface, SIGNAL(stateChanged(const InterfaceProperties &properties)), this, SLOT(dbusstateChanged(const InterfaceProperties &properties)));
 }
 //CInterface private slots
-void CInterface::dbusstateChanged(const libnut_InterfaceProperties &properties) {
+void CInterface::dbusstateChanged(const InterfaceProperties &properties) {
 	//Check changes:
 	if (properties.active != active) {
 		active = properties.active;
