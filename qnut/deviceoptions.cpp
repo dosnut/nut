@@ -37,9 +37,6 @@ namespace qnut {
         deactivateInterfaceAction = new QAction(QIcon(UI_ICON_INTERFACE_DEACTIVATE), tr("Deactivate interface"), this);
         editInterfaceAction       = new QAction(QIcon(UI_ICON_EDIT), tr("Edit IP Configuration..."), this);
         
-        foreach(QAction * i, environmentsMenu->actions()) {
-            i->setEnabled(false);
-        }
         separator->setSeparator(true);
         
         addAction(enterEnvironmentAction);
@@ -48,6 +45,10 @@ namespace qnut {
         addAction(deactivateInterfaceAction);
         addAction(separator);
         addAction(editInterfaceAction);
+        
+        foreach(QAction * i, actions()) {
+            i->setEnabled(false);
+        }
         
         setAllColumnsShowFocus(true);
         
