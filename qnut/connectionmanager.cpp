@@ -1,7 +1,6 @@
 #include <QDate>
 #include "connectionmanager.h"
 #include "common.h"
-#include <iostream>
 
 namespace qnut {
     CConnectionManager::CConnectionManager(QWidget * parent) :
