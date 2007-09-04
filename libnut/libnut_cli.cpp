@@ -376,8 +376,8 @@ void CDevice::environmentRemoved(const QDBusObjectPath &path) {
         *log << tr("Tried to remove non-existing environment");
     }
 }
-void CDevice::stateChanged(int instate) {
-    state = (DeviceState) instate;
+void CDevice::dbusstateChanged(DeviceState newstate, DeviceState oldstate) {
+    state = newstate;
     emit(stateChanged(state));
 }
 

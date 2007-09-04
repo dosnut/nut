@@ -33,8 +33,9 @@ namespace libnut {
 	}
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceType &devtype) {
 		argument << (int) devtype;
+		return argument;
 	}
-    const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceState &devtype) {
+    const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceType &devtype) {
 		int type;
 		argument >> type;
 		devtype = (DeviceType) type;
