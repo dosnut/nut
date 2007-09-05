@@ -33,6 +33,7 @@ namespace qnut {
         int columnCount(const QModelIndex & parent = QModelIndex()) const;
     private:
         CDevice * device;
+        //inline static QString getInterfaceName(CInterface * interface) const;
     };
 }
 

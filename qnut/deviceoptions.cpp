@@ -15,7 +15,7 @@
 #include "common.h"
 #include <QHeaderView>
 #include <QInputDialog>
-
+//#include <iostream>
 namespace qnut {
     CDeviceOptions::CDeviceOptions(CDevice * parentDevice, QTabWidget * parentTabWidget, QWidget * parent) : QTreeView(parent) {
         device = parentDevice;
@@ -64,7 +64,7 @@ namespace qnut {
         connect(device, SIGNAL(environmentsUpdated()), this, SLOT(reset()));
         
         connect(selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-                this            , SLOT(selectionChanged(const QItemSelection &, const QItemSelection &)));
+                this            , SLOT(uiSelectionChanged(const QItemSelection &, const QItemSelection &)));
     }
     
     CDeviceOptions::~CDeviceOptions() {
@@ -128,7 +128,7 @@ namespace qnut {
                 enterEnvironmentAction->setEnabled(false);
                 activateInterfaceAction->setDisabled(target->active);
                 deactivateInterfaceAction->setEnabled(target->active);
-                editInterfaceAction->setEnabled(true);
+                editInterfaceAction->setEnabled(target->userDefineable);
             }
         }
         else {
@@ -153,8 +153,34 @@ namespace qnut {
     
     void CDeviceOptions::uiHandleStateChange(DeviceState state) {
         updateDeviceIcons();
-        setDisabled(state == DS_DEACTIVATED);
+        //setDisabled(state == DS_DEACTIVATED);
         enableDeviceAction->setDisabled(state == DS_UP);
         disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
+        
+        if (!selectedIndexes().isEmpty()) {
+            QModelIndex targetIndex = selectedIndexes()[0];
+            if (!targetIndex.parent().isValid()) {
+                CEnvironment * target = (CEnvironment *)(targetIndex.internalPointer());
+                
+                enterEnvironmentAction->setDisabled(target->active);
+                activateInterfaceAction->setEnabled(false);
+                deactivateInterfaceAction->setEnabled(false);
+                editInterfaceAction->setEnabled(false);
+            }
+            else {
+                CInterface * target = (CInterface *)(targetIndex.internalPointer());
+                
+                enterEnvironmentAction->setEnabled(false);
+                activateInterfaceAction->setDisabled(target->active);
+                deactivateInterfaceAction->setEnabled(target->active);
+                editInterfaceAction->setEnabled(target->userDefineable);
+            }
+        }
+        else {
+            enterEnvironmentAction->setEnabled(false);
+            activateInterfaceAction->setEnabled(false);
+            deactivateInterfaceAction->setEnabled(false);
+            editInterfaceAction->setEnabled(false);
+        }
     }
 };

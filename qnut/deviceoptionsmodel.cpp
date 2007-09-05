@@ -13,6 +13,13 @@
 #include "constants.h"
 #include <QIcon>
 
+#define DEV_OPMOD_ITEM    0
+#define DEV_OPMOD_STATUS  1
+#define DEV_OPMOD_IP      2
+#define DEV_OPMOD_NETMASK 3
+#define DEV_OPMOD_GATEWAY 4
+#define DEV_OPMOD_CONFIG  5
+
 namespace qnut {
     CDeviceOptionsModel::CDeviceOptionsModel(CDevice * data, QObject * parent) : QAbstractItemModel(parent) {
         device = data;
@@ -21,12 +28,18 @@ namespace qnut {
     CDeviceOptionsModel::~CDeviceOptionsModel() {
         device = NULL;
     }
+    /*
+    inline static QString CDeviceOptionsModel::getInterfaceName(CInterface * interface) {
+            return tr("IP-Address") + ": " + (interface->active ? interface->ip.toString()      : tr("no dynamic")) + "\n" +
+                   tr("Netmask")    + ": " + (interface->active ? interface->netmask.toString() : tr("no dynamic")) + "\n" +
+                   tr("Gateway")    + ": " + (interface->active ? interface->gateway.toString() : tr("no dynamic"));
+    }*/
     
     int CDeviceOptionsModel::columnCount(const QModelIndex & parent) const {
         if (device == NULL)
             return 0;
         else
-            return 3;
+            return 6;
     }
 
     
@@ -54,7 +67,7 @@ namespace qnut {
         
         QObject * data = (QObject *)(index.internalPointer());
         switch (index.column()) {
-            case 0:
+            case DEV_OPMOD_ITEM:
                 if (data->parent() == device) {
                     switch (role) {
                     case Qt::DisplayRole:
@@ -68,10 +81,9 @@ namespace qnut {
                 
                 if (data->parent()->parent() == device) {
                     switch (role) {
-                    case Qt::DisplayRole:
-                        return tr("IP-Address") + ": " +((CInterface *)data)->ip.toString() + "\n" +
-                            tr("Netmask") + ": " + ((CInterface *)data)->netmask.toString() + "\n" +
-                            tr("Gateway") + ": " + ((CInterface *)data)->gateway.toString();
+ /*                   case Qt::DisplayRole:
+                        return ...
+                        //return getInterfaceName((CInterface *)data);*/
                     case Qt::DecorationRole:
                         return QIcon(UI_ICON_INTERFACE);
                     default:
@@ -79,10 +91,10 @@ namespace qnut {
                     }
                 }
                 break;
-            case 1:
+            case DEV_OPMOD_STATUS:
                 if (role == Qt::DisplayRole) {
                     if (data->parent() == device) {
-                        return ((CEnvironment *)data)->active ? tr("active") : QVariant();//tr("inactive");
+                        return ((CEnvironment *)data)->active ? tr("active") : QVariant();
                     }
                     
                     if (data->parent()->parent() == device) {
@@ -90,7 +102,7 @@ namespace qnut {
                     }
                 }
                 break;
-            case 2:
+            case DEV_OPMOD_CONFIG:
                 if (role == Qt::DisplayRole) {
                     if (data->parent() == device) {
                         int configFlags = 0;
@@ -124,6 +136,39 @@ namespace qnut {
                     }
                 }
                 break;
+            case DEV_OPMOD_IP:
+                if (role == Qt::DisplayRole) {
+                    if (data->parent() == device) {
+                        return QString('-');
+                    }
+                    
+                    if (data->parent()->parent() == device) {
+                        return (((CInterface *)data)->isStatic || ((CInterface *)data)->active) ? ((CInterface *)data)->ip.toString() : tr("not assigned");
+                    }
+                }
+                break;
+            case DEV_OPMOD_NETMASK:
+                if (role == Qt::DisplayRole) {
+                    if (data->parent() == device) {
+                        return QString('-');
+                    }
+                    
+                    if (data->parent()->parent() == device) {
+                        return (((CInterface *)data)->isStatic || ((CInterface *)data)->active) ? ((CInterface *)data)->netmask.toString() : tr("not assigned");
+                    }
+                }
+                break;
+            case DEV_OPMOD_GATEWAY:
+                if (role == Qt::DisplayRole) {
+                    if (data->parent() == device) {
+                        return QString('-');
+                    }
+                    
+                    if (data->parent()->parent() == device) {
+                        return (((CInterface *)data)->isStatic || ((CInterface *)data)->active) ? ((CInterface *)data)->gateway.toString() : tr("not assigned");
+                    }
+                }
+                break;
             default:
                 break;
         }
@@ -150,12 +195,19 @@ namespace qnut {
         
         if (orientation == Qt::Horizontal) {
             switch (section) {
-            case 0:
-                return tr("Item");
-            case 1:
+            case DEV_OPMOD_ITEM:
+                //return tr("Item");
+                break;
+            case DEV_OPMOD_STATUS:
                 return tr("Status");
-            case 2:
+            case DEV_OPMOD_CONFIG:
                 return tr("Config");
+            case DEV_OPMOD_IP:
+                return tr("IP-Address");
+            case DEV_OPMOD_NETMASK:
+                return tr("Netmask");
+            case DEV_OPMOD_GATEWAY:
+                return tr("Gateway");
             default:
                 break;
             }
