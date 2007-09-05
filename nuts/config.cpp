@@ -56,14 +56,14 @@ namespace nuts {
 	EnvironmentConfig* DeviceConfig::getDefaultEnv() {
 		return defEnv;
 	}
-	EnvironmentConfig* DeviceConfig::createEnvironment() {
-		EnvironmentConfig* t = new EnvironmentConfig();
+	EnvironmentConfig* DeviceConfig::createEnvironment(const QString &name) {
+		EnvironmentConfig* t = new EnvironmentConfig(name);
 		environments.push_back(t);
 		return t;
 	}
 	
-	EnvironmentConfig::EnvironmentConfig()
-	: canUserSelect(true), noDefaultDHCP(false), noDefaultZeroconf(false), dhcp(0), zeroconf(0) {
+	EnvironmentConfig::EnvironmentConfig(const QString &name)
+	: name(name), canUserSelect(true), noDefaultDHCP(false), noDefaultZeroconf(false), dhcp(0), zeroconf(0) {
 	}
 	EnvironmentConfig::~EnvironmentConfig() {
 		delete dhcp;

@@ -90,7 +90,8 @@ deviceoption: { curenvconfig = curdevconfig->getDefaultEnv(); } environmentoptio
 	| environment
 ;
 
-environment: ENVIRONMENT { curenvconfig = curdevconfig->createEnvironment(); } environmentconfig
+environment: ENVIRONMENT STRING { curenvconfig = curdevconfig->createEnvironment(*$2); } environmentconfig
+	| ENVIRONMENT { curenvconfig = curdevconfig->createEnvironment(); } environmentconfig
 ;
 
 environmentconfig: ';'

@@ -129,6 +129,7 @@ namespace nuts {
 	}
 	
 	libnut::EnvironmentProperties DBusEnvironment::getProperties() {
+		m_properties.name = m_env->getName();
 		return m_properties;
 	}
 	QList<libnut::SelectConfig> DBusEnvironment::getSelectConfig() {

@@ -44,7 +44,7 @@ namespace nuts {
 			virtual ~DeviceConfig();
 			
 			EnvironmentConfig* getDefaultEnv();
-			EnvironmentConfig* createEnvironment();
+			EnvironmentConfig* createEnvironment(const QString &name = "");
 			
 			bool canUserEnable;
 	};
@@ -82,8 +82,10 @@ namespace nuts {
 		protected:
 			friend class Environment;
 		public:
-			EnvironmentConfig();
+			EnvironmentConfig(const QString &name = "");
 			virtual ~EnvironmentConfig();
+			
+			QString name;
 			bool canUserSelect;
 			bool noDefaultDHCP, noDefaultZeroconf;
 			QList<IPv4Config*> ipv4Interfaces;

@@ -178,6 +178,7 @@ namespace nuts {
 			
 			const QList<Interface*>& getInterfaces();
 			int getID() { return m_id; }
+			QString getName() { return config->name; }
 	};
 	
 	class Interface : public QObject {
