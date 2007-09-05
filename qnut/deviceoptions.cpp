@@ -35,7 +35,6 @@ namespace qnut {
         deactivateInterfaceAction = new QAction(QIcon(UI_ICON_INTERFACE_DEACTIVATE), tr("Deactivate interface"), this);
         editInterfaceAction       = new QAction(QIcon(UI_ICON_EDIT), tr("Edit IP Configuration..."), this);
         
-        
         addAction(enterEnvironmentAction);
         addAction(getSeparator(this));
         addAction(activateInterfaceAction);

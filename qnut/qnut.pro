@@ -34,10 +34,14 @@ DESTDIR = .
 
 
 target.path = /usr/bin/
-restarget.path = /usr/share/qnut
-restarget.files = res/*.png
-INSTALLS += target
-INSTALLS += restarget
+iconstarget.path = /usr/share/qnut/icons
+iconstarget.files = res/*.png
+langtarget.path = /usr/share/qnut/lang
+langtarget.files = qnut_*.ts
+INSTALLS += target iconstarget langtarget
+
+QMAKE_CXXFLAGS_RELEASE += -DQNUT_RELEASE
+
 
 INCLUDEPATH += ..
 
