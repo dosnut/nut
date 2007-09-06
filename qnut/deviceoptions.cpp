@@ -15,7 +15,7 @@
 #include "common.h"
 #include <QHeaderView>
 #include <QInputDialog>
-//#include <iostream>
+
 namespace qnut {
     CDeviceOptions::CDeviceOptions(CDevice * parentDevice, QTabWidget * parentTabWidget, QWidget * parent) : QTreeView(parent) {
         device = parentDevice;

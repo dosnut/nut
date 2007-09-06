@@ -16,9 +16,9 @@
 #define DEV_OPMOD_ITEM    0
 #define DEV_OPMOD_STATUS  1
 #define DEV_OPMOD_IP      2
+#define DEV_OPMOD_CONFIG  5
 #define DEV_OPMOD_NETMASK 3
 #define DEV_OPMOD_GATEWAY 4
-#define DEV_OPMOD_CONFIG  5
 
 namespace qnut {
     CDeviceOptionsModel::CDeviceOptionsModel(CDevice * data, QObject * parent) : QAbstractItemModel(parent) {
@@ -81,9 +81,9 @@ namespace qnut {
                 
                 if (data->parent()->parent() == device) {
                     switch (role) {
- /*                   case Qt::DisplayRole:
-                        return ...
-                        //return getInterfaceName((CInterface *)data);*/
+                    case Qt::DisplayRole:
+                        return '#' + QString::number(((CEnvironment *)(data->parent()))->interfaces.indexOf((CInterface *)data));
+                        //return getInterfaceName((CInterface *)data);
                     case Qt::DecorationRole:
                         return QIcon(UI_ICON_INTERFACE);
                     default:
@@ -196,8 +196,8 @@ namespace qnut {
         if (orientation == Qt::Horizontal) {
             switch (section) {
             case DEV_OPMOD_ITEM:
-                //return tr("Item");
-                break;
+                return tr("Item");
+                //break;
             case DEV_OPMOD_STATUS:
                 return tr("Status");
             case DEV_OPMOD_CONFIG:

@@ -13,6 +13,11 @@
 #include "overviewmodel.h"
 #include "common.h"
 
+#define OVMOD_NAME    0
+#define OVMOD_STATUS  1
+#define OVMOD_TYPE    2
+#define OVMOD_IP      3
+
 namespace qnut {
     COverViewModel::COverViewModel(CDeviceList * deviceList, QObject * parent) : QAbstractItemModel(parent) {
         devices = deviceList;
@@ -43,7 +48,7 @@ namespace qnut {
         if (parent.isValid())
             return 0;
         
-        return 3;
+        return 4;
     }
     
     QModelIndex COverViewModel::index(int row, int column, const QModelIndex & parent) const {
@@ -77,9 +82,9 @@ namespace qnut {
         
         if (role == Qt::DisplayRole) {
             switch (index.column()) {
-            case 0:
+            case OVMOD_NAME:
                 return data->name;
-            case 1:
+            case OVMOD_STATUS:
                 switch (data->state) {
                 case DS_UP:             return tr("up");
                 case DS_UNCONFIGURED:   return tr("unconfigured");
@@ -88,11 +93,32 @@ namespace qnut {
                 case DS_DEACTIVATED:    return tr("deactivated");
                 default:                break;
                 }
-            case 2:
+            case OVMOD_TYPE:
                 switch (data->type) {
                 case DT_ETH: return tr("Ethernet");
                 case DT_AIR: return tr("Wireless");
                 default:     break;
+                }
+            case OVMOD_IP: {
+                    if (data->state != DS_UP)
+                        return QString('-');
+                    
+                    QString result = QString("");
+                    //if (data->activeEnvironment == NULL) break;
+                    foreach (CInterface * i, data->activeEnvironment->interfaces) {
+                        if (result.length() > 0) {
+                            result += " (...)";
+                            break;
+                        }
+                        else if (i->active) {
+                            result += i->ip.toString();
+                        }
+                    }
+                    
+                    if (result.length() > 0)
+                        return result;
+                    else
+                        return QString('-');
                 }
             default:
                 break;
@@ -115,12 +141,14 @@ namespace qnut {
         
         if (orientation == Qt::Horizontal) {
             switch (section) {
-            case 0:
+            case OVMOD_NAME:
                 return tr("Name");
-            case 1:
+            case OVMOD_STATUS:
                 return tr("Status");
-            case 2:
+            case OVMOD_TYPE:
                 return tr("Type");
+            case OVMOD_IP:
+                return tr("assigned IP-Addess");
             default:
                 break;
             }
