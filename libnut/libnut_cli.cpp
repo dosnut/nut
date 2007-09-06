@@ -232,11 +232,6 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		type = replyProp.value().type;
 		state = (DeviceState) replyProp.value().state;
 		activeEnvironment = 0;
-		if (!replyProp.value().activeEnvironment.isEmpty()) {
-			dbusActiveEnvironment = QDBusObjectPath(replyProp.value().activeEnvironment);
-			activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment);
-			emit(environmentChangedActive(activeEnvironment, 0));
-		}
 		*log << (tr("Device properties fetched"));
 		*log << (tr("Name") + ": " + QString(name));
 		*log << (tr("Type") + ": " + toString(type));
@@ -267,6 +262,11 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		environments.append(env);
 		//Maybe we need to send signal environmentsUpdated?
 		emit(environmentsUpdated());
+	}
+	if (!replyProp.value().activeEnvironment.isEmpty()) {
+		dbusActiveEnvironment = QDBusObjectPath(replyProp.value().activeEnvironment);
+		activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment, 0);
+		emit(environmentChangedActive(activeEnvironment, 0));
 	}
 	//connect signals to slots
 	connect(dbusDevice, SIGNAL(environmentChangedActive(const QDBusObjectPath &)),
@@ -363,8 +363,8 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 //CDevice private slots:
 void CDevice::environmentChangedActive(const QDBusObjectPath &newenv) {
 	CEnvironment * oldenv = activeEnvironment;
-	activeEnvironment = dbusEnvironments.value(newenv);
-	emit(environmentChangedActive(activeEnvironment,oldenv));
+	activeEnvironment = dbusEnvironments.value(newenv, 0);
+	emit(environmentChangedActive(activeEnvironment, oldenv));
 }
 void CDevice::environmentAdded(const QDBusObjectPath &path) {
 	if (!dbusEnvironments.contains(path)) {
