@@ -85,6 +85,12 @@ namespace nuts {
 
 	libnut::DeviceProperties DBusDevice::getProperties() {
 		m_properties.state = m_dev->getState();
+		int aenv = m_dev->getEnvironment();
+		if (aenv >= 0) {
+			m_properties.activeEnvironment = m_envs[aenv]->getPath();
+		} else {
+			m_properties.activeEnvironment = QString();
+		}
 		return m_properties;
 	}
 	
