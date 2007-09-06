@@ -9,9 +9,9 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
+#include <QIcon>
 #include "deviceoptionsmodel.h"
 #include "constants.h"
-#include <QIcon>
 
 #define DEV_OPMOD_ITEM    0
 #define DEV_OPMOD_STATUS  1

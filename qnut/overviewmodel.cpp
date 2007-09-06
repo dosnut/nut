@@ -104,7 +104,7 @@ namespace qnut {
                         return QString('-');
                     
                     QString result = QString("");
-                    //if (data->activeEnvironment == NULL) break;
+                    if (data->activeEnvironment == NULL) break;
                     foreach (CInterface * i, data->activeEnvironment->interfaces) {
                         if (result.length() > 0) {
                             result += " (...)";
