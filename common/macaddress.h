@@ -13,6 +13,14 @@
 #define NUT_COMMON_MACADDRESS_H
 
 #include <QString>
+#include <QDBusArgument>
+
+namespace nut {
+	class MacAddress;
+
+	QDBusArgument &operator<< (QDBusArgument &argument, const MacAddress &data);
+	const QDBusArgument &operator>> (const QDBusArgument &argument, MacAddress &data);
+}
 
 namespace nut {
 	/**
@@ -42,5 +50,7 @@ namespace nut {
 			}
 	};
 }
+
+Q_DECLARE_METATYPE(nut::MacAddress);
 
 #endif

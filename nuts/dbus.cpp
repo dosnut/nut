@@ -138,17 +138,6 @@ namespace nuts {
 		m_properties.name = m_env->getName();
 		return m_properties;
 	}
-	QList<libnut::SelectConfig> DBusEnvironment::getSelectConfig() {
-		libnut::SelectConfig tmp;
-		tmp.useMac = false;
-		tmp.selected = true;
-		tmp.flags = libnut::SF_USER;
-		tmp.arpIP = QHostAddress("127.0.0.1");
-		tmp.essid = "ipvs";
-		QList<libnut::SelectConfig> tmpl;
-		tmpl.append(tmp);
-		return tmpl;
-	}
 	
 	QList<QDBusObjectPath> DBusEnvironment::getInterfaces() {
 		QList<QDBusObjectPath> paths;

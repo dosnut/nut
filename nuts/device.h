@@ -32,7 +32,8 @@ namespace nuts {
 	class DeviceManager : public QObject {
 		Q_OBJECT
 		protected:
-			Config *config;
+			ConfigParser configParser;
+			nut::Config *config;
 			HardwareManager hwman;
 			QTimer carrier_timer;
 			struct ca_evt {
@@ -60,6 +61,7 @@ namespace nuts {
 			virtual ~DeviceManager();
 			
 			const QHash<QString, Device*>& getDevices() { return devices; }
+			nut::Config *getConfig() { return config; }
 		
 		signals:
 			void deviceAdded(QString devName, Device *dev);
@@ -84,7 +86,7 @@ namespace nuts {
 			DeviceManager *dm;
 			QString name;
 			int interfaceIndex;
-			DeviceConfig *config;
+			nut::DeviceConfig *config;
 			int activeEnv, nextEnv;
 			libnut::DeviceState m_state;
 			QList<Environment*> envs;
@@ -119,7 +121,7 @@ namespace nuts {
 			nut::MacAddress getMacAddress();
 			
 		public:
-			Device(DeviceManager* dm, const QString &name, DeviceConfig *config);
+			Device(DeviceManager* dm, const QString &name, nut::DeviceConfig *config);
 			virtual ~Device();
 			
 		public slots:
@@ -156,7 +158,7 @@ namespace nuts {
 			Device *device;
 			QList<Interface*> ifs;
 			
-			EnvironmentConfig *config;
+			nut::EnvironmentConfig *config;
 			QBitArray ifUpStatus;
 			bool envIsUp, envStart;
 			
@@ -171,14 +173,14 @@ namespace nuts {
 			void ifDown(Interface*);
 			
 		public:
-			Environment(Device *device, EnvironmentConfig *config, int id);
+			Environment(Device *device, nut::EnvironmentConfig *config, int id);
 			virtual ~Environment();
 			
 			Device* getDevice();
 			
 			const QList<Interface*>& getInterfaces();
 			int getID() { return m_id; }
-			QString getName() { return config->name; }
+			QString getName() { return config->getName(); }
 	};
 	
 	class Interface : public QObject {
@@ -239,7 +241,7 @@ namespace nuts {
 			friend class Device;
 		
 		public:
-			Interface_IPv4(Environment *env, int index, IPv4Config *config);
+			Interface_IPv4(Environment *env, int index, nut::IPv4Config *config);
 			virtual ~Interface_IPv4();
 			virtual void start();
 			virtual void stop();
@@ -248,7 +250,7 @@ namespace nuts {
 			QString localdomain;
 			QList<QHostAddress> dnsserver;
 			
-			IPv4Config *config;
+			nut::IPv4Config *config;
 	};
 };
 

@@ -1,35 +1,7 @@
 #include "types.h"
-
-// QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress &adr) {
-// 	argument << adr.toString();
-// 	return argument;
-// }
-// const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &adr) {
-// 	argument >> adr;
-// 	return argument;
-// }
+#include "config.h"
 
 namespace libnut {
-	QDBusArgument &operator<< (QDBusArgument &argument, const SelectConfig & selconf) {
-		argument.beginStructure();
-		argument << selconf.selected << selconf.flags << selconf.useMac << selconf.macAddress.toString() << selconf.arpIP.toString() << selconf.essid;
-		argument.endStructure();
-		return argument;
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectConfig &selconf) {
-		argument.beginStructure();
-		QString mac;
-		QString ip;
-		argument >> selconf.selected >> selconf.flags >> selconf.useMac;
-		argument >> mac;
-		selconf.macAddress = nut::MacAddress(mac);
-		argument >> ip;
-		selconf.arpIP = QHostAddress(ip);
-		argument >> selconf.essid;
-		argument.endStructure();
-		return argument;
-	}
-
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceProperties & devprop) {
 		argument.beginStructure();
 		argument << devprop.name << devprop.activeEnvironment << (int) devprop.state << (int) devprop.type;
@@ -110,25 +82,14 @@ namespace libnut {
 	}
 	
 	static void init() {
-		static int done = 0;
-		if (done) return;
-		done = 1;
-// 		qRegisterMetaType<QHostAddress>("QHostAddress");
-// 		qRegisterMetaType<QList<QHostAddress> >("QHostAddressList");
 		qRegisterMetaType<DeviceProperties>("DeviceProperties");
-		qRegisterMetaType<SelectConfig>("SelectConfig");
-		qRegisterMetaType<QList<SelectConfig> >("SelectConfigList");
 		qRegisterMetaType<EnvironmentProperties>("EnvironmentProperties");
 		qRegisterMetaType<InterfaceProperties>("InterfaceProperties");
 		qRegisterMetaType<WlanScanresult>("WlanScanresult");
 		qRegisterMetaType<QList<libnut::WlanScanresult> >("WlanScanresultList");
 		qRegisterMetaType<WlanNetworkProperties>("WlanNetworkProperties");
 		
-// 		qDBusRegisterMetaType<QHostAddress>();
-// 		qDBusRegisterMetaType<QList<QHostAddress> >();
 		qDBusRegisterMetaType<DeviceProperties>();
-		qDBusRegisterMetaType<SelectConfig>();
-		qDBusRegisterMetaType<QList<SelectConfig> >();
 		qDBusRegisterMetaType<EnvironmentProperties>();
 		qDBusRegisterMetaType<InterfaceProperties>();
 		qDBusRegisterMetaType<WlanScanresult>();
@@ -137,7 +98,40 @@ namespace libnut {
 	}
 }
 
-namespace common {
-	void init() { libnut::init(); }
+namespace nut {
+	static void init() {
+		qRegisterMetaType<Config>("nut::Config");
+		qRegisterMetaType<DeviceConfig>("nut::DeviceConfig");
+		qRegisterMetaType<SelectRule>("nut::SelectRule");
+		qRegisterMetaType<SelectConfig>("nut::SelectConfig");
+		qRegisterMetaType<EnvironmentConfig>("nut::EnvironmentConfig");
+		qRegisterMetaType<IPv4Config>("nut::IPv4Config");
+		qRegisterMetaType< QVector< size_t > >("QVector< size_t >");
+		qRegisterMetaType< QVector< QVector< size_t > > >("QVector< QVector< size_t > >");
+	
+		qDBusRegisterMetaType<Config>();
+		qDBusRegisterMetaType<DeviceConfig>();
+		qDBusRegisterMetaType<SelectRule>();
+		qDBusRegisterMetaType<SelectConfig>();
+		qDBusRegisterMetaType<EnvironmentConfig>();
+		qDBusRegisterMetaType<IPv4Config>();
+		qDBusRegisterMetaType< QVector< size_t > >();
+		qDBusRegisterMetaType< QVector< QVector< size_t > > >();
+	}
 }
 
+namespace common {
+	void init() {
+		static int done = 0;
+		if (done) return;
+		done = 1;
+		
+		qRegisterMetaType<QHostAddress>("QHostAddress");
+		qRegisterMetaType<QList<QHostAddress> >("QList<QHostAddress>");
+		qDBusRegisterMetaType<QHostAddress>();
+		qDBusRegisterMetaType<QList<QHostAddress> >();
+		
+		libnut::init();
+		nut::init();
+	}
+}

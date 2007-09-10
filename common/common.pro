@@ -9,10 +9,12 @@ QT += network
 
 CODECFORSRC = UTF-8
 
-SOURCES += macaddress.cpp types.cpp
+SOURCES += macaddress.cpp types.cpp \
+ config.cpp
 HEADERS += macaddress.h   types.h \
  dbus.h \
- common.h
+ common.h \
+ config.h
 
 OBJECTS_DIR = build/
 UI_DIR = build/

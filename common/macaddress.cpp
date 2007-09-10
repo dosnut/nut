@@ -12,6 +12,17 @@
 #include "macaddress.h"
 
 namespace nut {
+	QDBusArgument &operator<< (QDBusArgument &argument, const MacAddress &data) {
+		argument << data.toString();
+		return argument;
+	}
+	const QDBusArgument &operator>> (const QDBusArgument &argument, MacAddress &data) {
+		QString addr;
+		argument >> addr;
+		data = MacAddress(addr);
+		return argument;
+	}
+	
 	static inline int read_hexdigit(char c) {
 		if ('0' <= c && c <= '9')
 			return c - '0';

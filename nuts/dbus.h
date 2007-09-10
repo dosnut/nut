@@ -38,6 +38,9 @@ namespace nuts {
 	
 		public slots:
 			QList<QDBusObjectPath> getDeviceList();
+			nut::Config getConfig() {
+				return *m_devmgr->getConfig();
+			}
 		signals:
 			void deviceAdded(const QDBusObjectPath &objectpath);
 			void deviceRemoved(const QDBusObjectPath &objectpath);
@@ -96,7 +99,6 @@ namespace nuts {
 	
 		public slots:
 			libnut::EnvironmentProperties getProperties();
-			QList<libnut::SelectConfig> getSelectConfig();
 			QList<QDBusObjectPath> getInterfaces();
 		signals:
 	};

@@ -1,45 +1,13 @@
 %{
 	#include "config.h"
-	#include <QStack>
+	
 
 	extern int configparserlex (void);
 	extern int line_num;
 	
 	using namespace nuts;
 	
-	static void configparsererror (Config *config, char* s);
-
-	static DeviceConfig *curdevconfig;
-	static EnvironmentConfig *curenvconfig;
-	static IPv4Config *curipv4config;
-	static SelectConfig *curselconfig;
-	static QStack<size_t> selBlocks;
-	
-	static SelectConfig *selectNew() {
-		curselconfig = new SelectConfig();
-		selBlocks.clear();
-		return curselconfig;
-	}
-	
-#define selectAdd(args...) do { \
-	size_t filterid = curselconfig->filters.size(); \
-	curselconfig->filters.append(SelectFilter(args)); \
-	curselconfig->blocks.last().append(filterid); \
-} while(0)
-	static void selectPushAnd() {
-		size_t blockid = curselconfig->blocks.size();
-		if (blockid)
-			selectAdd(blockid);
-		curselconfig->blocks.append(QVector<size_t>(1, 0));
-	}
-	
-	static void selectPushOr() {
-		size_t blockid = curselconfig->blocks.size();
-		if (blockid)
-			selectAdd(blockid);
-		curselconfig->blocks.append(QVector<size_t>(1, 1));
-	}
-
+	static void configparsererror (ConfigParser *cp, char* s);
 %}
 
 %union {
@@ -64,7 +32,7 @@
 %token <i> INTEGER
 %error-verbose
 
-%parse-param {Config *curconfig};
+%parse-param {ConfigParser *cp};
 %start input
 
 %%
@@ -73,7 +41,7 @@ input:
 	| input device
 ;
 
-device: DEVICE STRING { curdevconfig = curconfig->createDevice(*$2); } deviceconfig
+device: DEVICE STRING { cp->newDevice(*$2); } deviceconfig
 ;
 
 deviceconfig: ';'
@@ -86,12 +54,12 @@ deviceoptions:
 	| deviceoptions deviceoption
 ;
 
-deviceoption: { curenvconfig = curdevconfig->getDefaultEnv(); } environmentoption
+deviceoption: { cp->devDefaultEnvironment(); } environmentoption
 	| environment
 ;
 
-environment: ENVIRONMENT STRING { curenvconfig = curdevconfig->createEnvironment(*$2); } environmentconfig
-	| ENVIRONMENT { curenvconfig = curdevconfig->createEnvironment(); } environmentconfig
+environment: ENVIRONMENT STRING { cp->devEnvironment(*$2); } environmentconfig
+	| ENVIRONMENT { cp->devEnvironment(""); } environmentconfig
 ;
 
 environmentconfig: ';'
@@ -106,16 +74,13 @@ environmentoptions:
 
 environmentoption: dhcpconfig
 	| static
-	| { if (!curenvconfig->select) curenvconfig->select = selectNew(); else {
-		yyerror(curconfig, "only one select block in one environment allowed");
-		YYERROR;
-	}} select
+	| { if (!cp->envSelect()) YYERROR; } select
 ;
 
-dhcpconfig: DHCP ';' { curenvconfig->doDHCP(); }
+dhcpconfig: DHCP ';' { cp->envDHCP(); }
 ;
 
-static: STATIC { curipv4config = curenvconfig->createStatic();  } staticconfig
+static: STATIC { cp->envStatic();  } staticconfig
 ;
 
 staticconfig: '{' staticoptions '}'
@@ -133,24 +98,24 @@ staticoption: staticoption_ip
 	| staticoption_dns
 ;
 
-staticoption_ip: IP IPv4_VAL ';' { curipv4config->static_ip = *$2; }
+staticoption_ip: IP IPv4_VAL ';' { if (!cp->staticIP(*$2)) YYERROR; }
 ;
 
-staticoption_netmask: NETMASK IPv4_VAL ';' { curipv4config->static_netmask = *$2; }
+staticoption_netmask: NETMASK IPv4_VAL ';' { if (!cp->staticNetmak(*$2)) YYERROR; }
 ;
 
-staticoption_gateway: GATEWAY IPv4_VAL ';' { curipv4config->static_gateway = *$2; }
+staticoption_gateway: GATEWAY IPv4_VAL ';' { if (!cp->staticGateway(*$2)) YYERROR; }
 ;
 
-staticoption_dns: DNSSERVER IPv4_VAL ';' { curipv4config->static_dnsservers.push_back(*$2); }
+staticoption_dns: DNSSERVER IPv4_VAL ';' { if (!cp->staticDNS(*$2)) YYERROR; }
 ;
 
 select: selectstart selectblock
 ;
 
-selectstart: SELECT AND { selectPushAnd(); }
-	| SELECT OR { selectPushOr(); }
-	| SELECT { selectPushAnd(); }
+selectstart: SELECT AND { if (!cp->selectAndBlock()) YYERROR; }
+	| SELECT OR { if (!cp->selectOrBlock()) YYERROR; }
+	| SELECT { if (!cp->selectAndBlock()) YYERROR; }
 ;
 
 selectblock: '{' selectfilters '}'
@@ -166,16 +131,17 @@ selectfilter: sf_user
 	| sf_arp
 	| sf_essid
 	| sf_block
+	| error
 ;
 
-sf_user: USER ';' { selectAdd(); }
+sf_user: USER ';' { if (!cp->selectUser()) YYERROR; }
 ;
 
-sf_arp: ARP MACADDR ';' { selectAdd(*$2); }
-	| ARP MACADDR IPv4_VAL ';' { selectAdd(*$2, *$3); }
+sf_arp: ARP IPv4_VAL ';' { if (!cp->selectARP(*$2)) YYERROR; }
+	| ARP IPv4_VAL MACADDR ';' { if (!cp->selectARP(*$2, *$3)) YYERROR; }
 ;
 
-sf_essid: ESSID STRING ';' { selectAdd(*$2); }
+sf_essid: ESSID STRING ';' { if (!cp->selectESSID(*$2)) YYERROR; }
 ;
 
 sf_block: select
@@ -183,5 +149,5 @@ sf_block: select
 
 %%
 
-void configparsererror (Config *, char*) {
+void configparsererror (ConfigParser *, char*) {
 }

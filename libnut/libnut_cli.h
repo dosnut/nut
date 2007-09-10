@@ -170,7 +170,6 @@ namespace libnut {
 	public:
 		bool active;
 		QString name;
-		QList<SelectConfig> selectStatements;
 		CInterfaceList interfaces;
 		
 		CEnvironment(CDevice * parent, QDBusObjectPath dbusPath);

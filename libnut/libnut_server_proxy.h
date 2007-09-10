@@ -142,12 +142,6 @@ public Q_SLOTS: // METHODS
         return callWithArgumentList(QDBus::Block, QLatin1String("getInterfaces"), argumentList);
     }
 
-    inline QDBusReply<QList<libnut::SelectConfig> > getSelectConfig()
-    {
-        QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("getSelectConfig"), argumentList);
-    }
-
     inline QDBusReply<libnut::EnvironmentProperties> getProperties()
     {
         QList<QVariant> argumentList;

@@ -6,7 +6,7 @@ extern "C" {
 #include <stdio.h>
 }
 
-void configparserparse(nuts::Config* config);
+void configparserparse(nuts::ConfigParser *cp);
 extern FILE *configparserin;
 
 /* sub configuration structures will
@@ -14,73 +14,136 @@ extern FILE *configparserin;
  */
 
 namespace nuts {
-	Config::Config(const QString &configFile)
-	: configFile(configFile) {
-		configparserin = fopen(configFile.toUtf8().constData(), "r");
+	ConfigParser::ConfigParser(const QString &configFile)
+	: m_configFile(configFile), m_config(new nut::Config()) {
+		configparserin = fopen(m_configFile.toUtf8().constData(), "r");
 		configparserparse(this);
 		fclose(configparserin);
 	}
-	Config::~Config() {
-		foreach(DeviceConfig* dc, devices)
-			delete dc;
-		devices.clear();
+	
+	ConfigParser::~ConfigParser() {
+		delete m_config;
 	}
-	DeviceConfig* Config::getDevice(const QString &deviceName) {
-		if (!devices.contains(deviceName)) {
-			return 0;
-		} else {
-			return devices[deviceName];
+	
+	bool ConfigParser::newDevice(const QString &name) {
+		if (!m_config->m_devices.contains(name)) {
+			m_curdevconfig = new nut::DeviceConfig();
+			m_config->m_devices.insert(name, m_curdevconfig);
+			m_curdevconfig->m_environments.push_back(new nut::EnvironmentConfig(""));
+			return true;
 		}
-	}
-
-	DeviceConfig* Config::createDevice(const QString &deviceName) {
-		if (!devices.contains(deviceName)) {
-			DeviceConfig* t = new DeviceConfig();
-			devices.insert(deviceName, t);
-			return t;
-		} else {
-			return devices[deviceName];
-		}
-	}
-
-	DeviceConfig::DeviceConfig()
-	: defEnv(new EnvironmentConfig()), canUserEnable(false) {
-		environments.push_back(defEnv);
-	}
-	DeviceConfig::~DeviceConfig() {
-		foreach(EnvironmentConfig* ec, environments)
-			delete ec;
-		environments.clear();
+		return false;
 	}
 	
-	EnvironmentConfig* DeviceConfig::getDefaultEnv() {
-		return defEnv;
-	}
-	EnvironmentConfig* DeviceConfig::createEnvironment(const QString &name) {
-		EnvironmentConfig* t = new EnvironmentConfig(name);
-		environments.push_back(t);
-		return t;
+	bool ConfigParser::devDefaultEnvironment() {
+		if (!m_curdevconfig) return false;
+		if (!m_curdevconfig->m_environments.count() > 0) return false;
+		m_curenvconfig = m_curdevconfig->m_environments[0];
+		return true;
 	}
 	
-	EnvironmentConfig::EnvironmentConfig(const QString &name)
-	: name(name), canUserSelect(true), noDefaultDHCP(false), noDefaultZeroconf(false), dhcp(0), zeroconf(0) {
-	}
-	EnvironmentConfig::~EnvironmentConfig() {
-		delete dhcp;
-		delete zeroconf;
-	}
-	IPv4Config *EnvironmentConfig::doDHCP() {
-		if (!dhcp)
-			dhcp = new IPv4Config(IPv4Config::DO_DHCP | IPv4Config::DO_ZEROCONF, 0);
-		return dhcp;
-	}
-	IPv4Config *EnvironmentConfig::createStatic() {
-		IPv4Config* ic = new IPv4Config(IPv4Config::DO_STATIC, 0);
-		ipv4Interfaces.push_back(ic);
-		return ic;
+	bool ConfigParser::devEnvironment(const QString &name) {
+		if (!m_curdevconfig) return false;
+		m_curenvconfig = new nut::EnvironmentConfig(name);
+		m_curdevconfig->m_environments.push_back(m_curenvconfig);
+		return true;
 	}
 	
-	IPv4Config::IPv4Config(int flags, int overwriteFlags)
-	: flags(flags), overwriteFlags(overwriteFlags), canUserEnable(false) {
+	bool ConfigParser::envSelect() {
+		if (!m_curenvconfig) return false;
+		// Only one select block per environment
+		if (m_curenvconfig->m_select.filters.count() != 0) return false;
+		m_selBlocks.clear();
+		return true;
+	}
+	
+	bool ConfigParser::envDHCP() {
+		if (!m_curenvconfig) return false;
+		if (m_curenvconfig->m_dhcp) return false;
+		m_curipv4config = m_curenvconfig->m_dhcp = new nut::IPv4Config();
+		m_curenvconfig->m_ipv4Interfaces.push_back(m_curipv4config);
+		return true;
+	}
+	
+	bool ConfigParser::envStatic() {
+		if (!m_curenvconfig) return false;
+		m_curipv4config = new nut::IPv4Config(nut::IPv4Config::DO_STATIC);
+		m_curenvconfig->m_ipv4Interfaces.push_back(m_curipv4config);
+		return true;
+	}
+	
+	bool ConfigParser::staticIP(const QHostAddress &addr) {
+		if (!m_curipv4config) return false;
+		if (!m_curipv4config->m_static_ip.isNull()) return false;
+		m_curipv4config->m_static_ip = addr;
+		return true;
+	}
+	
+	bool ConfigParser::staticNetmak(const QHostAddress &addr) {
+		if (!m_curipv4config) return false;
+		if (!m_curipv4config->m_static_netmask.isNull()) return false;
+		m_curipv4config->m_static_netmask = addr;
+		return true;
+	}
+	
+	bool ConfigParser::staticGateway(const QHostAddress &addr) {
+		if (!m_curipv4config) return false;
+		if (!m_curipv4config->m_static_gateway.isNull()) return false;
+		m_curipv4config->m_static_gateway = addr;
+		return true;
+	}
+	
+	bool ConfigParser::staticDNS(const QHostAddress &addr) {
+		if (!m_curipv4config) return false;
+		m_curipv4config->m_static_dnsservers.push_back(addr);
+		return true;
+	}
+	
+	void ConfigParser::selectAdd(const nut::SelectRule &rule) {
+		size_t filterid = m_curenvconfig->m_select.filters.count();
+		m_curenvconfig->m_select.filters.append(rule);
+		m_curenvconfig->m_select.blocks.last().append(filterid);
+	}
+	
+	bool ConfigParser::selectAndBlock() {
+		if (!m_curenvconfig) return false;
+		size_t blockid = m_curenvconfig->m_select.blocks.size();
+		if (blockid)
+			selectAdd(nut::SelectRule(blockid));
+		m_curenvconfig->m_select.blocks.append(QVector<size_t>(1, 0));
+		return true;
+	}
+	
+	bool ConfigParser::selectOrBlock() {
+		if (!m_curenvconfig) return false;
+		size_t blockid = m_curenvconfig->m_select.blocks.size();
+		if (blockid)
+			selectAdd(nut::SelectRule(blockid));
+		m_curenvconfig->m_select.blocks.append(QVector<size_t>(1, 1));
+		return true;
+	}
+	
+	bool ConfigParser::selectUser() {
+		if (!m_curenvconfig) return false;
+		selectAdd(nut::SelectRule());
+		return true;
+	}
+	
+	bool ConfigParser::selectARP(const QHostAddress &addr) {
+		if (!m_curenvconfig) return false;
+		selectAdd(nut::SelectRule(addr));
+		return true;
+	}
+	
+	bool ConfigParser::selectARP(const QHostAddress &addr, const nut::MacAddress &mac) {
+		if (!m_curenvconfig) return false;
+		selectAdd(nut::SelectRule(addr, mac));
+		return true;
+	}
+	
+	bool ConfigParser::selectESSID(const QString &essid) {
+		if (!m_curenvconfig) return false;
+		selectAdd(nut::SelectRule(essid));
+		return true;
 	}
 };

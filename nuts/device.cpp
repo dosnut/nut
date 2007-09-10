@@ -38,7 +38,7 @@ static inline void setSockaddrIPv4(struct sockaddr &s, quint32 host = 0, quint16
 
 namespace nuts {
 	DeviceManager::DeviceManager(const QString &configFile)
-	: config(new Config(configFile)) {
+	: configParser(configFile), config(configParser.getConfig()) {
 		connect(&hwman, SIGNAL(gotCarrier(const QString&, int )), SLOT(gotCarrier(const QString &, int )));
 		connect(&hwman, SIGNAL(lostCarrier(const QString&)), SLOT(lostCarrier(const QString &)));
 		 /* Wait for 400 ms before deliver carrier events
@@ -50,7 +50,7 @@ namespace nuts {
 		*/
 		carrier_timer.setInterval(400);
 		connect(&carrier_timer, SIGNAL(timeout()), SLOT(ca_timer()));
-		QHashIterator<QString, DeviceConfig*> i(config->devices);
+		QHashIterator<QString, nut::DeviceConfig*> i(config->getDevices());
 		while (i.hasNext()) {
 			i.next();
 			Device *d = new Device(this, i.key(), i.value());
@@ -121,10 +121,10 @@ namespace nuts {
 			carrier_timer.start();
 	}
 	
-	Device::Device(DeviceManager* dm, const QString &name, DeviceConfig *config)
+	Device::Device(DeviceManager* dm, const QString &name, nut::DeviceConfig *config)
 	: dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_state(libnut::DS_DEACTIVATED), dhcp_client_socket(-1) {
 		int i = 0;
-		foreach(EnvironmentConfig *ec, config->environments)
+		foreach(nut::EnvironmentConfig *ec, config->getEnvironments())
 			envs.push_back(new Environment(this, ec, i++));
 	}
 	
@@ -329,13 +329,9 @@ namespace nuts {
 		}
 	}
 	
-	Environment::Environment(Device *device, EnvironmentConfig *config, int id)
+	Environment::Environment(Device *device, nut::EnvironmentConfig *config, int id)
 	: device(device), config(config), envIsUp(false), envStart(false), m_id(id) {
-		if (config->dhcp)
-			ifs.push_back(new Interface_IPv4(this, ifs.size(), config->dhcp));
-		if (config->zeroconf)
-			ifs.push_back(new Interface_IPv4(this, ifs.size(), config->zeroconf));
-		foreach (IPv4Config *ic, config->ipv4Interfaces)
+		foreach (nut::IPv4Config *ic, config->getIPv4Interfaces())
 			ifs.push_back(new Interface_IPv4(this, ifs.size(), ic));
 		ifUpStatus.fill(false, ifs.size());
 	}
@@ -393,7 +389,7 @@ namespace nuts {
 	Interface::Interface(int index) : m_index(index) { }
 	Interface::~Interface() { }
 	
-	Interface_IPv4::Interface_IPv4(Environment *env, int index, IPv4Config *config)
+	Interface_IPv4::Interface_IPv4(Environment *env, int index, nut::IPv4Config *config)
 	: Interface(index), env(env), dm(env->device->dm), dhcpstate(DHCPS_OFF), config(config) {
 	}
 	
@@ -486,17 +482,17 @@ namespace nuts {
 	void Interface_IPv4::startZeroconf() {
 	}
 	void Interface_IPv4::startStatic() {
-		ip = config->static_ip;
-		netmask = config->static_netmask;
-		gateway = config->static_gateway;
-		dnsserver = config->static_dnsservers;
+		ip = config->getStaticIP();
+		netmask = config->getStaticNetmask();
+		gateway = config->getStaticGateway();
+		dnsserver = config->getStaticDNS();
 		systemUp();
 		env->ifUp(this);
 	}
 
 	void Interface_IPv4::start() {
 		log << "Interface_IPv4::start" << endl;
-		if (config->flags & IPv4Config::DO_DHCP)
+		if (config->getFlags() & nut::IPv4Config::DO_DHCP)
 			startDHCP();
 		else
 			startStatic();
