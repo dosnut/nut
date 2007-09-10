@@ -38,6 +38,7 @@ namespace qnut {
         CConnectionManager(QWidget * parent = 0);
         
     public slots:
+        void uiUpdateTrayIconInfo();
         void uiAddedDevice(CDevice * dev);
         void uiRemovedDevice(CDevice * dev);
         void uiCurrentTabChanged(int index);

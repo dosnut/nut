@@ -82,6 +82,7 @@ CDeviceManager::~CDeviceManager() {
 }
 
 void CDeviceManager::init(CLog * inlog) {
+	nutsstate = true;
 	log = inlog;
 	//setup dbus connections
 	dbusConnectionInterface = dbusConnection.interface();
@@ -90,11 +91,47 @@ void CDeviceManager::init(CLog * inlog) {
 		serviceCheck(dbusConnectionInterface);
 	}
 	catch (CLI_ConnectionInitException& e) {
-		QDBusReply<void> reply = dbusConnectionInterface->startService(NUT_DBUS_URL);
-		serviceCheck(dbusConnectionInterface);
+		*log << tr("Please start nuts. Starting idle mode");
+		nutsstate = false;
 	}
+	connect(dbusConnectionInterface, SIGNAL(serviceOwnerChanged(const QString &, const QString &, const QString &)), this, SLOT(dbusServiceOwnerChanged(const QString &, const QString &, const QString &)));
 	//Attach to DbusDevicemanager
 	dbusDevmgr = new DBusDeviceManagerInterface(NUT_DBUS_URL, "/manager",dbusConnection, this);
+	if (nutsstate) {
+		setInformation();
+	}
+	//Connect dbus-signals to own slots:
+	connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
+	connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+}
+
+//CDeviceManager private functions:
+//rebuilds the device list
+void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
+	//Delete all devices
+	dbusDevices.clear();
+	CDevice * device;
+	while (!devices.isEmpty()) {
+		device = devices.takeFirst();
+		emit(deviceRemoved(device));
+		delete device;
+	}
+	//Build new devices
+	foreach(QDBusObjectPath i, paths) {
+		try {
+			device = new CDevice(this, i);
+		}
+		catch (CLI_ConnectionException &e) {
+			*log << e.what();
+			continue;
+		}
+		dbusDevices.insert(i, device);
+		devices.append(device);
+		emit(deviceAdded(device));
+	}
+}
+
+void CDeviceManager::setInformation() {
 	//get devicelist etc.
 	QDBusReply<QList<QDBusObjectPath> > replydevs;
 	replydevs = dbusDevmgr->getDeviceList();
@@ -104,7 +141,6 @@ void CDeviceManager::init(CLog * inlog) {
 	//Let's populate our own DeviceList
 	CDevice * device;
 	foreach (QDBusObjectPath i, replydevs.value()) {
-//    for (QList<QDBusObjectPath>::iterator i=replydevs.value().begin(); i != replydevs.value().end(); ++i) {
 		try {
 			device = new CDevice(this, i);
 		}
@@ -116,10 +152,41 @@ void CDeviceManager::init(CLog * inlog) {
 		dbusDevices.insert(i, device);
 		emit(deviceAdded(device));
 	}
-	//Connect dbus-signals to own slots:
-	connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
-	connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
 }
+void CDeviceManager::clearInformation() {
+	//Clean Device list:
+	CDevice * dev;
+	while (!devices.isEmpty()) {
+		dev = devices.takeFirst();
+		emit(deviceRemoved(dev));
+		delete dev;
+	}
+}
+
+//CDeviceManager private slots:
+void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner) {
+	if (NUT_DBUS_URL == name) {
+		if (oldOwner.isEmpty()) {
+			*log << tr("NUTS has been started");
+			if (nutsstate) {
+				clearInformation();
+				setInformation();
+			}
+			else {
+				nutsstate = true;
+				setInformation();
+			}
+		}
+		else if (newOwner.isEmpty()) {
+			*log << tr("NUTS has been stopped");
+			if (nutsstate) {
+				nutsstate = false;
+				clearInformation();
+			}
+		}
+	}
+}
+
 //CDeviceManager DBUS-SLOTS:
 void CDeviceManager::dbusDeviceAdded(const QDBusObjectPath &objectpath) {
 	if (!dbusDevices.contains(objectpath)) {
@@ -184,31 +251,6 @@ void CDeviceManager::refreshAll() {
 	}
 }
 
-//CDeviceManager private functions:
-//rebuilds the device list
-void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
-	//Delete all devices
-	dbusDevices.clear();
-	CDevice * device;
-	while (!devices.isEmpty()) {
-		device = devices.takeFirst();
-		emit(deviceRemoved(device));
-		delete device;
-	}
-	//Build new devices
-	foreach(QDBusObjectPath i, paths) {
-		try {
-			device = new CDevice(this, i);
-		}
-		catch (CLI_ConnectionException &e) {
-			*log << e.what();
-			continue;
-		}
-		dbusDevices.insert(i, device);
-		devices.append(device);
-		emit(deviceAdded(device));
-	}
-}
 
 
 /////////
