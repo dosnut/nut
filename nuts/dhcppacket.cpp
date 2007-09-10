@@ -232,13 +232,13 @@ namespace nuts {
 	
 	DHCPClientPacket::DHCPClientPacket(Interface_IPv4 *iface)
 	: DHCPPacket(true), iface(iface) {
-		setClientMac(iface->env->device->getMacAddress());
+		setClientMac(iface->m_env->device->getMacAddress());
 		setOptionString(DHCP_VENDOR, "nuts-0.0");
 	}
 	
 	void DHCPClientPacket::doDHCPDiscover() {
 		quint32 xid = get_rand();
-		while (!iface->env->device->registerXID(xid, iface)) xid++;
+		while (!iface->m_env->device->registerXID(xid, iface)) xid++;
 		setXID(xid);
 		setMessageType(DHCP_DISCOVER);
 		quint8 parameter_request[] = {

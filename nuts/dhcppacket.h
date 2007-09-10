@@ -192,7 +192,7 @@ namespace nuts {
 			}
 			
 			inline void send(Interface_IPv4 *iface) {
-				iface->env->device->sendDHCPClientPacket(this);
+				iface->m_env->device->sendDHCPClientPacket(this);
 			}
 	};
 	

@@ -60,9 +60,10 @@ namespace nuts {
 	}
 	
 	DeviceManager::~DeviceManager() {
-		delete config;
-		foreach(Device* d, devices)
-			delete d;
+		// manually deleting devices so HardwareManager is available for their destruction;
+		// in ~QObject  (deleteChildren) it is too late for them.
+		foreach (Device* device, devices)
+			delete device;
 		devices.clear();
 	}
 	
@@ -122,7 +123,7 @@ namespace nuts {
 	}
 	
 	Device::Device(DeviceManager* dm, const QString &name, nut::DeviceConfig *config)
-	: dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_state(libnut::DS_DEACTIVATED), dhcp_client_socket(-1) {
+	: QObject(dm), dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_state(libnut::DS_DEACTIVATED), dhcp_client_socket(-1) {
 		int i = 0;
 		foreach(nut::EnvironmentConfig *ec, config->getEnvironments())
 			envs.push_back(new Environment(this, ec, i++));
@@ -130,11 +131,6 @@ namespace nuts {
 	
 	Device::~Device() {
 		disable();
-		QMutableListIterator<Environment*> i(envs);
-		while (i.hasNext()) {
-			delete i.next();
-			i.remove();
-		}
 		if (dhcp_client_socket >= 0)
 			closeDHCPClientSocket();
 	}
@@ -330,17 +326,12 @@ namespace nuts {
 	}
 	
 	Environment::Environment(Device *device, nut::EnvironmentConfig *config, int id)
-	: device(device), config(config), envIsUp(false), envStart(false), m_id(id) {
+	: QObject(device), device(device), config(config), envIsUp(false), envStart(false), m_id(id) {
 		foreach (nut::IPv4Config *ic, config->getIPv4Interfaces())
 			ifs.push_back(new Interface_IPv4(this, ifs.size(), ic));
 		ifUpStatus.fill(false, ifs.size());
 	}
 	Environment::~Environment() {
-		QMutableListIterator<Interface*> i(ifs);
-		while (i.hasNext()) {
-			delete i.next();
-			i.remove();
-		}
 	}
 	
 	Device* Environment::getDevice() {
@@ -386,16 +377,16 @@ namespace nuts {
 		checkStatus();
 	}
 	
-	Interface::Interface(int index) : m_index(index) { }
+	Interface::Interface(Environment *env, int index) : QObject(env), m_env(env), m_index(index) { }
 	Interface::~Interface() { }
 	
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, nut::IPv4Config *config)
-	: Interface(index), env(env), dm(env->device->dm), dhcpstate(DHCPS_OFF), config(config) {
+	: Interface(env, index), dm(env->device->dm), dhcpstate(DHCPS_OFF), config(config) {
 	}
 	
 	Interface_IPv4::~Interface_IPv4() {
 		if (dhcp_xid) {
-			env->device->unregisterXID(dhcp_xid);
+			m_env->device->unregisterXID(dhcp_xid);
 			dhcp_xid = 0;
 		}
 	}
@@ -424,7 +415,7 @@ namespace nuts {
 		dhcp_server_identifier = ack->getOption(DHCP_SERVER_ID);
 		dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
 		systemUp();
-		env->ifUp(this);
+		m_env->ifUp(this);
 	}
 	
 	void Interface_IPv4::dhcpAction(DHCPPacket *source) {
@@ -487,7 +478,7 @@ namespace nuts {
 		gateway = config->getStaticGateway();
 		dnsserver = config->getStaticDNS();
 		systemUp();
-		env->ifUp(this);
+		m_env->ifUp(this);
 	}
 
 	void Interface_IPv4::start() {
@@ -501,7 +492,7 @@ namespace nuts {
 	void Interface_IPv4::stop() {
 		log << "Interface_IPv4::stop" << endl;
 		systemDown();
-		env->ifDown(this);
+		m_env->ifDown(this);
 	}
 	
 	inline int getPrefixLen(const QHostAddress &netmask) {
@@ -519,6 +510,15 @@ namespace nuts {
 		return nl_addr_build(AF_INET, &i, sizeof(i));
 	}
 	
+	inline struct nl_addr* getNLBroadcast(const QHostAddress &addr, const QHostAddress &netmask) {
+		quint32 nm = 0;
+		if (!netmask.isNull()) nm = htonl(netmask.toIPv4Address());
+		quint32 i = htonl(addr.toIPv4Address());
+		quint32 bcast = (i & nm) | (~nm);
+		struct nl_addr* a = nl_addr_build(AF_INET, &bcast, sizeof(bcast));
+		return a;
+	}
+	
 	inline struct nl_addr* getNLAddr(const QHostAddress &addr, const QHostAddress &netmask) {
 		quint32 i = htonl(addr.toIPv4Address());
 		struct nl_addr* a = nl_addr_build(AF_INET, &i, sizeof(i));
@@ -528,16 +528,18 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::systemUp() {
-		struct nl_addr *local = getNLAddr(ip, netmask);
+		struct nl_addr *local = getNLAddr(ip, netmask), *bcast = getNLBroadcast(ip, netmask);
 		char buf[32];
 		log << nl_addr2str (local, buf, 32) << endl;
 		struct rtnl_addr *addr = rtnl_addr_alloc();
-		rtnl_addr_set_ifindex(addr, env->device->interfaceIndex);
+		rtnl_addr_set_ifindex(addr, m_env->device->interfaceIndex);
 		rtnl_addr_set_family(addr, AF_INET);
 		rtnl_addr_set_local(addr, local);
+		rtnl_addr_set_broadcast(addr, bcast);
 		log << "systemUp: addr_add = " << rtnl_addr_add(dm->hwman.getNLHandle(), addr, 0) << endl;
 		rtnl_addr_put(addr);
 		nl_addr_put(local);
+		nl_addr_put(bcast);
 		// Gateway
 		if (!gateway.isNull()) {
 			log << "Try setting gateway" << endl;
@@ -547,7 +549,7 @@ namespace nuts {
 			setSockaddrIPv4(rt.rt_dst);
 			setSockaddrIPv4(rt.rt_gateway, gateway.toIPv4Address());
 			setSockaddrIPv4(rt.rt_genmask);
-			QByteArray buf = env->device->name.toUtf8();
+			QByteArray buf = m_env->device->name.toUtf8();
 			rt.rt_dev = buf.data();
 			int skfd = socket(AF_INET, SOCK_DGRAM, 0);
 			write(3, &rt, sizeof(rt));
@@ -558,7 +560,7 @@ namespace nuts {
 		if (!dnsserver.empty()) {
 			QProcess *proc = new QProcess();
 			QStringList arguments;
-			arguments << "-a" << QString("%1_%2").arg(env->device->name).arg(m_index);
+			arguments << "-a" << QString("%1_%2").arg(m_env->device->name).arg(m_index);
 			proc->start("/sbin/resolvconf", arguments);
 			QTextStream ts(proc);
 			if (!localdomain.isEmpty())
@@ -575,7 +577,7 @@ namespace nuts {
 		// Resolvconf
 		QProcess *proc = new QProcess();
 		QStringList arguments;
-		arguments << "-d" << QString("%1_%2").arg(env->device->name).arg(m_index);
+		arguments << "-d" << QString("%1_%2").arg(m_env->device->name).arg(m_index);
 		proc->start("/sbin/resolvconf", arguments);
 		proc->closeWriteChannel();
 		proc->waitForFinished(-1);
@@ -588,7 +590,7 @@ namespace nuts {
 			setSockaddrIPv4(rt.rt_dst);
 			setSockaddrIPv4(rt.rt_gateway, gateway.toIPv4Address());
 			setSockaddrIPv4(rt.rt_genmask);
-			QByteArray buf = env->device->name.toUtf8();
+			QByteArray buf = m_env->device->name.toUtf8();
 			rt.rt_dev = buf.data();
 			int skfd = socket(AF_INET, SOCK_DGRAM, 0);
 			ioctl(skfd, SIOCDELRT, &rt);
@@ -598,7 +600,7 @@ namespace nuts {
 		char buf[32];
 		log << nl_addr2str (local, buf, 32) << endl;
 		struct rtnl_addr *addr = rtnl_addr_alloc();
-		rtnl_addr_set_ifindex(addr, env->device->interfaceIndex);
+		rtnl_addr_set_ifindex(addr, m_env->device->interfaceIndex);
 		rtnl_addr_set_family(addr, AF_INET);
 		rtnl_addr_set_local(addr, local);
 		log << "systemUp: addr_delete = " << rtnl_addr_delete(dm->hwman.getNLHandle(), addr, 0) << endl;
@@ -608,10 +610,10 @@ namespace nuts {
 	
 	bool Interface_IPv4::registerXID(quint32 xid) {
 		if (dhcp_xid) {
-			env->device->unregisterXID(dhcp_xid);
+			m_env->device->unregisterXID(dhcp_xid);
 			dhcp_xid = 0;
 		}
-		if (env->device->registerXID(xid, this)) {
+		if (m_env->device->registerXID(xid, this)) {
 			dhcp_xid = xid;
 			return true;
 		}

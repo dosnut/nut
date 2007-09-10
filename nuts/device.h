@@ -187,10 +187,11 @@ namespace nuts {
 		Q_OBJECT
 		protected:
 			friend class Environment;
+			Environment *m_env;
 			int m_index;
 			
 		public:
-			Interface(int index);
+			Interface(Environment *env, int index);
 			virtual ~Interface();
 			
 			virtual void start() = 0;
@@ -213,7 +214,6 @@ namespace nuts {
 				DHCPS_INITREBOOT,  // request last ip -> rebooting
 				DHCPS_REBOOTING    // wait for ack -> bound, timeout/nak -> init
 			};
-			Environment *env;
 			DeviceManager *dm;
 			quint32 dhcp_xid;
 			dhcp_state dhcpstate;
