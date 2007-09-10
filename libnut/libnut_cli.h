@@ -77,10 +77,14 @@ namespace libnut {
 		QHash<QDBusObjectPath, CDevice* > dbusDevices;
 		QDBusConnection dbusConnection;
 		CLog * log;
+		bool nutsstate;
 		void rebuild(QList<QDBusObjectPath> paths);
+		void setInformation();
+		void clearInformation();
 	private slots:
 		void dbusDeviceAdded(const QDBusObjectPath &objectpath);
 		void dbusDeviceRemoved(const QDBusObjectPath &objectpath);
+		void dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner);
 	public:
 		CDeviceList devices;
 		void init(CLog * inlog);

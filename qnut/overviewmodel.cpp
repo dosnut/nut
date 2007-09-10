@@ -85,20 +85,9 @@ namespace qnut {
             case OVMOD_NAME:
                 return data->name;
             case OVMOD_STATUS:
-                switch (data->state) {
-                case DS_UP:             return tr("up");
-                case DS_UNCONFIGURED:   return tr("unconfigured");
-                case DS_CARRIER:        return tr("got carrier");
-                case DS_ACTIVATED:      return tr("activated");
-                case DS_DEACTIVATED:    return tr("deactivated");
-                default:                break;
-                }
+                return toString(data->state);
             case OVMOD_TYPE:
-                switch (data->type) {
-                case DT_ETH: return tr("Ethernet");
-                case DT_AIR: return tr("Wireless");
-                default:     break;
-                }
+                return toString(data->type);
             case OVMOD_IP: {
                     if (data->state != DS_UP)
                         return QString('-');

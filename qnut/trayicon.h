@@ -7,18 +7,18 @@
 #include <QMenu>
 
 namespace qnut {
-    class CTrayIcon : public QSystemTrayIcon {
-        Q_OBJECT
-    public:
-        QMenu trayMenu;
-        QMenu devicesMenu;
-    
-        CTrayIcon(QObject * parent = 0);
-    
-    public slots:
-        void nothingHere();
-        void handleClicks(QSystemTrayIcon::ActivationReason reason);
-    };
+	class CTrayIcon : public QSystemTrayIcon {
+		Q_OBJECT
+	public:
+		QMenu trayMenu;
+		QMenu devicesMenu;
+
+		CTrayIcon(QObject * parent = 0);
+
+	public slots:
+		void nothingHere();
+		void handleClicks(QSystemTrayIcon::ActivationReason reason);
+	};
 };
 
 #endif

@@ -26,7 +26,7 @@ namespace qnut {
         }
         return QString();
     }
-    
+
     QAction * getSeparator(QObject * parent) {
         QAction * separator = new QAction(parent);
         separator->setSeparator(true);
