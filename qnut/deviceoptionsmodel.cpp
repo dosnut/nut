@@ -71,7 +71,8 @@ namespace qnut {
                 if (data->parent() == device) {
                     switch (role) {
                     case Qt::DisplayRole:
-                        return ((CEnvironment *)data)->name;
+                        return (device->environments[0] == (CEnvironment *)data) ? tr("default") : (
+							((CEnvironment *)data)->name.isEmpty() ? tr("untitled") : ((CEnvironment *)data)->name);
                     case Qt::DecorationRole:
                         return QIcon(UI_ICON_ENVIRONMENT);
                     default:
@@ -94,7 +95,7 @@ namespace qnut {
             case DEV_OPMOD_STATUS:
                 if (role == Qt::DisplayRole) {
                     if (data->parent() == device) {
-                        return ((CEnvironment *)data)->active ? tr("active") : QVariant();
+                        return ((CEnvironment *)data == device->activeEnvironment) ? tr("active") : QVariant();
                     }
                     
                     if (data->parent()->parent() == device) {

@@ -31,15 +31,15 @@ namespace qnut {
         
         //environmentsMenu = new QMenu(this);
         enterEnvironmentAction    = new QAction(QIcon(UI_ICON_ENVIRONMENT_ENTER), tr("Enter environment"), this);
-        activateInterfaceAction   = new QAction(QIcon(UI_ICON_INTERFACE_ACTIVATE), tr("Activate interface"), this);
-        deactivateInterfaceAction = new QAction(QIcon(UI_ICON_INTERFACE_DEACTIVATE), tr("Deactivate interface"), this);
+/*        activateInterfaceAction   = new QAction(QIcon(UI_ICON_INTERFACE_ACTIVATE), tr("Activate interface"), this);
+        deactivateInterfaceAction = new QAction(QIcon(UI_ICON_INTERFACE_DEACTIVATE), tr("Deactivate interface"), this);*/
         editInterfaceAction       = new QAction(QIcon(UI_ICON_EDIT), tr("Edit IP Configuration..."), this);
         
         addAction(enterEnvironmentAction);
         addAction(getSeparator(this));
-        addAction(activateInterfaceAction);
+/*        addAction(activateInterfaceAction);
         addAction(deactivateInterfaceAction);
-        addAction(getSeparator(this));
+        addAction(getSeparator(this));*/
         addAction(editInterfaceAction);
         
         foreach(QAction * i, actions()) {
@@ -97,13 +97,13 @@ namespace qnut {
                 disconnect(target, SIGNAL(activeChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
                 disconnect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
             }
-            else {
-                CInterface * target = (CInterface *)(targetIndex.internalPointer());
-                disconnect(target, SIGNAL(activeChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
-                disconnect(target, SIGNAL(activeChanged(bool)), deactivateInterfaceAction, SLOT(setEnabled(bool)));
-                disconnect(activateInterfaceAction, SIGNAL(triggered()), target, SLOT(activate()));
-                disconnect(deactivateInterfaceAction, SIGNAL(triggered()), target, SLOT(deactivate()));
-            }
+//             else {
+//                 CInterface * target = (CInterface *)(targetIndex.internalPointer());
+// /*                disconnect(target, SIGNAL(activeChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
+//                 disconnect(target, SIGNAL(activeChanged(bool)), deactivateInterfaceAction, SLOT(setEnabled(bool)));*/
+// /*                disconnect(activateInterfaceAction, SIGNAL(triggered()), target, SLOT(activate()));
+//                 disconnect(deactivateInterfaceAction, SIGNAL(triggered()), target, SLOT(deactivate()));*/
+//             }
         }
         
         if (!selectedIndexes.isEmpty()) {
@@ -114,27 +114,27 @@ namespace qnut {
                 connect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
                 
                 enterEnvironmentAction->setDisabled(target->active);
-                activateInterfaceAction->setEnabled(false);
-                deactivateInterfaceAction->setEnabled(false);
+/*                activateInterfaceAction->setEnabled(false);
+                deactivateInterfaceAction->setEnabled(false);*/
                 editInterfaceAction->setEnabled(false);
             }
             else {
                 CInterface * target = (CInterface *)(targetIndex.internalPointer());
-                connect(target, SIGNAL(activeChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
+/*                connect(target, SIGNAL(activeChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
                 connect(target, SIGNAL(activeChanged(bool)), deactivateInterfaceAction, SLOT(setEnabled(bool)));
                 connect(activateInterfaceAction, SIGNAL(triggered()), target, SLOT(activate()));
-                connect(deactivateInterfaceAction, SIGNAL(triggered()), target, SLOT(deactivate()));
+                connect(deactivateInterfaceAction, SIGNAL(triggered()), target, SLOT(deactivate()));*/
                 
                 enterEnvironmentAction->setEnabled(false);
-                activateInterfaceAction->setDisabled(target->active);
-                deactivateInterfaceAction->setEnabled(target->active);
+/*                activateInterfaceAction->setDisabled(target->active);
+                deactivateInterfaceAction->setEnabled(target->active);*/
                 editInterfaceAction->setEnabled(target->userDefineable);
             }
         }
         else {
             enterEnvironmentAction->setEnabled(false);
-            activateInterfaceAction->setEnabled(false);
-            deactivateInterfaceAction->setEnabled(false);
+/*            activateInterfaceAction->setEnabled(false);
+            deactivateInterfaceAction->setEnabled(false);*/
             editInterfaceAction->setEnabled(false);
         }
     }
@@ -163,23 +163,23 @@ namespace qnut {
                 CEnvironment * target = (CEnvironment *)(targetIndex.internalPointer());
                 
                 enterEnvironmentAction->setDisabled(target->active);
-                activateInterfaceAction->setEnabled(false);
-                deactivateInterfaceAction->setEnabled(false);
+/*                activateInterfaceAction->setEnabled(false);
+                deactivateInterfaceAction->setEnabled(false);*/
                 editInterfaceAction->setEnabled(false);
             }
             else {
                 CInterface * target = (CInterface *)(targetIndex.internalPointer());
                 
                 enterEnvironmentAction->setEnabled(false);
-                activateInterfaceAction->setDisabled(target->active);
-                deactivateInterfaceAction->setEnabled(target->active);
+/*                activateInterfaceAction->setDisabled(target->active);
+                deactivateInterfaceAction->setEnabled(target->active);*/
                 editInterfaceAction->setEnabled(target->userDefineable);
             }
         }
         else {
             enterEnvironmentAction->setEnabled(false);
-            activateInterfaceAction->setEnabled(false);
-            deactivateInterfaceAction->setEnabled(false);
+/*            activateInterfaceAction->setEnabled(false);
+            deactivateInterfaceAction->setEnabled(false);*/
             editInterfaceAction->setEnabled(false);
         }
     }

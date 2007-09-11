@@ -108,16 +108,16 @@ namespace qnut {
 			ui.toolBar->addAction(current->disableDeviceAction);
 			ui.menuDevice->addAction(current->enableDeviceAction);
 			ui.menuDevice->addAction(current->disableDeviceAction);
-			ui.toolBar->addSeparator();
+//			ui.toolBar->addSeparator();
 			//environment actions
-			ui.toolBar->addAction(current->enterEnvironmentAction);
-			ui.menuEnvironment->addAction(current->enterEnvironmentAction);
-			ui.toolBar->addSeparator();
+//			ui.toolBar->addAction(current->enterEnvironmentAction);
+//			ui.menuEnvironment->addAction(current->enterEnvironmentAction);
+/*			ui.toolBar->addSeparator();
 			//interface actions
 			ui.toolBar->addAction(current->activateInterfaceAction);
 			ui.toolBar->addAction(current->deactivateInterfaceAction);
 			ui.menuInterface->addAction(current->activateInterfaceAction);
-			ui.menuInterface->addAction(current->deactivateInterfaceAction);
+			ui.menuInterface->addAction(current->deactivateInterfaceAction);*/
 			break;
 		}
 	}

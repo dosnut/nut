@@ -94,15 +94,15 @@ void CDeviceManager::init(CLog * inlog) {
 		*log << tr("Please start nuts. Starting idle mode");
 		nutsstate = false;
 	}
-	connect(dbusConnectionInterface, SIGNAL(serviceOwnerChanged(const QString &, const QString &, const QString &)), this, SLOT(dbusServiceOwnerChanged(const QString &, const QString &, const QString &)));
 	//Attach to DbusDevicemanager
 	dbusDevmgr = new DBusDeviceManagerInterface(NUT_DBUS_URL, "/manager",dbusConnection, this);
 	if (nutsstate) {
 		setInformation();
 	}
+	connect(dbusConnectionInterface, SIGNAL(serviceOwnerChanged(const QString &, const QString &, const QString &)), this, SLOT(dbusServiceOwnerChanged(const QString &, const QString &, const QString &)));
 	//Connect dbus-signals to own slots:
-	connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
-	connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+//	connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
+//	connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
 }
 
 //CDeviceManager private functions:
@@ -133,10 +133,11 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 
 void CDeviceManager::setInformation() {
 	//get devicelist etc.
+	*log << "setInformation()";
 	QDBusReply<QList<QDBusObjectPath> > replydevs;
 	replydevs = dbusDevmgr->getDeviceList();
 	if (!replydevs.isValid()) {
-		throw CLI_ConnectionException(tr("Failed to get DeviceList"));
+		*log << tr("Failed to get DeviceList");
 	}
 	//Let's populate our own DeviceList
 	CDevice * device;
@@ -155,6 +156,7 @@ void CDeviceManager::setInformation() {
 }
 void CDeviceManager::clearInformation() {
 	//Clean Device list:
+	*log << "clearInformation()";
 	dbusDevices.clear();
 	CDevice * dev;
 	while (!devices.isEmpty()) {
@@ -177,6 +179,8 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 				nutsstate = true;
 				setInformation();
 			}
+/*			connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
+			connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));*/
 		}
 		else if (newOwner.isEmpty()) {
 			*log << tr("NUTS has been stopped");
@@ -184,7 +188,9 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 				nutsstate = false;
 				clearInformation();
 			}
-		}
+/*			disconnect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
+			disconnect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));*/
+ 		}
 	}
 }
 
@@ -302,6 +308,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		dbusEnvironments.insert(i,env);
 		environments.append(env);
 	}
+	
 	if (!replyProp.value().activeEnvironment.isEmpty()) {
 		dbusActiveEnvironment = QDBusObjectPath(replyProp.value().activeEnvironment);
 		activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment, 0);
@@ -439,6 +446,16 @@ void CDevice::environmentRemoved(const QDBusObjectPath &path) {
 }
 void CDevice::dbusstateChanged(int newState, int oldState) {
 	state = (DeviceState) newState;
+	if (state == DS_UP) {
+		QDBusReply<libnut::DeviceProperties> replyprop = dbusDevice->getProperties();
+		if (replyprop.isValid()) {
+			dbusActiveEnvironment = QDBusObjectPath(replyprop.value().activeEnvironment);
+			activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment, 0);
+			if (activeEnvironment != 0) {
+				activeEnvironment->refreshAll();
+			}
+		}
+	}
 	emit(stateChanged(state));
 }
 
@@ -478,6 +495,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	QDBusReply<EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
 	if (replyprop.isValid()) {
 		name = replyprop.value().name;
+		*log << "Environmentname" + name;
 	}
 	else {
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment properties"));

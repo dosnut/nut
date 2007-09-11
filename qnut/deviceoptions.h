@@ -34,8 +34,8 @@ namespace qnut {
         QAction * enableDeviceAction;
         QAction * disableDeviceAction;
         QAction * enterEnvironmentAction;
-        QAction * activateInterfaceAction;
-        QAction * deactivateInterfaceAction;
+/*        QAction * activateInterfaceAction;
+        QAction * deactivateInterfaceAction;*/
         QAction * editInterfaceAction;
         
         QAction * showAction;
