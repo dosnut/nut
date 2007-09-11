@@ -33,13 +33,13 @@ namespace qnut {
         return separator;
     }
 
-	QString activeIP(CEnvironment * environment) {
-		QString result = QString("");
-		
-		if (environment == NULL)
+	QString activeIP(CDevice * device) {
+		if ((device->activeEnvironment == NULL) || (device->state != DS_UP))
 			return QString('-');
 		
-		foreach (CInterface * i, environment->interfaces) {
+		QString result = QString("");
+		
+		foreach (CInterface * i, device->activeEnvironment->interfaces) {
 			if (result.length() > 0) {
 				result += " (...)";
 				break;

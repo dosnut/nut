@@ -10,6 +10,6 @@ namespace qnut {
     using namespace libnut;
     QString getDeviceIcon(CDevice * device);
     QAction * getSeparator(QObject * parent);
-    QString activeIP(CEnvironment * environment);
+    QString activeIP(CDevice * device);
 };
 #endif
