@@ -164,7 +164,7 @@ namespace qnut {
 				result << (i->name + ": " + toString(i->state) + ", " + activeIP(i->activeEnvironment));
 			}
 		
-		trayicon.setToolTip(result.join('\n'));
+		trayicon.setToolTip(result.join("\n"));
 	}
 	
 	void CConnectionManager::uiCurrentTabChanged(int index) {
