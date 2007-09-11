@@ -85,7 +85,7 @@ namespace nuts {
 		if (ifIndex >= ifStates.size())
 			ifStates.resize(ifIndex+1);
 		ifStates[ifIndex] = ifstate(true);
-		log << "activated interface " << ifIndex << endl;
+//		log << "activated interface " << ifIndex << endl;
 		return isControlled(ifIndex);
 	}
 	bool HardwareManager::controlOff(const QString &ifName) {

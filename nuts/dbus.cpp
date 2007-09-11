@@ -116,7 +116,6 @@ namespace nuts {
 	DBusEnvironment::DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path)
 	: QDBusAbstractAdaptor(env), m_env(env), m_connection(connection) {
 		m_dbusPath = path + QString("/%1").arg(env->getID());
-		log << "Dbus Path: " << m_dbusPath << endl;
 		m_connection->registerObject(m_dbusPath, env);
 		foreach (Interface *iface, m_env->getInterfaces()) {
 			Interface_IPv4 *ifv4 = dynamic_cast<Interface_IPv4*>(iface);
@@ -171,11 +170,11 @@ namespace nuts {
 		m_properties.isStatic = false;
 		return m_properties;
 	}
-	void DBusInterface_IPv4::setIP(quint32 HostAddress) {
+	void DBusInterface_IPv4::setIP(quint32 /*HostAddress*/) {
 	}
-	void DBusInterface_IPv4::setNetmask(quint32 Netmask) {
+	void DBusInterface_IPv4::setNetmask(quint32 /*Netmask*/) {
 	}
-	void DBusInterface_IPv4::setGateway(quint32 Gateway) {
+	void DBusInterface_IPv4::setGateway(quint32 /*Gateway*/) {
 	}
 // 	void DBusInterface_IPv4::setDNS(QList<QHostAddress> dns) {
 // 	}

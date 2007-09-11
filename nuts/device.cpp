@@ -68,9 +68,7 @@ namespace nuts {
 	}
 	
 	void DeviceManager::ca_timer() {
-		log << "ca_timer" << endl;
 		if (!ca_evts.empty()) {
-			log << "ca_timer takeFirst()" << endl;
 			struct ca_evt e = ca_evts.takeFirst();
 			if (e.up)
 				devices[e.ifName]->gotCarrier(e.ifIndex);
@@ -260,7 +258,7 @@ namespace nuts {
 	}
 	
 	void Device::writeDHCPClientSocket() {
-		log << "writeDHCPClientSocket" << endl;
+//		log << "writeDHCPClientSocket" << endl;
 		if (!dhcp_write_buf.empty()) {
 			QByteArray msgdata = dhcp_write_buf.takeFirst();
 			// raw_packet(&packet, INADDR_ANY, CLIENT_PORT, INADDR_BROADCAST,
@@ -482,7 +480,7 @@ namespace nuts {
 	}
 
 	void Interface_IPv4::start() {
-		log << "Interface_IPv4::start" << endl;
+//		log << "Interface_IPv4::start" << endl;
 		if (config->getFlags() & nut::IPv4Config::DO_DHCP)
 			startDHCP();
 		else
@@ -490,7 +488,7 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::stop() {
-		log << "Interface_IPv4::stop" << endl;
+//		log << "Interface_IPv4::stop" << endl;
 		systemDown();
 		m_env->ifDown(this);
 	}
@@ -529,20 +527,24 @@ namespace nuts {
 	
 	void Interface_IPv4::systemUp() {
 		struct nl_addr *local = getNLAddr(ip, netmask), *bcast = getNLBroadcast(ip, netmask);
-		char buf[32];
-		log << nl_addr2str (local, buf, 32) << endl;
+//		char buf[32];
+//		log << nl_addr2str (local, buf, 32) << endl;
 		struct rtnl_addr *addr = rtnl_addr_alloc();
 		rtnl_addr_set_ifindex(addr, m_env->device->interfaceIndex);
 		rtnl_addr_set_family(addr, AF_INET);
 		rtnl_addr_set_local(addr, local);
 		rtnl_addr_set_broadcast(addr, bcast);
+#if 0
 		log << "systemUp: addr_add = " << rtnl_addr_add(dm->hwman.getNLHandle(), addr, 0) << endl;
+#else
+		rtnl_addr_add(dm->hwman.getNLHandle(), addr, 0);
+#endif
 		rtnl_addr_put(addr);
 		nl_addr_put(local);
 		nl_addr_put(bcast);
 		// Gateway
 		if (!gateway.isNull()) {
-			log << "Try setting gateway" << endl;
+//			log << "Try setting gateway" << endl;
 			struct rtentry rt;
 			memset(&rt, 0, sizeof(rt));
 			rt.rt_flags = RTF_UP | RTF_GATEWAY;
@@ -597,13 +599,17 @@ namespace nuts {
 			close(skfd);
 		}
 		struct nl_addr *local = getNLAddr(ip, netmask);
-		char buf[32];
-		log << nl_addr2str (local, buf, 32) << endl;
+//		char buf[32];
+//		log << nl_addr2str (local, buf, 32) << endl;
 		struct rtnl_addr *addr = rtnl_addr_alloc();
 		rtnl_addr_set_ifindex(addr, m_env->device->interfaceIndex);
 		rtnl_addr_set_family(addr, AF_INET);
 		rtnl_addr_set_local(addr, local);
+#if 0
 		log << "systemUp: addr_delete = " << rtnl_addr_delete(dm->hwman.getNLHandle(), addr, 0) << endl;
+#else
+		rtnl_addr_delete(dm->hwman.getNLHandle(), addr, 0);
+#endif
 		rtnl_addr_put(addr);
 		nl_addr_put(local);
 	}
