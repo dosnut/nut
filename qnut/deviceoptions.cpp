@@ -48,7 +48,7 @@ namespace qnut {
         
         setAllColumnsShowFocus(true);
         
-        setDisabled(device->state == DS_DEACTIVATED);
+        //setDisabled(device->state == DS_DEACTIVATED);
         enableDeviceAction->setDisabled(device->state == DS_UP);
         disableDeviceAction->setDisabled(device->state == DS_DEACTIVATED);
         
@@ -65,6 +65,8 @@ namespace qnut {
         
         connect(selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
                 this            , SLOT(uiSelectionChanged(const QItemSelection &, const QItemSelection &)));
+		if (device->state == DS_UP)
+			expand(model()->index(device->environments.indexOf(device->activeEnvironment), 0));
     }
     
     CDeviceOptions::~CDeviceOptions() {
@@ -113,7 +115,7 @@ namespace qnut {
                 connect(target, SIGNAL(activeChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
                 connect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
                 
-                enterEnvironmentAction->setDisabled(target->active);
+                enterEnvironmentAction->setDisabled(target == device->activeEnvironment);
 /*                activateInterfaceAction->setEnabled(false);
                 deactivateInterfaceAction->setEnabled(false);*/
                 editInterfaceAction->setEnabled(false);
@@ -153,6 +155,9 @@ namespace qnut {
     
     void CDeviceOptions::uiHandleStateChange(DeviceState state) {
         updateDeviceIcons();
+		collapseAll();
+		if (state == DS_UP)
+			expand(model()->index(device->environments.indexOf(device->activeEnvironment), 0));
         //setDisabled(state == DS_DEACTIVATED);
         enableDeviceAction->setDisabled(state == DS_UP);
         disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
@@ -162,7 +167,7 @@ namespace qnut {
             if (!targetIndex.parent().isValid()) {
                 CEnvironment * target = (CEnvironment *)(targetIndex.internalPointer());
                 
-                enterEnvironmentAction->setDisabled(target->active);
+                enterEnvironmentAction->setDisabled(target == device->activeEnvironment);
 /*                activateInterfaceAction->setEnabled(false);
                 deactivateInterfaceAction->setEnabled(false);*/
                 editInterfaceAction->setEnabled(false);

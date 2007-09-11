@@ -71,8 +71,7 @@ namespace qnut {
                 if (data->parent() == device) {
                     switch (role) {
                     case Qt::DisplayRole:
-                        return (device->environments[0] == (CEnvironment *)data) ? tr("default") : (
-							((CEnvironment *)data)->name.isEmpty() ? tr("untitled") : ((CEnvironment *)data)->name);
+                        return (device->environments[0] == (CEnvironment *)data) ? tr("default") : (((CEnvironment *)data)->name.isEmpty() ? tr("untitled") : ((CEnvironment *)data)->name);
                     case Qt::DecorationRole:
                         return QIcon(UI_ICON_ENVIRONMENT);
                     default:
