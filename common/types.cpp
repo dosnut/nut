@@ -61,22 +61,14 @@ namespace libnut {
 	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop) {
 		argument.beginStructure();
 		argument << ifprop.active << ifprop.userDefineable << ifprop.isStatic;
-		argument << ifprop.ip.toString() << ifprop.netmask.toString() << ifprop.gateway.toString() << ifprop.dns.toString();
+		argument << ifprop.ip << ifprop.netmask << ifprop.gateway << ifprop.dns;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceProperties &ifprop) {
 		argument.beginStructure();
-		QString ip;
 		argument >> ifprop.active >> ifprop.userDefineable >> ifprop.isStatic;
-		argument >> ip;
-		ifprop.ip = QHostAddress(ip);
-		argument >> ip;
-		ifprop.netmask = QHostAddress(ip);
-		argument >> ip;
-		ifprop.gateway = QHostAddress(ip);
-		argument >> ip;
-		ifprop.dns = QHostAddress(ip);
+		argument >> ifprop.ip >> ifprop.netmask >> ifprop.gateway >> ifprop.dns;
 		argument.endStructure();
 		return argument;
 	}

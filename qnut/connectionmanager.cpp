@@ -161,7 +161,7 @@ namespace qnut {
 			result << tr("no devcies present");
 		else
 			foreach (CDevice * i, deviceManager.devices) {
-				result << (i->name + ": " + toString(i->state) + ", " + activeIP(i->activeEnvironment));
+				result << (i->name + ": " + toString(i->state) + ", " + activeIP(i));
 			}
 		
 		trayicon.setToolTip(result.join("\n"));

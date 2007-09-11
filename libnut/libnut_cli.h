@@ -207,7 +207,7 @@ namespace libnut {
 		QHostAddress ip;
 		QHostAddress netmask;
 		QHostAddress gateway;
-		QHostAddress dnsserver;
+		QList<QHostAddress> dnsserver;
 
 		CInterface(CEnvironment * parent, QDBusObjectPath dbusPath);
 		~CInterface();

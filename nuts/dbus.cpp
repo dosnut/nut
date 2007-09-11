@@ -168,6 +168,12 @@ namespace nuts {
 		m_properties.netmask = m_iface->netmask;
 		m_properties.userDefineable = false;
 		m_properties.isStatic = false;
+		if (!m_iface->dnsserver.isEmpty()) {
+			m_properties.dns = m_iface->dnsserver;
+		}
+		else {
+			m_properties.dns = QList<QHostAddress>();
+		}
 		return m_properties;
 	}
 	void DBusInterface_IPv4::setIP(quint32 /*HostAddress*/) {

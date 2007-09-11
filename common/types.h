@@ -78,7 +78,7 @@ namespace libnut {
 		QHostAddress ip;
 		QHostAddress netmask;
 		QHostAddress gateway;
-		QHostAddress dns;
+		QList<QHostAddress> dns;
 	};
 	
 	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop);

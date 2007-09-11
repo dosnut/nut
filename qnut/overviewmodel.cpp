@@ -92,7 +92,7 @@ namespace qnut {
                     if (data->state != DS_UP)
                         return QString('-');
                     
-                    return activeIP(data->activeEnvironment);
+                    return activeIP(data);
                 }
             default:
                 break;
