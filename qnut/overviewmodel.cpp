@@ -92,22 +92,7 @@ namespace qnut {
                     if (data->state != DS_UP)
                         return QString('-');
                     
-                    QString result = QString("");
-                    if (data->activeEnvironment == NULL) break;
-                    foreach (CInterface * i, data->activeEnvironment->interfaces) {
-                        if (result.length() > 0) {
-                            result += " (...)";
-                            break;
-                        }
-                        else if (i->active) {
-                            result += i->ip.toString();
-                        }
-                    }
-                    
-                    if (result.length() > 0)
-                        return result;
-                    else
-                        return QString('-');
+                    return activeIP(data->activeEnvironment);
                 }
             default:
                 break;

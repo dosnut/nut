@@ -32,4 +32,26 @@ namespace qnut {
         separator->setSeparator(true);
         return separator;
     }
+
+	QString activeIP(CEnvironment * environment) {
+		QString result = QString("");
+		
+		if (environment == NULL)
+			return QString('-');
+		
+		foreach (CInterface * i, environment->interfaces) {
+			if (result.length() > 0) {
+				result += " (...)";
+				break;
+			}
+			else if (i->active) {
+				result += i->ip.toString();
+			}
+		}
+		
+		if (result.length() > 0)
+			return result;
+		else
+			return QString('-');
+	}
 };

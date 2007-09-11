@@ -155,18 +155,16 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::uiUpdateTrayIconInfo() {
-		QString result = "- QNUT -\n";
+		QStringList result;
 		
 		if (deviceManager.devices.isEmpty())
-			result += tr("no devcies present");
+			result << tr("no devcies present");
 		else
 			foreach (CDevice * i, deviceManager.devices) {
-				result += i->name;
-				result += ": ";
-// 				result += toString(i->state) + ", " + activeIP(i->activeEnvironment) + '\n';
+				result << (i->name + ": " + toString(i->state) + ", " + activeIP(i->activeEnvironment));
 			}
 		
-		trayicon.setToolTip(result);
+		trayicon.setToolTip(result.join('\n'));
 	}
 	
 	void CConnectionManager::uiCurrentTabChanged(int index) {
