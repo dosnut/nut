@@ -208,7 +208,7 @@ Q_DECLARE_METATYPE(nut::SelectRule)
 Q_DECLARE_METATYPE(nut::SelectConfig)
 Q_DECLARE_METATYPE(nut::EnvironmentConfig)
 Q_DECLARE_METATYPE(nut::IPv4Config)
-Q_DECLARE_METATYPE(QVector< size_t >);
-Q_DECLARE_METATYPE(QVector< QVector< size_t > >);
+Q_DECLARE_METATYPE(QVector< quint32 >);
+Q_DECLARE_METATYPE(QVector< QVector< quint32 > >);
 
 #endif
