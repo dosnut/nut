@@ -155,6 +155,7 @@ void CDeviceManager::setInformation() {
 }
 void CDeviceManager::clearInformation() {
 	//Clean Device list:
+	dbusDevices.clear();
 	CDevice * dev;
 	while (!devices.isEmpty()) {
 		dev = devices.takeFirst();
@@ -278,13 +279,11 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		*log << (tr("Name") + ": " + QString(name));
 		*log << (tr("Type") + ": " + toString(type));
 		*log << (tr("State") + ": " + toString(state));
-		*log << (tr("Active Environement") + ": " + dbusActiveEnvironment.path());
 	}
 	else {
 		throw CLI_DevConnectionException(tr("Error while retrieving dbus' device information"));
 	}
 	//get Environment list
-	//set activeEnv to NULL
 	QDBusReply<QList<QDBusObjectPath> > replyEnv = dbusDevice->getEnvironments();
 	if (!replyEnv.isValid()) {
 		throw CLI_DevConnectionException(tr("Error while trying to get environment list"));
@@ -302,13 +301,11 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		}
 		dbusEnvironments.insert(i,env);
 		environments.append(env);
-		//Maybe we need to send signal environmentsUpdated?
-		emit(environmentsUpdated());
 	}
 	if (!replyProp.value().activeEnvironment.isEmpty()) {
 		dbusActiveEnvironment = QDBusObjectPath(replyProp.value().activeEnvironment);
 		activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment, 0);
-		emit(environmentChangedActive(activeEnvironment, 0));
+		*log << (tr("Active Environement") + ": " + dbusActiveEnvironment.path());
 	}
 	//connect signals to slots
 	connect(dbusDevice, SIGNAL(environmentChangedActive(const QDBusObjectPath &)),
@@ -369,6 +366,7 @@ void CDevice::refreshAll() {
 			dbusActiveEnvironment = QDBusObjectPath(replyprop.value().activeEnvironment);
 			activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment);
 		}
+		*log << "Refreshing active environment: " + dbusActiveEnvironment.path();
 		state = (DeviceState) replyprop.value().state;
 		type = replyprop.value().type;
 		name = replyprop.value().name;
