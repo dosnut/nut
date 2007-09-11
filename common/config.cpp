@@ -13,13 +13,17 @@
 #include "config.h"
 
 QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress &data) {
+	argument.beginStructure();
 	argument << data.toString();
+	argument.endStructure();
 	return argument;
 }
 const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &data) {
+	argument.beginStructure();
 	QString addr;
 	argument >> addr;
 	data = QHostAddress(addr);
+	argument.endStructure();
 	return argument;
 }
 
