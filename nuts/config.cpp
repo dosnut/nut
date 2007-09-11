@@ -100,26 +100,26 @@ namespace nuts {
 	}
 	
 	void ConfigParser::selectAdd(const nut::SelectRule &rule) {
-		size_t filterid = m_curenvconfig->m_select.filters.count();
+		quint32 filterid = m_curenvconfig->m_select.filters.count();
 		m_curenvconfig->m_select.filters.append(rule);
 		m_curenvconfig->m_select.blocks.last().append(filterid);
 	}
 	
 	bool ConfigParser::selectAndBlock() {
 		if (!m_curenvconfig) return false;
-		size_t blockid = m_curenvconfig->m_select.blocks.size();
+		quint32 blockid = m_curenvconfig->m_select.blocks.size();
 		if (blockid)
 			selectAdd(nut::SelectRule(blockid));
-		m_curenvconfig->m_select.blocks.append(QVector<size_t>(1, 0));
+		m_curenvconfig->m_select.blocks.append(QVector<quint32>(1, 0));
 		return true;
 	}
 	
 	bool ConfigParser::selectOrBlock() {
 		if (!m_curenvconfig) return false;
-		size_t blockid = m_curenvconfig->m_select.blocks.size();
+		quint32 blockid = m_curenvconfig->m_select.blocks.size();
 		if (blockid)
 			selectAdd(nut::SelectRule(blockid));
-		m_curenvconfig->m_select.blocks.append(QVector<size_t>(1, 1));
+		m_curenvconfig->m_select.blocks.append(QVector<quint32>(1, 1));
 		return true;
 	}
 	

@@ -106,8 +106,8 @@ namespace nut {
 		qRegisterMetaType<SelectConfig>("nut::SelectConfig");
 		qRegisterMetaType<EnvironmentConfig>("nut::EnvironmentConfig");
 		qRegisterMetaType<IPv4Config>("nut::IPv4Config");
-		qRegisterMetaType< QVector< size_t > >("QVector< size_t >");
-		qRegisterMetaType< QVector< QVector< size_t > > >("QVector< QVector< size_t > >");
+		qRegisterMetaType< QVector< quint32 > >("QVector< quint32 >");
+		qRegisterMetaType< QVector< QVector< quint32 > > >("QVector< QVector< quint32 > >");
 	
 		qDBusRegisterMetaType<Config>();
 		qDBusRegisterMetaType<DeviceConfig>();
@@ -115,8 +115,8 @@ namespace nut {
 		qDBusRegisterMetaType<SelectConfig>();
 		qDBusRegisterMetaType<EnvironmentConfig>();
 		qDBusRegisterMetaType<IPv4Config>();
-		qDBusRegisterMetaType< QVector< size_t > >();
-		qDBusRegisterMetaType< QVector< QVector< size_t > > >();
+		qDBusRegisterMetaType< QVector< quint32 > >();
+		qDBusRegisterMetaType< QVector< QVector< quint32 > > >();
 	}
 }
 

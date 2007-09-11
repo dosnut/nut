@@ -109,10 +109,10 @@ namespace nut {
 			SelectRule(const QHostAddress &ipAddr) : selType(SEL_ARP), ipAddr(ipAddr) { }
 			SelectRule(const QHostAddress &ipAddr, const nut::MacAddress &macAddr) : selType(SEL_ARP), ipAddr(ipAddr), macAddr(macAddr) { }
 			SelectRule(const QString &essid) : selType(SEL_ESSID), essid(essid) { }
-			SelectRule(size_t block) : selType(SEL_BLOCK), block(block) { }
+			SelectRule(quint32 block) : selType(SEL_BLOCK), block(block) { }
 			
 			SelectType selType;
-			size_t block;
+			quint32 block;
 			QString essid;
 			QHostAddress ipAddr;
 			nut::MacAddress macAddr;
@@ -131,7 +131,7 @@ namespace nut {
 			// List of blocks: each block contains at the first position the type:
 			//  0 = AND, 1 = OR
 			// followed by the list of filter ids for the block.
-			QVector< QVector<size_t> > blocks;
+			QVector< QVector<quint32> > blocks;
 	};
 	
 	class EnvironmentConfig {
