@@ -73,6 +73,7 @@ namespace nuts {
 			QList<QDBusObjectPath> getEnvironments();
 			void enable();
 			void disable();
+			void setEnvironment(const QDBusObjectPath &path);
 		
 		signals:
 			void stateChanged(int newState, int oldState);
@@ -94,6 +95,7 @@ namespace nuts {
 		public:
 			DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path);
 			virtual ~DBusEnvironment();
+			inline Environment * getEnvironment() const { return m_env; }
 	
 			QString getPath();
 	

@@ -456,6 +456,10 @@ void CDevice::dbusstateChanged(int newState, int oldState) {
 			}
 		}
 	}
+	else {
+		dbusActiveEnvironment = QDBusObjectPath();
+		activeEnvironment = 0;
+	}
 	emit(stateChanged(state));
 }
 

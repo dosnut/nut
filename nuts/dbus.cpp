@@ -105,6 +105,14 @@ namespace nuts {
 		}
 		return paths;
 	}
+	void DBusDevice::setEnvironment(const QDBusObjectPath &path) {
+		foreach(DBusEnvironment * i, m_envs) {
+			if (i->getPath() == path.path()) {
+				m_dev->setEnvironment((i->getEnvironment())->getID());
+				break;
+			}
+		}
+	}
 	
 	void DBusDevice::enable() {
 		m_dev->enable();

@@ -160,6 +160,7 @@ namespace libnut {
 		CLog * log;
 		QHash<QDBusObjectPath, CInterface *> dbusInterfaces;
 		DBusEnvironmentInterface * dbusEnvironment;
+		bool active; //nicht nötig?
 		
 		void refreshAll();
 		void rebuild(const QList<QDBusObjectPath> &paths);
@@ -168,7 +169,6 @@ namespace libnut {
 		void dbusinterfaceRemoved(const QDBusObjectPath &path);
 		void dbusstateChanged(bool state);
 	public:
-		bool active;
 		QString name;
 		CInterfaceList interfaces;
 		
