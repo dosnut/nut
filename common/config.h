@@ -85,6 +85,7 @@ namespace nut {
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data);
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data);
 			QList<EnvironmentConfig*> m_environments;
+			bool m_noAutoStart;
 		
 		public:
 			DeviceConfig();

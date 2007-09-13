@@ -32,6 +32,7 @@ namespace nuts {
 			bool newDevice(const QString &name);
 			bool devDefaultEnvironment();
 			bool devEnvironment(const QString &name);
+			bool devNoAutoStart();
 			
 			bool envSelect();
 			bool envDHCP();

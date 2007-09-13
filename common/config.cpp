@@ -60,6 +60,7 @@ namespace nut {
 	
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data) {
 		argument.beginStructure();
+		argument << data.m_noAutoStart;
 		argument.beginArray( qMetaTypeId<EnvironmentConfig>() );
 		foreach(EnvironmentConfig* ec, data.m_environments) {
 			argument << *ec;
@@ -70,6 +71,7 @@ namespace nut {
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data) {
 		argument.beginStructure();
+		argument >> data.m_noAutoStart;
 		argument.beginArray();
 		while (!argument.atEnd()) {
 			EnvironmentConfig *ec = new EnvironmentConfig();
@@ -173,7 +175,7 @@ namespace nut {
 	}
 
 	DeviceConfig::DeviceConfig()
-	: m_canUserEnable(false) {
+	: m_noAutoStart(false) {
 	}
 	
 	DeviceConfig::~DeviceConfig() {

@@ -134,7 +134,7 @@ namespace nuts {
 			libnut::DeviceState getState() { return m_state; }
 			
 			// enable(true) forces the use of an interface, even if it is already up.
-			void enable(bool force = false);
+			bool enable(bool force = false);
 			void disable();
 			
 			const QList<Environment*>& getEnvironments() { return envs; }

@@ -55,7 +55,8 @@ namespace nuts {
 			i.next();
 			Device *d = new Device(this, i.key(), i.value());
 			devices.insert(i.key(), d);
-			d->enable(true);
+			if (!i.value()->m_noAutoStart)
+				d->enable(true);
 		}
 	}
 	
@@ -304,11 +305,13 @@ namespace nuts {
 		}
 	}
 	
-	void Device::enable(bool force) {
+	bool Device::enable(bool force) {
 		if (m_state == libnut::DS_DEACTIVATED) {
+			if (!dm->hwman.controlOn(name, force))
+				return false;
 			setState(libnut::DS_ACTIVATED);
-			dm->hwman.controlOn(name, force);
 		}
+		return true;
 	}
 	void Device::disable() {
 		if (m_state != libnut::DS_DEACTIVATED) {
@@ -521,18 +524,18 @@ namespace nuts {
 	
 	void Interface_IPv4::timerEvent(QTimerEvent *) {
 		killTimer(dhcp_timer_id);
-		switch (dhcp_state) {
+		switch (dhcpstate) {
 			case DHCPS_SELECTING:
-				dhcp_state = DHCPS_INIT;
+				dhcpstate = DHCPS_INIT;
 				break;
 			case DHCPS_REQUESTING:
-				dhcp_state = DHCPS_INIT;
+				dhcpstate = DHCPS_INIT;
 				break;
 			case DHCPS_RENEWING:
-				dhcp_state = DHCPS_REBINDING;
+				dhcpstate = DHCPS_REBINDING;
 				break;
 			case DHCPS_REBINDING:
-				dhcp_state = DHCPS_INIT_START;
+				dhcpstate = DHCPS_INIT_START;
 				break;
 			default:
 				break;

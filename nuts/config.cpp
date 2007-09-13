@@ -49,6 +49,12 @@ namespace nuts {
 		return true;
 	}
 	
+	bool ConfigParser::devNoAutoStart() {
+		if (!m_curdevconfig) return false;
+		m_curdevconfig->m_noAutoStart = true;
+		return true;
+	}
+	
 	bool ConfigParser::envSelect() {
 		if (!m_curenvconfig) return false;
 		// Only one select block per environment
