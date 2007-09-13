@@ -141,7 +141,6 @@ namespace nuts {
 		
 		signals:
 			void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState);
-			void environmentChanged(int newEnv, int oldEnv);
 	};
 	
 	class Environment : public QObject {

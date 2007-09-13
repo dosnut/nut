@@ -89,8 +89,6 @@ namespace nut {
 			const QList<EnvironmentConfig*>& getEnvironments() {
 				return m_environments;
 			}
-			
-			bool m_canUserEnable;
 	};
 	
 	class SelectRule {
