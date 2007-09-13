@@ -103,6 +103,47 @@ namespace nut {
 			QString wpaDriver() { return m_wpaDriver; }
 	};
 	
+	class SelectResult {
+		public:
+			typedef enum { False = 0, User = 1, NotUser = 2, True = 3 } bool_t;
+		private:
+			bool_t m_value;
+			
+		public:
+			SelectResult(bool_t value);
+			SelectResult& operator = (bool_t value) {
+				m_value = value;
+				return *this;
+			}
+			SelectResult& operator = (const SelectResult &other) {
+				m_value = other.m_value;
+				return *this;
+			}
+			
+			SelectResult operator || (const SelectResult &other) {
+				const bool_t op_or[16] = {
+					False  , User , NotUser, True,
+					User   , User , True   , True,
+					NotUser, True , NotUser, True,
+					True   , True , True   , True
+				};
+				return op_or[m_value*4 + other.m_value];
+			}
+			SelectResult operator && (const SelectResult &other) {
+				const bool_t op_and[16] = {
+					False  , False, False  , False,
+					False  , User , False  , User,
+					False  , False, NotUser, NotUser,
+					False  , User , NotUser, True
+				};
+				return op_and[m_value*4 + other.m_value];
+			}
+			
+			operator bool_t () {
+				return m_value;
+			}
+	};
+	
 	class SelectRule {
 		protected:
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const SelectRule &data);
