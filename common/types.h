@@ -20,9 +20,8 @@ inline bool operator== (const QDBusObjectPath &p1, const QDBusObjectPath &p2){
 inline uint qHash(const QDBusObjectPath &key) {
 	return qHash(key.path());
 }
-
-QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress & addr);
-const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &addr);
+QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress &data);
+const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &data);
 
 namespace common {
 	void init();
@@ -41,7 +40,7 @@ namespace libnut {
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceProperties &devprop);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceProperties &devprop);
 	
-	enum WlanEncryptionType {none=0, wep=2, wpa1=4, wpa2=8, other=16};
+	enum WlanEncryptionType {WET_NONE=0, WET_WEP=2, WET_WPA1=4, WET_WPA2=8, WET_OTHER=16};
 	struct WlanScanresult {
 		QString essid;
 		int channel;
@@ -92,5 +91,6 @@ Q_DECLARE_METATYPE(QList<libnut::WlanScanresult>)
 Q_DECLARE_METATYPE(libnut::WlanNetworkProperties)
 Q_DECLARE_METATYPE(libnut::EnvironmentProperties)
 Q_DECLARE_METATYPE(libnut::InterfaceProperties)
-
+Q_DECLARE_METATYPE(QHostAddress)
+Q_DECLARE_METATYPE(QList<QHostAddress>)
 #endif

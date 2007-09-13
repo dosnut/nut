@@ -218,12 +218,12 @@ public Q_SLOTS: // METHODS
         argumentList << qVariantFromValue(Netmask);
         return callWithArgumentList(QDBus::NoBlock, QLatin1String("setNetmask"), argumentList);
     }
-// 	inline QDBusReply<void> setDNS(QList<QHostAddress> dns)
-// 	{
-// 		QList<QVariant> argumentList;
-// 		argumentList << qVariantFromValue(dns);
-// 		return callWithArgumentList(QDBus::NoBlock, QLatin1String("setDNS"), argumentList);
-// 	}
+	inline QDBusReply<void> setDNS(QList<QHostAddress> dns)
+	{
+		QList<QVariant> argumentList;
+		argumentList << qVariantFromValue(dns);
+		return callWithArgumentList(QDBus::NoBlock, QLatin1String("setDNS"), argumentList);
+	}
 
     inline QDBusReply<void> setDynamic()
     {

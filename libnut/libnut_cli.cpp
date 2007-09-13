@@ -27,6 +27,16 @@ QString toString(DeviceType type) {
 		default:     return QString();
 	}
 }
+QString toString(WlanEncryptionType type) {
+	switch (type) {
+		case WET_NONE:  return QObject::tr("none");
+		case WET_WEP:   return QObject::tr("WEP");
+		case WET_WPA1:  return QObject::tr("WPA1");
+		case WET_WPA2:  return QObject::tr("WPA2");
+		case WET_OTHER: return QObject::tr("Other");
+		default:        return QString();
+	}
+}
 
 ////////////////
 //CLog

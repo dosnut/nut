@@ -31,6 +31,8 @@ namespace libnut {
 
 	QString toString(DeviceState state);
 	QString toString(DeviceType type);
+	QString toString(WlanEncryptionType type);
+	
 
 	class CLog : public QObject {
 		Q_OBJECT
@@ -137,7 +139,7 @@ namespace libnut {
 		void enable();
 		void disable();
 		void addEnvironment(QString name);
-		void removeEnvironment(CEnvironment * environment); //only user defineable
+		void removeEnvironment(CEnvironment * environment);
 		void setEnvironment(CEnvironment * environment);
 		
 	signals:
@@ -160,7 +162,7 @@ namespace libnut {
 		CLog * log;
 		QHash<QDBusObjectPath, CInterface *> dbusInterfaces;
 		DBusEnvironmentInterface * dbusEnvironment;
-		bool active; //nicht nötig?
+		bool active;
 		
 		void refreshAll();
 		void rebuild(const QList<QDBusObjectPath> &paths);
@@ -214,13 +216,13 @@ namespace libnut {
 	public slots:
 		void activate();
 		void deactivate();
-		void setIP(QHostAddress & address); //zuvor pointer
-		void setNetmask(QHostAddress & address); //zuvor pointer
-		void setGateway(QHostAddress & address); //zuvor pointer
-		void setDynamic(); // war zuvor nicht da
+		void setIP(QHostAddress & address);
+		void setNetmask(QHostAddress & address);
+		void setGateway(QHostAddress & address);
+		void setDynamic();
 		
 	signals:
-		void activeChanged(bool active); //zuvor activeStateChanged()
+		void activeChanged(bool active);
 		void ipconfigChanged(bool isStatic, QHostAddress ip, QHostAddress netmask, QHostAddress gateway);
 	};
 };
