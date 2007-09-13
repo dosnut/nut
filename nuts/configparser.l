@@ -19,6 +19,8 @@
 device      return DEVICE;
 environment return ENVIRONMENT;
 
+no-auto-start return NOAUTOSTART;
+
 default     return DEFAULT;
 
 dhcp        return DHCP;

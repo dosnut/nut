@@ -21,11 +21,7 @@
 #include <QHash>
 #include <QDBusArgument>
 #include "macaddress.h"
-
-QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress &data);
-const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &data);
-Q_DECLARE_METATYPE(QHostAddress)
-Q_DECLARE_METATYPE(QList<QHostAddress>)
+#include "types.h"
 
 namespace nut {
 	class Config;
@@ -60,12 +56,13 @@ namespace nuts {
 
 namespace nut {
 	class Config {
+		private:
+			bool m_isCopy;
 		protected:
 			friend class nuts::ConfigParser;
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const Config &data);
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, Config &data);
 			QHash<QString, DeviceConfig*> m_devices;
-			bool m_isCopy;
 		
 		public:
 			Config();
@@ -80,21 +77,25 @@ namespace nut {
 	};
 	
 	class DeviceConfig {
+		private:
+			bool m_isCopy;
 		protected:
 			friend class nuts::ConfigParser;
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data);
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data);
 			QList<EnvironmentConfig*> m_environments;
+			bool m_noAutoStart;
 		
 		public:
 			DeviceConfig();
+			DeviceConfig(const DeviceConfig &other);
 			virtual ~DeviceConfig();
 			
 			const QList<EnvironmentConfig*>& getEnvironments() {
 				return m_environments;
 			}
 			
-			bool m_canUserEnable;
+			bool noAutoStart() { return m_noAutoStart; }
 	};
 	
 	class SelectRule {
@@ -135,6 +136,8 @@ namespace nut {
 	};
 	
 	class EnvironmentConfig {
+		private:
+			bool m_isCopy;
 		protected:
 			friend class nuts::ConfigParser;
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentConfig &data);
@@ -148,6 +151,7 @@ namespace nut {
 			
 		public:
 			EnvironmentConfig(const QString &name = "");
+			EnvironmentConfig(const EnvironmentConfig& other);
 			virtual ~EnvironmentConfig();
 			
 			QString getName() { return m_name; }

@@ -61,7 +61,7 @@ namespace nuts {
 			virtual ~DeviceManager();
 			
 			const QHash<QString, Device*>& getDevices() { return devices; }
-			nut::Config *getConfig() { return config; }
+			const nut::Config& getConfig() { return *config; }
 		
 		signals:
 			void deviceAdded(QString devName, Device *dev);
@@ -127,6 +127,7 @@ namespace nuts {
 		public slots:
 			// Properties
 			QString getName();
+			const nut::DeviceConfig& getConfig() { return *config; }
 			
 			int getEnvironment();
 			void setEnvironment(int env);
@@ -134,7 +135,7 @@ namespace nuts {
 			libnut::DeviceState getState() { return m_state; }
 			
 			// enable(true) forces the use of an interface, even if it is already up.
-			void enable(bool force = false);
+			bool enable(bool force = false);
 			void disable();
 			
 			const QList<Environment*>& getEnvironments() { return envs; }
@@ -201,11 +202,17 @@ namespace nuts {
 	
 	class Interface_IPv4 : public Interface {
 		Q_OBJECT
+		private:
+			int dhcp_timer_id;     // timer id
+			int dhcp_retry;        // count retries
+			virtual void timerEvent(QTimerEvent *event);
+		
 		protected:
 			enum dhcp_state {
 				DHCPS_OFF, DHCPS_FAILED,
-				DHCPS_INIT,        // Discover all
-	 			DHCPS_SELECTING,   // Waiting for offer; request a offer -> requesting
+				DHCPS_INIT_START,  // reset dhcp_retry, -> DHCPS_INIT
+				DHCPS_INIT,        // (++dhcp_retry >= 5) -> failed, Discover all -> selecting
+	 			DHCPS_SELECTING,   // Waiting for offer; request a offer -> requesting, timeout -> init
 				DHCPS_REQUESTING,  // Requested a offer, waiting for ack -> bound, nak -> init
 				DHCPS_BOUND,       // bound, on timeout request -> renew
 				DHCPS_RENEWING,    // wait for ack -> bound, on timeout request -> rebind, on nak -> init

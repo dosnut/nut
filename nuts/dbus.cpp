@@ -115,7 +115,7 @@ namespace nuts {
 	}
 	
 	void DBusDevice::enable() {
-		m_dev->enable();
+		m_dev->enable(true);
 	}
 	void DBusDevice::disable() {
 		m_dev->disable();

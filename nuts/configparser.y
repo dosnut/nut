@@ -18,6 +18,7 @@
 }
 
 %token DEVICE ENVIRONMENT
+%token NOAUTOSTART
 %token DEFAULT
 %token DHCP NODHCP ZEROCONF NOZEROCONF STATIC
 %token IP NETMASK GATEWAY DNSSERVER
@@ -41,7 +42,7 @@ input:
 	| input device
 ;
 
-device: DEVICE STRING { cp->newDevice(*$2); } deviceconfig
+device: DEVICE STRING { if (!cp->newDevice(*$2)) YYERROR; } deviceconfig
 ;
 
 deviceconfig: ';'
@@ -54,12 +55,13 @@ deviceoptions:
 	| deviceoptions deviceoption
 ;
 
-deviceoption: { cp->devDefaultEnvironment(); } environmentoption
+deviceoption: { if (!cp->devDefaultEnvironment()) YYERROR; } environmentoption
 	| environment
+	| NOAUTOSTART { if (!cp->devNoAutoStart()) YYERROR; } ';'
 ;
 
 environment: ENVIRONMENT STRING { cp->devEnvironment(*$2); } environmentconfig
-	| ENVIRONMENT { cp->devEnvironment(""); } environmentconfig
+	| ENVIRONMENT { if (!cp->devEnvironment("")) YYERROR; } environmentconfig
 ;
 
 environmentconfig: ';'
@@ -77,10 +79,10 @@ environmentoption: dhcpconfig
 	| { if (!cp->envSelect()) YYERROR; } select
 ;
 
-dhcpconfig: DHCP ';' { cp->envDHCP(); }
+dhcpconfig: DHCP ';' { if (!cp->envDHCP()) YYERROR; }
 ;
 
-static: STATIC { cp->envStatic();  } staticconfig
+static: STATIC { if (!cp->envStatic()) YYERROR;  } staticconfig
 ;
 
 staticconfig: '{' staticoptions '}'
