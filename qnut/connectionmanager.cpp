@@ -7,7 +7,8 @@ namespace qnut {
 		QMainWindow(parent),
 		deviceManager(this),
 		logFile(this, UI_FILE_LOG),
-		trayicon(this)
+		trayicon(this),
+		settings(UI_FILE_CONFIG, QSettings::IniFormat, this)
 	{
 		setWindowIcon(trayicon.icon());
 		deviceOptions.reserve(10);
@@ -50,14 +51,16 @@ namespace qnut {
 			refreshDevicesAction->setEnabled(false);
 		}
 		
-		
 		distributeActions();
 		
 		ui.toolBar->addActions(overView.actions());
 		ui.menuDevice->addActions(overView.actions());
 		
+		readSettings();
+		
 		connect(refreshDevicesAction, SIGNAL(triggered()), &deviceManager, SLOT(refreshAll()));
 		connect(refreshDevicesAction, SIGNAL(triggered()), &overView, SLOT(reset()));
+		connect(ui.actionShowBalloonTips, SIGNAL(toggled(bool)), this, SLOT(uiSetShowBalloonTips(bool)));
 		connect(ui.actionAboutQt, SIGNAL(triggered()), qApp , SLOT(aboutQt()));
 		connect(ui.actionAboutQNUT, SIGNAL(triggered()), this , SLOT(uiShowAbout()));
 		connect(overView.selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
@@ -66,6 +69,10 @@ namespace qnut {
 		connect(&trayicon, SIGNAL(messageClicked()), this, SLOT(show()));
 		
 		trayicon.show();
+	}
+	
+	CConnectionManager::~CConnectionManager() {
+		writeSettings();
 	}
 	
 	void CConnectionManager::createActions() {
@@ -120,6 +127,29 @@ namespace qnut {
 //			ui.menuInterface->addAction(current->deactivateInterfaceAction);
 			break;
 		}
+	}
+	
+	void CConnectionManager::readSettings() {
+		settings.beginGroup("Main");
+		showBalloonTips = settings.value("showBalloonTips", true).toBool();
+		ui.actionShowBalloonTips->setChecked(showBalloonTips);
+		settings.endGroup();
+		
+		settings.beginGroup("ConnectionManager");
+		resize(settings.value("size", QSize(646, 322)).toSize());
+		move(settings.value("pos", QPoint(200, 200)).toPoint());
+		settings.endGroup();
+	}
+	
+	void CConnectionManager::writeSettings() {
+		settings.beginGroup("Main");
+		settings.setValue("showBalloonTips", showBalloonTips);
+		settings.endGroup();
+		
+		settings.beginGroup("ConnectionManager");
+		settings.setValue("size", size());
+		settings.setValue("pos", pos());
+		settings.endGroup();
 	}
 	
 	void CConnectionManager::uiAddedDevice(CDevice * dev) {
@@ -212,7 +242,8 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::uiShowMessage(QString title, QString message, int millisecondsTimeoutHint) {
-		trayicon.showMessage(title, message, QSystemTrayIcon::Information, millisecondsTimeoutHint);
+		if (showBalloonTips)
+			trayicon.showMessage(title, message, QSystemTrayIcon::Information, millisecondsTimeoutHint);
 	}
 	
 	void CConnectionManager::uiShowAbout() {
@@ -222,5 +253,9 @@ namespace qnut {
 	void CConnectionManager::uiHandleDeviceStateChanged(DeviceState state) {
 		enableDeviceAction->setDisabled(state == DS_UP);
 		disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
+	}
+	
+	void CConnectionManager::uiSetShowBalloonTips(bool value) {
+		showBalloonTips = value;
 	}
 };

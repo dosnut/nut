@@ -12,10 +12,12 @@
 #define UI_DIR_ICONS                    "res/"
 #define UI_DIR_TRANSLATIONS             ""
 #endif
-#define UI_DIR_USER                     "~/.qnut/"
+#define UI_DIR_HOME                     "~/"
+#define UI_DIR_WORK                     ".qnut/"
+#define UI_DIR_WORK_ABS                 UI_DIR_HOME UI_DIR_WORK
 
-#define UI_FILE_LOG                     UI_DIR_USER "qnut.log"
-#define UI_FILE_CONFIG                  UI_DIR_USER "qnut.conf"
+#define UI_FILE_LOG                     UI_DIR_WORK_ABS "qnut.log"
+#define UI_FILE_CONFIG                  UI_DIR_WORK_ABS "qnut.conf"
 
 #define UI_ICON_SYSTRAY                 UI_DIR_ICONS "network.png"
 

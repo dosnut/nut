@@ -42,7 +42,7 @@ QString toString(WlanEncryptionType type) {
 //CLog
 ///////////////
 CLog::CLog(QObject * parent, QString fileName) : QObject(parent), file(fileName) {
-	fileLoggingEnabled = file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append);
+	fileLoggingEnabled = file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
 	
 	if (fileLoggingEnabled) {
 		outStream.setDevice(&file);

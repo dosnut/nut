@@ -31,11 +31,18 @@ namespace qnut {
 		QTreeView overView;
 		QTextEdit logEdit;
 		
+		QSettings settings;
+		
+		bool showBalloonTips;
+		
 		void createActions();
 		void distributeActions(int mode = 0);
 		
+		void readSettings();
+		void writeSettings();
 	public:
 		CConnectionManager(QWidget * parent = 0);
+		~CConnectionManager();
 		
 	public slots:
 		void uiUpdateTrayIconInfo();
@@ -46,6 +53,7 @@ namespace qnut {
 		void uiShowMessage(QString title, QString message, int millisecondsTimeoutHint);
 		void uiShowAbout();
 		void uiHandleDeviceStateChanged(DeviceState state);
+		void uiSetShowBalloonTips(bool value);
 	};
 };
 
