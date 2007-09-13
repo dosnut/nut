@@ -21,11 +21,7 @@
 #include <QHash>
 #include <QDBusArgument>
 #include "macaddress.h"
-
-QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress &data);
-const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &data);
-Q_DECLARE_METATYPE(QHostAddress)
-Q_DECLARE_METATYPE(QList<QHostAddress>)
+#include "types.h"
 
 namespace nut {
 	class Config;

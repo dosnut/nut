@@ -71,9 +71,9 @@ namespace nuts {
 			libnut::DeviceProperties getProperties();
 			QList<libnut::WlanScanresult> getwlanScan();
 			QList<QDBusObjectPath> getEnvironments();
-			void enable();
-			void disable();
-			void setEnvironment(const QDBusObjectPath &path);
+			Q_NOREPLY void enable();
+			Q_NOREPLY void disable();
+			Q_NOREPLY void setEnvironment(const QDBusObjectPath &path);
 		
 		signals:
 			void stateChanged(int newState, int oldState);
@@ -122,11 +122,11 @@ namespace nuts {
 		
 		public slots:
 			libnut::InterfaceProperties getProperties();
-			void setIP(quint32 HostAddress);
-			void setNetmask(quint32 Netmask);
-			void setGateway(quint32 Gateway);
+			Q_NOREPLY void setIP(quint32 HostAddress);
+			Q_NOREPLY void setNetmask(quint32 Netmask);
+			Q_NOREPLY void setGateway(quint32 Gateway);
 // 			void setDNS(QList<QHostAddress> dns);
-			void setDynamic();
+			Q_NOREPLY void setDynamic();
 		signals:
 			void stateChanged(const libnut::InterfaceProperties &properties);
 	};
