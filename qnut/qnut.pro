@@ -1,6 +1,8 @@
 
 TEMPLATE = app
-CONFIG += qt qdbus
+CONFIG += qt qdbus \
+ debug_and_release \
+ build_all
 QT += network
 
 CODECFORSRC = UTF-8
@@ -10,7 +12,14 @@ OBJECTS_DIR = build/
 MOC_DIR = build/
 UI_DIR = ui/
 RCC_DIR = build/
-TARGET = qnut
+
+CONFIG += debug_and_release
+
+CONFIG(debug, debug|release) {
+ TARGET = qnut_debug
+} else {
+ TARGET = qnut
+}
 
 FORMS = connman.ui \
  ipconf.ui
@@ -31,19 +40,23 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  common.cpp
 DESTDIR = .
 
-
-
 target.path = /usr/bin/
 iconstarget.path = /usr/share/qnut/icons
 iconstarget.files = res/*.png
 langtarget.path = /usr/share/qnut/lang
 langtarget.files = qnut_*.ts
-shortcuttarget.path = /usr/share/applnk/System
+shortcuttarget.path = /usr/share/applications
 shortcuttarget.files = qnut.desktop
-INSTALLS += target iconstarget langtarget
+
+CONFIG(debug, debug|release) {
+ INSTALLS += target
+} else {
+ INSTALLS += target iconstarget langtarget shortcuttarget
+}
 
 QMAKE_CXXFLAGS_RELEASE += -DQNUT_RELEASE
 
+CONFIG -= debug
 
 INCLUDEPATH += ..
 

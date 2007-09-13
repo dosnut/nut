@@ -1,10 +1,11 @@
 build
-Makefile
+Makefile*
 ui
 moc_*
 *.qm
 fp
 qnut
+qnut_debug
 qnut.kde*
 Doxyfile
 qnut.log
