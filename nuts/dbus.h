@@ -39,7 +39,7 @@ namespace nuts {
 		public slots:
 			QList<QDBusObjectPath> getDeviceList();
 			nut::Config getConfig() {
-				return *m_devmgr->getConfig();
+				return m_devmgr->getConfig();
 			}
 		signals:
 			void deviceAdded(const QDBusObjectPath &objectpath);
@@ -71,6 +71,9 @@ namespace nuts {
 			libnut::DeviceProperties getProperties();
 			QList<libnut::WlanScanresult> getwlanScan();
 			QList<QDBusObjectPath> getEnvironments();
+			nut::DeviceConfig getConfig() {
+				return m_dev->getConfig();
+			}
 			void enable();
 			void disable();
 			void setEnvironment(const QDBusObjectPath &path);

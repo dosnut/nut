@@ -61,7 +61,7 @@ namespace nuts {
 			virtual ~DeviceManager();
 			
 			const QHash<QString, Device*>& getDevices() { return devices; }
-			nut::Config *getConfig() { return config; }
+			const nut::Config& getConfig() { return *config; }
 		
 		signals:
 			void deviceAdded(QString devName, Device *dev);
@@ -127,6 +127,7 @@ namespace nuts {
 		public slots:
 			// Properties
 			QString getName();
+			const nut::DeviceConfig& getConfig() { return *config; }
 			
 			int getEnvironment();
 			void setEnvironment(int env);

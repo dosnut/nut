@@ -55,7 +55,7 @@ namespace nuts {
 			i.next();
 			Device *d = new Device(this, i.key(), i.value());
 			devices.insert(i.key(), d);
-			if (!i.value()->m_noAutoStart)
+			if (!i.value()->noAutoStart())
 				d->enable(true);
 		}
 	}

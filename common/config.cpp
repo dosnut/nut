@@ -156,7 +156,7 @@ namespace nut {
 	: m_isCopy(false) {
 	}
 	Config::Config(const Config &other)
-	: m_devices(other.m_devices), m_isCopy(true) {
+	: m_isCopy(true), m_devices(other.m_devices) {
 	}
 	
 	Config::~Config() {
@@ -175,22 +175,32 @@ namespace nut {
 	}
 
 	DeviceConfig::DeviceConfig()
-	: m_noAutoStart(false) {
+	: m_isCopy(false), m_noAutoStart(false) {
 	}
 	
+	DeviceConfig::DeviceConfig(const DeviceConfig &other)
+	: m_isCopy(true), m_environments(other.m_environments), m_noAutoStart(other.m_noAutoStart) {
+	}
+
+	
 	DeviceConfig::~DeviceConfig() {
-		foreach(EnvironmentConfig* ec, m_environments)
-			delete ec;
+		if (!m_isCopy)
+			foreach(EnvironmentConfig* ec, m_environments)
+				delete ec;
 		m_environments.clear();
 	}
 	
 	EnvironmentConfig::EnvironmentConfig(const QString &name)
-	: m_name(name), m_canUserSelect(true), m_noDefaultDHCP(false), m_noDefaultZeroconf(false), m_dhcp(0), m_zeroconf(0) {
+	: m_isCopy(false), m_name(name), m_canUserSelect(true), m_noDefaultDHCP(false), m_noDefaultZeroconf(false), m_dhcp(0), m_zeroconf(0) {
+	}
+	EnvironmentConfig::EnvironmentConfig(const EnvironmentConfig& other)
+	: m_isCopy(true), m_name(other.m_name), m_canUserSelect(other.m_canUserSelect), m_noDefaultDHCP(other.m_noDefaultDHCP), m_noDefaultZeroconf(other.m_noDefaultZeroconf), m_dhcp(0), m_zeroconf(0) {
 	}
 	
 	EnvironmentConfig::~EnvironmentConfig() {
-		foreach(IPv4Config *ic, m_ipv4Interfaces)
-			delete ic;
+		if (!m_isCopy)
+			foreach(IPv4Config *ic, m_ipv4Interfaces)
+				delete ic;
 		m_ipv4Interfaces.clear();
 	}
 	
