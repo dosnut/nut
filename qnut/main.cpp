@@ -17,7 +17,7 @@ int main(int argc, char * argv[])
 	app.setQuitOnLastWindowClosed(false);
 	
 	{
-		QDir workdir(UI_DIR_WORK_ABS);
+		QDir workdir(QDir::toNativeSeparators(QDir::homePath()) + "/" UI_DIR_WORK);
 		if (!workdir.exists()) {
 			workdir.cdUp();
 			workdir.mkdir(UI_DIR_WORK);
