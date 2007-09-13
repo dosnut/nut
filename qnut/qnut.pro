@@ -38,6 +38,8 @@ iconstarget.path = /usr/share/qnut/icons
 iconstarget.files = res/*.png
 langtarget.path = /usr/share/qnut/lang
 langtarget.files = qnut_*.ts
+shortcuttarget.path = /usr/share/applnk/System
+shortcuttarget.files = qnut.desktop
 INSTALLS += target iconstarget langtarget
 
 QMAKE_CXXFLAGS_RELEASE += -DQNUT_RELEASE
