@@ -108,16 +108,16 @@ namespace qnut {
 			ui.toolBar->addAction(current->disableDeviceAction);
 			ui.menuDevice->addAction(current->enableDeviceAction);
 			ui.menuDevice->addAction(current->disableDeviceAction);
-//			ui.toolBar->addSeparator();
+			ui.toolBar->addSeparator();
 			//environment actions
 //			ui.toolBar->addAction(current->enterEnvironmentAction);
-//			ui.menuEnvironment->addAction(current->enterEnvironmentAction);
-/*			ui.toolBar->addSeparator();
+			ui.menuEnvironment->addAction(current->enterEnvironmentAction);
+//			ui.toolBar->addSeparator();
 			//interface actions
-			ui.toolBar->addAction(current->activateInterfaceAction);
-			ui.toolBar->addAction(current->deactivateInterfaceAction);
-			ui.menuInterface->addAction(current->activateInterfaceAction);
-			ui.menuInterface->addAction(current->deactivateInterfaceAction);*/
+//			ui.toolBar->addAction(current->activateInterfaceAction);
+//			ui.toolBar->addAction(current->deactivateInterfaceAction);
+//			ui.menuInterface->addAction(current->activateInterfaceAction);
+//			ui.menuInterface->addAction(current->deactivateInterfaceAction);
 			break;
 		}
 	}
@@ -136,7 +136,7 @@ namespace qnut {
 		connect(dev, SIGNAL(stateChanged(DeviceState)), &overView, SLOT(reset()));
 		connect(dev, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiUpdateTrayIconInfo()));
 		connect(newDeviceOptions->showAction, SIGNAL(triggered()), this, SLOT(show()));
-		connect(newDeviceOptions, SIGNAL(showMessage(QString, QString)), this, SLOT(uiShowMessage(QString, QString)));
+		connect(newDeviceOptions, SIGNAL(showMessage(QString, QString, int)), this, SLOT(uiShowMessage(QString, QString, int)));
 		overView.reset();
 	}
 	
@@ -211,8 +211,8 @@ namespace qnut {
 		}
 	}
 	
-	void CConnectionManager::uiShowMessage(QString title, QString message) {
-		trayicon.showMessage(title, message);
+	void CConnectionManager::uiShowMessage(QString title, QString message, int millisecondsTimeoutHint) {
+		trayicon.showMessage(title, message, QSystemTrayIcon::Information, millisecondsTimeoutHint);
 	}
 	
 	void CConnectionManager::uiShowAbout() {

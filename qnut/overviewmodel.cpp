@@ -122,7 +122,7 @@ namespace qnut {
             case OVMOD_TYPE:
                 return tr("Type");
             case OVMOD_IP:
-                return tr("assigned IP-Addess");
+                return tr("assigned IP-Address");
             default:
                 break;
             }

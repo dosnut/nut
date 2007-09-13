@@ -48,12 +48,11 @@ namespace qnut {
     public slots:
         void uiShowThisTab();
         void uiSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-        void uiHandleEnvironmentChange(CEnvironment * current, CEnvironment * previous);
         void uiChangeIPConfiguration();
         void uiHandleStateChange(DeviceState state);
         
     signals:
-        void showMessage(QString title, QString message);
+        void showMessage(QString title, QString message, int millisecondsTimeoutHint);
     };
 };
 
