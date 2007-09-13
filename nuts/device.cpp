@@ -422,40 +422,95 @@ namespace nuts {
 				case DHCPS_OFF:
 				case DHCPS_FAILED:
 					return;
+				case DHCPS_INIT_START:
+					dhcp_retry = 0;
+					// fall through:
+					// dhcpstate = DHCPS_INIT;
 				case DHCPS_INIT:
-					dhcp_send_discover();
-					dhcpstate = DHCPS_SELECTING;
+					if (++dhcp_retry >= 5) {
+						dhcpstate = DHCPS_FAILED;
+					} else {
+						dhcp_send_discover();
+						dhcpstate = DHCPS_SELECTING;
+					}
 					break;
 				case DHCPS_SELECTING:
 					if (source) {
 						if (source->getMessageType() == DHCP_OFFER)  {
+							killTimer(dhcp_timer_id);
 							dhcp_send_request(source);
 							dhcpstate = DHCPS_REQUESTING;
 						}
 					} else {
-						// TODO: setup timeout
+						// 0, 500, 2500, 4500, 6500 [ms]
+						dhcp_timer_id = startTimer(500 + (dhcp_retry-1) * 2000);
 						return;
 					}
 				case DHCPS_REQUESTING:
 					if (source) {
 						switch (source->getMessageType()) {
 							case DHCP_ACK:
+								killTimer(dhcp_timer_id);
 								dhcp_setup_interface(source);
 								dhcpstate = DHCPS_BOUND;
 								break;
 							case DHCP_NAK:
+								killTimer(dhcp_timer_id);
 								dhcpstate = DHCPS_INIT;
 								break;
 							default:
 								break;
 						}
+						break;
 					} else {
-						// TODO: setup timeout
+						dhcp_timer_id = startTimer(4000);
+						return;
 					}
-					return;
 				case DHCPS_BOUND:
-					// TODO: setup timeout
+					// TODO: setup timeout -> renew
 					return;
+				case DHCPS_RENEWING:
+					if (source) {
+						switch (source->getMessageType()) {
+							case DHCP_ACK:
+								killTimer(dhcp_timer_id);
+								dhcp_setup_interface(source);
+								dhcpstate = DHCPS_BOUND;
+								break;
+							case DHCP_NAK:
+								killTimer(dhcp_timer_id);
+								dhcpstate = DHCPS_INIT_START;
+								break;
+							default:
+								break;
+						}
+						break;
+					} else {
+						// dhcp_send_renew();
+						// TODO: setup timeout -> DHCPS_REBINDING
+						return;
+					}
+				case DHCPS_REBINDING:
+					if (source) {
+						switch (source->getMessageType()) {
+							case DHCP_ACK:
+								killTimer(dhcp_timer_id);
+								dhcp_setup_interface(source);
+								dhcpstate = DHCPS_BOUND;
+								break;
+							case DHCP_NAK:
+								killTimer(dhcp_timer_id);
+								dhcpstate = DHCPS_INIT_START;
+								break;
+							default:
+								break;
+						}
+						break;
+					} else {
+						// dhcp_send_rebind();
+						// TODO: setup timeout -> DHCPS_INIT_START
+						return;
+					}
 				default:
 					log << "Unhandled dhcp state" << endl;
 					return;
@@ -464,8 +519,29 @@ namespace nuts {
 		}
 	}
 	
+	void Interface_IPv4::timerEvent(QTimerEvent *) {
+		killTimer(dhcp_timer_id);
+		switch (dhcp_state) {
+			case DHCPS_SELECTING:
+				dhcp_state = DHCPS_INIT;
+				break;
+			case DHCPS_REQUESTING:
+				dhcp_state = DHCPS_INIT;
+				break;
+			case DHCPS_RENEWING:
+				dhcp_state = DHCPS_REBINDING;
+				break;
+			case DHCPS_REBINDING:
+				dhcp_state = DHCPS_INIT_START;
+				break;
+			default:
+				break;
+		}
+		dhcpAction();
+	}
+	
 	void Interface_IPv4::startDHCP() {
-		dhcpstate = DHCPS_INIT;
+		dhcpstate = DHCPS_INIT_START;
 		dhcpAction();
 	}
 	void Interface_IPv4::startZeroconf() {
