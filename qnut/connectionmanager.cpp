@@ -47,7 +47,7 @@ namespace qnut {
 			deviceManager.init(&logFile);
 		}
 		catch (Exception & e) {
-			logFile << tr("ERROR:") + " " + QString(e.what());
+			logFile << tr("ERROR") + ": " + QString(e.what());
 			refreshDevicesAction->setEnabled(false);
 		}
 		
