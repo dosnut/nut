@@ -1,2 +1,3 @@
 debian/tmp/usr/bin/qnut
 debian/tmp/usr/share/qnut/*
+debian/tmp/usr/share/applications/qnut.desktop
