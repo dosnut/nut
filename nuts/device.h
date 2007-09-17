@@ -181,6 +181,7 @@ namespace nuts {
 			const QList<Interface*>& getInterfaces();
 			int getID() { return m_id; }
 			QString getName() { return config->getName(); }
+			const nut::EnvironmentConfig& getConfig() { return *config; }
 	};
 	
 	class Interface : public QObject {
@@ -225,6 +226,7 @@ namespace nuts {
 			dhcp_state dhcpstate;
 			QVector<quint8> dhcp_server_identifier;
 			quint32 dhcp_lease_time;
+			nut::IPv4Config *m_config;
 			
 			void dhcp_send_discover();
 			void dhcp_send_request(DHCPPacket *offer);
@@ -256,7 +258,7 @@ namespace nuts {
 			QString localdomain;
 			QList<QHostAddress> dnsserver;
 			
-			nut::IPv4Config *config;
+			const nut::IPv4Config& getConfig() { return *m_config; }
 	};
 };
 

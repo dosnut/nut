@@ -382,7 +382,7 @@ namespace nuts {
 	Interface::~Interface() { }
 	
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, nut::IPv4Config *config)
-	: Interface(env, index), dm(env->device->dm), dhcpstate(DHCPS_OFF), config(config) {
+	: Interface(env, index), dm(env->device->dm), dhcpstate(DHCPS_OFF), m_config(config) {
 	}
 	
 	Interface_IPv4::~Interface_IPv4() {
@@ -550,17 +550,17 @@ namespace nuts {
 	void Interface_IPv4::startZeroconf() {
 	}
 	void Interface_IPv4::startStatic() {
-		ip = config->getStaticIP();
-		netmask = config->getStaticNetmask();
-		gateway = config->getStaticGateway();
-		dnsserver = config->getStaticDNS();
+		ip = m_config->getStaticIP();
+		netmask = m_config->getStaticNetmask();
+		gateway = m_config->getStaticGateway();
+		dnsserver = m_config->getStaticDNS();
 		systemUp();
 		m_env->ifUp(this);
 	}
 
 	void Interface_IPv4::start() {
 //		log << "Interface_IPv4::start" << endl;
-		if (config->getFlags() & nut::IPv4Config::DO_DHCP)
+		if (m_config->getFlags() & nut::IPv4Config::DO_DHCP)
 			startDHCP();
 		else
 			startStatic();
