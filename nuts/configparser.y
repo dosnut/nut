@@ -25,7 +25,9 @@
 %token LABELINDEX
 %token SELECT USER ARP ESSID
 %token AND OR
-%token WLAN MODE WPACONFIG
+%token WLAN MODE
+ 
+%token WPASUPPLICANT CONFIG DRIVER
 
 %token <str> STRING
 %token <addr> IPv4_VAL
@@ -57,7 +59,13 @@ deviceoptions:
 
 deviceoption: { if (!cp->devDefaultEnvironment()) YYERROR; } environmentoption
 	| environment
+	| wpasupplicant
 	| NOAUTOSTART { if (!cp->devNoAutoStart()) YYERROR; } ';'
+;
+
+wpasupplicant: WPASUPPLICANT DRIVER STRING CONFIG STRING ';' { if (!cp->devWPASuppConfig(*$3, *$5)) YYERROR; }
+	| WPASUPPLICANT CONFIG STRING ';' { if (!cp->devWPASuppConfig("wext", *$3)) YYERROR; }
+	| WPASUPPLICANT CONFIG STRING DRIVER STRING ';' { if (!cp->devWPASuppConfig(*$5, *$3)) YYERROR; }
 ;
 
 environment: ENVIRONMENT STRING { cp->devEnvironment(*$2); } environmentconfig

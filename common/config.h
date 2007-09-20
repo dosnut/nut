@@ -85,6 +85,8 @@ namespace nut {
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data);
 			QList<EnvironmentConfig*> m_environments;
 			bool m_noAutoStart;
+			QString m_wpaConfigFile;
+			QString m_wpaDriver;
 		
 		public:
 			DeviceConfig();
@@ -96,6 +98,9 @@ namespace nut {
 			}
 			
 			bool noAutoStart() { return m_noAutoStart; }
+			
+			QString wpaConfigFile() { return m_wpaConfigFile; }
+			QString wpaDriver() { return m_wpaDriver; }
 	};
 	
 	class SelectRule {

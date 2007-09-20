@@ -45,7 +45,10 @@ or          return OR;
 
 wlan        return WLAN;
 mode        return MODE;
-wpa-config  return WPACONFIG;
+
+wpa-supplicant  return WPASUPPLICANT;
+config      return CONFIG;
+driver      return DRIVER;
 
 ([[:digit:]]{1,3}\.){3}[[:digit:]]{1,3} {
             yylval.addr = new QHostAddress(QString(yytext)); return IPv4_VAL; }

@@ -33,6 +33,7 @@ namespace nuts {
 			bool devDefaultEnvironment();
 			bool devEnvironment(const QString &name);
 			bool devNoAutoStart();
+			bool devWPASuppConfig(const QString &driver, const QString &config);
 			
 			bool envSelect();
 			bool envDHCP();

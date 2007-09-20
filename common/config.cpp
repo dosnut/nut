@@ -51,6 +51,8 @@ namespace nut {
 			argument << *ec;
 		}
 		argument.endArray();
+		argument << data.m_wpaConfigFile;
+		argument << data.m_wpaDriver;
 		argument.endStructure();
 		return argument;
 	}
@@ -64,6 +66,8 @@ namespace nut {
 			data.m_environments.push_back(ec);
 		}
 		argument.endArray();
+		argument >> data.m_wpaConfigFile;
+		argument >> data.m_wpaDriver;
 		argument.endStructure();
 		return argument;
 	}

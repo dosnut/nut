@@ -55,6 +55,13 @@ namespace nuts {
 		return true;
 	}
 	
+	bool ConfigParser::devWPASuppConfig(const QString &driver, const QString &config) {
+		if (!m_curdevconfig) return false;
+		m_curdevconfig->m_wpaDriver = driver;
+		m_curdevconfig->m_wpaConfigFile = config;
+		return true;
+	}
+	
 	bool ConfigParser::envSelect() {
 		if (!m_curenvconfig) return false;
 		// Only one select block per environment
