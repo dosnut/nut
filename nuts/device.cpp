@@ -39,7 +39,7 @@ static inline void setSockaddrIPv4(struct sockaddr &s, quint32 host = 0, quint16
 namespace nuts {
 	DeviceManager::DeviceManager(const QString &configFile)
 	: configParser(configFile), config(configParser.getConfig()) {
-		connect(&hwman, SIGNAL(gotCarrier(const QString&, int )), SLOT(gotCarrier(const QString &, int )));
+		connect(&hwman, SIGNAL(gotCarrier(const QString&, int, const QString)), SLOT(gotCarrier(const QString &, int, const QString)));
 		connect(&hwman, SIGNAL(lostCarrier(const QString&)), SLOT(lostCarrier(const QString &)));
 		 /* Wait for 400 ms before deliver carrier events
 		   There are 2 reasons:
@@ -53,7 +53,7 @@ namespace nuts {
 		QHashIterator<QString, nut::DeviceConfig*> i(config->getDevices());
 		while (i.hasNext()) {
 			i.next();
-			Device *d = new Device(this, i.key(), i.value());
+			Device *d = new Device(this, i.key(), i.value(), hwman.hasWLAN(i.key()));
 			devices.insert(i.key(), d);
 			if (!i.value()->noAutoStart())
 				d->enable(true);
@@ -82,7 +82,11 @@ namespace nuts {
 			carrier_timer.stop();
 	}
 	
-	void DeviceManager::gotCarrier(const QString &ifName, int ifIndex) {
+	void DeviceManager::gotCarrier(const QString &ifName, int ifIndex, const QString &essid) {
+		if (!essid.isEmpty()) {
+			devices[ifName]->gotCarrier(ifIndex, essid);
+			return;
+		}
 		QMutableLinkedListIterator<struct ca_evt> i(ca_evts);
 		while(i.hasNext()) {
 			if (i.next().ifName == ifName) {
@@ -102,6 +106,11 @@ namespace nuts {
 			carrier_timer.start();
 	}
 	void DeviceManager::lostCarrier(const QString &ifName) {
+		Device *dev = devices[ifName];
+		if (dev->hasWLAN()) {
+			dev->lostCarrier();
+			return;
+		}
 		QMutableLinkedListIterator<struct ca_evt> i(ca_evts);
 		while(i.hasNext()) {
 			if (i.next().ifName == ifName) {
@@ -121,8 +130,8 @@ namespace nuts {
 			carrier_timer.start();
 	}
 	
-	Device::Device(DeviceManager* dm, const QString &name, nut::DeviceConfig *config)
-	: QObject(dm), dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_state(libnut::DS_DEACTIVATED), dhcp_client_socket(-1) {
+	Device::Device(DeviceManager* dm, const QString &name, nut::DeviceConfig *config, bool hasWLAN)
+	: QObject(dm), dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_state(libnut::DS_DEACTIVATED), dhcp_client_socket(-1), m_hasWLAN(hasWLAN) {
 		int i = 0;
 		foreach(nut::EnvironmentConfig *ec, config->getEnvironments())
 			envs.push_back(new Environment(this, ec, i++));
@@ -132,6 +141,9 @@ namespace nuts {
 		disable();
 		if (dhcp_client_socket >= 0)
 			closeDHCPClientSocket();
+		foreach (Environment* env, envs)
+			delete env;
+		envs.clear();
 	}
 	
 	void Device::setState(libnut::DeviceState state) {
@@ -154,10 +166,13 @@ namespace nuts {
 		if (activeEnv != -1)
 			envs[activeEnv]->start();
 	}
-	void Device::gotCarrier(int ifIndex) {
+	void Device::gotCarrier(int ifIndex, const QString &essid) {
 		interfaceIndex = ifIndex;
+		m_essid = essid;
+		m_hasWLAN = !essid.isEmpty();
 		macAddress = dm->hwman.getMacAddress(interfaceIndex);
 		log << "Device(" << name << ") gotCarrier" << endl;
+		if (m_hasWLAN) log << "ESSID: " << essid << endl;
 		activeEnv = 0;
 		setState(libnut::DS_CARRIER);
 		envs[activeEnv]->start();
@@ -309,6 +324,8 @@ namespace nuts {
 		if (m_state == libnut::DS_DEACTIVATED) {
 			if (!dm->hwman.controlOn(name, force))
 				return false;
+			if (!startWPASupplicant())
+				return false;
 			setState(libnut::DS_ACTIVATED);
 		}
 		return true;
@@ -321,10 +338,39 @@ namespace nuts {
 				activeEnv = -1;
 			}
 			interfaceIndex = -1;
+			stopWPASupplicant();
 			dm->hwman.controlOff(name);
 			setState(libnut::DS_DEACTIVATED);
 		}
 	}
+	
+	bool Device::startWPASupplicant() {
+		if (!config->wpaDriver().isEmpty()) {
+			m_wpa_supplicant = new QProcess(this);
+			QStringList arguments;
+			arguments << "-i" << name;
+			arguments << "-D" << config->wpaDriver();
+			arguments << "-c" << config->wpaConfigFile();
+			m_wpa_supplicant->start("/sbin/wpa_supplicant", arguments);
+			if (m_wpa_supplicant->waitForStarted(-1)) return true;
+			log << "Couldn't start wpa_supplicant" << endl;
+			delete m_wpa_supplicant;
+			m_wpa_supplicant = 0;
+			return false;
+		}
+		return true;
+	}
+	
+	void Device::stopWPASupplicant() {
+		if (m_wpa_supplicant) {
+			m_wpa_supplicant->terminate();
+			m_wpa_supplicant->waitForFinished(2000);
+			m_wpa_supplicant->kill();
+			delete m_wpa_supplicant;
+			m_wpa_supplicant = 0;
+		}
+	}
+
 	
 	Environment::Environment(Device *device, nut::EnvironmentConfig *config, int id)
 	: QObject(device), device(device), config(config), envIsUp(false), envStart(false), m_id(id) {
@@ -333,6 +379,9 @@ namespace nuts {
 		ifUpStatus.fill(false, ifs.size());
 	}
 	Environment::~Environment() {
+		foreach (Interface* iface, ifs)
+			delete iface;
+		ifs.clear();
 	}
 	
 	Device* Environment::getDevice() {

@@ -10,6 +10,7 @@
 #include <QSocketNotifier>
 #include <QLinkedList>
 #include <QTimer>
+#include <QProcess>
 
 #include <common/macaddress.h>
 #include <common/types.h>
@@ -53,7 +54,7 @@ namespace nuts {
 		private slots:
 			void ca_timer();
 		protected slots:
-			void gotCarrier(const QString &ifName, int ifIndex);
+			void gotCarrier(const QString &ifName, int ifIndex, const QString &essid);
 			void lostCarrier(const QString &ifName);
 		
 		public:
@@ -76,6 +77,10 @@ namespace nuts {
 		private:
 			void setState(libnut::DeviceState state);
 			
+			// only false on failed startup, not on "unused"
+			bool startWPASupplicant();
+			void stopWPASupplicant();
+			
 		protected:
 			friend class DeviceManager;
 			friend class Environment;
@@ -95,11 +100,14 @@ namespace nuts {
 			QSocketNotifier *dhcp_read_nf, *dhcp_write_nf;
 			QLinkedList< QByteArray > dhcp_write_buf;
 			nut::MacAddress macAddress;
+			bool m_hasWLAN;
+			QString m_essid;
+			QProcess *m_wpa_supplicant;
 		
 			void envUp(Environment*);
 			void envDown(Environment*);
 			
-			void gotCarrier(int ifIndex);
+			void gotCarrier(int ifIndex, const QString &essid = "");
 			void lostCarrier();
 			
 			// DHCP
@@ -121,7 +129,7 @@ namespace nuts {
 			nut::MacAddress getMacAddress();
 			
 		public:
-			Device(DeviceManager* dm, const QString &name, nut::DeviceConfig *config);
+			Device(DeviceManager* dm, const QString &name, nut::DeviceConfig *config, bool hasWLAN);
 			virtual ~Device();
 			
 		public slots:
@@ -139,6 +147,9 @@ namespace nuts {
 			void disable();
 			
 			const QList<Environment*>& getEnvironments() { return envs; }
+			
+			bool hasWLAN() { return m_hasWLAN; }
+			QString essid() { return m_essid; }
 		
 		signals:
 			void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState);

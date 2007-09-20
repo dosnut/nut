@@ -85,6 +85,7 @@ namespace nuts {
 
 	libnut::DeviceProperties DBusDevice::getProperties() {
 		m_properties.state = m_dev->getState();
+		m_properties.type = m_dev->hasWLAN() ? libnut::DT_AIR : libnut::DT_ETH;
 		int aenv = m_dev->getEnvironment();
 		if (aenv >= 0) {
 			m_properties.activeEnvironment = m_envs[aenv]->getPath();

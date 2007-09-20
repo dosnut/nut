@@ -32,6 +32,7 @@ extern "C" {
 #include <linux/if.h>
 #include <linux/ethtool.h>
 #include <linux/sysctl.h>
+#include <linux/wireless.h>
 // hardware_ext.c
 extern struct nla_policy ifla_policy[IFLA_MAX+1];
 extern struct nla_policy ifa_ipv4_policy[IFA_MAX+1];
@@ -267,9 +268,11 @@ namespace nuts {
 					bool carrier = (ifm->ifi_flags & IFF_LOWER_UP) > 0;
 					if (carrier != ifStates[ifindex].carrier) {
 						ifStates[ifindex].carrier = carrier;
-						if (carrier)
-							emit gotCarrier(ifname, ifindex);
-						else
+						if (carrier) {
+							QString essid;
+							getEssid(ifname, essid);
+							emit gotCarrier(ifname, ifindex, essid);
+						} else
 							emit lostCarrier(ifname);
 					}
 					break;
@@ -280,5 +283,36 @@ namespace nuts {
 		if (ifIndex < 0) return false;
 		if (ifIndex >= ifStates.size()) return false;
 		return ifStates[ifIndex].active;
+	}
+	
+	static void iwreq_init(struct iwreq &iwr) {
+		memset((char*) &iwr, 0, sizeof(iwr));
+	}
+	
+	static bool iwreq_init(struct iwreq &iwr, const QString &ifname) {
+		QByteArray buf = ifname.toUtf8();
+		if (buf.size() >= IFNAMSIZ) return false;
+		iwreq_init(iwr);
+		strncpy (iwr.ifr_ifrn.ifrn_name, buf.constData(), buf.size());
+		return true;
+	}
+	
+	bool HardwareManager::hasWLAN(const QString &ifName) {
+		struct iwreq iwr;
+		iwreq_init(iwr, ifName);
+		if (ioctl(ethtool_fd, SIOCGIWNAME, &iwr) < 0) return false;
+		return true;
+	}
+	
+	bool HardwareManager::getEssid(const QString &ifName, QString &essid) {
+		essid = "";
+		struct iwreq iwr;
+		iwreq_init(iwr, ifName);
+		char buf[32];
+		iwr.u.essid.pointer = buf;
+		iwr.u.essid.length = sizeof(buf);
+		if (ioctl(ethtool_fd, SIOCGIWESSID, &iwr) < 0) return false;
+		essid = QString::fromUtf8(buf, qstrnlen(buf, iwr.u.essid.length));
+		return true;
 	}
 };

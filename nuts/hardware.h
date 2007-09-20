@@ -64,8 +64,11 @@ namespace nuts {
 			
 			nut::MacAddress getMacAddress(int ifIndex);
 			
+			bool hasWLAN(const QString &ifName);
+			bool getEssid(const QString &ifName, QString &essid);
+			
 		signals:
-			void gotCarrier(const QString &ifName, int ifIndex);
+			void gotCarrier(const QString &ifName, int ifIndex, const QString &essid);
 			void lostCarrier(const QString &ifName);
 	};
 };
