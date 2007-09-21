@@ -2,12 +2,13 @@ Source: nut
 Section: admin
 Priority: important
 Maintainer: Stefan Bühler <stbuehler@web.de>
-Build-Depends: cdbs, debhelper (>= 5)
+Build-Depends: cdbs, debhelper (>= 5), qt4-dev-tools, libqt4-dev, bison, flex, libnl-dev (>= 1.0~pre6-5)
 Standards-Version: 3.7.2
 
 Package: nuts
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, resolvconf, libnl1-pre6 (>= 1.0~pre6-5)
+Recommends: wpasupplicant
 Description: Network UTility (substitute for ifupdown)
  Manages your network cards; the server has an DBus Interface,
  which the clients use to control the server.
