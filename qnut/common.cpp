@@ -1,7 +1,7 @@
 #include "common.h"
 
 namespace qnut {
-    QString getDeviceIcon(CDevice * device) {
+    QString iconFile(CDevice * device) {
         switch (device->type) {
         case DT_ETH:
             switch (device->state) {

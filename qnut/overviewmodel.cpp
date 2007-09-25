@@ -100,7 +100,7 @@ namespace qnut {
         }
         else if (role == Qt::DecorationRole) {
             if (index.column() == 0) {
-                return QIcon(getDeviceIcon(data));
+                return QIcon(iconFile(data));
             }
         }
         return QVariant();

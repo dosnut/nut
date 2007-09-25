@@ -8,7 +8,7 @@
 
 namespace qnut {
     using namespace libnut;
-    QString getDeviceIcon(CDevice * device);
+    QString iconFile(CDevice * device);
     QAction * getSeparator(QObject * parent);
     QString activeIP(CDevice * device);
 };
