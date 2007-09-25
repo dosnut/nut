@@ -79,8 +79,8 @@ namespace qnut {
 	}
 	
 	void CDeviceOptions::updateDeviceIcons() {
-		tabWidget->setTabIcon(tabWidget->indexOf(this), QIcon(getDeviceIcon(device)));
-		deviceMenu->setIcon(QIcon(getDeviceIcon(device)));
+		tabWidget->setTabIcon(tabWidget->indexOf(this), QIcon(iconFile(device)));
+		deviceMenu->setIcon(QIcon(iconFile(device)));
 	}
 	
 	void CDeviceOptions::uiShowThisTab() {
