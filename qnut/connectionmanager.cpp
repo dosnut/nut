@@ -180,6 +180,9 @@ namespace qnut {
 		trayicon.devicesMenu.removeAction(target->deviceMenu->menuAction());
 		trayicon.devicesMenu.setDisabled(deviceManager.devices.isEmpty());
 		
+		enableDeviceAction->setDisabled(deviceManager.devices.isEmpty());
+		disableDeviceAction->setDisabled(deviceManager.devices.isEmpty());
+		
 		deviceOptions.remove(dev);
 		delete target;
 	}
