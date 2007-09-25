@@ -29,7 +29,7 @@
 #define UI_ICON_AIR_UNCONFIGURED        UI_DIR_ICONS "air_unconfigured.png"
 #define UI_ICON_AIR_CARRIER             UI_DIR_ICONS "air_carrier.png"
 #define UI_ICON_AIR_ACTIVATED           UI_DIR_ICONS "air_activated.png"
-#define UI_ICON_AIR_DEACTIVATED         UI_DIR_ICONS "air_deactived.png"
+#define UI_ICON_AIR_DEACTIVATED         UI_DIR_ICONS "air_deactivated.png"
 
 #define UI_ICON_DEVICE_ENABLE           UI_DIR_ICONS "device_enable.png"
 #define UI_ICON_DEVICE_DISABLE          UI_DIR_ICONS "device_disable.png"
