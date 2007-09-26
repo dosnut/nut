@@ -158,7 +158,7 @@ namespace nuts {
 		log << "Device(" << name << ") is up!" << endl;
 	}
 	void Device::envDown(Environment* env) {
-		if (envs[activeEnv] != env) return;
+		if (activeEnv < 0 || envs[activeEnv] != env) return;
 		setState(libnut::DS_CARRIER);
 		log << "Device(" << name << ") is down!" << endl;
 		activeEnv = nextEnv;
@@ -316,9 +316,12 @@ namespace nuts {
 			activeEnv = env;
 			envs[env]->start();
 		} else {
-			if (nextEnv == -1)
+			if (nextEnv == -1) {
+				nextEnv = env;
 				envs[activeEnv]->stop();
-			nextEnv = env;
+			} else {
+				nextEnv = env;
+			}
 		}
 	}
 	
