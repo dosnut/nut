@@ -221,11 +221,13 @@ namespace nuts {
 	}
 	
 	nut::MacAddress HardwareManager::getMacAddress(int ifIndex) {
-//		nl_cache_update(nlh, nlcache);
+		nl_cache_update(nlh, nlcache);
 		struct rtnl_link *link = rtnl_link_get(nlcache, ifIndex);
+		if (!link) return nut::MacAddress();
 		struct nl_addr *addr = rtnl_link_get_addr(link);
+		if (!addr) return nut::MacAddress();
 		if (nl_addr_get_len (addr) != 6) {
-			return nut::MacAddress("");
+			return nut::MacAddress();
 		} else {
 			return nut::MacAddress((quint8*) nl_addr_get_binary_addr(addr));
 		}

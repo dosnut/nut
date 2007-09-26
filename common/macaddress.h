@@ -28,7 +28,7 @@ namespace nut {
 	*/
 	class MacAddress {
 		public:
-			MacAddress();
+			MacAddress() { clear(); }
 			MacAddress(const QString &str);
 			MacAddress(const quint8 *d);
 			quint8 data[6];
@@ -47,6 +47,19 @@ namespace nut {
 				sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
 					data[0],data[1],data[2],data[3],data[4],data[5]);
 				return QString(buf);
+			}
+			
+			inline bool zero() const {
+				return *((quint32*)data) == 0 && *((quint16*)(data+4)) == 0;
+			}
+			
+			inline operator bool () const {
+				return zero();
+			}
+			
+			inline void clear() {
+				*((quint32*)data) = 0;
+				*((quint16*)(data+4)) = 0;
 			}
 	};
 }

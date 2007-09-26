@@ -170,7 +170,9 @@ namespace nuts {
 		interfaceIndex = ifIndex;
 		m_essid = essid;
 		m_hasWLAN = !essid.isEmpty();
-		macAddress = dm->hwman.getMacAddress(interfaceIndex);
+		nut::MacAddress mAddr = dm->hwman.getMacAddress(interfaceIndex);
+		if (mAddr) macAddress = mAddr;
+		if (!macAddress) log << "Device(" << name << "): couldn't get MacAddress" << endl;
 		log << "Device(" << name << ") gotCarrier" << endl;
 		if (m_hasWLAN) log << "ESSID: " << essid << endl;
 		activeEnv = 0;
@@ -473,6 +475,10 @@ namespace nuts {
 			switch (dhcpstate) {
 				case DHCPS_OFF:
 				case DHCPS_FAILED:
+					if (dhcp_xid) {
+						m_env->device->unregisterXID(dhcp_xid);
+						dhcp_xid = 0;
+					}
 					return;
 				case DHCPS_INIT_START:
 					dhcp_retry = 0;
@@ -519,6 +525,10 @@ namespace nuts {
 						return;
 					}
 				case DHCPS_BOUND:
+					if (dhcp_xid) {
+						m_env->device->unregisterXID(dhcp_xid);
+						dhcp_xid = 0;
+					}
 					// TODO: setup timeout -> renew
 					return;
 				case DHCPS_RENEWING:
