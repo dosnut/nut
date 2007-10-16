@@ -512,7 +512,15 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	//Retrieve dbus information:
 	QDBusReply<EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
 	if (replyprop.isValid()) {
-		name = replyprop.value().name;
+		if (parent->environments.size() == 0)
+			//standard environment
+			name = tr("default");
+		else {
+			name = replyprop.value().name;
+			//environment untitled
+			if (name.length() == 0)
+				name = tr("untitled (%1)").arg(parent->environments.size());
+		}
 		*log << "Environmentname" + name;
 	}
 	else {

@@ -13,120 +13,129 @@
 #include "overviewmodel.h"
 #include "common.h"
 
-#define OVMOD_NAME    0
-#define OVMOD_STATUS  1
-#define OVMOD_TYPE    2
-#define OVMOD_IP      3
+#define OV_MOD_NAME    0
+#define OV_MOD_STATUS  1
+#define OV_MOD_TYPE    2
+#define OV_MOD_ENV     3
+#define OV_MOD_IP      4
 
 namespace qnut {
-    COverViewModel::COverViewModel(CDeviceList * deviceList, QObject * parent) : QAbstractItemModel(parent) {
-        devices = deviceList;
-    }
-    
-    COverViewModel::~COverViewModel() {
-        devices = NULL;
-    }
-    
-    Qt::ItemFlags COverViewModel::flags(const QModelIndex & index) const {
-        if (devices == NULL)
-            return 0;
-        
-        if (!index.isValid())
-            return 0;
-        
-        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    }
-    
-    QModelIndex COverViewModel::parent(const QModelIndex & index) const {
-        return QModelIndex();
-    }
-    
-    int COverViewModel::columnCount(const QModelIndex & parent) const {
-        if (devices == NULL)
-            return 0;
-            
-        if (parent.isValid())
-            return 0;
-        
-        return 4;
-    }
-    
-    QModelIndex COverViewModel::index(int row, int column, const QModelIndex & parent) const {
-        if ((devices != NULL) && (row < devices->count()) && (!parent.isValid()))
-            return createIndex(row, column, (void *)(devices->at(row)));
-        else
-            return QModelIndex();
-    }
-    
-    int COverViewModel::rowCount(const QModelIndex & parent) const {
-        if (devices == NULL)
-            return 0;
-        
-        if (!parent.isValid())
-            return devices->count();
-        
-        return 0;
-    }
-    
-    QVariant COverViewModel::data(const QModelIndex & index, int role) const {
-        if (devices == NULL)
-            return QVariant();
-        
-        if (!index.isValid())
-            return QVariant();
-        
-        if (index.row() >= devices->size())
-            return QVariant();
-        
-        CDevice * data = (CDevice *)(index.internalPointer());
-        
-        if (role == Qt::DisplayRole) {
-            switch (index.column()) {
-            case OVMOD_NAME:
-                return data->name;
-            case OVMOD_STATUS:
-                return toString(data->state);
-            case OVMOD_TYPE:
-                return toString(data->type);
-            case OVMOD_IP: {
-                    if (data->state != DS_UP)
-                        return QString('-');
-                    
-                    return activeIP(data);
-                }
-            default:
-                break;
-            }
-        }
-        else if (role == Qt::DecorationRole) {
-            if (index.column() == 0) {
-                return QIcon(iconFile(data));
-            }
-        }
-        return QVariant();
-    }
-    
-    QVariant COverViewModel::headerData(int section, Qt::Orientation orientation, int role) const {
-        if (devices == NULL)
-            return QVariant();
-        
-        if (role != Qt::DisplayRole)
-            return QVariant();
-        
-        if (orientation == Qt::Horizontal) {
-            switch (section) {
-            case OVMOD_NAME:
-                return tr("Name");
-            case OVMOD_STATUS:
-                return tr("Status");
-            case OVMOD_TYPE:
-                return tr("Type");
-            case OVMOD_IP:
-                return tr("assigned IP-Address");
-            default:
-                break;
-            }
-        }
-        return QVariant();
-    }
+	COverViewModel::COverViewModel(CDeviceList * deviceList, QObject * parent) : QAbstractItemModel(parent) {
+		devices = deviceList;
+	}
+	
+	COverViewModel::~COverViewModel() {
+		devices = NULL;
+	}
+	
+	Qt::ItemFlags COverViewModel::flags(const QModelIndex & index) const {
+		if (devices == NULL)
+			return 0;
+		
+		if (!index.isValid())
+			return 0;
+		
+		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+	}
+	
+	QModelIndex COverViewModel::parent(const QModelIndex & index) const {
+		return QModelIndex();
+	}
+	
+	int COverViewModel::columnCount(const QModelIndex & parent) const {
+		if (devices == NULL)
+			return 0;
+			
+		if (parent.isValid())
+			return 0;
+		
+		return 4;
+	}
+	
+	QModelIndex COverViewModel::index(int row, int column, const QModelIndex & parent) const {
+		if ((devices != NULL) && (row < devices->count()) && (!parent.isValid()))
+			return createIndex(row, column, (void *)(devices->at(row)));
+		else
+			return QModelIndex();
+	}
+	
+	int COverViewModel::rowCount(const QModelIndex & parent) const {
+		if (devices == NULL)
+			return 0;
+		
+		if (!parent.isValid())
+			return devices->count();
+		
+		return 0;
+	}
+	
+	QVariant COverViewModel::data(const QModelIndex & index, int role) const {
+		if (devices == NULL)
+			return QVariant();
+		
+		if (!index.isValid())
+			return QVariant();
+		
+		if (index.row() >= devices->size())
+			return QVariant();
+		
+		CDevice * data = (CDevice *)(index.internalPointer());
+		
+		if (role == Qt::DisplayRole) {
+			switch (index.column()) {
+			case OV_MOD_NAME:
+				return data->name;
+			case OV_MOD_STATUS:
+				return toString(data->state);
+			case OV_MOD_TYPE:
+				return toString(data->type);
+			case OV_MOD_IP: {
+					if (data->state != DS_UP)
+						return QString('-');
+					else
+						return activeIP(data);
+				}
+			case OV_MOD_ENV: {
+					if (data->state != DS_UP)
+						return tr("none");
+					else
+						return data->activeEnvironment->name;
+				}
+			default:
+				break;
+			}
+		}
+		else if (role == Qt::DecorationRole) {
+			if (index.column() == 0) {
+				return QIcon(iconFile(data));
+			}
+		}
+		return QVariant();
+	}
+	
+	QVariant COverViewModel::headerData(int section, Qt::Orientation orientation, int role) const {
+		if (devices == NULL)
+			return QVariant();
+		
+		if (role != Qt::DisplayRole)
+			return QVariant();
+		
+		if (orientation == Qt::Horizontal) {
+			switch (section) {
+			case OV_MOD_NAME:
+				return tr("Name");
+			case OV_MOD_STATUS:
+				return tr("Status");
+			case OV_MOD_TYPE:
+				return tr("Type");
+			case OV_MOD_IP:
+				return tr("assigned IP-Address");
+			case OV_MOD_ENV:
+				return tr("Environment");
+			default:
+				break;
+			}
+		}
+		return QVariant();
+	}
 };
