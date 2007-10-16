@@ -58,13 +58,13 @@ namespace qnut {
 		
 		readSettings();
 		
-		connect(refreshDevicesAction, SIGNAL(triggered()), &deviceManager, SLOT(refreshAll()));
+		connect(refreshDevicesAction, SIGNAL(triggered()), &deviceManager, SLOT(rebuild()));
 		connect(refreshDevicesAction, SIGNAL(triggered()), &overView, SLOT(reset()));
 		connect(ui.actionShowBalloonTips, SIGNAL(toggled(bool)), this, SLOT(uiSetShowBalloonTips(bool)));
 		connect(ui.actionAboutQt, SIGNAL(triggered()), qApp , SLOT(aboutQt()));
 		connect(ui.actionAboutQNUT, SIGNAL(triggered()), this , SLOT(uiShowAbout()));
 		connect(overView.selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-				this                     , SLOT(uiSelectedDeviceChanged(const QItemSelection &, const QItemSelection &)));
+		        this                     , SLOT(uiSelectedDeviceChanged(const QItemSelection &, const QItemSelection &)));
 		connect(&tabWidget, SIGNAL(currentChanged(int)), this, SLOT(uiCurrentTabChanged(int)));
 		connect(&trayicon, SIGNAL(messageClicked()), this, SLOT(show()));
 		
@@ -93,9 +93,6 @@ namespace qnut {
 	void CConnectionManager::distributeActions(int mode) {
 		switch (mode) {
 		case 0:
-			ui.menuEnvironment->setEnabled(false);
-			ui.menuInterface->setEnabled(false);
-			
 			//general device actions
 			ui.toolBar->addActions(overView.actions());
 			ui.menuDevice->addActions(overView.actions());
@@ -105,9 +102,6 @@ namespace qnut {
 			ui.menuDevice->addAction(refreshDevicesAction);
 			break;
 		case 2:
-			ui.menuEnvironment->setEnabled(true);
-			ui.menuInterface->setEnabled(true);
-			
 			CDeviceOptions * current = (CDeviceOptions *)(tabWidget.currentWidget());
 			
 			//current device actions
@@ -116,15 +110,11 @@ namespace qnut {
 			ui.menuDevice->addAction(current->enableDeviceAction);
 			ui.menuDevice->addAction(current->disableDeviceAction);
 			ui.toolBar->addSeparator();
-			//environment actions
-//			ui.toolBar->addAction(current->enterEnvironmentAction);
-			ui.menuEnvironment->addAction(current->enterEnvironmentAction);
-//			ui.toolBar->addSeparator();
+			ui.menuDevice->addSeparator();
+			ui.toolBar->addAction(current->enterEnvironmentAction);
+			ui.menuDevice->addAction(current->enterEnvironmentAction);
 			//interface actions
-//			ui.toolBar->addAction(current->activateInterfaceAction);
-//			ui.toolBar->addAction(current->deactivateInterfaceAction);
-//			ui.menuInterface->addAction(current->activateInterfaceAction);
-//			ui.menuInterface->addAction(current->deactivateInterfaceAction);
+			//...
 			break;
 		}
 	}
@@ -203,8 +193,6 @@ namespace qnut {
 	
 	void CConnectionManager::uiCurrentTabChanged(int index) {
 		ui.menuDevice->clear();
-		ui.menuEnvironment->clear();
-		ui.menuInterface->clear();
 		ui.toolBar->setUpdatesEnabled(false);
 		ui.toolBar->clear();
 		if (index == 0) {

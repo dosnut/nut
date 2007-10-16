@@ -26,24 +26,14 @@ namespace qnut {
 		enableDeviceAction  = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_ENABLE) , tr("Enable device") , device, SLOT(enable()));
 		disableDeviceAction = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"), device, SLOT(disable()));
 		deviceMenu->addSeparator();
-		showAction = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(uiShowThisTab()));
+		showAction          = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(uiShowThisTab()));
+		deviceMenu->addSeparator();
+		editInterfaceAction = deviceMenu->addAction(QIcon(UI_ICON_EDIT), tr("Set IP Configuration..."), this, SLOT(uiChangeIPConfiguration()));
 		
-		//environmentsMenu = new QMenu(this);
-		enterEnvironmentAction    = new QAction(QIcon(UI_ICON_ENVIRONMENT_ENTER), tr("Enter environment"), this);
-/*		activateInterfaceAction   = new QAction(QIcon(UI_ICON_INTERFACE_ACTIVATE), tr("Activate interface"), this);
-		deactivateInterfaceAction = new QAction(QIcon(UI_ICON_INTERFACE_DEACTIVATE), tr("Deactivate interface"), this);
-		editInterfaceAction       = new QAction(QIcon(UI_ICON_EDIT), tr("Edit IP Configuration..."), this);*/
+		enterEnvironmentAction = new QAction(QIcon(UI_ICON_ENVIRONMENT_ENTER), tr("Enter environment"), this);
 		
-		addAction(enterEnvironmentAction);
-		addAction(getSeparator(this));
-/*		addAction(activateInterfaceAction);
-		addAction(deactivateInterfaceAction);
-		addAction(getSeparator(this));
-		addAction(editInterfaceAction);*/
-		
-		foreach(QAction * i, actions()) {
-			i->setEnabled(false);
-		}
+		editInterfaceAction->setEnabled(false);
+		enterEnvironmentAction->setEnabled(false);
 		
 		setAllColumnsShowFocus(true);
 		
@@ -58,7 +48,6 @@ namespace qnut {
 		
 		header()->setResizeMode(QHeaderView::ResizeToContents);
 		
-//		connect(editInterfaceAction, SIGNAL(triggered()), this, SLOT(uiChangeIPConfiguration()));
 		connect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
 		connect(device, SIGNAL(environmentsUpdated()), this, SLOT(reset()));
 		
@@ -98,13 +87,6 @@ namespace qnut {
 				disconnect(target, SIGNAL(activeChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
 				disconnect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
 			}
-/*			else {
-				CInterface * target = (CInterface *)(targetIndex.internalPointer());
-				disconnect(target, SIGNAL(activeChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
-				disconnect(target, SIGNAL(activeChanged(bool)), deactivateInterfaceAction, SLOT(setEnabled(bool)));
-				disconnect(activateInterfaceAction, SIGNAL(triggered()), target, SLOT(activate()));
-				disconnect(deactivateInterfaceAction, SIGNAL(triggered()), target, SLOT(deactivate()));
-			}*/
 		}
 		
 		if (!selectedIndexes.isEmpty()) {
@@ -115,28 +97,13 @@ namespace qnut {
 				connect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
 				
 				enterEnvironmentAction->setDisabled(target == device->activeEnvironment);
-/*				activateInterfaceAction->setEnabled(false);
-				deactivateInterfaceAction->setEnabled(false);
-				editInterfaceAction->setEnabled(false);*/
 			}
 			else {
-/*				CInterface * target = (CInterface *)(targetIndex.internalPointer());
-				connect(target, SIGNAL(activeChanged(bool)), activateInterfaceAction, SLOT(setDisabled(bool)));
-				connect(target, SIGNAL(activeChanged(bool)), deactivateInterfaceAction, SLOT(setEnabled(bool)));
-				connect(activateInterfaceAction, SIGNAL(triggered()), target, SLOT(activate()));
-				connect(deactivateInterfaceAction, SIGNAL(triggered()), target, SLOT(deactivate()));*/
-				
 				enterEnvironmentAction->setEnabled(false);
-/*				activateInterfaceAction->setDisabled(target->active);
-				deactivateInterfaceAction->setEnabled(target->active);
-				editInterfaceAction->setEnabled(target->userDefineable);*/
 			}
 		}
 		else {
 			enterEnvironmentAction->setEnabled(false);
-/*			activateInterfaceAction->setEnabled(false);
-			deactivateInterfaceAction->setEnabled(false);
-			editInterfaceAction->setEnabled(false);*/
 		}
 	}
 	
@@ -155,33 +122,31 @@ namespace qnut {
 		//setDisabled(state == DS_DEACTIVATED);
 		enableDeviceAction->setDisabled(state == DS_UP);
 		disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
+		editInterfaceAction->setEnabled(state == DS_UNCONFIGURED);
 
 		if (!selectedIndexes().isEmpty()) {
 			QModelIndex targetIndex = selectedIndexes()[0];
 			if (!targetIndex.parent().isValid()) {
 				CEnvironment * target = (CEnvironment *)(targetIndex.internalPointer());
-
 				enterEnvironmentAction->setDisabled(target == device->activeEnvironment);
-/*				activateInterfaceAction->setEnabled(false);
-				deactivateInterfaceAction->setEnabled(false);
-				editInterfaceAction->setEnabled(false);*/
 			}
 			else {
-				CInterface * target = (CInterface *)(targetIndex.internalPointer());
-
 				enterEnvironmentAction->setEnabled(false);
-/*				activateInterfaceAction->setDisabled(target->active);
-				deactivateInterfaceAction->setEnabled(target->active);
-				editInterfaceAction->setEnabled(target->userDefineable);*/
 			}
 		}
 		else {
 			enterEnvironmentAction->setEnabled(false);
-/*			activateInterfaceAction->setEnabled(false);
-			deactivateInterfaceAction->setEnabled(false);
-			editInterfaceAction->setEnabled(false);*/
 		}
-		
-		emit showMessage(tr("QNUT"), device->name + ' ' + tr("changed its state to") + " \"" + toString(state) + '\"', 4000);
+
+		switch (device->state) {
+			case DS_UP:             emit showMessage(tr("QNUT"), tr("%1 is now up and running.").arg(device->name), 4000);
+			case DS_UNCONFIGURED:   emit showMessage(tr("QNUT"), tr("%1 got carrier but needs configuration.\n\nKlick here to open the configuration dialog.").arg(device->name), 4000);
+			//case DS_CARRIER:        emit showMessage(tr("QNUT"), tr("%1 got carrier").arg(device->name), 4000);
+			case DS_ACTIVATED:      emit showMessage(tr("QNUT"), tr("%1 is now activated an waits for carrier.").arg(device->name), 4000);
+			case DS_DEACTIVATED:    emit showMessage(tr("QNUT"), tr("%1 is now deactivated").arg(device->name), 4000);
+			default:                break;
+		}
+
+		//emit showMessage(tr("QNUT"), tr("%1 changed its state to \"%2\"").arg(device->name, toString(state)), 4000);
 	}
 };
