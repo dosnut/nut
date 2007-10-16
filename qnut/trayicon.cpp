@@ -5,10 +5,10 @@ using namespace std;
 
 namespace qnut {
 	CTrayIcon::CTrayIcon (QObject * parent) : QSystemTrayIcon(QIcon(UI_ICON_SYSTRAY), parent) {
-		devicesMenu.setTitle (tr("Network &devices"));
+		devicesMenu.setTitle (tr("Network &Devices"));
 
 		trayMenu.setTitle("KNut");
-		trayMenu.addAction(tr("open Connection &Manager"), parent, SLOT(show()));
+		trayMenu.addAction(tr("Open Connection &Manager"), parent, SLOT(show()));
 
 		trayMenu.addMenu(&devicesMenu);
 		devicesMenu.setEnabled (false);

@@ -156,7 +156,8 @@ namespace qnut {
 		connect(dev, SIGNAL(stateChanged(DeviceState)), &overView, SLOT(reset()));
 		connect(dev, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiUpdateTrayIconInfo()));
 		connect(newDeviceOptions->showAction, SIGNAL(triggered()), this, SLOT(show()));
-		connect(newDeviceOptions, SIGNAL(showMessage(QString, QString, int)), this, SLOT(uiShowMessage(QString, QString, int)));
+		connect(newDeviceOptions, SIGNAL(showMessage(QSystemTrayIcon *, QString, QString)),
+		        this,             SLOT(uiShowMessage(QSystemTrayIcon *, QString, QString)));
 		overView.reset();
 		overView.clearSelection();
 	}
@@ -185,7 +186,7 @@ namespace qnut {
 			result << tr("no devcies present");
 		else
 			foreach (CDevice * i, deviceManager.devices) {
-				result << (i->name + ": " + toString(i->state) + ", " + activeIP(i));
+				result << shortSummary(i);
 			}
 		
 		trayicon.setToolTip(result.join("\n"));
@@ -233,9 +234,13 @@ namespace qnut {
 		}
 	}
 	
-	void CConnectionManager::uiShowMessage(QString title, QString message, int millisecondsTimeoutHint) {
-		if (showBalloonTips)
-			trayicon.showMessage(title, message, QSystemTrayIcon::Information, millisecondsTimeoutHint);
+	void CConnectionManager::uiShowMessage(QSystemTrayIcon * trayIcon, QString title, QString message) {
+		if (showBalloonTips) {
+			if (trayIcon)
+				trayIcon->showMessage(title, message, QSystemTrayIcon::Information, 4000);
+			else
+				trayicon.showMessage(title, message, QSystemTrayIcon::Information, 4000);
+		}
 	}
 	
 	void CConnectionManager::uiShowAbout() {

@@ -35,6 +35,14 @@ namespace qnut {
 		editInterfaceAction->setEnabled(false);
 		enterEnvironmentAction->setEnabled(false);
 		
+		trayIcon = new QSystemTrayIcon(QIcon(iconFile(device)), this);
+		trayIcon->setToolTip(shortSummary(device));
+		trayIcon->setVisible(true);
+		trayIcon->setContextMenu(deviceMenu);
+		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+		        this,     SLOT(uiHandleTrayActivated(QSystemTrayIcon::ActivationReason)));
+		connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(uiShowThisTab()));
+		
 		setAllColumnsShowFocus(true);
 		
 		//setDisabled(device->state == DS_DEACTIVATED);
@@ -70,6 +78,12 @@ namespace qnut {
 	void CDeviceOptions::updateDeviceIcons() {
 		tabWidget->setTabIcon(tabWidget->indexOf(this), QIcon(iconFile(device)));
 		deviceMenu->setIcon(QIcon(iconFile(device)));
+	}
+	
+	void CDeviceOptions::uiHandleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
+		if (reason == QSystemTrayIcon::Trigger) {
+			showAction->trigger();
+		}
 	}
 	
 	void CDeviceOptions::uiShowThisTab() {
@@ -137,16 +151,53 @@ namespace qnut {
 		else {
 			enterEnvironmentAction->setEnabled(false);
 		}
-
-		switch (device->state) {
-			case DS_UP:             emit showMessage(tr("QNUT"), tr("%1 is now up and running.").arg(device->name), 4000);
-			case DS_UNCONFIGURED:   emit showMessage(tr("QNUT"), tr("%1 got carrier but needs configuration.\n\nKlick here to open the configuration dialog.").arg(device->name), 4000);
-			//case DS_CARRIER:        emit showMessage(tr("QNUT"), tr("%1 got carrier").arg(device->name), 4000);
-			case DS_ACTIVATED:      emit showMessage(tr("QNUT"), tr("%1 is now activated an waits for carrier.").arg(device->name), 4000);
-			case DS_DEACTIVATED:    emit showMessage(tr("QNUT"), tr("%1 is now deactivated").arg(device->name), 4000);
-			default:                break;
+		if (trayIcon->isVisible()) {
+			trayIcon->setToolTip(shortSummary(device));
+			trayIcon->setIcon(QIcon(iconFile(device)));
+			
+			switch (state) {
+			case DS_UP:
+				emit showMessage(trayIcon, tr("QNUT - %1...").arg(device->name),
+					tr("...is now up and running."));
+				break;
+			case DS_UNCONFIGURED:
+				emit showMessage(trayIcon, tr("QNUT - %1...").arg(device->name),
+					tr("...got carrier but needs configuration.\n\nKlick here to open the configuration dialog."));
+				break;
+			case DS_ACTIVATED:
+				emit showMessage(trayIcon, tr("QNUT - %1...").arg(device->name),
+					tr("...is now activated an waits for carrier."));
+				break;
+			case DS_DEACTIVATED: 
+				emit showMessage(trayIcon, tr("QNUT - %1...").arg(device->name),
+					tr("...is now deactivated"));
+				break;
+			default:
+				break;
+			}
 		}
-
+		else {
+			switch (state) {
+			case DS_UP:
+				emit showMessage(NULL, tr("QNUT"),
+					tr("%1 is now up and running.").arg(device->name));
+				break;
+			case DS_UNCONFIGURED:
+				emit showMessage(NULL, tr("QNUT"),
+					tr("%1 got carrier but needs configuration.\n\nKlick here to open the configuration dialog.").arg(device->name));
+				break;
+			case DS_ACTIVATED:
+				emit showMessage(NULL, tr("QNUT"),
+					tr("%1 is now activated an waits for carrier.").arg(device->name));
+				break;
+			case DS_DEACTIVATED:
+				emit showMessage(NULL, tr("QNUT"),
+					tr("%1 is now deactivated").arg(device->name));
+				break;
+			default:
+				break;
+			}
+		}
 		//emit showMessage(tr("QNUT"), tr("%1 changed its state to \"%2\"").arg(device->name, toString(state)), 4000);
 	}
 };
