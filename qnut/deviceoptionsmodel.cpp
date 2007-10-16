@@ -13,12 +13,12 @@
 #include "deviceoptionsmodel.h"
 #include "constants.h"
 
-#define DEV_OPMOD_ITEM    0
-#define DEV_OPMOD_STATUS  1
-#define DEV_OPMOD_IP      2
-#define DEV_OPMOD_CONFIG  5
-#define DEV_OPMOD_NETMASK 3
-#define DEV_OPMOD_GATEWAY 4
+#define DEVOP_MOD_ITEM    0
+#define DEVOP_MOD_STATUS  1
+#define DEVOP_MOD_IP      2
+#define DEVOP_MOD_CONFIG  5
+#define DEVOP_MOD_NETMASK 3
+#define DEVOP_MOD_GATEWAY 4
 
 namespace qnut {
     CDeviceOptionsModel::CDeviceOptionsModel(CDevice * data, QObject * parent) : QAbstractItemModel(parent) {
@@ -67,11 +67,11 @@ namespace qnut {
         
         QObject * data = (QObject *)(index.internalPointer());
         switch (index.column()) {
-            case DEV_OPMOD_ITEM:
+            case DEVOP_MOD_ITEM:
                 if (data->parent() == device) {
                     switch (role) {
                     case Qt::DisplayRole:
-                        return (device->environments[0] == (CEnvironment *)data) ? tr("default") : (((CEnvironment *)data)->name.isEmpty() ? tr("untitled") : ((CEnvironment *)data)->name);
+                        return ((CEnvironment *)data)->name;
                     case Qt::DecorationRole:
                         return QIcon(UI_ICON_ENVIRONMENT);
                     default:
@@ -91,7 +91,7 @@ namespace qnut {
                     }
                 }
                 break;
-            case DEV_OPMOD_STATUS:
+            case DEVOP_MOD_STATUS:
                 if (role == Qt::DisplayRole) {
                     if (data->parent() == device) {
                         return ((CEnvironment *)data == device->activeEnvironment) ? tr("active") : QVariant();
@@ -102,7 +102,7 @@ namespace qnut {
                     }
                 }
                 break;
-            case DEV_OPMOD_CONFIG:
+            case DEVOP_MOD_CONFIG:
                 if (role == Qt::DisplayRole) {
                     if (data->parent() == device) {
                         int configFlags = 0;
@@ -131,7 +131,7 @@ namespace qnut {
                     }
                 }
                 break;
-            case DEV_OPMOD_IP:
+            case DEVOP_MOD_IP:
                 if (role == Qt::DisplayRole) {
                     if (data->parent() == device) {
                         return QString('-');
@@ -142,7 +142,7 @@ namespace qnut {
                     }
                 }
                 break;
-            case DEV_OPMOD_NETMASK:
+            case DEVOP_MOD_NETMASK:
                 if (role == Qt::DisplayRole) {
                     if (data->parent() == device) {
                         return QString('-');
@@ -153,7 +153,7 @@ namespace qnut {
                     }
                 }
                 break;
-            case DEV_OPMOD_GATEWAY:
+            case DEVOP_MOD_GATEWAY:
                 if (role == Qt::DisplayRole) {
                     if (data->parent() == device) {
                         return QString('-');
@@ -190,18 +190,17 @@ namespace qnut {
         
         if (orientation == Qt::Horizontal) {
             switch (section) {
-            case DEV_OPMOD_ITEM:
+            case DEVOP_MOD_ITEM:
                 return tr("Item");
-                //break;
-            case DEV_OPMOD_STATUS:
+            case DEVOP_MOD_STATUS:
                 return tr("Status");
-            case DEV_OPMOD_CONFIG:
+            case DEVOP_MOD_CONFIG:
                 return tr("Config");
-            case DEV_OPMOD_IP:
+            case DEVOP_MOD_IP:
                 return tr("IP-Address");
-            case DEV_OPMOD_NETMASK:
+            case DEVOP_MOD_NETMASK:
                 return tr("Netmask");
-            case DEV_OPMOD_GATEWAY:
+            case DEVOP_MOD_GATEWAY:
                 return tr("Gateway");
             default:
                 break;
