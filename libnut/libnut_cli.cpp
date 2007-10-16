@@ -565,7 +565,15 @@ void CEnvironment::refreshAll() {
 	//Retrieve properties and select config, then interfaces:
 	QDBusReply<EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
 	if (replyprop.isValid()) {
-		name = replyprop.value().name;
+		if (parent->environments[0] == this)
+			//standard environment
+			name = tr("default");
+		else {
+			name = replyprop.value().name;
+			//environment untitled
+			if (name.length() == 0)
+				name = tr("untitled (%1)").arg(parent->environments.size());
+		}
 	}
 	else {
 		*log << tr("Error while refreshing environment properties");

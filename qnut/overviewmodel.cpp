@@ -49,7 +49,7 @@ namespace qnut {
 		if (parent.isValid())
 			return 0;
 		
-		return 4;
+		return 5;
 	}
 	
 	QModelIndex COverViewModel::index(int row, int column, const QModelIndex & parent) const {

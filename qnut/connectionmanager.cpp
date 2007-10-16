@@ -168,6 +168,7 @@ namespace qnut {
 		connect(newDeviceOptions->showAction, SIGNAL(triggered()), this, SLOT(show()));
 		connect(newDeviceOptions, SIGNAL(showMessage(QString, QString, int)), this, SLOT(uiShowMessage(QString, QString, int)));
 		overView.reset();
+		overView.clearSelection();
 	}
 	
 	void CConnectionManager::uiRemovedDevice(CDevice * dev) {
