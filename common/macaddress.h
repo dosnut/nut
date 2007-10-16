@@ -53,8 +53,8 @@ namespace nut {
 				return *((quint32*)data) == 0 && *((quint16*)(data+4)) == 0;
 			}
 			
-			inline operator bool () const {
-				return zero();
+			inline bool valid() const {
+				return !zero();
 			}
 			
 			inline void clear() {
