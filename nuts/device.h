@@ -168,6 +168,7 @@ namespace nuts {
 			
 			Device *device;
 			QList<Interface*> ifs;
+			QVector<nut::SelectResult> m_selectResults;
 			
 			nut::EnvironmentConfig *config;
 			QBitArray ifUpStatus;

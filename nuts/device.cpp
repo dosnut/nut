@@ -158,7 +158,7 @@ namespace nuts {
 		log << "Device(" << name << ") is up!" << endl;
 	}
 	void Device::envDown(Environment* env) {
-		if (envs[activeEnv] != env) return;
+		if (activeEnv < 0 || envs[activeEnv] != env) return;
 		setState(libnut::DS_CARRIER);
 		log << "Device(" << name << ") is down!" << endl;
 		activeEnv = nextEnv;
@@ -170,7 +170,10 @@ namespace nuts {
 		interfaceIndex = ifIndex;
 		m_essid = essid;
 		m_hasWLAN = !essid.isEmpty();
-		macAddress = dm->hwman.getMacAddress(interfaceIndex);
+		nut::MacAddress mAddr = dm->hwman.getMacAddress(name);
+		if (mAddr.valid()) macAddress = mAddr;
+		if (mAddr.zero()) log << "Device(" << name << "): couldn't get MacAddress from hardware:" << mAddr.toString() << endl;
+		if (macAddress.zero()) log << "Device(" << name << "): couldn't get MacAddress" << endl;
 		log << "Device(" << name << ") gotCarrier" << endl;
 		if (m_hasWLAN) log << "ESSID: " << essid << endl;
 		activeEnv = 0;
@@ -314,9 +317,12 @@ namespace nuts {
 			activeEnv = env;
 			envs[env]->start();
 		} else {
-			if (nextEnv == -1)
+			if (nextEnv == -1) {
+				nextEnv = env;
 				envs[activeEnv]->stop();
-			nextEnv = env;
+			} else {
+				nextEnv = env;
+			}
 		}
 	}
 	
@@ -473,6 +479,10 @@ namespace nuts {
 			switch (dhcpstate) {
 				case DHCPS_OFF:
 				case DHCPS_FAILED:
+					if (dhcp_xid) {
+						m_env->device->unregisterXID(dhcp_xid);
+						dhcp_xid = 0;
+					}
 					return;
 				case DHCPS_INIT_START:
 					dhcp_retry = 0;
@@ -519,6 +529,10 @@ namespace nuts {
 						return;
 					}
 				case DHCPS_BOUND:
+					if (dhcp_xid) {
+						m_env->device->unregisterXID(dhcp_xid);
+						dhcp_xid = 0;
+					}
 					// TODO: setup timeout -> renew
 					return;
 				case DHCPS_RENEWING:

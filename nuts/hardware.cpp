@@ -116,6 +116,7 @@ namespace nuts {
 		return false;
 	}
 	void HardwareManager::free_netlink() {
+		nl_cache_free(nlcache);
 		nl_close(nlh);
 		nl_handle_destroy(nlh);
 	}
@@ -220,15 +221,17 @@ namespace nuts {
 		return nlh;
 	}
 	
-	nut::MacAddress HardwareManager::getMacAddress(int ifIndex) {
-//		nl_cache_update(nlh, nlcache);
-		struct rtnl_link *link = rtnl_link_get(nlcache, ifIndex);
-		struct nl_addr *addr = rtnl_link_get_addr(link);
-		if (nl_addr_get_len (addr) != 6) {
-			return nut::MacAddress("");
-		} else {
-			return nut::MacAddress((quint8*) nl_addr_get_binary_addr(addr));
+	nut::MacAddress HardwareManager::getMacAddress(const QString &ifName) {
+		struct ifreq ifr;
+		if (!ifreq_init(ifr, ifName)) {
+			err << QString("Interface name too long") << endl;
+			return nut::MacAddress();
 		}
+		if (ioctl(ethtool_fd, SIOCGIFHWADDR, &ifr) < 0) {
+			err << QString("Couldn't get hardware address of '%1'").arg(ifName) << endl;
+			return nut::MacAddress();
+		}
+		return nut::MacAddress((quint8*) ifr.ifr_hwaddr.sa_data);
 	}
 	
 	bool HardwareManager::ifreq_init(struct ifreq &ifr, const QString &ifname) {

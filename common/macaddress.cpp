@@ -49,10 +49,6 @@ namespace nut {
 		return msg;
 	}
 	
-	MacAddress::MacAddress() {
-		for (int i = 0; i < 6; i++)
-			data[i] = 0;
-	}
 	MacAddress::MacAddress(const QString &str) {
 		QByteArray buf = str.toUtf8();
 		char *s = buf.data();

@@ -77,6 +77,9 @@ namespace nuts {
 			Q_NOREPLY void enable();
 			Q_NOREPLY void disable();
 			Q_NOREPLY void setEnvironment(const QDBusObjectPath &path);
+			Q_NOREPLY void setEnvironment(int env) {
+				m_dev->setEnvironment(env);
+			}
 			
 			bool hasWLAN() { return m_dev->hasWLAN(); }
 			QString essid() { return m_dev->essid(); }
