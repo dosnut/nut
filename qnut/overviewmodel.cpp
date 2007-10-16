@@ -99,7 +99,7 @@ namespace qnut {
 					if (data->state != DS_UP)
 						return tr("none");
 					else
-						return data->activeEnvironment->name();
+						return data->activeEnvironment->name;
 				}
 			default:
 				break;
