@@ -35,7 +35,7 @@ namespace qnut {
 				tr("Gateway")    + ": " + (interface->active ? interface->gateway.toString() : tr("no dynamic"));
 	}*/
 	
-	int CDeviceOptionsModel::columnCount(const QModelIndex & parent) const {
+	int CDeviceOptionsModel::columnCount(const QModelIndex &) const {
 		if (device == NULL)
 			return 0;
 		else

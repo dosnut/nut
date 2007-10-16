@@ -38,7 +38,7 @@ namespace qnut {
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	}
 	
-	QModelIndex COverViewModel::parent(const QModelIndex & index) const {
+	QModelIndex COverViewModel::parent(const QModelIndex &) const {
 		return QModelIndex();
 	}
 	
