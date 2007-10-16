@@ -170,9 +170,10 @@ namespace nuts {
 		interfaceIndex = ifIndex;
 		m_essid = essid;
 		m_hasWLAN = !essid.isEmpty();
-		nut::MacAddress mAddr = dm->hwman.getMacAddress(interfaceIndex);
-		if (mAddr) macAddress = mAddr;
-		if (!macAddress) log << "Device(" << name << "): couldn't get MacAddress" << endl;
+		nut::MacAddress mAddr = dm->hwman.getMacAddress(name);
+		if (mAddr.valid()) macAddress = mAddr;
+		if (mAddr.zero()) log << "Device(" << name << "): couldn't get MacAddress from hardware:" << mAddr.toString() << endl;
+		if (macAddress.zero()) log << "Device(" << name << "): couldn't get MacAddress" << endl;
 		log << "Device(" << name << ") gotCarrier" << endl;
 		if (m_hasWLAN) log << "ESSID: " << essid << endl;
 		activeEnv = 0;

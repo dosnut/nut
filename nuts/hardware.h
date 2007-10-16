@@ -62,7 +62,7 @@ namespace nuts {
 			
 			struct nl_handle *getNLHandle();
 			
-			nut::MacAddress getMacAddress(int ifIndex);
+			nut::MacAddress getMacAddress(const QString &ifName);
 			
 			bool hasWLAN(const QString &ifName);
 			bool getEssid(const QString &ifName, QString &essid);
