@@ -242,6 +242,6 @@ namespace qnut {
 			}
 			if (scriptFlags && UI_FLAG_SCRIPT_DEACTIVATED) {
 			}
-		}
-	}*/
+		}*/
+	}
 };
