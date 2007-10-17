@@ -9,13 +9,15 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
+
+#include <QHeaderView>
+#include <QInputDialog>
+#include <QProcess>
 #include "deviceoptions.h"
 #include "deviceoptionsmodel.h"
 #include "ipconfiguration.h"
 #include "deviceconfiguration.h"
 #include "common.h"
-#include <QHeaderView>
-#include <QInputDialog>
 
 namespace qnut {
 	CDeviceOptions::CDeviceOptions(CDevice * parentDevice, QTabWidget * parentTabWidget, QWidget * parent) :
@@ -227,21 +229,43 @@ namespace qnut {
 		}
 		//emit showMessage(tr("QNUT"), tr("%1 changed its state to \"%2\"").arg(device->name, toString(state)), 4000);
 		
-		//skripting hier
-/*		if (scriptFlags) {
-			QDir workdir(UI_PATH_DEV(parentDevice->name));
+		if (scriptFlags) {
+			QDir workdir(UI_PATH_DEV(device->name));
 			if (scriptFlags && UI_FLAG_SCRIPT_UP) {
 				workdir.cd(UI_DIR_SCRIPT_UP);
+				foreach(QString i, workdir.entryList()) {
+					QProcess::startDetached(workdir.path() + i);
+				}
+				workdir.cdUp();
 			}
 			if (scriptFlags && UI_FLAG_SCRIPT_UNCONFIGURED) {
-				
+				workdir.cd(UI_DIR_SCRIPT_UNCONFIGURED);
+				foreach(QString i, workdir.entryList()) {
+					QProcess::startDetached(workdir.path() + i);
+				}
+				workdir.cdUp();
 			}
 			if (scriptFlags && UI_FLAG_SCRIPT_CARRIER) {
+				workdir.cd(UI_DIR_SCRIPT_UNCONFIGURED);
+				foreach(QString i, workdir.entryList()) {
+					QProcess::startDetached(workdir.path() + i);
+				}
+				workdir.cdUp();
 			}
 			if (scriptFlags && UI_FLAG_SCRIPT_ACTIVATED) {
+				workdir.cd(UI_DIR_SCRIPT_UNCONFIGURED);
+				foreach(QString i, workdir.entryList()) {
+					QProcess::startDetached(workdir.path() + i);
+				}
+				workdir.cdUp();
 			}
 			if (scriptFlags && UI_FLAG_SCRIPT_DEACTIVATED) {
+				workdir.cd(UI_DIR_SCRIPT_UNCONFIGURED);
+				foreach(QString i, workdir.entryList()) {
+					QProcess::startDetached(workdir.path() + i);
+				}
+				workdir.cdUp();
 			}
-		}*/
+		}
 	}
 };
