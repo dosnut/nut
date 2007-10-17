@@ -41,6 +41,9 @@
    </property>
   </widget>
   <widget class="QToolBar" name="toolBar" >
+   <property name="windowTitle" >
+    <string>Main Toolbar</string>
+   </property>
    <property name="movable" >
     <bool>false</bool>
    </property>
@@ -123,6 +126,11 @@
    </property>
    <property name="text" >
     <string>Show balloon tips</string>
+   </property>
+  </action>
+  <action name="actionShowTrayIcon" >
+   <property name="text" >
+    <string>Show main tray icon</string>
    </property>
   </action>
  </widget>

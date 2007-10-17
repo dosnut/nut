@@ -4,6 +4,7 @@
 #include <libnut/libnut_cli.h>
 #include <QString>
 #include <QAction>
+#include <QDir>
 #include "constants.h"
 
 namespace qnut {

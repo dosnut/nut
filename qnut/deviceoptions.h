@@ -16,6 +16,7 @@
 #include <QMenu>
 #include <QTabWidget>
 #include <QSystemTrayIcon>
+#include <QSettings>
 #include <libnut/libnut_cli.h>
 
 namespace qnut {
@@ -29,16 +30,26 @@ namespace qnut {
 	protected:
 		QTabWidget * tabWidget;
 		QString statusMessage(DeviceState state);
+		
+		QSettings settings;
+		
+		void readSettings();
+		void writeSettings();
 	public:
 		CDevice * device;
 		
 		QSystemTrayIcon * trayIcon;
 		
+		quint8 scriptFlags;
+		
 		QMenu * deviceMenu;
 		QAction * enableDeviceAction;
 		QAction * disableDeviceAction;
+		
 		QAction * enterEnvironmentAction;
-		QAction * editInterfaceAction;
+		
+		QAction * deviceSettingsAction;
+		QAction * ipConfigurationAction;
 		
 		QAction * showAction;
 		
@@ -54,6 +65,7 @@ namespace qnut {
 		void uiShowThisTab();
 		void uiSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 		void uiChangeIPConfiguration();
+		void uiChangeDeviceSettings();
 		void uiHandleStateChange(DeviceState state);
 		
 	signals:

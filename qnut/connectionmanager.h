@@ -27,6 +27,9 @@ namespace qnut {
 		QAction * enableDeviceAction;
 		QAction * disableDeviceAction;
 		
+		QAction * deviceSettingsAction;
+		QAction * ipConfigurationAction;
+		
 		QTabWidget tabWidget;
 		QTreeView overView;
 		QTextEdit logEdit;
