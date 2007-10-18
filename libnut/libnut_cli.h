@@ -32,6 +32,7 @@ namespace libnut {
 	QString toString(DeviceState state);
 	QString toString(DeviceType type);
 	QString toString(WlanEncryptionType type);
+	QString toString(QDBusError error);
 	
 
 	class CLog : public QObject {
@@ -95,6 +96,7 @@ namespace libnut {
 		~CDeviceManager();
 	public slots:
 		void refreshAll();
+		void rebuild();
 	signals:
 		void deviceAdded(CDevice * device);
 		void deviceRemoved(CDevice * device); //nach entfernen aus der liste aber vor dem löschen

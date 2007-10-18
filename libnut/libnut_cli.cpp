@@ -41,6 +41,34 @@ QString toString(WlanEncryptionType type) {
 		default:        return QString();
 	}
 }
+QString toString(QDBusError error) {
+	return QDBusError::errorString(error.type());
+/*
+	switch ((int) error) {
+		case QDBusError::NoError: return QObject::tr("NoError");
+		case QDBusError::Other: return QObject::tr("Other");
+		case QDBusError::NoMemory: return QObject::tr("NoMemory");
+		case QDBusError::ServiceUnknown: return QObject::tr("ServiceUnknown");
+		case QDBusError::NoReply: return QObject::tr("NoReply");
+		case QDBusError::BadAddress: return QObject::tr("BadAddress");
+		case QDBusError::NotSupported: return QObject::tr("NotSupported");
+		case QDBusError::LimitsExceeded: return QObject::tr("LimitsExceeded");
+		case QDBusError::AccessDenied: return QObject::tr("AccessDenied");
+		case QDBusError::NoServer: return QObject::tr("NoServer");
+		case QDBusError::Timeout: return QObject::tr("Timeout");
+		case QDBusError::NoNetwork: return QObject::tr("NoNetwork");
+		case QDBusError::AddressInUse: return QObject::tr("AddressInUse");
+		case QDBusError::Disconnected: return QObject::tr("Disconnected");
+		case QDBusError::InvalidArgs: return QObject::tr("InvalidArgs");
+		case QDBusError::UnknownMethod: return QObject::tr("UnknownMethod");
+		case QDBusError::TimedOut: return QObject::tr("TimedOut");
+		case QDBusError::InvalidSignature: return QObject::tr("InvalidSignature");
+		case QDBusError::UnknownInterface: return QObject::tr("UnknownInterface");
+		case QDBusError::InternalError: return QObject::tr("InternalError");
+		case QDBusError::UnknownObject: return QObject::tr("UnknownObject");
+		default: return QString();
+	}*/
+}
 
 ////////////////
 //CLog
@@ -73,7 +101,7 @@ void CLibNut::serviceCheck(QDBusConnectionInterface * interface) {
 		}
 	}
 	else {
-		throw CLI_ConnectionInitException(tr("Error while setting-up dbusconnection"));
+		throw CLI_ConnectionInitException(tr("(%1)Error while setting-up dbusconnection").arg(toString(reply.error())));
 	}
 }
 void CLibNut::objectCheck(QDBusConnectionInterface * interface) {
@@ -151,7 +179,7 @@ void CDeviceManager::setInformation() {
 	QDBusReply<QList<QDBusObjectPath> > replydevs;
 	replydevs = dbusDevmgr->getDeviceList();
 	if (!replydevs.isValid()) {
-		*log << tr("Failed to get DeviceList");
+		*log << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
 	}
 	//Let's populate our own DeviceList
 	CDevice * device;
@@ -170,7 +198,6 @@ void CDeviceManager::setInformation() {
 }
 void CDeviceManager::clearInformation() {
 	//Clean Device list:
-	*log << "clearInformation()";
 	dbusDevices.clear();
 	CDevice * dev;
 	while (!devices.isEmpty()) {
@@ -268,7 +295,17 @@ void CDeviceManager::refreshAll() {
 		}
 	}
 	else {
-		*log << tr("Could not refresh device list");
+		*log << tr("(%1) Could not refresh device list").arg(toString(replydevs.error()));
+	}
+}
+
+void CDeviceManager::rebuild() {
+	QDBusReply<QList<QDBusObjectPath> > replydevs = dbusDevmgr->getDeviceList();
+	if (replydevs.isValid()) {
+		rebuild(replydevs.value());
+	}
+	else {
+		*log << tr("(%1) Error while retrieving device list").arg(toString(replydevs.error()));
 	}
 }
 
@@ -301,12 +338,12 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		*log << (tr("State") + ": " + toString(state));
 	}
 	else {
-		throw CLI_DevConnectionException(tr("Error while retrieving dbus' device information"));
+		throw CLI_DevConnectionException(tr("(%1) Error while retrieving dbus' device information").arg(toString(replyProp.error())));
 	}
 	//get Environment list
 	QDBusReply<QList<QDBusObjectPath> > replyEnv = dbusDevice->getEnvironments();
 	if (!replyEnv.isValid()) {
-		throw CLI_DevConnectionException(tr("Error while trying to get environment list"));
+		throw CLI_DevConnectionException(tr("(%1) Error while trying to get environment list").arg(toString(replyEnv.error())));
 	}
 	//poppulate own Environmentlist
 	CEnvironment * env;
@@ -352,6 +389,10 @@ CDevice::~CDevice() {
 
 //CDevice private functions
 
+/**
+ *  refreshAll rebuilds the device's environment list if any environmentpath has changed, otherwise
+ *  it will just refresh the information
+ */
 void CDevice::refreshAll() {
 	//Refresh environment list
 	QDBusReply<QList<QDBusObjectPath> > replyenvs = dbusDevice->getEnvironments();
@@ -377,7 +418,7 @@ void CDevice::refreshAll() {
 		}
 	}
 	else {
-		*log << tr("Could not refresh environments");
+		*log << tr("(%1) Could not refresh environments").arg(toString(replyenvs.error()));
 	}
 	activeEnvironment = 0;
 	//now refresh the rest of our device properties:
@@ -393,7 +434,7 @@ void CDevice::refreshAll() {
 		name = replyprop.value().name;
 	}
 	else {
-		*log << tr("Could not refresh device properties");
+		*log << tr("(%1) Could not refresh device properties").arg(toString(replyprop.error()));
 	}
 }
 //Rebuilds the environment list
@@ -458,6 +499,7 @@ void CDevice::environmentRemoved(const QDBusObjectPath &path) {
 		*log << tr("Tried to remove non-existing environment");
 	}
 }
+//Every time our device changed from anything to active, our active environment may have changed
 void CDevice::dbusstateChanged(int newState, int oldState) {
 	state = (DeviceState) newState;
 	if (state == DS_UP) {
@@ -524,7 +566,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 		*log << "Environmentname" + name;
 	}
 	else {
-		throw CLI_EnvConnectionException(tr("Error while retrieving environment properties"));
+		throw CLI_EnvConnectionException(tr("Error while retrieving environment properties").arg(toString(replyprop.error())));
 	}
 	
  	QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnvironment->getInterfaces();
