@@ -8,6 +8,7 @@
 
 #include <common/types.h>
 #include <common/dbus.h>
+#include <common/config.h>
 
 namespace nuts {
 	class DBusDeviceManager;
@@ -122,7 +123,7 @@ namespace nuts {
 			void interfaceAdded(const QDBusObjectPath &objectpath);
 			void interfaceRemoved(const QDBusObjectPath &objectpath);
 	};
-	
+
 	class DBusInterface_IPv4: public QDBusAbstractAdaptor {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Interface_IPv4")
@@ -148,6 +149,13 @@ namespace nuts {
 		signals:
 			void stateChanged(const libnut::InterfaceProperties &properties);
 	};
+	#ifdef IPv6
+	class DBusInterface_IPv6: public QDBusAbstractAdaptor {
+		Q_OBJECT
+		Q_CLASSINFO("D-BUS Interface", "de.unistuttgart.de" ".Interface_IPv6");
+		
+	}
+	#endif
 }
 
 #endif
