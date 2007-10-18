@@ -70,6 +70,7 @@ namespace qnut {
 		
 	signals:
 		void showMessage(QSystemTrayIcon * trayIcon, QString title, QString message);
+		void showOptions(QWidget * widget);
 	};
 };
 
