@@ -210,7 +210,7 @@ namespace nuts {
 		dbus_properties.gateway = s_interface->gateway;
 		dbus_properties.netmask = s_interface->netmask;
 		dbus_properties.userDefineable = false; //Fliegt raus, da Info bereits in der Config
-		dbus_properties.isStatic = ((int) ((s_interface->getConfig()).getFlags()) == 4) ? true : false;
+		dbus_properties.isStatic = !(s_interface->getConfig().getFlags() & nut::IPv4Config::DO_DHCP);
 		if (!s_interface->dnsserver.isEmpty()) {
 			dbus_properties.dns = s_interface->dnsserver;
 		}
