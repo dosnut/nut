@@ -4,6 +4,7 @@
 #include <QMutableListIterator>
 #include <QProcess>
 #include <QStringList>
+#include <QTimerEvent>
 #include "dhcppacket.h"
 
 extern "C" {
@@ -204,19 +205,24 @@ namespace nuts {
 		if (dhcp_xid_iface.count() == 0 && dhcp_client_socket >= 0)
 			closeDHCPClientSocket();
 	}
-	void Device::sendDHCPClientPacket(DHCPPacket *packet) {
+	bool Device::sendDHCPClientPacket(DHCPPacket *packet) {
+		if (dhcp_client_socket < 0) {
+			err << "Cannot send DHCP packet" << endl;
+			return false;
+		}
 		dhcp_write_buf.push_back(packet->msgdata);
 		dhcp_write_nf->setEnabled(true);
+		return true;
 	}
-	void Device::setupDHCPClientSocket() {
+	bool Device::setupDHCPClientSocket() {
 		if (interfaceIndex < 0) {
 			log << "Interface index invalid" << endl;
-			return;
+			return false;
 		}
 		if ((dhcp_client_socket = socket(PF_PACKET, SOCK_DGRAM, htons(ETH_P_IP))) < 0) {
 			log << "Couldn't open rawsocket for dhcp client" << endl;
 			dhcp_client_socket = -1;
-			return;
+			return false;
 		}
 		const char MAC_BCAST_ADDR[] = "\xff\xff\xff\xff\xff\xff";
 		struct sockaddr_ll sock;
@@ -230,12 +236,15 @@ namespace nuts {
 			log << "Couldn't bind socket for dhcp client" << endl;
 			close(dhcp_client_socket);
 			dhcp_client_socket = -1;
+			return false;
 		}
+		
 		dhcp_read_nf = new QSocketNotifier(dhcp_client_socket, QSocketNotifier::Read);
 		dhcp_write_nf = new QSocketNotifier(dhcp_client_socket, QSocketNotifier::Write);
 		dhcp_write_nf->setEnabled(!dhcp_write_buf.empty());
 		connect(dhcp_read_nf, SIGNAL(activated(int)), SLOT(readDHCPClientSocket()));
 		connect(dhcp_write_nf, SIGNAL(activated(int)), SLOT(writeDHCPClientSocket()));
+		return true;
 	}
 	void Device::closeDHCPClientSocket() {
 		delete dhcp_read_nf; dhcp_read_nf = 0;
@@ -314,8 +323,7 @@ namespace nuts {
 			return;
 		}
 		if (activeEnv == -1) {
-			activeEnv = env;
-			envs[env]->start();
+			return;
 		} else {
 			if (nextEnv == -1) {
 				nextEnv = env;
@@ -437,14 +445,12 @@ namespace nuts {
 	Interface::~Interface() { }
 	
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, nut::IPv4Config *config)
-	: Interface(env, index), dm(env->device->dm), dhcpstate(DHCPS_OFF), m_config(config) {
+	: Interface(env, index), dhcp_timer_id(-1), dm(env->device->dm), dhcpstate(DHCPS_OFF), m_config(config) {
 	}
 	
 	Interface_IPv4::~Interface_IPv4() {
-		if (dhcp_xid) {
-			m_env->device->unregisterXID(dhcp_xid);
-			dhcp_xid = 0;
-		}
+		dhcp_set_timeout(-1);
+		releaseXID();
 	}
 	
 	void Interface_IPv4::dhcp_send_discover() {
@@ -462,16 +468,52 @@ namespace nuts {
 		cp.send();
 	}
 	
-	void Interface_IPv4::dhcp_setup_interface(DHCPPacket *ack) {
-		ip = ack->getYourIP();
-		netmask = ack->getOptionAddress(DHCP_SUBNET);
-		gateway = ack->getOptionAddress(DHCP_ROUTER);
-		dnsserver = ack->getOptionAddresses(DHCP_DNS_SERVER);
-		localdomain = ack->getOptionString(DHCP_DOMAIN_NAME);
-		dhcp_server_identifier = ack->getOption(DHCP_SERVER_ID);
-		dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
-		systemUp();
-		m_env->ifUp(this);
+	void Interface_IPv4::dhcp_send_renew() {
+		DHCPClientPacket cp(this, dhcp_server_ip);
+		cp.doDHCPRenew(ip);
+		cp.check();
+		cp.send();
+	}
+	
+	void Interface_IPv4::dhcp_send_rebind() {
+		DHCPClientPacket cp(this);
+		cp.doDHCPRebind(ip);
+		cp.check();
+		cp.send();
+	}
+	
+	void Interface_IPv4::dhcp_send_release() {
+		DHCPClientPacket cp(this, dhcp_server_ip);
+		cp.doDHCPRelease(ip, dhcp_server_identifier);
+		cp.check();
+		cp.send();
+	}
+	
+	void Interface_IPv4::dhcp_setup_interface(DHCPPacket *ack, bool renewing) {
+		if (renewing) {
+			dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
+		} else {
+			ip = ack->getYourIP();
+			netmask = ack->getOptionAddress(DHCP_SUBNET);
+			gateway = ack->getOptionAddress(DHCP_ROUTER);
+			dnsserver = ack->getOptionAddresses(DHCP_DNS_SERVER);
+			localdomain = ack->getOptionString(DHCP_DOMAIN_NAME);
+			dhcp_server_identifier = ack->getOption(DHCP_SERVER_ID);
+			dhcp_server_ip = QHostAddress(ntohl(ack->headers.ip.saddr));
+			dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
+				// T1: 0.5 * dhcp_lease_time
+				// T2: 0.875 * dhcp_lease_time ( 7/8 )
+			systemUp();
+			m_env->ifUp(this);
+		}
+	}
+	
+	void Interface_IPv4::dhcp_set_timeout(int msec) {
+		if (dhcp_timer_id != -1) killTimer(dhcp_timer_id);
+		if (msec != -1)
+			dhcp_timer_id = startTimer(msec);
+		else
+			dhcp_timer_id = -1;
 	}
 	
 	void Interface_IPv4::dhcpAction(DHCPPacket *source) {
@@ -479,10 +521,7 @@ namespace nuts {
 			switch (dhcpstate) {
 				case DHCPS_OFF:
 				case DHCPS_FAILED:
-					if (dhcp_xid) {
-						m_env->device->unregisterXID(dhcp_xid);
-						dhcp_xid = 0;
-					}
+					releaseXID();
 					return;
 				case DHCPS_INIT_START:
 					dhcp_retry = 0;
@@ -505,7 +544,7 @@ namespace nuts {
 						}
 					} else {
 						// 0, 500, 2500, 4500, 6500 [ms]
-						dhcp_timer_id = startTimer(500 + (dhcp_retry-1) * 2000);
+						dhcp_set_timeout(500 + (dhcp_retry-1) * 2000);
 						return;
 					}
 				case DHCPS_REQUESTING:
@@ -525,22 +564,20 @@ namespace nuts {
 						}
 						break;
 					} else {
-						dhcp_timer_id = startTimer(4000);
+						dhcp_set_timeout(4000);
 						return;
 					}
 				case DHCPS_BOUND:
-					if (dhcp_xid) {
-						m_env->device->unregisterXID(dhcp_xid);
-						dhcp_xid = 0;
-					}
-					// TODO: setup timeout -> renew
+					releaseXID();
+					// 0.5 * 1000 (msecs)
+					dhcp_set_timeout(500 * dhcp_lease_time);
 					return;
 				case DHCPS_RENEWING:
 					if (source) {
 						switch (source->getMessageType()) {
 							case DHCP_ACK:
 								killTimer(dhcp_timer_id);
-								dhcp_setup_interface(source);
+								dhcp_setup_interface(source, true);
 								dhcpstate = DHCPS_BOUND;
 								break;
 							case DHCP_NAK:
@@ -552,8 +589,9 @@ namespace nuts {
 						}
 						break;
 					} else {
-						// dhcp_send_renew();
-						// TODO: setup timeout -> DHCPS_REBINDING
+						dhcp_send_renew();
+						// T2 - T1 * 1000 (msecs) = (7 / 8 - 1 / 2) * 1000 = 3 / 8 * 1000 = 375
+						dhcp_set_timeout(375 * dhcp_lease_time);
 						return;
 					}
 				case DHCPS_REBINDING:
@@ -561,7 +599,7 @@ namespace nuts {
 						switch (source->getMessageType()) {
 							case DHCP_ACK:
 								killTimer(dhcp_timer_id);
-								dhcp_setup_interface(source);
+								dhcp_setup_interface(source, true);
 								dhcpstate = DHCPS_BOUND;
 								break;
 							case DHCP_NAK:
@@ -573,8 +611,9 @@ namespace nuts {
 						}
 						break;
 					} else {
-						// dhcp_send_rebind();
-						// TODO: setup timeout -> DHCPS_INIT_START
+						dhcp_send_rebind();
+						// T - (T2) = 1/8 -> 125
+						dhcp_set_timeout(125 * dhcp_lease_time);
 						return;
 					}
 				default:
@@ -585,14 +624,21 @@ namespace nuts {
 		}
 	}
 	
-	void Interface_IPv4::timerEvent(QTimerEvent *) {
-		killTimer(dhcp_timer_id);
+	void Interface_IPv4::timerEvent(QTimerEvent *tevt) {
+		if (tevt->timerId() != dhcp_timer_id) {
+			err << "Unrequested timer Event: " << tevt->timerId() << endl;
+//			return;
+		}
+		dhcp_set_timeout(-1);
 		switch (dhcpstate) {
 			case DHCPS_SELECTING:
 				dhcpstate = DHCPS_INIT;
 				break;
 			case DHCPS_REQUESTING:
 				dhcpstate = DHCPS_INIT;
+				break;
+			case DHCPS_BOUND:
+				dhcpstate = DHCPS_RENEWING;
 				break;
 			case DHCPS_RENEWING:
 				dhcpstate = DHCPS_REBINDING;
@@ -610,6 +656,27 @@ namespace nuts {
 		dhcpstate = DHCPS_INIT_START;
 		dhcpAction();
 	}
+	void Interface_IPv4::stopDHCP() {
+		switch (dhcpstate) {
+			case DHCPS_INITREBOOT:  // nothing to do ??
+			case DHCPS_REBOOTING:  // nothing to do ??
+			
+			case DHCPS_OFF: // should not happen
+			case DHCPS_FAILED: // nothing to do
+			case DHCPS_INIT_START: // should not happen
+			case DHCPS_INIT: // should not happen
+			case DHCPS_SELECTING: // normal cleanup
+				break;
+			case DHCPS_REQUESTING: // release
+			case DHCPS_BOUND: // release
+			case DHCPS_RENEWING: // release
+			case DHCPS_REBINDING: // release
+				dhcp_send_release();
+		}
+		releaseXID();
+		dhcp_set_timeout(-1);
+	}
+	
 	void Interface_IPv4::startZeroconf() {
 	}
 	void Interface_IPv4::startStatic() {
@@ -631,6 +698,8 @@ namespace nuts {
 	
 	void Interface_IPv4::stop() {
 //		log << "Interface_IPv4::stop" << endl;
+		if (dhcpstate != DHCPS_OFF)
+			stopDHCP();
 		systemDown();
 		m_env->ifDown(this);
 	}
@@ -759,18 +828,106 @@ namespace nuts {
 	}
 	
 	bool Interface_IPv4::registerXID(quint32 xid) {
-		if (dhcp_xid) {
-			m_env->device->unregisterXID(dhcp_xid);
-			dhcp_xid = 0;
-		}
+		releaseXID();
 		if (m_env->device->registerXID(xid, this)) {
+			dhcp_xid_unicast = false;
 			dhcp_xid = xid;
 			return true;
 		}
 		return false;
 	}
 	
+	bool Interface_IPv4::registerUnicastXID(quint32 xid) {
+		releaseXID();
+		if (!xid) return false;
+		if (setupUnicastDHCP()) {
+			dhcp_xid_unicast = true;
+			dhcp_xid = xid;
+			return true;
+		}
+		return false;
+	}
+	
+	void Interface_IPv4::releaseXID() {
+		if (dhcp_xid) {
+			if (dhcp_xid_unicast) {
+				closeUnicastDHCP();
+			} else{
+				m_env->device->unregisterXID(dhcp_xid);
+			}
+			dhcp_xid = 0;
+		}
+	}
+	
 	void Interface_IPv4::dhcpReceived(DHCPPacket *packet) {
 		dhcpAction(packet);
+	}
+
+	bool Interface_IPv4::setupUnicastDHCP(bool temporary) {
+		dhcp_unicast_socket = socket(PF_INET, SOCK_DGRAM, 0);
+		if (dhcp_unicast_socket == -1) {
+			err << "Couldn't create UDP socket" << endl;
+			return false;
+		}
+		struct sockaddr_in sin;
+		sin.sin_family = AF_INET;
+		sin.sin_port = htons(68);
+		sin.sin_addr.s_addr = htonl(ip.toIPv4Address());
+		if (-1 == bind(dhcp_unicast_socket, (struct sockaddr*) &sin, sizeof(sin))) {
+			err << "Couldn't bind on local dhcp client socket" << endl;
+			close(dhcp_unicast_socket);
+			dhcp_unicast_socket = -1;
+			return false;
+		}
+		dhcp_unicast_read_nf = 0;
+		if (!temporary) {
+			dhcp_unicast_read_nf = new QSocketNotifier(dhcp_unicast_socket, QSocketNotifier::Read);
+			connect(dhcp_unicast_read_nf, SIGNAL(activated(int)), SLOT(readDHCPUnicastClientSocket()));
+		}
+		return true;
+	}
+	
+	void Interface_IPv4::closeUnicastDHCP() {
+		if (dhcp_unicast_read_nf) {
+			delete dhcp_unicast_read_nf;
+			dhcp_unicast_read_nf = 0;
+		}
+		close(dhcp_unicast_socket);
+		dhcp_unicast_socket = -1;
+	}
+	
+	bool Interface_IPv4::sendUnicastDHCP(DHCPPacket *packet) {
+		bool tmpSocket = !dhcp_xid || !dhcp_xid_unicast;
+		if (tmpSocket && !setupUnicastDHCP(true)) return false;
+		struct sockaddr_in sin;
+		sin.sin_family = AF_INET;
+		sin.sin_port = htons(67);
+		sin.sin_addr.s_addr = htonl(packet->unicast_addr.toIPv4Address());
+		sendto(dhcp_unicast_socket, packet->msgdata.data() + sizeof(packet->headers), packet->msgdata.length() - sizeof(packet->headers), 0, (struct sockaddr*) &sin, sizeof(sin));
+		if (tmpSocket) closeUnicastDHCP();
+		return true;
+	}
+
+	void Interface_IPv4::readDHCPUnicastClientSocket() {
+		struct sockaddr_in sin;
+		socklen_t slen = sizeof(sin);
+		QByteArray buf;
+		int nread, msgsize = 256 + 1;
+		do {
+			msgsize = (msgsize << 1) - 1;
+			buf.resize(msgsize);
+			nread = recvfrom(dhcp_unicast_socket, buf.data(), msgsize, MSG_PEEK, (struct sockaddr *)&sin, &slen);
+			if (nread < 0) {
+//				perror("Device::readDHCPClientSocket: recvfrom");
+				closeUnicastDHCP();
+			}
+			if (nread == 0) return;
+		} while (nread == msgsize);
+		buf.resize(nread);
+		recvfrom(dhcp_unicast_socket, buf.data(), nread, 0, (struct sockaddr *)&sin, &slen);
+		DHCPPacket *packet = DHCPPacket::parseData(buf, sin);
+		if (!packet) return;
+		dhcpAction(packet);
+		delete packet;
 	}
 }

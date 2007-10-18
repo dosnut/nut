@@ -104,16 +104,22 @@ namespace nuts {
 			QHash< quint8, QVector<quint8> > options;
 			QByteArray msgdata;
 			
+			bool sendUnicast;
+			QHostAddress unicast_addr;
+			
 		public:
-			DHCPPacket(QDataStream &in);
+			DHCPPacket(QDataStream &in, quint32 from_ip /* network order */);
 			DHCPPacket(bool client);
+			DHCPPacket(bool client, const QHostAddress &unicast_addr);
 			virtual ~DHCPPacket();
 			
 			static DHCPPacket* parseRaw(QByteArray &buf);
+			static DHCPPacket* parseData(QByteArray &buf, struct sockaddr_in &from);
 			
 			bool check();
 			
 			void setClientMac(const nut::MacAddress &chaddr);
+			void setClientAddress(const QHostAddress &addr);
 			void setXID(quint32 xid);
 			void setOption(quint8 op, const QVector<quint8>& data);
 			void setOption(quint8 op, const quint8* data, int size);
@@ -192,7 +198,11 @@ namespace nuts {
 			}
 			
 			inline void send(Interface_IPv4 *iface) {
-				iface->m_env->device->sendDHCPClientPacket(this);
+				if (sendUnicast) {
+					iface->sendUnicastDHCP(this);
+				} else {
+					iface->m_env->device->sendDHCPClientPacket(this);
+				}
 			}
 	};
 	
@@ -200,10 +210,25 @@ namespace nuts {
 			Interface_IPv4 *iface;
 		
 		public:
+			// broadcast packet
 			DHCPClientPacket(Interface_IPv4 *iface);
 			
+			// unicast packet
+			DHCPClientPacket(Interface_IPv4 *iface, const QHostAddress &unicast_addr);
+			
+			// set vendor option ("nuts-0.1")
+			void setVendor();
+			// set requested parameter option
+			void setParamRequest();
+			
+			// broadcasts
 			void doDHCPDiscover();
 			void doDHCPRequest(const DHCPPacket &reply);
+			void doDHCPRebind(const QHostAddress &ip);
+			
+			// unicasts
+			void doDHCPRenew(const QHostAddress &ip);
+			void doDHCPRelease(const QHostAddress &ip, const QVector<quint8> server_id);
 			
 			void requestIP(const QHostAddress &ip);
 			void send();
