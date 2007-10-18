@@ -15,14 +15,15 @@ RCC_DIR = build/
 
 CONFIG += debug_and_release
 
-CONFIG(debug, debug|release) {
- TARGET = qnut_debug
-} else {
- TARGET = qnut
+CONFIG(debug, debug|release){
+    TARGET = qnut_debug
+}else {
+    TARGET = qnut
 }
 
 FORMS = connman.ui \
- ipconf.ui
+ ipconf.ui \
+ devconf.ui
 TRANSLATIONS = qnut_de.ts
 
 HEADERS += connectionmanager.h trayicon.h \
@@ -31,13 +32,15 @@ HEADERS += connectionmanager.h trayicon.h \
  deviceoptionsmodel.h \
  deviceoptions.h \
  ipconfiguration.h \
- common.h
+ common.h \
+ deviceconfiguration.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  overviewmodel.cpp \
  deviceoptionsmodel.cpp \
  deviceoptions.cpp \
  ipconfiguration.cpp \
- common.cpp
+ common.cpp \
+ deviceconfiguration.cpp
 DESTDIR = .
 
 target.path = /usr/bin/
@@ -48,10 +51,10 @@ langtarget.files = qnut_*.ts
 shortcuttarget.path = /usr/share/applications
 shortcuttarget.files = qnut.desktop
 
-CONFIG(debug, debug|release) {
- INSTALLS += target
-} else {
- INSTALLS += target iconstarget langtarget shortcuttarget
+CONFIG(debug, debug|release){
+    INSTALLS += target
+}else {
+    INSTALLS += target iconstarget langtarget shortcuttarget
 }
 
 QMAKE_CXXFLAGS_RELEASE += -DQNUT_RELEASE

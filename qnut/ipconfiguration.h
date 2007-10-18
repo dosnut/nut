@@ -9,26 +9,26 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#ifndef QNUTIPCONF_H
-#define QNUTIPCONF_H
+#ifndef QNUT_IPCONFIGURATION_H
+#define QNUT_IPCONFIGURATION_H
 
 #include <QDialog>
 #include <libnut/libnut_cli.h>
 #include "ui/ui_ipconf.h"
 
 namespace qnut {
-    using namespace libnut;
+	using namespace libnut;
 
-    class CIPConfiguration : public QDialog {
-        Q_OBJECT
-    private:
-        Ui::ipconf ui;
-    public:
-        bool execute(CInterface * interface);
-        
-        CIPConfiguration(QWidget * parent = 0);
-        ~CIPConfiguration();
-    };
+	class CIPConfiguration : public QDialog {
+		Q_OBJECT
+	private:
+		Ui::ipconf ui;
+	public:
+		bool execute(CInterface * interface);
+		
+		CIPConfiguration(QWidget * parent = 0);
+		~CIPConfiguration();
+	};
 
 };
 

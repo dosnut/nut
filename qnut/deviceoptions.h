@@ -15,45 +15,62 @@
 #include <QTreeView>
 #include <QMenu>
 #include <QTabWidget>
+#include <QSystemTrayIcon>
+#include <QSettings>
 #include <libnut/libnut_cli.h>
 
 namespace qnut {
-    using namespace libnut;
-    
-    class CDeviceOptions;
-    typedef QHash<CDevice *, CDeviceOptions *> CDeviceOptionsHash;
-    
-    class CDeviceOptions : public QTreeView {
-        Q_OBJECT
-    protected:
-        QTabWidget * tabWidget;
-    public:
-        CDevice * device;
-        
-        QMenu * deviceMenu;
-        QAction * enableDeviceAction;
-        QAction * disableDeviceAction;
-        QAction * enterEnvironmentAction;
-/*        QAction * activateInterfaceAction;
-        QAction * deactivateInterfaceAction;*/
-        QAction * editInterfaceAction;
-        
-        QAction * showAction;
-        
-        void updateDeviceIcons();
-        
-        CDeviceOptions(CDevice * parentDevice, QTabWidget * parentTabWidget, QWidget * parent = 0);
-        ~CDeviceOptions();
-        
-    public slots:
-        void uiShowThisTab();
-        void uiSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-        void uiChangeIPConfiguration();
-        void uiHandleStateChange(DeviceState state);
-        
-    signals:
-        void showMessage(QString title, QString message, int millisecondsTimeoutHint);
-    };
+	using namespace libnut;
+	
+	class CDeviceOptions;
+	typedef QHash<CDevice *, CDeviceOptions *> CDeviceOptionsHash;
+	
+	class CDeviceOptions : public QTreeView {
+		Q_OBJECT
+	protected:
+		QTabWidget * tabWidget;
+		QString statusMessage(DeviceState state);
+		
+		QSettings settings;
+		
+		void readSettings();
+		void writeSettings();
+	public:
+		CDevice * device;
+		
+		QSystemTrayIcon * trayIcon;
+		
+		quint8 scriptFlags;
+		
+		QMenu * deviceMenu;
+		QAction * enableDeviceAction;
+		QAction * disableDeviceAction;
+		
+		QAction * enterEnvironmentAction;
+		
+		QAction * deviceSettingsAction;
+		QAction * ipConfigurationAction;
+		
+		QAction * showAction;
+		
+		void updateDeviceIcons();
+		
+		CDeviceOptions(CDevice * parentDevice, QTabWidget * parentTabWidget, QWidget * parent = 0);
+		~CDeviceOptions();
+		
+	private slots:
+		void uiHandleTrayActivated(QSystemTrayIcon::ActivationReason);
+		
+	public slots:
+		void uiShowThisTab();
+		void uiSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+		void uiChangeIPConfiguration();
+		void uiChangeDeviceSettings();
+		void uiHandleStateChange(DeviceState state);
+		
+	signals:
+		void showMessage(QSystemTrayIcon * trayIcon, QString title, QString message);
+	};
 };
 
 #endif

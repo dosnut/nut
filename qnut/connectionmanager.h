@@ -27,6 +27,9 @@ namespace qnut {
 		QAction * enableDeviceAction;
 		QAction * disableDeviceAction;
 		
+		QAction * deviceSettingsAction;
+		QAction * ipConfigurationAction;
+		
 		QTabWidget tabWidget;
 		QTreeView overView;
 		QTextEdit logEdit;
@@ -50,7 +53,7 @@ namespace qnut {
 		void uiRemovedDevice(CDevice * dev);
 		void uiCurrentTabChanged(int index);
 		void uiSelectedDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected);
-		void uiShowMessage(QString title, QString message, int millisecondsTimeoutHint);
+		void uiShowMessage(QSystemTrayIcon * trayIcon, QString title, QString message);
 		void uiShowAbout();
 		void uiHandleDeviceStateChanged(DeviceState state);
 		void uiSetShowBalloonTips(bool value);
