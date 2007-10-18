@@ -159,5 +159,6 @@ sf_block: select
 
 %%
 
-void configparsererror (ConfigParser *, char*) {
+void configparsererror (ConfigParser *cp, char* msg) {
+	cp->parseError(line_num, QString::fromUtf8(msg));
 }
