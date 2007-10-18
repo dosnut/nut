@@ -8,14 +8,8 @@ CODECFORSRC = UTF-8
 OBJECTS_DIR = build
 TARGET = build/nut
 
-SOURCES += nut.cpp \
- nut_library.cpp \
- nut_interactive.cpp \
- nut_commandline.cpp \
+SOURCES += nut.cpp
 
-HEADERS += nut_library.h \
- nut_interactive.h \
- nut_commandline.h
 
 #DISTFILES += ../libnut/libnut_server.xml
 
