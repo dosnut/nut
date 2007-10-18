@@ -12,6 +12,7 @@ namespace nuts {
 namespace nuts {
 	class ConfigParser {
 		private:
+			bool failed;
 			QString m_configFile;
 		
 			nut::Config *m_config;
@@ -29,6 +30,8 @@ namespace nuts {
 			
 		// internal functions for config parsing
 		// didn't get protected/friend working with extern "C"
+			void parseError(int lineNum, const QString &msg);
+			
 			bool newDevice(const QString &name);
 			bool devDefaultEnvironment();
 			bool devEnvironment(const QString &name);

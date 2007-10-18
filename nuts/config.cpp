@@ -6,6 +6,9 @@ extern "C" {
 #include <stdio.h>
 }
 
+#include "exception.h"
+#include "log.h"
+
 void configparserparse(nuts::ConfigParser *cp);
 extern FILE *configparserin;
 
@@ -16,13 +19,23 @@ extern FILE *configparserin;
 namespace nuts {
 	ConfigParser::ConfigParser(const QString &configFile)
 	: m_configFile(configFile), m_config(new nut::Config()) {
+		failed = false;
 		configparserin = fopen(m_configFile.toUtf8().constData(), "r");
+		if (!configparserin)
+			throw Exception(QString("Couldn't open config file '%1'").arg(m_configFile));
 		configparserparse(this);
 		fclose(configparserin);
+		if (failed)
+			throw Exception(QString("Invalid config file"));
 	}
 	
 	ConfigParser::~ConfigParser() {
 		delete m_config;
+	}
+	
+	void ConfigParser::parseError(int lineNum, const QString &msg) {
+		failed = true;
+		err << QString("%1:%2: %3").arg(m_configFile).arg(lineNum).arg(msg) << endl;
 	}
 	
 	bool ConfigParser::newDevice(const QString &name) {
