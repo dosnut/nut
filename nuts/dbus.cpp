@@ -171,12 +171,11 @@ namespace nuts {
 	}
 
 	libnut::InterfaceProperties DBusInterface_IPv4::getProperties() {
-		m_properties.active = true;
 		m_properties.ip = m_iface->ip;
 		m_properties.gateway = m_iface->gateway;
 		m_properties.netmask = m_iface->netmask;
-		m_properties.userDefineable = false;
-		m_properties.isStatic = false;
+		m_properties.userDefineable = false; //Fliegt raus, da Info bereits in der Config
+		m_properties.isStatic = false; //Fliegt raus, da info bereits in der Config
 		if (!m_iface->dnsserver.isEmpty()) {
 			m_properties.dns = m_iface->dnsserver;
 		}
