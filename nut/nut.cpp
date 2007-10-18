@@ -4,35 +4,9 @@
 #include <libnut/libnut_cli.h>
 #include <QDBusConnectionInterface>
 #include <QDBus>
-#include "nut_commandline.h"
-#include "nut_interactive.h"
-#include "nut_library.h"
-
-
 
 
 //Interaktiver Modus mit TAB-Competion
-void interactive_mode(QCoreApplication app) {
-    QStringList commandlist;
-    while (app.arguments().first() != "exit") {
-        int command_index = commands.contains((Ccommands) app.arguments().first());
-        if (command_index != -1) {
-            commands[command_index].exec();
-        }
-        else {
-            echo("Command not found");
-            if (commandlist.empty()) {
-                for (QList<Tcommands>::iterator i = commands.begin(); i != commands.end(); ++i) {
-                    commandlist.append(*i.name);
-                }
-            }
-            else {
-                echo(commandlist(commands));
-            }
-        }
-    }
-}
-
 int main(int argc, char* argv[]) {
 
 
@@ -44,7 +18,7 @@ int main(int argc, char* argv[]) {
     }
     if (0 < argc) {
         interactive_mode(app);
-    }
+		}
     else {
         commandline_mode(app);
     }
