@@ -271,6 +271,10 @@ namespace nuts {
 			QList<QHostAddress> dnsserver;
 			
 			const nut::IPv4Config& getConfig() { return *m_config; }
+		
+		signals:
+			void interfaceUp();
+			void interfaceDown();
 	};
 };
 
