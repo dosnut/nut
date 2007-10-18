@@ -716,6 +716,7 @@ namespace nuts {
 			proc->waitForFinished(-1);
 			delete proc; // waits for process
 		}
+		emit interfaceUp();
 	}
 	void Interface_IPv4::systemDown() {
 		// Resolvconf
@@ -754,6 +755,7 @@ namespace nuts {
 #endif
 		rtnl_addr_put(addr);
 		nl_addr_put(local);
+		emit interfaceDown();
 	}
 	
 	bool Interface_IPv4::registerXID(quint32 xid) {
