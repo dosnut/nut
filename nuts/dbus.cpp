@@ -14,14 +14,16 @@
 #include <QHashIterator>
 
 namespace nuts {
-	const QString DBusDeviceManager::s_manager_path("/manager");
-	const QString DBusDeviceManager::s_devices_path("/devices");
+	const QString DBusDeviceManager::dbus_path("/manager");
+	const QString DBusDeviceManager::dbus_devices_path("/devices");
 
 	DBusDeviceManager::DBusDeviceManager(DeviceManager *devmgr)
-	: QDBusAbstractAdaptor(devmgr), m_connection(QDBusConnection::systemBus()), m_devmgr(devmgr) {
-		m_connection.registerService(NUT_DBUS_URL);
-		m_connection.registerObject(s_manager_path, devmgr);
-		QHashIterator<QString, Device *> i(m_devmgr->getDevices());
+	: QDBusAbstractAdaptor(devmgr), dbus_connection(QDBusConnection::systemBus()), s_devmgr(devmgr) {
+		//Register Service and device manager object
+		dbus_connection.registerService(NUT_DBUS_URL);
+		dbus_connection.registerObject(dbus_path, devmgr);
+		//Insert devices into devices Hash.
+		QHashIterator<QString, Device *> i(s_devmgr->getDevices());
 		while (i.hasNext()) {
 			i.next();
 			devAdded(i.key(), i.value());
@@ -31,158 +33,191 @@ namespace nuts {
 	}
 
 	DBusDeviceManager::~DBusDeviceManager() {
-		m_connection.unregisterService(NUT_DBUS_URL);
-	}
-
-	void DBusDeviceManager::devAdded(QString devName, Device *dev) {
-		DBusDevice *ddev = new DBusDevice(dev, &m_connection, s_devices_path);
-		m_devices.insert(devName, ddev);
-		emit deviceAdded(QDBusObjectPath(ddev->getPath()));
+		dbus_connection.unregisterObject(dbus_path);
+		dbus_connection.unregisterService(NUT_DBUS_URL);
 	}
 	
+	//SLOT: Inserts device into device hash
+	void DBusDeviceManager::devAdded(QString devName, Device *dev) {
+		DBusDevice *dbus_device = new DBusDevice(dev, &dbus_connection, dbus_devices_path);
+		dbus_devices.insert(devName, dbus_device);
+		emit deviceAdded(QDBusObjectPath(dbus_device->getPath()));
+	}
+	
+	
 	void DBusDeviceManager::devRemoved(QString devName, Device* /* *dev */) {
-		DBusDevice *ddev = m_devices[devName];
-		emit deviceRemoved(QDBusObjectPath(ddev->getPath()));
-		m_devices.remove(devName);
-		// ddev is deleted as child of dev
+		DBusDevice *dbus_device = dbus_devices[devName];
+		emit deviceRemoved(QDBusObjectPath(dbus_device->getPath()));
+		dbus_devices.remove(devName);
+		// dbus_device is deleted as child of dev
 	}
 	
 	QList<QDBusObjectPath> DBusDeviceManager::getDeviceList() {
 		QList<QDBusObjectPath> paths;
-		foreach (DBusDevice *ddev, m_devices) {
-			paths.append(QDBusObjectPath(ddev->getPath()));
+		foreach (DBusDevice *dbus_device, dbus_devices) {
+			paths.append(QDBusObjectPath(dbus_device->getPath()));
 		}
 		return paths;
 	}
 
 	DBusDevice::DBusDevice(Device *dev, QDBusConnection *connection, const QString &path)
-	: QDBusAbstractAdaptor(dev), m_dev(dev), m_connection(connection) {
-		int env = dev->getEnvironment();
-		if (env >= 0)
-			m_properties.activeEnvironment = m_envs[env]->getPath();
-		else
-			m_properties.activeEnvironment = "";
-		m_properties.type = libnut::DT_ETH;
-		m_properties.name = dev->getName();
-		m_properties.state = dev->getState();
-	
-		m_dbusPath = path + '/' + dev->getName();
-		m_connection->registerObject(m_dbusPath, dev);
-		foreach (Environment *env, m_dev->getEnvironments()) {
-			DBusEnvironment *denv = new DBusEnvironment(env, m_connection, m_dbusPath);
-			m_envs.append(denv);
+	: QDBusAbstractAdaptor(dev), s_device(dev), dbus_connection(connection) {
+
+		//Set Device Properties
+		dbus_properties.type = s_device->hasWLAN() ? libnut::DT_AIR : libnut::DT_ETH;
+		dbus_properties.name = s_device->getName();
+		dbus_properties.state = s_device->getState();
+
+		//Set dbus device path an register objects
+		dbus_path = path + '/' + dev->getName();
+		dbus_connection->registerObject(dbus_path, s_device);
+		
+		//Add Environments
+		foreach (Environment *env, s_device->getEnvironments()) {
+			DBusEnvironment *dbus_env = new DBusEnvironment(env, dbus_connection, dbus_path);
+			dbus_environments.append(dbus_env);
+			emit(environmentAdded(QDBusObjectPath(dbus_env->getPath())));
 		}
-		connect(m_dev,SIGNAL(stateChanged(libnut::DeviceState , libnut::DeviceState )),this,SLOT(stateChanged(libnut::DeviceState, libnut::DeviceState)));
+
+		//Set active Environment
+		int active_environment = s_device->getEnvironment();
+		if (active_environment >= 0) {
+			dbus_properties.activeEnvironment = dbus_environments[active_environment]->getPath();
+		}
+		else {
+			dbus_properties.activeEnvironment = "";
+		}
+		connect(s_device,SIGNAL(stateChanged(libnut::DeviceState , libnut::DeviceState )),this,SLOT(stateChanged(libnut::DeviceState, libnut::DeviceState)));
 		setAutoRelaySignals(true);
 	}
 	
 	DBusDevice::~DBusDevice() {
+		dbus_connection->unregisterObject(dbus_path);
 	}
 	
 	QString DBusDevice::getPath() {
-		return m_dbusPath;
+		return dbus_path;
 	}
 
 	libnut::DeviceProperties DBusDevice::getProperties() {
-		m_properties.state = m_dev->getState();
-		m_properties.type = m_dev->hasWLAN() ? libnut::DT_AIR : libnut::DT_ETH;
-		int aenv = m_dev->getEnvironment();
-		if (aenv >= 0) {
-			m_properties.activeEnvironment = m_envs[aenv]->getPath();
+		dbus_properties.state = s_device->getState();
+		dbus_properties.type = s_device->hasWLAN() ? libnut::DT_AIR : libnut::DT_ETH;
+		int active_environment = s_device->getEnvironment();
+		if (active_environment >= 0) {
+			dbus_properties.activeEnvironment = dbus_environments[active_environment]->getPath();
 		} else {
-			m_properties.activeEnvironment = QString();
+			dbus_properties.activeEnvironment = QString();
 		}
-		return m_properties;
-	}
-	
-	QList<libnut::WlanScanresult> DBusDevice::getwlanScan() {
-		return QList<libnut::WlanScanresult>();
+		return dbus_properties;
 	}
 	
 	QList<QDBusObjectPath> DBusDevice::getEnvironments() {
 		QList<QDBusObjectPath> paths;
-		foreach (DBusEnvironment *denv, m_envs) {
-			paths.append(QDBusObjectPath(denv->getPath()));
+		foreach (DBusEnvironment *dbus_env, dbus_environments) {
+			paths.append(QDBusObjectPath(dbus_env->getPath()));
 		}
 		return paths;
 	}
+
 	void DBusDevice::setEnvironment(const QDBusObjectPath &path) {
-		foreach(DBusEnvironment * i, m_envs) {
+		foreach(DBusEnvironment * i, dbus_environments) {
 			if (i->getPath() == path.path()) {
-				m_dev->setEnvironment((i->getEnvironment())->getID());
+				s_device->setEnvironment((i->getEnvironment())->getID());
 				break;
 			}
 		}
 	}
 	
 	void DBusDevice::enable() {
-		m_dev->enable(true);
+		s_device->enable(true);
 	}
+
 	void DBusDevice::disable() {
-		m_dev->disable();
+		s_device->disable();
 	}
 
 	DBusEnvironment::DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path)
-	: QDBusAbstractAdaptor(env), m_env(env), m_connection(connection) {
-		m_dbusPath = path + QString("/%1").arg(env->getID());
-		m_connection->registerObject(m_dbusPath, env);
-		foreach (Interface *iface, m_env->getInterfaces()) {
-			Interface_IPv4 *ifv4 = dynamic_cast<Interface_IPv4*>(iface);
+	: QDBusAbstractAdaptor(env), s_environment(env), dbus_connection(connection) {
+		//Set dbus path an register object
+		dbus_path = path + QString("/%1").arg(s_environment->getID());
+		dbus_connection->registerObject(dbus_path, s_environment);
+
+		//Insert interfaces
+		foreach (Interface *interface, s_environment->getInterfaces()) {
+			//Check if interface is IPv4 or IPv6
+			Interface_IPv4 *ifv4 = dynamic_cast<Interface_IPv4*>(interface);
 			if (ifv4) {
-				DBusInterface_IPv4 *diface = new DBusInterface_IPv4(ifv4, m_connection, m_dbusPath);
-				m_ifaces.append(diface);
+				DBusInterface_IPv4 *dbus_interface = new DBusInterface_IPv4(ifv4, dbus_connection, dbus_path);
+				dbus_interfaces_IPv4.append(dbus_interface);
+				emit(interfaceAdded(QDBusObjectPath(dbus_interface->getPath())));
 			}
+			#ifdef IPv6
+			else {
+				Interface_IPv6 *if6 = dynamic_cast<Interface_IPv6*>(interface);
+				if (if6) {
+					DBusInterface_IPv6 *dbus_interface = new DBusInterface_IPv6(ifv6, dbus_connection, dbus_path);
+					dbus_interfaces_IPv6.append(dbus_interface);
+					emit(interfaceAdded(dbus_interface->getPath()));
+				}
+			}
+			#endif
 		}
 	}
 	
 	DBusEnvironment::~DBusEnvironment() {
+		dbus_connection->unregisterObject(dbus_path);
 	}
 	
 	QString DBusEnvironment::getPath() {
-		return m_dbusPath;
+		return dbus_path;
 	}
 	
 	libnut::EnvironmentProperties DBusEnvironment::getProperties() {
-		m_properties.name = m_env->getName();
-		return m_properties;
+		dbus_properties.name = s_environment->getName();
+		return dbus_properties;
 	}
 	
 	QList<QDBusObjectPath> DBusEnvironment::getInterfaces() {
 		QList<QDBusObjectPath> paths;
-		foreach (QObject *diface, m_ifaces) {
-			DBusInterface_IPv4 *difv4 = dynamic_cast<DBusInterface_IPv4*>(diface);
-			if (difv4)
-				paths.append(QDBusObjectPath(difv4->getPath()));
+		//Append IPv4 Paths
+		foreach (DBusInterface_IPv4 *i, dbus_interfaces_IPv4) {
+			paths.append(QDBusObjectPath(i->getPath()));
 		}
+		#ifdef IPv6
+		//Append IPv6 Paths
+		foreach (DBusInterface_IPv6 *i, dbus_interfaces_IPv6) {
+			paths.append(QDBusObjectPath(i->getPath()));
+		}
+		#endif
 		return paths;
 	}
 
 	DBusInterface_IPv4::DBusInterface_IPv4(Interface_IPv4 *iface, QDBusConnection *connection, const QString &path)
-	: QDBusAbstractAdaptor(iface), m_iface(iface), m_connection(connection) {
-		m_dbusPath = path + QString("/%1").arg(iface->getIndex());
-		m_connection->registerObject(m_dbusPath, iface);
+	: QDBusAbstractAdaptor(iface), s_interface(iface), dbus_connection(connection) {
+		dbus_path = path + QString("/%1").arg(s_interface->getIndex());
+		dbus_connection->registerObject(dbus_path, s_interface);
 	}
 	
 	DBusInterface_IPv4::~DBusInterface_IPv4() {
 	}
 
 	QString DBusInterface_IPv4::getPath() {
-		return m_dbusPath;
+		return dbus_path;
 	}
 
 	libnut::InterfaceProperties DBusInterface_IPv4::getProperties() {
-		m_properties.ip = m_iface->ip;
-		m_properties.gateway = m_iface->gateway;
-		m_properties.netmask = m_iface->netmask;
-		m_properties.userDefineable = false; //Fliegt raus, da Info bereits in der Config
-		m_properties.isStatic = false; //Fliegt raus, da info bereits in der Config
-		if (!m_iface->dnsserver.isEmpty()) {
-			m_properties.dns = m_iface->dnsserver;
+		dbus_properties.ip = s_interface->ip;
+		dbus_properties.gateway = s_interface->gateway;
+		dbus_properties.netmask = s_interface->netmask;
+		dbus_properties.userDefineable = false; //Fliegt raus, da Info bereits in der Config
+		dbus_properties.isStatic = false; //Fliegt raus, da info bereits in der Config
+		if (!s_interface->dnsserver.isEmpty()) {
+			dbus_properties.dns = s_interface->dnsserver;
 		}
 		else {
-			m_properties.dns = QList<QHostAddress>();
+			dbus_properties.dns = QList<QHostAddress>();
 		}
-		return m_properties;
+		return dbus_properties;
 	}
 	void DBusInterface_IPv4::setIP(quint32 /*HostAddress*/) {
 	}

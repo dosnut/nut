@@ -14,19 +14,24 @@ namespace nuts {
 	class DBusDevice;
 	class DBusEnvironment;
 	class DBusInterface;
+	class DBusInterface_IPv4;
+	#ifdef IPv6
+	class DBusInterface_IPv6;
+	#endif
 }
 
 #include "device.h"
 
 namespace nuts {
+	
 	class DBusDeviceManager: public QDBusAbstractAdaptor {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".DeviceManager")
 		private:
-			QDBusConnection m_connection;
-			DeviceManager *m_devmgr;
-			QHash<QString, DBusDevice *> m_devices;
-			static const QString s_manager_path, s_devices_path;
+			QDBusConnection dbus_connection;
+			DeviceManager *s_devmgr;
+			QHash<QString, DBusDevice *> dbus_devices;
+			static const QString dbus_path, dbus_devices_path;
 			
 		private slots:
 			void devAdded(QString devName, Device *dev);
@@ -39,7 +44,7 @@ namespace nuts {
 		public slots:
 			QList<QDBusObjectPath> getDeviceList();
 			nut::Config getConfig() {
-				return m_devmgr->getConfig();
+				return s_devmgr->getConfig();
 			}
 		signals:
 			void deviceAdded(const QDBusObjectPath &objectpath);
@@ -50,11 +55,11 @@ namespace nuts {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Device")
 		private:
-			Device *m_dev;
-			QDBusConnection *m_connection;
-			QList<DBusEnvironment*> m_envs;
-			QString m_dbusPath;
-			libnut::DeviceProperties m_properties;
+			Device *s_device;
+			QDBusConnection *dbus_connection;
+			QList<DBusEnvironment* > dbus_environments;
+			QString dbus_path;
+			libnut::DeviceProperties dbus_properties;
 		
 		private slots:
 			inline void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState) {
@@ -69,20 +74,19 @@ namespace nuts {
 	
 		public slots:
 			libnut::DeviceProperties getProperties();
-			QList<libnut::WlanScanresult> getwlanScan();
 			QList<QDBusObjectPath> getEnvironments();
 			nut::DeviceConfig getConfig() {
-				return m_dev->getConfig();
+				return s_device->getConfig();
 			}
 			Q_NOREPLY void enable();
 			Q_NOREPLY void disable();
 			Q_NOREPLY void setEnvironment(const QDBusObjectPath &path);
 			Q_NOREPLY void setEnvironment(int env) {
-				m_dev->setEnvironment(env);
+				s_device->setEnvironment(env);
 			}
 			
-			bool hasWLAN() { return m_dev->hasWLAN(); }
-			QString essid() { return m_dev->essid(); }
+			bool hasWLAN() { return s_device->hasWLAN(); }
+			QString essid() { return s_device->essid(); }
 		
 		signals:
 			void stateChanged(int newState, int oldState);
@@ -95,16 +99,19 @@ namespace nuts {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Environment")
 		private:
-			Environment *m_env;
-			QDBusConnection *m_connection;
-			QList<QObject*> m_ifaces;
-			QString m_dbusPath;
-			libnut::EnvironmentProperties m_properties;
+			Environment *s_environment;
+			QDBusConnection *dbus_connection;
+			QList<DBusInterface_IPv4*> dbus_interfaces_IPv4;
+			#ifdef IPv6
+			QList<DBusInterface_IPv6*> dbus_interfaces_IPv6;
+			#endif
+			QString dbus_path;
+			libnut::EnvironmentProperties dbus_properties;
 		
 		public:
 			DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path);
 			virtual ~DBusEnvironment();
-			inline Environment * getEnvironment() const { return m_env; }
+			inline Environment * getEnvironment() const { return s_environment; }
 	
 			QString getPath();
 	
@@ -112,16 +119,18 @@ namespace nuts {
 			libnut::EnvironmentProperties getProperties();
 			QList<QDBusObjectPath> getInterfaces();
 		signals:
+			void interfaceAdded(const QDBusObjectPath &objectpath);
+			void interfaceRemoved(const QDBusObjectPath &objectpath);
 	};
 	
 	class DBusInterface_IPv4: public QDBusAbstractAdaptor {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Interface_IPv4")
 		private:
-			Interface_IPv4 *m_iface;
-			QDBusConnection *m_connection;
-			QString m_dbusPath;
-			libnut::InterfaceProperties m_properties;
+			Interface_IPv4 *s_interface;
+			QDBusConnection *dbus_connection;
+			QString dbus_path;
+			libnut::InterfaceProperties dbus_properties;
 		
 		public:
 			DBusInterface_IPv4(Interface_IPv4 *iface, QDBusConnection *connection, const QString &path);
@@ -139,7 +148,6 @@ namespace nuts {
 		signals:
 			void stateChanged(const libnut::InterfaceProperties &properties);
 	};
-
 }
 
 #endif
