@@ -528,6 +528,9 @@ void CDevice::disable() {
 	dbusDevice->disable();
 }
 void CDevice::setEnvironment(CEnvironment * environment) {
+	if (DS_DEACTIVATED == state) {
+		enable();
+	}
 	dbusDevice->setEnvironment(dbusEnvironments.key(environment));
 }
 void CDevice::addEnvironment(QString name) {
