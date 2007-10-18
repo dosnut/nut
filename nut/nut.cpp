@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     }
     if (0 < argc) {
         interactive_mode(app);
-    }
+		}
     else {
         commandline_mode(app);
     }
