@@ -76,9 +76,7 @@ namespace nuts {
 		public slots:
 			libnut::DeviceProperties getProperties();
 			QList<QDBusObjectPath> getEnvironments();
-			nut::DeviceConfig getConfig() {
-				return s_device->getConfig();
-			}
+			nut::DeviceConfig getConfig();
 			Q_NOREPLY void enable();
 			Q_NOREPLY void disable();
 			Q_NOREPLY void setEnvironment(const QDBusObjectPath &path);

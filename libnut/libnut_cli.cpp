@@ -340,6 +340,15 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	else {
 		throw CLI_DevConnectionException(tr("(%1) Error while retrieving dbus' device information").arg(toString(replyProp.error())));
 	}
+	//get config
+	QDBusReply<nut::DeviceConfig> replyconf = dbusDevice->getConfig();
+	if (replyconf.isValid()) {
+		config = replyconf.value();
+	}
+	else {
+		throw CLI_DevConnectionException(tr("Error while retrieving device config") + replyconf.error().name());
+	}
+
 	//get Environment list
 	QDBusReply<QList<QDBusObjectPath> > replyEnv = dbusDevice->getEnvironments();
 	if (!replyEnv.isValid()) {
@@ -533,6 +542,10 @@ void CDevice::setEnvironment(CEnvironment * environment) {
 	}
 	dbusDevice->setEnvironment(dbusEnvironments.key(environment));
 }
+nut::DeviceConfig CDevice::getConfig() {
+	return config;
+}
+
 void CDevice::addEnvironment(QString name) {
 	EnvironmentProperties props;
 	props.name = name;
@@ -554,7 +567,8 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	dbusConnectionInterface = parent->dbusConnectionInterface;
 	serviceCheck(dbusConnectionInterface);
 	dbusEnvironment = new DBusEnvironmentInterface(NUT_DBUS_URL, dbusPath.path(),*dbusConnection,this);
-	//Retrieve dbus information:
+
+	//get Environment properties
 	QDBusReply<EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
 	if (replyprop.isValid()) {
 		if (parent->environments.size() == 0)
@@ -571,7 +585,15 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	else {
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment properties").arg(toString(replyprop.error())));
 	}
-	
+	//Get environment config
+	QDBusReply<nut::EnvironmentConfig> replyconf = dbusEnvironment->getConfig();
+	if (replyconf.isValid()) {
+		config = replyconf.value();
+	}
+	else {
+		throw CLI_EnvConnectionException(tr("Error while retrieving environment config") + replyconf.error().name());
+	}
+	//Get Interfaces
  	QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnvironment->getInterfaces();
 	if (replyifs.isValid()) {
 		CInterface * interface;
@@ -717,6 +739,9 @@ void CEnvironment::dbusstateChanged(bool state) {
 void CEnvironment::enter() {
 	parent->setEnvironment(this);
 }
+nut::EnvironmentConfig CEnvironment::getConfig() {
+	return config;
+}
 void CEnvironment::addInterface(bool isStatic, QHostAddress ip, QHostAddress netmask, QHostAddress gateway, bool active=true) {
 	InterfaceProperties ifprops;
 	ifprops.isStatic = isStatic;
@@ -759,10 +784,10 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	QDBusReply<nut::IPv4Config> replyconf = dbusInterface->getConfig();
 	if (replyconf.isValid()) {
 		config = replyconf.value();
-		userDefineable = (config.getFlags() & nut::IPv4Config::MAY_USER_STATIC);
+		userDefineable = (config.getFlags() & nut::IPv4Config::MAY_USERSTATIC);
 	}
 	else {
-		throw CLI_IfConnectionException(TR("Error while retrieving interface config") + replyconf.error().name());
+		throw CLI_IfConnectionException(tr("Error while retrieving interface config") + replyconf.error().name());
 	}
 
 	connect(dbusInterface, SIGNAL(stateChanged(const InterfaceProperties &)), this, SLOT(dbusstateChanged(const InterfaceProperties &)));
@@ -818,10 +843,8 @@ void CInterface::setNetmask(QHostAddress & address) {
 void CInterface::setGateway(QHostAddress & address) {
 	dbusInterface->setGateway(address.toIPv4Address());
 }
-void CInterface::setDynamic() {
-	if (isStatic) {
-		dbusInterface->setDynamic();
-	}
+nut::IPv4Config CInterface::getConfig() {
+	return config;
 }
 
 };

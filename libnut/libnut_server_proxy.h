@@ -22,6 +22,7 @@
 #include <QtDBus/QtDBus>
 #include <common/dbus.h>
 #include <common/types.h>
+#include <common/config.h>
 #include <QMetaType>
 namespace libnut {
 /*
@@ -61,6 +62,11 @@ public Q_SLOTS: // METHODS
         QList<QVariant> argumentList;
         return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
     }
+	inline QDBusReply<nut::DeviceConfig> getConfig()
+	{
+		QList<QVariant> argumentList;
+		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList);
+	}
     inline QDBusReply<void> setEnvironment(QDBusObjectPath envpath) {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(envpath);
@@ -147,6 +153,11 @@ public Q_SLOTS: // METHODS
         QList<QVariant> argumentList;
         return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
     }
+	inline QDBusReply<nut::EnvironmentConfig> getConfig()
+	{
+		QList<QVariant> argumentList;
+		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList);
+	}
     inline QDBusReply<void> addInterface(InterfaceProperties prop) {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(prop);

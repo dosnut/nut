@@ -118,6 +118,9 @@ namespace nuts {
 		}
 		return paths;
 	}
+	nut::DeviceConfig DBusDevice::getConfig() {
+		return (s_device->getConfig());
+	}
 
 	void DBusDevice::setEnvironment(const QDBusObjectPath &path) {
 		foreach(DBusEnvironment * i, dbus_environments) {
@@ -175,6 +178,9 @@ namespace nuts {
 	libnut::EnvironmentProperties DBusEnvironment::getProperties() {
 		dbus_properties.name = s_environment->getName();
 		return dbus_properties;
+	}
+	nut::EnvironmentConfig DBusEnvironment::getConfig() {
+		return (s_environment->getConfig());
 	}
 	
 	QList<QDBusObjectPath> DBusEnvironment::getInterfaces() {

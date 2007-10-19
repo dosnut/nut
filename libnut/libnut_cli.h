@@ -5,6 +5,7 @@
 #include <QList>
 #include <QHostAddress>
 #include <common/types.h>
+#include <common/config.h>
 #include "libnut_server_proxy.h"
 #include "libnut_exceptions.h"
 #include <QDBusConnectionInterface>
@@ -114,9 +115,8 @@ namespace libnut {
 		QDBusObjectPath dbusActiveEnvironment;
 		QHash<QDBusObjectPath, CEnvironment*> dbusEnvironments;
 		CLog * log;
-
-
 		DBusDeviceInterface * dbusDevice;
+		nut::DeviceConfig config;
 		void refreshAll();
 		void setActiveEnvironment(CEnvironment * env, QDBusObjectPath dbusPath);
 		void rebuild(QList<QDBusObjectPath> paths);
@@ -143,6 +143,7 @@ namespace libnut {
 		void addEnvironment(QString name);
 		void removeEnvironment(CEnvironment * environment);
 		void setEnvironment(CEnvironment * environment);
+		nut::DeviceConfig getConfig();
 		
 	signals:
 		void environmentChangedActive(CEnvironment * current, CEnvironment * previous);
@@ -165,6 +166,7 @@ namespace libnut {
 		QHash<QDBusObjectPath, CInterface *> dbusInterfaces;
 		DBusEnvironmentInterface * dbusEnvironment;
 		bool active;
+		nut::EnvironmentConfig config;
 		
 		void refreshAll();
 		void rebuild(const QList<QDBusObjectPath> &paths);
@@ -180,6 +182,7 @@ namespace libnut {
 		~CEnvironment();
 	public slots:
 		void enter();
+		nut::EnvironmentConfig getConfig();
 		void addInterface(bool isStatic, QHostAddress ip, QHostAddress netmask, QHostAddress gateway, bool active);
 		void removeInterface(CInterface * interface);
 		
@@ -209,7 +212,7 @@ namespace libnut {
 		bool isStatic;
 		bool active;
 		bool userDefineable;
-		QHostAddress ip
+		QHostAddress ip;
 		QHostAddress netmask;
 		QHostAddress gateway;
 		QList<QHostAddress> dnsserver;
