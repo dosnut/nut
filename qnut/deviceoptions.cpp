@@ -25,21 +25,18 @@ namespace qnut {
 		settings(UI_PATH_DEV(parentDevice->name) + "dev.conf", QSettings::IniFormat, this)
 	{
 		device = parentDevice;
-		//tabWidget = parentTabWidget;
 		
 		createView();
 		createActions();
 		
 		trayIcon->setToolTip(shortSummary(device));
 		trayIcon->setContextMenu(deviceMenu);
-/*		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-		        this,     SLOT(uiHandleTrayActivated(QSystemTrayIcon::ActivationReason)));
-		connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(uiShowThisTab()));*/		
+		connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(uiShowThisTab()));
+		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+			this, SLOT(uiHandleTrayActivated(QSystemTrayIcon::ActivationReason)));
 		
 		readSettings();
 		
-		enableDeviceAction->setDisabled(device->state == DS_UP);
-		disableDeviceAction->setDisabled(device->state == DS_DEACTIVATED);
 		
 		connect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
 		
@@ -74,14 +71,15 @@ namespace qnut {
 		enableDeviceAction    = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_ENABLE) , tr("Enable device") , device, SLOT(enable()));
 		disableDeviceAction   = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"), device, SLOT(disable()));
 		deviceMenu->addSeparator();
-		//showAction            = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(uiShowThisTab()));
+		showAction            = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(uiShowThisTab()));
 		deviceSettingsAction  = deviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("Scripting settings..."), this, SLOT(uiChangeDeviceSettings()));
-		deviceMenu->addSeparator();
 		ipConfigurationAction = deviceMenu->addAction(QIcon(UI_ICON_EDIT), tr("Set IP Configuration..."), this, SLOT(uiChangeIPConfiguration()));
 		
 		enterEnvironmentAction = new QAction(QIcon(UI_ICON_ENVIRONMENT_ENTER), tr("Enter environment"), this);
 		environmentTree->addAction(enterEnvironmentAction);
 		
+		enableDeviceAction->setEnabled(device->state == DS_DEACTIVATED);
+		disableDeviceAction->setDisabled(device->state == DS_DEACTIVATED);
 		ipConfigurationAction->setEnabled(false);
 		enterEnvironmentAction->setEnabled(false);
 	}
@@ -103,7 +101,7 @@ namespace qnut {
 		connect(environmentTree->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(uiSelectionChanged(const QItemSelection &, const QItemSelection &)));
 		connect(device, SIGNAL(environmentsUpdated()), environmentTree, SLOT(reset()));
-		//interfacesänderungen hier
+		//todo: interfacesänderungen hier
 		
 		statusIcon = new QLabel();
 		statusText = new QLabel();
@@ -114,7 +112,6 @@ namespace qnut {
 		headlayout->addWidget(statusIcon);
 		headlayout->addWidget(statusText);
 		
-		//todo: device status als überschrift
 		QVBoxLayout * mainlayout = new QVBoxLayout();
 		mainlayout->addLayout(headlayout);
 		mainlayout->addWidget(environmentTree);
@@ -128,14 +125,13 @@ namespace qnut {
 	}
 	
 	void CDeviceOptions::uiHandleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
-//		if (reason == QSystemTrayIcon::Trigger) {
-//			showAction->trigger();
-//		}
+		if (reason == QSystemTrayIcon::Trigger) {
+			showAction->trigger();
+		}
 	}
 	
 	void CDeviceOptions::uiShowThisTab() {
-		emit showOptions((QWidget *)this);
-		//tabWidget->setCurrentIndex(tabWidget->indexOf(this));
+		emit showOptions(this);
 	}
 	
 	void CDeviceOptions::uiSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
@@ -182,13 +178,12 @@ namespace qnut {
 	}
 	
 	void CDeviceOptions::uiHandleStateChange(DeviceState state) {
-		//updateDeviceIcons();
 		setHeadInfo();
 		environmentTree->collapseAll();
 		if (state == DS_UP)
 			environmentTree->expand(environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
-		//setDisabled(state == DS_DEACTIVATED);
-		enableDeviceAction->setDisabled(state == DS_UP);
+		
+		enableDeviceAction->setEnabled(state == DS_DEACTIVATED);
 		disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
 		ipConfigurationAction->setEnabled(state == DS_UNCONFIGURED);
 

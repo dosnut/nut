@@ -39,7 +39,7 @@ namespace qnut {
 		bool showBalloonTips;
 		
 		inline void createActions();
-		inline void distributeActions(int mode = 0);
+		void distributeActions(int mode = 0);
 		
 		inline void readSettings();
 		inline void writeSettings();
@@ -57,6 +57,7 @@ namespace qnut {
 		void uiShowAbout();
 		void uiHandleDeviceStateChanged(DeviceState state);
 		void uiHandleShowLogToggle(bool state);
+		void uiShowOptions(QWidget * widget);
 	};
 };
 
