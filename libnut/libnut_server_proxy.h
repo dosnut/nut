@@ -72,15 +72,6 @@ public Q_SLOTS: // METHODS
         argumentList << qVariantFromValue(envpath);
         return callWithArgumentList(QDBus::NoBlock, QLatin1String("setEnvironment"), argumentList);
     }
-    inline QDBusReply<QList<WlanScanresult> > getwlanScan() {
-        QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getwlanScan"), argumentList);
-    }
-    inline QDBusReply<void> addwlanEnvironment(WlanNetworkProperties netprops) {
-        QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(netprops);
-        return callWithArgumentList(QDBus::NoBlock, QLatin1String("addwlanEnvironment"), argumentList);
-    }
     inline QDBusReply<void> addEnvironment(EnvironmentProperties envprops) {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(envprops);

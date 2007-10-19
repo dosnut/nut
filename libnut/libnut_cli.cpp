@@ -511,6 +511,7 @@ void CDevice::environmentRemoved(const QDBusObjectPath &path) {
 //Every time our device changed from anything to active, our active environment may have changed
 void CDevice::dbusstateChanged(int newState, int oldState) {
 	state = (DeviceState) newState;
+	//Workaround so far, as nuts does not send any environment changed information
 	if (state == DS_UP) {
 		QDBusReply<libnut::DeviceProperties> replyprop = dbusDevice->getProperties();
 		if (replyprop.isValid()) {
