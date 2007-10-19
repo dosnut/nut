@@ -99,16 +99,18 @@ namespace qnut {
 	
 	void CConnectionManager::distributeActions(int mode) {
 		switch (mode) {
-		case 0:
+		case 0: {
 			//general device actions
-			ui.toolBar->addActions(overView.actions());
+			//ui.toolBar->addActions(overView.actions());
 			ui.menuDevice->addActions(overView.actions());
+			}
 			break;
-		case 1:
-			ui.toolBar->addAction(refreshDevicesAction);
+		case 1: {
+			//ui.toolBar->addAction(refreshDevicesAction);
 			ui.menuDevice->addAction(refreshDevicesAction);
+			}
 			break;
-		case 2:
+		case 2: {
 			ui.menuDevice->addAction(refreshDevicesAction);
 			ui.menuDevice->addSeparator();
 			
@@ -118,13 +120,16 @@ namespace qnut {
 			ui.menuDevice->addAction(current->enableDeviceAction);
 			ui.menuDevice->addAction(current->disableDeviceAction);
 			ui.menuDevice->addSeparator();
-			ui.menuDevice->addAction(current->enterEnvironmentAction);
-			ui.menuDevice->addSeparator();
 			ui.menuDevice->addAction(current->deviceSettingsAction);
 			ui.menuDevice->addAction(current->ipConfigurationAction);
+			ui.menuDevice->addSeparator();
+			ui.menuDevice->addAction(current->enterEnvironmentAction);
 			//interface actions
 			//...
-			ui.toolBar->addActions(ui.menuDevice->actions());
+			//ui.toolBar->addActions(ui.menuDevice->actions());
+			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -165,7 +170,8 @@ namespace qnut {
 		
 		connect(dev, SIGNAL(stateChanged(DeviceState)), &overView, SLOT(reset()));
 		connect(dev, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiUpdateTrayIconInfo()));
-		connect(newDeviceOptions->showAction, SIGNAL(triggered()), this, SLOT(show()));
+		//connect(newDeviceOptions->showAction, SIGNAL(triggered()), this, SLOT(show()));
+		connect(newDeviceOptions, SIGNAL(showOptions(QWidget *)), ui.toolBar, SLOT(setCurrentWidget(QWidget *)));
 		connect(newDeviceOptions, SIGNAL(showMessage(QSystemTrayIcon *, QString, QString)),
 		        this,             SLOT(uiShowMessage(QSystemTrayIcon *, QString, QString)));
 		overView.reset();
@@ -203,8 +209,6 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::uiCurrentTabChanged(int index) {
-		ui.toolBar->setUpdatesEnabled(false);
-		ui.toolBar->clear();
 		ui.menuDevice->clear();
 		if (index == 0) {
 			distributeActions(0);
@@ -215,7 +219,14 @@ namespace qnut {
 		else {
 			distributeActions(2);
 		}
+		
+		ui.toolBar->setUpdatesEnabled(false);
+		ui.toolBar->clear();
+		ui.toolBar->addActions(ui.menuDevice->actions());
 		ui.toolBar->setUpdatesEnabled(true);
+		
+		if (ui.toolBar->actions().isEmpty())
+			logFile << "BUG!";
 	}
 	
 	void CConnectionManager::uiSelectedDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected) {
@@ -241,8 +252,8 @@ namespace qnut {
 			
 			enableDeviceAction->setDisabled(selectedDevice->state == DS_UP);
 			disableDeviceAction->setDisabled(selectedDevice->state == DS_DEACTIVATED);
-			ipConfigurationAction->setEnabled(selectedDevice->state == DS_UNCONFIGURED);
 			deviceSettingsAction->setEnabled(true);
+			ipConfigurationAction->setEnabled(selectedDevice->state == DS_UNCONFIGURED);
 		}
 		else {
 			enableDeviceAction->setEnabled(false);
