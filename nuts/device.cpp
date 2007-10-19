@@ -323,8 +323,10 @@ namespace nuts {
 			return;
 		}
 		if (activeEnv == -1) {
+			log << QString("Cannot change environment while no one active") << endl;
 			return;
 		} else {
+			log << QString("Selecting environment %1").arg(env) << endl;
 			if (nextEnv == -1) {
 				nextEnv = env;
 				envs[activeEnv]->stop();
@@ -407,36 +409,42 @@ namespace nuts {
 	}
 	
 	void Environment::checkStatus() {
-		bool ifsUp = (ifUpStatus.count(true) == ifUpStatus.size());
-		if (envIsUp != ifsUp) {
-			envIsUp = ifsUp;
-			if (envIsUp)
+//		log << QString("checkStatus: %1/%2").arg(ifUpStatus.count(true)).arg(ifUpStatus.size()) << endl;
+		if (envStart) {
+			if (!envIsUp && ifUpStatus.count(true) == ifUpStatus.size()) {
+				envIsUp = true;
 				device->envUp(this);
-			else
+			}
+		} else {
+			if (envIsUp && ifUpStatus.count(true) == 0) {
+				envIsUp = false;
 				device->envDown(this);
+			}
 		}
 	}
 
 	void Environment::start() {
 		if (envStart) return;
-		envStart = true;
+		envStart = true; envIsUp = false;
 		foreach (Interface* i, ifs)
 			i->start();
 		checkStatus();
 	}
 	void Environment::stop() {
 		if (!envStart) return;
-		envStart = false;
+		envStart = false; envIsUp = true;
 		foreach (Interface* i, ifs)
 			i->stop();
 		checkStatus();
 	}
 	
 	void Environment::ifUp(Interface* i) {
+//		log << QString("Interface %1 up").arg(i->m_index) << endl;
 		ifUpStatus[i->m_index] = true;
 		checkStatus();
 	}
 	void Environment::ifDown(Interface* i) {
+//		log << QString("Interface %1 down").arg(i->m_index) << endl;
 		ifUpStatus[i->m_index] = false;
 		checkStatus();
 	}
@@ -504,7 +512,6 @@ namespace nuts {
 				// T1: 0.5 * dhcp_lease_time
 				// T2: 0.875 * dhcp_lease_time ( 7/8 )
 			systemUp();
-			m_env->ifUp(this);
 		}
 	}
 	
@@ -685,11 +692,10 @@ namespace nuts {
 		gateway = m_config->getStaticGateway();
 		dnsserver = m_config->getStaticDNS();
 		systemUp();
-		m_env->ifUp(this);
 	}
 
 	void Interface_IPv4::start() {
-//		log << "Interface_IPv4::start" << endl;
+		log << "Interface_IPv4::start" << endl;
 		if (m_config->getFlags() & nut::IPv4Config::DO_DHCP)
 			startDHCP();
 		else
@@ -697,11 +703,10 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::stop() {
-//		log << "Interface_IPv4::stop" << endl;
+		log << "Interface_IPv4::stop" << endl;
 		if (dhcpstate != DHCPS_OFF)
 			stopDHCP();
 		systemDown();
-		m_env->ifDown(this);
 	}
 	
 	inline int getPrefixLen(const QHostAddress &netmask) {
@@ -785,6 +790,7 @@ namespace nuts {
 			proc->waitForFinished(-1);
 			delete proc; // waits for process
 		}
+		m_env->ifUp(this);
 		emit interfaceUp();
 	}
 	void Interface_IPv4::systemDown() {
@@ -824,6 +830,7 @@ namespace nuts {
 #endif
 		rtnl_addr_put(addr);
 		nl_addr_put(local);
+		m_env->ifDown(this);
 		emit interfaceDown();
 	}
 	
