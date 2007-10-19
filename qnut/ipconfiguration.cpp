@@ -29,9 +29,6 @@ namespace qnut {
 			tempAddr.setAddress(ui.netmaskEdit->text());
 			interface->setNetmask(tempAddr);
 			
-			//setDynamic is pendig for removal
-			//if (ui.dynamicRadio->isChecked())
-			//	interface->setDynamic();
 			return true;
 		}
 		else {

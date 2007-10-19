@@ -20,7 +20,6 @@ namespace qnut {
 		ui.carrierCheck->setChecked(flags && UI_FLAG_SCRIPT_CARRIER);
 		ui.activatedCheck->setChecked(flags && UI_FLAG_SCRIPT_ACTIVATED);
 		ui.deactivatedCheck->setChecked(flags && UI_FLAG_SCRIPT_DEACTIVATED);
-		ui.showIconCheck->setChecked(deviceoptions->trayIcon->isVisible());
 		if (exec() == QDialog::Accepted) {
 			flags = UI_FLAG_SCRIPT_NONE;
 			
@@ -36,8 +35,6 @@ namespace qnut {
 				flags = flags | UI_FLAG_SCRIPT_DEACTIVATED;
 			
 			deviceoptions->scriptFlags = flags;
-			
-			deviceoptions->trayIcon->setVisible(ui.showIconCheck->isChecked());
 			
 			return true;
 		}

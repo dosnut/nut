@@ -13,7 +13,7 @@
 #define QNUT_SCRIPTSETTINGS_H
 
 #include <QDialog>
-#include "ui/ui_devconf.h"
+#include "ui/ui_scrset.h"
 #include "deviceoptions.h"
 
 namespace qnut {
