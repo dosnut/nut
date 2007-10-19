@@ -113,11 +113,11 @@ namespace nuts {
 			// DHCP
 			bool registerXID(quint32 xid, Interface_IPv4 *iface);
 			void unregisterXID(quint32 xid);
-			void sendDHCPClientPacket(DHCPPacket *packet);
-			void setupDHCPClientSocket();
+			bool sendDHCPClientPacket(DHCPPacket *packet);
+			bool setupDHCPClientSocket();
 			void closeDHCPClientSocket();
 		
-		private slots:
+		protected slots:
 			void readDHCPClientSocket();
 			void writeDHCPClientSocket();
 			
@@ -219,6 +219,7 @@ namespace nuts {
 			int dhcp_timer_id;     // timer id
 			int dhcp_retry;        // count retries
 			virtual void timerEvent(QTimerEvent *event);
+			void dhcp_set_timeout(int msec);
 		
 		protected:
 			enum dhcp_state {
@@ -235,30 +236,46 @@ namespace nuts {
 			};
 			DeviceManager *dm;
 			quint32 dhcp_xid;
+			bool dhcp_xid_unicast;
+			int dhcp_unicast_socket;
+			QSocketNotifier *dhcp_unicast_read_nf;
 			dhcp_state dhcpstate;
+			QHostAddress dhcp_server_ip;
 			QVector<quint8> dhcp_server_identifier;
 			quint32 dhcp_lease_time;
 			nut::IPv4Config *m_config;
 			
 			void dhcp_send_discover();
 			void dhcp_send_request(DHCPPacket *offer);
-			void dhcp_setup_interface(DHCPPacket *ack);
+			void dhcp_send_renew();
+			void dhcp_send_rebind();
+			void dhcp_send_release();
+			void dhcp_setup_interface(DHCPPacket *ack, bool renewing = false);
 			void dhcpAction(DHCPPacket *source = 0);
 			
 			void startDHCP();
+			void stopDHCP();
 			void startZeroconf();
 			void startStatic();
 			
 			void systemUp();
 			void systemDown();
 			
+			bool setupUnicastDHCP(bool temporary = false);
+			void closeUnicastDHCP();
+			bool sendUnicastDHCP(DHCPPacket *packet);
 			bool registerXID(quint32 xid);
+			bool registerUnicastXID(quint32 xid);
+			void releaseXID();
 			void dhcpReceived(DHCPPacket *packet);
 			
 			friend class DHCPPacket;
 			friend class DHCPClientPacket;
 			friend class Environment;
 			friend class Device;
+		
+		protected slots:
+			void readDHCPUnicastClientSocket();
 		
 		public:
 			Interface_IPv4(Environment *env, int index, nut::IPv4Config *config);
