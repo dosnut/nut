@@ -755,6 +755,15 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	else {
 		throw CLI_IfConnectionException(tr("Error while retrieving interface properties") + replyprops.error().name());
 	}
+	//Get Config
+	QDBusReply<nut::IPv4Config> replyconf = dbusInterface->getConfig();
+	if (replyconf.isValid()) {
+		config = replyconf.value();
+		userDefineable = (config.getFlags() & nut::IPv4Config::MAY_USER_STATIC);
+	}
+	else {
+		throw CLI_IfConnectionException(TR("Error while retrieving interface config") + replyconf.error().name());
+	}
 
 	connect(dbusInterface, SIGNAL(stateChanged(const InterfaceProperties &)), this, SLOT(dbusstateChanged(const InterfaceProperties &)));
 }

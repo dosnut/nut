@@ -201,6 +201,7 @@ namespace libnut {
 		QDBusObjectPath dbusPath;
 		CLog * log;
 		DBusInterfaceInterface_IPv4 * dbusInterface;
+		nut::IPv4Config config;
 		void refreshAll();
 	private slots:
 		void dbusstateChanged(const InterfaceProperties &properties);
@@ -208,7 +209,7 @@ namespace libnut {
 		bool isStatic;
 		bool active;
 		bool userDefineable;
-		QHostAddress ip;
+		QHostAddress ip
 		QHostAddress netmask;
 		QHostAddress gateway;
 		QList<QHostAddress> dnsserver;
@@ -221,7 +222,7 @@ namespace libnut {
 		void setIP(QHostAddress & address);
 		void setNetmask(QHostAddress & address);
 		void setGateway(QHostAddress & address);
-		void setDynamic();
+		nut::IPv4Config getConfig();
 		
 	signals:
 		void activeChanged(bool active);

@@ -201,7 +201,7 @@ namespace nuts {
 		dbus_properties.gateway = s_interface->gateway;
 		dbus_properties.netmask = s_interface->netmask;
 		dbus_properties.userDefineable = false; //Fliegt raus, da Info bereits in der Config
-		dbus_properties.isStatic = ((int) ((s_interface->getConfig()).getFlags()) == 4) ? true : false;
+		dbus_properties.isStatic = !(s_interface->getConfig().getFlags() & nut::IPv4Config::DO_DHCP);
 		if (!s_interface->dnsserver.isEmpty()) {
 			dbus_properties.dns = s_interface->dnsserver;
 		}
@@ -248,14 +248,16 @@ void DBusInterface_IPv4::interfaceDown() {
 		}
 		return dbus_properties;
 	}
+	nut::IPv4Config DBusInterface_IPv4::getConfig() {
+		return (s_interface->getConfig());
+	}
 	void DBusInterface_IPv4::setIP(quint32 /*HostAddress*/) {
 	}
 	void DBusInterface_IPv4::setNetmask(quint32 /*Netmask*/) {
 	}
 	void DBusInterface_IPv4::setGateway(quint32 /*Gateway*/) {
 	}
-// 	void DBusInterface_IPv4::setDNS(QList<QHostAddress> dns) {
-// 	}
-	void DBusInterface_IPv4::setDynamic() {
+	void DBusInterface_IPv4::setDNS(QList<QHostAddress> /*DNS*/) {
 	}
+
 }

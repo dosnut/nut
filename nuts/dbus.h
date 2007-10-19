@@ -118,6 +118,7 @@ namespace nuts {
 	
 		public slots:
 			libnut::EnvironmentProperties getProperties();
+			nut::EnvironmentConfig getConfig();
 			QList<QDBusObjectPath> getInterfaces();
 		signals:
 			void interfaceAdded(const QDBusObjectPath &objectpath);
@@ -143,11 +144,11 @@ namespace nuts {
 		
 		public slots:
 			libnut::InterfaceProperties getProperties();
+			nut::IPv4Config getConfig();
 			Q_NOREPLY void setIP(quint32 HostAddress);
 			Q_NOREPLY void setNetmask(quint32 Netmask);
 			Q_NOREPLY void setGateway(quint32 Gateway);
-// 			void setDNS(QList<QHostAddress> dns);
-			Q_NOREPLY void setDynamic();
+ 			void setDNS(QList<QHostAddress> dns);
 		signals:
 			void stateChanged(const libnut::InterfaceProperties &properties);
 	};
