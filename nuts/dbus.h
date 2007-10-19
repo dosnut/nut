@@ -132,7 +132,9 @@ namespace nuts {
 			QDBusConnection *dbus_connection;
 			QString dbus_path;
 			libnut::InterfaceProperties dbus_properties;
-		
+		private slots:
+			void interfaceUp();
+			void interfaceDown();
 		public:
 			DBusInterface_IPv4(Interface_IPv4 *iface, QDBusConnection *connection, const QString &path);
 			virtual ~DBusInterface_IPv4();

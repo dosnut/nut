@@ -196,6 +196,20 @@ namespace nuts {
 	: QDBusAbstractAdaptor(iface), s_interface(iface), dbus_connection(connection) {
 		dbus_path = path + QString("/%1").arg(s_interface->getIndex());
 		dbus_connection->registerObject(dbus_path, s_interface);
+		//Set Interface properties
+		dbus_properties.ip = s_interface->ip;
+		dbus_properties.gateway = s_interface->gateway;
+		dbus_properties.netmask = s_interface->netmask;
+		dbus_properties.userDefineable = false; //Fliegt raus, da Info bereits in der Config
+		dbus_properties.isStatic = ((int) ((s_interface->getConfig()).getFlags()) == 4) ? true : false;
+		if (!s_interface->dnsserver.isEmpty()) {
+			dbus_properties.dns = s_interface->dnsserver;
+		}
+		else {
+			dbus_properties.dns = QList<QHostAddress>();
+		}
+		connect(s_interface,SIGNAL(interfaceUp()),this,SLOT(interfaceUp()));
+		connect(s_interface,SIGNAL(interfaceDown()),this,SLOT(interfaceDown()));
 	}
 	
 	DBusInterface_IPv4::~DBusInterface_IPv4() {
@@ -204,6 +218,21 @@ namespace nuts {
 	QString DBusInterface_IPv4::getPath() {
 		return dbus_path;
 	}
+//Private SLOTS:
+
+void DBusInterface_IPv4::interfaceUp() {
+	if (!dbus_properties.active) {
+		dbus_properties.active = true;
+		emit stateChanged(dbus_properties);
+	}
+}
+void DBusInterface_IPv4::interfaceDown() {
+	if (dbus_properties.active) {
+		dbus_properties.active = false;
+		emit(stateChanged(dbus_properties));
+	}
+}
+
 
 	libnut::InterfaceProperties DBusInterface_IPv4::getProperties() {
 		dbus_properties.ip = s_interface->ip;
