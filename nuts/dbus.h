@@ -44,9 +44,6 @@ namespace nuts {
 	
 		public slots:
 			QList<QDBusObjectPath> getDeviceList();
-			nut::Config getConfig() {
-				return s_devmgr->getConfig();
-			}
 		signals:
 			void deviceAdded(const QDBusObjectPath &objectpath);
 			void deviceRemoved(const QDBusObjectPath &objectpath);
