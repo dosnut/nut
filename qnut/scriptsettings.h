@@ -9,8 +9,8 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#ifndef QNUT_DEVICECONFIGURATION_H
-#define QNUT_DEVICECONFIGURATION_H
+#ifndef QNUT_SCRIPTSETTINGS_H
+#define QNUT_SCRIPTSETTINGS_H
 
 #include <QDialog>
 #include "ui/ui_devconf.h"
@@ -19,16 +19,16 @@
 namespace qnut {
 	using namespace libnut;
 	
-	class CDeviceConfiguration : public QDialog {
+	class CScriptSettings : public QDialog {
 		Q_OBJECT
 	private:
 		Ui::devconf ui;
 	public:
 		bool execute(CDeviceOptions * deviceoptions);
 	
-		CDeviceConfiguration(QWidget *parent = 0);
+		CScriptSettings(QWidget *parent = 0);
 	
-		~CDeviceConfiguration();
+		~CScriptSettings();
 	
 	};
 };

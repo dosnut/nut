@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>devconf</class>
- <widget class="QDialog" name="devconf" >
+ <class>scrset</class>
+ <widget class="QDialog" name="scrset" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -10,16 +10,9 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Device Settings</string>
+   <string>Scripting Settings</string>
   </property>
   <layout class="QVBoxLayout" >
-   <item>
-    <widget class="QCheckBox" name="showIconCheck" >
-     <property name="text" >
-      <string>Show Tray Icon</string>
-     </property>
-    </widget>
-   </item>
    <item>
     <widget class="QGroupBox" name="scriptBox" >
      <property name="title" >
@@ -77,7 +70,6 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>showIconCheck</tabstop>
   <tabstop>deactivatedCheck</tabstop>
   <tabstop>activatedCheck</tabstop>
   <tabstop>carrierCheck</tabstop>
@@ -90,7 +82,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>devconf</receiver>
+   <receiver>scrset</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
@@ -106,7 +98,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>devconf</receiver>
+   <receiver>scrset</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >

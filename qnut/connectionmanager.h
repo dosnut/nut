@@ -38,11 +38,11 @@ namespace qnut {
 		
 		bool showBalloonTips;
 		
-		void createActions();
-		void distributeActions(int mode = 0);
+		inline void createActions();
+		inline void distributeActions(int mode = 0);
 		
-		void readSettings();
-		void writeSettings();
+		inline void readSettings();
+		inline void writeSettings();
 	public:
 		CConnectionManager(QWidget * parent = 0);
 		~CConnectionManager();
@@ -56,7 +56,7 @@ namespace qnut {
 		void uiShowMessage(QSystemTrayIcon * trayIcon, QString title, QString message);
 		void uiShowAbout();
 		void uiHandleDeviceStateChanged(DeviceState state);
-		void uiSetShowBalloonTips(bool value);
+		void uiHandleShowLogToggle(bool state);
 	};
 };
 

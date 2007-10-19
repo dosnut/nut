@@ -16,98 +16,106 @@
 #include "deviceoptions.h"
 #include "deviceoptionsmodel.h"
 #include "ipconfiguration.h"
-#include "deviceconfiguration.h"
+#include "scriptsettings.h"
 #include "common.h"
 
 namespace qnut {
-	CDeviceOptions::CDeviceOptions(CDevice * parentDevice, QTabWidget * parentTabWidget, QWidget * parent) :
-		QTreeView(parent),
+	CDeviceOptions::CDeviceOptions(CDevice * parentDevice, QWidget * parent) :
+		QWidget(parent),
 		settings(UI_PATH_DEV(parentDevice->name) + "dev.conf", QSettings::IniFormat, this)
 	{
 		device = parentDevice;
-		tabWidget = parentTabWidget;
-		setModel(new CDeviceOptionsModel(device));
+		//tabWidget = parentTabWidget;
 		
-		deviceMenu = new QMenu(device->name, NULL);
-		enableDeviceAction    = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_ENABLE) , tr("Enable device") , device, SLOT(enable()));
-		disableDeviceAction   = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"), device, SLOT(disable()));
-		deviceMenu->addSeparator();
-		//showAction            = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(uiShowThisTab()));
-		deviceSettingsAction  = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_SETTINGS), tr("General settings..."), this, SLOT(uiChangeDeviceSettings()));
-		deviceMenu->addSeparator();
-		ipConfigurationAction = deviceMenu->addAction(QIcon(UI_ICON_EDIT), tr("Set IP Configuration..."), this, SLOT(uiChangeIPConfiguration()));
+		createView();
+		createActions();
 		
-		enterEnvironmentAction = new QAction(QIcon(UI_ICON_ENVIRONMENT_ENTER), tr("Enter environment"), this);
-		
-		ipConfigurationAction->setEnabled(false);
-		enterEnvironmentAction->setEnabled(false);
-		
-		trayIcon = new QSystemTrayIcon(QIcon(iconFile(device)), this);
 		trayIcon->setToolTip(shortSummary(device));
 		trayIcon->setContextMenu(deviceMenu);
+/*		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+		        this,     SLOT(uiHandleTrayActivated(QSystemTrayIcon::ActivationReason)));
+		connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(uiShowThisTab()));*/		
 		
 		readSettings();
 		
-/*		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-		        this,     SLOT(uiHandleTrayActivated(QSystemTrayIcon::ActivationReason)));
-		connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(uiShowThisTab()));*/
-		
-		setAllColumnsShowFocus(true);
-		
-		//setDisabled(device->state == DS_DEACTIVATED);
 		enableDeviceAction->setDisabled(device->state == DS_UP);
 		disableDeviceAction->setDisabled(device->state == DS_DEACTIVATED);
 		
-		setContextMenuPolicy(Qt::ActionsContextMenu);
-		setAllColumnsShowFocus(true);
-		setAlternatingRowColors(true);
-		setIconSize(QSize(18, 18));
-		
-		header()->setResizeMode(QHeaderView::ResizeToContents);
-		
 		connect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
-		connect(device, SIGNAL(environmentsUpdated()), this, SLOT(reset()));
 		
-		connect(selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-				this            , SLOT(uiSelectionChanged(const QItemSelection &, const QItemSelection &)));
 		if (device->state == DS_UP)
-			expand(model()->index(device->environments.indexOf(device->activeEnvironment), 0));
+			environmentTree->expand(environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
 	}
 	
 	CDeviceOptions::~CDeviceOptions() {
-//nicht nötig?
 		disconnect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
-		disconnect(device, SIGNAL(environmentsUpdated()), this, SLOT(reset()));
-//        CDeviceOptionsModel * targetTreeModel = (CDeviceOptionsModel *)targetDeviceOptions.environmentsTree->model();
-//        targetDeviceOptions.environmentsTree->setModel(NULL);
-//        delete targetTreeModel;
+		disconnect(device, SIGNAL(environmentsUpdated()), environmentTree, SLOT(reset()));
 		writeSettings();
 		delete deviceMenu;
 	}
 	
-	void CDeviceOptions::readSettings() {
+	inline void CDeviceOptions::readSettings() {
 		settings.beginGroup("Main");
 		scriptFlags = settings.value("scriptFlags", true).toInt();
 		trayIcon->setVisible(settings.value("showTrayIcon", true).toBool());
 		settings.endGroup();
+		showTrayCheck->setChecked(trayIcon->isVisible());
 	}
 	
-	void CDeviceOptions::writeSettings() {
+	inline void CDeviceOptions::writeSettings() {
 		settings.beginGroup("Main");
 		settings.setValue("scriptFlags", scriptFlags);
 		settings.setValue("showTrayIcon", trayIcon->isVisible());
 		settings.endGroup();
 	}
 	
-	void CDeviceOptions::updateDeviceIcons() {
-		tabWidget->setTabIcon(tabWidget->indexOf(this), QIcon(iconFile(device)));
-		deviceMenu->setIcon(QIcon(iconFile(device)));
+	inline void CDeviceOptions::createActions() {
+		deviceMenu = new QMenu(device->name, NULL);
+		enableDeviceAction    = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_ENABLE) , tr("Enable device") , device, SLOT(enable()));
+		disableDeviceAction   = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"), device, SLOT(disable()));
+		deviceMenu->addSeparator();
+		//showAction            = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(uiShowThisTab()));
+		deviceSettingsAction  = deviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("Scripting settings..."), this, SLOT(uiChangeDeviceSettings()));
+		deviceMenu->addSeparator();
+		ipConfigurationAction = deviceMenu->addAction(QIcon(UI_ICON_EDIT), tr("Set IP Configuration..."), this, SLOT(uiChangeIPConfiguration()));
+		
+		enterEnvironmentAction = new QAction(QIcon(UI_ICON_ENVIRONMENT_ENTER), tr("Enter environment"), this);
+		environmentTree->addAction(enterEnvironmentAction);
+		
+		ipConfigurationAction->setEnabled(false);
+		enterEnvironmentAction->setEnabled(false);
+	}
+	
+	inline void CDeviceOptions::createView() {
+		trayIcon = new QSystemTrayIcon(QIcon(iconFile(device)), this);
+		
+		showTrayCheck = new QCheckBox(tr("Show tray icon for this device"));
+		connect(showTrayCheck, SIGNAL(toggled(bool)), trayIcon, SLOT(setVisible(bool)));
+		
+		environmentTree = new QTreeView();
+		environmentTree->setContextMenuPolicy(Qt::ActionsContextMenu);
+		environmentTree->setAllColumnsShowFocus(true);
+		environmentTree->setAlternatingRowColors(true);
+		environmentTree->setIconSize(QSize(18, 18));
+		environmentTree->setAllColumnsShowFocus(true);
+		environmentTree->header()->setResizeMode(QHeaderView::ResizeToContents);
+		environmentTree->setModel(new CDeviceOptionsModel(device));
+		connect(environmentTree->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+			this, SLOT(uiSelectionChanged(const QItemSelection &, const QItemSelection &)));
+		connect(device, SIGNAL(environmentsUpdated()), environmentTree, SLOT(reset()));
+		//interfacesänderungen hier
+		
+		QVBoxLayout * layout = new QVBoxLayout(this);
+		//todo: device status als überschrift
+		layout->addWidget(environmentTree);
+		layout->addWidget(showTrayCheck);
+		setLayout(layout);
 	}
 	
 	void CDeviceOptions::uiHandleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
-		if (reason == QSystemTrayIcon::Trigger) {
-			//showAction->trigger();
-		}
+//		if (reason == QSystemTrayIcon::Trigger) {
+//			showAction->trigger();
+//		}
 	}
 	
 	void CDeviceOptions::uiShowThisTab() {
@@ -148,28 +156,28 @@ namespace qnut {
 	
 	void CDeviceOptions::uiChangeIPConfiguration() {
 		CIPConfiguration dialog(this);
-		QModelIndex selectedIndex = (selectionModel()->selection().indexes())[0];
+		QModelIndex selectedIndex = (environmentTree->selectionModel()->selection().indexes())[0];
 
 		dialog.execute((CInterface *)(selectedIndex.internalPointer()));
 	}
 	
 	void CDeviceOptions::uiChangeDeviceSettings() {
-		CDeviceConfiguration dialog(this);
+		CScriptSettings dialog(this);
 		dialog.execute(this);
 	}
 	
 	void CDeviceOptions::uiHandleStateChange(DeviceState state) {
-		updateDeviceIcons();
-		collapseAll();
+		//updateDeviceIcons();
+		environmentTree->collapseAll();
 		if (state == DS_UP)
-			expand(model()->index(device->environments.indexOf(device->activeEnvironment), 0));
+			environmentTree->expand(environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
 		//setDisabled(state == DS_DEACTIVATED);
 		enableDeviceAction->setDisabled(state == DS_UP);
 		disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
 		ipConfigurationAction->setEnabled(state == DS_UNCONFIGURED);
 
-		if (!selectedIndexes().isEmpty()) {
-			QModelIndex targetIndex = selectedIndexes()[0];
+		if (!environmentTree->selectionModel()->selectedIndexes().isEmpty()) {
+			QModelIndex targetIndex = environmentTree->selectionModel()->selectedIndexes()[0];
 			if (!targetIndex.parent().isValid()) {
 				CEnvironment * target = (CEnvironment *)(targetIndex.internalPointer());
 				enterEnvironmentAction->setDisabled(target == device->activeEnvironment);

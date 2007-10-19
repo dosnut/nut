@@ -14,7 +14,7 @@
 
 #include <QTreeView>
 #include <QMenu>
-#include <QTabWidget>
+#include <QCheckBox>
 #include <QSystemTrayIcon>
 #include <QSettings>
 #include <libnut/libnut_cli.h>
@@ -25,22 +25,28 @@ namespace qnut {
 	class CDeviceOptions;
 	typedef QHash<CDevice *, CDeviceOptions *> CDeviceOptionsHash;
 	
-	class CDeviceOptions : public QTreeView {
+	//todo: qtreeview und teile der device settings zusammenlegen
+	//kein subclassing beim treeview nötig
+	
+	class CDeviceOptions : public QWidget {
 		Q_OBJECT
 	protected:
-		QTabWidget * tabWidget;
-		QString statusMessage(DeviceState state);
+		//QTabWidget * tabWidget;
+		QTreeView * environmentTree;
+		QCheckBox * showTrayCheck;
 		
 		QSettings settings;
 		
-		void readSettings();
-		void writeSettings();
+		inline void readSettings();
+		inline void writeSettings();
+		inline void createActions();
+		inline void createView();
 	public:
+		quint8 scriptFlags;
+		
 		CDevice * device;
 		
 		QSystemTrayIcon * trayIcon;
-		
-		quint8 scriptFlags;
 		
 		QMenu * deviceMenu;
 		QAction * enableDeviceAction;
@@ -53,9 +59,8 @@ namespace qnut {
 		
 		QAction * showAction;
 		
-		void updateDeviceIcons();
 		
-		CDeviceOptions(CDevice * parentDevice, QTabWidget * parentTabWidget, QWidget * parent = 0);
+		CDeviceOptions(CDevice * parentDevice, QWidget * parent = 0);
 		~CDeviceOptions();
 		
 	private slots:
