@@ -17,6 +17,7 @@
 #include <QCheckBox>
 #include <QSystemTrayIcon>
 #include <QSettings>
+#include <QLabel>
 #include <libnut/libnut_cli.h>
 
 namespace qnut {
@@ -32,6 +33,9 @@ namespace qnut {
 		Q_OBJECT
 	protected:
 		//QTabWidget * tabWidget;
+		QLabel * statusText;
+		QLabel * statusIcon;
+		
 		QTreeView * environmentTree;
 		QCheckBox * showTrayCheck;
 		
@@ -41,6 +45,7 @@ namespace qnut {
 		inline void writeSettings();
 		inline void createActions();
 		inline void createView();
+		inline void setHeadInfo();
 	public:
 		quint8 scriptFlags;
 		

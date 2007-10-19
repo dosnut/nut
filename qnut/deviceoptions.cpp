@@ -105,11 +105,26 @@ namespace qnut {
 		connect(device, SIGNAL(environmentsUpdated()), environmentTree, SLOT(reset()));
 		//interfacesänderungen hier
 		
-		QVBoxLayout * layout = new QVBoxLayout(this);
+		statusIcon = new QLabel();
+		statusText = new QLabel();
+		statusIcon->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+		setHeadInfo();
+		
+		QHBoxLayout * headlayout = new QHBoxLayout();
+		headlayout->addWidget(statusIcon);
+		headlayout->addWidget(statusText);
+		
 		//todo: device status als überschrift
-		layout->addWidget(environmentTree);
-		layout->addWidget(showTrayCheck);
-		setLayout(layout);
+		QVBoxLayout * mainlayout = new QVBoxLayout();
+		mainlayout->addLayout(headlayout);
+		mainlayout->addWidget(environmentTree);
+		mainlayout->addWidget(showTrayCheck);
+		setLayout(mainlayout);
+	}
+	
+	inline void CDeviceOptions::setHeadInfo() {
+		statusIcon->setPixmap(QPixmap(iconFile(device)));
+		statusText->setText(toString(device->state));
 	}
 	
 	void CDeviceOptions::uiHandleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
@@ -168,6 +183,7 @@ namespace qnut {
 	
 	void CDeviceOptions::uiHandleStateChange(DeviceState state) {
 		//updateDeviceIcons();
+		setHeadInfo();
 		environmentTree->collapseAll();
 		if (state == DS_UP)
 			environmentTree->expand(environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
