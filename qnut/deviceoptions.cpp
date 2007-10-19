@@ -32,7 +32,7 @@ namespace qnut {
 		enableDeviceAction    = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_ENABLE) , tr("Enable device") , device, SLOT(enable()));
 		disableDeviceAction   = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"), device, SLOT(disable()));
 		deviceMenu->addSeparator();
-		showAction            = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(uiShowThisTab()));
+		//showAction            = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(uiShowThisTab()));
 		deviceSettingsAction  = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_SETTINGS), tr("General settings..."), this, SLOT(uiChangeDeviceSettings()));
 		deviceMenu->addSeparator();
 		ipConfigurationAction = deviceMenu->addAction(QIcon(UI_ICON_EDIT), tr("Set IP Configuration..."), this, SLOT(uiChangeIPConfiguration()));
@@ -48,9 +48,9 @@ namespace qnut {
 		
 		readSettings();
 		
-		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+/*		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 		        this,     SLOT(uiHandleTrayActivated(QSystemTrayIcon::ActivationReason)));
-		connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(uiShowThisTab()));
+		connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(uiShowThisTab()));*/
 		
 		setAllColumnsShowFocus(true);
 		
@@ -106,12 +106,13 @@ namespace qnut {
 	
 	void CDeviceOptions::uiHandleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
 		if (reason == QSystemTrayIcon::Trigger) {
-			showAction->trigger();
+			//showAction->trigger();
 		}
 	}
 	
 	void CDeviceOptions::uiShowThisTab() {
-		tabWidget->setCurrentWidget(this);
+		emit showOptions((QWidget *)this);
+		//tabWidget->setCurrentIndex(tabWidget->indexOf(this));
 	}
 	
 	void CDeviceOptions::uiSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
