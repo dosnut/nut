@@ -22,6 +22,7 @@
 #include <QtDBus/QtDBus>
 #include <common/dbus.h>
 #include <common/types.h>
+#include <common/config.h>
 #include <QMetaType>
 namespace libnut {
 /*
@@ -55,12 +56,17 @@ public Q_SLOTS: // METHODS
     inline QDBusReply<QList<QDBusObjectPath> > getEnvironments()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("getEnvironments"), argumentList);
+        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getEnvironments"), argumentList);
     }
     inline QDBusReply<libnut::DeviceProperties> getProperties() {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("getProperties"), argumentList);
+        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
     }
+	inline QDBusReply<nut::DeviceConfig> getConfig()
+	{
+		QList<QVariant> argumentList;
+		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList);
+	}
     inline QDBusReply<void> setEnvironment(QDBusObjectPath envpath) {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(envpath);
@@ -68,7 +74,7 @@ public Q_SLOTS: // METHODS
     }
     inline QDBusReply<QList<WlanScanresult> > getwlanScan() {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("getwlanScan"), argumentList);
+        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getwlanScan"), argumentList);
     }
     inline QDBusReply<void> addwlanEnvironment(WlanNetworkProperties netprops) {
         QList<QVariant> argumentList;
@@ -112,7 +118,7 @@ public Q_SLOTS: // METHODS
     inline QDBusReply<QList<QDBusObjectPath> > getDeviceList()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("getDeviceList"), argumentList);
+        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getDeviceList"), argumentList);
     }
 
 Q_SIGNALS: // SIGNALS
@@ -139,14 +145,19 @@ public Q_SLOTS: // METHODS
     inline QDBusReply<QList<QDBusObjectPath> > getInterfaces()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("getInterfaces"), argumentList);
+        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getInterfaces"), argumentList);
     }
 
     inline QDBusReply<libnut::EnvironmentProperties> getProperties()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("getProperties"), argumentList);
+        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
     }
+	inline QDBusReply<nut::EnvironmentConfig> getConfig()
+	{
+		QList<QVariant> argumentList;
+		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList);
+	}
     inline QDBusReply<void> addInterface(InterfaceProperties prop) {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(prop);
@@ -195,8 +206,13 @@ public Q_SLOTS: // METHODS
     inline QDBusReply<libnut::InterfaceProperties> getProperties()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::Block, QLatin1String("getProperties"), argumentList);
+        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
     }
+	inline QDBusReply<nut::IPv4Config> getConfig()
+	{
+		QList<QVariant> argumentList;
+		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList); 
+	}
 
     inline QDBusReply<void> setIP(uint HostAddress)
     {

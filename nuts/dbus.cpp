@@ -118,6 +118,9 @@ namespace nuts {
 		}
 		return paths;
 	}
+	nut::DeviceConfig DBusDevice::getConfig() {
+		return (s_device->getConfig());
+	}
 
 	void DBusDevice::setEnvironment(const QDBusObjectPath &path) {
 		foreach(DBusEnvironment * i, dbus_environments) {
@@ -176,6 +179,9 @@ namespace nuts {
 		dbus_properties.name = s_environment->getName();
 		return dbus_properties;
 	}
+	nut::EnvironmentConfig DBusEnvironment::getConfig() {
+		return (s_environment->getConfig());
+	}
 	
 	QList<QDBusObjectPath> DBusEnvironment::getInterfaces() {
 		QList<QDBusObjectPath> paths;
@@ -196,6 +202,20 @@ namespace nuts {
 	: QDBusAbstractAdaptor(iface), s_interface(iface), dbus_connection(connection) {
 		dbus_path = path + QString("/%1").arg(s_interface->getIndex());
 		dbus_connection->registerObject(dbus_path, s_interface);
+		//Set Interface properties
+		dbus_properties.ip = s_interface->ip;
+		dbus_properties.gateway = s_interface->gateway;
+		dbus_properties.netmask = s_interface->netmask;
+		dbus_properties.userDefineable = false; //Fliegt raus, da Info bereits in der Config
+		dbus_properties.isStatic = !(s_interface->getConfig().getFlags() & nut::IPv4Config::DO_DHCP);
+		if (!s_interface->dnsserver.isEmpty()) {
+			dbus_properties.dns = s_interface->dnsserver;
+		}
+		else {
+			dbus_properties.dns = QList<QHostAddress>();
+		}
+		connect(s_interface,SIGNAL(interfaceUp()),this,SLOT(interfaceUp()));
+		connect(s_interface,SIGNAL(interfaceDown()),this,SLOT(interfaceDown()));
 	}
 	
 	DBusInterface_IPv4::~DBusInterface_IPv4() {
@@ -204,6 +224,21 @@ namespace nuts {
 	QString DBusInterface_IPv4::getPath() {
 		return dbus_path;
 	}
+//Private SLOTS:
+
+void DBusInterface_IPv4::interfaceUp() {
+	if (!dbus_properties.active) {
+		dbus_properties.active = true;
+		emit stateChanged(dbus_properties);
+	}
+}
+void DBusInterface_IPv4::interfaceDown() {
+	if (dbus_properties.active) {
+		dbus_properties.active = false;
+		emit(stateChanged(dbus_properties));
+	}
+}
+
 
 	libnut::InterfaceProperties DBusInterface_IPv4::getProperties() {
 		dbus_properties.ip = s_interface->ip;
@@ -219,14 +254,16 @@ namespace nuts {
 		}
 		return dbus_properties;
 	}
+	nut::IPv4Config DBusInterface_IPv4::getConfig() {
+		return (s_interface->getConfig());
+	}
 	void DBusInterface_IPv4::setIP(quint32 /*HostAddress*/) {
 	}
 	void DBusInterface_IPv4::setNetmask(quint32 /*Netmask*/) {
 	}
 	void DBusInterface_IPv4::setGateway(quint32 /*Gateway*/) {
 	}
-// 	void DBusInterface_IPv4::setDNS(QList<QHostAddress> dns) {
-// 	}
-	void DBusInterface_IPv4::setDynamic() {
+	void DBusInterface_IPv4::setDNS(QList<QHostAddress> /*DNS*/) {
 	}
+
 }
