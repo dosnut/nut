@@ -40,7 +40,6 @@
 
 #define UI_ICON_DEVICE_ENABLE           UI_DIR_ICONS "device_enable.png"
 #define UI_ICON_DEVICE_DISABLE          UI_DIR_ICONS "device_disable.png"
-#define UI_ICON_DEVICE_SETTINGS         UI_DIR_ICONS "device_settings.png"
 
 #define UI_ICON_ENVIRONMENT             UI_DIR_ICONS "environment.png"
 #define UI_ICON_ENVIRONMENT_ENTER       UI_DIR_ICONS "environment_enter.png"
@@ -49,6 +48,7 @@
 #define UI_ICON_INTERFACE_ACTIVATE      UI_DIR_ICONS "interface_activate.png"
 #define UI_ICON_INTERFACE_DEACTIVATE    UI_DIR_ICONS "interface_deactivate.png"
 
+#define UI_ICON_SCRIPT_SETTINGS         UI_DIR_ICONS "script_settings.png"
 #define UI_ICON_EDIT                    UI_DIR_ICONS "edit.png"
 #define UI_ICON_REFRESH                 UI_DIR_ICONS "refresh.png"
 

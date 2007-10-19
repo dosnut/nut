@@ -12,7 +12,13 @@ namespace qnut {
 	{
 		setWindowIcon(trayicon.icon());
 		deviceOptions.reserve(10);
+		
 		ui.setupUi(this);
+		
+		readSettings();
+		
+		logEdit.setReadOnly(true);
+		logEdit.setAcceptRichText(false);
 		
 		overView.setModel(new COverViewModel(&(deviceManager.devices)));
 		overView.setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -21,15 +27,16 @@ namespace qnut {
 		overView.setAllColumnsShowFocus(true);
 		overView.setIconSize(QSize(32, 32));
 		
-		logEdit.setReadOnly(true);
-		logEdit.setAcceptRichText(false);
-		
 		tabWidget.addTab(&overView, tr("Overview"));
-		tabWidget.addTab(&logEdit, tr("Log"));
+		
+		if (ui.actionShowLog->isChecked())
+			uiHandleShowLogToggle(true);
 		
 		ui.centralwidget->layout()->addWidget(&tabWidget);
 		
+		connect(ui.actionShowLog, SIGNAL(toggled(bool)), this, SLOT(uiHandleShowLogToggle(bool)));
 		connect(&logFile, SIGNAL(printed(const QString &)), &logEdit, SLOT(append(const QString &)));
+		
 		connect(&deviceManager, SIGNAL(deviceAdded(CDevice *)), this, SLOT(uiAddedDevice(CDevice *)));
 		connect(&deviceManager, SIGNAL(deviceAdded(CDevice *)), this, SLOT(uiUpdateTrayIconInfo()));
 		connect(&deviceManager, SIGNAL(deviceRemoved(CDevice *)), this, SLOT(uiRemovedDevice(CDevice *)));
@@ -56,11 +63,8 @@ namespace qnut {
 		ui.toolBar->addActions(overView.actions());
 		ui.menuDevice->addActions(overView.actions());
 		
-		readSettings();
-		
 		connect(refreshDevicesAction, SIGNAL(triggered()), &deviceManager, SLOT(rebuild()));
 		connect(refreshDevicesAction, SIGNAL(triggered()), &overView, SLOT(reset()));
-		connect(ui.actionShowBalloonTips, SIGNAL(toggled(bool)), this, SLOT(uiSetShowBalloonTips(bool)));
 		connect(ui.actionAboutQt, SIGNAL(triggered()), qApp , SLOT(aboutQt()));
 		connect(ui.actionAboutQNUT, SIGNAL(triggered()), this , SLOT(uiShowAbout()));
 		connect(overView.selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
@@ -75,12 +79,12 @@ namespace qnut {
 		writeSettings();
 	}
 	
-	void CConnectionManager::createActions() {
+	inline void CConnectionManager::createActions() {
 		//overViewMenu Actions
 		refreshDevicesAction  = new QAction(QIcon(UI_ICON_REFRESH), tr("Refresh devices"), &overView);
 		enableDeviceAction    = new QAction(QIcon(UI_ICON_DEVICE_ENABLE), tr("Enable device"), &overView);
 		disableDeviceAction   = new QAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"), &overView);
-		deviceSettingsAction  = new QAction(QIcon(UI_ICON_DEVICE_SETTINGS), tr("General device settings..."), &overView);
+		deviceSettingsAction  = new QAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("General device settings..."), &overView);
 		ipConfigurationAction = new QAction(QIcon(UI_ICON_EDIT), tr("Set IP Configuration..."), &overView);
 		
 		enableDeviceAction->setEnabled(false);
@@ -97,7 +101,7 @@ namespace qnut {
 		overView.addAction(ipConfigurationAction);
 	}
 	
-	void CConnectionManager::distributeActions(int mode) {
+	inline void CConnectionManager::distributeActions(int mode) {
 		switch (mode) {
 		case 0: {
 			//general device actions
@@ -134,10 +138,10 @@ namespace qnut {
 		}
 	}
 	
-	void CConnectionManager::readSettings() {
+	inline void CConnectionManager::readSettings() {
 		settings.beginGroup("Main");
-		showBalloonTips = settings.value("showBalloonTips", true).toBool();
-		ui.actionShowBalloonTips->setChecked(showBalloonTips);
+		ui.actionShowBalloonTips->setChecked(settings.value("showBalloonTips", true).toBool());
+		ui.actionShowLog->setChecked(settings.value("showLog", true).toBool());
 		settings.endGroup();
 		
 		settings.beginGroup("ConnectionManager");
@@ -146,9 +150,10 @@ namespace qnut {
 		settings.endGroup();
 	}
 	
-	void CConnectionManager::writeSettings() {
+	inline void CConnectionManager::writeSettings() {
 		settings.beginGroup("Main");
-		settings.setValue("showBalloonTips", showBalloonTips);
+		settings.setValue("showBalloonTips", ui.actionShowBalloonTips->isChecked());
+		settings.setValue("showLog", ui.actionShowLog->isChecked());
 		settings.endGroup();
 		
 		settings.beginGroup("ConnectionManager");
@@ -158,11 +163,9 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::uiAddedDevice(CDevice * dev) {
-		CDeviceOptions * newDeviceOptions = new CDeviceOptions(dev, &tabWidget);
+		CDeviceOptions * newDeviceOptions = new CDeviceOptions(dev);
 		
-		tabWidget.insertTab(tabWidget.count()-1, newDeviceOptions, dev->name);
-		
-		newDeviceOptions->updateDeviceIcons();
+		tabWidget.insertTab(tabWidget.count()-(ui.actionShowLog->isChecked() ? 1 : 0), newDeviceOptions, dev->name);
 		
 		deviceOptions.insert(dev, newDeviceOptions);
 		trayicon.devicesMenu.addMenu(newDeviceOptions->deviceMenu);
@@ -171,7 +174,7 @@ namespace qnut {
 		connect(dev, SIGNAL(stateChanged(DeviceState)), &overView, SLOT(reset()));
 		connect(dev, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiUpdateTrayIconInfo()));
 		//connect(newDeviceOptions->showAction, SIGNAL(triggered()), this, SLOT(show()));
-		connect(newDeviceOptions, SIGNAL(showOptions(QWidget *)), ui.toolBar, SLOT(setCurrentWidget(QWidget *)));
+		//connect(newDeviceOptions, SIGNAL(showOptions(QWidget *)), ui.toolBar, SLOT(setCurrentWidget(QWidget *)));
 		connect(newDeviceOptions, SIGNAL(showMessage(QSystemTrayIcon *, QString, QString)),
 		        this,             SLOT(uiShowMessage(QSystemTrayIcon *, QString, QString)));
 		overView.reset();
@@ -199,7 +202,7 @@ namespace qnut {
 		QStringList result;
 		
 		if (deviceManager.devices.isEmpty())
-			result << tr("no devcies present");
+			result << tr("no devices present");
 		else
 			foreach (CDevice * i, deviceManager.devices) {
 				result << shortSummary(i);
@@ -210,23 +213,18 @@ namespace qnut {
 	
 	void CConnectionManager::uiCurrentTabChanged(int index) {
 		ui.menuDevice->clear();
-		if (index == 0) {
+		
+		if (index == 0)
 			distributeActions(0);
-		}
-		else if (index == tabWidget.count()-1) {
+		else if ((index == tabWidget.count()-1) && (ui.actionShowLog->isChecked()))
 			distributeActions(1);
-		}
-		else {
+		else
 			distributeActions(2);
-		}
 		
 		ui.toolBar->setUpdatesEnabled(false);
 		ui.toolBar->clear();
 		ui.toolBar->addActions(ui.menuDevice->actions());
 		ui.toolBar->setUpdatesEnabled(true);
-		
-		if (ui.toolBar->actions().isEmpty())
-			logFile << "BUG!";
 	}
 	
 	void CConnectionManager::uiSelectedDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected) {
@@ -264,7 +262,7 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::uiShowMessage(QSystemTrayIcon * trayIcon, QString title, QString message) {
-		if (showBalloonTips) {
+		if (ui.actionShowBalloonTips->isChecked()) {
 			if (trayIcon)
 				trayIcon->showMessage(title, message, QSystemTrayIcon::Information, 4000);
 			else
@@ -281,7 +279,12 @@ namespace qnut {
 		disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
 	}
 	
-	void CConnectionManager::uiSetShowBalloonTips(bool value) {
-		showBalloonTips = value;
+	void CConnectionManager::uiHandleShowLogToggle(bool state) {
+		if (state) {
+			tabWidget.addTab(&logEdit, tr("Log"));
+		}
+		else {
+			tabWidget.removeTab(tabWidget.count()-1);
+		}
 	}
 };

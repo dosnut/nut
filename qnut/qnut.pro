@@ -23,7 +23,7 @@ CONFIG(debug, debug|release){
 
 FORMS = connman.ui \
  ipconf.ui \
- devconf.ui
+ scrset.ui
 TRANSLATIONS = qnut_de.ts
 
 HEADERS += connectionmanager.h trayicon.h \
@@ -33,14 +33,14 @@ HEADERS += connectionmanager.h trayicon.h \
  deviceoptions.h \
  ipconfiguration.h \
  common.h \
- deviceconfiguration.h
+ scriptsettings.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  overviewmodel.cpp \
  deviceoptionsmodel.cpp \
  deviceoptions.cpp \
  ipconfiguration.cpp \
  common.cpp \
- deviceconfiguration.cpp
+ scriptsettings.cpp
 DESTDIR = .
 
 target.path = /usr/bin/
