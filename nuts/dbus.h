@@ -63,7 +63,7 @@ namespace nuts {
 			libnut::DeviceProperties dbus_properties;
 		
 		private slots:
-			inline void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState) {
+			void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState) {
 				emit(stateChanged((int) newState, (int) oldState));
 			}
 		
