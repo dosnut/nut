@@ -11,9 +11,11 @@ SOURCES += main.cpp device.cpp config.cpp hardware.cpp hardware_ext.c
 HEADERS += common.h device.h   config.h   hardware.h
 
 SOURCES += sighandler.cpp log.cpp dhcppacket.cpp \
- dbus.cpp
+ dbus.cpp \
+ arp.cpp
 HEADERS += sighandler.h   log.h   dhcppacket.h   exception.h \
- dbus.h
+ dbus.h \
+ arp.h
 
 YACCSOURCES += configparser.y
 LEXSOURCES += configparser.l
