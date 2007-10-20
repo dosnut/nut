@@ -270,7 +270,7 @@ namespace qnut {
 				doExecuteScripts = (scriptFlags & UI_FLAG_SCRIPT_ACTIVATED);
 				targetDir = UI_DIR_SCRIPT_ACTIVATED;
 				break;
-			case: DS_DEACTIVATED:
+			case DS_DEACTIVATED:
 				doExecuteScripts = (scriptFlags & UI_FLAG_SCRIPT_DEACTIVATED);
 				targetDir = UI_DIR_SCRIPT_DEACTIVATED;
 				break;
