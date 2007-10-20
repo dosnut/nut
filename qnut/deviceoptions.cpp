@@ -262,17 +262,19 @@ namespace qnut {
 				doExecuteScripts = (scriptFlags & UI_FLAG_SCRIPT_UNCONFIGURED);
 				targetDir = UI_DIR_SCRIPT_UNCONFIGURED;
 				break;
-			case DS_ACTIVATED:
+			case DS_CARRIER:
 				doExecuteScripts = (scriptFlags & UI_FLAG_SCRIPT_CARRIER);
 				targetDir = UI_DIR_SCRIPT_CARRIER;
 				break;
-			case DS_DEACTIVATED:
+			case DS_ACTIVATED:
 				doExecuteScripts = (scriptFlags & UI_FLAG_SCRIPT_ACTIVATED);
 				targetDir = UI_DIR_SCRIPT_ACTIVATED;
 				break;
-			default:
+			case: DS_DEACTIVATED:
 				doExecuteScripts = (scriptFlags & UI_FLAG_SCRIPT_DEACTIVATED);
 				targetDir = UI_DIR_SCRIPT_DEACTIVATED;
+				break;
+			default:
 				break;
 			}
 			
