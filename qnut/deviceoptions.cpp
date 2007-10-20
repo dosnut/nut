@@ -251,40 +251,51 @@ namespace qnut {
 		
 		if (scriptFlags) {
 			QDir workdir(UI_PATH_DEV(device->name));
-			if (scriptFlags && UI_FLAG_SCRIPT_UP) {
-				workdir.cd(UI_DIR_SCRIPT_UP);
-				foreach(QString i, workdir.entryList()) {
-					QProcess::startDetached(workdir.path() + i);
-				}
-				workdir.cdUp();
+			bool doExecuteScripts = false;
+			QString targetDir;
+			switch (state) {
+			case DS_UP:
+				doExecuteScripts = (scriptFlags & UI_FLAG_SCRIPT_UP);
+				targetDir = UI_DIR_SCRIPT_UP;
+				break;
+			case DS_UNCONFIGURED:
+				doExecuteScripts = (scriptFlags & UI_FLAG_SCRIPT_UNCONFIGURED);
+				targetDir = UI_DIR_SCRIPT_UNCONFIGURED;
+				break;
+			case DS_ACTIVATED:
+				doExecuteScripts = (scriptFlags & UI_FLAG_SCRIPT_CARRIER);
+				targetDir = UI_DIR_SCRIPT_CARRIER;
+				break;
+			case DS_DEACTIVATED:
+				doExecuteScripts = (scriptFlags & UI_FLAG_SCRIPT_ACTIVATED);
+				targetDir = UI_DIR_SCRIPT_ACTIVATED;
+				break;
+			default:
+				doExecuteScripts = (scriptFlags & UI_FLAG_SCRIPT_DEACTIVATED);
+				targetDir = UI_DIR_SCRIPT_DEACTIVATED;
+				break;
 			}
-			if (scriptFlags && UI_FLAG_SCRIPT_UNCONFIGURED) {
-				workdir.cd(UI_DIR_SCRIPT_UNCONFIGURED);
-				foreach(QString i, workdir.entryList()) {
-					QProcess::startDetached(workdir.path() + i);
+			
+			if (doExecuteScripts && workdir.exists(targetDir)) {
+				QStringList env;
+				QProcess process;
+				env << "QNUT_DEV_NAME="  + device->name;
+				env << "QNUT_DEV_STATE=" + toString(state);
+				//activeEnvironment workarround
+				if ((state == DS_UP) && (device->activeEnvironment != NULL)) {
+					env << "QNUT_ENV_NAME="  + device->activeEnvironment->name;
+					env << "QNUT_IF_COUNT=" + QString::number(device->activeEnvironment->interfaces.count());
+					int j = 0;
+					foreach (CInterface * i, device->activeEnvironment->interfaces) {
+						env << "QNUT_IF_" + QString::number(j) + "=" + i->ip.toString();
+						j++;
+					}
 				}
-				workdir.cdUp();
-			}
-			if (scriptFlags && UI_FLAG_SCRIPT_CARRIER) {
-				workdir.cd(UI_DIR_SCRIPT_UNCONFIGURED);
+				process.setEnvironment(env);
+				workdir.cd(targetDir);
 				foreach(QString i, workdir.entryList()) {
-					QProcess::startDetached(workdir.path() + i);
+					process.start(workdir.path() + i);
 				}
-				workdir.cdUp();
-			}
-			if (scriptFlags && UI_FLAG_SCRIPT_ACTIVATED) {
-				workdir.cd(UI_DIR_SCRIPT_UNCONFIGURED);
-				foreach(QString i, workdir.entryList()) {
-					QProcess::startDetached(workdir.path() + i);
-				}
-				workdir.cdUp();
-			}
-			if (scriptFlags && UI_FLAG_SCRIPT_DEACTIVATED) {
-				workdir.cd(UI_DIR_SCRIPT_UNCONFIGURED);
-				foreach(QString i, workdir.entryList()) {
-					QProcess::startDetached(workdir.path() + i);
-				}
-				workdir.cdUp();
 			}
 		}
 	}
