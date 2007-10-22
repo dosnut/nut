@@ -27,9 +27,9 @@ namespace nuts {
 			struct nl_handle *nlh;
 			struct nl_cache *nlcache;
 			struct ifstate {
-				bool active, carrier;
-				ifstate() : active(false), carrier(false) { }
-				ifstate(bool active) : active(active), carrier(false) { }
+				bool active, carrier, exists;
+				ifstate() : active(false), carrier(false), exists(false) { }
+				ifstate(bool active) : active(active), carrier(false), exists(true) { }
 			};
 			QVector<struct ifstate> ifStates;
 			
@@ -64,12 +64,16 @@ namespace nuts {
 			
 			nut::MacAddress getMacAddress(const QString &ifName);
 			
+			bool ifExists(const QString &ifName);
 			bool hasWLAN(const QString &ifName);
 			bool getEssid(const QString &ifName, QString &essid);
 			
 		signals:
 			void gotCarrier(const QString &ifName, int ifIndex, const QString &essid);
 			void lostCarrier(const QString &ifName);
+			
+			void newDevice(const QString &ifName, int ifIndex);
+			void delDevice(const QString &ifName);
 	};
 };
 

@@ -42,6 +42,8 @@ namespace nuts {
 	: configParser(configFile), config(configParser.getConfig()) {
 		connect(&hwman, SIGNAL(gotCarrier(const QString&, int, const QString)), SLOT(gotCarrier(const QString &, int, const QString)));
 		connect(&hwman, SIGNAL(lostCarrier(const QString&)), SLOT(lostCarrier(const QString &)));
+		connect(&hwman, SIGNAL(newDevice(const QString&, int)), SLOT(newDevice(const QString &, int)));
+		connect(&hwman, SIGNAL(delDevice(const QString&)), SLOT(delDevice(const QString&)));
 		 /* Wait for 400 ms before deliver carrier events
 		   There are 2 reasons:
 		    - a kernel bug: dhcp messages cannot be sent immediately
@@ -54,11 +56,16 @@ namespace nuts {
 		QHashIterator<QString, nut::DeviceConfig*> i(config->getDevices());
 		while (i.hasNext()) {
 			i.next();
-			Device *d = new Device(this, i.key(), i.value(), hwman.hasWLAN(i.key()));
-			devices.insert(i.key(), d);
-			if (!i.value()->noAutoStart())
-				d->enable(true);
+			if (hwman.ifExists(i.key()))
+				addDevice(i.key(), i.value());
 		}
+	}
+	
+	void DeviceManager::addDevice(const QString &ifname, nut::DeviceConfig *dc) {
+		Device *d = new Device(this, ifname, dc, hwman.hasWLAN(ifname));
+		devices.insert(ifname, d);
+		if (!dc->noAutoStart())
+			d->enable(true);
 	}
 	
 	DeviceManager::~DeviceManager() {
@@ -107,7 +114,8 @@ namespace nuts {
 			carrier_timer.start();
 	}
 	void DeviceManager::lostCarrier(const QString &ifName) {
-		Device *dev = devices[ifName];
+		Device *dev = devices.value(ifName, 0);
+		if (!dev) return;
 		if (dev->hasWLAN()) {
 			dev->lostCarrier();
 			return;
@@ -131,8 +139,28 @@ namespace nuts {
 			carrier_timer.start();
 	}
 	
+	void DeviceManager::newDevice(const QString &ifName, int) {
+		Device *d = devices.value(ifName, 0);
+		if (d) return;
+		nut::DeviceConfig *dc = config->getDevices().value(ifName, 0);
+		if (!dc) return;
+		addDevice(ifName, dc);
+//		log << QString("newDevice(%1)").arg(ifName) << endl;
+		emit deviceAdded(ifName, devices[ifName]);
+	}
+	
+	void DeviceManager::delDevice(const QString &ifName) {
+		Device *d = devices.value(ifName, 0);
+		if (!d) return;
+//		log << QString("delDevice(%1)").arg(ifName) << endl;
+		d->disable();
+		emit deviceRemoved(ifName, d);
+		d->deleteLater();
+		devices.remove(ifName);
+	}
+	
 	Device::Device(DeviceManager* dm, const QString &name, nut::DeviceConfig *config, bool hasWLAN)
-	: QObject(dm), dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_state(libnut::DS_DEACTIVATED), dhcp_client_socket(-1), m_hasWLAN(hasWLAN) {
+	: QObject(dm), dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_state(libnut::DS_DEACTIVATED), dhcp_client_socket(-1), m_hasWLAN(hasWLAN), m_wpa_supplicant(0) {
 		int i = 0;
 		foreach(nut::EnvironmentConfig *ec, config->getEnvironments())
 			envs.push_back(new Environment(this, ec, i++));
@@ -453,7 +481,7 @@ namespace nuts {
 	Interface::~Interface() { }
 	
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, nut::IPv4Config *config)
-	: Interface(env, index), dhcp_timer_id(-1), dm(env->device->dm), dhcpstate(DHCPS_OFF), m_config(config) {
+	: Interface(env, index), dhcp_timer_id(-1), dm(env->device->dm), dhcp_xid(0), dhcpstate(DHCPS_OFF), m_config(config) {
 	}
 	
 	Interface_IPv4::~Interface_IPv4() {
