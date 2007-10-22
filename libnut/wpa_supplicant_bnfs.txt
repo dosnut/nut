@@ -7,16 +7,19 @@ Status Variables:
 
 List Networks:
 
+network id / ssid / bssid / flags
+0	example network	any	[CURRENT]
+
+network id / ssid / bssid / flags
+{{number}<TAB>{alphanumeric}<TAB>{alphanumeric}<TAB>{alphanumeric}<br>}
+
+
+Scan results:
 
 bssid / frequency / signal level / flags / ssid
 00:09:5b:95:e0:4e	2412	208	[WPA-PSK-CCMP]	jkm private
 02:55:24:33:77:a3	2462	187	[WPA-PSK-TKIP]	testing
 00:09:5b:95:e0:4f	2412	209		jkm guest
 
-
 bssid / frequency / signal level / flags / ssid
-{{number}<TAB>{alphanumeric}<TAB>{alphanumeric}<TAB>
-
-
-Scan results:
-bssid<TAB>/<TAB>frequency<TAB>/<TAB>signal<TAB>level<TAB>/<TAB>flags<TAB>/<TAB>ssid<br> //or maybe " " istead of <TAB>
+{{0-9,a-f,:}<TAB>{0-9}<TAB>{0-9}<TAB>{alphanumeric,eps}<TAB>{alphanumeric}}
