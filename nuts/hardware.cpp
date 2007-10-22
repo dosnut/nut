@@ -87,7 +87,7 @@ namespace nuts {
 			ifStates.resize(ifIndex+1);
 		ifStates[ifIndex] = ifstate(true);
 //		log << "activated interface " << ifIndex << endl;
-		return isControlled(ifIndex);
+		return true;
 	}
 	bool HardwareManager::controlOff(const QString &ifName) {
 		int ifIndex = ifName2Index(ifName);
@@ -255,22 +255,27 @@ namespace nuts {
 		for (hdr = (struct nlmsghdr*) msg; nlmsg_ok(hdr, n); hdr = (struct nlmsghdr*) nlmsg_next(hdr, &n)) {
 //			log << QString("Message type 0x%1").arg(hdr->nlmsg_type, 0, 16) << endl;
 			switch (hdr->nlmsg_type) {
-				case RTM_NEWLINK:
+				case RTM_NEWLINK: {
 					struct ifinfomsg *ifm = (struct ifinfomsg*) nlmsg_data(hdr);
 					struct nlattr *tb[IFLA_MAX+1];
 					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
 						break;
 					}
 					int ifindex = ifm->ifi_index;
-					if (!isControlled(ifindex))
-						break;
-					QString ifname = ifIndex2Name(ifindex);
-//					log << QString("RTM_NEWLINK: %1 (%2)")
-//							.arg(ifname).arg(ifindex)
-//						<< endl;
+					if (ifindex >= ifStates.size())
+						ifStates.resize(ifindex+1);
+					if (!ifStates[ifindex].exists) {
+						ifStates[ifindex].exists = true;
+						QString ifname = ifIndex2Name(ifindex);
+//						log << QString("RTM_NEWLINK(%1/%2)").arg(ifindex).arg(ifname) << endl;
+						emit newDevice(ifname, ifindex);
+					}
 					bool carrier = (ifm->ifi_flags & IFF_LOWER_UP) > 0;
 					if (carrier != ifStates[ifindex].carrier) {
 						ifStates[ifindex].carrier = carrier;
+						if (!isControlled(ifindex))
+							break;
+						QString ifname = ifIndex2Name(ifindex);
 						if (carrier) {
 							QString essid;
 							getEssid(ifname, essid);
@@ -278,7 +283,31 @@ namespace nuts {
 						} else
 							emit lostCarrier(ifname);
 					}
-					break;
+					} break;
+				case RTM_DELLINK: {
+					struct ifinfomsg *ifm = (struct ifinfomsg*) nlmsg_data(hdr);
+					struct nlattr *tb[IFLA_MAX+1];
+					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
+						break;
+					}
+					int ifindex = ifm->ifi_index;
+					struct nlattr *nla_ifname = tb[IFLA_IFNAME];
+					QString ifname;
+					if (nla_ifname)
+						ifname = QString::fromUtf8((char*) nla_data(nla_ifname), nla_len(nla_ifname)-1);
+					if (ifname.isNull()) break;
+//					log << QString("RTM_DELLINK(%1/%2)").arg(ifindex).arg(ifname) << endl;
+					if (ifindex < ifStates.size()) {
+						if (ifStates[ifindex].exists) {
+							if (ifStates[ifindex].carrier)
+								emit lostCarrier(ifname);
+							ifStates[ifindex].exists = false;
+							ifStates[ifindex].carrier = false;
+							ifStates[ifindex].active = false;
+						}
+					}
+					emit delDevice(ifname);
+					} break;
 			}
 		}
 	}
@@ -297,6 +326,22 @@ namespace nuts {
 		if (buf.size() >= IFNAMSIZ) return false;
 		iwreq_init(iwr);
 		strncpy (iwr.ifr_ifrn.ifrn_name, buf.constData(), buf.size());
+		return true;
+	}
+	
+	bool HardwareManager::ifExists(const QString &ifName) {
+		struct ifreq ifr;
+		if (!ifreq_init(ifr, ifName)) {
+			err << QString("Interface name too long") << endl;
+			return false;
+		}
+		if (ioctl(ethtool_fd, SIOCGIFFLAGS, &ifr) < 0) {
+			return false;
+		}
+		int ifIndex = ifName2Index(ifName);
+		if (ifIndex >= ifStates.size())
+			ifStates.resize(ifIndex+1);
+		ifStates[ifIndex] = ifstate(false);
 		return true;
 	}
 	

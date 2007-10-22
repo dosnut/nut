@@ -51,11 +51,16 @@ namespace nuts {
 			friend class Environment;
 			friend class Interface_IPv4;
 			
+		private:
+			void addDevice(const QString &ifname, nut::DeviceConfig *dc);
+			
 		private slots:
 			void ca_timer();
 		protected slots:
 			void gotCarrier(const QString &ifName, int ifIndex, const QString &essid);
 			void lostCarrier(const QString &ifName);
+			void newDevice(const QString &ifName, int ifIndex);
+			void delDevice(const QString &ifname);
 		
 		public:
 			DeviceManager(const QString &configFile);
