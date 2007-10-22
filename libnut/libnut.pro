@@ -14,7 +14,9 @@ HEADERS += libnut_cli.h libnut_server_proxy.h libnut_exceptions.h \
  libnut_wpa_supplicant.h \
  wpa_ctrl.h \
  includes.h \
- build_config.h
+ build_config.h \
+ common.h \
+ os.h
 SOURCES += libnut_cli.cpp libnut_server_proxy.cpp \
  libnut_wpa_supplicant.cpp \
  wpa_ctrl.c
