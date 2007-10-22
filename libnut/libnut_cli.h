@@ -8,6 +8,7 @@
 #include <common/config.h>
 #include "libnut_server_proxy.h"
 #include "libnut_exceptions.h"
+#include "libnut_wpa_supplicant.h"
 #include <QDBusConnectionInterface>
 #include <QDBusReply>
 #include <QDBusObjectPath>
@@ -54,6 +55,8 @@ namespace libnut {
 			fileLoggingEnabled = isEnabled && (file.error() == QFile::NoError);
 		}
 		void operator<<(QString text);
+	public slots:
+		void log(QString text) { operator<<(text); }
 	signals:
 		void printed(const QString & line);
 	};
@@ -133,6 +136,7 @@ namespace libnut {
 		DeviceState state;
 		DeviceType type;
 		CEnvironment * activeEnvironment;
+		CWpa_Supplicant * wpa_supplicant;
 		
 		CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);
 		~CDevice();
@@ -204,7 +208,7 @@ namespace libnut {
 		QDBusObjectPath dbusPath;
 		CLog * log;
 		DBusInterfaceInterface_IPv4 * dbusInterface;
-		nut::IPv4Config config;
+		nut::IPv4Config dbusConfig;
 		void refreshAll();
 	private slots:
 		void dbusstateChanged(const InterfaceProperties &properties);
@@ -216,6 +220,14 @@ namespace libnut {
 		QHostAddress netmask;
 		QHostAddress gateway;
 		QList<QHostAddress> dnsserver;
+		typedef enum {IF_DYNAMIC = 1, IF_ZEROCONF = 2, IF_STATIC = 4, IF_FALLBACK = 8} InterfaceFlags;
+		struct InterfaceConfig {
+			InterfaceFlags flags;
+			QHostAddress staticIp;
+			QHostAddress staticNetmask;
+			QHostAddress staticGateway;
+		} config;
+
 
 		CInterface(CEnvironment * parent, QDBusObjectPath dbusPath);
 		~CInterface();

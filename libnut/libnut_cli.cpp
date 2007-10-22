@@ -386,6 +386,10 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 
 	connect(dbusDevice, SIGNAL(stateChanged(int , int)),
 			this, SLOT(dbusstateChanged(int, int)));
+	
+	wpa_supplicant = new CWpa_Supplicant();
+	connect(wpa_supplicant,SIGNAL(message(QString)),log,SLOT(log(QString)));
+	wpa_supplicant->wps_open();
 }
 CDevice::~CDevice() {
 	CEnvironment * env;
@@ -784,8 +788,24 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	//Get Config
 	QDBusReply<nut::IPv4Config> replyconf = dbusInterface->getConfig();
 	if (replyconf.isValid()) {
-		config = replyconf.value();
-		userDefineable = (config.getFlags() & nut::IPv4Config::MAY_USERSTATIC);
+		dbusConfig = replyconf.value();
+		userDefineable = (dbusConfig.getFlags() & nut::IPv4Config::MAY_USERSTATIC);
+		//set config for clients
+		
+		//Set Configflags
+		if (isStatic & (dbusConfig.getFlags() == nut::IPv4Config::DO_DHCP)) {
+			config.flags = IF_FALLBACK;
+		}
+		else {
+			config.flags = (InterfaceFlags) dbusConfig.getFlags();
+		}
+		
+		//
+		if (isStatic) {
+			config.staticIp = dbusConfig.getStaticIP();
+			config.staticNetmask = dbusConfig.getStaticNetmask();
+			config.staticGateway = dbusConfig.getStaticGateway();
+		}
 	}
 	else {
 		throw CLI_IfConnectionException(tr("Error while retrieving interface config") + replyconf.error().name());
@@ -845,7 +865,7 @@ void CInterface::setGateway(QHostAddress & address) {
 	dbusInterface->setGateway(address.toIPv4Address());
 }
 nut::IPv4Config CInterface::getConfig() {
-	return config;
+	return dbusConfig;
 }
 
 };
