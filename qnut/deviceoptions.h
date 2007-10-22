@@ -25,14 +25,10 @@ namespace qnut {
 	
 	class CDeviceOptions;
 	typedef QHash<CDevice *, CDeviceOptions *> CDeviceOptionsHash;
-	
-	//todo: qtreeview und teile der device settings zusammenlegen
-	//kein subclassing beim treeview nötig
-	
+		
 	class CDeviceOptions : public QWidget {
 		Q_OBJECT
 	protected:
-		//QTabWidget * tabWidget;
 		QLabel * statusText;
 		QLabel * statusIcon;
 		

@@ -96,10 +96,11 @@ namespace qnut {
 						return activeIP(data);
 				}
 			case OV_MOD_ENV: {
-					if (data->state != DS_UP)
-						return tr("none");
-					else
+					//activeEnvironment workarround
+					if ((data->state == DS_UP) && (data->activeEnvironment != NULL))
 						return data->activeEnvironment->name;
+					else
+						return tr("none");
 				}
 			default:
 				break;

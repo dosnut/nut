@@ -1,7 +1,7 @@
 #include <QDate>
 #include "connectionmanager.h"
 #include "common.h"
-
+#include <iostream>
 namespace qnut {
 	CConnectionManager::CConnectionManager(QWidget * parent) :
 		QMainWindow(parent),
@@ -14,7 +14,6 @@ namespace qnut {
 		deviceOptions.reserve(10);
 		
 		ui.setupUi(this);
-		
 		readSettings();
 		
 		logEdit.setReadOnly(true);
@@ -34,9 +33,6 @@ namespace qnut {
 		
 		ui.centralwidget->layout()->addWidget(&tabWidget);
 		
-		connect(ui.actionShowLog, SIGNAL(toggled(bool)), this, SLOT(uiHandleShowLogToggle(bool)));
-		connect(&logFile, SIGNAL(printed(const QString &)), &logEdit, SLOT(append(const QString &)));
-		
 		connect(&deviceManager, SIGNAL(deviceAdded(CDevice *)), this, SLOT(uiAddedDevice(CDevice *)));
 		connect(&deviceManager, SIGNAL(deviceAdded(CDevice *)), this, SLOT(uiUpdateTrayIconInfo()));
 		connect(&deviceManager, SIGNAL(deviceRemoved(CDevice *)), this, SLOT(uiRemovedDevice(CDevice *)));
@@ -45,11 +41,25 @@ namespace qnut {
 		if (logFile.error() != QFile::NoError)
 			logEdit.append(tr("ERROR:") + " " + tr("Cannot create/open log file."));
 		
+		connect(&logFile, SIGNAL(printed(const QString &)), &logEdit, SLOT(append(const QString &)));
+		
 		logFile << UI_NAME + " (v" + QString(UI_VERSION) + ") " + tr("started");
 		logFile << QDateTime::currentDateTime().toString();
 		
 		createActions();
+		distributeActions();
+		ui.toolBar->addActions(ui.menuDevice->actions());
 		
+		connect(ui.actionShowLog, SIGNAL(toggled(bool)), this, SLOT(uiHandleShowLogToggle(bool)));
+		connect(ui.actionAboutQt, SIGNAL(triggered()), qApp , SLOT(aboutQt()));
+		connect(ui.actionAboutQNUT, SIGNAL(triggered()), this , SLOT(uiShowAbout()));
+		connect(refreshDevicesAction, SIGNAL(triggered()), &deviceManager, SLOT(rebuild()));
+		connect(&tabWidget, SIGNAL(currentChanged(int)), this, SLOT(uiCurrentTabChanged(int)));
+		connect(&trayicon, SIGNAL(messageClicked()), this, SLOT(show()));
+		connect(overView.selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+			this, SLOT(uiSelectedDeviceChanged(const QItemSelection &, const QItemSelection &)));
+		
+		trayicon.show();
 		try {
 			deviceManager.init(&logFile);
 		}
@@ -58,21 +68,6 @@ namespace qnut {
 			refreshDevicesAction->setEnabled(false);
 		}
 		
-		distributeActions();
-		
-		ui.toolBar->addActions(overView.actions());
-		ui.menuDevice->addActions(overView.actions());
-		
-		connect(refreshDevicesAction, SIGNAL(triggered()), &deviceManager, SLOT(rebuild()));
-		connect(refreshDevicesAction, SIGNAL(triggered()), &overView, SLOT(reset()));
-		connect(ui.actionAboutQt, SIGNAL(triggered()), qApp , SLOT(aboutQt()));
-		connect(ui.actionAboutQNUT, SIGNAL(triggered()), this , SLOT(uiShowAbout()));
-		connect(overView.selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-		        this                     , SLOT(uiSelectedDeviceChanged(const QItemSelection &, const QItemSelection &)));
-		connect(&tabWidget, SIGNAL(currentChanged(int)), this, SLOT(uiCurrentTabChanged(int)));
-		connect(&trayicon, SIGNAL(messageClicked()), this, SLOT(show()));
-		
-		trayicon.show();
 	}
 	
 	CConnectionManager::~CConnectionManager() {
@@ -81,11 +76,11 @@ namespace qnut {
 	
 	inline void CConnectionManager::createActions() {
 		//overViewMenu Actions
-		refreshDevicesAction  = new QAction(QIcon(UI_ICON_REFRESH), tr("Refresh devices"), &overView);
-		enableDeviceAction    = new QAction(QIcon(UI_ICON_DEVICE_ENABLE), tr("Enable device"), &overView);
-		disableDeviceAction   = new QAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"), &overView);
-		deviceSettingsAction  = new QAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("General device settings..."), &overView);
-		ipConfigurationAction = new QAction(QIcon(UI_ICON_EDIT), tr("Set IP Configuration..."), &overView);
+		refreshDevicesAction  = new QAction(QIcon(UI_ICON_REFRESH), tr("Refresh devices"), this);
+		enableDeviceAction    = new QAction(QIcon(UI_ICON_DEVICE_ENABLE), tr("Enable"), this);
+		disableDeviceAction   = new QAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable"), this);
+		deviceSettingsAction  = new QAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("Scripting settings..."), this);
+		ipConfigurationAction = new QAction(QIcon(UI_ICON_EDIT), tr("Set IP Configuration..."), this);
 		
 		enableDeviceAction->setEnabled(false);
 		disableDeviceAction->setEnabled(false);
@@ -101,18 +96,14 @@ namespace qnut {
 		overView.addAction(ipConfigurationAction);
 	}
 	
-	inline void CConnectionManager::distributeActions(int mode) {
+	void CConnectionManager::distributeActions(int mode) {
 		switch (mode) {
-		case 0: {
+		case 0:
 			//general device actions
-			//ui.toolBar->addActions(overView.actions());
 			ui.menuDevice->addActions(overView.actions());
-			}
 			break;
-		case 1: {
-			//ui.toolBar->addAction(refreshDevicesAction);
+		case 1:
 			ui.menuDevice->addAction(refreshDevicesAction);
-			}
 			break;
 		case 2: {
 			ui.menuDevice->addAction(refreshDevicesAction);
@@ -130,7 +121,6 @@ namespace qnut {
 			ui.menuDevice->addAction(current->enterEnvironmentAction);
 			//interface actions
 			//...
-			//ui.toolBar->addActions(ui.menuDevice->actions());
 			}
 			break;
 		default:
@@ -165,16 +155,18 @@ namespace qnut {
 	void CConnectionManager::uiAddedDevice(CDevice * dev) {
 		CDeviceOptions * newDeviceOptions = new CDeviceOptions(dev);
 		
-		tabWidget.insertTab(tabWidget.count()-(ui.actionShowLog->isChecked() ? 1 : 0), newDeviceOptions, dev->name);
-		
+		if (ui.actionShowLog->isChecked())
+			tabWidget.insertTab(tabWidget.count()-1, newDeviceOptions, dev->name);
+		else
+			tabWidget.addTab(newDeviceOptions, dev->name);
+			
 		deviceOptions.insert(dev, newDeviceOptions);
 		trayicon.devicesMenu.addMenu(newDeviceOptions->deviceMenu);
 		trayicon.devicesMenu.setEnabled(true);
 		
 		connect(dev, SIGNAL(stateChanged(DeviceState)), &overView, SLOT(reset()));
 		connect(dev, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiUpdateTrayIconInfo()));
-		//connect(newDeviceOptions->showAction, SIGNAL(triggered()), this, SLOT(show()));
-		//connect(newDeviceOptions, SIGNAL(showOptions(QWidget *)), ui.toolBar, SLOT(setCurrentWidget(QWidget *)));
+		connect(newDeviceOptions, SIGNAL(showOptions(QWidget *)), this, SLOT(uiShowOptions(QWidget *)));
 		connect(newDeviceOptions, SIGNAL(showMessage(QSystemTrayIcon *, QString, QString)),
 		        this,             SLOT(uiShowMessage(QSystemTrayIcon *, QString, QString)));
 		overView.reset();
@@ -188,6 +180,7 @@ namespace qnut {
 		CDeviceOptions * target = deviceOptions[dev];
 		
 		tabWidget.removeTab(tabWidget.indexOf(target));
+		
 		trayicon.devicesMenu.removeAction(target->deviceMenu->menuAction());
 		trayicon.devicesMenu.setDisabled(deviceManager.devices.isEmpty());
 		
@@ -216,7 +209,7 @@ namespace qnut {
 		
 		if (index == 0)
 			distributeActions(0);
-		else if ((index == tabWidget.count()-1) && (ui.actionShowLog->isChecked()))
+		else if ((ui.actionShowLog->isChecked()) && (index == tabWidget.count()-1))
 			distributeActions(1);
 		else
 			distributeActions(2);
@@ -248,7 +241,7 @@ namespace qnut {
 			connect(deviceSettingsAction, SIGNAL(triggered()), deviceOptions[selectedDevice], SLOT(uiChangeDeviceSettings()));
 			connect(ipConfigurationAction, SIGNAL(triggered()), deviceOptions[selectedDevice], SLOT(uiChangeIPConfiguration()));
 			
-			enableDeviceAction->setDisabled(selectedDevice->state == DS_UP);
+			enableDeviceAction->setEnabled(selectedDevice->state == DS_DEACTIVATED);
 			disableDeviceAction->setDisabled(selectedDevice->state == DS_DEACTIVATED);
 			deviceSettingsAction->setEnabled(true);
 			ipConfigurationAction->setEnabled(selectedDevice->state == DS_UNCONFIGURED);
@@ -286,5 +279,10 @@ namespace qnut {
 		else {
 			tabWidget.removeTab(tabWidget.count()-1);
 		}
+	}
+	
+	void CConnectionManager::uiShowOptions(QWidget * widget) {
+		show();
+		tabWidget.setCurrentWidget(widget);
 	}
 };
