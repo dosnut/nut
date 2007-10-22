@@ -28,20 +28,13 @@ namespace qnut {
 	CDeviceOptionsModel::~CDeviceOptionsModel() {
 		device = NULL;
 	}
-	/*
-	inline static QString CDeviceOptionsModel::getInterfaceName(CInterface * interface) {
-			return tr("IP-Address") + ": " + (interface->active ? interface->ip.toString()      : tr("no dynamic")) + "\n" +
-				tr("Netmask")    + ": " + (interface->active ? interface->netmask.toString() : tr("no dynamic")) + "\n" +
-				tr("Gateway")    + ": " + (interface->active ? interface->gateway.toString() : tr("no dynamic"));
-	}*/
 	
 	int CDeviceOptionsModel::columnCount(const QModelIndex &) const {
 		if (device == NULL)
 			return 0;
 		else
-			return 6;
+			return 5;
 	}
-
 	
 	int CDeviceOptionsModel::rowCount(const QModelIndex & parent) const {
 		if (device == NULL)
@@ -80,10 +73,12 @@ namespace qnut {
 				}
 				
 				if (data->parent()->parent() == device) {
+					CInterface * interface = (CInterface *)data;
+					CEnvironment * environment = (CEnvironment *)(((QObject *)interface)->parent());
 					switch (role) {
 					case Qt::DisplayRole:
-						return '#' + QString::number(((CEnvironment *)(data->parent()))->interfaces.indexOf((CInterface *)data));
-						//return getInterfaceName((CInterface *)data);
+						return '#' + QString::number(environment->interfaces.indexOf(interface)) +
+							' ' + (interface->isStatic ? tr("static") : tr("dynamic"));
 					case Qt::DecorationRole:
 						return QIcon(UI_ICON_INTERFACE);
 					default:
@@ -98,34 +93,44 @@ namespace qnut {
 					}
 					
 					if (data->parent()->parent() == device) {
-						return ((CInterface *)data)->active ? tr("enabled") : tr("disabled");
+						CInterface * current = (CInterface *)data;
+// 						QString statusArg;
+// 						if (current->isStatic) {
+// 							statusArg = tr("static");
+// // 							if (current->getConfig().getFlags() == nut::IPv4Config::DO_DHCP) {
+// // 								statusArg += " (" + tr("fallback") + ')';
+// // 							}
+// 						}
+// 						else
+// 							statusArg = tr("dynamic");
+						
+						return current->active ? tr("assigned") : tr("unassigned");
 					}
 				}
 				break;
 			case DEVOP_MOD_CONFIG:
 				if (role == Qt::DisplayRole) {
-					if (data->parent() == device) {
-						int configFlags = 0;
-						bool configUseMac = false;
-						// TODO: Use new config structures (Stefan)
-						
-						QString result = tr("selected by") + " ";
-						switch (configFlags) {
-						case 3:
-							result += tr("essid") + ", " + tr("arp");
-							break;
-						case 2:
-							result += tr("essid");
-							break;
-						case 1:
-							result += tr("arp");
-							break;
-						default:
-							result += tr("user");
-							break;
-						}
-						return result + " " + (configUseMac ? tr("and MAC-Address") : "");
-					}
+// 					if (data->parent() == device) {
+// 						int configFlags = 0;
+// 						bool configUseMac = false;
+// 						// TODO: Use new config structures (Stefan)
+// 						QString result = tr("selected by") + " ";
+// 						switch (configFlags) {
+// 						case 3:
+// 							result += tr("essid") + ", " + tr("arp");
+// 							break;
+// 						case 2:
+// 							result += tr("essid");
+// 							break;
+// 						case 1:
+// 							result += tr("arp");
+// 							break;
+// 						default:
+// 							result += tr("user");
+// 							break;
+// 						}
+// 						return result + " " + (configUseMac ? tr("and MAC-Address") : "");
+// 					}
 					if (data->parent()->parent() == device) {
 						return ((CInterface *)data)->isStatic ? tr("static") : tr("dynamic");
 					}
