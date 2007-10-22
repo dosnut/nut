@@ -75,10 +75,10 @@ void CWpa_Supplicant::wps_read(int socket) {
 }
 
 //Public functions:
-CWpa_Supplicant::CWpa_Supplicant() {
+CWpa_Supplicant::CWpa_Supplicant(QObject * parent) : QObject(parent) {
 	wpa_supplicant_path = "/var/run/wpa_supplicant";
 }
-CWpa_Supplicant::CWpa_Supplicant(QString wpa_supplicant_path) : wpa_supplicant_path(wpa_supplicant_path) {
+CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) : QObject(parent), wpa_supplicant_path(wpa_supplicant_path) {
 }
 CWpa_Supplicant::~CWpa_Supplicant() {
 	wps_close();

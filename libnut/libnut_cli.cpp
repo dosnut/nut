@@ -387,7 +387,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	connect(dbusDevice, SIGNAL(stateChanged(int , int)),
 			this, SLOT(dbusstateChanged(int, int)));
 	
-	wpa_supplicant = new CWpa_Supplicant();
+	wpa_supplicant = new CWpa_Supplicant(this);
 	connect(wpa_supplicant,SIGNAL(message(QString)),log,SLOT(log(QString)));
 	wpa_supplicant->wps_open();
 }

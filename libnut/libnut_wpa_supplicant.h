@@ -140,8 +140,8 @@ namespace libnut {
 			void wps_read(int socket);
 			
 		public:
-			CWpa_Supplicant();
-			CWpa_Supplicant(QString wpa_supplicant_path);
+			CWpa_Supplicant(QObject * parent);
+			CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path);
 			~CWpa_Supplicant();
 			bool wps_open();
 			bool wps_close();
