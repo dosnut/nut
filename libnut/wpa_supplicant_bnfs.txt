@@ -1,3 +1,5 @@
+//to check: is there a line break at the end of the message
+
 
 MIB Variables:
 {(dot11|dot1x){alphanumeric}={alphanumeric}<br>}
@@ -22,4 +24,34 @@ bssid / frequency / signal level / flags / ssid
 00:09:5b:95:e0:4f	2412	209		jkm guest
 
 bssid / frequency / signal level / flags / ssid
-{{0-9,a-f,:}<TAB>{0-9}<TAB>{0-9}<TAB>{alphanumeric,eps}<TAB>{alphanumeric}}
+{{0-9,a-f,:}<TAB>{0-9}<TAB>{0-9}<TAB>{alphanumeric,eps}<TAB>{alphanumeric}<br>}
+
+
+GET_CAPABILITY (here : eap)
+AKA FAST GTC LEAP MD5 MSCHAPV2 OTP PAX PEAP PSK SIM TLS TTLS
+({{alphanumeric}" "}{alphanumeric}+<br>)|eps
+
+
+Interactive request
+
+IDENTITY (EAP identity/user name)
+PASSWORD (EAP password)
+NEW_PASSWORD (New password if the server is requesting password change)
+PIN (PIN code for accessing a SIM or smartcard)
+OTP (one-time password; like password, but the value is used only once)
+PASSPHRASE (passphrase for a private key file)
+
+CTRL-REQ-<field name>-<network id>-<human readable text>
+CTRL-RSP-<field name>-<network id>-<value>
+
+CTRL-REQ-PASSWORD-1-Password needed for SSID test-network
+
+
+CTRL-REQ-(IDENTITY|PASSWORD|NEW_PASSWORD|PIN|OTP|PASSPHRASE)-{0-9}-{alphanumeric}<br>
+
+
+Interfaces Command:
+eth0
+wlan0
+
+{{alphanumeric}<br>}
