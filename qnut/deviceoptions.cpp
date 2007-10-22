@@ -37,7 +37,6 @@ namespace qnut {
 		
 		readSettings();
 		
-		
 		connect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
 		
 		if (device->state == DS_UP)
@@ -101,6 +100,7 @@ namespace qnut {
 		connect(environmentTree->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(uiSelectionChanged(const QItemSelection &, const QItemSelection &)));
 		connect(device, SIGNAL(environmentsUpdated()), environmentTree, SLOT(reset()));
+		
 		//todo: interfacesänderungen hier
 		
 		statusIcon = new QLabel();

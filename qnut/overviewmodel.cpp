@@ -124,7 +124,7 @@ namespace qnut {
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
 			case OV_MOD_NAME:
-				return tr("Name");
+				return tr("Device");
 			case OV_MOD_STATUS:
 				return tr("Status");
 			case OV_MOD_TYPE:
