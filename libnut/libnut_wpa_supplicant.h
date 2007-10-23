@@ -28,8 +28,8 @@
 
 namespace libnut {
 	typedef enum {WNF_NONE=0, WNF_CURRENT=1} wps_network_flags;
-	typedef enum {CI_CCMP=1, CI_TKIP=2, CI_WEP104=4, CI_WEP40=8} CIPHERS;
-	typedef enum {KEYMGMT_WPA_PSK=1, KEYMGMT_WPA_EAP=2, KEYMGMT_IEEE8021X=4, KEYMGMT_NONE=8} KEYMGMT;
+	typedef enum {CI_UNDEFINED=0, CI_NONE=1, CI_CCMP=2, CI_TKIP=4, CI_WEP104=8, CI_WEP40=16} CIPHERS;
+	typedef enum {KEYMGMT_UNDEFINED=0, KEYMGMT_NONE=1, KEYMGMT_WPA_PSK=2, KEYMGMT_WPA_EAP=4, KEYMGMT_IEEE8021X=8} KEYMGMT;
 	struct wps_network {
 		int id;
 		QString ssid;
@@ -47,18 +47,27 @@ namespace libnut {
 		CIPHERS ciphers;
 		KEYMGMT key_mgmt;
 	};
-	struct wps_MIB {
-	};
+	struct wps_variable;
+	typedef QList<wps_variable> wps_MIB;
 	//enums are NOT complete, but maybe we schould change this to QString
 	struct wps_status {
-		typedef enum {COMPLETED} WPA_STATE;
-		typedef enum {AUTHENTICATED} PAE_STATE;
-		typedef enum {AUTHORIZED} PORT_STATUS;
-		typedef enum {AUTO} PORT_CONTROL;
-		typedef enum {IDLE} BACKEND_STATE;
-		typedef enum {SUCCESS} EAP_STATE;
-		typedef enum {NOSTATE} METHOD_STATE;
-		typedef enum {COND_SUCC} DECISION;
+// 		typedef enum {COMPLETED} WPA_STATE;
+// 		typedef enum {AUTHENTICATED} PAE_STATE;
+// 		typedef enum {AUTHORIZED} PORT_STATUS;
+// 		typedef enum {AUTO} PORT_CONTROL;
+// 		typedef enum {IDLE} BACKEND_STATE;
+// 		typedef enum {SUCCESS} EAP_STATE;
+// 		typedef enum {NOSTATE} METHOD_STATE;
+// 		typedef enum {COND_SUCC} DECISION;
+		//These typedefs may change in the future to the ones above (more complete)
+		typedef QString WPA_STATE;
+		typedef QString PAE_STATE;
+		typedef QString PORT_STATUS;
+		typedef QString PORT_CONTROL;
+		typedef QString BACKEND_STATE;
+		typedef QString EAP_STATE;
+		typedef QString METHOD_STATE;
+		typedef QString DECISION;
 		nut::MacAddress bssid;
 		QString ssid;
 		int id;
@@ -82,11 +91,12 @@ namespace libnut {
 		int ClientTimeout;
 	};
 
-	struct wps_var {
-		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} Type;
+	struct wps_variable {
+		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} wps_variable_type;
+		wps_variable_type type;
 		QString name;
 		union {
-			int * num;
+			qint32 * num;
 			QString * str;
 			bool * logic;
 		} value;
@@ -100,9 +110,9 @@ namespace libnut {
 			bool * logic;
 		} value;
 	};
-	typedef enum {WI_REQ=1,WI_EVENT=2} wps_interact_type;
-	typedef enum {WR_IDENTITY=1, WR_NEW_PASSWORD=2, WR_PIN=4, WR_OTP=8, WR_PASSPHRASE=16} wps_req_type;
-	typedef enum {WE_DISCONNECTED=1, WE_CONNECTED=2} wps_event_type;
+	typedef enum {WI_MSG=0, WI_REQ=1,WI_EVENT=2} wps_interact_type;
+	typedef enum {WR_FAIL=0, WR_PASSWORD=2, WR_IDENTITY=4, WR_NEW_PASSWORD=8, WR_PIN=16, WR_OTP=32, WR_PASSPHRASE=64} wps_req_type;
+	typedef enum {WE_OTHER=0, WE_DISCONNECTED=1, WE_CONNECTED=2} wps_event_type;
 	struct wps_req {
 		wps_req_type type;
 		int id;
@@ -156,29 +166,55 @@ namespace libnut {
 			inline QString wps_cmd_INTERFACES() { return wps_ctrl_command("INTERFACES"); }
 			
 			//Parser Functions
-				//So far this function does nothing more than just print the message via message
+
 			
 			QStringList sliceMessage(QString str);
+			
+			//Parse MIB Variables
 			wps_MIB parseMIB(QStringList list);
+			wps_variable::wps_variable_type parseMIBType(QString str);
+			
+			//parse list network
 			QList<wps_network> parseListNetwork(QStringList list);
-			QList<wps_scan> parseScanResult(QStringList list);
-			wps_status parseStatus(QStringList list);
-			
-			inline void printMessage(QString msg);
-			
+			wps_network_flags parseNetworkFlags(QString str);
 
-			//Helper functions:
+
+			//parse scan results
+			CIPHERS parseScanCiphers(QString str);
+			KEYMGMT parseScanKeymgmt(QString str);
+			QList<wps_scan> parseScanResult(QStringList list);
+
+			//parse Status with helper functionss
+			wps_status parseStatus(QStringList list);
+			wps_status::WPA_STATE parseWpaState(QString str);
+			wps_status::PAE_STATE parsePaeState(QString str);
+			wps_status::PORT_STATUS parsePortStatus(QString str);
+			wps_status::PORT_CONTROL parsePortControl(QString str);
+			wps_status::BACKEND_STATE parseBackendState(QString str);
+			wps_status::EAP_STATE parseEapState(QString str);
+			wps_status::METHOD_STATE parseMethodState(QString str);
+			wps_status::DECISION parseDecision(QString str);
+			
+			//parse Event
+			wps_event_type parseEvent(QString str);
+			wps_req parseReq(QString str);
+			wps_req_type parseReqType(QString str);
+			wps_interact_type parseInteract(QString str);
+
+			//Event helper functions:
 			void Event_dispatcher(wps_req request);
 			void Event_dispatcher(wps_event_type event);
+			void Event_dispatcher(QString event);
+
+			inline void printMessage(QString msg);
 		private slots:
 			void wps_read(int socket);
 			
 		public:
-			CWpa_Supplicant(QObject * parent);
 			CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path);
 			~CWpa_Supplicant();
 			bool wps_open();
-			bool wps_close();
+			bool wps_close(bool available=true);
 			bool connected();
 	
 		public slots:
@@ -206,17 +242,17 @@ namespace libnut {
 			void setVariable(QString var, QString val);
 			void setNetworkVariable(int id, QString var, QString val);
 			QString getNetworkVariable(int id, QString val);
-			//Future functions:
-			/*
+
 			QList<wps_network> listNetworks();
 			QList<wps_scan> scanResults();
-			//QList<QStringList> getMIBVariables();
-			wps_status status(bool verbose);
-			getCapability(QString option, bool strict);
-			//QString wps_cmd_PMKSA();
-			//Maybe variable/value as new wps_variable / wps_net_variable class
+			wps_status status();
 
-			
+			//Future functions:
+			/*
+			QList<QStringList> getMIBVariables();
+			getCapability(QString option, bool strict);
+			QString wps_cmd_PMKSA();
+			//Maybe variable/value as new wps_variable / wps_net_variable class
 			void setVariable(wps_var var);
 			void setNetworkVariable(int id, wps_net_var var);
 			wps_net_var getNetworkVariable(int id, wps_net_var::Type);
