@@ -13,31 +13,30 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 	//	     void (*msg_cb)(char *msg, size_t len));
 	//	     
 	//First Check if wpa_supplicant is running:
-	size_t * reply_len;
 	size_t command_len;
 	char * command;
-	char * reply;
+	char reply[4096];
+	size_t reply_len = sizeof(reply);
 	
 	command = new char[5];
 	command = "PING";
 	command_len = sizeof(command);
-	int status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, reply_len,NULL);
-	if ( (status != 0) or (QString(reply) != "PONG") ) {
+	int status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);
+	if ( (status != 0) or (QString::fromUtf8(reply, reply_len) != "PONG") ) {
 		//TODO: Maybe we need to detach and close wpa_supplicant:
 		wps_close();
 		return QString();
 	}
 	if (cmd != "PING") {
-		delete [] reply;
-		delete reply_len;
+		size_t reply_len = sizeof(reply);
 		command = cmd.toAscii().data();
 		command_len = cmd.toAscii().size();
 		
-		status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, reply_len,NULL);
+		status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);
 		if (0 == status) {
 			if (reply_len > 0) {
 				//TODO:Check if reply is \0 terminated
-				return QString(reply);
+				return QString::fromUtf8(reply, reply_len);
 			}
 			else {
 				return QString();
@@ -48,14 +47,78 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 		}
 	}
 	else { //PING command requested
-		return QString(reply);
+		return QString::fromUtf8(reply, reply_len);
 	}
 }
 
 //parser Functions:
-void CWpa_Supplicant::parseMessage(QString msg) {
-	emit(message(msg));
+QStringList CWpa_Supplicant::sliceMessage(QString str) {
+	return str.split('\n',QString::SkipEmptyParts);
 }
+wps_MIB CWpa_Supplicant::parseMIB(QStringList list) {
+	wps_MIB dummy;
+	return dummy;
+}
+
+wps_network_flags parseNetworkFlags(QString str) {
+	if (str.contains("CURRENT",Qt::CaseInsensitive)) {
+		return WNF_CURRENT;
+	}
+	return WNF_NONE;
+}
+//network id / ssid / bssid / flags
+//0 example network	any	[CURRENT]
+QList<wps_network> CWpa_Supplicant::parseListNetwork(QStringList list) {
+	list.removeFirst();
+	QList<wps_network> networks;
+	QStringList line;
+	wps_network net;
+	foreach(QString str, list) {
+		line = str.split('\t',QString::KeepEmptyParts);
+		net.id = line[0].toInt();
+		net.ssid = line[1];
+		net.bssid = nut::MacAddress(line[2]);
+		net.flags = parseNetworkFlags(line[3]);
+		networks.append(net);
+	}
+	return networks;
+}
+/* Scan results:
+bssid / frequency / signal level / flags / ssid
+00:09:5b:95:e0:4e	2412	208	[WPA-PSK-CCMP]	jkm private
+02:55:24:33:77:a3	2462	187	[WPA-PSK-TKIP]	testing
+00:09:5b:95:e0:4f	2412	209		jkm guest
+*/
+QList<wps_scan> CWpa_Supplicant::parseScanResult(QStringList list) {
+	list.removeFirst();
+	QList<wps_scan> scanresults;
+	QStringList line;
+	wps_scan scanresult;
+	foreach(QString str, list) {
+		line = str.split('\t',QString::KeepEmptyParts);
+		scanresult.bssid = nut::MacAddress(line[0]);
+		scanresult.freq = line[1].toInt();
+		scanresult.level = line[2].toInt();
+		//scanresult.ciphers = parseScanCiphers;
+		//scanresult.KEYMGMT key_mgmt;
+		scanresult.ssid = line[4];
+		scanresults.append(scanresult);
+	}
+	return scanresults;
+}
+wps_status CWpa_Supplicant::parseStatus(QStringList list) {
+	wps_status dummy;
+	return dummy;
+}
+
+
+void CWpa_Supplicant::printMessage(QString msg) {
+	if (log_enabled) {
+		emit(message(msg));
+	}
+}
+
+
 
 //Private slots:
 //Reads messages from wpa_supplicant
@@ -65,12 +128,13 @@ void CWpa_Supplicant::wps_read(int socket) {
 		int status = wpa_ctrl_pending(event_ctrl);
 		if (1 == status) {
 			//Receive Messages
-			char * reply;
-			size_t * reply_len;
-			wpa_ctrl_recv(event_ctrl, reply,reply_len);
-			//TODO:Write parser functions needed here:
-			//TODO:Check if reply is \0 terminated
-			parseMessage(QString(reply));
+			char reply[512];
+			size_t reply_len = sizeof(reply);
+			wpa_ctrl_recv(event_ctrl, reply, &reply_len);
+			//
+			printMessage(QString::fromUtf8(reply,reply_len));
+			//Slice String into StringList
+//			eventParser(QString::fromUtf8(reply, reply_len));
 		}
 	}
 }
@@ -117,7 +181,18 @@ bool CWpa_Supplicant::wps_open() {
 	//Open wpa_supplicant control interface
 	cmd_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
 	event_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
-	
+	if (cmd_ctrl == NULL and event_ctrl == NULL) {
+		return false;
+	}
+	if (cmd_ctrl == NULL) {
+		wpa_ctrl_close(event_ctrl);
+		return false;
+	}
+	if (event_ctrl == NULL) {
+		wpa_ctrl_close(cmd_ctrl);
+		return false;
+	}
+		
 	//Atach event monitor
 	status = wpa_ctrl_attach(event_ctrl);
 	//Status : 0 = succ; -1 = fail, -2 = timeout
@@ -156,6 +231,11 @@ bool CWpa_Supplicant::connected() {
 }
 
 //Public slots
+
+
+void setLog(bool enabled) {
+	log_enabled = enabled;
+}
 //Function to respond to ctrl requests from wpa_supplicant
 void CWpa_Supplicant::wps_response(wps_req request, QString msg) {
 	switch (request.type) {
@@ -239,6 +319,16 @@ int CWpa_Supplicant::addNetwork() {
 //TODO:Check is id is in range
 void CWpa_Supplicant::setBssid(int id, nut::MacAddress bssid) {
 	wps_cmd_BSSID(id,bssid.toString());
+}
+//Plain setVaraiable functions
+void CWpa_Supplicant::setVariable(QString var, QString val) {
+	wps_cmd_SET(var,val);
+}
+void CWpa_Supplicant::setNetworkVariable(int id, QString var, QString val) {
+	wps_cmd_SET_NETWORK(id,var,val);
+}
+QString CWpa_Supplicant::getNetworkVariable(int id, QString val) {
+	return wps_cmd_GET_NETWORK(id,val);
 }
 
 //Future Functions:

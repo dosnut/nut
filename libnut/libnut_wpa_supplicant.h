@@ -22,17 +22,22 @@
 #include <QStringList>
 #include <common/macaddress.h>
 
+//TODO:Check if we can start multiple wpa_supplicants for multiple devices and test behavior
+
 
 
 namespace libnut {
-	typedef enum {} wps_network_flags;
+	typedef enum {WNF_NONE=0, WNF_CURRENT=1} wps_network_flags;
 	typedef enum {CI_CCMP=1, CI_TKIP=2, CI_WEP104=4, CI_WEP40=8} CIPHERS;
 	typedef enum {KEYMGMT_WPA_PSK=1, KEYMGMT_WPA_EAP=2, KEYMGMT_IEEE8021X=4, KEYMGMT_NONE=8} KEYMGMT;
 	struct wps_network {
 		int id;
 		QString ssid;
-		QString bssid;
+		nut::MacAddress bssid;
 		wps_network_flags flags;
+	};
+	struct wps_network_config {
+		
 	};
 	struct wps_scan {
 		nut::MacAddress bssid;
@@ -41,6 +46,8 @@ namespace libnut {
 		int level;
 		CIPHERS ciphers;
 		KEYMGMT key_mgmt;
+	};
+	struct wps_MIB {
 	};
 	//enums are NOT complete, but maybe we schould change this to QString
 	struct wps_status {
@@ -109,6 +116,7 @@ namespace libnut {
 			int wps_fd;
 			QString wps_ctrl_command(QString cmd);
 			QSocketNotifier *event_sn;
+			bool log_enabled;
 			
 		//Abstracted Commands:
 			inline QString wps_cmd_PING() { return wps_ctrl_command("PING"); }
@@ -149,7 +157,15 @@ namespace libnut {
 			
 			//Parser Functions
 				//So far this function does nothing more than just print the message via message
-			void parseMessage(QString msg);
+			
+			QStringList sliceMessage(QString str);
+			wps_MIB parseMIB(QStringList list);
+			QList<wps_network> parseListNetwork(QStringList list);
+			QList<wps_scan> parseScanResult(QStringList list);
+			wps_status parseStatus(QStringList list);
+			
+			inline void printMessage(QString msg);
+			
 
 			//Helper functions:
 			void Event_dispatcher(wps_req request);
@@ -164,8 +180,9 @@ namespace libnut {
 			bool wps_open();
 			bool wps_close();
 			bool connected();
-			
+	
 		public slots:
+			void setLog(bool enabled);
 			//Functions to react to request made from wpa_supplicant:
 			void wps_response(wps_req request, QString msg);
 			//
@@ -185,6 +202,10 @@ namespace libnut {
 			void preauth(nut::MacAddress bssid);
 			int addNetwork();
 			void setBssid(int id, nut::MacAddress bssid);
+
+			void setVariable(QString var, QString val);
+			void setNetworkVariable(int id, QString var, QString val);
+			QString getNetworkVariable(int id, QString val);
 			//Future functions:
 			/*
 			QList<wps_network> listNetworks();
@@ -194,9 +215,7 @@ namespace libnut {
 			getCapability(QString option, bool strict);
 			//QString wps_cmd_PMKSA();
 			//Maybe variable/value as new wps_variable / wps_net_variable class
-			void setVariable(QString var, QString val);
-			void setNetworkVariable(int id, QString var, QString val);
-			QString getNetworkVariable(int id, QString val);
+
 			
 			void setVariable(wps_var var);
 			void setNetworkVariable(int id, wps_net_var var);

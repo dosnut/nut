@@ -104,8 +104,6 @@ void CLibNut::serviceCheck(QDBusConnectionInterface * interface) {
 		throw CLI_ConnectionInitException(tr("(%1)Error while setting-up dbusconnection").arg(toString(reply.error())));
 	}
 }
-void CLibNut::objectCheck(QDBusConnectionInterface * interface) {
-}
 
 ////////////////
 //CDeviceManager
@@ -387,9 +385,12 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	connect(dbusDevice, SIGNAL(stateChanged(int , int)),
 			this, SLOT(dbusstateChanged(int, int)));
 	
-	wpa_supplicant = new CWpa_Supplicant(this);
+	wpa_supplicant = new CWpa_Supplicant(this,"/var/run/wpa_supplicant/"+name);
 	connect(wpa_supplicant,SIGNAL(message(QString)),log,SLOT(log(QString)));
-	wpa_supplicant->wps_open();
+	bool opened = wpa_supplicant->wps_open();
+	if (!opened) {
+		*log << tr("ERROR: Could not attach to wpa_supplicant");
+	}
 }
 CDevice::~CDevice() {
 	CEnvironment * env;
