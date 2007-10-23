@@ -1,0 +1,56 @@
+\documentclass[a4paper,10pt]{scrartcl}
+\usepackage[latin1]{inputenc}
+\usepackage[a4paper,left=1.5cm,right=1.5cm,top=2.5cm,bottom=2cm]{geometry}
+
+\begin{document}
+
+\begin{Large}\textbf{Netzwerkmanager - nut (Networkutility) - Spezifikation}\end{Large}
+
+
+\section*{Fähigkeiten}
+\begin{itemize}
+\item Netzwerkmanager
+\item D-Bus-Interface
+\item KDE-Client
+\item Unterstützung von WPA (voraussichtlich Konfiguration durch wpa\_supplicant)
+\item Unterstützung von zeroconf/dhcp/static ip
+\item Erkennung von Hardwarezustandsänderung (Kabel aus/einstecken, Wlankarte anschalten etc.)
+\item Unterstützung von mehreren IPs pro Interface 
+\item Eventgesteuerte Ausführung von Skripten für zusätzliche Aktionen
+\end{itemize}
+
+
+\section*{Komponenten}
+\subsection*{nuts - Network UTility Server}
+Daemon der die Netzwerkkarten (devices) verwaltet \\
+und gegebenenfalls je nach Zustand oder Zustandswechsel entsprechende Aktionen ausführt. \\
+Idee:
+Für jede Netzwerkkarte (device) existieren Umgebungen (\geq 1 pro Karte) mit bestimmten Eigenschaften. \\
+In diesen Umgebungen sind die softwareseitigen Netzwerkschnittstellen (IP-Adressen, hier: interfaces).\\
+Die Umgebungen können nach mehreren Kriterien ausgewählt werden:
+\begin{itemize}
+ \item Andere IP-Adressen (und optional passende MAC-Adresse) im Netzwerk
+ \item evtl. weitere Kriterien
+\end{itemize}
+Standardumgebung für jede Netzwerkkarte ist ``default'' mit IP-Adresse per dhcp. \\
+Wenn die Netzwerkkarte nicht aufgeführt ist, so wird sie nicht verwaltet.\\
+Die Kommunikation mit dem Server erfolgt über D-Bus.
+D-Bus-Interface Dienste:
+\begin{itemize}
+ \item Umgebungen setzen
+ \item Umgebung erfragen
+ \item Manuelle Konfiguration der Netzwerkkarte (erfragt vom Server/aufgerufen vom NUTser (Konfig der Interfaces) static user)
+\end{itemize}
+
+\subsection*{nut - Network UTility}
+Kommandozeilensteuerung für nuts.
+\subsection*{knut/qnut}
+KDE bzw. Qt Steuerprogramm für nut. Der NUTser (Benutzer) kann damit die Wlan-Verbindungen wechseln, \\
+neue aufbauen oder wird vom Server nach einer manuellen Konfiguration gefragt bzw. kann diese selbst verwalten.
+
+\section*{Voraussichtliche Arbeitsteilung}
+Oliver: Knut \\
+Stefan: Nuts \\
+Daniel: D-Bus
+
+\end{document}
