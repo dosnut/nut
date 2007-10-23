@@ -19,6 +19,7 @@
 #include <QSettings>
 #include <QLabel>
 #include <libnut/libnut_cli.h>
+#include "ui/ui_devopt.h"
 
 namespace qnut {
 	using namespace libnut;
@@ -29,11 +30,13 @@ namespace qnut {
 	class CDeviceOptions : public QWidget {
 		Q_OBJECT
 	protected:
-		QLabel * statusText;
-		QLabel * statusIcon;
+//		QLabel * statusText;
+//		QLabel * statusIcon;
 		
-		QTreeView * environmentTree;
-		QCheckBox * showTrayCheck;
+//		QTreeView * environmentTree;
+//		QCheckBox * showTrayCheck;
+		
+		Ui::devopt ui;
 		
 		QSettings settings;
 		

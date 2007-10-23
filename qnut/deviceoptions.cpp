@@ -15,6 +15,8 @@
 #include <QProcess>
 #include "deviceoptions.h"
 #include "deviceoptionsmodel.h"
+#include "interfacedetailsmodel.h"
+//#include "environmentdetailsmodel.h"
 #include "ipconfiguration.h"
 #include "scriptsettings.h"
 #include "common.h"
@@ -40,28 +42,30 @@ namespace qnut {
 		connect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
 		
 		if (device->state == DS_UP)
-			environmentTree->expand(environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
+			ui.environmentTree->expand(ui.environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
 	}
 	
 	CDeviceOptions::~CDeviceOptions() {
 		disconnect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
-		disconnect(device, SIGNAL(environmentsUpdated()), environmentTree, SLOT(reset()));
+		disconnect(device, SIGNAL(environmentsUpdated()), ui.environmentTree, SLOT(reset()));
 		writeSettings();
 		delete deviceMenu;
 	}
 	
 	inline void CDeviceOptions::readSettings() {
 		settings.beginGroup("Main");
-		scriptFlags = settings.value("scriptFlags", true).toInt();
-		trayIcon->setVisible(settings.value("showTrayIcon", true).toBool());
+		scriptFlags = settings.value("scriptFlags", 0).toInt();
+		trayIcon->setVisible(settings.value("showTrayIcon", false).toBool());
+		ui.detailsButton->setChecked(settings.value("showDetails", false).toBool());
 		settings.endGroup();
-		showTrayCheck->setChecked(trayIcon->isVisible());
+		ui.showTrayCheck->setChecked(trayIcon->isVisible());
 	}
 	
 	inline void CDeviceOptions::writeSettings() {
 		settings.beginGroup("Main");
 		settings.setValue("scriptFlags", scriptFlags);
 		settings.setValue("showTrayIcon", trayIcon->isVisible());
+		settings.setValue("showDetails", ui.detailsButton->isChecked());
 		settings.endGroup();
 	}
 	
@@ -75,7 +79,7 @@ namespace qnut {
 		ipConfigurationAction = deviceMenu->addAction(QIcon(UI_ICON_EDIT), tr("Set IP Configuration..."), this, SLOT(uiChangeIPConfiguration()));
 		
 		enterEnvironmentAction = new QAction(QIcon(UI_ICON_ENVIRONMENT_ENTER), tr("Enter environment"), this);
-		environmentTree->addAction(enterEnvironmentAction);
+		ui.environmentTree->addAction(enterEnvironmentAction);
 		
 		enableDeviceAction->setEnabled(device->state == DS_DEACTIVATED);
 		disableDeviceAction->setDisabled(device->state == DS_DEACTIVATED);
@@ -86,42 +90,46 @@ namespace qnut {
 	inline void CDeviceOptions::createView() {
 		trayIcon = new QSystemTrayIcon(QIcon(iconFile(device)), this);
 		
-		showTrayCheck = new QCheckBox(tr("Show tray icon for this device"));
-		connect(showTrayCheck, SIGNAL(toggled(bool)), trayIcon, SLOT(setVisible(bool)));
+		ui.setupUi(this);
 		
-		environmentTree = new QTreeView();
+		//interfaceDetails = new CInterfaceDetailsModel();
+		
+//		showTrayCheck = new QCheckBox(tr("Show tray icon for this device"));
+		connect(ui.showTrayCheck, SIGNAL(toggled(bool)), trayIcon, SLOT(setVisible(bool)));
+		
+/*		environmentTree = new QTreeView();
 		environmentTree->setContextMenuPolicy(Qt::ActionsContextMenu);
 		environmentTree->setAllColumnsShowFocus(true);
 		environmentTree->setAlternatingRowColors(true);
 		environmentTree->setIconSize(QSize(18, 18));
-		environmentTree->setAllColumnsShowFocus(true);
-		environmentTree->header()->setResizeMode(QHeaderView::ResizeToContents);
-		environmentTree->setModel(new CDeviceOptionsModel(device));
-		connect(environmentTree->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+		environmentTree->setAllColumnsShowFocus(true);*/
+		ui.environmentTree->header()->setResizeMode(QHeaderView::ResizeToContents);
+		ui.environmentTree->setModel(new CDeviceOptionsModel(device));
+		connect(ui.environmentTree->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(uiSelectionChanged(const QItemSelection &, const QItemSelection &)));
-		connect(device, SIGNAL(environmentsUpdated()), environmentTree, SLOT(reset()));
+		connect(device, SIGNAL(environmentsUpdated()), ui.environmentTree, SLOT(reset()));
 		
 		//todo: interfacesänderungen hier
 		
-		statusIcon = new QLabel();
+/*		statusIcon = new QLabel();
 		statusText = new QLabel();
-		statusIcon->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+		statusIcon->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);*/
 		setHeadInfo();
 		
-		QHBoxLayout * headlayout = new QHBoxLayout();
+/*		QHBoxLayout * headlayout = new QHBoxLayout();
 		headlayout->addWidget(statusIcon);
 		headlayout->addWidget(statusText);
 		
-		QVBoxLayout * mainlayout = new QVBoxLayout();
+		QVBo	xLayout * mainlayout = new QVBoxLayout();
 		mainlayout->addLayout(headlayout);
 		mainlayout->addWidget(environmentTree);
 		mainlayout->addWidget(showTrayCheck);
-		setLayout(mainlayout);
+		setLayout(mainlayout);*/
 	}
 	
 	inline void CDeviceOptions::setHeadInfo() {
-		statusIcon->setPixmap(QPixmap(iconFile(device)));
-		statusText->setText(toString(device->state));
+		ui.iconLabel->setPixmap(QPixmap(iconFile(device)));
+		ui.statusLabel->setText(toString(device->state));
 	}
 	
 	void CDeviceOptions::uiHandleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
@@ -145,7 +153,11 @@ namespace qnut {
 				disconnect(target, SIGNAL(activeChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
 				disconnect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
 			}
+			
 		}
+		
+		QItemSelectionModel * oldSelectionModel = ui.detailsView->selectionModel();
+		QAbstractItemModel * oldItemModel = ui.detailsView->model();
 		
 		if (!selectedIndexes.isEmpty()) {
 			QModelIndex targetIndex = selectedIndexes[0];
@@ -155,19 +167,27 @@ namespace qnut {
 				connect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
 				
 				enterEnvironmentAction->setDisabled(target == device->activeEnvironment);
+				//workarround für environment details model
+				ui.detailsView->setModel(new CInterfaceDetailsModel(NULL));
 			}
 			else {
 				enterEnvironmentAction->setEnabled(false);
+				ui.detailsView->setModel(new CInterfaceDetailsModel((CInterface *)(targetIndex.internalPointer())));
 			}
 		}
 		else {
 			enterEnvironmentAction->setEnabled(false);
+			//workarround für leeres model
+			ui.detailsView->setModel(new CInterfaceDetailsModel(NULL));
 		}
+		
+		delete oldSelectionModel;
+		delete oldItemModel;
 	}
 	
 	void CDeviceOptions::uiChangeIPConfiguration() {
 		CIPConfiguration dialog(this);
-		QModelIndex selectedIndex = (environmentTree->selectionModel()->selection().indexes())[0];
+		QModelIndex selectedIndex = (ui.environmentTree->selectionModel()->selection().indexes())[0];
 
 		dialog.execute((CInterface *)(selectedIndex.internalPointer()));
 	}
@@ -179,16 +199,16 @@ namespace qnut {
 	
 	void CDeviceOptions::uiHandleStateChange(DeviceState state) {
 		setHeadInfo();
-		environmentTree->collapseAll();
+		ui.environmentTree->collapseAll();
 		if (state == DS_UP)
-			environmentTree->expand(environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
+			ui.environmentTree->expand(ui.environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
 		
 		enableDeviceAction->setEnabled(state == DS_DEACTIVATED);
 		disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
 		ipConfigurationAction->setEnabled(state == DS_UNCONFIGURED);
 
-		if (!environmentTree->selectionModel()->selectedIndexes().isEmpty()) {
-			QModelIndex targetIndex = environmentTree->selectionModel()->selectedIndexes()[0];
+		if (!ui.environmentTree->selectionModel()->selectedIndexes().isEmpty()) {
+			QModelIndex targetIndex = ui.environmentTree->selectionModel()->selectedIndexes()[0];
 			if (!targetIndex.parent().isValid()) {
 				CEnvironment * target = (CEnvironment *)(targetIndex.internalPointer());
 				enterEnvironmentAction->setDisabled(target == device->activeEnvironment);

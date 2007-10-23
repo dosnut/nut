@@ -16,9 +16,9 @@
 #define DEVOP_MOD_ITEM    0
 #define DEVOP_MOD_STATUS  1
 #define DEVOP_MOD_IP      2
-#define DEVOP_MOD_CONFIG  5
 #define DEVOP_MOD_NETMASK 3
 #define DEVOP_MOD_GATEWAY 4
+#define DEVOP_MOD_CONFIG  5
 
 namespace qnut {
 	CDeviceOptionsModel::CDeviceOptionsModel(CDevice * data, QObject * parent) : QAbstractItemModel(parent) {
@@ -33,7 +33,7 @@ namespace qnut {
 		if (device == NULL)
 			return 0;
 		else
-			return 5;
+			return 3;
 	}
 	
 	int CDeviceOptionsModel::rowCount(const QModelIndex & parent) const {
@@ -93,22 +93,11 @@ namespace qnut {
 					}
 					
 					if (data->parent()->parent() == device) {
-						CInterface * current = (CInterface *)data;
-// 						QString statusArg;
-// 						if (current->isStatic) {
-// 							statusArg = tr("static");
-// // 							if (current->getConfig().getFlags() == nut::IPv4Config::DO_DHCP) {
-// // 								statusArg += " (" + tr("fallback") + ')';
-// // 							}
-// 						}
-// 						else
-// 							statusArg = tr("dynamic");
-						
-						return current->active ? tr("assigned") : tr("unassigned");
+						return ((CInterface *)data)->active ? tr("assigned") : tr("unassigned");
 					}
 				}
 				break;
-			case DEVOP_MOD_CONFIG:
+/*			case DEVOP_MOD_CONFIG:
 				if (role == Qt::DisplayRole) {
 // 					if (data->parent() == device) {
 // 						int configFlags = 0;
@@ -135,7 +124,7 @@ namespace qnut {
 						return ((CInterface *)data)->isStatic ? tr("static") : tr("dynamic");
 					}
 				}
-				break;
+				break;*/
 			case DEVOP_MOD_IP:
 				if (role == Qt::DisplayRole) {
 					if (data->parent() == device) {
@@ -143,11 +132,22 @@ namespace qnut {
 					}
 					
 					if (data->parent()->parent() == device) {
-						return (((CInterface *)data)->isStatic || ((CInterface *)data)->active) ? ((CInterface *)data)->ip.toString() : tr("not assigned");
+						if (((CInterface *)data)->active)
+							return ((CInterface *)data)->ip.toString();
+						else {
+							switch (((CInterface *)data)->config.flags) {
+							case CInterface::IF_STATIC:
+								return ((CInterface *)data)->config.staticIp.toString();
+							case CInterface::IF_FALLBACK:
+								return tr("none (fallback: %1)").arg(((CInterface *)data)->config.staticIp.toString());
+							default:
+								return tr("none");
+							}
+						}
 					}
 				}
 				break;
-			case DEVOP_MOD_NETMASK:
+/*			case DEVOP_MOD_NETMASK:
 				if (role == Qt::DisplayRole) {
 					if (data->parent() == device) {
 						return QString('-');
@@ -168,7 +168,7 @@ namespace qnut {
 						return (((CInterface *)data)->isStatic || ((CInterface *)data)->active) ? ((CInterface *)data)->gateway.toString() : tr("not assigned");
 					}
 				}
-				break;
+				break;*/
 			default:
 				break;
 		}
