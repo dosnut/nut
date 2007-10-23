@@ -67,7 +67,6 @@ namespace libnut {
 			QDBusConnectionInterface * dbusConnectionInterface;
 			QDBusConnection * dbusConnection;
 			void serviceCheck(QDBusConnectionInterface * interface);
-			void objectCheck(QDBusConnectionInterface * interface);
 		public:
 			CLibNut(QObject * parent) : QObject(parent) {}
 
@@ -220,7 +219,7 @@ namespace libnut {
 		QHostAddress netmask;
 		QHostAddress gateway;
 		QList<QHostAddress> dnsserver;
-		typedef enum {IF_DYNAMIC = 1, IF_ZEROCONF = 2, IF_STATIC = 4, IF_FALLBACK = 8} InterfaceFlags;
+		typedef enum {IF_DYNAMIC = 1, IF_ZEROCONF = 2, IF_STATIC = 4, IF_FALLBACK = 5} InterfaceFlags;
 		struct InterfaceConfig {
 			InterfaceFlags flags;
 			QHostAddress staticIp;
@@ -228,7 +227,7 @@ namespace libnut {
 			QHostAddress staticGateway;
 		} config;
 
-
+		nut::IPv4Config getConfig();
 		CInterface(CEnvironment * parent, QDBusObjectPath dbusPath);
 		~CInterface();
 	public slots:
@@ -237,7 +236,6 @@ namespace libnut {
 		void setIP(QHostAddress & address);
 		void setNetmask(QHostAddress & address);
 		void setGateway(QHostAddress & address);
-		nut::IPv4Config getConfig();
 		
 	signals:
 		void activeChanged(bool active);

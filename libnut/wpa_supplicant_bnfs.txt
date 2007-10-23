@@ -49,6 +49,9 @@ CTRL-REQ-PASSWORD-1-Password needed for SSID test-network
 
 CTRL-REQ-(IDENTITY|PASSWORD|NEW_PASSWORD|PIN|OTP|PASSPHRASE)-{0-9}-{alphanumeric}<br>
 
+CTRL-EVENT-(DISCONNECTED|CONNECTED|OHTER) - {alphanumeric}<br>
+So far only DISCONNECTED and CONNECTED are interessting as we only refresh our status information on these events.
+
 
 Interfaces Command:
 eth0

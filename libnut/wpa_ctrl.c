@@ -23,7 +23,6 @@
 #include "wpa_ctrl.h"
 #include "common.h"
 
-
 #if defined(CONFIG_CTRL_IFACE_UNIX) || defined(CONFIG_CTRL_IFACE_UDP)
 #define CTRL_IFACE_SOCKET
 #endif /* CONFIG_CTRL_IFACE_UNIX || CONFIG_CTRL_IFACE_UDP */
@@ -38,7 +37,7 @@
  * an identifier for the control interface connection and use this as one of
  * the arguments for most of the control interface library functions.
  */
-struct wpa_ctrl {
+typedef struct wpa_ctrl {
 #ifdef CONFIG_CTRL_IFACE_UDP
 	int s;
 	struct sockaddr_in local;
@@ -53,7 +52,7 @@ struct wpa_ctrl {
 #ifdef CONFIG_CTRL_IFACE_NAMED_PIPE
 	HANDLE pipe;
 #endif /* CONFIG_CTRL_IFACE_NAMED_PIPE */
-};
+} wpa_ctrl;
 
 
 #ifdef CONFIG_CTRL_IFACE_UNIX
@@ -63,7 +62,7 @@ struct wpa_ctrl * wpa_ctrl_open(const char *ctrl_path)
 	struct wpa_ctrl *ctrl;
 	static int counter = 0;
 
-	ctrl = os_malloc(sizeof(*ctrl));
+	ctrl = (wpa_ctrl*) os_malloc(sizeof(*ctrl));
 	if (ctrl == NULL)
 		return NULL;
 	os_memset(ctrl, 0, sizeof(*ctrl));

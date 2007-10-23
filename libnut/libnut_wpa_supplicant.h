@@ -1,5 +1,7 @@
 #ifndef LIBNUT_LIBNUT_WPA_SUPPLICANT_H
 #define LIBNUT_LIBNUT_WPA_SUPPLICANT_H
+// #define CONFIG_CTRL_IFACE
+// #define CONFIG_CTRL_IFACE_UNIX
 #include <iostream>
 #include <QObject>
 #include <QList>
@@ -20,23 +22,35 @@
 #include <QStringList>
 #include <common/macaddress.h>
 
+//TODO:Check if we can start multiple wpa_supplicants for multiple devices and test behavior
+
 
 
 namespace libnut {
-	typedef enum {} wps_network_flags;
+	typedef enum {WNF_NONE=0, WNF_CURRENT=1} wps_network_flags;
+	typedef enum {CI_CCMP=1, CI_TKIP=2, CI_WEP104=4, CI_WEP40=8} CIPHERS;
+	typedef enum {KEYMGMT_WPA_PSK=1, KEYMGMT_WPA_EAP=2, KEYMGMT_IEEE8021X=4, KEYMGMT_NONE=8} KEYMGMT;
 	struct wps_network {
 		int id;
 		QString ssid;
-		QString bssid;
+		nut::MacAddress bssid;
 		wps_network_flags flags;
 	};
-	struct wps_scan {
+	struct wps_network_config {
 		
+	};
+	struct wps_scan {
+		nut::MacAddress bssid;
+		QString ssid;
+		int freq;
+		int level;
+		CIPHERS ciphers;
+		KEYMGMT key_mgmt;
+	};
+	struct wps_MIB {
 	};
 	//enums are NOT complete, but maybe we schould change this to QString
 	struct wps_status {
-		typedef enum {CCMP, TKIP, WEP104, WEP40} CIPHERS;
-		typedef enum {WPA_PSK, WPA_EAP, IEEE8021X, NONE_KEYMGMT} KEYMGMT;
 		typedef enum {COMPLETED} WPA_STATE;
 		typedef enum {AUTHENTICATED} PAE_STATE;
 		typedef enum {AUTHORIZED} PORT_STATUS;
@@ -86,6 +100,13 @@ namespace libnut {
 			bool * logic;
 		} value;
 	};
+	typedef enum {WI_REQ=1,WI_EVENT=2} wps_interact_type;
+	typedef enum {WR_IDENTITY=1, WR_NEW_PASSWORD=2, WR_PIN=4, WR_OTP=8, WR_PASSPHRASE=16} wps_req_type;
+	typedef enum {WE_DISCONNECTED=1, WE_CONNECTED=2} wps_event_type;
+	struct wps_req {
+		wps_req_type type;
+		int id;
+	};
 
 	class CWpa_Supplicant: public QObject {
 			Q_OBJECT
@@ -95,11 +116,12 @@ namespace libnut {
 			int wps_fd;
 			QString wps_ctrl_command(QString cmd);
 			QSocketNotifier *event_sn;
+			bool log_enabled;
 			
 		//Abstracted Commands:
 			inline QString wps_cmd_PING() { return wps_ctrl_command("PING"); }
 			inline QString wps_cmd_MIB() { return wps_ctrl_command("MIB"); }
-			inline QString wps_cmd_STATUS(bool verbose) { return (verbose) ? wps_ctrl_command("STATUS") : wps_ctrl_command("STATUS-VERBOSE"); }
+			inline QString wps_cmd_STATUS(bool verbose=false) { return (verbose) ? wps_ctrl_command("STATUS-VERBOSE") : wps_ctrl_command("STATUS"); }
 			inline QString wps_cmd_PMKSA() { return wps_ctrl_command("PMKSA"); }
 			inline void wps_cmd_SET(QString var, QString val) { wps_ctrl_command(QString("SET %1 %2").arg(var,val)); }
 			inline void wps_cmd_LOGON() { wps_ctrl_command("LOGON"); }
@@ -135,7 +157,19 @@ namespace libnut {
 			
 			//Parser Functions
 				//So far this function does nothing more than just print the message via message
-			void parseMessage(QString msg);
+			
+			QStringList sliceMessage(QString str);
+			wps_MIB parseMIB(QStringList list);
+			QList<wps_network> parseListNetwork(QStringList list);
+			QList<wps_scan> parseScanResult(QStringList list);
+			wps_status parseStatus(QStringList list);
+			
+			inline void printMessage(QString msg);
+			
+
+			//Helper functions:
+			void Event_dispatcher(wps_req request);
+			void Event_dispatcher(wps_event_type event);
 		private slots:
 			void wps_read(int socket);
 			
@@ -146,8 +180,12 @@ namespace libnut {
 			bool wps_open();
 			bool wps_close();
 			bool connected();
-			
+	
 		public slots:
+			void setLog(bool enabled);
+			//Functions to react to request made from wpa_supplicant:
+			void wps_response(wps_req request, QString msg);
+			//
 			void selectNetwork(int id);
 			void enableNetwork(int id);
 			void disableNetwork(int id);
@@ -164,6 +202,10 @@ namespace libnut {
 			void preauth(nut::MacAddress bssid);
 			int addNetwork();
 			void setBssid(int id, nut::MacAddress bssid);
+
+			void setVariable(QString var, QString val);
+			void setNetworkVariable(int id, QString var, QString val);
+			QString getNetworkVariable(int id, QString val);
 			//Future functions:
 			/*
 			QList<wps_network> listNetworks();
@@ -173,9 +215,7 @@ namespace libnut {
 			getCapability(QString option, bool strict);
 			//QString wps_cmd_PMKSA();
 			//Maybe variable/value as new wps_variable / wps_net_variable class
-			void setVariable(QString var, QString val);
-			void setNetworkVariable(int id, QString var, QString val);
-			QString getNetworkVariable(int id, QString val);
+
 			
 			void setVariable(wps_var var);
 			void setNetworkVariable(int id, wps_net_var var);
@@ -187,6 +227,8 @@ namespace libnut {
 		signals:
 			void opened();
 			void closed();
+			void wps_stateChange(bool state);
+			void wps_request(wps_req request);
 			void message(QString msg);
 	};
 
