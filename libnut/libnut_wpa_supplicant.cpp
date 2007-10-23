@@ -58,6 +58,7 @@ void CWpa_Supplicant::parseMessage(QString msg) {
 }
 
 //Private slots:
+//Reads messages from wpa_supplicant
 void CWpa_Supplicant::wps_read(int socket) {
 	if (socket == wps_fd) {
 		//status: 1 = msg available; 0 = no messages, -1 = error
@@ -73,6 +74,34 @@ void CWpa_Supplicant::wps_read(int socket) {
 		}
 	}
 }
+
+
+/*
+IDENTITY (EAP identity/user name)
+PASSWORD (EAP password)
+NEW_PASSWORD (New password if the server is requesting password change)
+PIN (PIN code for accessing a SIM or smartcard)
+OTP (one-time password; like password, but the value is used only once)
+PASSPHRASE (passphrase for a private key file)
+//CTRL-REQ-<field name>-<network id>-<human readable text>
+//CTRL-RSP-<field name>-<network id>-<value>
+*/
+/*
+CTRL-EVENT-DISCONNECTED
+CTRL-EVENT-CONNECTED
+*/
+void CWpa_Supplicant::Event_dispatcher(wps_req request) {
+	emit(wps_request(request));
+}
+void CWpa_Supplicant::Event_dispatcher(wps_event_type event) {
+	if (event == WE_CONNECTED) {
+		emit(wps_stateChange(true));
+	}
+	else if (event == WE_DISCONNECTED) {
+		emit(wps_stateChange(false));
+	}
+}
+
 
 //Public functions:
 CWpa_Supplicant::CWpa_Supplicant(QObject * parent) : QObject(parent) {
@@ -104,6 +133,7 @@ bool CWpa_Supplicant::wps_open() {
 	return true;
 }
 bool CWpa_Supplicant::wps_close() {
+	disconnect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
 	delete event_sn;
 	int status;
 	status = wpa_ctrl_detach(event_ctrl);
@@ -126,6 +156,30 @@ bool CWpa_Supplicant::connected() {
 }
 
 //Public slots
+//Function to respond to ctrl requests from wpa_supplicant
+void CWpa_Supplicant::wps_response(wps_req request, QString msg) {
+	switch (request.type) {
+		case (WR_IDENTITY):
+			wps_cmd_CTRL_RSP("IDENTITY",request.id,msg);
+			break;
+		case (WR_NEW_PASSWORD):
+			wps_cmd_CTRL_RSP("NEW_PASSWORD",request.id,msg);
+			break;
+		case (WR_PIN):
+			wps_cmd_CTRL_RSP("PIN",request.id,msg);
+			break;
+		case (WR_OTP):
+			wps_cmd_CTRL_RSP("OTP",request.id,msg);
+			break;
+		case (WR_PASSPHRASE):
+			wps_cmd_CTRL_RSP("PASSPHRASE",request.id,msg);
+			break;
+		default:
+			break;
+	}
+}
+
+
 void CWpa_Supplicant::selectNetwork(int id) {
 	wps_cmd_SELECT_NETWORK(id);
 }

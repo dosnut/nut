@@ -63,7 +63,7 @@ struct wpa_ctrl * wpa_ctrl_open(const char *ctrl_path)
 	struct wpa_ctrl *ctrl;
 	static int counter = 0;
 
-	ctrl = os_malloc(sizeof(*ctrl));
+	ctrl = (wpa_ctrl*) os_malloc(sizeof(*ctrl));
 	if (ctrl == NULL)
 		return NULL;
 	os_memset(ctrl, 0, sizeof(*ctrl));

@@ -2,9 +2,9 @@
 TEMPLATE = lib
 CONFIG += static create_prl
 TARGET = nut
-VERSION = 0.1.0
 
-CONFIG += qt warn_on qdbus exceptions
+CONFIG += qt warn_on qdbus exceptions \
+ staticlib
 QT -= gui
 QT += network
 
@@ -26,10 +26,21 @@ OBJECTS_DIR = build/
 UI_DIR = build/
 MOC_DIR = build/
 
-INCLUDEPATH += ../
 
-LIBS += ../common/libnutcommon.a
-TARGETDEPS += ../common/libnutcommon.a
 
 target.path = /usr/lib/
 INSTALLS += target
+DESTDIR = .
+
+DEFINES += CONFIG_CTRL_IFACE \
+ CONFIG_CTRL_IFACE_UNIX
+
+
+
+
+INCLUDEPATH += ../
+
+LIBS += ../common/libnutcommon.a
+
+TARGETDEPS += ../common/libnutcommon.a
+
