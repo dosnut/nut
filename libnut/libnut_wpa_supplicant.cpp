@@ -155,15 +155,21 @@ CIPHERS CWpa_Supplicant::parseScanCiphers(QString str) {
 	if (str.contains("WEP40")) {
 		cip = (CIPHERS) (cip | CI_WEP40);
 	}
+	if (str.contains("WEP")) {
+		cip = (CIPHERS) (cip | CI_WEP);
+	}
 	return cip;
 }
 KEYMGMT CWpa_Supplicant::parseScanKeymgmt(QString str) {
-	KEYMGMT key = KEYMGMT_UNDEFINED;
-	if (str.contains("NONE")) {
-		key = (KEYMGMT) (key | KEYMGMT_NONE);
-	}
+	KEYMGMT key = KEYMGMT_PLAIN;
 	if (str.contains("WPA-PSK")) {
 		key = (KEYMGMT) (key | KEYMGMT_WPA_PSK);
+	}
+	if (str.contains("WPA2-EAP")) {
+		key = (KEYMGMT) (key | KEYMGMT_WPA2_EAP);
+	}
+	if (str.contains("WPA2-PSK")) {
+		key = (KEYMGMT) (key | KEYMGMT_WPA2_PSK);
 	}
 	if (str.contains("WPA-EAP")) {
 		key = (KEYMGMT) (key | KEYMGMT_WPA_EAP);
@@ -441,6 +447,9 @@ wps_event_type CWpa_Supplicant::parseEvent(QString str) {
 	if (str.contains("DISCONNECTED") ) {
 		return WE_DISCONNECTED;
 	}
+	if (str.contains("TERMINATING")) {
+		return WE_TERMINATING;
+	}
 	return WE_OTHER;
 }
 
@@ -491,6 +500,9 @@ void CWpa_Supplicant::Event_dispatcher(wps_event_type event) {
 	else if (event == WE_DISCONNECTED) {
 		emit(wps_stateChange(false));
 	}
+	else if (event == WE_TERMINATING) {
+		wps_close(false);
+	}
 }
 
 void CWpa_Supplicant::Event_dispatcher(QString event) {
@@ -516,7 +528,7 @@ void CWpa_Supplicant::Event_dispatcher(QString event) {
 CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) : QObject(parent), wpa_supplicant_path(wpa_supplicant_path) {
 }
 CWpa_Supplicant::~CWpa_Supplicant() {
-	wps_close();
+	wps_close(false);
 }
 bool CWpa_Supplicant::wps_open() {
 	int status;
@@ -543,7 +555,7 @@ bool CWpa_Supplicant::wps_open() {
 	}
 	//Set socket notifier
 	wps_fd = wpa_ctrl_get_fd(event_ctrl);
-	event_sn  = new QSocketNotifier(wps_fd, QSocketNotifier::Read,this);
+	event_sn  = new QSocketNotifier(wps_fd, QSocketNotifier::Read,NULL);
 	connect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
 	event_sn->setEnabled(true);
 	emit(opened());
@@ -559,9 +571,14 @@ bool CWpa_Supplicant::wps_close(bool available) {
 		if (status == -1) {
 			return false;
 		}
-	}
+	
 	wpa_ctrl_close(event_ctrl);
 	wpa_ctrl_close(cmd_ctrl);
+	}
+	else {
+		delete cmd_ctrl;
+		delete event_ctrl;
+	}
 	emit(closed());
 
 	return true;

@@ -28,8 +28,8 @@
 
 namespace libnut {
 	typedef enum {WNF_NONE=0, WNF_CURRENT=1} wps_network_flags;
-	typedef enum {CI_UNDEFINED=0, CI_NONE=1, CI_CCMP=2, CI_TKIP=4, CI_WEP104=8, CI_WEP40=16} CIPHERS;
-	typedef enum {KEYMGMT_UNDEFINED=0, KEYMGMT_NONE=1, KEYMGMT_WPA_PSK=2, KEYMGMT_WPA_EAP=4, KEYMGMT_IEEE8021X=8} KEYMGMT;
+	typedef enum {CI_UNDEFINED=0, CI_NONE=1, CI_CCMP=2, CI_TKIP=4, CI_WEP104=8, CI_WEP40=16, CI_WEP=32} CIPHERS;
+	typedef enum {KEYMGMT_PLAIN=0, KEYMGMT_WPA_PSK=2, KEYMGMT_WPA2_PSK=4, KEYMGMT_WPA_EAP=8, KEYMGMT_WPA2_EAP=16, KEYMGMT_IEEE8021X=32} KEYMGMT;
 	struct wps_network {
 		int id;
 		QString ssid;
@@ -112,7 +112,7 @@ namespace libnut {
 	};
 	typedef enum {WI_MSG=0, WI_REQ=1,WI_EVENT=2} wps_interact_type;
 	typedef enum {WR_FAIL=0, WR_PASSWORD=2, WR_IDENTITY=4, WR_NEW_PASSWORD=8, WR_PIN=16, WR_OTP=32, WR_PASSPHRASE=64} wps_req_type;
-	typedef enum {WE_OTHER=0, WE_DISCONNECTED=1, WE_CONNECTED=2} wps_event_type;
+	typedef enum {WE_OTHER=0, WE_DISCONNECTED=1, WE_CONNECTED=2, WE_TERMINATING=4} wps_event_type;
 	struct wps_req {
 		wps_req_type type;
 		int id;
