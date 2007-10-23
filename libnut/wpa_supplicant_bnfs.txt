@@ -58,3 +58,28 @@ eth0
 wlan0
 
 {{alphanumeric}<br>}
+
+
+//
+		
+bssid=02:00:01:02:03:04
+ssid=test network
+id=0
+pairwise_cipher=CCMP
+group_cipher=CCMP
+key_mgmt=WPA-PSK
+wpa_state=COMPLETED
+ip_address=192.168.1.21
+Supplicant PAE state=AUTHENTICATED
+suppPortStatus=Authorized
+heldPeriod=60
+authPeriod=30
+startPeriod=30
+maxStart=3
+portControl=Auto
+Supplicant Backend state=IDLE
+EAP state=SUCCESS
+reqMethod=0
+methodState=NONE
+decision=COND_SUCC
+ClientTimeout=60

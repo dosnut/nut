@@ -20,11 +20,11 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 	
 	command = new char[5];
 	command = "PING";
-	command_len = sizeof(command);
+	command_len = strlen(command);
 	int status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);
 	if ( (status != 0) or (QString::fromUtf8(reply, reply_len) != "PONG") ) {
 		//TODO: Maybe we need to detach and close wpa_supplicant:
-		wps_close();
+		wps_close(false);
 		return QString();
 	}
 	if (cmd != "PING") {
@@ -55,12 +55,57 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 QStringList CWpa_Supplicant::sliceMessage(QString str) {
 	return str.split('\n',QString::SkipEmptyParts);
 }
+
+
+//MIB Variables:
+//(dot11|dot1x)VARIABLENAME=<value>
+//<value> = (TRUE|FALSE) | <Integer> | <String> | <other?>
+//so far we do not care about <other> => <other> <-> <string>
 wps_MIB CWpa_Supplicant::parseMIB(QStringList list) {
-	wps_MIB dummy;
-	return dummy;
+	//First strip dot11 or dot1x
+	//create new wps_variable
+	//append to wps_MIB
+	QList<wps_variable> wpsMIB;
+	QStringList tmp_strlist;
+	wps_variable var;
+	foreach(QString str, list) {
+		tmp_strlist = (str.remove(0,5)).split('=',QString::KeepEmptyParts);
+		var.name = tmp_strlist[0];
+		var.type = parseMIBType(tmp_strlist[1]);
+		var.value.num = 0;
+		if (wps_variable::PLAIN == var.type || wps_variable::STRING == var.type) {
+			var.value.str = new QString(tmp_strlist[0]);
+		}
+		if (wps_variable::NUMBER == var.type) {
+			bool ok = true;
+			var.value.num = new qint32(tmp_strlist[1].toInt(&ok));
+			if (!ok) {
+				*(var.value.num) = -1;
+			}
+		}
+		if (wps_variable::LOGIC == var.type) {
+			var.value.logic = new bool((tmp_strlist[1] == "TRUE"));
+		}
+		wpsMIB.append(var);
+	}
+	return ((wps_MIB) wpsMIB);
+}
+wps_variable::wps_variable_type CWpa_Supplicant::parseMIBType(QString str) {
+	bool ok;
+	str.toInt(&ok);
+	if (ok) {
+		return wps_variable::NUMBER;
+	}
+	if ( (0 == str.indexOf("TRUE")) || (0 == str.indexOf("FALSE")) ) {
+		return wps_variable::LOGIC;
+	}
+	if (str.contains(":") || str.contains("-")) {
+		return wps_variable::PLAIN;
+	}
+	return wps_variable::STRING;
 }
 
-wps_network_flags parseNetworkFlags(QString str) {
+wps_network_flags CWpa_Supplicant::parseNetworkFlags(QString str) {
 	if (str.contains("CURRENT",Qt::CaseInsensitive)) {
 		return WNF_CURRENT;
 	}
@@ -73,9 +118,14 @@ QList<wps_network> CWpa_Supplicant::parseListNetwork(QStringList list) {
 	QList<wps_network> networks;
 	QStringList line;
 	wps_network net;
+	bool worked = true;
 	foreach(QString str, list) {
 		line = str.split('\t',QString::KeepEmptyParts);
-		net.id = line[0].toInt();
+		net.id = line[0].toInt(&worked);
+		if (!worked) {
+			worked = true;
+			continue;
+		}
 		net.ssid = line[1];
 		net.bssid = nut::MacAddress(line[2]);
 		net.flags = parseNetworkFlags(line[3]);
@@ -83,34 +133,316 @@ QList<wps_network> CWpa_Supplicant::parseListNetwork(QStringList list) {
 	}
 	return networks;
 }
+
+
 /* Scan results:
 bssid / frequency / signal level / flags / ssid
 00:09:5b:95:e0:4e	2412	208	[WPA-PSK-CCMP]	jkm private
 02:55:24:33:77:a3	2462	187	[WPA-PSK-TKIP]	testing
 00:09:5b:95:e0:4f	2412	209		jkm guest
 */
+CIPHERS CWpa_Supplicant::parseScanCiphers(QString str) {
+	CIPHERS cip = CI_UNDEFINED;
+	if (str.contains("CCMP")) {
+		cip = (CIPHERS) (cip | CI_CCMP);
+	}
+	if (str.contains("TKIP")) {
+		cip = (CIPHERS) (cip | CI_TKIP);
+	}
+	if (str.contains("WEP104")) {
+		cip = (CIPHERS) (cip | CI_WEP104);
+	}
+	if (str.contains("WEP40")) {
+		cip = (CIPHERS) (cip | CI_WEP40);
+	}
+	return cip;
+}
+KEYMGMT CWpa_Supplicant::parseScanKeymgmt(QString str) {
+	KEYMGMT key = KEYMGMT_UNDEFINED;
+	if (str.contains("NONE")) {
+		key = (KEYMGMT) (key | KEYMGMT_NONE);
+	}
+	if (str.contains("WPA-PSK")) {
+		key = (KEYMGMT) (key | KEYMGMT_WPA_PSK);
+	}
+	if (str.contains("WPA-EAP")) {
+		key = (KEYMGMT) (key | KEYMGMT_WPA_EAP);
+	}
+	if (str.contains("IEEE8021X")) {
+		key = (KEYMGMT) (key | KEYMGMT_IEEE8021X);
+	}
+	return key;
+}
+
 QList<wps_scan> CWpa_Supplicant::parseScanResult(QStringList list) {
 	list.removeFirst();
 	QList<wps_scan> scanresults;
 	QStringList line;
 	wps_scan scanresult;
+	bool worked = true;
 	foreach(QString str, list) {
 		line = str.split('\t',QString::KeepEmptyParts);
 		scanresult.bssid = nut::MacAddress(line[0]);
-		scanresult.freq = line[1].toInt();
-		scanresult.level = line[2].toInt();
-		//scanresult.ciphers = parseScanCiphers;
-		//scanresult.KEYMGMT key_mgmt;
+		scanresult.freq = line[1].toInt(&worked);
+		if (!worked) {
+			worked = true;
+			continue;
+		}
+		scanresult.level = line[2].toInt(&worked);
+		if (!worked) {
+			worked = true;
+			continue;
+		}
+		scanresult.ciphers = parseScanCiphers(line[3]);
+		scanresult.key_mgmt = parseScanKeymgmt(line[3]);
 		scanresult.ssid = line[4];
 		scanresults.append(scanresult);
 	}
 	return scanresults;
 }
+
+//Parse status:
+/*
+bssid=02:00:01:02:03:04
+ssid=test network
+id=0
+pairwise_cipher=CCMP
+group_cipher=CCMP
+key_mgmt=WPA-PSK
+wpa_state=COMPLETED
+ip_address=192.168.1.21
+Supplicant PAE state=AUTHENTICATED
+suppPortStatus=Authorized
+heldPeriod=60
+authPeriod=30
+startPeriod=30
+maxStart=3
+portControl=Auto
+Supplicant Backend state=IDLE
+EAP state=SUCCESS
+reqMethod=0
+methodState=NONE
+decision=COND_SUCC
+ClientTimeout=60
+*/
+//Always parse as if status verbose
 wps_status CWpa_Supplicant::parseStatus(QStringList list) {
-	wps_status dummy;
+	wps_status status;
+	bool ok = true;
+	foreach(QString str, list) {
+		if (0 == str.indexOf("bssid=")) {
+			status.bssid = nut::MacAddress(str.split('=',QString::KeepEmptyParts)[1]);
+			continue;
+		}
+		if (0 == str.indexOf("ssid=")) {
+			status.ssid = str.split('=',QString::KeepEmptyParts)[1];
+			continue;
+		}
+		if (0 == str.indexOf("id=")) {
+			status.id = (str.split('=',QString::KeepEmptyParts)[1]).toInt(&ok);
+			if (!ok)  {
+				status.id = -1;
+				ok = true;
+			}
+			continue;
+		}
+		if (0 == str.indexOf("pairwise_cipher=")) {
+			status.pairwise_cipher = parseScanCiphers(str.split('=',QString::KeepEmptyParts)[1]);
+			continue;
+		}
+		if (0 == str.indexOf("group_cipher=")) {
+			status.group_cipher = parseScanCiphers(str.split('=',QString::KeepEmptyParts)[1]);
+			continue;
+		}
+		if (0 == str.indexOf("key_mgmt=")) {
+			status.key_mgmt = parseScanKeymgmt(str.split('=',QString::KeepEmptyParts)[1]);
+			continue;
+		}
+		if (0 == str.indexOf("wpa_state=")) {
+			status.wpa_state = parseWpaState(str.split('=',QString::KeepEmptyParts)[1]);
+			continue;
+		}
+		if (0 == str.indexOf("ip_address=")) {
+			status.ip_address = QHostAddress(str.split('=',QString::KeepEmptyParts)[1]);
+			continue;
+		}
+		if (0 == str.indexOf("Supplicant PAE state=")) {
+			status.pae_state = parsePaeState(str.split('=',QString::KeepEmptyParts)[1]);
+			continue;
+		}
+		if (0 == str.indexOf("suppPortStatus=")) {
+			status.PortStatus = parsePortStatus(str.split('=',QString::KeepEmptyParts)[1]);
+			continue;
+		}
+		if (0 == str.indexOf("heldPeriod=")) {
+			status.heldPeriod = (str.split('=',QString::KeepEmptyParts)[1]).toInt(&ok);
+			if (!ok)  {
+				status.heldPeriod = -1;
+				ok = true;
+			}
+			continue;
+		}
+		if (0 == str.indexOf("authPeriod=")) {
+			status.authPeriod = (str.split('=',QString::KeepEmptyParts)[1]).toInt(&ok);
+			if (!ok)  {
+				status.authPeriod = -1;
+				ok = true;
+			}
+			continue;
+		}
+		if (0 == str.indexOf("startPeriod=")) {
+			status.startPeriod = (str.split('=',QString::KeepEmptyParts)[1]).toInt(&ok);
+			if (!ok)  {
+				status.startPeriod = -1;
+				ok = true;
+			}
+			continue;
+		}
+		if (0 == str.indexOf("maxStart=")) {
+			status.maxStart = (str.split('=',QString::KeepEmptyParts)[1]).toInt(&ok);
+			if (!ok)  {
+				status.maxStart = -1;
+				ok = true;
+			}
+			continue;
+		}
+		if (0 == str.indexOf("portControl=")) {
+			status.portControl = parsePortControl(str.split('=',QString::KeepEmptyParts)[1]);
+			continue;
+		}
+		if (0 == str.indexOf("Supplicant Backend state=")) {
+			status.backend_state = parseBackendState(str.split('=',QString::KeepEmptyParts)[1]);
+			continue;
+		}
+		if (0 == str.indexOf("EAP state=")) {
+			status.eap_state = parseEapState(str.split('=',QString::KeepEmptyParts)[1]);
+			continue;
+		}
+		if (0 == str.indexOf("reqMethod=")) {
+			status.reqMethod = (str.split('=',QString::KeepEmptyParts)[1]).toInt(&ok);
+			if (!ok)  {
+				status.reqMethod = -1;
+				ok = true;
+			}
+			continue;
+		}
+		if (0 == str.indexOf("methodState=")) {
+			status.methodState = parseMethodState(str.split('=',QString::KeepEmptyParts)[1]);
+			continue;
+		}
+		if (0 == str.indexOf("decision=")) {
+			status.decision = parseDecision(str.split('=',QString::KeepEmptyParts)[1]);
+			continue;
+		}
+		if (0 == str.indexOf("ClientTimeout=")) {
+			status.ClientTimeout = (str.split('=',QString::KeepEmptyParts)[1]).toInt(&ok);
+			if (!ok)  {
+				status.ClientTimeout = -1;
+				ok = true;
+			}
+			continue;
+		}
+	}
+	return status;
+}
+//parseStatus helper parsers (that's crazy)
+//So far they dont really parse
+wps_status::WPA_STATE CWpa_Supplicant::parseWpaState(QString str) {
+	wps_status::WPA_STATE dummy = str;
 	return dummy;
 }
+wps_status::PAE_STATE CWpa_Supplicant::parsePaeState(QString str) {
+	wps_status::PAE_STATE dummy = str;
+	return dummy;
+}
+wps_status::PORT_STATUS CWpa_Supplicant::parsePortStatus(QString str) {
+	wps_status::PORT_STATUS dummy = str;
+	return dummy;
+}
+wps_status::PORT_CONTROL CWpa_Supplicant::parsePortControl(QString str) {
+	wps_status::PORT_CONTROL dummy = str;
+	return dummy;
+}
+wps_status::BACKEND_STATE CWpa_Supplicant::parseBackendState(QString str) {
+	wps_status::BACKEND_STATE dummy = str;
+	return dummy;
+}
+wps_status::EAP_STATE CWpa_Supplicant::parseEapState(QString str) {
+	wps_status::EAP_STATE dummy = str;
+	return dummy;
+}
+wps_status::METHOD_STATE CWpa_Supplicant::parseMethodState(QString str) {
+	wps_status::METHOD_STATE dummy = str;
+	return dummy;
+}
+wps_status::DECISION CWpa_Supplicant::parseDecision(QString str) {
+	wps_status::DECISION dummy = str;
+	return dummy;
+}
+//
+wps_interact_type CWpa_Supplicant::parseInteract(QString str) {
+	if (str.contains("CTRL-EVENT")) {
+		return WI_EVENT;
+	}
+	else if (str.contains("CTRL-REQ")) {
+		return WI_REQ;
+	}
+	else {
+		return WI_MSG;
+	}
+}
+/*
+IDENTITY (EAP identity/user name)
+PASSWORD (EAP password)
+NEW_PASSWORD (New password if the server is requesting password change)
+PIN (PIN code for accessing a SIM or smartcard)
+OTP (one-time password; like password, but the value is used only once)
+PASSPHRASE (passphrase for a private key file)
+//CTRL-REQ-<field name>-<network id>-<human readable text>
+*/
+wps_req_type CWpa_Supplicant::parseReqType(QString str) {
+	if (str.contains("IDENTITY")) {
+		return WR_IDENTITY;
+	}
+	if (str.contains("PASSWORD")) {
+		return WR_PASSWORD;
+	}
+	if (str.contains("NEW_PASSWORD")) {
+		return WR_NEW_PASSWORD;
+	}
+	if (str.contains("PIN")) {
+		return WR_PIN;
+	}
+	if (str.contains("OTP")) {
+		return WR_OTP;
+	}
+	if (str.contains("PASSPHRASE")) {
+		return WR_PASSPHRASE;
+	}
+	return WR_FAIL;
+}
+wps_req CWpa_Supplicant::parseReq(QString str) {
+	bool ok = true;
+	wps_req req;
+	//Check request type:
+	req.type = parseReqType(str);
+	//get network id:
+	req.id = ((str.split('-',QString::KeepEmptyParts))[2]).toInt(&ok);
+	if (!ok) {
+		req.id = -1;
+	}
+	return req;
+}
 
+wps_event_type CWpa_Supplicant::parseEvent(QString str) {
+	if (str.contains("CONNECTED") ) {
+		return WE_CONNECTED;
+	}
+	if (str.contains("DISCONNECTED") ) {
+		return WE_DISCONNECTED;
+	}
+	return WE_OTHER;
+}
 
 void CWpa_Supplicant::printMessage(QString msg) {
 	if (log_enabled) {
@@ -122,32 +454,25 @@ void CWpa_Supplicant::printMessage(QString msg) {
 
 //Private slots:
 //Reads messages from wpa_supplicant
+////TODO:Check if we need to check if wpa_supplicant is still available
 void CWpa_Supplicant::wps_read(int socket) {
 	if (socket == wps_fd) {
-		//status: 1 = msg available; 0 = no messages, -1 = error
-		int status = wpa_ctrl_pending(event_ctrl);
-		if (1 == status) {
-			//Receive Messages
-			char reply[512];
-			size_t reply_len = sizeof(reply);
-			wpa_ctrl_recv(event_ctrl, reply, &reply_len);
-			//
-			printMessage(QString::fromUtf8(reply,reply_len));
-			//Slice String into StringList
-//			eventParser(QString::fromUtf8(reply, reply_len));
+		if (connected()) {
+			//status: 1 = msg available; 0 = no messages, -1 = error
+			int status = wpa_ctrl_pending(event_ctrl);
+			if (1 == status) {
+				//Receive Messages
+				char reply[512];
+				size_t reply_len = sizeof(reply);
+				wpa_ctrl_recv(event_ctrl, reply, &reply_len);
+				Event_dispatcher(QString::fromUtf8(reply, reply_len));
+			}
 		}
 	}
 }
 
 
 /*
-IDENTITY (EAP identity/user name)
-PASSWORD (EAP password)
-NEW_PASSWORD (New password if the server is requesting password change)
-PIN (PIN code for accessing a SIM or smartcard)
-OTP (one-time password; like password, but the value is used only once)
-PASSPHRASE (passphrase for a private key file)
-//CTRL-REQ-<field name>-<network id>-<human readable text>
 //CTRL-RSP-<field name>-<network id>-<value>
 */
 /*
@@ -155,7 +480,9 @@ CTRL-EVENT-DISCONNECTED
 CTRL-EVENT-CONNECTED
 */
 void CWpa_Supplicant::Event_dispatcher(wps_req request) {
-	emit(wps_request(request));
+	if (request.type != WR_FAIL) {
+		emit(wps_request(request));
+	}
 }
 void CWpa_Supplicant::Event_dispatcher(wps_event_type event) {
 	if (event == WE_CONNECTED) {
@@ -166,11 +493,26 @@ void CWpa_Supplicant::Event_dispatcher(wps_event_type event) {
 	}
 }
 
+void CWpa_Supplicant::Event_dispatcher(QString event) {
+	QStringList str_list = event.split('\n',QString::KeepEmptyParts);
+	wps_interact_type type;
+	foreach(QString str, str_list) {
+		type = parseInteract(str);
+		switch (type) {
+			case (WI_REQ):
+				Event_dispatcher(parseReq(str));
+				break;
+			case (WI_EVENT):
+				Event_dispatcher(parseEvent(str));
+				break;
+			default:
+				printMessage(str);
+				break;
+		}
+	}
+}
 
 //Public functions:
-CWpa_Supplicant::CWpa_Supplicant(QObject * parent) : QObject(parent) {
-	wpa_supplicant_path = "/var/run/wpa_supplicant";
-}
 CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) : QObject(parent), wpa_supplicant_path(wpa_supplicant_path) {
 }
 CWpa_Supplicant::~CWpa_Supplicant() {
@@ -207,18 +549,21 @@ bool CWpa_Supplicant::wps_open() {
 	emit(opened());
 	return true;
 }
-bool CWpa_Supplicant::wps_close() {
+bool CWpa_Supplicant::wps_close(bool available) {
 	disconnect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
 	delete event_sn;
-	int status;
-	status = wpa_ctrl_detach(event_ctrl);
-	//Status : 0 = succ; -1 = fail, -2 = timeout
-	if (status == -1) {
-		return false;
+	if (available) {
+		int status;
+		status = wpa_ctrl_detach(event_ctrl);
+		//Status : 0 = succ; -1 = fail, -2 = timeout
+		if (status == -1) {
+			return false;
+		}
 	}
 	wpa_ctrl_close(event_ctrl);
 	wpa_ctrl_close(cmd_ctrl);
 	emit(closed());
+
 	return true;
 }
 bool CWpa_Supplicant::connected() {
@@ -233,7 +578,7 @@ bool CWpa_Supplicant::connected() {
 //Public slots
 
 
-void setLog(bool enabled) {
+void CWpa_Supplicant::setLog(bool enabled) {
 	log_enabled = enabled;
 }
 //Function to respond to ctrl requests from wpa_supplicant
@@ -331,13 +676,36 @@ QString CWpa_Supplicant::getNetworkVariable(int id, QString val) {
 	return wps_cmd_GET_NETWORK(id,val);
 }
 
-//Future Functions:
-/*
-
+//Functions with a lot more functionality  (in the parser functions :)
 QList<wps_network> CWpa_Supplicant::listNetworks() {
-	return QList<wps_network>();
+	QString reply = wps_cmd_LIST_NETWORKS();
+	if (!reply.isEmpty()) {
+		return parseListNetwork(sliceMessage(reply));
+	}
+	else {
+		return QList<wps_network>();
+	}
+}
+
+QList<wps_scan> CWpa_Supplicant::scanResults() {
+	QString reply = wps_cmd_SCAN_RESULTS();
+	if (!reply.isEmpty()) {
+		return parseScanResult(sliceMessage(reply));
+	}
+	else {
+		return QList<wps_scan>();
+	}
+}
+wps_status CWpa_Supplicant::status() {
+	QString reply = wps_cmd_STATUS(true);
+	if (!reply.isEmpty()) {
+		return parseStatus(sliceMessage(reply));
+	}
+	else {
+		wps_status dummy;
+		return dummy;
+	}
 }
 
 
-*/
 }
