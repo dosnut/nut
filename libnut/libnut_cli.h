@@ -220,9 +220,8 @@ namespace libnut {
 		QHostAddress netmask;
 		QHostAddress gateway;
 		QList<QHostAddress> dnsserver;
-		typedef enum {IF_DYNAMIC = 1, IF_ZEROCONF = 2, IF_STATIC = 4, IF_FALLBACK = 5} InterfaceFlags;
 		struct InterfaceConfig {
-			InterfaceFlags flags;
+			nut::IPv4Config::Flags flags;
 			QHostAddress staticIp;
 			QHostAddress staticNetmask;
 			QHostAddress staticGateway;

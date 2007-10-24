@@ -208,14 +208,17 @@ namespace libnut {
 			void Event_dispatcher(QString event);
 
 			inline void printMessage(QString msg);
+
+			bool wps_open();
+			bool wps_close(bool internal=true);
 		private slots:
 			void wps_read(int socket);
 			
 		public:
 			CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path);
 			~CWpa_Supplicant();
-			bool wps_open();
-			bool wps_close(bool available=true);
+			inline bool open() { return wps_open(); }
+			inline bool close() {return wps_close(false); }
 			bool connected();
 	
 		public slots:

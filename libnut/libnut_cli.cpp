@@ -342,7 +342,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	QDBusReply<nut::DeviceConfig> replyconf = dbusDevice->getConfig();
 	if (replyconf.isValid()) {
 		dbusConfig = replyconf.value();
-		need_wpa_supplicant = (dbusConfig.wpaConfigFile() != "");
+		need_wpa_supplicant = !(dbusConfig.wpaConfigFile().isNull());
 		*log << tr("wpa_supplicant config file at: %1").arg(dbusConfig.wpaConfigFile());
 		//Somehow this does not work; 
 		//TODO: Fix this, workaround for now: every wireless device needs wpa_supplicant
@@ -351,7 +351,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		} 
 	}
 	else {
-		throw CLI_DevConnectionException(tr("Error while retrieving device config") + replyconf.error().name());
+		throw CLI_DevConnectionException(tr("(%2) Error(%1) while retrieving device config").arg(replyconf.error().name(),name));
 	}
 
 	//get Environment list
@@ -398,7 +398,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		connect(wpa_supplicant,SIGNAL(message(QString)),log,SLOT(log(QString)));
 		//Connect to wpa_supplicant only if device is not deaktivated
 		if (! (DS_DEACTIVATED == state) ) {
-			wpa_supplicant->wps_open();
+			wpa_supplicant->open();
 		}
 	}
 	else {
@@ -466,7 +466,7 @@ void CDevice::refreshAll() {
 
 	if ( !(DS_DEACTIVATED == state) ) {
 		if (need_wpa_supplicant) {
-			wpa_supplicant->wps_open();
+			wpa_supplicant->open();
 		}
 	}
 }
@@ -539,12 +539,12 @@ void CDevice::dbusstateChanged(int newState, int oldState) {
 	//connect when device has carrier, although this should happen, when device is beeing activated
 	if (DS_ACTIVATED == oldState && !(DS_ACTIVATED == newState) ) {
 		if (need_wpa_supplicant) {
-			wpa_supplicant->wps_open();
+			wpa_supplicant->open();
 		}
 	}
 	else if (DS_DEACTIVATED == newState) {
 		if (need_wpa_supplicant) {
-			wpa_supplicant->wps_close();
+			wpa_supplicant->close();
 		}
 	}
 	state = (DeviceState) newState;
@@ -823,15 +823,9 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	if (replyconf.isValid()) {
 		dbusConfig = replyconf.value();
 		userDefineable = (dbusConfig.getFlags() & nut::IPv4Config::MAY_USERSTATIC);
-		//set config for clients
-		
+
 		//Set Configflags
-		if (isStatic & (dbusConfig.getFlags() == nut::IPv4Config::DO_DHCP)) {
-			config.flags = IF_FALLBACK;
-		}
-		else {
-			config.flags = (InterfaceFlags) dbusConfig.getFlags();
-		}
+		config.flags = dbusConfig.getFlags();
 		
 		//
 		if (isStatic) {

@@ -28,7 +28,7 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 	int status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);
 	if ( (status != 0) or (QString::fromUtf8(reply, reply_len) != "PONG") ) {
 		//TODO: Maybe we need to detach and close wpa_supplicant:
-		wps_close(false);
+		wps_close();
 		return QString();
 	}
 	if (cmd != "PING") {
@@ -38,6 +38,7 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 		
 		status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);
 		if (0 == status) {
+			qDebug() << cmd << ":" << QString::fromUtf8(reply, reply_len) << "EOC";
 			if (reply_len > 0) {
 				//TODO:Check if reply is \0 terminated
 				return QString::fromUtf8(reply, reply_len);
@@ -51,6 +52,7 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 		}
 	}
 	else { //PING command requested
+		qDebug() << cmd << ":" << QString::fromUtf8(reply, reply_len) << "EOC";
 		return QString::fromUtf8(reply, reply_len);
 	}
 }
@@ -505,7 +507,7 @@ void CWpa_Supplicant::Event_dispatcher(wps_event_type event) {
 		emit(wps_stateChange(false));
 	}
 	else if (event == WE_TERMINATING) {
-		wps_close(false);
+		wps_close();
 	}
 }
 
@@ -534,7 +536,7 @@ CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) 
 	log_enabled = true;
 }
 CWpa_Supplicant::~CWpa_Supplicant() {
-	wps_close(false);
+	wps_close();
 }
 bool CWpa_Supplicant::wps_open() {
 	if (wps_connected) {
@@ -583,7 +585,7 @@ bool CWpa_Supplicant::wps_open() {
 	printMessage(tr("wpa_supplicant connection established"));
 	return true;
 }
-bool CWpa_Supplicant::wps_close(bool available) {
+bool CWpa_Supplicant::wps_close(bool internal) {
 	if (wps_connected) {
 		disconnect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
 		delete event_sn;
@@ -601,7 +603,7 @@ bool CWpa_Supplicant::wps_close(bool available) {
 		wps_connected = false;
 		emit(closed());
 	}
-	printMessage(tr("wpa_supplicant disconnected"));
+	printMessage(tr("(%1) wpa_supplicant disconnected").arg(((internal) ? "internal" : "external")));
 	return true;
 }
 bool CWpa_Supplicant::connected() {
