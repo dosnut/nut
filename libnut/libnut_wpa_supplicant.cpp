@@ -12,6 +12,10 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 	//	     char *reply, size_t *reply_len,
 	//	     void (*msg_cb)(char *msg, size_t len));
 	//	     
+	//Check if we have a control interface:
+	if (cmd_ctrl == NULL || event_ctrl == NULL) {
+		return QString();
+	}
 	//First Check if wpa_supplicant is running:
 	size_t command_len;
 	char * command;
@@ -526,13 +530,18 @@ void CWpa_Supplicant::Event_dispatcher(QString event) {
 
 //Public functions:
 CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) : QObject(parent), wpa_supplicant_path(wpa_supplicant_path) {
+	wps_connected = false;
 }
 CWpa_Supplicant::~CWpa_Supplicant() {
 	wps_close(false);
 }
 bool CWpa_Supplicant::wps_open() {
+	wps_connected = false;
 	int status;
 	//Open wpa_supplicant control interface
+	if (!QFile::exists(wpa_supplicant_path)) {
+		return false;
+	}
 	cmd_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
 	event_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
 	if (cmd_ctrl == NULL and event_ctrl == NULL) {
@@ -551,6 +560,9 @@ bool CWpa_Supplicant::wps_open() {
 	status = wpa_ctrl_attach(event_ctrl);
 	//Status : 0 = succ; -1 = fail, -2 = timeout
 	if (status != 0) {
+		wpa_ctrl_close(event_ctrl);
+		wpa_ctrl_close(cmd_ctrl);
+		printMessage(tr("Could not attach to wpa_supplicant"));
 		return false;
 	}
 	//Set socket notifier
@@ -559,28 +571,28 @@ bool CWpa_Supplicant::wps_open() {
 	connect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
 	event_sn->setEnabled(true);
 	emit(opened());
+	wps_connected = true;
+	printMessage(tr("wpa_supplicant connection established"));
 	return true;
 }
 bool CWpa_Supplicant::wps_close(bool available) {
-	disconnect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
-	delete event_sn;
-	if (available) {
-		int status;
-		status = wpa_ctrl_detach(event_ctrl);
-		//Status : 0 = succ; -1 = fail, -2 = timeout
-		if (status == -1) {
-			return false;
+	if (wps_connected) {
+		disconnect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
+		delete event_sn;
+		
+		//Before detaching, check if wpa_supplicant_path is still available
+		if (QFile::exists(wpa_supplicant_path)) {
+			wpa_ctrl_detach(event_ctrl);
+			//Status : 0 = succ; -1 = fail, -2 = timeout
 		}
-	
-	wpa_ctrl_close(event_ctrl);
-	wpa_ctrl_close(cmd_ctrl);
+		//Close control connections
+		wpa_ctrl_close(event_ctrl);
+		wpa_ctrl_close(cmd_ctrl);
+		event_ctrl = NULL;
+		cmd_ctrl = NULL;
+		wps_connected = false;
+		emit(closed());
 	}
-	else {
-		delete cmd_ctrl;
-		delete event_ctrl;
-	}
-	emit(closed());
-
 	return true;
 }
 bool CWpa_Supplicant::connected() {
@@ -599,7 +611,7 @@ void CWpa_Supplicant::setLog(bool enabled) {
 	log_enabled = enabled;
 }
 //Function to respond to ctrl requests from wpa_supplicant
-void CWpa_Supplicant::wps_response(wps_req request, QString msg) {
+void CWpa_Supplicant::response(wps_req request, QString msg) {
 	switch (request.type) {
 		case (WR_IDENTITY):
 			wps_cmd_CTRL_RSP("IDENTITY",request.id,msg);

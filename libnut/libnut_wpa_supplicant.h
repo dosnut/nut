@@ -127,6 +127,7 @@ namespace libnut {
 			QString wps_ctrl_command(QString cmd);
 			QSocketNotifier *event_sn;
 			bool log_enabled;
+			bool wps_connected;
 			
 		//Abstracted Commands:
 			inline QString wps_cmd_PING() { return wps_ctrl_command("PING"); }
@@ -220,7 +221,7 @@ namespace libnut {
 		public slots:
 			void setLog(bool enabled);
 			//Functions to react to request made from wpa_supplicant:
-			void wps_response(wps_req request, QString msg);
+			void response(wps_req request, QString msg);
 			//
 			void selectNetwork(int id);
 			void enableNetwork(int id);
