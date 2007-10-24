@@ -472,6 +472,11 @@ void CWpa_Supplicant::printMessage(QString msg) {
 void CWpa_Supplicant::wps_read(int socket) {
 	if (socket == wps_fd) {
 		if (wps_connected) {
+			//check if wpa_supplicant is still running (i.e. file exists)
+			if (! QFile::exists(wpa_supplicant_path)) {
+				wps_close("wps_read/no wps interface on event");
+				return;
+			}
 			//status: 1 = msg available; 0 = no messages, -1 = error
 			int status = wpa_ctrl_pending(event_ctrl);
 			if (1 == status) {
