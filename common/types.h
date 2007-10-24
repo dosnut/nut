@@ -40,29 +40,6 @@ namespace libnut {
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceProperties &devprop);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceProperties &devprop);
 	
-	enum WlanEncryptionType {WET_NONE=0, WET_WEP=2, WET_WPA1=4, WET_WPA2=8, WET_OTHER=16};
-	struct WlanScanresult {
-		QString essid;
-		int channel;
-		QByteArray bssid;
-		int flags;
-		int signallevel;
-		WlanEncryptionType encryption;
-	};
-
-
-	QDBusArgument &operator<< (QDBusArgument &argument, const WlanScanresult &scanres);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanScanresult &scanres);
-	
-	struct WlanNetworkProperties {
-		WlanScanresult scanresult;
-		QString password;
-		QString proto;
-		QString key_mgmt;
-	};
-	QDBusArgument &operator<< (QDBusArgument &argument, const WlanNetworkProperties &wlanprop);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanNetworkProperties &wlanprop);
-	
 	struct EnvironmentProperties {
 		QString name;
 	};
@@ -70,10 +47,13 @@ namespace libnut {
 	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentProperties &envprop);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentProperties &envprop);
 	
+	enum InterfaceState { IFS_OFF, IFS_STATIC, IFS_DHCP, IFS_ZEROCONF };
+	
 	struct InterfaceProperties {
 		bool isStatic;
 		bool active;
 		bool userDefineable;
+		InterfaceState ifState;
 		QHostAddress ip;
 		QHostAddress netmask;
 		QHostAddress gateway;
@@ -86,9 +66,6 @@ namespace libnut {
 
 Q_DECLARE_METATYPE(libnut::DeviceProperties)
 Q_DECLARE_METATYPE(libnut::DeviceState)
-Q_DECLARE_METATYPE(libnut::WlanScanresult)
-Q_DECLARE_METATYPE(QList<libnut::WlanScanresult>)
-Q_DECLARE_METATYPE(libnut::WlanNetworkProperties)
 Q_DECLARE_METATYPE(libnut::EnvironmentProperties)
 Q_DECLARE_METATYPE(libnut::InterfaceProperties)
 Q_DECLARE_METATYPE(QHostAddress)

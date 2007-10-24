@@ -481,7 +481,7 @@ namespace nuts {
 	Interface::~Interface() { }
 	
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, nut::IPv4Config *config)
-	: Interface(env, index), dhcp_timer_id(-1), dm(env->device->dm), dhcp_xid(0), dhcpstate(DHCPS_OFF), m_config(config) {
+	: Interface(env, index), dhcp_timer_id(-1), dm(env->device->dm), dhcp_xid(0), dhcpstate(DHCPS_OFF), m_config(config), m_ifstate(libnut::IFS_OFF) {
 	}
 	
 	Interface_IPv4::~Interface_IPv4() {
@@ -539,6 +539,7 @@ namespace nuts {
 			dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
 				// T1: 0.5 * dhcp_lease_time
 				// T2: 0.875 * dhcp_lease_time ( 7/8 )
+			m_ifstate = libnut::IFS_DHCP;
 			systemUp();
 		}
 	}
@@ -719,6 +720,7 @@ namespace nuts {
 		netmask = m_config->getStaticNetmask();
 		gateway = m_config->getStaticGateway();
 		dnsserver = m_config->getStaticDNS();
+		m_ifstate = libnut::IFS_STATIC;
 		systemUp();
 	}
 
@@ -859,6 +861,7 @@ namespace nuts {
 		rtnl_addr_put(addr);
 		nl_addr_put(local);
 		m_env->ifDown(this);
+		m_ifstate = libnut::IFS_OFF;
 		emit interfaceDown();
 	}
 	

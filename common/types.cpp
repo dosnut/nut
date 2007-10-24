@@ -34,34 +34,6 @@ namespace libnut {
 		return argument;
 	}
 	
-	QDBusArgument &operator<< (QDBusArgument &argument, const WlanScanresult &scanres) {
-		argument.beginStructure();
-		argument << scanres.essid << scanres.channel << scanres.bssid << scanres.flags << scanres.signallevel << (int) scanres.encryption;
-		argument.endStructure();
-		return argument;
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanScanresult &scanres) {
-		int tmp;
-		argument.beginStructure();
-		argument >> scanres.essid >> scanres.channel >> scanres.bssid >> scanres.flags >> scanres.signallevel >> tmp;
-		scanres.encryption = (WlanEncryptionType) tmp;
-		argument.endStructure();
-		return argument;
-	}
-	
-	QDBusArgument &operator<< (QDBusArgument &argument, const WlanNetworkProperties &wlanprop) {
-		argument.beginStructure();
-		argument << wlanprop.scanresult << wlanprop.password << wlanprop.proto << wlanprop.key_mgmt;
-		argument.endStructure();
-		return argument;
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, WlanNetworkProperties &wlanprop) {
-		argument.beginStructure();
-		argument >> wlanprop.scanresult >> wlanprop.password >> wlanprop.proto >> wlanprop.key_mgmt;
-		argument.endStructure();
-		return argument;
-	}
-	
 	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentProperties &envprop) {
 		argument.beginStructure();
 		argument << envprop.name;
@@ -75,14 +47,16 @@ namespace libnut {
 	}
 	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop) {
 		argument.beginStructure();
-		argument << ifprop.active << ifprop.userDefineable << ifprop.isStatic;
+		argument << ifprop.active << ifprop.userDefineable << ifprop.isStatic << ifprop.ifState;
 		argument << ifprop.ip << ifprop.netmask << ifprop.gateway << ifprop.dns;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceProperties &ifprop) {
 		argument.beginStructure();
-		argument >> ifprop.active >> ifprop.userDefineable >> ifprop.isStatic;
+		int tmp;
+		argument >> ifprop.active >> ifprop.userDefineable >> ifprop.isStatic >> tmp;
+		ifprop.ifState = (InterfaceState) tmp;
 		argument >> ifprop.ip >> ifprop.netmask >> ifprop.gateway >> ifprop.dns;
 		argument.endStructure();
 		return argument;
@@ -92,16 +66,10 @@ namespace libnut {
 		qRegisterMetaType<DeviceProperties>("DeviceProperties");
 		qRegisterMetaType<EnvironmentProperties>("EnvironmentProperties");
 		qRegisterMetaType<InterfaceProperties>("InterfaceProperties");
-		qRegisterMetaType<WlanScanresult>("WlanScanresult");
-		qRegisterMetaType<QList<libnut::WlanScanresult> >("WlanScanresultList");
-		qRegisterMetaType<WlanNetworkProperties>("WlanNetworkProperties");
 		
 		qDBusRegisterMetaType<DeviceProperties>();
 		qDBusRegisterMetaType<EnvironmentProperties>();
 		qDBusRegisterMetaType<InterfaceProperties>();
-		qDBusRegisterMetaType<WlanScanresult>();
-		qDBusRegisterMetaType<QList<libnut::WlanScanresult> >();
-		qDBusRegisterMetaType<WlanNetworkProperties>();
 	}
 }
 
