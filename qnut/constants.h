@@ -38,6 +38,8 @@
 #define UI_ICON_AIR_ACTIVATED           UI_DIR_ICONS "air_activated.png"
 #define UI_ICON_AIR_DEACTIVATED         UI_DIR_ICONS "air_deactivated.png"
 
+#define UI_ICON_AIR_SETTINGS            UI_DIR_ICONS "air_settings.png"
+
 #define UI_ICON_DEVICE_ENABLE           UI_DIR_ICONS "device_enable.png"
 #define UI_ICON_DEVICE_DISABLE          UI_DIR_ICONS "device_disable.png"
 

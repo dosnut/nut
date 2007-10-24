@@ -29,6 +29,7 @@ namespace qnut {
 		
 		QAction * deviceSettingsAction;
 		QAction * ipConfigurationAction;
+		QAction * wirelessSettingsAction;
 		
 		QTabWidget tabWidget;
 		QTreeView overView;

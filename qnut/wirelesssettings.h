@@ -24,6 +24,8 @@ namespace qnut {
 	private:
 		Ui::wpaset ui;
 		CDevice * device;
+		
+		inline void setHeadInfo();
 	public:
 		CWirelessSettings(CDevice * wireless, QWidget *parent = 0);
 		~CWirelessSettings();

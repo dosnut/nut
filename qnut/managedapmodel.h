@@ -9,20 +9,20 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#ifndef QNUT_INTERFACEDETAILSMODEL_H
-#define QNUT_INTERFACEDETAILSMODEL_H
+#ifndef QNUT_MANAGEDAPMODEL_H
+#define QNUT_MANAGEDAPMODEL_H
 
 #include <QAbstractItemModel>
 #include <libnut/libnut_cli.h>
 
 namespace qnut {
 	using namespace libnut;
-	
-	class CInterfaceDetailsModel : public QAbstractItemModel {
+
+	class CManagedAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		CInterfaceDetailsModel(CInterface * data = NULL, QObject * parent = 0);
-		~CInterfaceDetailsModel();
+		CManagedAPModel(CWpa_Supplicant * data = NULL, QObject * parent = 0);
+		~CManagedAPModel();
 		
 		QVariant data(const QModelIndex & index, int role) const;
 		Qt::ItemFlags flags(const QModelIndex & index) const;
@@ -31,8 +31,11 @@ namespace qnut {
 		QModelIndex parent(const QModelIndex & index) const;
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
+	public slots:
+		void reloadNetworks();
 	private:
-		CInterface * interface;
+		CWpa_Supplicant * supplicant;
+		QList<wps_network> networks;
 	};
 }
 

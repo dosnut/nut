@@ -19,7 +19,7 @@
 //#include "environmentdetailsmodel.h"
 #include "ipconfiguration.h"
 #include "scriptsettings.h"
-//#include "wirelesssettings.h"
+#include "wirelesssettings.h"
 #include "common.h"
 
 namespace qnut {
@@ -72,12 +72,14 @@ namespace qnut {
 	
 	inline void CDeviceOptions::createActions() {
 		deviceMenu = new QMenu(device->name, NULL);
-		enableDeviceAction    = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_ENABLE) , tr("Enable device") , device, SLOT(enable()));
-		disableDeviceAction   = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"), device, SLOT(disable()));
+		enableDeviceAction     = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_ENABLE) , tr("Enable device") , device, SLOT(enable()));
+		disableDeviceAction    = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"), device, SLOT(disable()));
 		deviceMenu->addSeparator();
-		showAction            = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(uiShowThisTab()));
-		deviceSettingsAction  = deviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("Scripting settings..."), this, SLOT(uiChangeDeviceSettings()));
-		ipConfigurationAction = deviceMenu->addAction(QIcon(UI_ICON_EDIT), tr("Set IP Configuration..."), this, SLOT(uiChangeIPConfiguration()));
+		showAction             = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(uiShowThisTab()));
+		deviceSettingsAction   = deviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("Scripting settings..."), this, SLOT(uiChangeDeviceSettings()));
+		ipConfigurationAction  = deviceMenu->addAction(QIcon(UI_ICON_EDIT), tr("Set IP configuration..."), this, SLOT(uiChangeIPConfiguration()));
+		deviceMenu->addSeparator();
+		wirelessSettingsAction = deviceMenu->addAction(QIcon(UI_ICON_AIR_SETTINGS), tr("Wireless settings..."), this, SLOT(uiOpenWirelessSettings()));
 		
 		enterEnvironmentAction = new QAction(QIcon(UI_ICON_ENVIRONMENT_ENTER), tr("Enter environment"), this);
 		ui.environmentTree->addAction(enterEnvironmentAction);
@@ -93,39 +95,18 @@ namespace qnut {
 		
 		ui.setupUi(this);
 		
-		//interfaceDetails = new CInterfaceDetailsModel();
-		
-//		showTrayCheck = new QCheckBox(tr("Show tray icon for this device"));
 		connect(ui.showTrayCheck, SIGNAL(toggled(bool)), trayIcon, SLOT(setVisible(bool)));
 		
-/*		environmentTree = new QTreeView();
-		environmentTree->setContextMenuPolicy(Qt::ActionsContextMenu);
-		environmentTree->setAllColumnsShowFocus(true);
-		environmentTree->setAlternatingRowColors(true);
-		environmentTree->setIconSize(QSize(18, 18));
-		environmentTree->setAllColumnsShowFocus(true);*/
 		ui.environmentTree->header()->setResizeMode(QHeaderView::ResizeToContents);
+		//ui.detailsView->header()->setResizeMode(QHeaderView::ResizeToContents);
+
 		ui.environmentTree->setModel(new CDeviceOptionsModel(device));
 		connect(ui.environmentTree->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(uiSelectionChanged(const QItemSelection &, const QItemSelection &)));
 		connect(device, SIGNAL(environmentsUpdated()), ui.environmentTree, SLOT(reset()));
 		
 		//todo: interfacesänderungen hier
-		
-/*		statusIcon = new QLabel();
-		statusText = new QLabel();
-		statusIcon->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);*/
 		setHeadInfo();
-		
-/*		QHBoxLayout * headlayout = new QHBoxLayout();
-		headlayout->addWidget(statusIcon);
-		headlayout->addWidget(statusText);
-		
-		QVBo	xLayout * mainlayout = new QVBoxLayout();
-		mainlayout->addLayout(headlayout);
-		mainlayout->addWidget(environmentTree);
-		mainlayout->addWidget(showTrayCheck);
-		setLayout(mainlayout);*/
 	}
 	
 	inline void CDeviceOptions::setHeadInfo() {
@@ -198,6 +179,11 @@ namespace qnut {
 		dialog.execute(this);
 	}
 	
+	void CDeviceOptions::uiOpenWirelessSettings() {
+		CWirelessSettings dialog(device);
+		dialog.exec();
+	}
+	
 	void CDeviceOptions::uiHandleStateChange(DeviceState state) {
 		setHeadInfo();
 		ui.environmentTree->collapseAll();
@@ -207,6 +193,7 @@ namespace qnut {
 		enableDeviceAction->setEnabled(state == DS_DEACTIVATED);
 		disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
 		ipConfigurationAction->setEnabled(state == DS_UNCONFIGURED);
+		wirelessSettingsAction->setDisabled((state == DS_DEACTIVATED) || (device->type == DT_AIR));
 
 		if (!ui.environmentTree->selectionModel()->selectedIndexes().isEmpty()) {
 			QModelIndex targetIndex = ui.environmentTree->selectionModel()->selectedIndexes()[0];

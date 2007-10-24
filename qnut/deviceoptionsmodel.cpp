@@ -90,11 +90,22 @@ namespace qnut {
 			case DEVOP_MOD_STATUS:
 				if (role == Qt::DisplayRole) {
 					if (data->parent() == device) {
-						return (static_cast<CEnvironment *>(data) == device->activeEnvironment) ? tr("active") : QVariant();
+						return (static_cast<CEnvironment *>(data) == device->activeEnvironment) ? tr("active") : QString('-');
 					}
 					
 					if (data->parent()->parent() == device) {
-						return (static_cast<CInterface *>(data)->state == IFS_OFF) ?  tr("unassigned") : tr("assigned");
+						switch (static_cast<CInterface *>(data)->state) {
+						case IFS_OFF:
+							return tr("off");
+						case IFS_STATIC:
+							return tr("static");
+						case IFS_DHCP:
+							return tr("dynamic");
+						case IFS_ZEROCONF:
+							return tr("zeroconf");
+						default:
+							break;
+						}
 					}
 				}
 				break;

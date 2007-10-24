@@ -13,7 +13,7 @@
 #include "interfacedetailsmodel.h"
 #include "constants.h"
 
-#define IFDET_MOD_ITEM    0
+#define IFDET_MOD_ITEM   0
 #define IFDET_MOD_VALUE  1
 
 namespace qnut {
@@ -28,10 +28,6 @@ namespace qnut {
 		interface = NULL;
 	}
 	
-	void CInterfaceDetailsModel::setInterface(CInterface * data) {
-		interface = data;
-	}
-	
 	int CInterfaceDetailsModel::columnCount(const QModelIndex &) const {
 		if (interface == NULL)
 			return 0;
@@ -44,7 +40,7 @@ namespace qnut {
 			return 0;
 		
 		if (!parent.isValid())
-			return 3;
+			return 4;
 		else {
 			return 0;
 		}
@@ -64,10 +60,12 @@ namespace qnut {
 		case IFDET_MOD_ITEM:
 			switch (index.row()) {
 			case 0:
-				return tr("Assignment");
+				return tr("Type");
 			case 1:
-				return tr("Netmask");
+				return tr("IP-Address");
 			case 2:
+				return tr("Netmask");
+			case 3:
 				return tr("Gateway");
 			default:
 				break;
@@ -116,6 +114,19 @@ namespace qnut {
 						return tr("none");
 					}
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC) {
+						return interface->getConfig().getStaticIP().toString();
+					}
+					else
+						return tr("unknown");
+				}
+				else
+					return interface->ip.toString();
+			case 2:
+				if (interface->state == IFS_OFF) {
+					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP) {
+						return tr("none");
+					}
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC) {
 						return interface->getConfig().getStaticNetmask().toString();
 					}
 					else
@@ -123,7 +134,7 @@ namespace qnut {
 				}
 				else
 					return interface->netmask.toString();
-			case 2:
+			case 3:
 				if (interface->state == IFS_OFF) {
 					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP) {
 						return tr("none");
@@ -187,7 +198,7 @@ namespace qnut {
 		
 		
 		if (!parent.isValid()) {
-			if (row < 4)
+			if (row <= 4)
 				return createIndex(row, column, (void *)NULL);
 		}
 		

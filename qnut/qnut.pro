@@ -25,7 +25,8 @@ FORMS = connman.ui \
  ipconf.ui \
  scrset.ui \
  devopt.ui \
- wpaset.ui
+ wrlset.ui \
+ airset.ui
 TRANSLATIONS = qnut_de.ts
 
 HEADERS += connectionmanager.h trayicon.h \
@@ -37,7 +38,8 @@ HEADERS += connectionmanager.h trayicon.h \
  common.h \
  scriptsettings.h \
  interfacedetailsmodel.h \
- wirelesssettings.h
+ wirelesssettings.h \
+ managedapmodel.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  overviewmodel.cpp \
  deviceoptionsmodel.cpp \
@@ -46,7 +48,8 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  common.cpp \
  scriptsettings.cpp \
  interfacedetailsmodel.cpp \
- wirelesssettings.cpp
+ wirelesssettings.cpp \
+ managedapmodel.cpp
 DESTDIR = .
 
 target.path = /usr/bin/
@@ -73,3 +76,5 @@ LIBS += ../common/libnutcommon.a \
 ../libnut/libnut.a
 TARGETDEPS += ../common/libnutcommon.a \
 ../libnut/libnut.a
+FORMS -= wpaset.ui \
+wrlset.ui

@@ -30,12 +30,6 @@ namespace qnut {
 	class CDeviceOptions : public QWidget {
 		Q_OBJECT
 	protected:
-//		QLabel * statusText;
-//		QLabel * statusIcon;
-		
-//		QTreeView * environmentTree;
-//		QCheckBox * showTrayCheck;
-		
 		Ui::devopt ui;
 		
 		QSettings settings;
@@ -60,9 +54,9 @@ namespace qnut {
 		
 		QAction * deviceSettingsAction;
 		QAction * ipConfigurationAction;
+		QAction * wirelessSettingsAction;
 		
 		QAction * showAction;
-		
 		
 		CDeviceOptions(CDevice * parentDevice, QWidget * parent = 0);
 		~CDeviceOptions();
@@ -76,7 +70,7 @@ namespace qnut {
 		void uiChangeIPConfiguration();
 		void uiChangeDeviceSettings();
 		void uiHandleStateChange(DeviceState state);
-		
+		void uiOpenWirelessSettings();
 	signals:
 		void showMessage(QSystemTrayIcon * trayIcon, QString title, QString message);
 		void showOptions(QWidget * widget);
