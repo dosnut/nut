@@ -823,16 +823,6 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	if (replyconf.isValid()) {
 		dbusConfig = replyconf.value();
 		userDefineable = (dbusConfig.getFlags() & nut::IPv4Config::MAY_USERSTATIC);
-
-		//Set Configflags
-		config.flags = dbusConfig.getFlags();
-		
-		//
-		if (isStatic) {
-			config.staticIp = dbusConfig.getStaticIP();
-			config.staticNetmask = dbusConfig.getStaticNetmask();
-			config.staticGateway = dbusConfig.getStaticGateway();
-		}
 	}
 	else {
 		throw CLI_IfConnectionException(tr("Error while retrieving interface config") + replyconf.error().name());
@@ -890,9 +880,6 @@ void CInterface::setNetmask(QHostAddress & address) {
 }
 void CInterface::setGateway(QHostAddress & address) {
 	dbusInterface->setGateway(address.toIPv4Address());
-}
-nut::IPv4Config CInterface::getConfig() {
-	return dbusConfig;
 }
 
 };

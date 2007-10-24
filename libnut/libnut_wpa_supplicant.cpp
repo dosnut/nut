@@ -18,11 +18,10 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 	}
 	//First Check if wpa_supplicant is running:
 	size_t command_len;
-	char * command;
+	const char * command;
 	char reply[4096];
 	size_t reply_len = sizeof(reply);
 	
-	command = new char[5];
 	command = "PING";
 	command_len = strlen(command);
 	int status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);

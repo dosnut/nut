@@ -220,14 +220,10 @@ namespace libnut {
 		QHostAddress netmask;
 		QHostAddress gateway;
 		QList<QHostAddress> dnsserver;
-		struct InterfaceConfig {
-			nut::IPv4Config::Flags flags;
-			QHostAddress staticIp;
-			QHostAddress staticNetmask;
-			QHostAddress staticGateway;
-		} config;
 
-		nut::IPv4Config getConfig();
+		nut::IPv4Config getConfig() { return dbusConfig; }
+		nut::IPv4Config config() { return dbusConfig; } //wants qnut wants it like that
+
 		CInterface(CEnvironment * parent, QDBusObjectPath dbusPath);
 		~CInterface();
 	public slots:

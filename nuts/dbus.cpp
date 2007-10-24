@@ -92,7 +92,7 @@ namespace nuts {
 	}
 	
 	DBusDevice::~DBusDevice() {
-		dbus_connection->unregisterObject(dbus_path,QDBusConnection::UnregisterTree);
+		dbus_connection->unregisterObject(dbus_path, QDBusConnection::UnregisterTree);
 	}
 	
 	QString DBusDevice::getPath() {
