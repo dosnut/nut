@@ -22,6 +22,7 @@
 #include <QStringList>
 #include <QTimerEvent>
 #include <common/macaddress.h>
+#include <QCoreApplication>
 
 //TODO:Check if we can start multiple wpa_supplicants for multiple devices and test behavior
 
@@ -113,7 +114,8 @@ namespace libnut {
 	};
 	typedef enum {WI_MSG=0, WI_REQ=1,WI_EVENT=2} wps_interact_type;
 	typedef enum {WR_FAIL=0, WR_PASSWORD=2, WR_IDENTITY=4, WR_NEW_PASSWORD=8, WR_PIN=16, WR_OTP=32, WR_PASSPHRASE=64} wps_req_type;
-	typedef enum {WE_OTHER=0, WE_DISCONNECTED=1, WE_CONNECTED=2, WE_TERMINATING=4} wps_event_type;
+	typedef enum {WE_OTHER, WE_DISCONNECTED, WE_CONNECTED, WE_TERMINATING, WE_PASSWORD_CHANGED, WE_EAP_NOTIFICATION, WE_EAP_STARTED, WE_EAP_METHOD, WE_EAP_SUCCESS, WE_EAP_FAILURE } wps_event_type;
+
 	struct wps_req {
 		wps_req_type type;
 		int id;
@@ -216,7 +218,7 @@ namespace libnut {
 			bool wps_close(QString call_func, bool internal=true);
 		private slots:
 			void wps_read(int socket);
-
+			void wps_detach();
 		protected:
 			void timerEvent(QTimerEvent *event);
 			
@@ -274,6 +276,7 @@ namespace libnut {
 			void wps_stateChange(bool state);
 			void wps_request(wps_req request);
 			void message(QString msg);
+			void eventMessage(wps_event_type type);
 	};
 
 }

@@ -455,6 +455,24 @@ wps_event_type CWpa_Supplicant::parseEvent(QString str) {
 	if (str.contains("TERMINATING")) {
 		return WE_TERMINATING;
 	}
+	if (str.contains("PASSWORD_CHANGED")) {
+		return WE_PASSWORD_CHANGED;
+	}
+	if (str.contains("WEAP_NOTIFICATION") ){
+		return WE_EAP_NOTIFICATION;
+	}
+	if (str.contains("EAP_STARTED") ) {
+		return WE_EAP_STARTED;
+	}
+	if (str.contains("EAP_METHOD") ) {
+		return WE_EAP_METHOD;
+	}
+	if (str.contains("EAP_SUCCESS") ) {
+		return WE_EAP_SUCCESS;
+	}
+	if (str.contains("EAP_FAILURE") ) {
+		return 	WE_EAP_FAILURE;
+	}
 	return WE_OTHER;
 }
 
@@ -516,6 +534,9 @@ void CWpa_Supplicant::Event_dispatcher(wps_event_type event) {
 	else if (event == WE_TERMINATING) {
 		wps_close("event-dispatcher/wpa-TERMINATING");
 	}
+	else {
+		emit(eventMessage(event));
+	}
 }
 
 void CWpa_Supplicant::Event_dispatcher(QString event) {
@@ -541,6 +562,7 @@ void CWpa_Supplicant::Event_dispatcher(QString event) {
 CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) : QObject(parent), wpa_supplicant_path(wpa_supplicant_path) {
 	wps_connected = false;
 	log_enabled = true;
+	connect(QCoreApplication::instance(),SIGNAL(aboutToQuit ()),this,SLOT(wps_detach()));
 }
 CWpa_Supplicant::~CWpa_Supplicant() {
 	wps_close("destructor");
@@ -615,14 +637,12 @@ bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 		timerId = 0;
 	}
 	if (wps_connected) {
-		disconnect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
-		delete event_sn;
-		
-		//Before detaching, check if wpa_supplicant_path is still available
-		if (QFile::exists(wpa_supplicant_path)) {
-			wpa_ctrl_detach(event_ctrl);
-			//Status : 0 = succ; -1 = fail, -2 = timeout
+		if (event_sn != NULL) {
+			disconnect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
+			delete event_sn;
+			event_sn = NULL;
 		}
+		//Detaching takes place if program is about to quit
 		//Close control connections
 		wpa_ctrl_close(event_ctrl);
 		wpa_ctrl_close(cmd_ctrl);
@@ -634,6 +654,13 @@ bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 	printMessage(tr("(%1)[%2] wpa_supplicant disconnected").arg(((internal) ? "internal" : "external"),call_func));
 	return true;
 }
+//Slot is executed when aplication is about to quit;
+void CWpa_Supplicant::wps_detach() {
+	if (event_ctrl != NULL) {
+		wpa_ctrl_detach(event_ctrl);
+	}
+}
+
 void CWpa_Supplicant::timerEvent(QTimerEvent *event) {
 	if (event->timerId() == timerId) {
 		if (!wps_connected) {
