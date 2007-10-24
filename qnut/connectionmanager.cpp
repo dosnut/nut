@@ -249,7 +249,7 @@ namespace qnut {
 			disableDeviceAction->setDisabled(selectedDevice->state == DS_DEACTIVATED);
 			deviceSettingsAction->setEnabled(true);
 			ipConfigurationAction->setEnabled(selectedDevice->state == DS_UNCONFIGURED);
-			wirelessSettingsAction->setDisabled((selectedDevice->state == DS_DEACTIVATED) || (selectedDevice->type != DT_AIR));
+			wirelessSettingsAction->setEnabled((selectedDevice->type == DT_AIR) && (selectedDevice->state != DS_DEACTIVATED));
 		}
 		else {
 			enableDeviceAction->setEnabled(false);
@@ -280,7 +280,7 @@ namespace qnut {
 		//TODO: folgendes Ekelhafte durch was sinnvolleres ersetzen
 		QModelIndexList selectedIndexes = overView.selectionModel()->selectedIndexes();
 		CDevice * currentDevice = static_cast<CDevice *>(selectedIndexes[0].internalPointer());
-		wirelessSettingsAction->setDisabled((state == DS_DEACTIVATED) || (currentDevice->type == DT_AIR));
+		wirelessSettingsAction->setEnabled((currentDevice->type == DT_AIR) && (state != DS_DEACTIVATED));
 	}
 	
 	void CConnectionManager::uiHandleShowLogToggle(bool state) {
