@@ -46,19 +46,21 @@ namespace nut {
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data) {
 		argument.beginStructure();
 		argument << data.m_noAutoStart;
+		argument << data.m_wpaConfigFile;
+		argument << data.m_wpaDriver;
 		argument.beginArray( qMetaTypeId<EnvironmentConfig>() );
 		foreach(EnvironmentConfig* ec, data.m_environments) {
 			argument << *ec;
 		}
 		argument.endArray();
-		argument << data.m_wpaConfigFile;
-		argument << data.m_wpaDriver;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data) {
 		argument.beginStructure();
 		argument >> data.m_noAutoStart;
+		argument >> data.m_wpaConfigFile;
+		argument >> data.m_wpaDriver;
 		argument.beginArray();
 		while (!argument.atEnd()) {
 			EnvironmentConfig *ec = new EnvironmentConfig();
@@ -66,8 +68,6 @@ namespace nut {
 			data.m_environments.push_back(ec);
 		}
 		argument.endArray();
-		argument >> data.m_wpaConfigFile;
-		argument >> data.m_wpaDriver;
 		argument.endStructure();
 		return argument;
 	}
@@ -179,7 +179,8 @@ namespace nut {
 	}
 	
 	DeviceConfig::DeviceConfig(const DeviceConfig &other)
-	: m_isCopy(true), m_environments(other.m_environments), m_noAutoStart(other.m_noAutoStart) {
+	: m_isCopy(true), m_environments(other.m_environments), m_noAutoStart(other.m_noAutoStart),
+	  m_wpaConfigFile(other.m_wpaConfigFile), m_wpaDriver(other.m_wpaDriver) {
 	}
 
 	
