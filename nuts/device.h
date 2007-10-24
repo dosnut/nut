@@ -246,6 +246,8 @@ namespace nuts {
 			quint32 dhcp_lease_time;
 			nut::IPv4Config *m_config;
 			
+			libnut::InterfaceState m_ifstate;
+			
 			void dhcp_send_discover();
 			void dhcp_send_request(DHCPPacket *offer);
 			void dhcp_send_renew();
@@ -289,6 +291,7 @@ namespace nuts {
 			QList<QHostAddress> dnsserver;
 			
 			const nut::IPv4Config& getConfig() { return *m_config; }
+			libnut::InterfaceState getState() { return m_ifstate; }
 		
 		signals:
 			void interfaceUp();

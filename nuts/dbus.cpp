@@ -246,6 +246,7 @@ void DBusInterface_IPv4::interfaceDown() {
 		dbus_properties.netmask = s_interface->netmask;
 		dbus_properties.userDefineable = false; //Fliegt raus, da Info bereits in der Config
 		dbus_properties.isStatic = !(s_interface->getConfig().getFlags() & nut::IPv4Config::DO_DHCP);
+		dbus_properties.ifState = s_interface->getState();
 		if (!s_interface->dnsserver.isEmpty()) {
 			dbus_properties.dns = s_interface->dnsserver;
 		}
