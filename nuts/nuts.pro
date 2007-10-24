@@ -12,10 +12,12 @@ HEADERS += common.h device.h   config.h   hardware.h
 
 SOURCES += sighandler.cpp log.cpp dhcppacket.cpp \
  dbus.cpp \
- arp.cpp
+ arp.cpp \
+ random.cpp
 HEADERS += sighandler.h   log.h   dhcppacket.h   exception.h \
  dbus.h \
- arp.h
+ arp.h \
+ random.h
 
 YACCSOURCES += configparser.y
 LEXSOURCES += configparser.l
