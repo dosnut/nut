@@ -206,8 +206,8 @@ namespace nuts {
 		dbus_properties.ip = s_interface->ip;
 		dbus_properties.gateway = s_interface->gateway;
 		dbus_properties.netmask = s_interface->netmask;
-		dbus_properties.userDefineable = false; //Fliegt raus, da Info bereits in der Config
-		dbus_properties.isStatic = !(s_interface->getConfig().getFlags() & nut::IPv4Config::DO_DHCP);
+		dbus_properties.ifState = s_interface->getState();
+		
 		if (!s_interface->dnsserver.isEmpty()) {
 			dbus_properties.dns = s_interface->dnsserver;
 		}
@@ -224,29 +224,30 @@ namespace nuts {
 	QString DBusInterface_IPv4::getPath() {
 		return dbus_path;
 	}
-//Private SLOTS:
+	//Private SLOTS:
 
-void DBusInterface_IPv4::interfaceUp() {
-	if (!dbus_properties.active) {
-		dbus_properties.active = true;
+	void DBusInterface_IPv4::interfaceUp() {
+		dbus_properties.ip = s_interface->ip;
+		dbus_properties.gateway = s_interface->gateway;
+		dbus_properties.netmask = s_interface->netmask;
+		dbus_properties.ifState = s_interface->getState();
 		emit stateChanged(dbus_properties);
 	}
-}
-void DBusInterface_IPv4::interfaceDown() {
-	if (dbus_properties.active) {
-		dbus_properties.active = false;
+	void DBusInterface_IPv4::interfaceDown() {
+		dbus_properties.ip = s_interface->ip;
+		dbus_properties.gateway = s_interface->gateway;
+		dbus_properties.netmask = s_interface->netmask;
+		dbus_properties.ifState = s_interface->getState();
 		emit(stateChanged(dbus_properties));
 	}
-}
 
 
 	libnut::InterfaceProperties DBusInterface_IPv4::getProperties() {
 		dbus_properties.ip = s_interface->ip;
 		dbus_properties.gateway = s_interface->gateway;
 		dbus_properties.netmask = s_interface->netmask;
-		dbus_properties.userDefineable = false; //Fliegt raus, da Info bereits in der Config
-		dbus_properties.isStatic = !(s_interface->getConfig().getFlags() & nut::IPv4Config::DO_DHCP);
 		dbus_properties.ifState = s_interface->getState();
+	
 		if (!s_interface->dnsserver.isEmpty()) {
 			dbus_properties.dns = s_interface->dnsserver;
 		}

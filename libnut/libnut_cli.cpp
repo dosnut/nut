@@ -31,43 +31,8 @@ QString toString(DeviceType type) {
 		default:     return QString();
 	}
 }
-QString toString(WlanEncryptionType type) {
-	switch (type) {
-		case WET_NONE:  return QObject::tr("none");
-		case WET_WEP:   return QObject::tr("WEP");
-		case WET_WPA1:  return QObject::tr("WPA1");
-		case WET_WPA2:  return QObject::tr("WPA2");
-		case WET_OTHER: return QObject::tr("Other");
-		default:        return QString();
-	}
-}
 QString toString(QDBusError error) {
 	return QDBusError::errorString(error.type());
-/*
-	switch ((int) error) {
-		case QDBusError::NoError: return QObject::tr("NoError");
-		case QDBusError::Other: return QObject::tr("Other");
-		case QDBusError::NoMemory: return QObject::tr("NoMemory");
-		case QDBusError::ServiceUnknown: return QObject::tr("ServiceUnknown");
-		case QDBusError::NoReply: return QObject::tr("NoReply");
-		case QDBusError::BadAddress: return QObject::tr("BadAddress");
-		case QDBusError::NotSupported: return QObject::tr("NotSupported");
-		case QDBusError::LimitsExceeded: return QObject::tr("LimitsExceeded");
-		case QDBusError::AccessDenied: return QObject::tr("AccessDenied");
-		case QDBusError::NoServer: return QObject::tr("NoServer");
-		case QDBusError::Timeout: return QObject::tr("Timeout");
-		case QDBusError::NoNetwork: return QObject::tr("NoNetwork");
-		case QDBusError::AddressInUse: return QObject::tr("AddressInUse");
-		case QDBusError::Disconnected: return QObject::tr("Disconnected");
-		case QDBusError::InvalidArgs: return QObject::tr("InvalidArgs");
-		case QDBusError::UnknownMethod: return QObject::tr("UnknownMethod");
-		case QDBusError::TimedOut: return QObject::tr("TimedOut");
-		case QDBusError::InvalidSignature: return QObject::tr("InvalidSignature");
-		case QDBusError::UnknownInterface: return QObject::tr("UnknownInterface");
-		case QDBusError::InternalError: return QObject::tr("InternalError");
-		case QDBusError::UnknownObject: return QObject::tr("UnknownObject");
-		default: return QString();
-	}*/
 }
 
 ////////////////
@@ -780,14 +745,8 @@ void CEnvironment::enter() {
 nut::EnvironmentConfig CEnvironment::getConfig() {
 	return config;
 }
-void CEnvironment::addInterface(bool isStatic, QHostAddress ip, QHostAddress netmask, QHostAddress gateway, bool active=true) {
-	InterfaceProperties ifprops;
-	ifprops.isStatic = isStatic;
-	ifprops.active = active;
-	ifprops.ip = ip;
-	ifprops.netmask = netmask;
-	ifprops.gateway = gateway;
-	dbusEnvironment->addInterface(ifprops);
+void CEnvironment::addInterface(nut::IPv4Config config) {
+	dbusEnvironment->addInterface(config);
 }
 void CEnvironment::removeInterface(CInterface * interface) {
 	dbusEnvironment->removeInterface(dbusInterfaces.key(interface));
@@ -806,8 +765,7 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	//Get properties:
 	QDBusReply<InterfaceProperties> replyprops = dbusInterface->getProperties();
 	if (replyprops.isValid()) {
-		isStatic = replyprops.value().isStatic;
-		active = replyprops.value().active;
+		state = replyprops.value().ifState;
 		ip = replyprops.value().ip;
 		netmask = replyprops.value().netmask;
 		gateway = replyprops.value().gateway;
@@ -833,8 +791,7 @@ CInterface::~CInterface() {
 void CInterface::refreshAll() {
 	QDBusReply<InterfaceProperties> replyprops = dbusInterface->getProperties();
 	if (replyprops.isValid()) {
-		isStatic = replyprops.value().isStatic;
-		active = replyprops.value().active;
+		state = replyprops.value().ifState;
 		ip = replyprops.value().ip;
 		netmask = replyprops.value().netmask;
 		gateway = replyprops.value().gateway;
@@ -847,15 +804,15 @@ void CInterface::refreshAll() {
 //CInterface private slots
 void CInterface::dbusstateChanged(const InterfaceProperties &properties) {
 	//Check changes:
-	if (properties.active != active) {
-		active = properties.active;
-		emit(activeChanged(active));
+	if (properties.ifState != state) {
+		state = properties.ifState;
+		emit(stateChanged(state));
 	}
-	isStatic = properties.isStatic;
+	state = properties.ifState;
 	ip = properties.ip;
 	netmask = properties.netmask;
 	gateway = properties.gateway;
-	emit(ipconfigChanged(isStatic,ip,netmask,gateway));
+	emit(ipconfigChanged(ip,netmask,gateway));
 }
 //CInterface SLOTS
 void CInterface::activate() {

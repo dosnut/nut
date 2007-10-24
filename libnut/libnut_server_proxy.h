@@ -149,7 +149,7 @@ public Q_SLOTS: // METHODS
 		QList<QVariant> argumentList;
 		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList);
 	}
-    inline QDBusReply<void> addInterface(InterfaceProperties prop) {
+    inline QDBusReply<void> addInterface(nut::IPv4Config prop) {
         QList<QVariant> argumentList;
         argumentList << qVariantFromValue(prop);
         return callWithArgumentList(QDBus::NoBlock, QLatin1String("addInterface"), argumentList);
