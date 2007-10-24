@@ -20,6 +20,7 @@
 #include <QSocketNotifier>
 #include <QString>
 #include <QStringList>
+#include <QTimerEvent>
 #include <common/macaddress.h>
 
 //TODO:Check if we can start multiple wpa_supplicants for multiple devices and test behavior
@@ -128,6 +129,8 @@ namespace libnut {
 			QSocketNotifier *event_sn;
 			bool log_enabled;
 			bool wps_connected;
+			int timerId;
+			bool inConnectionPhase;
 			
 		//Abstracted Commands:
 			inline QString wps_cmd_PING() { return wps_ctrl_command("PING"); }
@@ -209,16 +212,19 @@ namespace libnut {
 
 			inline void printMessage(QString msg);
 
-			bool wps_open();
-			bool wps_close(bool internal=true);
+			void wps_open(bool time_call);
+			bool wps_close(QString call_func, bool internal=true);
 		private slots:
 			void wps_read(int socket);
+
+		protected:
+			void timerEvent(QTimerEvent *event);
 			
 		public:
 			CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path);
 			~CWpa_Supplicant();
-			inline bool open() { return wps_open(); }
-			inline bool close() {return wps_close(false); }
+			inline void open() { wps_open(false); }
+			inline bool close() {return wps_close("libnut",false); }
 			bool connected();
 	
 		public slots:
@@ -265,8 +271,6 @@ namespace libnut {
 
 			
 		signals:
-			void opened();
-			void closed();
 			void wps_stateChange(bool state);
 			void wps_request(wps_req request);
 			void message(QString msg);

@@ -27,7 +27,7 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 	int status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);
 	if ( (status != 0) or (QString::fromUtf8(reply, reply_len) != "PONG") ) {
 		//TODO: Maybe we need to detach and close wpa_supplicant:
-		wps_close();
+		wps_close("wps_ctrl_command/nopong");
 		return QString();
 	}
 	if (cmd != "PING") {
@@ -471,7 +471,7 @@ void CWpa_Supplicant::printMessage(QString msg) {
 ////TODO:Check if we need to check if wpa_supplicant is still available
 void CWpa_Supplicant::wps_read(int socket) {
 	if (socket == wps_fd) {
-		if (connected()) {
+		if (wps_connected) {
 			//status: 1 = msg available; 0 = no messages, -1 = error
 			int status = wpa_ctrl_pending(event_ctrl);
 			if (1 == status) {
@@ -480,6 +480,9 @@ void CWpa_Supplicant::wps_read(int socket) {
 				size_t reply_len = sizeof(reply);
 				wpa_ctrl_recv(event_ctrl, reply, &reply_len);
 				Event_dispatcher(QString::fromUtf8(reply, reply_len));
+			}
+			else if (-1 == status) {
+				printMessage("Error while trying to receive messages from wpa_supplicant");
 			}
 		}
 	}
@@ -506,7 +509,7 @@ void CWpa_Supplicant::Event_dispatcher(wps_event_type event) {
 		emit(wps_stateChange(false));
 	}
 	else if (event == WE_TERMINATING) {
-		wps_close();
+		wps_close("event-dispatcher/wpa-TERMINATING");
 	}
 }
 
@@ -535,34 +538,46 @@ CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) 
 	log_enabled = true;
 }
 CWpa_Supplicant::~CWpa_Supplicant() {
-	wps_close();
+	wps_close("destructor");
 }
-bool CWpa_Supplicant::wps_open() {
+void CWpa_Supplicant::wps_open(bool timer_call) {
 	if (wps_connected) {
-		return true;
+		return;
 	}
 	wps_connected = false;
 	int status;
 	//Open wpa_supplicant control interface
 	if (!QFile::exists(wpa_supplicant_path)) {
 		printMessage(tr("Could not open wpa_supplicant socket"));
-		return false;
+		if (! timer_call) {
+			timerId = startTimer(1000);
+		}
+		return;
 	}
 	cmd_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
 	event_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
 	if (cmd_ctrl == NULL and event_ctrl == NULL) {
 		printMessage(tr("Could not open wpa_supplicant control interface"));
-		return false;
+		if (! timer_call) {
+			timerId = startTimer(1000);
+		}
+		return;
 	}
 	if (cmd_ctrl == NULL) {
 		wpa_ctrl_close(event_ctrl);
 		printMessage(tr("Could not open wpa_supplicant control interface"));
-		return false;
+		if (! timer_call) {
+			timerId = startTimer(1000);
+		}
+		return;
 	}
 	if (event_ctrl == NULL) {
 		wpa_ctrl_close(cmd_ctrl);
 		printMessage(tr("Could not open wpa_supplicant control interface"));
-		return false;
+		if (! timer_call) {
+			timerId = startTimer(1000);
+		}
+		return;
 	}
 		
 	//Atach event monitor
@@ -572,19 +587,28 @@ bool CWpa_Supplicant::wps_open() {
 		wpa_ctrl_close(event_ctrl);
 		wpa_ctrl_close(cmd_ctrl);
 		printMessage(tr("Could not attach to wpa_supplicant"));
-		return false;
+		if (! timer_call) {
+			timerId = startTimer(1000);
+		}
+		return;
 	}
+	killTimer(timerId);
+	timerId = 0;
 	//Set socket notifier
 	wps_fd = wpa_ctrl_get_fd(event_ctrl);
 	event_sn  = new QSocketNotifier(wps_fd, QSocketNotifier::Read,NULL);
 	connect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
 	event_sn->setEnabled(true);
-	emit(opened());
+	emit(wps_stateChange(true));
 	wps_connected = true;
 	printMessage(tr("wpa_supplicant connection established"));
-	return true;
+	return;
 }
-bool CWpa_Supplicant::wps_close(bool internal) {
+bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
+	if (timerId != 0) {
+		killTimer(timerId);
+		timerId = 0;
+	}
 	if (wps_connected) {
 		disconnect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
 		delete event_sn;
@@ -600,11 +624,19 @@ bool CWpa_Supplicant::wps_close(bool internal) {
 		event_ctrl = NULL;
 		cmd_ctrl = NULL;
 		wps_connected = false;
-		emit(closed());
+		emit(wps_stateChange(false));
 	}
-	printMessage(tr("(%1) wpa_supplicant disconnected").arg(((internal) ? "internal" : "external")));
+	printMessage(tr("(%1)[%2] wpa_supplicant disconnected").arg(((internal) ? "internal" : "external"),call_func));
 	return true;
 }
+void CWpa_Supplicant::timerEvent(QTimerEvent *event) {
+	if (event->timerId() == timerId) {
+		if (!wps_connected) {
+			wps_open(true);
+		}
+	}
+}
+
 bool CWpa_Supplicant::connected() {
 	if (wps_cmd_PING() == "PONG") {
 		return true;
