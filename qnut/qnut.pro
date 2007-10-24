@@ -24,7 +24,8 @@ CONFIG(debug, debug|release){
 FORMS = connman.ui \
  ipconf.ui \
  scrset.ui \
- devopt.ui
+ devopt.ui \
+ wpaset.ui
 TRANSLATIONS = qnut_de.ts
 
 HEADERS += connectionmanager.h trayicon.h \
@@ -35,7 +36,8 @@ HEADERS += connectionmanager.h trayicon.h \
  ipconfiguration.h \
  common.h \
  scriptsettings.h \
- interfacedetailsmodel.h
+ interfacedetailsmodel.h \
+ wirelesssettings.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  overviewmodel.cpp \
  deviceoptionsmodel.cpp \
@@ -43,7 +45,8 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  ipconfiguration.cpp \
  common.cpp \
  scriptsettings.cpp \
- interfacedetailsmodel.cpp
+ interfacedetailsmodel.cpp \
+ wirelesssettings.cpp
 DESTDIR = .
 
 target.path = /usr/bin/

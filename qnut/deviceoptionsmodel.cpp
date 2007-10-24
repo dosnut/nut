@@ -21,6 +21,7 @@
 #define DEVOP_MOD_CONFIG  5
 
 namespace qnut {
+	using namespace nut;
 	CDeviceOptionsModel::CDeviceOptionsModel(CDevice * data, QObject * parent) : QAbstractItemModel(parent) {
 		device = data;
 	}
@@ -77,8 +78,8 @@ namespace qnut {
 					CEnvironment * environment = (CEnvironment *)(((QObject *)interface)->parent());
 					switch (role) {
 					case Qt::DisplayRole:
-						return '#' + QString::number(environment->interfaces.indexOf(interface)) +
-							' ' + (interface->isStatic ? tr("static") : tr("dynamic"));
+						return '#' + QString::number(environment->interfaces.indexOf(interface));// +
+							//' ' + (interface->isStatic ? tr("static") : tr("dynamic"));
 					case Qt::DecorationRole:
 						return QIcon(UI_ICON_INTERFACE);
 					default:
@@ -89,42 +90,14 @@ namespace qnut {
 			case DEVOP_MOD_STATUS:
 				if (role == Qt::DisplayRole) {
 					if (data->parent() == device) {
-						return ((CEnvironment *)data == device->activeEnvironment) ? tr("active") : QVariant();
+						return (static_cast<CEnvironment *>(data) == device->activeEnvironment) ? tr("active") : QVariant();
 					}
 					
 					if (data->parent()->parent() == device) {
-						return ((CInterface *)data)->active ? tr("assigned") : tr("unassigned");
+						return (static_cast<CInterface *>(data)->state == IFS_OFF) ?  tr("unassigned") : tr("assigned");
 					}
 				}
 				break;
-/*			case DEVOP_MOD_CONFIG:
-				if (role == Qt::DisplayRole) {
-// 					if (data->parent() == device) {
-// 						int configFlags = 0;
-// 						bool configUseMac = false;
-// 						// TODO: Use new config structures (Stefan)
-// 						QString result = tr("selected by") + " ";
-// 						switch (configFlags) {
-// 						case 3:
-// 							result += tr("essid") + ", " + tr("arp");
-// 							break;
-// 						case 2:
-// 							result += tr("essid");
-// 							break;
-// 						case 1:
-// 							result += tr("arp");
-// 							break;
-// 						default:
-// 							result += tr("user");
-// 							break;
-// 						}
-// 						return result + " " + (configUseMac ? tr("and MAC-Address") : "");
-// 					}
-					if (data->parent()->parent() == device) {
-						return ((CInterface *)data)->isStatic ? tr("static") : tr("dynamic");
-					}
-				}
-				break;*/
 			case DEVOP_MOD_IP:
 				if (role == Qt::DisplayRole) {
 					if (data->parent() == device) {
@@ -132,43 +105,21 @@ namespace qnut {
 					}
 					
 					if (data->parent()->parent() == device) {
-						if (((CInterface *)data)->active)
-							return ((CInterface *)data)->ip.toString();
-						else {
-							switch (((CInterface *)data)->config.flags) {
-							case CInterface::IF_STATIC:
-								return ((CInterface *)data)->config.staticIp.toString();
-							case CInterface::IF_FALLBACK:
-								return tr("none (fallback: %1)").arg(((CInterface *)data)->config.staticIp.toString());
-							default:
+						if (static_cast<CInterface *>(data)->state == IFS_OFF) {
+							if (static_cast<CInterface *>(data)->getConfig().getFlags() & IPv4Config::DO_DHCP) {
 								return tr("none");
 							}
+							else if (static_cast<CInterface *>(data)->getConfig().getFlags() & IPv4Config::DO_STATIC) {
+								return static_cast<CInterface *>(data)->getConfig().getStaticIP().toString();
+							}
+							else
+								return tr("unknown");
 						}
+						else
+							return static_cast<CInterface *>(data)->ip.toString();
 					}
 				}
 				break;
-/*			case DEVOP_MOD_NETMASK:
-				if (role == Qt::DisplayRole) {
-					if (data->parent() == device) {
-						return QString('-');
-					}
-					
-					if (data->parent()->parent() == device) {
-						return (((CInterface *)data)->isStatic || ((CInterface *)data)->active) ? ((CInterface *)data)->netmask.toString() : tr("not assigned");
-					}
-				}
-				break;
-			case DEVOP_MOD_GATEWAY:
-				if (role == Qt::DisplayRole) {
-					if (data->parent() == device) {
-						return QString('-');
-					}
-					
-					if (data->parent()->parent() == device) {
-						return (((CInterface *)data)->isStatic || ((CInterface *)data)->active) ? ((CInterface *)data)->gateway.toString() : tr("not assigned");
-					}
-				}
-				break;*/
 			default:
 				break;
 		}

@@ -48,7 +48,7 @@ namespace qnut {
 				result += " (...)";
 				break;
 			}
-			else if (i->active) {
+			else if (i->state != IFS_OFF) {
 				result += i->ip.toString();
 			}
 		}
