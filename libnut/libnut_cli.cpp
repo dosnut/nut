@@ -784,7 +784,6 @@ void CEnvironment::addInterface(bool isStatic, QHostAddress ip, QHostAddress net
 	InterfaceProperties ifprops;
 	ifprops.isStatic = isStatic;
 	ifprops.active = active;
-	ifprops.userDefineable = true;
 	ifprops.ip = ip;
 	ifprops.netmask = netmask;
 	ifprops.gateway = gateway;
@@ -809,7 +808,6 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	if (replyprops.isValid()) {
 		isStatic = replyprops.value().isStatic;
 		active = replyprops.value().active;
-		userDefineable = replyprops.value().userDefineable;
 		ip = replyprops.value().ip;
 		netmask = replyprops.value().netmask;
 		gateway = replyprops.value().gateway;
@@ -822,7 +820,6 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	QDBusReply<nut::IPv4Config> replyconf = dbusInterface->getConfig();
 	if (replyconf.isValid()) {
 		dbusConfig = replyconf.value();
-		userDefineable = (dbusConfig.getFlags() & nut::IPv4Config::MAY_USERSTATIC);
 	}
 	else {
 		throw CLI_IfConnectionException(tr("Error while retrieving interface config") + replyconf.error().name());
@@ -838,7 +835,6 @@ void CInterface::refreshAll() {
 	if (replyprops.isValid()) {
 		isStatic = replyprops.value().isStatic;
 		active = replyprops.value().active;
-		userDefineable = replyprops.value().userDefineable;
 		ip = replyprops.value().ip;
 		netmask = replyprops.value().netmask;
 		gateway = replyprops.value().gateway;
@@ -855,15 +851,11 @@ void CInterface::dbusstateChanged(const InterfaceProperties &properties) {
 		active = properties.active;
 		emit(activeChanged(active));
 	}
-	bool equal = ( (isStatic == properties.isStatic) && (userDefineable == properties.userDefineable) && (ip == properties.ip) && (netmask == properties.netmask) && (gateway == properties.gateway) && (dnsserver == properties.dns));
-	if (!equal) {
-		isStatic = properties.isStatic;
-		userDefineable = properties.userDefineable;
-		ip = properties.ip;
-		netmask = properties.netmask;
-		gateway = properties.gateway;
-		emit(ipconfigChanged(isStatic,ip,netmask,gateway));
-	}
+	isStatic = properties.isStatic;
+	ip = properties.ip;
+	netmask = properties.netmask;
+	gateway = properties.gateway;
+	emit(ipconfigChanged(isStatic,ip,netmask,gateway));
 }
 //CInterface SLOTS
 void CInterface::activate() {

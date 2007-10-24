@@ -215,7 +215,6 @@ namespace libnut {
 	public:
 		bool isStatic;
 		bool active;
-		bool userDefineable;
 		QHostAddress ip;
 		QHostAddress netmask;
 		QHostAddress gateway;
