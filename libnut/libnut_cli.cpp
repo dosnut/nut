@@ -309,11 +309,6 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		dbusConfig = replyconf.value();
 		need_wpa_supplicant = !(dbusConfig.wpaConfigFile().isNull());
 		*log << tr("wpa_supplicant config file at: %1").arg(dbusConfig.wpaConfigFile());
-		//Somehow this does not work; 
-		//TODO: Fix this, workaround for now: every wireless device needs wpa_supplicant
-		if (DT_AIR == type) {
-			need_wpa_supplicant = true;
-		} 
 	}
 	else {
 		throw CLI_DevConnectionException(tr("(%2) Error(%1) while retrieving device config").arg(replyconf.error().name(),name));
