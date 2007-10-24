@@ -544,19 +544,23 @@ bool CWpa_Supplicant::wps_open() {
 	int status;
 	//Open wpa_supplicant control interface
 	if (!QFile::exists(wpa_supplicant_path)) {
+		printMessage(tr("Could not open wpa_supplicant socket"));
 		return false;
 	}
 	cmd_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
 	event_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
 	if (cmd_ctrl == NULL and event_ctrl == NULL) {
+		printMessage(tr("Could not open wpa_supplicant control interface"));
 		return false;
 	}
 	if (cmd_ctrl == NULL) {
 		wpa_ctrl_close(event_ctrl);
+		printMessage(tr("Could not open wpa_supplicant control interface"));
 		return false;
 	}
 	if (event_ctrl == NULL) {
 		wpa_ctrl_close(cmd_ctrl);
+		printMessage(tr("Could not open wpa_supplicant control interface"));
 		return false;
 	}
 		
@@ -597,6 +601,7 @@ bool CWpa_Supplicant::wps_close(bool available) {
 		wps_connected = false;
 		emit(closed());
 	}
+	printMessage(tr("wpa_supplicant disconnected"));
 	return true;
 }
 bool CWpa_Supplicant::connected() {

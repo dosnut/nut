@@ -343,6 +343,12 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	if (replyconf.isValid()) {
 		dbusConfig = replyconf.value();
 		need_wpa_supplicant = (dbusConfig.wpaConfigFile() != "");
+		*log << tr("wpa_supplicant config file at: %1").arg(dbusConfig.wpaConfigFile());
+		//Somehow this does not work; 
+		//TODO: Fix this, workaround for now: every wireless device needs wpa_supplicant
+		if (DT_AIR == type) {
+			need_wpa_supplicant = true;
+		} 
 	}
 	else {
 		throw CLI_DevConnectionException(tr("Error while retrieving device config") + replyconf.error().name());
@@ -529,7 +535,9 @@ void CDevice::environmentRemoved(const QDBusObjectPath &path) {
 //Every time our device changed from anything to active, our active environment may have changed
 void CDevice::dbusstateChanged(int newState, int oldState) {
 	//If switching from DS_DEACTIVATED to any other state then connect wpa_supplicant
-	if (DS_DEACTIVATED == oldState && (!DS_DEACTIVATED == newState) ) {
+	//TODO:fix wpa_supplicant connecting; workaround for now:
+	//connect when device has carrier, although this should happen, when device is beeing activated
+	if (DS_ACTIVATED == oldState && !(DS_ACTIVATED == newState) ) {
 		if (need_wpa_supplicant) {
 			wpa_supplicant->wps_open();
 		}
