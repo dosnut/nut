@@ -22,6 +22,8 @@ namespace qnut {
 
 	CInterfaceDetailsModel::CInterfaceDetailsModel(CInterface * data, QObject * parent) : QAbstractItemModel(parent) {
 		interface = data;
+		if (interface)
+			connect(interface, SIGNAL(stateChanged(InterfaceState)), this, SIGNAL(layoutChanged()));
 	}
 	
 	CInterfaceDetailsModel::~CInterfaceDetailsModel() {

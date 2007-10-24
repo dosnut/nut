@@ -20,8 +20,18 @@
 #define OV_MOD_IP      4
 
 namespace qnut {
-	COverViewModel::COverViewModel(CDeviceList * deviceList, QObject * parent) : QAbstractItemModel(parent) {
-		devices = deviceList;
+	COverViewModel::COverViewModel(CDeviceManager * deviceManager, QObject * parent) : QAbstractItemModel(parent) {
+		if (deviceManager) {
+			devices = &(deviceManager->devices);
+			
+			connect(deviceManager, SIGNAL(deviceAdded(CDevice *)), this, SIGNAL(layoutChanged()));
+			connect(deviceManager, SIGNAL(deviceRemoved(CDevice *)), this, SIGNAL(layoutChanged()));
+			foreach (CDevice * i, *devices) {
+				connect(i, SIGNAL(stateChanged(DeviceState)), this, SIGNAL(layoutChanged()));
+			}
+		}
+		else
+			devices = NULL;
 	}
 	
 	COverViewModel::~COverViewModel() {

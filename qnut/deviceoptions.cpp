@@ -14,7 +14,7 @@
 #include <QInputDialog>
 #include <QProcess>
 #include "deviceoptions.h"
-#include "deviceoptionsmodel.h"
+#include "environmenttreemodel.h"
 #include "interfacedetailsmodel.h"
 //#include "environmentdetailsmodel.h"
 #include "ipconfiguration.h"
@@ -48,7 +48,6 @@ namespace qnut {
 	
 	CDeviceOptions::~CDeviceOptions() {
 		disconnect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
-		disconnect(device, SIGNAL(environmentsUpdated()), ui.environmentTree, SLOT(reset()));
 		writeSettings();
 		delete deviceMenu;
 	}
@@ -98,15 +97,11 @@ namespace qnut {
 		
 		connect(ui.showTrayCheck, SIGNAL(toggled(bool)), trayIcon, SLOT(setVisible(bool)));
 		
+		ui.environmentTree->setModel(new CEnvironmentTreeModel(device));
 		ui.environmentTree->header()->setResizeMode(QHeaderView::ResizeToContents);
-		//ui.detailsView->header()->setResizeMode(QHeaderView::ResizeToContents);
-
-		ui.environmentTree->setModel(new CDeviceOptionsModel(device));
+		
 		connect(ui.environmentTree->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(uiSelectionChanged(const QItemSelection &, const QItemSelection &)));
-		connect(device, SIGNAL(environmentsUpdated()), ui.environmentTree, SLOT(reset()));
-		
-		//todo: interfacesänderungen hier
 		setHeadInfo();
 	}
 	

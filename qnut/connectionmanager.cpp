@@ -20,7 +20,7 @@ namespace qnut {
 		logEdit.setAcceptRichText(false);
 		
 		//overView.setSortingEnabled(true);
-		overView.setModel(new COverViewModel(&(deviceManager.devices)));
+		overView.setModel(new COverViewModel(&(deviceManager)));
 		overView.setContextMenuPolicy(Qt::ActionsContextMenu);
 		overView.setRootIsDecorated(false);
 		overView.setItemsExpandable(false);
@@ -166,19 +166,14 @@ namespace qnut {
 		trayicon.devicesMenu.addMenu(newDeviceOptions->deviceMenu);
 		trayicon.devicesMenu.setEnabled(true);
 		
-		connect(dev, SIGNAL(stateChanged(DeviceState)), &overView, SLOT(reset()));
 		connect(dev, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiUpdateTrayIconInfo()));
 		connect(newDeviceOptions, SIGNAL(showOptions(QWidget *)), this, SLOT(uiShowOptions(QWidget *)));
 		connect(newDeviceOptions, SIGNAL(showMessage(QSystemTrayIcon *, QString, QString)),
 		        this,             SLOT(uiShowMessage(QSystemTrayIcon *, QString, QString)));
-		overView.reset();
-		overView.clearSelection();
 	}
 	
 	void CConnectionManager::uiRemovedDevice(CDevice * dev) {
-		overView.reset();
 		//disconnect(dev, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiUpdateTrayIconInfo()));
-		//disconnect(dev, SIGNAL(stateChanged(DeviceState)), &overView, SLOT(reset()));
 		CDeviceOptions * target = deviceOptions[dev];
 		
 		tabWidget.removeTab(tabWidget.indexOf(target));

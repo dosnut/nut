@@ -32,24 +32,24 @@ TRANSLATIONS = qnut_de.ts
 HEADERS += connectionmanager.h trayicon.h \
  constants.h \
  overviewmodel.h \
- deviceoptionsmodel.h \
  deviceoptions.h \
  ipconfiguration.h \
  common.h \
  scriptsettings.h \
  interfacedetailsmodel.h \
  wirelesssettings.h \
- managedapmodel.h
+ managedapmodel.h \
+ environmenttreemodel.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  overviewmodel.cpp \
- deviceoptionsmodel.cpp \
  deviceoptions.cpp \
  ipconfiguration.cpp \
  common.cpp \
  scriptsettings.cpp \
  interfacedetailsmodel.cpp \
  wirelesssettings.cpp \
- managedapmodel.cpp
+ managedapmodel.cpp \
+ environmenttreemodel.cpp
 DESTDIR = .
 
 target.path = /usr/bin/
