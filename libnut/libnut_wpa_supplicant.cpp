@@ -531,11 +531,15 @@ void CWpa_Supplicant::Event_dispatcher(QString event) {
 //Public functions:
 CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) : QObject(parent), wpa_supplicant_path(wpa_supplicant_path) {
 	wps_connected = false;
+	log_enabled = true;
 }
 CWpa_Supplicant::~CWpa_Supplicant() {
 	wps_close(false);
 }
 bool CWpa_Supplicant::wps_open() {
+	if (wps_connected) {
+		return true;
+	}
 	wps_connected = false;
 	int status;
 	//Open wpa_supplicant control interface

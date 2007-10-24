@@ -338,10 +338,11 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	else {
 		throw CLI_DevConnectionException(tr("(%1) Error while retrieving dbus' device information").arg(toString(replyProp.error())));
 	}
-	//get config
+	//get config and set wpa_supplicant variable
 	QDBusReply<nut::DeviceConfig> replyconf = dbusDevice->getConfig();
 	if (replyconf.isValid()) {
-		config = replyconf.value();
+		dbusConfig = replyconf.value();
+		need_wpa_supplicant = (dbusConfig.wpaConfigFile() != "");
 	}
 	else {
 		throw CLI_DevConnectionException(tr("Error while retrieving device config") + replyconf.error().name());
@@ -384,12 +385,18 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 
 	connect(dbusDevice, SIGNAL(stateChanged(int , int)),
 			this, SLOT(dbusstateChanged(int, int)));
-	
-	wpa_supplicant = new CWpa_Supplicant(this,"/var/run/wpa_supplicant/"+name);
-	connect(wpa_supplicant,SIGNAL(message(QString)),log,SLOT(log(QString)));
-	bool opened = wpa_supplicant->wps_open();
-	if (!opened) {
-		*log << tr("ERROR: Could not attach to wpa_supplicant");
+
+	//Only use wpa_supplicant if we need one
+	if (need_wpa_supplicant) {
+		wpa_supplicant = new CWpa_Supplicant(this,"/var/run/wpa_supplicant/"+name);
+		connect(wpa_supplicant,SIGNAL(message(QString)),log,SLOT(log(QString)));
+		//Connect to wpa_supplicant only if device is not deaktivated
+		if (! (DS_DEACTIVATED == state) ) {
+			wpa_supplicant->wps_open();
+		}
+	}
+	else {
+		wpa_supplicant = NULL;
 	}
 }
 CDevice::~CDevice() {
@@ -449,6 +456,12 @@ void CDevice::refreshAll() {
 	}
 	else {
 		*log << tr("(%1) Could not refresh device properties").arg(toString(replyprop.error()));
+	}
+
+	if ( !(DS_DEACTIVATED == state) ) {
+		if (need_wpa_supplicant) {
+			wpa_supplicant->wps_open();
+		}
 	}
 }
 //Rebuilds the environment list
@@ -515,6 +528,17 @@ void CDevice::environmentRemoved(const QDBusObjectPath &path) {
 }
 //Every time our device changed from anything to active, our active environment may have changed
 void CDevice::dbusstateChanged(int newState, int oldState) {
+	//If switching from DS_DEACTIVATED to any other state then connect wpa_supplicant
+	if (DS_DEACTIVATED == oldState && (!DS_DEACTIVATED == newState) ) {
+		if (need_wpa_supplicant) {
+			wpa_supplicant->wps_open();
+		}
+	}
+	else if (DS_DEACTIVATED == newState) {
+		if (need_wpa_supplicant) {
+			wpa_supplicant->wps_close();
+		}
+	}
 	state = (DeviceState) newState;
 	//Workaround so far, as nuts does not send any environment changed information
 	if (state == DS_UP) {
@@ -549,7 +573,7 @@ void CDevice::setEnvironment(CEnvironment * environment) {
 	dbusDevice->setEnvironment(dbusEnvironments.key(environment));
 }
 nut::DeviceConfig CDevice::getConfig() {
-	return config;
+	return dbusConfig;
 }
 
 void CDevice::addEnvironment(QString name) {

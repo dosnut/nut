@@ -118,7 +118,8 @@ namespace libnut {
 		QHash<QDBusObjectPath, CEnvironment*> dbusEnvironments;
 		CLog * log;
 		DBusDeviceInterface * dbusDevice;
-		nut::DeviceConfig config;
+		nut::DeviceConfig dbusConfig;
+		bool need_wpa_supplicant;
 		void refreshAll();
 		void setActiveEnvironment(CEnvironment * env, QDBusObjectPath dbusPath);
 		void rebuild(QList<QDBusObjectPath> paths);
@@ -139,6 +140,7 @@ namespace libnut {
 		
 		CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);
 		~CDevice();
+		nut::DeviceConfig getConfig();
 
 	public slots:
 		void enable();
@@ -146,7 +148,6 @@ namespace libnut {
 		void addEnvironment(QString name);
 		void removeEnvironment(CEnvironment * environment);
 		void setEnvironment(CEnvironment * environment);
-		nut::DeviceConfig getConfig();
 		
 	signals:
 		void environmentChangedActive(CEnvironment * current, CEnvironment * previous);
