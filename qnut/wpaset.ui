@@ -5,12 +5,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>440</width>
-    <height>397</height>
+    <width>506</width>
+    <height>363</height>
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Wireless settings</string>
+   <string>Wireless Settings</string>
   </property>
   <layout class="QVBoxLayout" >
    <item>
@@ -69,7 +69,14 @@
         </widget>
        </item>
        <item>
-        <widget class="QTreeView" name="managedView" />
+        <widget class="QTreeView" name="managedView" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Expanding" hsizetype="MinimumExpanding" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" >
@@ -90,6 +97,13 @@
           <widget class="QPushButton" name="switchButton" >
            <property name="text" >
             <string>Switch</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="configureButton" >
+           <property name="text" >
+            <string>Configure...</string>
            </property>
           </widget>
          </item>
@@ -192,6 +206,12 @@
          </item>
          <item>
           <widget class="QPushButton" name="rescanButton" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text" >
             <string>Rescan</string>
            </property>

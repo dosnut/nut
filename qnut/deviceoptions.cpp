@@ -19,6 +19,7 @@
 //#include "environmentdetailsmodel.h"
 #include "ipconfiguration.h"
 #include "scriptsettings.h"
+//#include "wirelesssettings.h"
 #include "common.h"
 
 namespace qnut {

@@ -17,6 +17,7 @@
 #define IFDET_MOD_VALUE  1
 
 namespace qnut {
+	using namespace nut;
 	//TODO: liste der dns server
 
 	CInterfaceDetailsModel::CInterfaceDetailsModel(CInterface * data, QObject * parent) : QAbstractItemModel(parent) {
@@ -62,52 +63,84 @@ namespace qnut {
 		switch (index.column()) {
 		case IFDET_MOD_ITEM:
 			switch (index.row()) {
-			case 0:  return tr("Assignment");
-			case 1:  return tr("Netmask");
-			case 2:  return tr("Gateway");
-			default: break;
-			}
-			break;
-		case IFDET_MOD_VALUE:
-			switch (index.row()) {
 			case 0:
-				switch (interface->config.flags) {
-				case CInterface::IF_STATIC:   return tr("static");
-				case CInterface::IF_DYNAMIC:  return tr("dynamic (DHCP)");
-				case CInterface::IF_ZEROCONF: return tr("dynamic (zeroconf)");
-				case CInterface::IF_FALLBACK: return tr("dynamic with fallback");
-				default: break;
-				}
+				return tr("Assignment");
 			case 1:
-				if (interface->active)
-					return interface->netmask.toString();
-				else {
-					switch (interface->config.flags) {
-					case CInterface::IF_STATIC:
-						return interface->config.staticNetmask.toString();
-					case CInterface::IF_FALLBACK:
-						return tr("none (fallback: %1)").arg(interface->config.staticNetmask.toString());
-					default:
-						return tr("none");
-					}
-				}
+				return tr("Netmask");
 			case 2:
-				if (interface->active)
-					return interface->netmask.toString();
-				else {
-					switch (interface->config.flags) {
-					case CInterface::IF_STATIC:
-						return interface->config.staticGateway.toString();
-					case CInterface::IF_FALLBACK:
-						return tr("none (fallback: %1)").arg(interface->config.staticGateway.toString());
-					default:
-						return tr("none");
-					}
-				}
+				return tr("Gateway");
 			default:
 				break;
 			}
 			break;
+		case IFDET_MOD_VALUE: {
+			QString result = tr("unknown");
+			switch (index.row()) {
+			case 0:
+				switch (interface->state) {
+				case IFS_OFF:
+					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP) {
+						result = tr("dynamic (DHCP)");
+						if (interface->getConfig().getFlags() & IPv4Config::DO_ZEROCONF) {
+							return result + ' ' + tr("fallback: zeroconf");
+						}
+						else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC) {
+							return result + ' ' + tr("fallback: static");
+						}
+					}
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC) {
+						result = tr("static");
+						if (interface->getConfig().getFlags() & IPv4Config::MAY_USERSTATIC) {
+							return result + " (" + tr("customizable") + ')';
+						}
+					}
+					return result;
+				case IFS_STATIC:
+					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
+						return tr("static (fallback)");
+					else
+						return tr("static");
+				case IFS_DHCP:
+					return tr("dynamic");
+				case IFS_ZEROCONF:
+					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
+						return tr("zeroconf (fallback)");
+					else
+						return tr("zeroconf");
+				default:
+					break;
+				}
+			case 1:
+				if (interface->state == IFS_OFF) {
+					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP) {
+						return tr("none");
+					}
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC) {
+						return interface->getConfig().getStaticNetmask().toString();
+					}
+					else
+						return tr("unknown");
+				}
+				else
+					return interface->netmask.toString();
+			case 2:
+				if (interface->state == IFS_OFF) {
+					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP) {
+						return tr("none");
+					}
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC) {
+						return interface->getConfig().getStaticGateway().toString();
+					}
+					else
+						return tr("unknown");
+				}
+				else
+					return interface->gateway.toString();
+			default:
+				break;
+			}
+			break;
+			}
 		default:
 			break;
 		}
