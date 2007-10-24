@@ -33,9 +33,7 @@ namespace libnut {
 
 	QString toString(DeviceState state);
 	QString toString(DeviceType type);
-	QString toString(WlanEncryptionType type);
 	QString toString(QDBusError error);
-	
 
 	class CLog : public QObject {
 		Q_OBJECT
@@ -187,7 +185,7 @@ namespace libnut {
 	public slots:
 		void enter();
 		nut::EnvironmentConfig getConfig();
-		void addInterface(bool isStatic, QHostAddress ip, QHostAddress netmask, QHostAddress gateway, bool active);
+		void addInterface(nut::IPv4Config config);
 		void removeInterface(CInterface * interface);
 		
 	signals:
@@ -213,8 +211,7 @@ namespace libnut {
 	private slots:
 		void dbusstateChanged(const InterfaceProperties &properties);
 	public:
-		bool isStatic;
-		bool active;
+		InterfaceState state;
 		QHostAddress ip;
 		QHostAddress netmask;
 		QHostAddress gateway;
@@ -233,8 +230,8 @@ namespace libnut {
 		void setGateway(QHostAddress & address);
 		
 	signals:
-		void activeChanged(bool active);
-		void ipconfigChanged(bool isStatic, QHostAddress ip, QHostAddress netmask, QHostAddress gateway);
+		void stateChanged(InterfaceState state);
+		void ipconfigChanged(QHostAddress ip, QHostAddress netmask, QHostAddress gateway);
 	};
 };
 

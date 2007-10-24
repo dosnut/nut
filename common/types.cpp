@@ -47,7 +47,7 @@ namespace libnut {
 	}
 	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop) {
 		argument.beginStructure();
-		argument << ifprop.active << ifprop.userDefineable << ifprop.isStatic << ifprop.ifState;
+		argument << ifprop.ifState;
 		argument << ifprop.ip << ifprop.netmask << ifprop.gateway << ifprop.dns;
 		argument.endStructure();
 		return argument;
@@ -55,7 +55,7 @@ namespace libnut {
 	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceProperties &ifprop) {
 		argument.beginStructure();
 		int tmp;
-		argument >> ifprop.active >> ifprop.userDefineable >> ifprop.isStatic >> tmp;
+		argument >> tmp;
 		ifprop.ifState = (InterfaceState) tmp;
 		argument >> ifprop.ip >> ifprop.netmask >> ifprop.gateway >> ifprop.dns;
 		argument.endStructure();

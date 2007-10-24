@@ -50,9 +50,6 @@ namespace libnut {
 	enum InterfaceState { IFS_OFF, IFS_STATIC, IFS_DHCP, IFS_ZEROCONF };
 	
 	struct InterfaceProperties {
-		bool isStatic;
-		bool active;
-		bool userDefineable;
 		InterfaceState ifState;
 		QHostAddress ip;
 		QHostAddress netmask;
@@ -64,10 +61,10 @@ namespace libnut {
 	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceProperties &ifprop);
 };
 
-Q_DECLARE_METATYPE(libnut::DeviceProperties)
-Q_DECLARE_METATYPE(libnut::DeviceState)
-Q_DECLARE_METATYPE(libnut::EnvironmentProperties)
-Q_DECLARE_METATYPE(libnut::InterfaceProperties)
-Q_DECLARE_METATYPE(QHostAddress)
-Q_DECLARE_METATYPE(QList<QHostAddress>)
+Q_DECLARE_METATYPE(libnut::DeviceProperties);
+Q_DECLARE_METATYPE(libnut::DeviceState);
+Q_DECLARE_METATYPE(libnut::EnvironmentProperties);
+Q_DECLARE_METATYPE(libnut::InterfaceProperties);
+Q_DECLARE_METATYPE(QHostAddress);
+Q_DECLARE_METATYPE(QList<QHostAddress>);
 #endif
