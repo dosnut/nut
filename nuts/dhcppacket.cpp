@@ -14,19 +14,16 @@
 #include "log.h"
 
 #include <netinet/in.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/socket.h>
-#include <sys/stat.h>
 #include <sys/types.h>
-#include <fcntl.h>
 #include <time.h>
-#include <unistd.h>
 
 #include <linux/if_arp.h>
 #include <linux/if_ether.h>
 
 #include <QDataStream>
+
+#include "random.h"
 
 namespace nuts {
 	/* Copied from udhcp */
@@ -57,23 +54,6 @@ namespace nuts {
 			sum = (sum & 0xffff) + (sum >> 16);
 
 		return (quint16) ~sum;
-	}
-	
-	static quint32 get_rand() {
-		static bool initialized = false;
-		if (!initialized) {
-			initialized = true;
-			quint32 seed;
-			int fd = open("/dev/urandom", O_RDONLY);
-			if (fd >= 0 && read(fd, &seed, sizeof(seed)) == sizeof(seed)) {
-				srand(seed);
-			} else {
-				srand(time(0));
-			}
-			if (fd >= 0)
-				close(fd);
-		}
-		return rand();
 	}
 	
 	DHCPPacket::DHCPPacket(bool client)
@@ -296,7 +276,7 @@ namespace nuts {
 	}
 	
 	void DHCPClientPacket::doDHCPDiscover() {
-		quint32 xid = get_rand();
+		quint32 xid = getRandomUInt32();
 		while (!iface->registerXID(xid)) xid++;
 		setXID(xid);
 		setMessageType(DHCP_DISCOVER);
@@ -316,7 +296,7 @@ namespace nuts {
 	
 	void DHCPClientPacket::doDHCPRenew(const QHostAddress &ip) {
 		// should be unicast to server
-		quint32 xid = get_rand();
+		quint32 xid = getRandomUInt32();
 		while (!iface->registerUnicastXID(xid)) xid++;
 		setXID(xid);
 		setMessageType(DHCP_REQUEST);
@@ -325,7 +305,7 @@ namespace nuts {
 	}
 	
 	void DHCPClientPacket::doDHCPRebind(const QHostAddress &ip) {
-		quint32 xid = get_rand();
+		quint32 xid = getRandomUInt32();
 		while (!iface->registerXID(xid)) xid++;
 		setXID(xid);
 		setMessageType(DHCP_REQUEST);
@@ -335,7 +315,7 @@ namespace nuts {
 	
 	void DHCPClientPacket::doDHCPRelease(const QHostAddress &ip, const QVector<quint8> server_id) {
 		// should be unicast to server
-		quint32 xid = get_rand();
+		quint32 xid = getRandomUInt32();
 		if (!xid) xid++;
 		setXID(xid);
 		setMessageType(DHCP_RELEASE);

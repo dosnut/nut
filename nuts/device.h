@@ -22,6 +22,7 @@ namespace nuts {
 	class Interface;
 	class Interface_IPv4;
 	
+	class ARP;
 	class DHCPPacket;
 	class DHCPClientPacket;
 };
@@ -92,6 +93,7 @@ namespace nuts {
 			friend class Interface_IPv4;
 			friend class DHCPPacket;
 			friend class DHCPClientPacket;
+			friend class ARP;
 			
 			DeviceManager *dm;
 			QString name;
@@ -126,13 +128,6 @@ namespace nuts {
 			void readDHCPClientSocket();
 			void writeDHCPClientSocket();
 			
-		protected:
-		private slots:
-			// ARP
-			
-		protected:
-			nut::MacAddress getMacAddress();
-			
 		public:
 			Device(DeviceManager* dm, const QString &name, nut::DeviceConfig *config, bool hasWLAN);
 			virtual ~Device();
@@ -155,6 +150,7 @@ namespace nuts {
 			
 			bool hasWLAN() { return m_hasWLAN; }
 			QString essid() { return m_essid; }
+			nut::MacAddress getMacAddress();
 		
 		signals:
 			void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState);
