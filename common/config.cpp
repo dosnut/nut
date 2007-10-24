@@ -127,7 +127,13 @@ namespace nut {
 	
 	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4Config &data) {
 		argument.beginStructure();
-		argument << (quint32) data.getFlags() << (quint32) data.getOverwriteFlags();
+		argument << (quint32) data.getFlags() << (quint32) data.getOverwriteFlags()
+			<< data.m_canUserEnable
+			<< data.m_static_ip
+			<< data.m_static_netmask
+			<< data.m_static_gateway
+			<< data.m_static_dnsservers;
+		
 		argument.endStructure();
 		return argument;
 	}
@@ -137,6 +143,11 @@ namespace nut {
 		argument >> flags >> oFlags;
 		data.m_flags = (IPv4Config::Flags) flags;
 		data.m_overwriteFlags = (IPv4Config::OverwriteFlags) oFlags;
+		argument >> data.m_canUserEnable
+			>> data.m_static_ip
+			>> data.m_static_netmask
+			>> data.m_static_gateway
+			>> data.m_static_dnsservers;
 		argument.endStructure();
 		return argument;
 	}
