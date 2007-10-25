@@ -16,6 +16,9 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 	if (cmd_ctrl == NULL || event_ctrl == NULL) {
 		return QString();
 	}
+	if (!wps_connected or inConnectionPhase) {
+		return QString();
+	}
 	//First Check if wpa_supplicant is running:
 	size_t command_len;
 	const char * command;
@@ -580,6 +583,7 @@ void CWpa_Supplicant::wps_open(bool timer_call) {
 	if (!QFile::exists(wpa_supplicant_path)) {
 		printMessage(tr("Could not open wpa_supplicant socket"));
 		if (! timer_call) {
+			inConnectionPhase = true;
 			timerId = startTimer(1000);
 		}
 		return;
@@ -589,6 +593,7 @@ void CWpa_Supplicant::wps_open(bool timer_call) {
 	if (cmd_ctrl == NULL and event_ctrl == NULL) {
 		printMessage(tr("Could not open wpa_supplicant control interface"));
 		if (! timer_call) {
+			inConnectionPhase = true;
 			timerId = startTimer(1000);
 		}
 		return;
@@ -597,6 +602,7 @@ void CWpa_Supplicant::wps_open(bool timer_call) {
 		wpa_ctrl_close(event_ctrl);
 		printMessage(tr("Could not open wpa_supplicant control interface"));
 		if (! timer_call) {
+			inConnectionPhase = true;
 			timerId = startTimer(1000);
 		}
 		return;
@@ -605,6 +611,7 @@ void CWpa_Supplicant::wps_open(bool timer_call) {
 		wpa_ctrl_close(cmd_ctrl);
 		printMessage(tr("Could not open wpa_supplicant control interface"));
 		if (! timer_call) {
+			inConnectionPhase = true;
 			timerId = startTimer(1000);
 		}
 		return;
@@ -618,10 +625,12 @@ void CWpa_Supplicant::wps_open(bool timer_call) {
 		wpa_ctrl_close(cmd_ctrl);
 		printMessage(tr("Could not attach to wpa_supplicant"));
 		if (! timer_call) {
+			inConnectionPhase = true;
 			timerId = startTimer(1000);
 		}
 		return;
 	}
+	inConnectionPhase = false;
 	killTimer(timerId);
 	timerId = 0;
 	//Set socket notifier
@@ -638,6 +647,7 @@ bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 	if (timerId != 0) {
 		killTimer(timerId);
 		timerId = 0;
+		inConnectionPhase = false;
 	}
 	if (wps_connected) {
 		if (event_sn != NULL) {
