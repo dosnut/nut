@@ -152,7 +152,7 @@ namespace libnut {
 			inline void wps_cmd_BSSID(int id, QString bssid) { wps_ctrl_command(QString("BSSID %1 %2").arg(QString::number(id),bssid));}
 			inline QString wps_cmd_LIST_NETWORKS() { return wps_ctrl_command("LIST_NETWORKS"); }
 			inline void wps_cmd_DISCONNECT() { wps_ctrl_command("DISCONNECT"); }
-			inline void wps_cmd_SCAN() { wps_ctrl_command("SCAN"); }
+			inline QString wps_cmd_SCAN() { return wps_ctrl_command("SCAN"); }
 			inline QString wps_cmd_SCAN_RESULTS() { return wps_ctrl_command("SCAN_RESULTS"); }
 			inline void wps_cmd_SELECT_NETWORK(int id) { wps_ctrl_command(QString("SELECT_NETWORK %1").arg(QString::number(id))); }
 			inline void wps_cmd_ENABLE_NETWORK(int id) { wps_ctrl_command(QString("ENABLE_NETWORK %1").arg(QString::number(id))); }
@@ -275,6 +275,7 @@ namespace libnut {
 		signals:
 			void wps_stateChange(bool state);
 			void wps_request(wps_req request);
+			void scanComplete();
 			void message(QString msg);
 			void eventMessage(wps_event_type type);
 	};

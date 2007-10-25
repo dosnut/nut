@@ -25,7 +25,8 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 	command = "PING";
 	command_len = strlen(command);
 	int status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);
-	if ( (status != 0) or (QString::fromUtf8(reply, reply_len) != "PONG") ) {
+	if ( (status != 0) or (QString::fromUtf8(reply, reply_len) != "PONG\n") ) {
+		printMessage(QString("(status=%2)PING COMMAND RESPONSE: %1").arg(QString::fromUtf8(reply, reply_len),QString::number(status)));
 		//TODO: Maybe we need to detach and close wpa_supplicant:
 		wps_close("wps_ctrl_command/nopong");
 		return QString();
@@ -37,7 +38,7 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 		
 		status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);
 		if (0 == status) {
-			qDebug() << cmd << ":" << QString::fromUtf8(reply, reply_len) << "EOC";
+			printMessage(cmd + ":" + QString::fromUtf8(reply, reply_len) + "\nEOC");
 			if (reply_len > 0) {
 				//TODO:Check if reply is \0 terminated
 				return QString::fromUtf8(reply, reply_len);
@@ -671,7 +672,7 @@ void CWpa_Supplicant::timerEvent(QTimerEvent *event) {
 }
 
 bool CWpa_Supplicant::connected() {
-	if (wps_cmd_PING() == "PONG") {
+	if (wps_cmd_PING() == "PONG\n") {
 		return true;
 	}
 	else {
@@ -719,7 +720,9 @@ void CWpa_Supplicant::disableNetwork(int id) {
 	wps_cmd_DISABLE_NETWORK(id);
 }
 void CWpa_Supplicant::scan() {
-	wps_cmd_SCAN();
+	if (0 == wps_cmd_SCAN().indexOf("OK")) {
+		emit(scanComplete());
+	}
 }
 void CWpa_Supplicant::ap_scan(int type) {
 	if ( !(0 <= type and 2 >= type) ) {
