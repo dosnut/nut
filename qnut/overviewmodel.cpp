@@ -24,11 +24,11 @@ namespace qnut {
 		if (deviceManager) {
 			devices = &(deviceManager->devices);
 			
-			connect(deviceManager, SIGNAL(deviceAdded(CDevice *)), this, SIGNAL(layoutChanged()));
-			connect(deviceManager, SIGNAL(deviceRemoved(CDevice *)), this, SIGNAL(layoutChanged()));
-			foreach (CDevice * i, *devices) {
+			connect(deviceManager, SIGNAL(deviceAdded(CDevice *)), this, SLOT(deviceAdded(CDevice *)));
+			connect(deviceManager, SIGNAL(deviceRemoved(CDevice *)), this, SLOT(deviceRemoved(CDevice *)));
+/*			foreach (CDevice * i, *devices) {
 				connect(i, SIGNAL(stateChanged(DeviceState)), this, SIGNAL(layoutChanged()));
-			}
+			}*/
 		}
 		else
 			devices = NULL;
@@ -36,6 +36,16 @@ namespace qnut {
 	
 	COverViewModel::~COverViewModel() {
 		devices = NULL;
+	}
+	
+	void COverViewModel::deviceAdded(CDevice * device) {
+		connect(device, SIGNAL(stateChanged(DeviceState)), this, SIGNAL(layoutChanged()));
+		emit layoutChanged();
+	}
+	
+	void COverViewModel::deviceRemoved(CDevice * device) {
+		disconnect(device, SIGNAL(stateChanged(DeviceState)), this, SIGNAL(layoutChanged()));
+		emit layoutChanged();
 	}
 	
 	Qt::ItemFlags COverViewModel::flags(const QModelIndex & index) const {

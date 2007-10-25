@@ -25,10 +25,19 @@ namespace qnut {
 		QWidget * mainwin = (QWidget *)(parent());
 		switch (reason) {
 			case Trigger:
-				if (mainwin->isVisible())
+				if (mainwin->isVisible()) {
 					mainwin->close();
-				else
+// 					if (mainwin->isActiveWindow())
+// 						mainwin->close();
+// 					else {
+// 						mainwin->activateWindow();
+// 						mainwin->raise();
+// 					}
+				}
+				else {
 					mainwin->show();
+					//mainwin->activateWindow();
+				}
 				break;
 			default:
 				break;

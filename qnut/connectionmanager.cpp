@@ -289,6 +289,7 @@ namespace qnut {
 	
 	void CConnectionManager::uiShowOptions(QWidget * widget) {
 		show();
+		activateWindow();
 		tabWidget.setCurrentWidget(widget);
 	}
 };
