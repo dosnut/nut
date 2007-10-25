@@ -1,5 +1,5 @@
 //
-// C++ Interface: deviceoptionsmodel
+// C++ Interface: managedapmodel
 //
 // Description: 
 //

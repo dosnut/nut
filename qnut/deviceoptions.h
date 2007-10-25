@@ -20,6 +20,7 @@
 #include <QLabel>
 #include <libnut/libnut_cli.h>
 #include "ui/ui_devopt.h"
+#include "wirelesssettings.h"
 
 namespace qnut {
 	using namespace libnut;
@@ -31,6 +32,8 @@ namespace qnut {
 		Q_OBJECT
 	protected:
 		Ui::devopt ui;
+		
+		CWirelessSettings * wirelessSettings;
 		
 		QSettings settings;
 		

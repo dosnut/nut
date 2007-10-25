@@ -1,5 +1,5 @@
 //
-// C++ Implementation: deviceoptionsmodel
+// C++ Implementation: managedapmodel
 //
 // Description: 
 //
@@ -25,7 +25,7 @@ namespace qnut {
 		supplicant = data;
 		if (supplicant) {
 			networks = supplicant->listNetworks();
-			connect(supplicant, SIGNAL(eventMessage(wps_event_type)), this, SIGNAL(layoutChanged()));
+			connect(supplicant, SIGNAL(eventMessage(wps_event_type)), this, SLOT(reloadNetworks()));
 		}
 	}
 	
@@ -34,8 +34,9 @@ namespace qnut {
 	}
 	
 	void CManagedAPModel::reloadNetworks() {
+		emit layoutAboutToBeChanged();
 		networks = supplicant->listNetworks();
-		//TODO: reset(); nötig??
+		emit layoutChanged();
 	}
 	
 	int CManagedAPModel::columnCount(const QModelIndex &) const {

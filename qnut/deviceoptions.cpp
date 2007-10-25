@@ -29,6 +29,12 @@ namespace qnut {
 	{
 		device = parentDevice;
 		
+		if (device->type == DT_AIR) {
+			wirelessSettings = new CWirelessSettings(device);
+		}
+		else
+			wirelessSettings = NULL;
+		
 		createView();
 		createActions();
 		
@@ -59,6 +65,13 @@ namespace qnut {
 		ui.detailsButton->setChecked(settings.value("showDetails", false).toBool());
 		settings.endGroup();
 		ui.showTrayCheck->setChecked(trayIcon->isVisible());
+		
+		if (wirelessSettings) {
+			settings.beginGroup("WirelessSettings");
+			wirelessSettings->resize(settings.value("size", QSize(646, 322)).toSize());
+			wirelessSettings->move(settings.value("pos", QPoint(200, 200)).toPoint());
+			settings.endGroup();
+		}
 	}
 	
 	inline void CDeviceOptions::writeSettings() {
@@ -67,6 +80,13 @@ namespace qnut {
 		settings.setValue("showTrayIcon", trayIcon->isVisible());
 		settings.setValue("showDetails", ui.detailsButton->isChecked());
 		settings.endGroup();
+		
+		if (wirelessSettings) {
+			settings.beginGroup("WirelessSettings");
+			settings.setValue("size", wirelessSettings->size());
+			settings.setValue("pos", wirelessSettings->pos());
+			settings.endGroup();
+		}
 	}
 	
 	inline void CDeviceOptions::createActions() {
@@ -176,8 +196,10 @@ namespace qnut {
 	}
 	
 	void CDeviceOptions::uiOpenWirelessSettings() {
-		CWirelessSettings dialog(device);
-		dialog.exec();
+		if (wirelessSettings) {
+			wirelessSettings->show();
+			wirelessSettings->activateWindow();
+		}
 	}
 	
 	void CDeviceOptions::uiHandleStateChange(DeviceState state) {

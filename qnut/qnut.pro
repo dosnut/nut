@@ -38,7 +38,8 @@ HEADERS += connectionmanager.h trayicon.h \
  interfacedetailsmodel.h \
  wirelesssettings.h \
  managedapmodel.h \
- environmenttreemodel.h
+ environmenttreemodel.h \
+ availableapmodel.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  overviewmodel.cpp \
  deviceoptions.cpp \
@@ -48,7 +49,8 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  interfacedetailsmodel.cpp \
  wirelesssettings.cpp \
  managedapmodel.cpp \
- environmenttreemodel.cpp
+ environmenttreemodel.cpp \
+ availableapmodel.cpp
 DESTDIR = .
 
 target.path = /usr/bin

@@ -14,15 +14,15 @@
 
 #include <QDialog>
 #include <libnut/libnut_cli.h>
-#include "ui/ui_wpaset.h"
+#include "ui/ui_airset.h"
 
 namespace qnut {
 	using namespace libnut;
 	
-	class CWirelessSettings : public QDialog {
+	class CWirelessSettings : public QWidget {
 		Q_OBJECT
 	private:
-		Ui::wpaset ui;
+		Ui::airset ui;
 		CDevice * device;
 		
 		inline void setHeadInfo();

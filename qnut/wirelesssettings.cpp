@@ -13,18 +13,25 @@
 #include "managedapmodel.h"
 #include "common.h"
 #include <QHeaderView>
-//#include "availableapmodel.h"
+#include "availableapmodel.h"
 
 namespace qnut {
-	CWirelessSettings::CWirelessSettings(CDevice * wireless, QWidget *parent) : QDialog(parent) {
+	CWirelessSettings::CWirelessSettings(CDevice * wireless, QWidget * parent) : QWidget(parent) {
 		device = wireless;
+		
 		ui.setupUi(this);
+		
+		setWindowTitle(tr("Wireless Settings for \"%1\"").arg(device->name));
+		setWindowIcon(QIcon(UI_ICON_AIR_SETTINGS));
+		
+		
 		ui.nameLabel->setText(device->name);
 		uiHandleStateChange(device->state);
 		setHeadInfo();
 		ui.managedView->header()->setResizeMode(QHeaderView::ResizeToContents);
 		ui.managedView->setModel(new CManagedAPModel(device->wpa_supplicant));
-		//ui.availableView->setModel(new CAvailableAPModel(device->wpa_supplicant));
+		ui.availableView->header()->setResizeMode(QHeaderView::ResizeToContents);
+		ui.availableView->setModel(new CAvailableAPModel(device->wpa_supplicant));
 		connect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
 		connect(ui.switchButton, SIGNAL(clicked()), this, SLOT(uiHandleSwitchNetwork()));
 		connect(ui.rescanButton, SIGNAL(clicked()), device->wpa_supplicant, SLOT(scan()));
