@@ -32,7 +32,7 @@ namespace qnut {
 		
 	public slots:
 		void uiHandleStateChange(DeviceState state);
-		//void uiHandleSwitchAP();
+		void uiHandleSwitchNetwork();
 	};
 };
 

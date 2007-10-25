@@ -12,6 +12,7 @@
 #include "wirelesssettings.h"
 #include "managedapmodel.h"
 #include "common.h"
+#include <QHeaderView>
 //#include "availableapmodel.h"
 
 namespace qnut {
@@ -19,10 +20,14 @@ namespace qnut {
 		device = wireless;
 		ui.setupUi(this);
 		ui.nameLabel->setText(device->name);
+		uiHandleStateChange(device->state);
 		setHeadInfo();
+		ui.managedView->header()->setResizeMode(QHeaderView::ResizeToContents);
 		ui.managedView->setModel(new CManagedAPModel(device->wpa_supplicant));
+		//ui.availableView->setModel(new CAvailableAPModel(device->wpa_supplicant));
 		connect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
-		//connect(device->wpa_supplicant); //hier weiter
+		connect(ui.switchButton, SIGNAL(clicked()), this, SLOT(uiHandleSwitchNetwork()));
+		connect(ui.rescanButton, SIGNAL(clicked()), device->wpa_supplicant, SLOT(scan()));
 	}
 	
 	CWirelessSettings::~CWirelessSettings() {
@@ -36,11 +41,19 @@ namespace qnut {
 	
 	void CWirelessSettings::uiHandleStateChange(DeviceState state) {
 		bool wpaAvailable = (state != DS_DEACTIVATED);
-		ui.switchButton->setDisabled(wpaAvailable);
-		ui.rescanButton->setDisabled(wpaAvailable);
-		ui.managedView->setDisabled(wpaAvailable);
-		ui.availableView->setDisabled(wpaAvailable);
+		ui.switchButton->setEnabled(wpaAvailable);
+		ui.rescanButton->setEnabled(wpaAvailable);
+		ui.managedView->setEnabled(wpaAvailable);
+		ui.availableView->setEnabled(wpaAvailable);
 		
 		setHeadInfo();
+	}
+	
+	void CWirelessSettings::uiHandleSwitchNetwork() {
+		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
+		wps_network * network = static_cast<wps_network *>(selectedIndexes[0].internalPointer());
+		if (network) {
+			device->wpa_supplicant->selectNetwork(network->id);
+		}
 	}
 };

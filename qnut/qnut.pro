@@ -1,8 +1,9 @@
 
 TEMPLATE = app
 CONFIG += qt qdbus \
- debug_and_release \
- build_all
+ build_all \
+ release \
+ debug_and_release
 QT += network
 
 CODECFORSRC = UTF-8
@@ -11,9 +12,7 @@ CODECFORTR = ISO-8859-1
 OBJECTS_DIR = build/
 MOC_DIR = build/
 UI_DIR = ui/
-RCC_DIR = build/
 
-CONFIG += debug_and_release
 
 CONFIG(debug, debug|release){
     TARGET = qnut_debug
@@ -52,7 +51,7 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  environmenttreemodel.cpp
 DESTDIR = .
 
-target.path = /usr/bin/
+target.path = /usr/bin
 iconstarget.path = /usr/share/qnut/icons
 iconstarget.files = res/*.png
 langtarget.path = /usr/share/qnut/lang
@@ -68,7 +67,6 @@ CONFIG(debug, debug|release){
 
 QMAKE_CXXFLAGS_RELEASE += -DQNUT_RELEASE
 
-CONFIG -= debug
 
 INCLUDEPATH += ..
 
@@ -78,3 +76,5 @@ TARGETDEPS += ../common/libnutcommon.a \
 ../libnut/libnut.a
 FORMS -= wpaset.ui \
 wrlset.ui
+CONFIG -= debug
+

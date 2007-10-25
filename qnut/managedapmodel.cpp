@@ -23,7 +23,10 @@ namespace qnut {
 	
 	CManagedAPModel::CManagedAPModel(CWpa_Supplicant * data, QObject * parent) : QAbstractItemModel(parent) {
 		supplicant = data;
-		networks = supplicant->listNetworks();
+		if (supplicant) {
+			networks = supplicant->listNetworks();
+			connect(supplicant, SIGNAL(wps_stateChange(bool)), this, SIGNAL(layoutChanged()));
+		}
 	}
 	
 	CManagedAPModel::~CManagedAPModel() {
@@ -123,7 +126,7 @@ namespace qnut {
 		
 		if (!parent.isValid()) {
 			if (row < networks.count())
-				return createIndex(row, column, (void *)NULL);
+				return createIndex(row, column, (void *)(&(networks[row])));
 		}
 		
 		return QModelIndex();
