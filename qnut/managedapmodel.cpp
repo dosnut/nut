@@ -25,7 +25,7 @@ namespace qnut {
 		supplicant = data;
 		if (supplicant) {
 			networks = supplicant->listNetworks();
-			connect(supplicant, SIGNAL(wps_stateChange(bool)), this, SIGNAL(layoutChanged()));
+			connect(supplicant, SIGNAL(eventMessage(wps_event_type)), this, SIGNAL(layoutChanged()));
 		}
 	}
 	
