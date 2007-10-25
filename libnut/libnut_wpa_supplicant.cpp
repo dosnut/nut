@@ -562,7 +562,8 @@ void CWpa_Supplicant::Event_dispatcher(QString event) {
 CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) : QObject(parent), wpa_supplicant_path(wpa_supplicant_path) {
 	wps_connected = false;
 	log_enabled = true;
-	connect(QCoreApplication::instance(),SIGNAL(aboutToQuit ()),this,SLOT(wps_detach()));
+	//nur so kein segfault beim beenden (oli)
+	//connect(QCoreApplication::instance(),SIGNAL(aboutToQuit ()),this,SLOT(wps_detach()));
 }
 CWpa_Supplicant::~CWpa_Supplicant() {
 	wps_close("destructor");
