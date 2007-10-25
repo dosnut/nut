@@ -719,7 +719,9 @@ void CWpa_Supplicant::disableNetwork(int id) {
 	wps_cmd_DISABLE_NETWORK(id);
 }
 void CWpa_Supplicant::scan() {
-	wps_cmd_SCAN();
+	if (0 == wps_cmd_SCAN().indexOf("OK")) {
+		emit(scanComplete());
+	}
 }
 void CWpa_Supplicant::ap_scan(int type) {
 	if ( !(0 <= type and 2 >= type) ) {
