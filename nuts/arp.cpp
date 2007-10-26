@@ -112,7 +112,7 @@ static void arp_ipv4_request(arp_packet_ipv4 &packet, const nut::MacAddress &sen
 }
 
 static bool arp_ipv4_parse(const QByteArray &data, nut::MacAddress &sender_mac, QHostAddress &sender_ip, nut::MacAddress &target_mac, QHostAddress &target_ip) {
-	if (data.size() < sizeof(arp_packet_ipv4))
+	if (data.size() < (int) sizeof(arp_packet_ipv4))
 		return false;
 	arp_packet_ipv4 *packet = (arp_packet_ipv4*) data.data();
 	if (   (packet->hwtype != htons(ARPHRD_ETHER))
@@ -261,7 +261,7 @@ namespace nuts {
 	}
 	
 	ARP::ARP(Device* device)
-	: QObject(device), m_device(device), m_timer_id(0) {
+	: QObject(device), m_device(device), m_arp_socket(-1), m_timer_id(0) {
 	}
 
 	ARP::~ARP() {
