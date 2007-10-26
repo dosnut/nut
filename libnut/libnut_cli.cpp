@@ -303,6 +303,18 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	else {
 		throw CLI_DevConnectionException(tr("(%1) Error while retrieving dbus' device information").arg(toString(replyProp.error())));
 	}
+
+	if (DT_AIR == type) {
+		QDBusReply<QString> replyessid = dbusDevice->getEssid();
+		if (replyessid.isValid()) {
+			essid = replyessid.value();
+		}
+		else {
+			*log << tr("(%1) Could not refresh device essid").arg(toString(replyessid.error()));
+			essid = QString();
+		}
+	}
+
 	//get config and set wpa_supplicant variable
 	QDBusReply<nut::DeviceConfig> replyconf = dbusDevice->getConfig();
 	if (replyconf.isValid()) {
@@ -423,6 +435,16 @@ void CDevice::refreshAll() {
 	else {
 		*log << tr("(%1) Could not refresh device properties").arg(toString(replyprop.error()));
 	}
+	if (DT_AIR == type) {
+		QDBusReply<QString> replyessid = dbusDevice->getEssid();
+		if (replyessid.isValid()) {
+			essid = replyessid.value();
+		}
+		else {
+			*log << tr("(%1) Could not refresh device essid").arg(toString(replyessid.error()));
+			essid = QString();
+		}
+	}
 
 	if ( !(DS_DEACTIVATED == state) ) {
 		if (need_wpa_supplicant) {
@@ -523,6 +545,17 @@ void CDevice::dbusstateChanged(int newState, int oldState) {
 		dbusActiveEnvironment = QDBusObjectPath();
 		activeEnvironment = 0;
 	}
+	if (DT_AIR == type) {
+		QDBusReply<QString> replyessid = dbusDevice->getEssid();
+		if (replyessid.isValid()) {
+			essid = replyessid.value();
+		}
+		else {
+			essid = QString();
+		}
+	}
+
+
 	emit(stateChanged(state));
 }
 

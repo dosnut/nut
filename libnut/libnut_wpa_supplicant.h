@@ -2,23 +2,15 @@
 #define LIBNUT_LIBNUT_WPA_SUPPLICANT_H
 // #define CONFIG_CTRL_IFACE
 // #define CONFIG_CTRL_IFACE_UNIX
-#include <iostream>
-#include <QObject>
-#include <QList>
 #include <QHostAddress>
 #include <common/types.h>
 #include <common/config.h>
 #include "libnut_server_proxy.h"
 #include "libnut_exceptions.h"
+#include "libnut_wpa_supplicant_types.h"
 #include "wpa_ctrl.h"
-#include <QDBusConnectionInterface>
-#include <QDBusReply>
-#include <QDBusObjectPath>
 #include <QFile>
-#include <QTextStream>
-#include <QHash>
 #include <QSocketNotifier>
-#include <QString>
 #include <QStringList>
 #include <QTimerEvent>
 #include <common/macaddress.h>
@@ -29,97 +21,6 @@
 
 
 namespace libnut {
-	typedef enum {WNF_NONE=0, WNF_CURRENT=1} wps_network_flags;
-	typedef enum {CI_UNDEFINED=0, CI_NONE=1, CI_CCMP=2, CI_TKIP=4, CI_WEP104=8, CI_WEP40=16, CI_WEP=32} CIPHERS;
-	typedef enum {KEYMGMT_PLAIN=0, KEYMGMT_WPA_PSK=2, KEYMGMT_WPA2_PSK=4, KEYMGMT_WPA_EAP=8, KEYMGMT_WPA2_EAP=16, KEYMGMT_IEEE8021X=32} KEYMGMT;
-	struct wps_network {
-		int id;
-		QString ssid;
-		nut::MacAddress bssid;
-		wps_network_flags flags;
-	};
-	struct wps_network_config {
-		
-	};
-	struct wps_scan {
-		nut::MacAddress bssid;
-		QString ssid;
-		int freq;
-		int level;
-		CIPHERS ciphers;
-		KEYMGMT key_mgmt;
-	};
-	struct wps_variable;
-	typedef QList<wps_variable> wps_MIB;
-	//enums are NOT complete, but maybe we schould change this to QString
-	struct wps_status {
-// 		typedef enum {COMPLETED} WPA_STATE;
-// 		typedef enum {AUTHENTICATED} PAE_STATE;
-// 		typedef enum {AUTHORIZED} PORT_STATUS;
-// 		typedef enum {AUTO} PORT_CONTROL;
-// 		typedef enum {IDLE} BACKEND_STATE;
-// 		typedef enum {SUCCESS} EAP_STATE;
-// 		typedef enum {NOSTATE} METHOD_STATE;
-// 		typedef enum {COND_SUCC} DECISION;
-		//These typedefs may change in the future to the ones above (more complete)
-		typedef QString WPA_STATE;
-		typedef QString PAE_STATE;
-		typedef QString PORT_STATUS;
-		typedef QString PORT_CONTROL;
-		typedef QString BACKEND_STATE;
-		typedef QString EAP_STATE;
-		typedef QString METHOD_STATE;
-		typedef QString DECISION;
-		nut::MacAddress bssid;
-		QString ssid;
-		int id;
-		CIPHERS pairwise_cipher;
-		CIPHERS group_cipher;
-		KEYMGMT key_mgmt;
-		WPA_STATE wpa_state;
-		QHostAddress ip_address;
-		PAE_STATE pae_state;
-		PORT_STATUS PortStatus;
-		int heldPeriod;
-		int authPeriod;
-		int startPeriod;
-		int maxStart;
-		PORT_CONTROL portControl;
-		BACKEND_STATE backend_state;
-		EAP_STATE eap_state;
-		int reqMethod;
-		METHOD_STATE methodState;
-		DECISION decision;
-		int ClientTimeout;
-	};
-
-	struct wps_variable {
-		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} wps_variable_type;
-		wps_variable_type type;
-		QString name;
-		union {
-			qint32 * num;
-			QString * str;
-			bool * logic;
-		} value;
-	};
-	struct wps_net_var {
-		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} Type;
-		QString name;
-		union {
-			int * num;
-			QString * str;
-			bool * logic;
-		} value;
-	};
-	typedef enum {WI_MSG=0, WI_REQ=1,WI_EVENT=2} wps_interact_type;
-	typedef enum {WR_FAIL=0, WR_PASSWORD=2, WR_IDENTITY=4, WR_NEW_PASSWORD=8, WR_PIN=16, WR_OTP=32, WR_PASSPHRASE=64} wps_req_type;
-	typedef enum {WE_OTHER, WE_DISCONNECTED, WE_CONNECTED, WE_TERMINATING, WE_PASSWORD_CHANGED, WE_EAP_NOTIFICATION, WE_EAP_STARTED, WE_EAP_METHOD, WE_EAP_SUCCESS, WE_EAP_FAILURE } wps_event_type;
-
-	struct wps_req {
-		wps_req_type type;
-		int id;
-	};
 
 	class CWpa_Supplicant: public QObject {
 			Q_OBJECT
@@ -249,7 +150,9 @@ namespace libnut {
 			void reconfigure();
 			void terminate();
 			void preauth(nut::MacAddress bssid);
-			int addNetwork();
+			int addNetwork(); //return -1 if failed, otherwise return network id
+			int addNetwork(wps_network_config config); //return -1 if failed, otherwise return network id
+			wps_network_config getNetworkConfig(int id);
 			void removeNetwork(int id);
 			void setBssid(int id, nut::MacAddress bssid);
 
@@ -279,7 +182,7 @@ namespace libnut {
 			void request(wps_req req);
 			void closed();
 			void opened();
-			void scanComplete();
+			void scanCompleted();
 			void message(QString msg);
 			void eventMessage(wps_event_type type);
 	};

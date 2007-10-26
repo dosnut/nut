@@ -81,8 +81,7 @@ namespace nuts {
 				s_device->setEnvironment(env);
 			}
 			
-			bool hasWLAN() { return s_device->hasWLAN(); }
-			QString essid() { return s_device->essid(); }
+			QString getEssid() { return s_device->essid(); }
 		
 		signals:
 			void stateChanged(int newState, int oldState);
