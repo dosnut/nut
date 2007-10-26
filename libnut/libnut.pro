@@ -16,11 +16,13 @@ HEADERS += libnut_cli.h libnut_server_proxy.h libnut_exceptions.h \
  includes.h \
  build_config.h \
  common.h \
- os.h
+ os.h \
+ libnut_wpa_supplicant_types.h
 SOURCES += libnut_cli.cpp libnut_server_proxy.cpp \
  libnut_wpa_supplicant.cpp \
  wpa_ctrl.c \
- common.c
+ common.c \
+ libnut_wpa_supplicant_types.cpp
 
 OBJECTS_DIR = build/
 UI_DIR = build/

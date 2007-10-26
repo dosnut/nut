@@ -131,6 +131,7 @@ namespace libnut {
 		CEnvironmentList environments;
 		
 		QString name;
+		QString essid;
 		DeviceState state;
 		DeviceType type;
 		CEnvironment * activeEnvironment;
@@ -152,7 +153,7 @@ namespace libnut {
 		void environmentsUpdated();
 		void environmentAdded(CEnvironment * environment);
 		void environmentRemoved(CEnvironment * environment);
-		void stateChanged(DeviceState state);
+		void stateChanged(DeviceState newState);
 	};
 	
 	class CEnvironment : public CLibNut {

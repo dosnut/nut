@@ -62,6 +62,11 @@ public Q_SLOTS: // METHODS
         QList<QVariant> argumentList;
         return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
     }
+    inline QDBusReply<QString> essid() {
+        QList<QVariant> argumentList;
+        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getEssid"), argumentList);
+    }
+	
 	inline QDBusReply<nut::DeviceConfig> getConfig()
 	{
 		QList<QVariant> argumentList;

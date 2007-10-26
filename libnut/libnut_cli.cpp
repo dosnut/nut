@@ -419,6 +419,7 @@ void CDevice::refreshAll() {
 		state = (DeviceState) replyprop.value().state;
 		type = replyprop.value().type;
 		name = replyprop.value().name;
+		essid = replyprop.value().essid;
 	}
 	else {
 		*log << tr("(%1) Could not refresh device properties").arg(toString(replyprop.error()));
@@ -517,6 +518,7 @@ void CDevice::dbusstateChanged(int newState, int oldState) {
 			if (activeEnvironment != 0) {
 				activeEnvironment->refreshAll();
 			}
+			essid = replyprop.value().essid;
 		}
 	}
 	else {
