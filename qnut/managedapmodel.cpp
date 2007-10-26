@@ -25,7 +25,9 @@ namespace qnut {
 		supplicant = data;
 		if (supplicant) {
 			networks = supplicant->listNetworks();
-			connect(supplicant, SIGNAL(wps_stateChange(bool)), this, SLOT(reloadNetworks()));
+			connect(supplicant, SIGNAL(opened()), this, SLOT(reloadNetworks()));
+			connect(supplicant, SIGNAL(closed()), this, SLOT(reloadNetworks()));
+			connect(supplicant, SIGNAL(stateChanged(bool)), this, SLOT(reloadNetworks()));
 		}
 	}
 	

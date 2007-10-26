@@ -25,7 +25,11 @@ FORMS = connman.ui \
  scrset.ui \
  devopt.ui \
  wrlset.ui \
- airset.ui
+ airset.ui \
+ eapconf.ui \
+ pskconf.ui \
+ wepconf.ui \
+ apconf.ui
 TRANSLATIONS = qnut_de.ts
 
 HEADERS += connectionmanager.h trayicon.h \
@@ -39,7 +43,8 @@ HEADERS += connectionmanager.h trayicon.h \
  wirelesssettings.h \
  managedapmodel.h \
  environmenttreemodel.h \
- availableapmodel.h
+ availableapmodel.h \
+ accesspointconfig.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  overviewmodel.cpp \
  deviceoptions.cpp \
@@ -50,7 +55,8 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  wirelesssettings.cpp \
  managedapmodel.cpp \
  environmenttreemodel.cpp \
- availableapmodel.cpp
+ availableapmodel.cpp \
+ accesspointconfig.cpp
 DESTDIR = .
 
 target.path = /usr/bin

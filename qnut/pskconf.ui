@@ -1,0 +1,55 @@
+<ui version="4.0" >
+ <class>pskconf</class>
+ <widget class="QWidget" name="pskconf" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>332</width>
+    <height>76</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>PSK</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <widget class="QLabel" name="keyLabel" >
+       <property name="text" >
+        <string>Key</string>
+       </property>
+       <property name="margin" >
+        <number>-1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="pskEdit" >
+       <property name="echoMode" >
+        <enum>QLineEdit::Password</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="charCountLabel" >
+       <property name="text" >
+        <string>0 chars</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="showKeyCheck" >
+     <property name="text" >
+      <string>Show key as plain text</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

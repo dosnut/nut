@@ -27,7 +27,9 @@ namespace qnut {
 		supplicant = data;
 		if (supplicant) {
 			scans = supplicant->scanResults();
-			connect(supplicant, SIGNAL(scanComplete()), this, SLOT(reloadScans()));
+			connect(supplicant, SIGNAL(opened()), this, SLOT(reloadScans()));
+			connect(supplicant, SIGNAL(closed()), this, SLOT(reloadScans()));
+			connect(supplicant, SIGNAL(scanCompleted()), this, SLOT(reloadScans()));
 		}
 	}
 	
@@ -84,7 +86,7 @@ namespace qnut {
 				if (flags & KEYMGMT_WPA_PSK)
 					results << tr("WPA PSK");
 				if (flags & KEYMGMT_WPA2_PSK)
-					results << tr("WPA PSK2");
+					results << tr("WPA2 PSK");
 				if (flags & KEYMGMT_WPA_EAP)
 					results << tr("WPA EAP");
 				if (flags & KEYMGMT_WPA2_EAP)

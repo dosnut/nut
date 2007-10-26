@@ -1,0 +1,151 @@
+<ui version="4.0" >
+ <class>eapconf</class>
+ <widget class="QWidget" name="eapconf" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>307</width>
+    <height>295</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>EAP</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <layout class="QGridLayout" >
+     <item row="0" column="0" >
+      <widget class="QLabel" name="eapLabel" >
+       <property name="text" >
+        <string>EAP method</string>
+       </property>
+       <property name="buddy" >
+        <cstring>eapCombo</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1" >
+      <widget class="QComboBox" name="eapCombo" >
+       <property name="enabled" >
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" >
+      <widget class="QLabel" name="identificationLabel" >
+       <property name="text" >
+        <string>Identification</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" >
+      <widget class="QLineEdit" name="identificationEdit" />
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="certGroup" >
+     <property name="title" >
+      <string>Certificates</string>
+     </property>
+     <layout class="QGridLayout" >
+      <item row="0" column="0" >
+       <widget class="QLabel" name="caLabel" >
+        <property name="text" >
+         <string>CA File</string>
+        </property>
+        <property name="buddy" >
+         <cstring>caEdit</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" >
+       <layout class="QHBoxLayout" >
+        <item>
+         <widget class="QLineEdit" name="caEdit" />
+        </item>
+        <item>
+         <widget class="QToolButton" name="caBrowse" >
+          <property name="text" >
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0" >
+       <widget class="QLabel" name="clientLabel" >
+        <property name="text" >
+         <string>Client File</string>
+        </property>
+        <property name="buddy" >
+         <cstring>clientEdit</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" >
+       <layout class="QHBoxLayout" >
+        <item>
+         <widget class="QLineEdit" name="clientEdit" />
+        </item>
+        <item>
+         <widget class="QToolButton" name="toolButton" >
+          <property name="text" >
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="privateKeyGroup" >
+     <property name="title" >
+      <string>Private Key</string>
+     </property>
+     <layout class="QGridLayout" >
+      <item row="0" column="0" >
+       <widget class="QLabel" name="keyFileLabel" >
+        <property name="text" >
+         <string>Key File</string>
+        </property>
+        <property name="buddy" >
+         <cstring>keyFileEdit</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" >
+       <layout class="QHBoxLayout" >
+        <item>
+         <widget class="QLineEdit" name="keyFileEdit" />
+        </item>
+        <item>
+         <widget class="QToolButton" name="toolButton_2" >
+          <property name="text" >
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0" >
+       <widget class="QLabel" name="passwordLabel" >
+        <property name="text" >
+         <string>Password</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" >
+       <widget class="QLineEdit" name="passwordEdit" />
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

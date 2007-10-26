@@ -5,30 +5,136 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>414</width>
+    <height>181</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Configure Access Point</string>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox" >
-   <property name="geometry" >
-    <rect>
-     <x>50</x>
-     <y>260</y>
-     <width>341</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="orientation" >
-    <enum>Qt::Horizontal</enum>
-   </property>
-   <property name="standardButtons" >
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
-   </property>
-  </widget>
+  <layout class="QVBoxLayout" >
+   <item>
+    <layout class="QHBoxLayout" >
+     <item>
+      <layout class="QVBoxLayout" >
+       <item>
+        <widget class="QLabel" name="ssidLabel" >
+         <property name="text" >
+          <string>SSID</string>
+         </property>
+         <property name="buddy" >
+          <cstring>ssidEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="authLabel" >
+         <property name="text" >
+          <string>Authentication</string>
+         </property>
+         <property name="buddy" >
+          <cstring>authCombo</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="encLabel" >
+         <property name="text" >
+          <string>Encryption</string>
+         </property>
+         <property name="buddy" >
+          <cstring>encCombo</cstring>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" >
+       <item>
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QLineEdit" name="ssidEdit" />
+         </item>
+         <item>
+          <widget class="QCheckBox" name="ssidHexCheck" >
+           <property name="text" >
+            <string>hexadecimal chars</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QComboBox" name="authCombo" >
+         <item>
+          <property name="text" >
+           <string>plain or WEP</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>IEEE 802.1X</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>WPA-Personal (PSK)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>WPA-Enterprise (EAP)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>WPA2-Personal (PSK)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>WPA2-Enterprise (EAP)</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="encCombo" />
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QFrame" name="confFrame" >
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" />
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons" >
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
+ <tabstops>
+  <tabstop>ssidEdit</tabstop>
+  <tabstop>authCombo</tabstop>
+  <tabstop>encCombo</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -38,12 +144,12 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>248</x>
-     <y>254</y>
+     <x>207</x>
+     <y>149</y>
     </hint>
     <hint type="destinationlabel" >
      <x>157</x>
-     <y>274</y>
+     <y>189</y>
     </hint>
    </hints>
   </connection>
@@ -54,12 +160,12 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>316</x>
-     <y>260</y>
+     <x>275</x>
+     <y>149</y>
     </hint>
     <hint type="destinationlabel" >
      <x>286</x>
-     <y>274</y>
+     <y>189</y>
     </hint>
    </hints>
   </connection>
