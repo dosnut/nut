@@ -62,7 +62,7 @@ public Q_SLOTS: // METHODS
         QList<QVariant> argumentList;
         return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
     }
-    inline QDBusReply<QString> essid() {
+    inline QDBusReply<QString> getEssid() {
         QList<QVariant> argumentList;
         return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getEssid"), argumentList);
     }

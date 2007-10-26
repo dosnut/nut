@@ -2,9 +2,6 @@
 #define LIBNUT_LIBNUT_WPA_SUPPLICANT_H
 // #define CONFIG_CTRL_IFACE
 // #define CONFIG_CTRL_IFACE_UNIX
-#include <iostream>
-#include <QObject>
-#include <QList>
 #include <QHostAddress>
 #include <common/types.h>
 #include <common/config.h>
@@ -12,14 +9,8 @@
 #include "libnut_exceptions.h"
 #include "libnut_wpa_supplicant_types.h"
 #include "wpa_ctrl.h"
-#include <QDBusConnectionInterface>
-#include <QDBusReply>
-#include <QDBusObjectPath>
 #include <QFile>
-#include <QTextStream>
-#include <QHash>
 #include <QSocketNotifier>
-#include <QString>
 #include <QStringList>
 #include <QTimerEvent>
 #include <common/macaddress.h>

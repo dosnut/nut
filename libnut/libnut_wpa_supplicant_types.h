@@ -1,4 +1,14 @@
+#ifndef LIBNUT_LIBNUT_WPA_SUPPLICANT_TYPES_H
+#define LIBNUT_LIBNUT_WPA_SUPPLICANT_TYPES_H
+
+#include <QString>
+#include <QByteArray>
+#include <QList>
+#include <common/macaddress.h>
+#include <QHostAddress>
+
 namespace libnut {
+
 	typedef enum {WNF_NONE=0, WNF_CURRENT=1} wps_network_flags;
 	typedef enum {CI_UNDEFINED=0, CI_NONE=1, CI_CCMP=2, CI_TKIP=4, CI_WEP104=8, CI_WEP40=16, CI_WEP=32} CIPHERS;
 	typedef enum {KEYMGMT_PLAIN=0, KEYMGMT_WPA_PSK=2, KEYMGMT_WPA2_PSK=4, KEYMGMT_WPA_EAP=8, KEYMGMT_WPA2_EAP=16, KEYMGMT_IEEE8021X=32, KEYMGMT_UNDEFINED=64} KEYMGMT;
@@ -6,6 +16,9 @@ namespace libnut {
 	typedef enum {WI_MSG, WI_REQ,WI_EVENT} wps_interact_type;
 	typedef enum {WR_FAIL, WR_PASSWORD, WR_IDENTITY, WR_NEW_PASSWORD, WR_PIN, WR_OTP, WR_PASSPHRASE} wps_req_type;
 	typedef enum {WE_OTHER, WE_DISCONNECTED, WE_CONNECTED, WE_TERMINATING, WE_PASSWORD_CHANGED, WE_EAP_NOTIFICATION, WE_EAP_STARTED, WE_EAP_METHOD, WE_EAP_SUCCESS, WE_EAP_FAILURE } wps_event_type;
+	typedef enum {WAA_UNDEFINED=0, WAA_OPEN=1, WAA_SHARED=2, WAA_LEAP=4} wps_auth_algs;
+	typedef enum {EAP_NONE=0,EAP_DYN_UNICAST_WEP=1, EAP_BCAST_WEP=2} EAPOL_FLAGS;
+	typedef enum {EAP_ALL=127, EAPM_MD5=1,EAPM_MSCHAPV2=2,EAPM_OTP=4,EAPM_GTC=8,EAPM_TLS=16,EAPM_PEAP=32,EAPM_TTLS=64} EAP_METHOD;
 
 	struct wps_scan {
 		nut::MacAddress bssid;
@@ -84,10 +97,12 @@ namespace libnut {
 	};
 
 	QString toString(wps_protocols proto);
-	QString toString(wps_network_flags netflags);
 	QString toString(CIPHERS cip);
 	QString toString(KEYMGMT keym);
-	QString toString(wps_req_type);
+	QString toString(wps_req_type reqt);
+	QString toString(wps_auth_algs algs);
+	QString toString(EAPOL_FLAGS flags);
+	QString toString(EAP_METHOD method);
 	
 	struct wps_network {
 		int id;
@@ -121,7 +136,7 @@ namespace libnut {
 			QString wep_key1;
 			QString wep_key2;
 			QString wep_key3;
-			wps_wep_key_index wep_tx_keyidx; //Default WEP key index (TX) (0..3) TODO: implement
+			uchar wep_tx_keyidx; //Default WEP key index (TX) (0..3) TODO: implement
 			bool peerkey; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
 	};
 	class wps_eap_network_config: wps_network_config {
@@ -157,3 +172,4 @@ namespace libnut {
 
 
 }
+#endif

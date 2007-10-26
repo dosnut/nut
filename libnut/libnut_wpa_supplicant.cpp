@@ -699,24 +699,9 @@ void CWpa_Supplicant::setLog(bool enabled) {
 }
 //Function to respond to ctrl requests from wpa_supplicant
 void CWpa_Supplicant::response(wps_req request, QString msg) {
-	switch (request.type) {
-		case (WR_IDENTITY):
-			wps_cmd_CTRL_RSP("IDENTITY",request.id,msg);
-			break;
-		case (WR_NEW_PASSWORD):
-			wps_cmd_CTRL_RSP("NEW_PASSWORD",request.id,msg);
-			break;
-		case (WR_PIN):
-			wps_cmd_CTRL_RSP("PIN",request.id,msg);
-			break;
-		case (WR_OTP):
-			wps_cmd_CTRL_RSP("OTP",request.id,msg);
-			break;
-		case (WR_PASSPHRASE):
-			wps_cmd_CTRL_RSP("PASSPHRASE",request.id,msg);
-			break;
-		default:
-			break;
+	QString cmd = toString(request.type);
+	if (!cmd.isEmpty()) {
+		wps_cmd_CTRL_RSP(cmd,request.id,msg);
 	}
 }
 
