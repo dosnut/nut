@@ -126,26 +126,26 @@ namespace nuts {
 	}
 	
 	void ConfigParser::selectAdd(const nut::SelectRule &rule) {
-		quint32 filterid = m_curenvconfig->m_select.filters.count();
 		m_curenvconfig->m_select.filters.append(rule);
-		m_curenvconfig->m_select.blocks.last().append(filterid);
+		if (!m_curenvconfig->m_select.blocks.isEmpty()) {
+			quint32 filterid = m_curenvconfig->m_select.filters.count() - 1;
+			m_curenvconfig->m_select.blocks.last().append(filterid);
+		}
 	}
 	
 	bool ConfigParser::selectAndBlock() {
 		if (!m_curenvconfig) return false;
 		quint32 blockid = m_curenvconfig->m_select.blocks.size();
-		if (blockid)
-			selectAdd(nut::SelectRule(blockid));
-		m_curenvconfig->m_select.blocks.append(QVector<quint32>(1, 0));
+		selectAdd(nut::SelectRule(blockid));
+		m_curenvconfig->m_select.blocks.append(QVector<quint32>(1, 0)); // [ 0 ]
 		return true;
 	}
 	
 	bool ConfigParser::selectOrBlock() {
 		if (!m_curenvconfig) return false;
 		quint32 blockid = m_curenvconfig->m_select.blocks.size();
-		if (blockid)
-			selectAdd(nut::SelectRule(blockid));
-		m_curenvconfig->m_select.blocks.append(QVector<quint32>(1, 1));
+		selectAdd(nut::SelectRule(blockid));
+		m_curenvconfig->m_select.blocks.append(QVector<quint32>(1, 1)); // [ 1 ]
 		return true;
 	}
 	

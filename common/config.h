@@ -110,7 +110,9 @@ namespace nut {
 			bool_t m_value;
 			
 		public:
-			SelectResult(bool_t value);
+			SelectResult(bool_t value = False)
+			: m_value(value) { }
+			
 			SelectResult& operator = (bool_t value) {
 				m_value = value;
 				return *this;
@@ -139,10 +141,18 @@ namespace nut {
 				return op_and[m_value*4 + other.m_value];
 			}
 			
-			operator bool_t () {
+			operator bool_t () const {
 				return m_value;
 			}
+			
+			operator qint8 () const {
+				return (qint8) m_value;
+			}
 	};
+	
+	static inline SelectResult operator !(const SelectResult &sr) {
+		return (SelectResult::bool_t) (3 - (SelectResult::bool_t) sr);
+	}
 	
 	class SelectRule {
 		protected:
@@ -173,7 +183,7 @@ namespace nut {
 		public:
 			SelectConfig() { }
 			
-			// List of filters
+			// List of filters; the first rule (if it exists) always references the global block.
 			QVector<SelectRule> filters;
 			// List of blocks: each block contains at the first position the type:
 			//  0 = AND, 1 = OR
