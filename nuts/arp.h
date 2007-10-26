@@ -22,11 +22,67 @@
 
 namespace nuts {
 	class ARP;
+	class ARPTimer;
+	class ARPRequest;
+	class ARPProbe;
 	
 	class Device;
 }
 
 namespace nuts {
+	typedef struct tv {
+		time_t sec;
+		suseconds_t usec;
+		tv(time_t sec = 0, suseconds_t usec = 0)
+		: sec(sec), usec(usec) { }
+	} tv;
+	
+	class Time {
+		private:
+			tv m_tv;
+		
+		public:
+			Time(time_t sec = 0, suseconds_t usec = 0)
+			: m_tv(sec, usec) { }
+			
+			static Time current();
+			static Time random(int min, int max);
+			static Time waitRandom(int min, int max);
+			static Time wait(time_t sec = 0, suseconds_t usec = 0);
+			
+			Time operator +(const Time &a) const {
+				return Time(m_tv.sec + a.m_tv.sec, m_tv.usec + a.m_tv.usec);
+			}
+			Time operator -(const Time &a) const {
+				return Time(m_tv.sec + a.m_tv.sec, m_tv.usec + a.m_tv.usec);
+			}
+			Time& operator += (const Time &a) {
+				m_tv.sec += a.m_tv.sec; m_tv.usec += a.m_tv.usec;
+				return *this;
+			}
+			Time& operator -= (const Time &a) {
+				m_tv.sec -= a.m_tv.sec; m_tv.usec -= a.m_tv.usec;
+				return *this;
+			}
+			
+			bool operator <=(const Time &a) const {
+				return (m_tv.sec < a.m_tv.sec) || (m_tv.sec == a.m_tv.sec && m_tv.usec <= a.m_tv.usec);
+			}
+			bool operator >=(const Time &a) const {
+				return (a <= *this);
+			}
+			bool operator <(const Time &a) const {
+				return !(a <= *this);
+			}
+			bool operator >(const Time &a) const {
+				return !(*this >= a);
+			}
+			
+			int msecs() {
+				return 1000*m_tv.sec + (m_tv.usec+999) / 1000;
+			}
+	};
+	
 	// same values as in protocol itself
 	typedef enum ArpOperation {
 		ARP_REQUEST = 1,
@@ -45,30 +101,6 @@ namespace nuts {
 		const int MAX_CONFLICTS = 10;
 		const int RATE_LIMIT_INTERVAL = 60;
 		const int DEFEND_INTERVAL = 10;
-	};
-	
-	class ARPRequest : public QObject {
-		Q_OBJECT
-		signals:
-			void foundMac(QHostAddress ip, nut::MacAddress mac);
-			void timeout(QHostAddress ip);
-	};
-	
-	class ARPProbe : public QObject {
-		Q_OBJECT
-		protected:
-			friend class ARP;
-			
-			QHostAddress m_ip;
-			float nextTime, retry;
-			
-			ARPProbe(const QHostAddress &ip)
-			: m_ip(ip), retry(0) {
-			}
-			
-		signals:
-			void foundMac(QHostAddress ip, nut::MacAddress mac);
-			void timeout(QHostAddress ip);
 	};
 	
 	/**
@@ -90,46 +122,123 @@ namespace nuts {
 			QSocketNotifier *m_arp_read_nf, *m_arp_write_nf;
 			QLinkedList< QByteArray > m_arp_write_buf;
 			
+			int m_timer_id;
+			QLinkedList<ARPTimer*> m_arp_timers;
+			
+			QHash<QHostAddress, ARPProbe*> m_probes;
+			QHash<QHostAddress, ARPRequest*> m_requests;
+			
 		public:
 			ARP(Device* device);
 			virtual ~ARP();
 
 			/**
-				Opens the socket and in case of incoming ARP packets emit signal.
-			*/
-			bool start();
-			
-			/**
-				Closes the socket; stops emmiting signals.
-			*/
-			void stop();
-			
-			/**
 				Prepare a request for an IPv4 address.
 				source_mac is set to the device mac, target_mac = 0.
-				
-				The packet is sent asynchronously, i.e. it needs the event loop to be executed.
 			*/
-			bool requestIPv4(QHostAddress &source_addr, QHostAddress &target_addr);
+			ARPRequest* requestIPv4(QHostAddress &source_addr, QHostAddress &target_addr);
 			
 			/**
-				Prepare a probe for an IPv4 address. (Needed for zeroconf, same as requestIPv4(0, addr))
-				
-				The packet is sent asynchronously, i.e. it needs the event loop to be executed.
+				Prepare a probe for an IPv4 address. (Needed for zeroconf)
 			*/
-			bool probeIPv4(QHostAddress &addr);
+			ARPProbe* probeIPv4(QHostAddress &addr);
 
-		signals:
-			// SIGNAL(gotRequestIPv4(nut::MacAddress, QHostAddress, QHostAddress))
-			void gotRequestIPv4(nut::MacAddress sender_mac, QHostAddress sender_ip, QHostAddress target_ip);
-			// SIGNAL(gotReplyIPv4(nut::MacAddress, QHostAddress, nut::MacAddress, QHostAddress))
-			void gotReplyIPv4(nut::MacAddress sender_mac, QHostAddress sender_ip, nut::MacAddress target_mac, QHostAddress target_ip);
-			
 		private slots:
 			void arpReadNF();
 			void arpWriteNF();
+			
 		private:
+			friend class ARPRequest;
+			friend class ARPProbe;
+			
 			void arpWrite(const QByteArray &buf);
+			
+			void recalcTimer();
+			void arpTimerAdd(ARPTimer *t);
+			void arpTimerDelete(ARPTimer *t);
+			
+			void timerEvent(QTimerEvent *event);
+			
+			friend class Device;
+			bool start();
+			void stop();
+	};
+
+	class ARPTimer : public QObject {
+		Q_OBJECT
+		protected:
+			friend class ARP;
+			
+			ARPTimer(ARP *arp);
+			ARPTimer(ARP *arp, const Time &firstTimeout);
+			
+			ARP *m_arp;
+			Time m_nextTimeout;
+			
+			virtual bool timeEvent() = 0;
+			
+			bool operator <(const ARPTimer &t) const {
+				return m_nextTimeout < t.m_nextTimeout;
+			}
+	};
+	
+	class ARPRequest : public ARPTimer {
+		Q_OBJECT
+		public:
+			virtual ~ARPRequest();
+		protected:
+			friend class ARP;
+			
+			QHostAddress m_sourceip, m_targetip;
+			int m_remaining_trys;
+			bool m_finished;
+			
+			ARPRequest(ARP *arp, const QHostAddress &sourceip, const QHostAddress &targetip);
+			
+			virtual bool timeEvent();
+			// got ARP Packet which resolves m_targetip to mac
+			void gotPacket(const nut::MacAddress &mac);
+			
+		private:
+			void finish();
+			
+		signals:
+			void foundMac(nut::MacAddress mac, QHostAddress ip);
+			void timeout(QHostAddress ip);
+	};
+	
+	class ARPProbe : public ARPTimer {
+		Q_OBJECT
+		public:
+			typedef enum ARPProbeState { PROBING, RESERVING, CONFLICT } ARPProbeState;
+			
+			virtual ~ARPProbe();
+			void setReserve(bool reserve);
+			ARPProbeState getState() { return m_state; }
+			
+		protected:
+			friend class ARP;
+			
+			QHostAddress m_ip;
+			int m_remaining_trys;
+			bool m_finished, m_reserve;
+			ARPProbeState m_state;
+			
+			ARPProbe(ARP *arp, const QHostAddress &ip);
+			
+			// got ARP Packet which resolves m_ip to mac
+			void gotPacket(const nut::MacAddress &mac);
+			// got ARP Probe from mac which probes for m_ip
+			void gotProbe(const nut::MacAddress &mac);
+			
+			virtual bool timeEvent();
+			
+		private:
+			void finish();
+			
+		signals:
+			void conflict(QHostAddress ip, nut::MacAddress mac);
+			void timeout(QHostAddress ip);
 	};
 }
 
