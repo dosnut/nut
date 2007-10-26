@@ -151,7 +151,7 @@ namespace libnut {
 			void terminate();
 			void preauth(nut::MacAddress bssid);
 			int addNetwork(); //return -1 if failed, otherwise return network id
-			int addNetwork(wps_network_config); //return -1 if failed, otherwise return network id
+			int addNetwork(wps_network_config config); //return -1 if failed, otherwise return network id
 			wps_network_config getNetworkConfig(int id);
 			void removeNetwork(int id);
 			void setBssid(int id, nut::MacAddress bssid);

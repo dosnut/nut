@@ -764,6 +764,15 @@ int CWpa_Supplicant::addNetwork() {
 		return reply.toInt();
 	}
 }
+
+int CWpa_Supplicant::addNetwork(wps_network_config config) { //return -1 if failed, otherwise return network id
+	
+}
+wps_network_config CWpa_Supplicant::getNetworkConfig(int id) {
+	
+}
+
+
 void CWpa_Supplicant::removeNetwork(int id) {
 	wps_cmd_REMOVE_NETWORK(id);
 }
