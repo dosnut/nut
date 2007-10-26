@@ -29,15 +29,25 @@ namespace nuts {
 
 #include "config.h"
 #include "hardware.h"
+#include "arp.h"
 
 namespace nuts {
+	/** @brief The DeviceManager keeps track of all hardware devices.
+		@author Stefan Bühler <stbuehler@web.de>
+		
+		On creation, the DeviceManager reads the config file and then tries to
+		find every device specified in it.
+		
+		If devices are created later (or are removed) by the kernel, it emits
+		signals if they are managed by the DeviceManager, i.e. are in the config file.
+	 */
 	class DeviceManager : public QObject {
 		Q_OBJECT
-		protected:
+		private:
 			ConfigParser configParser;
 			nut::Config *config;
-			HardwareManager hwman;
 			QTimer carrier_timer;
+			/// Internal structure for delaying carrier events.
 			struct ca_evt {
 				QString ifName;
 				int ifIndex;
@@ -47,39 +57,68 @@ namespace nuts {
 			
 			QHash<QString, Device*> devices;
 			
-			friend class HardwareManager;
+			void addDevice(const QString &ifname, nut::DeviceConfig *dc);
+			
 			friend class Device;
-			friend class Environment;
 			friend class Interface_IPv4;
 			
-		private:
-			void addDevice(const QString &ifname, nut::DeviceConfig *dc);
+			HardwareManager hwman;
 			
 		private slots:
 			void ca_timer();
-		protected slots:
 			void gotCarrier(const QString &ifName, int ifIndex, const QString &essid);
 			void lostCarrier(const QString &ifName);
 			void newDevice(const QString &ifName, int ifIndex);
 			void delDevice(const QString &ifname);
 		
 		public:
+			/**
+			 * @brief Constructs the DeviceManager
+			 * @param configFile Path to the configfile.
+			 */
 			DeviceManager(const QString &configFile);
 			virtual ~DeviceManager();
 			
+			/**
+			 * @brief Gets all managed devices.
+			 * @return Hash of devices; the keys in the hash represent the device name in the kernel.
+			 */
 			const QHash<QString, Device*>& getDevices() { return devices; }
+			/**
+			 * @brief Get the config.
+			 * @return Config
+			 */
 			const nut::Config& getConfig() { return *config; }
 		
 		signals:
+			/**
+			 * Emmitted when a device is added after construction.
+			 * @param devName Device name in kernel
+			 * @param dev Pointer to Device
+			 */
 			void deviceAdded(QString devName, Device *dev);
+			/**
+			 * Emmited when a device is removed.
+			 * @param devName Device name in kernel
+			 * @param dev Pointer to Device
+			 */
 			void deviceRemoved(QString devName, Device *dev);
 	};
 	
+	/** @brief A Device manages the state of a hardware device from the kernel.
+		@author Stefan Bühler <stbuehler@web.de>
+		
+		If a Device gets activated (either by configuration default or by user),
+		it waits for a "carrier", i.e. WLAN selection (by wpa_supplicant) or a cable plugged in.
+		
+		It then tries to find the right environment, based on the common::SelectConfig; only one environment
+		can be activated.
+	 */
 	class Device : public QObject {
 		Q_OBJECT
-		Q_PROPERTY(QString name READ getName)
-		Q_PROPERTY(int environment READ getEnvironment WRITE setEnvironment)
-		Q_PROPERTY(bool state READ getState)
+		Q_PROPERTY(QString name READ getName) //!< Name of the device in the kernel, e.g. "eth0"
+		Q_PROPERTY(int environment READ getEnvironment WRITE setEnvironment) //!< Number of the active environment, or -1
+		Q_PROPERTY(libnut::DeviceState state READ getState)
 		private:
 			void setState(libnut::DeviceState state);
 			
@@ -87,7 +126,7 @@ namespace nuts {
 			bool startWPASupplicant();
 			void stopWPASupplicant();
 			
-		protected:
+		private:
 			friend class DeviceManager;
 			friend class Environment;
 			friend class Interface_IPv4;
@@ -95,6 +134,7 @@ namespace nuts {
 			friend class DHCPClientPacket;
 			friend class ARP;
 			
+			ARP m_arp;
 			DeviceManager *dm;
 			QString name;
 			int interfaceIndex;
@@ -124,27 +164,32 @@ namespace nuts {
 			bool setupDHCPClientSocket();
 			void closeDHCPClientSocket();
 		
-		protected slots:
+		private slots:
 			void readDHCPClientSocket();
 			void writeDHCPClientSocket();
 			
-		public:
+		private:
 			Device(DeviceManager* dm, const QString &name, nut::DeviceConfig *config, bool hasWLAN);
 			virtual ~Device();
 			
 		public slots:
 			// Properties
-			QString getName();
+			QString getName(); //!< Name of the device in the kernel, e.g. "eth0"
 			const nut::DeviceConfig& getConfig() { return *config; }
 			
-			int getEnvironment();
-			void setEnvironment(int env);
+			int getEnvironment(); //!< Active environment, or -1
+			void setEnvironment(int env); //!< Select specific environment
 			
 			libnut::DeviceState getState() { return m_state; }
 			
-			// enable(true) forces the use of an interface, even if it is already up.
+			/**
+			 * Enable device.
+			 * @param force Force the use of a kernel interface, even if it is already up and perhaps in use.
+			 *	nuts will takeover the interface.
+			 * @return 
+			 */
 			bool enable(bool force = false);
-			void disable();
+			void disable(); //!< Disable device
 			
 			const QList<Environment*>& getEnvironments() { return envs; }
 			
@@ -160,7 +205,7 @@ namespace nuts {
 		Q_OBJECT
 		Q_PROPERTY(Device* device READ getDevice)
 		
-		protected:
+		private:
 			friend class Device;
 			friend class Interface;
 			friend class Interface_IPv4;
@@ -185,13 +230,21 @@ namespace nuts {
 			void ifUp(Interface*);
 			void ifDown(Interface*);
 			
+			int selArpWaiting;
+			bool startSelect();
+			void checkSelectState();
+			
+		private slots:
+			void selectArpRequestTimeout(QHostAddress ip);
+			void selectArpRequestFoundMac(nut::MacAddress mac, QHostAddress ip);
+			
 		public:
 			Environment(Device *device, nut::EnvironmentConfig *config, int id);
 			virtual ~Environment();
 			
-			Device* getDevice();
+			Device* getDevice() { return device; }
 			
-			const QList<Interface*>& getInterfaces();
+			const QList<Interface*>& getInterfaces() { return ifs; }
 			int getID() { return m_id; }
 			QString getName() { return config->getName(); }
 			const nut::EnvironmentConfig& getConfig() { return *config; }

@@ -8,7 +8,7 @@ QT += network
 CODECFORSRC = UTF-8
 
 SOURCES += main.cpp device.cpp config.cpp hardware.cpp hardware_ext.c
-HEADERS += common.h device.h   config.h   hardware.h
+HEADERS += device.h   config.h   hardware.h
 
 SOURCES += sighandler.cpp log.cpp dhcppacket.cpp \
  dbus.cpp \

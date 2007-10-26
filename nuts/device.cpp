@@ -160,7 +160,7 @@ namespace nuts {
 	}
 	
 	Device::Device(DeviceManager* dm, const QString &name, nut::DeviceConfig *config, bool hasWLAN)
-	: QObject(dm), dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_state(libnut::DS_DEACTIVATED), dhcp_client_socket(-1), m_hasWLAN(hasWLAN), m_wpa_supplicant(0) {
+	: QObject(dm), m_arp(this), dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_state(libnut::DS_DEACTIVATED), dhcp_client_socket(-1), m_hasWLAN(hasWLAN), m_wpa_supplicant(0) {
 		int i = 0;
 		foreach(nut::EnvironmentConfig *ec, config->getEnvironments())
 			envs.push_back(new Environment(this, ec, i++));
@@ -178,6 +178,18 @@ namespace nuts {
 	void Device::setState(libnut::DeviceState state) {
 		libnut::DeviceState ostate = m_state;
 		m_state = state;
+		if (ostate == m_state) return;
+		switch (m_state) {
+			case libnut::DS_DEACTIVATED:
+			case libnut::DS_ACTIVATED:
+				m_arp.stop();
+				break;
+			case libnut::DS_CARRIER:
+			case libnut::DS_UNCONFIGURED:
+			case libnut::DS_UP:
+				m_arp.start();
+				break;
+		}
 		emit stateChanged(m_state, ostate);
 	}
 	
@@ -205,8 +217,10 @@ namespace nuts {
 		if (macAddress.zero()) log << "Device(" << name << "): couldn't get MacAddress" << endl;
 		log << "Device(" << name << ") gotCarrier" << endl;
 		if (m_hasWLAN) log << "ESSID: " << essid << endl;
-		activeEnv = 0;
 		setState(libnut::DS_CARRIER);
+		foreach (Environment* env, envs)
+			env->startSelect();
+		activeEnv = 0;
 		envs[activeEnv]->start();
 	}
 	void Device::lostCarrier() {
@@ -428,14 +442,6 @@ namespace nuts {
 		ifs.clear();
 	}
 	
-	Device* Environment::getDevice() {
-		return device;
-	}
-	
-	const QList<Interface*>& Environment::getInterfaces() {
-		return ifs;
-	}
-	
 	void Environment::checkStatus() {
 //		log << QString("checkStatus: %1/%2").arg(ifUpStatus.count(true)).arg(ifUpStatus.size()) << endl;
 		if (envStart) {
@@ -475,6 +481,105 @@ namespace nuts {
 //		log << QString("Interface %1 down").arg(i->m_index) << endl;
 		ifUpStatus[i->m_index] = false;
 		checkStatus();
+	}
+	
+	bool Environment::startSelect() {
+		selArpWaiting = 0;
+		
+		ARPRequest *r;
+		
+		const QVector<nut::SelectRule> &filters = config->getSelect().filters;
+		int c = filters.size();
+		m_selectResults.resize(c);
+		for (int i = 0; i < c; i++) {
+			switch (filters[i].selType) {
+				case nut::SelectRule::SEL_USER:
+					m_selectResults[i] = nut::SelectResult::User;
+					break;
+				case nut::SelectRule::SEL_ARP:
+					r = device->m_arp.requestIPv4(QHostAddress((quint32) 0), filters[i].ipAddr);
+					if (!r) return false;
+					r->disconnect(this);
+					connect(r, SIGNAL(timeout(QHostAddress)), this, SLOT(selectArpRequestTimeout(QHostAddress)));
+					connect(r, SIGNAL(foundMac(nut::MacAddress, QHostAddress)), this, SLOT(selectArpRequestFoundMac(nut::MacAddress, QHostAddress)));
+					selArpWaiting++;
+					break;
+				case nut::SelectRule::SEL_ESSID:
+					m_selectResults[i] = (filters[i].essid == device->essid()) ? nut::SelectResult::True : nut::SelectResult::False;
+					break;
+				case nut::SelectRule::SEL_BLOCK:
+					break;
+			}
+		}
+		checkSelectState();
+		return true;
+	}
+	
+	void Environment::checkSelectState() {
+		if (selArpWaiting > 0) return;
+		const QVector<nut::SelectRule> &filters = config->getSelect().filters;
+		const QVector< QVector<quint32> > &blocks = config->getSelect().blocks;
+		int c = filters.size();
+		if (!c) {
+//			qDebug() << QString("Nothing to select") << endl;
+			return;
+		}
+		for (int i = c-1; i >= 0; i--) {
+			if (filters[i].selType == nut::SelectRule::SEL_BLOCK) {
+				const QVector<quint32> &block = blocks[filters[i].block];
+				int d = block.size();
+				if (d == 0)
+					m_selectResults[i] = nut::SelectResult::False;
+				else {
+					if (block[0] == 0) { // AND
+						nut::SelectResult tmp = nut::SelectResult::True;
+						for (int j = 1; j < d; j++) {
+							tmp = tmp && m_selectResults[block[j]];
+							if (tmp == nut::SelectResult::False) break;
+						}
+						m_selectResults[i] = tmp;
+					} else { // OR
+						nut::SelectResult tmp = nut::SelectResult::False;
+						for (int j = 1; j < d; j++) {
+							tmp = tmp || m_selectResults[block[j]];
+							if (tmp == nut::SelectResult::True) break;
+						}
+						m_selectResults[i] = tmp;
+					}
+				}
+			}
+		}
+//		qDebug() << QString("Select Result: %1").arg((qint8) m_selectResults[0]) << endl;
+	}
+	
+	void Environment::selectArpRequestTimeout(QHostAddress ip) {
+//		qDebug() << QString("arp timeout: %1").arg(ip.toString()) << endl;
+		const QVector<nut::SelectRule> &filters = config->getSelect().filters;
+		int c = filters.size();
+		for (int i = 0; i < c; i++) {
+			if (filters[i].selType == nut::SelectRule::SEL_ARP && filters[i].ipAddr == ip) {
+				m_selectResults[i] = nut::SelectResult::False;
+				selArpWaiting--;
+			}
+		}
+		checkSelectState();
+	}
+	
+	void Environment::selectArpRequestFoundMac(nut::MacAddress mac, QHostAddress ip) {
+//		qDebug() << QString("arp found: %1 -> %2").arg(ip.toString()).arg(mac.toString()) << endl;
+		const QVector<nut::SelectRule> &filters = config->getSelect().filters;
+		int c = filters.size();
+		for (int i = 0; i < c; i++) {
+			if (filters[i].selType == nut::SelectRule::SEL_ARP && filters[i].ipAddr == ip) {
+				if ((!filters[i].macAddr.zero()) && (filters[i].macAddr != mac)) {
+					m_selectResults[i] = nut::SelectResult::False;
+				} else {
+					m_selectResults[i] = nut::SelectResult::True;
+				}
+				selArpWaiting--;
+			}
+		}
+		checkSelectState();
 	}
 	
 	Interface::Interface(Environment *env, int index) : QObject(env), m_env(env), m_index(index) { }
