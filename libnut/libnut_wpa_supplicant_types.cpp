@@ -109,13 +109,13 @@ wps_network_config::wps_network_config() {
 			priority = 0;
 			mode = 0; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
 			frequency = 0; //no default, but 0 is not a working value
-			wps_protocols proto = WKI_UNDEFINED; //list of accepted protocols TODO: implement
+			proto = WKI_UNDEFINED; //list of accepted protocols TODO: implement
 			key_mgmt = KEYMGMT_UNDEFINED; // list of accepted authenticated key management protocols
-			wps_auth_algs auth_alg = WAA_UNDEFINED; //list of allowed IEEE 802.11 authentication algorithms TODO:implement
+			auth_alg = WAA_UNDEFINED; //list of allowed IEEE 802.11 authentication algorithms TODO:implement
 			pairwise = CI_UNDEFINED; //list of accepted pairwise (unicast) ciphers for WPA (CCMP,TKIP,NONE)
 			group = CI_UNDEFINED; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
 			QString psk = QString(); //WPA preshared key; 256-bit pre-shared key
-			EAPOL_FLAGS eapol_flags = (EAPOL_FLAGS) (EAP_DYN_UNICAST_WEP | EAP_BCAST_WEP);
+			eapol_flags = (EAPOL_FLAGS) (EAP_DYN_UNICAST_WEP | EAP_BCAST_WEP);
 			mixed_cell = false; //This option can be used to configure whether so called mixed
 			proactive_key_caching = false; //Enable/disable opportunistic PMKSA caching for WPA2.
 			wep_key0 = QString(); //Static WEP key (ASCII in double quotation, hex without)

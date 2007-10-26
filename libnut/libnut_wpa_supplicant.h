@@ -61,7 +61,7 @@ namespace libnut {
 			//creates new empty network, return id on success and FAIL on failure
 			inline QString wps_cmd_ADD_NETWORK() { return wps_ctrl_command("ADD_NETWORK"); }
 			inline void wps_cmd_REMOVE_NETWORK(int id) { wps_ctrl_command(QString("REMOVE_NETWORK %1").arg(QString::number(id))); }
-			inline void wps_cmd_SET_NETWORK(int id, QString var, QString val) { wps_ctrl_command(QString("SET_NETWORK %1 %2 %3").arg(QString::number(id),var,val));}
+			inline QString wps_cmd_SET_NETWORK(int id, QString var, QString val) { return wps_ctrl_command(QString("SET_NETWORK %1 %2 %3").arg(QString::number(id),var,val));}
 			//get network variable
 			inline QString wps_cmd_GET_NETWORK(int id, QString var) { return wps_ctrl_command(QString("GET_NETWORK %1 %2").arg(QString::number(id), var)); }
 			inline void wps_cmd_SAVE_CONFIG() { wps_ctrl_command("SAVE_CONFIG"); }
@@ -152,12 +152,13 @@ namespace libnut {
 			void preauth(nut::MacAddress bssid);
 			int addNetwork(); //return -1 if failed, otherwise return network id
 			int addNetwork(wps_network_config config); //return -1 if failed, otherwise return network id
+			int editNetwork(int netid, wps_network_config config);
 			wps_network_config getNetworkConfig(int id);
 			void removeNetwork(int id);
 			void setBssid(int id, nut::MacAddress bssid);
 
 			void setVariable(QString var, QString val);
-			void setNetworkVariable(int id, QString var, QString val);
+			bool setNetworkVariable(int id, QString var, QString val);
 			QString getNetworkVariable(int id, QString val);
 
 			QList<wps_network> listNetworks();

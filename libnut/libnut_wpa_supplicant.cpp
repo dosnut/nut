@@ -765,8 +765,135 @@ int CWpa_Supplicant::addNetwork() {
 	}
 }
 
-int CWpa_Supplicant::addNetwork(wps_network_config config) { //return -1 if failed, otherwise return network id
-	
+inline int toNumber(bool b) {
+	return ((b)? 1 : 0);
+}
+int CWpa_Supplicant::addNetwork(wps_network_config config) {
+	int netid = addNetwork();
+	if (-1 == netid) {
+		return -1;
+	}
+	else {
+		return editNetwork(netid, config);
+	}
+}
+
+
+int CWpa_Supplicant::editNetwork(int netid, wps_network_config config) { //return -1 if failed, otherwise return network id
+	bool status;
+	if ( setNetworkVariable(netid,"ssid",config.ssid) ) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if (!config.bssid.zero()) {
+		if ( setNetworkVariable(netid,"bssid",config.bssid.toString()) ) {
+			removeNetwork(netid);
+			return -1;
+		}
+	}
+	if ( setNetworkVariable(netid,"disabled",QString::number(toNumber(config.disabled))) ) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if (!config.id_str.isEmpty()) {
+		if ( setNetworkVariable(netid,"id_str",config.id_str) ) {
+			removeNetwork(netid);
+			return -1;
+		}
+	}
+	if ( setNetworkVariable(netid,"scan_ssid",QString::number(toNumber(config.scan_ssid))) ) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if ( setNetworkVariable(netid,"priority",QString::number(config.priority)) ) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if ( setNetworkVariable(netid,"mode",QString::number(toNumber(config.mode))) ) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if (0 != config.frequency) {
+		if ( setNetworkVariable(netid,"frequency",QString::number(config.frequency)) ) {
+			removeNetwork(netid);
+			return -1;
+		}
+	}
+	if ( setNetworkVariable(netid,"proto",toString(config.proto)) ) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if ( setNetworkVariable(netid,"key_mgmt",toString(config.key_mgmt)) ) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if ( setNetworkVariable(netid,"auth_alg",toString(config.auth_alg) )) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if ( setNetworkVariable(netid,"pairwise",toString(config.pairwise) )) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if ( setNetworkVariable(netid,"group",toString(config.group) )) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if ( setNetworkVariable(netid,"psk",config.psk)) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if ( setNetworkVariable(netid,"eapol_flags",toString(config.eapol_flags))) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if ( setNetworkVariable(netid,"mixed_cell",QString::number(toNumber(config.mixed_cell))) ) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if ( setNetworkVariable(netid,"proactive_key_caching",QString::number(toNumber(config.proactive_key_caching))) ) {
+		removeNetwork(netid);
+		return -1;
+	}
+	if (!config.wep_key0.isEmpty()) {
+		if ( setNetworkVariable(netid,"wep_key0",config.wep_key0) ) {
+			removeNetwork(netid);
+			return -1;
+		}	
+	}
+	if (!config.wep_key1.isEmpty()) {
+		if ( setNetworkVariable(netid,"wep_key1",config.wep_key1)) {
+			removeNetwork(netid);
+			return -1;
+		}	
+	}
+	if (!config.wep_key2.isEmpty()) {
+		if ( setNetworkVariable(netid,"wep_key2",config.wep_key2) ) {
+			removeNetwork(netid);
+			return -1;
+		}	
+	}
+	if (!config.wep_key3.isEmpty()) {
+		if ( setNetworkVariable(netid,"wep_key3",config.wep_key3) ) {
+			removeNetwork(netid);
+			return -1;
+		}	
+	}
+	if (config.wep_tx_keyidx <= 3 && config.wep_tx_keyidx >= 0) {
+		if ( setNetworkVariable(netid,"wep_tx_keyidx",QString::number(config.wep_tx_keyidx)) ) {
+			removeNetwork(netid);
+			return -1;
+		}	
+	}
+	else {
+		removeNetwork(netid);
+		return -1;
+	}
+	if ( setNetworkVariable(netid,"peerkey",QString::number(toNumber(config.peerkey))) ) {
+		removeNetwork(netid);
+		return -1;
+	}	
+	return netid;
 }
 wps_network_config CWpa_Supplicant::getNetworkConfig(int id) {
 	
@@ -785,8 +912,14 @@ void CWpa_Supplicant::setBssid(int id, nut::MacAddress bssid) {
 void CWpa_Supplicant::setVariable(QString var, QString val) {
 	wps_cmd_SET(var,val);
 }
-void CWpa_Supplicant::setNetworkVariable(int id, QString var, QString val) {
-	wps_cmd_SET_NETWORK(id,var,val);
+bool CWpa_Supplicant::setNetworkVariable(int id, QString var, QString val) {
+	QString ret = wps_cmd_SET_NETWORK(id,var,val);
+	if (ret.contains("OK")) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 QString CWpa_Supplicant::getNetworkVariable(int id, QString val) {
 	return wps_cmd_GET_NETWORK(id,val);

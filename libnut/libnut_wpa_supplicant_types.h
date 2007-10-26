@@ -127,8 +127,7 @@ namespace libnut {
 			wps_auth_algs auth_alg; //list of allowed IEEE 802.11 authentication algorithms TODO:implement
 			CIPHERS pairwise; //list of accepted pairwise (unicast) ciphers for WPA (CCMP,TKIP,NONE)
 			CIPHERS group; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
-			QString ascii_psk; //WPA preshared key; 256-bit pre-shared key
-			QByteArray hex_psk; //WPA preshared key; 256-bit pre-shared key
+			QString psk; //WPA preshared key; 256-bit pre-shared key
 			EAPOL_FLAGS eapol_flags; // IEEE 802.1X/EAPOL options (bit field) TODO:implement
 			bool mixed_cell; //This option can be used to configure whether so called mixed
 			bool proactive_key_caching; //Enable/disable opportunistic PMKSA caching for WPA2.
