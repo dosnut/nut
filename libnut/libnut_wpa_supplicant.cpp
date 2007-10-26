@@ -780,7 +780,6 @@ int CWpa_Supplicant::addNetwork(wps_network_config config) {
 
 
 int CWpa_Supplicant::editNetwork(int netid, wps_network_config config) { //return -1 if failed, otherwise return network id
-	bool status;
 	if ( setNetworkVariable(netid,"ssid",config.ssid) ) {
 		removeNetwork(netid);
 		return -1;
@@ -879,7 +878,7 @@ int CWpa_Supplicant::editNetwork(int netid, wps_network_config config) { //retur
 			return -1;
 		}	
 	}
-	if (config.wep_tx_keyidx <= 3 && config.wep_tx_keyidx >= 0) {
+	if (config.wep_tx_keyidx <= 3) {
 		if ( setNetworkVariable(netid,"wep_tx_keyidx",QString::number(config.wep_tx_keyidx)) ) {
 			removeNetwork(netid);
 			return -1;
