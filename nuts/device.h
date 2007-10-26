@@ -205,7 +205,7 @@ namespace nuts {
 		Q_OBJECT
 		Q_PROPERTY(Device* device READ getDevice)
 		
-		protected:
+		private:
 			friend class Device;
 			friend class Interface;
 			friend class Interface_IPv4;
@@ -230,13 +230,21 @@ namespace nuts {
 			void ifUp(Interface*);
 			void ifDown(Interface*);
 			
+			int selArpWaiting;
+			bool startSelect();
+			void checkSelectState();
+			
+		private slots:
+			void selectArpRequestTimeout(QHostAddress ip);
+			void selectArpRequestFoundMac(nut::MacAddress mac, QHostAddress ip);
+			
 		public:
 			Environment(Device *device, nut::EnvironmentConfig *config, int id);
 			virtual ~Environment();
 			
-			Device* getDevice();
+			Device* getDevice() { return device; }
 			
-			const QList<Interface*>& getInterfaces();
+			const QList<Interface*>& getInterfaces() { return ifs; }
 			int getID() { return m_id; }
 			QString getName() { return config->getName(); }
 			const nut::EnvironmentConfig& getConfig() { return *config; }
