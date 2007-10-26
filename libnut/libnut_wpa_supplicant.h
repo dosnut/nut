@@ -159,6 +159,7 @@ namespace libnut {
 			inline void wps_cmd_DISABLE_NETWORK(int id) { wps_ctrl_command(QString("DISABLE_NETWORK %1").arg(QString::number(id))); }
 			//creates new empty network, return id on success and FAIL on failure
 			inline QString wps_cmd_ADD_NETWORK() { return wps_ctrl_command("ADD_NETWORK"); }
+			inline void wps_cmd_REMOVE_NETWORK(int id) { wps_ctrl_command(QString("REMOVE_NETWORK %1").arg(QString::number(id))); }
 			inline void wps_cmd_SET_NETWORK(int id, QString var, QString val) { wps_ctrl_command(QString("SET_NETWORK %1 %2 %3").arg(QString::number(id),var,val));}
 			//get network variable
 			inline QString wps_cmd_GET_NETWORK(int id, QString var) { return wps_ctrl_command(QString("GET_NETWORK %1 %2").arg(QString::number(id), var)); }
@@ -208,7 +209,7 @@ namespace libnut {
 			wps_interact_type parseInteract(QString str);
 
 			//Event helper functions:
-			void Event_dispatcher(wps_req request);
+			void Event_dispatcher(wps_req req);
 			void Event_dispatcher(wps_event_type event);
 			void Event_dispatcher(QString event);
 
@@ -249,6 +250,7 @@ namespace libnut {
 			void terminate();
 			void preauth(nut::MacAddress bssid);
 			int addNetwork();
+			void removeNetwork(int id);
 			void setBssid(int id, nut::MacAddress bssid);
 
 			void setVariable(QString var, QString val);
@@ -273,8 +275,10 @@ namespace libnut {
 
 			
 		signals:
-			void wps_stateChange(bool state);
-			void wps_request(wps_req request);
+			void stateChanged(bool state);
+			void request(wps_req req);
+			void closed();
+			void opened();
 			void scanComplete();
 			void message(QString msg);
 			void eventMessage(wps_event_type type);

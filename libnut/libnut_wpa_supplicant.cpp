@@ -524,17 +524,17 @@ void CWpa_Supplicant::wps_read(int socket) {
 CTRL-EVENT-DISCONNECTED
 CTRL-EVENT-CONNECTED
 */
-void CWpa_Supplicant::Event_dispatcher(wps_req request) {
-	if (request.type != WR_FAIL) {
-		emit(wps_request(request));
+void CWpa_Supplicant::Event_dispatcher(wps_req req) {
+	if (req.type != WR_FAIL) {
+		emit(request(req));
 	}
 }
 void CWpa_Supplicant::Event_dispatcher(wps_event_type event) {
 	if (event == WE_CONNECTED) {
-		emit(wps_stateChange(true));
+		emit(stateChanged(true));
 	}
 	else if (event == WE_DISCONNECTED) {
-		emit(wps_stateChange(false));
+		emit(stateChanged(false));
 	}
 	else if (event == WE_TERMINATING) {
 		wps_close("event-dispatcher/wpa-TERMINATING");
@@ -638,7 +638,7 @@ void CWpa_Supplicant::wps_open(bool timer_call) {
 	event_sn  = new QSocketNotifier(wps_fd, QSocketNotifier::Read,NULL);
 	connect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
 	event_sn->setEnabled(true);
-	emit(wps_stateChange(true));
+	emit(opened());
 	wps_connected = true;
 	printMessage(tr("wpa_supplicant connection established"));
 	return;
@@ -662,7 +662,7 @@ bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 		event_ctrl = NULL;
 		cmd_ctrl = NULL;
 		wps_connected = false;
-		emit(wps_stateChange(false));
+		emit(closed());
 	}
 	printMessage(tr("(%1)[%2] wpa_supplicant disconnected").arg(((internal) ? "internal" : "external"),call_func));
 	return true;
@@ -772,13 +772,17 @@ void CWpa_Supplicant::preauth(nut::MacAddress bssid) {
 }
 int CWpa_Supplicant::addNetwork() {
 	QString reply = wps_cmd_ADD_NETWORK();
-	if ("FAIL" == reply) {
+	if ("FAIL\n" == reply) {
 		return -1;
 	}
 	else {
 		return reply.toInt();
 	}
 }
+void CWpa_Supplicant::removeNetwork(int id) {
+	wps_cmd_REMOVE_NETWORK(id);
+}
+
 //TODO:Check is id is in range
 void CWpa_Supplicant::setBssid(int id, nut::MacAddress bssid) {
 	wps_cmd_BSSID(id,bssid.toString());
