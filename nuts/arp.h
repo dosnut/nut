@@ -40,7 +40,18 @@ namespace nuts {
 	class Time {
 		private:
 			tv m_tv;
+			
+			void fix() {
+				while (m_tv.usec < 0) { m_tv.sec--; m_tv.usec += 1000000; }
+				while (m_tv.usec > 1000000) { m_tv.sec++; m_tv.usec -= 1000000; }
+			}
 		
+			static Time fix(time_t sec, suseconds_t usec) {
+				while (usec < 0) { sec--; usec += 1000000; }
+				while (usec > 1000000) { sec++; usec -= 1000000; }
+				return Time(sec, usec);
+			}
+			
 		public:
 			Time(time_t sec = 0, suseconds_t usec = 0)
 			: m_tv(sec, usec) { }
@@ -49,19 +60,20 @@ namespace nuts {
 			static Time random(int min, int max);
 			static Time waitRandom(int min, int max);
 			static Time wait(time_t sec = 0, suseconds_t usec = 0);
-			
 			Time operator +(const Time &a) const {
-				return Time(m_tv.sec + a.m_tv.sec, m_tv.usec + a.m_tv.usec);
+				return Time::fix(m_tv.sec + a.m_tv.sec, m_tv.usec + a.m_tv.usec);
 			}
 			Time operator -(const Time &a) const {
-				return Time(m_tv.sec + a.m_tv.sec, m_tv.usec + a.m_tv.usec);
+				return Time::fix(m_tv.sec - a.m_tv.sec, m_tv.usec - a.m_tv.usec);
 			}
 			Time& operator += (const Time &a) {
 				m_tv.sec += a.m_tv.sec; m_tv.usec += a.m_tv.usec;
+				fix();
 				return *this;
 			}
 			Time& operator -= (const Time &a) {
 				m_tv.sec -= a.m_tv.sec; m_tv.usec -= a.m_tv.usec;
+				fix();
 				return *this;
 			}
 			
@@ -80,6 +92,10 @@ namespace nuts {
 			
 			int msecs() {
 				return 1000*m_tv.sec + (m_tv.usec+999) / 1000;
+			}
+			
+			QString toString() const {
+				return QString("%1.%2").arg(m_tv.sec).arg(m_tv.usec, 6, 10, QLatin1Char('0'));
 			}
 	};
 	
@@ -136,12 +152,12 @@ namespace nuts {
 				Prepare a request for an IPv4 address.
 				source_mac is set to the device mac, target_mac = 0.
 			*/
-			ARPRequest* requestIPv4(QHostAddress &source_addr, QHostAddress &target_addr);
+			ARPRequest* requestIPv4(const QHostAddress &source_addr, const QHostAddress &target_addr);
 			
 			/**
 				Prepare a probe for an IPv4 address. (Needed for zeroconf)
 			*/
-			ARPProbe* probeIPv4(QHostAddress &addr);
+			ARPProbe* probeIPv4(const QHostAddress &addr);
 
 		private slots:
 			void arpReadNF();

@@ -35,8 +35,8 @@ namespace nuts {
 	}
 	
 	Time Time::random(int min, int max) {
-		float range = (max - min + 1);
-		float r = min + range * ((float) getRandomUInt32()) / (1<<31-1);
+		float range = (max - min);
+		float r = min + range * ((float) getRandomUInt32()) / ((float) (quint32) -1);
 		int sec = (int) r;
 		r -= sec; r *= 1000000;
 		int usec = (int) r;
@@ -44,7 +44,7 @@ namespace nuts {
 	}
 
 	Time Time::waitRandom(int min, int max) {
-		return current() + random(min, max);
+		return random(min, max) + current();
 	}
 	
 	Time Time::wait(time_t sec, suseconds_t usec) {
@@ -70,7 +70,7 @@ namespace nuts {
 typedef struct arp_packet_base arp_packet_base;
 struct arp_packet_base {
 	ARP_BASE_STRUCT
-};
+} __attribute__ ((__packed__));
 
 typedef struct arp_packet_ipv4 arp_packet_ipv4;
 struct arp_packet_ipv4 {
@@ -79,7 +79,7 @@ struct arp_packet_ipv4 {
 	quint32 sender_p_addr;
 	quint8 target_hw_addr[ETH_ALEN];
 	quint32 target_p_addr;
-};
+} __attribute__ ((__packed__));
 
 static bool arp_parse(const QByteArray &data, quint8 &proto_len, nuts::ArpOperation &operation) {
 	if (data.size() < (int) sizeof(arp_packet_base))
@@ -96,6 +96,7 @@ static bool arp_parse(const QByteArray &data, quint8 &proto_len, nuts::ArpOperat
 
 template<typename Packet>
 static void arp_base_request(Packet &packet, quint8 proto_len, nuts::ArpOperation operation) {
+	memset(&packet, 0, sizeof(packet));
 	packet.hwtype = htons(ARPHRD_ETHER);
 	packet.ptype = htons(ETH_P_IP);
 	packet.hlen = ETH_ALEN;
@@ -106,12 +107,12 @@ static void arp_base_request(Packet &packet, quint8 proto_len, nuts::ArpOperatio
 static void arp_ipv4_request(arp_packet_ipv4 &packet, const nut::MacAddress &sender_mac, const QHostAddress &sender_ip, const QHostAddress &target_ip) {
 	arp_base_request(packet, 4, nuts::ARP_REQUEST);
 	memcpy(packet.sender_hw_addr, sender_mac.data, ETH_ALEN);
-	packet.sender_p_addr = sender_ip.toIPv4Address();
-	packet.target_p_addr = target_ip.toIPv4Address();
+	packet.sender_p_addr = htonl(sender_ip.toIPv4Address());
+	packet.target_p_addr = htonl(target_ip.toIPv4Address());
 }
 
 static bool arp_ipv4_parse(const QByteArray &data, nut::MacAddress &sender_mac, QHostAddress &sender_ip, nut::MacAddress &target_mac, QHostAddress &target_ip) {
-	if (data.size() != sizeof(arp_packet_ipv4))
+	if (data.size() < sizeof(arp_packet_ipv4))
 		return false;
 	arp_packet_ipv4 *packet = (arp_packet_ipv4*) data.data();
 	if (   (packet->hwtype != htons(ARPHRD_ETHER))
@@ -120,9 +121,9 @@ static bool arp_ipv4_parse(const QByteArray &data, nut::MacAddress &sender_mac, 
 		|| (packet->plen != 4))
 		return false;
 	sender_mac = nut::MacAddress(packet->sender_hw_addr);
-	sender_ip = QHostAddress(packet->sender_p_addr);
+	sender_ip = QHostAddress(ntohl(packet->sender_p_addr));
 	target_mac = nut::MacAddress(packet->target_hw_addr);
-	target_ip = QHostAddress(packet->target_p_addr);
+	target_ip = QHostAddress(ntohl(packet->target_p_addr));
 	return true;
 }
 
@@ -186,7 +187,7 @@ namespace nuts {
 			
 			arp_packet_ipv4 packet;
 			arp_ipv4_request(packet, m_arp->m_device->getMacAddress(), m_sourceip, m_targetip);
-			m_arp->arpWrite(QByteArray::fromRawData((const char*) &packet, sizeof(packet)));
+			m_arp->arpWrite(QByteArray((const char*) &packet, sizeof(packet)));
 			
 			return true;
 		}
@@ -232,7 +233,7 @@ namespace nuts {
 			
 			arp_packet_ipv4 packet;
 			arp_ipv4_request(packet, m_arp->m_device->getMacAddress(), QHostAddress((quint32) 0), m_ip);
-			m_arp->arpWrite(QByteArray::fromRawData((const char*) &packet, sizeof(packet)));
+			m_arp->arpWrite(QByteArray((const char*) &packet, sizeof(packet)));
 			
 			return true;
 		}
@@ -268,6 +269,7 @@ namespace nuts {
 	}
 	
 	bool ARP::start() {
+		if (m_arp_socket != -1) return true;
 		int if_index = m_device->interfaceIndex;
 		if (if_index < 0) {
 			err << "Interface index invalid" << endl;
@@ -318,7 +320,7 @@ namespace nuts {
 			delete t;
 	}
 	
-	ARPRequest *ARP::requestIPv4(QHostAddress &source_addr, QHostAddress &target_addr) {
+	ARPRequest *ARP::requestIPv4(const QHostAddress &source_addr, const QHostAddress &target_addr) {
 		if (m_arp_socket == -1) return 0;
 		ARPRequest *r;
 		if (0 != (r = m_requests.value(target_addr, 0))) return r;
@@ -328,7 +330,7 @@ namespace nuts {
 		return r;
 	}
 
-	ARPProbe *ARP::probeIPv4(QHostAddress &addr) {
+	ARPProbe *ARP::probeIPv4(const QHostAddress &addr) {
 		if (m_arp_socket == -1) return 0;
 		ARPProbe *p;
 		if (0 != (p = m_probes.value(addr, 0))) return p;
@@ -392,6 +394,7 @@ namespace nuts {
 		if (!m_arp_timers.isEmpty()) {
 			Time dt = m_arp_timers.first()->m_nextTimeout - Time::current();
 			int interval = qMax(250, dt.msecs());	// wait at least 250ms
+//			qDebug() << QString("recalc Timer: %1 (%2) ms").arg(interval).arg(dt.toString()) << endl;
 			m_timer_id = startTimer(interval);
 		}
 	}
@@ -426,7 +429,7 @@ namespace nuts {
 			return;
 		}
 		ARPTimer *t;
-		while ( (!m_arp_timers.isEmpty()) && (t = m_arp_timers.first()) && (t->m_nextTimeout >= now) ) {
+		while ( (!m_arp_timers.isEmpty()) && (t = m_arp_timers.first()) && (now >= t->m_nextTimeout) ) {
 			if (t->timeEvent()) {
 				m_arp_timers.pop_front();
 				arpTimerAdd(t);
