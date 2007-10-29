@@ -248,8 +248,8 @@ wps_network_config::wps_network_config() {
 			priority = 0;
 			mode = 0; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
 			frequency = 0; //no default, but 0 is not a working value
-			proto = WP_UNDEFINED; //list of accepted protocols TODO: implement
-			key_mgmt = WKM_UNDEFINED; // list of accepted authenticated key management protocols
+			protocols = WP_UNDEFINED; //list of accepted protocols TODO: implement
+			keyManagement = WKM_UNDEFINED; // list of accepted authenticated key management protocols
 			auth_alg = WAA_UNDEFINED; //list of allowed IEEE 802.11 authentication algorithms TODO:implement
 			pairwise = WPC_DEF; //list of accepted pairwise (unicast) ciphers for WPA (CCMP,TKIP,NONE)
 			group = WGC_DEF; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)

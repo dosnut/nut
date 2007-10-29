@@ -77,22 +77,29 @@ namespace qnut {
 		case AVLAP_MOD_FREQ:
 			return QString::number(scans[index.row()].freq);
 		case AVLAP_MOD_KEYMGMT: {
-				int flags = scans[index.row()].auth;
-				if (flags == WA_PLAIN)
-					return tr("none");
+				int keyFlags = scans[index.row()].keyManagement;
+				int protocolFlags = scans[index.row()].protocols;
+				if (keyFlags & WKM_NONE)
+					return tr("plain or WEP");
 				
 				QStringList results;
+				QStringList wpaPrefixes;
 				
-				if (flags & WA_WPA_PSK)
-					results << tr("WPA PSK");
-				if (flags & WA_WPA2_PSK)
-					results << tr("WPA2 PSK");
-				if (flags & WA_WPA_EAP)
-					results << tr("WPA EAP");
-				if (flags & WA_WPA2_EAP)
-					results << tr("WPA2 EAP");
-				if (flags & WA_IEEE8021X)
-					results << tr("IEEE8021X");
+				if (protocolFlags & WP_WPA)
+					wpaPrefixes << "WPA";
+				
+				if (protocolFlags & WP_RSN)
+					wpaPrefixes << "WPA2";
+				
+				if (keyFlags & WKM_WPA_PSK) {
+					results << wpaPrefixes.join("/") + " PSK";
+				}
+				if (keyFlags & WKM_WPA_EAP) {
+					results << wpaPrefixes.join("/") + " EAP";
+				}
+				if (keyFlags & WKM_IEEE8021X) {
+					results << "IEEE 802.1X";
+				}
 				
 				return results.join(", ");
 			}

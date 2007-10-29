@@ -31,7 +31,7 @@ namespace qnut {
 		setHeadInfo();
 		ui.managedView->header()->setResizeMode(QHeaderView::ResizeToContents);
 		ui.managedView->setModel(new CManagedAPModel(device->wpa_supplicant));
-		ui.availableView->header()->setResizeMode(QHeaderView::ResizeToContents);
+		//ui.availableView->header()->setResizeMode(QHeaderView::ResizeToContents);
 		ui.availableView->setModel(new CAvailableAPModel(device->wpa_supplicant));
 		
 		connect(ui.managedView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
@@ -104,6 +104,6 @@ namespace qnut {
 		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
 		CAccessPointConfig dialog(device->wpa_supplicant, this);
 		wps_network * network = static_cast<wps_network *>(selectedIndexes[0].internalPointer());
-		dialog.execute(*network);
+		dialog.execute(network->id);
 	}
 };

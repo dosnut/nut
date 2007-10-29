@@ -27,9 +27,11 @@ namespace qnut {
 		QRegExpValidator * hexValidator;
 		
 		CWpa_Supplicant * supplicant;
+		
+		inline void convertLineEditText(QLineEdit * lineEdit, bool hex);
 	public:
 		bool execute(wps_scan scanResult);
-		bool execute(wps_network network);
+		bool execute(int id);
 		
 		CAccessPointConfig(CWpa_Supplicant * wpa_supplicant, QWidget * parent = 0);
 		~CAccessPointConfig();
@@ -37,6 +39,10 @@ namespace qnut {
 		void uiHandleAuthChanged(int type);
 		void uiHandleEncChanged(QString text);
 		void convertSSID(bool hex);
+		void convertWEPKey0(bool hex);
+		void convertWEPKey1(bool hex);
+		void convertWEPKey2(bool hex);
+		void convertWEPKey3(bool hex);
 	};
 }
 

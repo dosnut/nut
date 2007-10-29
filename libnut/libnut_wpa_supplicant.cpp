@@ -170,7 +170,7 @@ wps_ciphers CWpa_Supplicant::parseScanCiphers(QString str) {
 	return cip;
 }
 wps_authentication CWpa_Supplicant::parseScanAuth(QString str) {
-	wps_authentication key = WA_DEF;
+	wps_authentication key = WA_UNDEFINED;
 	if (str.contains("WPA-PSK")) {
 		key = (wps_authentication) (key | WA_WPA_PSK);
 	}
@@ -917,11 +917,11 @@ wps_netconfig_failures CWpa_Supplicant::editNetwork(int netid, wps_network_confi
 			wps_fail = (wps_netconfig_failures) (wps_fail | WCF_FREQ);
 		}
 	}
-	if ( !setNetworkVariable(netid,"proto",toString(config.proto)) ) {
+	if ( !setNetworkVariable(netid,"proto",toString(config.protocols)) ) {
 		removeNetwork(netid);
 		wps_fail = (wps_netconfig_failures) (wps_fail | WCF_PROTO);
 	}
-	if ( !setNetworkVariable(netid,"key_mgmt",toString(config.key_mgmt)) ) {
+	if ( !setNetworkVariable(netid,"key_mgmt",toString(config.keyManagement)) ) {
 		removeNetwork(netid);
 		wps_fail = (wps_netconfig_failures) (wps_fail | WCF_KEYMGMT);
 	}
@@ -1040,12 +1040,12 @@ wps_network_config CWpa_Supplicant::getNetworkConfig(int id) {
 
 	response = wps_cmd_GET_NETWORK(id,"proto");
 	if ("FAIL\n" != response) {
-		config.proto = parseProtocols(response); // TODO: implement
+		config.protocols = parseProtocols(response); // TODO: implement
 	}
 
 	response = wps_cmd_GET_NETWORK(id,"key_mgmt");
 	if ("FAIL\n" != response) {
-		config.key_mgmt = parseKeyMgmt(response); // TODO: implement
+		config.keyManagement = parseKeyMgmt(response); // TODO: implement
 	}
 
 	response = wps_cmd_GET_NETWORK(id,"auth_alg");

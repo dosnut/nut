@@ -12,7 +12,7 @@ namespace libnut {
 	typedef enum {WNF_NONE=0, WNF_CURRENT=1} wps_network_flags;
 
 	typedef enum {WC_UNDEFINED=0, WC_NONE=1, WC_CCMP=2, WC_TKIP=4, WC_WEP104=8, WC_WEP40=16, WC_WEP=24} wps_ciphers;
-	typedef enum {WA_PLAIN=1,WA_WPA_PSK=2,WA_WPA2_PSK=4, WA_WPA_EAP=8, WA_WPA2_EAP=16, WA_IEEE8021X=32, WA_DEF=62} wps_authentication;
+	typedef enum {WA_UNDEFINED=0, WA_PLAIN=1,WA_WPA_PSK=2,WA_WPA2_PSK=4, WA_WPA_EAP=8, WA_WPA2_EAP=16, WA_IEEE8021X=32, WA_DEF=62} wps_authentication;
 	//WA_WPA_PSK = WAA_OPEN && WKI_WPA && KEYMGMT_WPA_PSK && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
 	//WA_WPA2_PSK = WAA_OPEN && WKI_RSN && KEYMGMT_WPA_PSK && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
 	//WA_WPA_EAP = (WAA_OPEN || WAA_LEAP) && KEYMGMT_WPA_EAP && WKI_WPA && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
@@ -172,8 +172,8 @@ namespace libnut {
 			int priority;
 			bool mode; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
 			int frequency;
-			wps_protocols proto; //list of accepted protocols TODO: implement
-			wps_key_management key_mgmt; // list of accepted authenticated key management protocols
+			wps_protocols protocols; //list of accepted protocols TODO: implement
+			wps_key_management keyManagement; // list of accepted authenticated key management protocols
 			wps_auth_algs auth_alg; //list of allowed IEEE 802.11 authentication algorithms TODO:implement
 			wps_pairwise_ciphers pairwise; //list of accepted pairwise (unicast) ciphers for WPA (CCMP,TKIP,NONE)
 			wps_group_ciphers group; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)

@@ -275,7 +275,7 @@ namespace qnut {
 		}
 		//emit showMessage(tr("QNUT"), tr("%1 changed its state to \"%2\"").arg(device->name, toString(state)), 4000);
 		
-		if (scriptFlags) {
+		if (scriptFlags) {//TODO:scripts testen
 			QDir workdir(UI_PATH_DEV(device->name));
 			bool doExecuteScripts = false;
 			QString targetDir;
@@ -311,18 +311,18 @@ namespace qnut {
 				env << "QNUT_DEV_STATE=" + toString(state);
 				//activeEnvironment workarround
 				if ((state == DS_UP) && (device->activeEnvironment != NULL)) {
-					env << "QNUT_ENV_NAME="  + device->activeEnvironment->name;
+					env << "QNUT_ENV_NAME=" + device->activeEnvironment->name;
 					env << "QNUT_IF_COUNT=" + QString::number(device->activeEnvironment->interfaces.count());
 					int j = 0;
 					foreach (CInterface * i, device->activeEnvironment->interfaces) {
-						env << "QNUT_IF_" + QString::number(j) + "=" + i->ip.toString();
+						env << QString("QNUT_IF_%1=%2").arg(QString::number(j),i->ip.toString());
 						j++;
 					}
 				}
 				process.setEnvironment(env);
 				workdir.cd(targetDir);
 				foreach(QString i, workdir.entryList()) {
-					process.start(workdir.path() + i);
+					process.startDetached(workdir.path() + i);
 				}
 			}
 		}

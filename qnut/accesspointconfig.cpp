@@ -23,7 +23,11 @@ namespace qnut {
 		hexValidator = new QRegExpValidator(regexp, this);
 		
 		connect(ui.ssidHexCheck, SIGNAL(toggled(bool)), this, SLOT(convertSSID(bool)));
-		connect(ui.authCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(uiHandleAuthChanged(int)));
+		connect(ui.wepKey0HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertWEPKey0(bool)));
+		connect(ui.wepKey1HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertWEPKey1(bool)));
+		connect(ui.wepKey2HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertWEPKey2(bool)));
+		connect(ui.wepKey3HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertWEPKey3(bool)));
+		connect(ui.keyManagementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(uiHandleAuthChanged(int)));
 		connect(ui.encCombo, SIGNAL(currentIndexChanged(QString)), this, SLOT(uiHandleEncChanged(QString)));
 	}
 	
@@ -42,7 +46,6 @@ namespace qnut {
 			ui.confTabs->setTabEnabled(0, false);
 			break;
 		case 2:
-		case 4:
 			ui.confTabs->setEnabled(true);
 			ui.confTabs->setTabEnabled(0, true);
 			ui.confTabs->setCurrentIndex(0);
@@ -50,7 +53,6 @@ namespace qnut {
 			break;
 		case 1:
 		case 3:
-		case 5:
 			ui.confTabs->setEnabled(true);
 			ui.confTabs->setTabEnabled(1, true);
 			ui.confTabs->setCurrentIndex(1);
@@ -61,6 +63,8 @@ namespace qnut {
 			break;
 		}
 		
+		ui.rsnCheck->setEnabled((type == 2) || (type == 3));
+		
 		switch (type) {
 		case 0:
 		case 1:
@@ -69,8 +73,6 @@ namespace qnut {
 			break;
 		case 2:
 		case 3:
-		case 4:
-		case 5:
 			ui.encCombo->addItem("TKIP");
 			ui.encCombo->addItem("CCMP");
 			break;
@@ -81,41 +83,25 @@ namespace qnut {
 	}
 	
 	void CAccessPointConfig::uiHandleEncChanged(QString text) {
-		if (ui.authCombo->currentIndex() == 0)
+		if (ui.keyManagementCombo->currentIndex() == 0)
 			ui.confTabs->setEnabled(text == "WEP");
 		else
 			ui.confTabs->setTabEnabled(2, text == "WEP");
 	}
 	
-	void CAccessPointConfig::convertSSID(bool hex) {
-		QString result;
-		if (hex) {
-			result = ui.ssidEdit->text().toAscii().toHex();
-			ui.ssidEdit->setValidator(hexValidator);
-		}
-		else {
-			result = QByteArray::fromHex(ui.ssidEdit->text().toAscii());
-			ui.ssidEdit->setValidator(0);
-		}
-		ui.ssidEdit->setText(result);
-	}
-	
 	bool CAccessPointConfig::execute(wps_scan scanResult) {
-		if (scanResult.auth & WA_WPA2_EAP)
-			ui.authCombo->setCurrentIndex(5);
-		else if (scanResult.auth & WA_WPA_EAP)
-			ui.authCombo->setCurrentIndex(3);
-		else if (scanResult.auth & WA_WPA2_PSK)
-			ui.authCombo->setCurrentIndex(4);
-		else if (scanResult.auth & WA_WPA_PSK)
-			ui.authCombo->setCurrentIndex(2);
-		else if (scanResult.auth & WA_IEEE8021X)
-			ui.authCombo->setCurrentIndex(1);
+		if (scanResult.keyManagement & WKM_WPA_EAP)
+			ui.keyManagementCombo->setCurrentIndex(3);
+		else if (scanResult.keyManagement & WKM_WPA_PSK)
+			ui.keyManagementCombo->setCurrentIndex(2);
+		else if (scanResult.keyManagement & WKM_IEEE8021X)
+			ui.keyManagementCombo->setCurrentIndex(1);
 		else
-			ui.authCombo->setCurrentIndex(0);
+			ui.keyManagementCombo->setCurrentIndex(0);
+		
+		ui.rsnCheck->setChecked(scanResult.protocols & WP_RSN);
 		
 		if (
-			(scanResult.ciphers & WC_WEP) ||
 			(scanResult.ciphers & WC_WEP40) ||
 			(scanResult.ciphers & WC_WEP104) ||
 			(scanResult.ciphers & WC_CCMP)
@@ -126,20 +112,74 @@ namespace qnut {
 		
 		ui.ssidEdit->setText(scanResult.ssid);
 		
-		if (exec()) {
+		if (exec()) { //TODO:addNetwork
 			return true;
 		}
 		else
 			return false;
 	}
 	
-	bool CAccessPointConfig::execute(wps_network network) {
+	bool CAccessPointConfig::execute(int id) {
+		wps_network_config config = supplicant->getNetworkConfig(id);
 		
-		if (exec()) {
+		if (config.ssid[0] == '\"')
+			ui.ssidEdit->setText(config.ssid.mid(1, config.ssid.length()-2));
+		else
+			ui.ssidEdit->setText(config.ssid);
+		
+		if (config.keyManagement & WKM_WPA_EAP)
+			ui.keyManagementCombo->setCurrentIndex(3);
+		else if (config.keyManagement & WKM_WPA_PSK)
+			ui.keyManagementCombo->setCurrentIndex(2);
+		else if (config.keyManagement & WKM_IEEE8021X)
+			ui.keyManagementCombo->setCurrentIndex(1);
+		else
+			ui.keyManagementCombo->setCurrentIndex(0);
+		
+		if (
+			(config.group & WC_WEP40) ||
+			(config.group & WC_WEP104) ||
+			(config.group & WC_CCMP)
+		)
+			ui.encCombo->setCurrentIndex(1);
+		else
+			ui.encCombo->setCurrentIndex(0);
+		
+		if (exec()) { //TODO:configNetwork
 			return true;
 		}
 		else
 			return false;
 	}
-
+	
+	inline void CAccessPointConfig::convertLineEditText(QLineEdit * lineEdit, bool hex) {
+		if (hex) {
+			lineEdit->setText(lineEdit->text().toAscii().toHex());
+			lineEdit->setValidator(hexValidator);
+		}
+		else {
+			lineEdit->setText(QByteArray::fromHex(lineEdit->text().toAscii()));
+			ui.ssidEdit->setValidator(0);
+		}
+	}
+	
+	void CAccessPointConfig::convertSSID(bool hex) {
+		convertLineEditText(ui.ssidEdit, hex);
+	}
+	
+	void CAccessPointConfig::convertWEPKey0(bool hex) {
+		convertLineEditText(ui.wepKey0Edit, hex);
+	}
+	
+	void CAccessPointConfig::convertWEPKey1(bool hex) {
+		convertLineEditText(ui.wepKey1Edit, hex);
+	}
+	
+	void CAccessPointConfig::convertWEPKey2(bool hex) {
+		convertLineEditText(ui.wepKey2Edit, hex);
+	}
+	
+	void CAccessPointConfig::convertWEPKey3(bool hex) {
+		convertLineEditText(ui.wepKey3Edit, hex);
+	}
 };

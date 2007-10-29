@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>611</width>
-    <height>483</height>
+    <height>576</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -14,95 +14,80 @@
   </property>
   <layout class="QVBoxLayout" >
    <item>
-    <layout class="QHBoxLayout" >
-     <item>
-      <layout class="QVBoxLayout" >
-       <item>
-        <widget class="QLabel" name="ssidLabel" >
-         <property name="text" >
-          <string>SSID</string>
-         </property>
-         <property name="buddy" >
-          <cstring>ssidEdit</cstring>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="authLabel" >
-         <property name="text" >
-          <string>Authentication</string>
-         </property>
-         <property name="buddy" >
-          <cstring>authCombo</cstring>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="encLabel" >
-         <property name="text" >
-          <string>Encryption</string>
-         </property>
-         <property name="buddy" >
-          <cstring>encCombo</cstring>
-         </property>
-        </widget>
-       </item>
-      </layout>
+    <layout class="QGridLayout" >
+     <item row="0" column="0" >
+      <widget class="QLabel" name="ssidLabel" >
+       <property name="text" >
+        <string>SSID</string>
+       </property>
+       <property name="buddy" >
+        <cstring>ssidEdit</cstring>
+       </property>
+      </widget>
      </item>
-     <item>
-      <layout class="QVBoxLayout" >
+     <item row="0" column="1" >
+      <widget class="QLineEdit" name="ssidEdit" />
+     </item>
+     <item row="1" column="1" >
+      <widget class="QCheckBox" name="ssidHexCheck" >
+       <property name="text" >
+        <string>hexadecimal chars</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" >
+      <widget class="QLabel" name="keyManagementLabel" >
+       <property name="text" >
+        <string>Key management</string>
+       </property>
+       <property name="buddy" >
+        <cstring>keyManagementCombo</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1" >
+      <widget class="QComboBox" name="keyManagementCombo" >
        <item>
-        <layout class="QHBoxLayout" >
-         <item>
-          <widget class="QLineEdit" name="ssidEdit" />
-         </item>
-         <item>
-          <widget class="QCheckBox" name="ssidHexCheck" >
-           <property name="text" >
-            <string>hexadecimal chars</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <property name="text" >
+         <string>plain or WEP</string>
+        </property>
        </item>
        <item>
-        <widget class="QComboBox" name="authCombo" >
-         <item>
-          <property name="text" >
-           <string>plain or WEP</string>
-          </property>
-         </item>
-         <item>
-          <property name="text" >
-           <string>IEEE 802.1X</string>
-          </property>
-         </item>
-         <item>
-          <property name="text" >
-           <string>WPA-Personal (PSK)</string>
-          </property>
-         </item>
-         <item>
-          <property name="text" >
-           <string>WPA-Enterprise (EAP)</string>
-          </property>
-         </item>
-         <item>
-          <property name="text" >
-           <string>WPA2-Personal (PSK)</string>
-          </property>
-         </item>
-         <item>
-          <property name="text" >
-           <string>WPA2-Enterprise (EAP)</string>
-          </property>
-         </item>
-        </widget>
+        <property name="text" >
+         <string>IEEE 802.1X</string>
+        </property>
        </item>
        <item>
-        <widget class="QComboBox" name="encCombo" />
+        <property name="text" >
+         <string>WPA-Personal (PSK)</string>
+        </property>
        </item>
-      </layout>
+       <item>
+        <property name="text" >
+         <string>WPA-Enterprise (EAP)</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="3" column="1" >
+      <widget class="QCheckBox" name="rsnCheck" >
+       <property name="text" >
+        <string>use WPA2 (RSN)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0" >
+      <widget class="QLabel" name="encLabel" >
+       <property name="text" >
+        <string>Encryption</string>
+       </property>
+       <property name="buddy" >
+        <cstring>encCombo</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1" >
+      <widget class="QComboBox" name="encCombo" />
      </item>
     </layout>
    </item>
@@ -130,6 +115,9 @@
          </item>
          <item>
           <widget class="QLineEdit" name="pskEdit" >
+           <property name="maxLength" >
+            <number>63</number>
+           </property>
            <property name="echoMode" >
             <enum>QLineEdit::Password</enum>
            </property>
@@ -256,18 +244,14 @@
            </widget>
           </item>
           <item row="0" column="1" >
-           <layout class="QHBoxLayout" >
-            <item>
-             <widget class="QLineEdit" name="caEdit" />
-            </item>
-            <item>
-             <widget class="QToolButton" name="caBrowse" >
-              <property name="text" >
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <widget class="QLineEdit" name="caEdit" />
+          </item>
+          <item row="0" column="2" >
+           <widget class="QToolButton" name="caBrowse" >
+            <property name="text" >
+             <string>...</string>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0" >
            <widget class="QLabel" name="clientLabel" >
@@ -280,18 +264,14 @@
            </widget>
           </item>
           <item row="1" column="1" >
-           <layout class="QHBoxLayout" >
-            <item>
-             <widget class="QLineEdit" name="clientEdit" />
-            </item>
-            <item>
-             <widget class="QToolButton" name="toolButton" >
-              <property name="text" >
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <widget class="QLineEdit" name="clientEdit" />
+          </item>
+          <item row="1" column="2" >
+           <widget class="QToolButton" name="toolButton" >
+            <property name="text" >
+             <string>...</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -345,101 +325,77 @@
       <attribute name="title" >
        <string>WEP Keys</string>
       </attribute>
-      <layout class="QHBoxLayout" >
-       <item>
-        <layout class="QVBoxLayout" >
-         <item>
-          <widget class="QRadioButton" name="key0Radio" >
-           <property name="text" >
-            <string>WEP Key 0</string>
-           </property>
-           <property name="checked" >
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="key1Radio" >
-           <property name="text" >
-            <string>WEP Key 1</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="key2Radio" >
-           <property name="text" >
-            <string>WEP Key 2</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="key3Radio" >
-           <property name="text" >
-            <string>WEP Key 3</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+      <layout class="QGridLayout" >
+       <item row="0" column="0" >
+        <widget class="QRadioButton" name="wepKey0Radio" >
+         <property name="text" >
+          <string>WEP Key 0</string>
+         </property>
+         <property name="checked" >
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
-       <item>
-        <layout class="QVBoxLayout" >
-         <item>
-          <layout class="QHBoxLayout" >
-           <item>
-            <widget class="QLineEdit" name="key0Edit" />
-           </item>
-           <item>
-            <widget class="QCheckBox" name="key0HexCheck" >
-             <property name="text" >
-              <string>hexadecimal chars</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" >
-           <item>
-            <widget class="QLineEdit" name="key1Edit" />
-           </item>
-           <item>
-            <widget class="QCheckBox" name="key1HexCheck" >
-             <property name="text" >
-              <string>hexadecimal chars</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" >
-           <item>
-            <widget class="QLineEdit" name="key2Edit" />
-           </item>
-           <item>
-            <widget class="QCheckBox" name="key2HexCheck" >
-             <property name="text" >
-              <string>hexadecimal chars</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" >
-           <item>
-            <widget class="QLineEdit" name="key3Edit" />
-           </item>
-           <item>
-            <widget class="QCheckBox" name="key3HexCheck" >
-             <property name="text" >
-              <string>hexadecimal chars</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
+       <item row="0" column="1" >
+        <widget class="QLineEdit" name="wepKey0Edit" />
+       </item>
+       <item row="0" column="2" >
+        <widget class="QCheckBox" name="wepKey0HexCheck" >
+         <property name="text" >
+          <string>hexadecimal chars</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" >
+        <widget class="QRadioButton" name="wepKey1Radio" >
+         <property name="text" >
+          <string>WEP Key 1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" >
+        <widget class="QLineEdit" name="wepKey1Edit" />
+       </item>
+       <item row="1" column="2" >
+        <widget class="QCheckBox" name="wepKey1HexCheck" >
+         <property name="text" >
+          <string>hexadecimal chars</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" >
+        <widget class="QRadioButton" name="wepKey2Radio" >
+         <property name="text" >
+          <string>WEP Key 2</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1" >
+        <widget class="QLineEdit" name="wepKey2Edit" />
+       </item>
+       <item row="2" column="2" >
+        <widget class="QCheckBox" name="wepKey2HexCheck" >
+         <property name="text" >
+          <string>hexadecimal chars</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" >
+        <widget class="QRadioButton" name="wepKey3Radio" >
+         <property name="text" >
+          <string>WEP Key 3</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1" >
+        <widget class="QLineEdit" name="wepKey3Edit" />
+       </item>
+       <item row="3" column="2" >
+        <widget class="QCheckBox" name="wepKey3HexCheck" >
+         <property name="text" >
+          <string>hexadecimal chars</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -459,7 +415,7 @@
  </widget>
  <tabstops>
   <tabstop>ssidEdit</tabstop>
-  <tabstop>authCombo</tabstop>
+  <tabstop>keyManagementCombo</tabstop>
   <tabstop>encCombo</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
