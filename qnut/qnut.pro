@@ -79,5 +79,8 @@ LIBS += ../common/libnutcommon.a \
 TARGETDEPS += ../common/libnutcommon.a \
 ../libnut/libnut.a
 FORMS -= wpaset.ui \
-wrlset.ui
+wrlset.ui \
+ pskconf.ui \
+ wepconf.ui \
+ eapconf.ui
 

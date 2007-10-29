@@ -101,24 +101,24 @@ namespace qnut {
 	}
 	
 	bool CAccessPointConfig::execute(wps_scan scanResult) {
-		if (scanResult.key_mgmt & KEYMGMT_WPA2_EAP)
+		if (scanResult.auth & WA_WPA2_EAP)
 			ui.authCombo->setCurrentIndex(5);
-		else if (scanResult.key_mgmt & KEYMGMT_WPA_EAP)
+		else if (scanResult.auth & WA_WPA_EAP)
 			ui.authCombo->setCurrentIndex(3);
-		else if (scanResult.key_mgmt & KEYMGMT_WPA2_PSK)
+		else if (scanResult.auth & WA_WPA2_PSK)
 			ui.authCombo->setCurrentIndex(4);
-		else if (scanResult.key_mgmt & KEYMGMT_WPA_PSK)
+		else if (scanResult.auth & WA_WPA_PSK)
 			ui.authCombo->setCurrentIndex(2);
-		else if (scanResult.key_mgmt & KEYMGMT_IEEE8021X)
+		else if (scanResult.auth & WA_IEEE8021X)
 			ui.authCombo->setCurrentIndex(1);
 		else
 			ui.authCombo->setCurrentIndex(0);
 		
 		if (
-			(scanResult.ciphers & CI_WEP) ||
-			(scanResult.ciphers & CI_WEP40) ||
-			(scanResult.ciphers & CI_WEP104) ||
-			(scanResult.ciphers & CI_CCMP)
+			(scanResult.ciphers & WC_WEP) ||
+			(scanResult.ciphers & WC_WEP40) ||
+			(scanResult.ciphers & WC_WEP104) ||
+			(scanResult.ciphers & WC_CCMP)
 		)
 			ui.encCombo->setCurrentIndex(1);
 		else
