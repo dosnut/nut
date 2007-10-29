@@ -139,20 +139,35 @@ namespace nuts {
 			QString name;
 			int interfaceIndex;
 			nut::DeviceConfig *config;
-			int activeEnv, nextEnv;
+			
+			int activeEnv, nextEnv, m_userEnv;
+			int m_waitForEnvSelects;
+			
 			libnut::DeviceState m_state;
 			QList<Environment*> envs;
+			
+			// DHCP
 			QHash< quint32, Interface_IPv4* > dhcp_xid_iface;
 			int dhcp_client_socket;
 			QSocketNotifier *dhcp_read_nf, *dhcp_write_nf;
 			QLinkedList< QByteArray > dhcp_write_buf;
+			
+			// Device properties
 			nut::MacAddress macAddress;
 			bool m_hasWLAN;
 			QString m_essid;
+			
+			// WPA
 			QProcess *m_wpa_supplicant;
-		
+			
+			// Called from Environment
 			void envUp(Environment*);
 			void envDown(Environment*);
+			void selectDone(Environment*);
+			
+			void setEnvironment(int env); //!< Select specific environment
+			void checkEnvironment();
+			void startEnvSelect();
 			
 			void gotCarrier(int ifIndex, const QString &essid = "");
 			void lostCarrier();
@@ -174,11 +189,13 @@ namespace nuts {
 			
 		public slots:
 			// Properties
-			QString getName(); //!< Name of the device in the kernel, e.g. "eth0"
+			QString getName() { return name; } //!< Name of the device in the kernel, e.g. "eth0"
 			const nut::DeviceConfig& getConfig() { return *config; }
 			
-			int getEnvironment(); //!< Active environment, or -1
-			void setEnvironment(int env); //!< Select specific environment
+			int getEnvironment() { return activeEnv; } //!< Active environment, or -1
+			
+			int getUserPreferredEnvironment() { return m_userEnv; }
+			void setUserPreferredEnvironment(int env);
 			
 			libnut::DeviceState getState() { return m_state; }
 			
@@ -195,8 +212,8 @@ namespace nuts {
 			
 			bool hasWLAN() { return m_hasWLAN; }
 			QString essid() { return m_essid; }
-			nut::MacAddress getMacAddress();
-		
+			nut::MacAddress getMacAddress() { return macAddress; }
+			
 		signals:
 			void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState);
 	};
@@ -215,6 +232,7 @@ namespace nuts {
 			Device *device;
 			QList<Interface*> ifs;
 			QVector<nut::SelectResult> m_selectResults;
+			nut::SelectResult m_selectResult;
 			
 			nut::EnvironmentConfig *config;
 			QBitArray ifUpStatus;
@@ -248,6 +266,10 @@ namespace nuts {
 			int getID() { return m_id; }
 			QString getName() { return config->getName(); }
 			const nut::EnvironmentConfig& getConfig() { return *config; }
+			
+			bool selectionDone() { return (selArpWaiting == -1); }
+			nut::SelectResult getSelectResult() { return m_selectResult; }
+			QVector<nut::SelectResult> getSelectResults() { return m_selectResults; }
 	};
 	
 	class Interface : public QObject {

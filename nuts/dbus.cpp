@@ -125,7 +125,7 @@ namespace nuts {
 	void DBusDevice::setEnvironment(const QDBusObjectPath &path) {
 		foreach(DBusEnvironment * i, dbus_environments) {
 			if (i->getPath() == path.path()) {
-				s_device->setEnvironment((i->getEnvironment())->getID());
+				s_device->setUserPreferredEnvironment((i->getEnvironment())->getID());
 				break;
 			}
 		}

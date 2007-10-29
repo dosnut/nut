@@ -160,7 +160,7 @@ namespace nuts {
 	}
 	
 	Device::Device(DeviceManager* dm, const QString &name, nut::DeviceConfig *config, bool hasWLAN)
-	: QObject(dm), m_arp(this), dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_state(libnut::DS_DEACTIVATED), dhcp_client_socket(-1), m_hasWLAN(hasWLAN), m_wpa_supplicant(0) {
+	: QObject(dm), m_arp(this), dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_userEnv(-1), m_waitForEnvSelects(0), m_state(libnut::DS_DEACTIVATED), dhcp_client_socket(-1), m_hasWLAN(hasWLAN), m_wpa_supplicant(0) {
 		int i = 0;
 		foreach(nut::EnvironmentConfig *ec, config->getEnvironments())
 			envs.push_back(new Environment(this, ec, i++));
@@ -218,10 +218,7 @@ namespace nuts {
 		log << "Device(" << name << ") gotCarrier" << endl;
 		if (m_hasWLAN) log << "ESSID: " << essid << endl;
 		setState(libnut::DS_CARRIER);
-		foreach (Environment* env, envs)
-			env->startSelect();
-		activeEnv = 0;
-		envs[activeEnv]->start();
+		startEnvSelect();
 	}
 	void Device::lostCarrier() {
 		log << "Device(" << name << ") lostCarrier" << endl;
@@ -346,36 +343,65 @@ namespace nuts {
 		dhcp_write_nf->setEnabled(!dhcp_write_buf.empty());
 	}
 	
-	nut::MacAddress Device::getMacAddress() {
-		return macAddress;
-	}
-
-	QString Device::getName() {
-		return name;
+	void Device::selectDone(Environment*) {
+		m_waitForEnvSelects--;
+		checkEnvironment();
 	}
 	
-	int Device::getEnvironment() {
-		return activeEnv;
-	}
 	void Device::setEnvironment(int env) {
+		if (activeEnv == env || nextEnv == env) return;
+		log << QString("Set next environment %1").arg(env) << endl;
 		if (env < 0 || env >= envs.size()) {
-			err << QString("Device::setEnvironment: environment %1 does not exist.")
-					.arg(env)
-				<< endl;
-			return;
-		}
-		if (activeEnv == -1) {
-			log << QString("Cannot change environment while no one active") << endl;
-			return;
-		} else {
-			log << QString("Selecting environment %1").arg(env) << endl;
-			if (nextEnv == -1) {
-				nextEnv = env;
+			nextEnv = -1;
+			if (activeEnv != -1)
 				envs[activeEnv]->stop();
-			} else {
-				nextEnv = env;
+		} else if (activeEnv == -1) {
+			activeEnv = env;
+			envs[activeEnv]->start();
+		} else if (nextEnv == -1) {
+			nextEnv = env;
+			envs[activeEnv]->stop();
+		} else {
+			nextEnv = env;
+		}
+	}
+	
+	void Device::checkEnvironment() {
+		nut::SelectResult user_res;
+		if (m_userEnv >= 0) user_res = envs[m_userEnv]->getSelectResult();
+		if ((m_userEnv >= 0) && (envs[m_userEnv]->selectionDone())) {
+			if (user_res == nut::SelectResult::True || user_res == nut::SelectResult::User) {
+				setEnvironment(m_userEnv);
+				return;
 			}
 		}
+		if (m_waitForEnvSelects != 0) return;
+		// every environment has now selectionDone() == true
+		// => m_userEnv is either -1 or m_userEnv cannot be selected.
+		if ((activeEnv >= 0) && (envs[activeEnv]->getSelectResult() == nut::SelectResult::True)) return;
+		// => select first with SelectResult::True
+		foreach (Environment* env, envs) {
+			if (env->getSelectResult() == nut::SelectResult::True) {
+				setEnvironment(env->m_id);
+				return;
+			}
+		}
+		setEnvironment(0);
+	}
+	
+	void Device::startEnvSelect() {
+		m_waitForEnvSelects = envs.size();
+		foreach (Environment* env, envs)
+			env->startSelect();
+	}
+	
+	void Device::setUserPreferredEnvironment(int env) {
+		if (env < 0 || env >= envs.size()) {
+			m_userEnv = -1;
+		} else {
+			m_userEnv = env;
+		}
+		checkEnvironment();
 	}
 	
 	bool Device::enable(bool force) {
@@ -431,7 +457,7 @@ namespace nuts {
 
 	
 	Environment::Environment(Device *device, nut::EnvironmentConfig *config, int id)
-	: QObject(device), device(device), config(config), envIsUp(false), envStart(false), m_id(id) {
+	: QObject(device), device(device), config(config), envIsUp(false), envStart(false), m_id(id), selArpWaiting(0) {
 		foreach (nut::IPv4Config *ic, config->getIPv4Interfaces())
 			ifs.push_back(new Interface_IPv4(this, ifs.size(), ic));
 		ifUpStatus.fill(false, ifs.size());
@@ -517,11 +543,18 @@ namespace nuts {
 	
 	void Environment::checkSelectState() {
 		if (selArpWaiting > 0) return;
+		if (selArpWaiting == -1) {
+			err << QString("Environment::checkSelectState called after selection was done") << endl;
+			return;
+		}
+		selArpWaiting = -1;
 		const QVector<nut::SelectRule> &filters = config->getSelect().filters;
 		const QVector< QVector<quint32> > &blocks = config->getSelect().blocks;
 		int c = filters.size();
 		if (!c) {
 //			qDebug() << QString("Nothing to select") << endl;
+			m_selectResult = nut::SelectResult::User;
+			device->selectDone(this);
 			return;
 		}
 		for (int i = c-1; i >= 0; i--) {
@@ -549,6 +582,8 @@ namespace nuts {
 				}
 			}
 		}
+		m_selectResult = m_selectResults[0];
+		device->selectDone(this);
 //		qDebug() << QString("Select Result: %1").arg((qint8) m_selectResults[0]) << endl;
 	}
 	

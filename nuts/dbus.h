@@ -78,7 +78,7 @@ namespace nuts {
 			Q_NOREPLY void disable();
 			Q_NOREPLY void setEnvironment(const QDBusObjectPath &path);
 			Q_NOREPLY void setEnvironment(int env) {
-				s_device->setEnvironment(env);
+				s_device->setUserPreferredEnvironment(env);
 			}
 			
 			QString getEssid() { return s_device->essid(); }
