@@ -88,9 +88,19 @@ namespace libnut {
 
 
 			//parse scan results
-			CIPHERS parseScanCiphers(QString str);
-			KEYMGMT parseScanKeymgmt(QString str);
+			wps_ciphers parseScanCiphers(QString str);
+			wps_authentication parseScanAuth(QString str);
 			QList<wps_scan> parseScanResult(QStringList list);
+
+			//parse config
+			wps_protocols parseProtocols(QString str);
+			wps_key_managment parseKeyMgmt(QString str);
+			wps_auth_algs parseAuthAlg(QString str);
+			wps_pairwise_ciphers parsePairwiseCiphers(QString str);
+			wps_group_ciphers parseGroupCiphers(QString str);
+			wps_eapol_flags parseEapolFlags(QString str);
+			
+			
 
 			//parse Status with helper functionss
 			wps_status parseStatus(QStringList list);
@@ -102,6 +112,7 @@ namespace libnut {
 			wps_status::EAP_STATE parseEapState(QString str);
 			wps_status::METHOD_STATE parseMethodState(QString str);
 			wps_status::DECISION parseDecision(QString str);
+
 			
 			//parse Event
 			wps_event_type parseEvent(QString str);
@@ -151,8 +162,8 @@ namespace libnut {
 			void terminate();
 			void preauth(nut::MacAddress bssid);
 			int addNetwork(); //return -1 if failed, otherwise return network id
-			int addNetwork(wps_network_config config); //return -1 if failed, otherwise return network id
-			int editNetwork(int netid, wps_network_config config);
+			wps_netconfig_status addNetwork(wps_network_config config); //return -1 if failed, otherwise return network id
+			wps_netconfig_failures editNetwork(int netid, wps_network_config config);
 			wps_network_config getNetworkConfig(int id);
 			void removeNetwork(int id);
 			void setBssid(int id, nut::MacAddress bssid);
