@@ -52,7 +52,7 @@ namespace nut {
 	
 	MacAddress::MacAddress(const QString &str) {
 		if (str == QLatin1String("any")) {
-			memset(data, 0xff, sizeof(data));
+			memset(data, 0, sizeof(data));
 			return;
 		}
 		QByteArray buf = str.toUtf8();
