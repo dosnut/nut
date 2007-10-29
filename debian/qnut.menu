@@ -1,2 +1,0 @@
-?package(qnut):needs="X11" section="Applications/System"\
-  title="QNut" command="/usr/bin/qnut"
