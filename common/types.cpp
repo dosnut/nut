@@ -1,6 +1,21 @@
 #include "types.h"
 #include "config.h"
 
+namespace nut {
+	QString toString(enum libnut::DeviceState state) {
+		const char* names[] = { "deactivated", "activated", "carrier", "unconfigured", "up" };
+		return names[(int) state];
+	}
+	QString toString(enum libnut::DeviceType type) {
+		const char* names[] = { "eth", "air", "ppp" };
+		return names[(int) type];
+	}
+	QString toString(enum libnut::InterfaceState state) {
+		const char* names[] = { "off", "static", "dhcp", "zeroconf" };
+		return names[(int) state];
+	}
+}
+
 QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress &data) {
 	argument.beginStructure();
 	argument << data.toString();

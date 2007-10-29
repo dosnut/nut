@@ -87,7 +87,7 @@ namespace nuts {
 		else {
 			dbus_properties.activeEnvironment = "";
 		}
-		connect(s_device,SIGNAL(stateChanged(libnut::DeviceState , libnut::DeviceState )),this,SLOT(stateChanged(libnut::DeviceState, libnut::DeviceState)));
+		connect(s_device,SIGNAL(stateChanged(libnut::DeviceState, libnut::DeviceState, Device*)),this,SLOT(stateChanged(libnut::DeviceState, libnut::DeviceState)));
 		setAutoRelaySignals(true);
 	}
 	
@@ -214,8 +214,8 @@ namespace nuts {
 		else {
 			dbus_properties.dns = QList<QHostAddress>();
 		}
-		connect(s_interface,SIGNAL(interfaceUp()),this,SLOT(interfaceUp()));
-		connect(s_interface,SIGNAL(interfaceDown()),this,SLOT(interfaceDown()));
+		connect(s_interface,SIGNAL(interfaceUp(Interface_IPv4*)),this,SLOT(interfaceUp()));
+		connect(s_interface,SIGNAL(interfaceDown(Interface_IPv4*)),this,SLOT(interfaceDown()));
 	}
 	
 	DBusInterface_IPv4::~DBusInterface_IPv4() {

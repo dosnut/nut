@@ -30,6 +30,7 @@ namespace nuts {
 #include "config.h"
 #include "hardware.h"
 #include "arp.h"
+#include "events.h"
 
 namespace nuts {
 	/** @brief The DeviceManager keeps track of all hardware devices.
@@ -45,6 +46,7 @@ namespace nuts {
 		Q_OBJECT
 		private:
 			ConfigParser configParser;
+			Events m_events;
 			nut::Config *config;
 			QTimer carrier_timer;
 			/// Internal structure for delaying carrier events.
@@ -215,7 +217,7 @@ namespace nuts {
 			nut::MacAddress getMacAddress() { return macAddress; }
 			
 		signals:
-			void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState);
+			void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState, Device* device);
 	};
 	
 	class Environment : public QObject {
@@ -287,6 +289,8 @@ namespace nuts {
 			virtual void stop() = 0;
 			
 			int getIndex() { return m_index; }
+			
+			Environment *getEnvironment() { return m_env; }
 	};
 	
 	class Interface_IPv4 : public Interface {
@@ -367,10 +371,10 @@ namespace nuts {
 			
 			const nut::IPv4Config& getConfig() { return *m_config; }
 			libnut::InterfaceState getState() { return m_ifstate; }
-		
+			
 		signals:
-			void interfaceUp();
-			void interfaceDown();
+			void interfaceUp(Interface_IPv4* iface);
+			void interfaceDown(Interface_IPv4* iface);
 	};
 };
 

@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# /etc/nuts/dispatch
+
+# Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
+# for Network UTility (nut).
+
+# Executes scripts for events on devices.
+# scripts should be located in /etc/nuts/events/<devname>/<event>.<priority><appname>
+# if the directory <devname> does not exist, default is tried instead.
+# scripts in /etc/nuts/events/all/<event>.<priority><appname> are executed for every device.
+
+# Params: <event> <devicename> [<environmentname> [<ifindex>]]
+
+# Environment:
+# NUT_EVENT              (event)
+# NUT_DEVICE             (device name)
+# NUT_HAS_WLAN
+# NUT_ESSID
+
+# on state changes (=NUT_NEW_STATE): deactivated, activated, carrier, unconfigured, up
+# NUT_ENVIRONMENT        (env name)
+# NUT_ENVIRONMENT_INDEX  (env index)
+# NUT_OLD_STATE          ( last state)
+# NUT_NEW_STATE = NUT_STATE ( current state)
+
+# + on ifup/ifdown
+# NUT_IP
+# NUT_NETMASK
+# NUT_LOCALDOMAIN
+# NUT_STATUS    ( off, static, dhcp, zeroconf )
+# NUT_GATEWAY
+# NUT_DNSSERVER (comma separated)
+
+[ ! -d /etc/nuts/events ] && exit 0
+
+cd /etc/nuts/events
+
+if [ -d "$NUT_DEVICE" ]; then
+	run-parts --regex="^${NUT_EVENT}." "$NUT_DEVICE"
+elif [ -d "default" ]; then
+	run-parts --regex="^${NUT_EVENT}." default
+fi
+
+if [ -d "all" ]; then
+	run-parts --regex="^${NUT_EVENT}." all
+fi

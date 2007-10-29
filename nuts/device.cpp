@@ -44,6 +44,10 @@ namespace nuts {
 		connect(&hwman, SIGNAL(lostCarrier(const QString&)), SLOT(lostCarrier(const QString &)));
 		connect(&hwman, SIGNAL(newDevice(const QString&, int)), SLOT(newDevice(const QString &, int)));
 		connect(&hwman, SIGNAL(delDevice(const QString&)), SLOT(delDevice(const QString&)));
+		
+		connect(this, SIGNAL(deviceAdded(QString, Device*)), &m_events, SLOT(deviceAdded(QString, Device*)));
+		connect(this, SIGNAL(deviceRemoved(QString, Device*)), &m_events, SLOT(deviceRemoved(QString, Device*)));
+		
 		 /* Wait for 400 ms before deliver carrier events
 		   There are 2 reasons:
 		    - a kernel bug: dhcp messages cannot be sent immediately
@@ -61,9 +65,10 @@ namespace nuts {
 		}
 	}
 	
-	void DeviceManager::addDevice(const QString &ifname, nut::DeviceConfig *dc) {
-		Device *d = new Device(this, ifname, dc, hwman.hasWLAN(ifname));
-		devices.insert(ifname, d);
+	void DeviceManager::addDevice(const QString &ifName, nut::DeviceConfig *dc) {
+		Device *d = new Device(this, ifName, dc, hwman.hasWLAN(ifName));
+		devices.insert(ifName, d);
+		emit deviceAdded(ifName, d);
 		if (!dc->noAutoStart())
 			d->enable(true);
 	}
@@ -146,7 +151,6 @@ namespace nuts {
 		if (!dc) return;
 		addDevice(ifName, dc);
 //		log << QString("newDevice(%1)").arg(ifName) << endl;
-		emit deviceAdded(ifName, devices[ifName]);
 	}
 	
 	void DeviceManager::delDevice(const QString &ifName) {
@@ -161,6 +165,8 @@ namespace nuts {
 	
 	Device::Device(DeviceManager* dm, const QString &name, nut::DeviceConfig *config, bool hasWLAN)
 	: QObject(dm), m_arp(this), dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_userEnv(-1), m_waitForEnvSelects(0), m_state(libnut::DS_DEACTIVATED), dhcp_client_socket(-1), m_hasWLAN(hasWLAN), m_wpa_supplicant(0) {
+		connect(this, SIGNAL(stateChanged(libnut::DeviceState, libnut::DeviceState, Device*)), &dm->m_events, SLOT(stateChanged(libnut::DeviceState, libnut::DeviceState, Device*)));
+		
 		int i = 0;
 		foreach(nut::EnvironmentConfig *ec, config->getEnvironments())
 			envs.push_back(new Environment(this, ec, i++));
@@ -190,7 +196,7 @@ namespace nuts {
 				m_arp.start();
 				break;
 		}
-		emit stateChanged(m_state, ostate);
+		emit stateChanged(m_state, ostate, this);
 	}
 	
 	void Device::envUp(Environment* env) {
@@ -622,6 +628,8 @@ namespace nuts {
 	
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, nut::IPv4Config *config)
 	: Interface(env, index), dhcp_timer_id(-1), dm(env->device->dm), dhcp_xid(0), dhcpstate(DHCPS_OFF), m_config(config), m_ifstate(libnut::IFS_OFF) {
+		connect(this, SIGNAL(interfaceUp(Interface_IPv4*)), &m_env->device->dm->m_events, SLOT(interfaceUp(Interface_IPv4*)));
+		connect(this, SIGNAL(interfaceDown(Interface_IPv4*)), &m_env->device->dm->m_events, SLOT(interfaceDown(Interface_IPv4*)));
 	}
 	
 	Interface_IPv4::~Interface_IPv4() {
@@ -960,8 +968,8 @@ namespace nuts {
 			proc->waitForFinished(-1);
 			delete proc; // waits for process
 		}
+		emit interfaceUp(this);
 		m_env->ifUp(this);
-		emit interfaceUp();
 	}
 	void Interface_IPv4::systemDown() {
 		// Resolvconf
@@ -1000,9 +1008,9 @@ namespace nuts {
 #endif
 		rtnl_addr_put(addr);
 		nl_addr_put(local);
-		m_env->ifDown(this);
 		m_ifstate = libnut::IFS_OFF;
-		emit interfaceDown();
+		emit interfaceDown(this);
+		m_env->ifDown(this);
 	}
 	
 	bool Interface_IPv4::registerXID(quint32 xid) {

@@ -61,6 +61,12 @@ namespace libnut {
 	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceProperties &ifprop);
 };
 
+namespace nut {
+	QString toString(enum libnut::DeviceState state);
+	QString toString(enum libnut::DeviceType type);
+	QString toString(enum libnut::InterfaceState state);
+}
+
 Q_DECLARE_METATYPE(libnut::DeviceProperties);
 Q_DECLARE_METATYPE(libnut::DeviceState);
 Q_DECLARE_METATYPE(libnut::EnvironmentProperties);
