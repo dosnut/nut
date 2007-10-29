@@ -15,9 +15,6 @@
 #include <QDialog>
 #include <libnut/libnut_cli.h>
 #include "ui/ui_apconf.h"
-#include "ui/ui_pskconf.h"
-#include "ui/ui_eapconf.h"
-#include "ui/ui_wepconf.h"
 
 namespace qnut {
 	using namespace libnut;
@@ -26,15 +23,8 @@ namespace qnut {
 		Q_OBJECT
 	private:
 		Ui::apconf ui;
-		Ui::pskconf pskUi;
-		Ui::eapconf eapUi;
-		Ui::wepconf wepUi;
 		
-		QWidget * pskWidget;
-		QWidget * eapWidget;
-		QWidget * wepWidget;
-		
-		QVBoxLayout * confLayout;
+		QRegExpValidator * hexValidator;
 		
 		CWpa_Supplicant * supplicant;
 	public:
@@ -45,7 +35,8 @@ namespace qnut {
 		~CAccessPointConfig();
 	private slots:
 		void uiHandleAuthChanged(int type);
-		//void uiHandleEncChanged(int type);
+		void uiHandleEncChanged(QString text);
+		void convertSSID(bool hex);
 	};
 }
 

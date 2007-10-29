@@ -35,14 +35,21 @@ namespace qnut {
 		ui.availableView->setModel(new CAvailableAPModel(device->wpa_supplicant));
 		
 		connect(ui.managedView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-			this, SLOT(uiSelectedDeviceChanged(const QItemSelection &, const QItemSelection &)));
+			this, SLOT(uiHandleManagedAPSelectionChanged(const QItemSelection &)));
+		
+		connect(ui.availableView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+			this, SLOT(uiHandleAvailableAPSelectionChanged(const QItemSelection &)));
 		
 		connect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
+		
 		connect(ui.switchButton, SIGNAL(clicked()), this, SLOT(switchToSelectedNetwork()));
 		connect(ui.rescanButton, SIGNAL(clicked()), device->wpa_supplicant, SLOT(scan()));
 		connect(ui.addButton, SIGNAL(clicked()), this, SLOT(addSelectedScanResult()));
+		connect(ui.availableView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(addSelectedScanResult()));
+		
 		connect(ui.removeButton, SIGNAL(clicked()), this, SLOT(removeSelectedNetwork()));
 		connect(ui.configureButton, SIGNAL(clicked()), this, SLOT(configureSelectedNetwork()));
+		connect(ui.managedView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(configureSelectedNetwork()));
 	}
 	
 	CWirelessSettings::~CWirelessSettings() {
@@ -56,20 +63,20 @@ namespace qnut {
 	void CWirelessSettings::uiHandleManagedAPSelectionChanged(const QItemSelection & selected) {
 		QModelIndexList selectedIndexes = selected.indexes();
 		
-		ui.switchButton->setEnabled(selectedIndexes.isEmpty());
-		ui.configureButton->setEnabled(selectedIndexes.isEmpty());
-		ui.removeButton->setEnabled(selectedIndexes.isEmpty());
+		ui.switchButton->setDisabled(selectedIndexes.isEmpty());
+		ui.configureButton->setDisabled(selectedIndexes.isEmpty());
+		ui.removeButton->setDisabled(selectedIndexes.isEmpty());
 	}
 	
 	void CWirelessSettings::uiHandleAvailableAPSelectionChanged(const QItemSelection & selected) {
 		QModelIndexList selectedIndexes = selected.indexes();
 		
-		ui.addButton->setEnabled(selectedIndexes.isEmpty());
+		ui.addButton->setDisabled(selectedIndexes.isEmpty());
 	}
 	
 	void CWirelessSettings::uiHandleStateChange(DeviceState state) {
-		ui.managedGroup->setEnabled(state == DS_DEACTIVATED);
-		ui.availableGroup->setEnabled(state == DS_DEACTIVATED);
+		ui.managedGroup->setEnabled(state != DS_DEACTIVATED);
+		ui.availableGroup->setEnabled(state != DS_DEACTIVATED);
 		
 		setHeadInfo();
 	}

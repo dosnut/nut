@@ -1,9 +1,6 @@
 
 TEMPLATE = app
-CONFIG += qt qdbus \
- build_all \
- release \
- debug_and_release
+CONFIG += qt qdbus
 QT += network
 
 CODECFORSRC = UTF-8
@@ -14,11 +11,11 @@ MOC_DIR = build/
 UI_DIR = ui/
 
 
-CONFIG(debug, debug|release){
-    TARGET = qnut_debug
-}else {
-    TARGET = qnut
-}
+#CONFIG(debug, debug|release){
+#    TARGET = qnut_debug
+#}else {
+#    TARGET = qnut
+#}
 
 FORMS = connman.ui \
  ipconf.ui \
@@ -59,7 +56,6 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  accesspointconfig.cpp
 DESTDIR = .
 
-target.path = /usr/bin
 iconstarget.path = /usr/share/qnut/icons
 iconstarget.files = res/*.png
 langtarget.path = /usr/share/qnut/lang
@@ -67,13 +63,13 @@ langtarget.files = qnut_*.ts
 shortcuttarget.path = /usr/share/applications
 shortcuttarget.files = qnut.desktop
 
-CONFIG(debug, debug|release){
-    INSTALLS += target
-}else {
-    INSTALLS += target iconstarget langtarget shortcuttarget
-}
+#CONFIG(debug, debug|release){
+#    INSTALLS += target
+#}else {
+#    INSTALLS += target iconstarget langtarget shortcuttarget
+#}
 
-QMAKE_CXXFLAGS_RELEASE += -DQNUT_RELEASE
+#QMAKE_CXXFLAGS_RELEASE += -DQNUT_RELEASE
 
 
 INCLUDEPATH += ..
@@ -84,5 +80,4 @@ TARGETDEPS += ../common/libnutcommon.a \
 ../libnut/libnut.a
 FORMS -= wpaset.ui \
 wrlset.ui
-CONFIG -= debug
 
