@@ -22,7 +22,7 @@ wps_pairwise_ciphers toPairwiseCiphers(wps_ciphers cip) {
 		return WPC_DEF;
 	}
 }
-wps_key_managment toKeyManagment(wps_authentication auth) {
+wps_key_management toKeyManagment(wps_authentication auth) {
 	//{WA_PLAIN=1,WA_WPA_PSK=2,WA_WPA2_PSK=4, WA_WPA_EAP=8, WA_WPA2_EAP=16, WA_IEEE8021X=32}
 	//{WKM_NONE=1, WKM_WPA_PSK=2, WKM_WPA_EAP=4, WKM_IEEE8021X=8} wps_key_managment;
 	int key = 0;
@@ -44,7 +44,7 @@ wps_key_managment toKeyManagment(wps_authentication auth) {
 	if (WA_IEEE8021X & auth) {
 		key = (key | WKM_IEEE8021X);
 	}
-	return ((wps_key_managment) key);
+	return ((wps_key_management) key);
 }
 wps_auth_algs toAuthAlgs(wps_authentication auth) {
 	//{WAA_UNDEFINED=0, WAA_OPEN=1, WAA_SHARED=2, WAA_LEAP=4} wps_auth_algs;
@@ -145,7 +145,7 @@ QString toString(wps_pairwise_ciphers cip) {
 	}
 	return ret;
 }
-QString toString(wps_key_managment keym) {
+QString toString(wps_key_management keym) {
 	//{WKM_NONE=1, WKM_WPA_PSK=2, WKM_WPA_EAP=4, WKM_IEEE8021X=8} wps_key_managment;
 	QString ret;
 	if (keym & WKM_NONE) {
@@ -187,7 +187,7 @@ QString toString(wps_eapol_flags flags) {
 	return QString::number((int) flags);
 }
 
-QString toString(EAP_METHOD method) {
+QString toString(wps_eap_method method) {
 	//{EAP_ALL=127, EAPM_MD5=1,EAPM_MSCHAPV2=2,EAPM_OTP=4,EAPM_GTC=8,EAPM_TLS=16,EAPM_PEAP=32,EAPM_TTLS=64} EAP_METHOD;
 	QString ret;
 	if (EAPM_MD5 & method) {

@@ -94,7 +94,7 @@ namespace libnut {
 
 			//parse config
 			wps_protocols parseProtocols(QString str);
-			wps_key_managment parseKeyMgmt(QString str);
+			wps_key_management parseKeyMgmt(QString str);
 			wps_auth_algs parseAuthAlg(QString str);
 			wps_pairwise_ciphers parsePairwiseCiphers(QString str);
 			wps_group_ciphers parseGroupCiphers(QString str);

@@ -195,6 +195,7 @@ QList<wps_scan> CWpa_Supplicant::parseScanResult(QStringList list) {
 	QStringList line;
 	wps_scan scanresult;
 	bool worked = true;
+	wps_authentication scanAuth;
 	foreach(QString str, list) {
 		line = str.split('\t',QString::KeepEmptyParts);
 		scanresult.bssid = nut::MacAddress(line[0]);
@@ -208,8 +209,10 @@ QList<wps_scan> CWpa_Supplicant::parseScanResult(QStringList list) {
 			worked = true;
 			continue;
 		}
+		scanAuth = parseScanAuth(line[3]);
 		scanresult.ciphers = parseScanCiphers(line[3]);
-		scanresult.auth = parseScanAuth(line[3]);
+		scanresult.protocols = toProtocols(scanAuth);
+		scanresult.keyManagement = toKeyManagment(scanAuth);
 		scanresult.ssid = line[4];
 		scanresults.append(scanresult);
 	}
@@ -228,7 +231,7 @@ wps_protocols CWpa_Supplicant::parseProtocols(QString str) {
 	return (wps_protocols) proto;
 }
 
-wps_key_managment CWpa_Supplicant::parseKeyMgmt(QString str) {
+wps_key_management CWpa_Supplicant::parseKeyMgmt(QString str) {
 	int key = 0;
 	if (str.contains("NONE")) {
 		key = (key | WKM_NONE);
@@ -242,7 +245,7 @@ wps_key_managment CWpa_Supplicant::parseKeyMgmt(QString str) {
 	if (str.contains("IEEE8021X")) {
 		key = (key | WKM_IEEE8021X);
 	}
-	return (wps_key_managment) key;
+	return (wps_key_management) key;
 }
 
 wps_auth_algs CWpa_Supplicant::parseAuthAlg(QString str) {

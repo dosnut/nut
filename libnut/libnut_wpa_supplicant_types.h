@@ -20,10 +20,10 @@ namespace libnut {
 	//WA_IEEE8021X = (WAA_OPEN || LEAP) && KEYMGMT_IEEE8021X && (WKI_RSN || WKI_WPA) // This is not very clear yet
 
 
-	typedef enum {WP_UNDEFINED=-1, WP_WPA=1, WP_RSN=2, WP_DEF=3} wps_protocols; //RSN=WPA2
-	typedef enum {WGC_CCMP=2, WGC_TKIP=4, WGC_WEP104=8, WGC_WEP40=16, WGC_DEF=31} wps_group_ciphers;
-	typedef enum {WPC_NONE=1, WPC_CCMP=2, WPC_TKIP=4, WPC_DEF=6} wps_pairwise_ciphers;
-	typedef enum {WKM_UNDEFINED=0, WKM_NONE=1, WKM_WPA_PSK=2, WKM_WPA_EAP=4, WKM_IEEE8021X=8, WKM_DEF=6} wps_key_managment;
+	typedef enum {WP_UNDEFINED=0, WP_WPA=1, WP_RSN=2, WP_DEF=3} wps_protocols; //RSN=WPA2
+	typedef enum {WGC_UNDEFINED=0, WGC_CCMP=2, WGC_TKIP=4, WGC_WEP104=8, WGC_WEP40=16, WGC_DEF=30} wps_group_ciphers;
+	typedef enum {WPC_UNDEFINED=0, WPC_NONE=1, WPC_CCMP=2, WPC_TKIP=4, WPC_DEF=6} wps_pairwise_ciphers;
+	typedef enum {WKM_UNDEFINED=0, WKM_NONE=1, WKM_WPA_PSK=2, WKM_WPA_EAP=4, WKM_IEEE8021X=8, WKM_DEF=6} wps_key_management;
 	typedef enum {WAA_UNDEFINED=0, WAA_OPEN=1, WAA_SHARED=2, WAA_LEAP=4} wps_auth_algs;
 
 	typedef enum {WI_MSG, WI_REQ,WI_EVENT} wps_interact_type;
@@ -31,7 +31,7 @@ namespace libnut {
 	typedef enum {WE_OTHER, WE_DISCONNECTED, WE_CONNECTED, WE_TERMINATING, WE_PASSWORD_CHANGED, WE_EAP_NOTIFICATION, WE_EAP_STARTED, WE_EAP_METHOD, WE_EAP_SUCCESS, WE_EAP_FAILURE } wps_event_type;
 
 	typedef enum {EAPF_NONE=0,EAPF_DYN_UNICAST_WEP=1, EAPF_BCAST_WEP=2,EAPF_DEF=3} wps_eapol_flags;
-	typedef enum {EAP_ALL=127, EAPM_MD5=1,EAPM_MSCHAPV2=2,EAPM_OTP=4,EAPM_GTC=8,EAPM_TLS=16,EAPM_PEAP=32,EAPM_TTLS=64} EAP_METHOD;
+	typedef enum {EAPM_ALL=127, EAPM_MD5=1,EAPM_MSCHAPV2=2,EAPM_OTP=4,EAPM_GTC=8,EAPM_TLS=16,EAPM_PEAP=32,EAPM_TTLS=64} wps_eap_method;
 
 	//0001 = 1
 	//0010 = 2
@@ -58,7 +58,8 @@ namespace libnut {
 		int freq;
 		int level;
 		wps_ciphers ciphers;
-		wps_authentication auth;
+		wps_key_management keyManagement;
+		wps_protocols protocols;
 	};
 	struct wps_variable;
 	typedef QList<wps_variable> wps_MIB;
@@ -86,7 +87,7 @@ namespace libnut {
 		int id;
 		wps_pairwise_ciphers pairwise_cipher;
 		wps_group_ciphers group_cipher;
-		wps_key_managment key_mgmt;
+		wps_key_management key_mgmt;
 		WPA_STATE wpa_state;
 		QHostAddress ip_address;
 		PAE_STATE pae_state;
@@ -132,14 +133,14 @@ namespace libnut {
 	//Conversion functions
 	wps_group_ciphers toGroupCiphers(wps_ciphers cip);
 	wps_pairwise_ciphers toPairwiseCiphers(wps_ciphers cip);
-	wps_key_managment toKeyManagment(wps_authentication auth);
+	wps_key_management toKeyManagment(wps_authentication auth);
 	wps_auth_algs toAuthAlgs(wps_authentication auth);
 	wps_protocols toProtocols(wps_authentication auth);
 
 
 	QString toString(wps_group_ciphers cip);
 	QString toString(wps_pairwise_ciphers cip);
-	QString toString(wps_key_managment keym);
+	QString toString(wps_key_management keym);
 	QString toString(wps_auth_algs algs);
 	QString toString(wps_protocols proto);
 
@@ -149,7 +150,7 @@ namespace libnut {
 	QString toString(wps_req_type reqt);
 	
 	QString toString(wps_eapol_flags flags);
-	QString toString(EAP_METHOD method);
+	QString toString(wps_eap_method method);
 	
 
 	
@@ -172,7 +173,7 @@ namespace libnut {
 			bool mode; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
 			int frequency;
 			wps_protocols proto; //list of accepted protocols TODO: implement
-			wps_key_managment key_mgmt; // list of accepted authenticated key management protocols
+			wps_key_management key_mgmt; // list of accepted authenticated key management protocols
 			wps_auth_algs auth_alg; //list of allowed IEEE 802.11 authentication algorithms TODO:implement
 			wps_pairwise_ciphers pairwise; //list of accepted pairwise (unicast) ciphers for WPA (CCMP,TKIP,NONE)
 			wps_group_ciphers group; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
@@ -190,7 +191,7 @@ namespace libnut {
 	class wps_eap_network_config: wps_network_config {
 		public:
 			//Following fields are only used with internal EAP implementation.
-			EAP_METHOD eap; //space-separated list of accepted EAP methods TODO: implement
+			wps_eap_method eap; //space-separated list of accepted EAP methods TODO: implement
 			QString identity; //Identity string for EAP
 			QString anonymous_identity; //Anonymous identity string for EAP;
 			QString password; //Password string for EAP.
