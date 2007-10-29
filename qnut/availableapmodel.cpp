@@ -27,7 +27,7 @@ namespace qnut {
 		supplicant = data;
 		if (supplicant) {
 			scans = supplicant->scanResults();
-			connect(supplicant, SIGNAL(scanComplete()), this, SLOT(reloadScans()));
+			connect(supplicant, SIGNAL(scanCompleted()), this, SLOT(reloadScans()));
 		}
 	}
 	
@@ -75,21 +75,21 @@ namespace qnut {
 		case AVLAP_MOD_FREQ:
 			return QString::number(scans[index.row()].freq);
 		case AVLAP_MOD_KEYMGMT: {
-				int flags = scans[index.row()].key_mgmt;
-				if (flags == KEYMGMT_PLAIN)
+				int flags = scans[index.row()].auth;
+				if (flags == WA_PLAIN)
 					return tr("none");
 				
 				QStringList results;
 				
-				if (flags & KEYMGMT_WPA_PSK)
+				if (flags & WA_WPA_PSK)
 					results << tr("WPA PSK");
-				if (flags & KEYMGMT_WPA2_PSK)
+				if (flags & WA_WPA2_PSK)
 					results << tr("WPA PSK2");
-				if (flags & KEYMGMT_WPA_EAP)
+				if (flags & WA_WPA_EAP)
 					results << tr("WPA EAP");
-				if (flags & KEYMGMT_WPA2_EAP)
+				if (flags & WA_WPA2_EAP)
 					results << tr("WPA2 EAP");
-				if (flags & KEYMGMT_IEEE8021X)
+				if (flags & WA_IEEE8021X)
 					results << tr("IEEE8021X");
 				
 				return results.join(", ");
@@ -100,22 +100,22 @@ namespace qnut {
 			return QString::number(scans[index.row()].level);
 		case AVLAP_MOD_CIPHERS: {
 				int flags = scans[index.row()].ciphers;
-				if (flags == CI_UNDEFINED)
+				if (flags == WC_UNDEFINED)
 					return tr("undefined");
-				else if (flags == CI_NONE)
+				else if (flags == WC_NONE)
 					return tr("none");
 				
 				QStringList results;
 				
-				if (flags & CI_CCMP)
+				if (flags & WC_CCMP)
 					results << tr("CCMP");
-				if (flags & CI_TKIP)
+				if (flags & WC_TKIP)
 					results << tr("TKIP");
-				if (flags & CI_WEP104)
+				if (flags & WC_WEP104)
 					results << tr("WEP 104");
-				if (flags & CI_WEP40)
+				if (flags & WC_WEP40)
 					results << tr("WEP 40");
-				if (flags & CI_WEP)
+				if (flags & WC_WEP)
 					results << tr("WEP");
 				
 				return results.join(", ");
