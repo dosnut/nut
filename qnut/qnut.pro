@@ -10,22 +10,13 @@ OBJECTS_DIR = build/
 MOC_DIR = build/
 UI_DIR = ui/
 
-
-#CONFIG(debug, debug|release){
-#    TARGET = qnut_debug
-#}else {
-#    TARGET = qnut
-#}
+TARGET = qnut
 
 FORMS = connman.ui \
  ipconf.ui \
  scrset.ui \
  devopt.ui \
- wrlset.ui \
  airset.ui \
- eapconf.ui \
- pskconf.ui \
- wepconf.ui \
  apconf.ui
 TRANSLATIONS = qnut_de.ts
 
@@ -56,6 +47,7 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  accesspointconfig.cpp
 DESTDIR = .
 
+target.path = /usr/bin
 iconstarget.path = /usr/share/qnut/icons
 iconstarget.files = res/*.png
 langtarget.path = /usr/share/qnut/lang
@@ -63,14 +55,7 @@ langtarget.files = qnut_*.ts
 shortcuttarget.path = /usr/share/applications
 shortcuttarget.files = qnut.desktop
 
-#CONFIG(debug, debug|release){
-#    INSTALLS += target
-#}else {
-#    INSTALLS += target iconstarget langtarget shortcuttarget
-#}
-
-#QMAKE_CXXFLAGS_RELEASE += -DQNUT_RELEASE
-
+INSTALLS += target iconstarget langtarget shortcuttarget
 
 INCLUDEPATH += ..
 
@@ -78,9 +63,4 @@ LIBS += ../common/libnutcommon.a \
 ../libnut/libnut.a
 TARGETDEPS += ../common/libnutcommon.a \
 ../libnut/libnut.a
-FORMS -= wpaset.ui \
-wrlset.ui \
- pskconf.ui \
- wepconf.ui \
- eapconf.ui
 

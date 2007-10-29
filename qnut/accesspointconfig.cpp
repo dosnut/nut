@@ -19,7 +19,7 @@ namespace qnut {
 		ui.setupUi(this);
 		uiHandleAuthChanged(0);
 		
-		QRegExp regexp("\\d*");
+		QRegExp regexp("[0123456789abcdefABCDEF]*");
 		hexValidator = new QRegExpValidator(regexp, this);
 		
 		connect(ui.ssidHexCheck, SIGNAL(toggled(bool)), this, SLOT(convertSSID(bool)));

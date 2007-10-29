@@ -175,6 +175,56 @@
            <property name="enabled" >
             <bool>true</bool>
            </property>
+           <item>
+            <property name="text" >
+             <string>MD5</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>TLS</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>MSCHAPV2</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>PEAP</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>TTLS</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>GTC</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>OTP</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>LEAP</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>PSK</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>PAX</string>
+            </property>
+           </item>
           </widget>
          </item>
          <item row="1" column="0" >
