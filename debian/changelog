@@ -1,3 +1,15 @@
+nut (0.3.0-rc1) unstable; urgency=low
+
+  * New Features:
+  * wpa_supplicant support (server and client)
+  * dhcp-client done
+  * server and client can start scripts on events
+  * client shows many informations
+  * server supports auto-select of environment based on essid/arp infos.
+  * 
+
+ -- Stefan Bühler <stbuehler@web.de>  Mon, 29 Oct 2007 23:25:03 +0100
+
 nut (0.1.1) unstable; urgency=low
 
   * WPA Supplicant support. 
