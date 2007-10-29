@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>553</width>
-    <height>398</height>
+    <width>536</width>
+    <height>274</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -80,7 +80,16 @@
      <property name="orientation" >
       <enum>Qt::Horizontal</enum>
      </property>
+     <property name="childrenCollapsible" >
+      <bool>false</bool>
+     </property>
      <widget class="QTreeView" name="environmentTree" >
+      <property name="sizePolicy" >
+       <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+        <horstretch>3</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="iconSize" >
        <size>
         <width>18</width>
@@ -91,7 +100,7 @@
      <widget class="QTreeView" name="detailsView" >
       <property name="sizePolicy" >
        <sizepolicy vsizetype="Expanding" hsizetype="Preferred" >
-        <horstretch>0</horstretch>
+        <horstretch>2</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>

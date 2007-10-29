@@ -31,8 +31,14 @@ namespace qnut {
 		~CWirelessSettings();
 		
 	public slots:
+		void uiHandleManagedAPSelectionChanged(const QItemSelection & selected);
+		void uiHandleAvailableAPSelectionChanged(const QItemSelection & selected);
 		void uiHandleStateChange(DeviceState state);
-		void uiHandleSwitchNetwork();
+	private slots:
+		void switchToSelectedNetwork();
+		void addSelectedScanResult();
+		void removeSelectedNetwork();
+		void configureSelectedNetwork();
 	};
 };
 
