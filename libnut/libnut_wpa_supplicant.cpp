@@ -198,7 +198,6 @@ QList<wps_scan> CWpa_Supplicant::parseScanResult(QStringList list) {
 	foreach(QString str, list) {
 		line = str.split('\t',QString::KeepEmptyParts);
 		scanresult.bssid = nut::MacAddress(line[0]);
-		printMessage(QString("Parsed BSSID from %1 to %2").arg(line[0],scanresult.bssid.toString()));
 		scanresult.freq = line[1].toInt(&worked);
 		if (!worked) {
 			worked = true;

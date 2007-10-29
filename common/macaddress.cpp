@@ -10,6 +10,7 @@
 //
 //
 #include "macaddress.h"
+#include <QDebug>
 
 namespace nut {
 	QDBusArgument &operator<< (QDBusArgument &argument, const MacAddress &data) {
@@ -50,17 +51,32 @@ namespace nut {
 	}
 	
 	MacAddress::MacAddress(const QString &str) {
+		if (str == QLatin1String("any")) {
+			memset(data, 0xff, sizeof(data));
+			return;
+		}
 		QByteArray buf = str.toUtf8();
 		char *s = buf.data();
+//		qDebug(s);
 		quint8 val;
 		char *s2;
 		for (int i = 0; i < 6; i++) {
-			if (!*s) return;
-			if ((s2 = hex2quint8(s, val)) == s) return;
+			if (!*s) {
+//				qDebug() << QString("Unexpected end of mac");
+				return;
+			}
+			if ((s2 = hex2quint8(s, val)) == s) {
+//				qDebug() << QString("No hexdata found at pos %1, '%2'").arg((int) (s - buf.data())).arg(*s);
+				return;
+			}
 			s = s2;
-			if (*s && *s != ':') return;
+			if (*s && *s++ != ':') {
+//				qDebug() << QString("Unexpected char in mac: '%1'").arg(*s);
+				return;
+			}
 			data[i] = val;
 		}
+//		qDebug() << QString("-> %1").arg(toString());
 	}
 	
 	MacAddress::MacAddress(const quint8 *d) {
