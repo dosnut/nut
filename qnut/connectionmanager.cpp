@@ -173,6 +173,7 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::uiRemovedDevice(CDevice * dev) {
+		overView.clearSelection();
 		//disconnect(dev, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiUpdateTrayIconInfo()));
 		CDeviceOptions * target = deviceOptions[dev];
 		
