@@ -244,17 +244,17 @@ wps_network_config::wps_network_config() {
 			bssid = nut::MacAddress();
 			disabled = 0;
 			id_str = QString();
-			scan_ssid = 0; // (do not) scan with SSID-specific Probe Request frames
-			priority = 0;
-			mode = 0; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
+			scan_ssid = false; // (do not) scan with SSID-specific Probe Request frames
+			priority = -1;
+			mode = false; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
 			frequency = 0; //no default, but 0 is not a working value
 			protocols = WP_UNDEFINED; //list of accepted protocols TODO: implement
 			keyManagement = WKM_UNDEFINED; // list of accepted authenticated key management protocols
 			auth_alg = WAA_UNDEFINED; //list of allowed IEEE 802.11 authentication algorithms TODO:implement
-			pairwise = WPC_DEF; //list of accepted pairwise (unicast) ciphers for WPA (CCMP,TKIP,NONE)
-			group = WGC_DEF; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
+			pairwise = WPC_UNDEFINED; //list of accepted pairwise (unicast) ciphers for WPA (CCMP,TKIP,NONE)
+			group = WGC_UNDEFINED; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
 			QString psk = QString(); //WPA preshared key; 256-bit pre-shared key
-			eapol_flags = (wps_eapol_flags) (EAPF_DYN_UNICAST_WEP | EAPF_BCAST_WEP);
+			eapol_flags = EAPF_UNDEFINED;
 			mixed_cell = false; //This option can be used to configure whether so called mixed
 			proactive_key_caching = false; //Enable/disable opportunistic PMKSA caching for WPA2.
 			wep_key0 = QString(); //Static WEP key (ASCII in double quotation, hex without)

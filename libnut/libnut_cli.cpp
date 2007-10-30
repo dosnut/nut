@@ -113,6 +113,10 @@ void CDeviceManager::init(CLog * inlog) {
 //CDeviceManager private functions:
 //rebuilds the device list
 void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
+	//Only rebuild when nuts is available
+	if (!nutsstate) {
+		return;
+	}
 	//Delete all devices
 	dbusDevices.clear();
 	CDevice * device;
@@ -145,8 +149,14 @@ void CDeviceManager::setInformation() {
 		*log << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
 	}
 	//Let's populate our own DeviceList
+	
 	CDevice * device;
 	foreach (QDBusObjectPath i, replydevs.value()) {
+		//Only add device if it's not already in our list;
+		if (dbusDevices.contains(i)) {
+			continue;
+		}
+		//Add device
 		try {
 			device = new CDevice(this, i);
 		}
@@ -229,6 +239,10 @@ void CDeviceManager::dbusDeviceRemoved(const QDBusObjectPath &objectpath) {
 
 //CDeviceManager SLOTS
 void CDeviceManager::refreshAll() {
+	//Only refresh when nuts is available
+	if (!nutsstate) {
+		return;
+	}
 	//Get our current DeviceList
 	QDBusReply<QList<QDBusObjectPath> > replydevs = dbusDevmgr->getDeviceList();
 	if (replydevs.isValid()) {
@@ -378,6 +392,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	}
 }
 CDevice::~CDevice() {
+	//CWpa_supplicant will be killed as child of CDevices
 	CEnvironment * env;
 	while (!environments.isEmpty()) {
 		env = environments.takeFirst();
@@ -519,7 +534,7 @@ void CDevice::dbusstateChanged(int newState, int oldState) {
 	//If switching from DS_DEACTIVATED to any other state then connect wpa_supplicant
 	//TODO:fix wpa_supplicant connecting; workaround for now:
 	//connect when device has carrier, although this should happen, when device is beeing activated
-	if (DS_ACTIVATED == oldState && !(DS_ACTIVATED == newState) ) {
+	if (DS_DEACTIVATED == oldState && !(DS_DEACTIVATED == newState) ) {
 		if (need_wpa_supplicant) {
 			wpa_supplicant->open();
 		}
