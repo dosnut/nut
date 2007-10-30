@@ -560,7 +560,7 @@ void CDevice::dbusstateChanged(int newState, int oldState) {
 		dbusActiveEnvironment = QDBusObjectPath();
 		activeEnvironment = 0;
 	}
-	if (DT_AIR == type && !(newState == DS_DEACTIVED) ) {
+	if (DT_AIR == type && !(newState == DS_DEACTIVATED) ) {
 		QDBusReply<QString> replyessid = dbusDevice->getEssid();
 		if (replyessid.isValid()) {
 			essid = replyessid.value();
