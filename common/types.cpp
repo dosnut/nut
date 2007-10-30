@@ -92,6 +92,7 @@ namespace nut {
 	static void init() {
 		qRegisterMetaType<Config>("nut::Config");
 		qRegisterMetaType<DeviceConfig>("nut::DeviceConfig");
+		qRegisterMetaType<SelectResult>("nut::SelectResult");
 		qRegisterMetaType<SelectRule>("nut::SelectRule");
 		qRegisterMetaType<SelectConfig>("nut::SelectConfig");
 		qRegisterMetaType<EnvironmentConfig>("nut::EnvironmentConfig");
@@ -101,6 +102,7 @@ namespace nut {
 	
 		qDBusRegisterMetaType<Config>();
 		qDBusRegisterMetaType<DeviceConfig>();
+		qDBusRegisterMetaType<SelectResult>();
 		qDBusRegisterMetaType<SelectRule>();
 		qDBusRegisterMetaType<SelectConfig>();
 		qDBusRegisterMetaType<EnvironmentConfig>();

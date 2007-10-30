@@ -72,6 +72,21 @@ namespace nut {
 		return argument;
 	}
 	
+	QDBusArgument &operator<< (QDBusArgument &argument, const SelectResult &data) {
+		argument.beginStructure();
+		argument << (quint8) (qint8) data;
+		argument.endStructure();
+		return argument;
+	}
+	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectResult &data) {
+		argument.beginStructure();
+		quint8 tmp;
+		argument >> tmp;
+		data = (qint8) tmp;
+		argument.endStructure();
+		return argument;
+	}
+	
 	QDBusArgument &operator<< (QDBusArgument &argument, const SelectRule &data) {
 		argument.beginStructure();
 		argument << (quint8) data.selType << data.block << data.essid << data.ipAddr << data.macAddr;
@@ -102,7 +117,7 @@ namespace nut {
 	
 	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentConfig &data) {
 		argument.beginStructure();
-		argument << data.m_name << data.m_canUserSelect << data.m_noDefaultDHCP << data.m_noDefaultZeroconf << data.m_select;
+		argument << data.m_name << data.m_select;
 		argument.beginArray( qMetaTypeId<IPv4Config>() );
 		foreach(IPv4Config* ic, data.m_ipv4Interfaces) {
 			argument << *ic;
@@ -113,7 +128,7 @@ namespace nut {
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentConfig &data) {
 		argument.beginStructure();
-		argument >> data.m_name >> data.m_canUserSelect >> data.m_noDefaultDHCP >> data.m_noDefaultZeroconf >> data.m_select;
+		argument >> data.m_name >> data.m_select;
 		argument.beginArray();
 		while (!argument.atEnd()) {
 			IPv4Config *ic = new IPv4Config();
@@ -152,57 +167,38 @@ namespace nut {
 		return argument;
 	}
 	
-	Config::Config()
-	: m_isCopy(false) {
-	}
-	Config::Config(const Config &other)
-	: m_isCopy(true), m_devices(other.m_devices) {
+	Config::Config() {
 	}
 	
 	Config::~Config() {
-		if (!m_isCopy)
+		if (!m_isCopy) {
 			foreach(DeviceConfig* dc, m_devices)
 				delete dc;
-		m_devices.clear();
-	}
-	
-	DeviceConfig* Config::getDevice(const QString &deviceName) {
-		if (!m_devices.contains(deviceName)) {
-			return 0;
-		} else {
-			return m_devices[deviceName];
+			m_devices.clear();
 		}
 	}
-
-	DeviceConfig::DeviceConfig()
-	: m_isCopy(false), m_noAutoStart(false) {
-	}
 	
-	DeviceConfig::DeviceConfig(const DeviceConfig &other)
-	: m_isCopy(true), m_environments(other.m_environments), m_noAutoStart(other.m_noAutoStart),
-	  m_wpaConfigFile(other.m_wpaConfigFile), m_wpaDriver(other.m_wpaDriver) {
+	DeviceConfig::DeviceConfig()
+	: m_noAutoStart(false) {
 	}
-
 	
 	DeviceConfig::~DeviceConfig() {
-		if (!m_isCopy)
+		if (!m_isCopy) {
 			foreach(EnvironmentConfig* ec, m_environments)
 				delete ec;
-		m_environments.clear();
+			m_environments.clear();
+		}
 	}
 	
 	EnvironmentConfig::EnvironmentConfig(const QString &name)
-	: m_isCopy(false), m_name(name), m_canUserSelect(true), m_noDefaultDHCP(false), m_noDefaultZeroconf(false), m_dhcp(0), m_zeroconf(0) {
+	: m_name(name) {
 	}
-	EnvironmentConfig::EnvironmentConfig(const EnvironmentConfig& other)
-	: m_isCopy(true), m_name(other.m_name), m_canUserSelect(other.m_canUserSelect), m_noDefaultDHCP(other.m_noDefaultDHCP), m_noDefaultZeroconf(other.m_noDefaultZeroconf), m_dhcp(0), m_zeroconf(0) {
-	}
-	
 	EnvironmentConfig::~EnvironmentConfig() {
-		if (!m_isCopy)
+		if (!m_isCopy) {
 			foreach(IPv4Config *ic, m_ipv4Interfaces)
 				delete ic;
-		m_ipv4Interfaces.clear();
+			m_ipv4Interfaces.clear();
+		}
 	}
 	
 	IPv4Config::IPv4Config(int flags, int overwriteFlags)

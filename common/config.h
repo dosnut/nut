@@ -55,21 +55,52 @@ namespace nuts {
 }
 
 namespace nut {
+	namespace internal {
+		/**
+		 * @brief Used as a member in other classes, it determines wheter that class is a original or a copy.
+		 *
+		 * On normal construct (-> default constructor) without params,
+		 * the instance evals to False (no copy)
+		 * On copy, it changes to true.
+		 * So obviously this breaks the idea that a copy is equal to the original.
+		 * This helps you to build copy-constructor (or to remove them), and do
+		 * some cleanups only in the original destructor.
+		 *
+		 * In a ideal world we would never copy objects which need this behaviour,
+		 * but in conjunction with the Qt DBus layer this is helpful.
+		 */
+		class CopyMark {
+			private:
+				bool m_isCopy;
+				CopyMark(bool isCopy) : m_isCopy(isCopy) { }
+			public:
+				CopyMark() : m_isCopy(false) { }
+				CopyMark(const CopyMark &) : m_isCopy(true) { }
+				operator bool () { return m_isCopy; }
+				
+				static CopyMark Copy() { return CopyMark(true); }
+				static CopyMark NoCopy() { return CopyMark(false); }
+		};
+	}
+	
 	class Config {
 		private:
-			bool m_isCopy;
+			internal::CopyMark m_isCopy;
+		
 		protected:
 			friend class nuts::ConfigParser;
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const Config &data);
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, Config &data);
+			
 			QHash<QString, DeviceConfig*> m_devices;
 		
 		public:
 			Config();
-			Config(const Config &other);
 			virtual ~Config();
 			
-			DeviceConfig* getDevice(const QString &deviceName);
+			DeviceConfig* getDevice(const QString &deviceName) {
+				return m_devices.value(deviceName, 0);
+			}
 			
 			const QHash<QString, DeviceConfig*> &getDevices() {
 				return m_devices;
@@ -78,11 +109,13 @@ namespace nut {
 	
 	class DeviceConfig {
 		private:
-			bool m_isCopy;
+			internal::CopyMark m_isCopy;
+		
 		protected:
 			friend class nuts::ConfigParser;
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data);
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data);
+			
 			QList<EnvironmentConfig*> m_environments;
 			bool m_noAutoStart;
 			QString m_wpaConfigFile;
@@ -90,7 +123,6 @@ namespace nut {
 		
 		public:
 			DeviceConfig();
-			DeviceConfig(const DeviceConfig &other);
 			virtual ~DeviceConfig();
 			
 			const QList<EnvironmentConfig*>& getEnvironments() {
@@ -106,7 +138,10 @@ namespace nut {
 	class SelectResult {
 		public:
 			typedef enum { False = 0, User = 1, NotUser = 2, True = 3 } bool_t;
-		private:
+		protected:
+			friend QDBusArgument &operator<< (QDBusArgument &argument, const SelectResult &data);
+			friend const QDBusArgument &operator>> (const QDBusArgument &argument, SelectResult &data);
+			
 			bool_t m_value;
 			
 		public:
@@ -119,6 +154,10 @@ namespace nut {
 			}
 			SelectResult& operator = (const SelectResult &other) {
 				m_value = other.m_value;
+				return *this;
+			}
+			SelectResult& operator = (qint8 value) {
+				m_value = (bool_t) value;
 				return *this;
 			}
 			
@@ -148,11 +187,11 @@ namespace nut {
 			operator qint8 () const {
 				return (qint8) m_value;
 			}
+			
+			SelectResult operator !() const {
+				return (SelectResult::bool_t) (3 - m_value);
+			}
 	};
-	
-	static inline SelectResult operator !(const SelectResult &sr) {
-		return (SelectResult::bool_t) (3 - (SelectResult::bool_t) sr);
-	}
 	
 	class SelectRule {
 		protected:
@@ -193,27 +232,21 @@ namespace nut {
 	
 	class EnvironmentConfig {
 		private:
-			bool m_isCopy;
+			internal::CopyMark m_isCopy;
 		protected:
 			friend class nuts::ConfigParser;
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentConfig &data);
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentConfig &data);
+			
 			QString m_name;
-			bool m_canUserSelect;
-			bool m_noDefaultDHCP, m_noDefaultZeroconf;
 			QList<IPv4Config*> m_ipv4Interfaces;
-			IPv4Config *m_dhcp, *m_zeroconf; // should be moved to ConfigParser, only for parsing
 			SelectConfig m_select;
 			
 		public:
 			EnvironmentConfig(const QString &name = "");
-			EnvironmentConfig(const EnvironmentConfig& other);
 			virtual ~EnvironmentConfig();
 			
 			QString getName() { return m_name; }
-			bool getCanUserSelect() { return m_canUserSelect; }
-			bool getNoDefaultDHCP() { return m_noDefaultDHCP; }
-			bool getNoDefaultZeroconf() { return m_noDefaultZeroconf; }
 			const QList<IPv4Config*>& getIPv4Interfaces() { return m_ipv4Interfaces; }
 			const SelectConfig &getSelect() { return m_select; }
 	};
@@ -264,6 +297,7 @@ namespace nut {
 
 Q_DECLARE_METATYPE(nut::Config);
 Q_DECLARE_METATYPE(nut::DeviceConfig);
+Q_DECLARE_METATYPE(nut::SelectResult);
 Q_DECLARE_METATYPE(nut::SelectRule);
 Q_DECLARE_METATYPE(nut::SelectConfig);
 Q_DECLARE_METATYPE(nut::EnvironmentConfig);
