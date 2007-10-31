@@ -720,8 +720,8 @@ void CWpa_Supplicant::wps_open(bool timer_call) {
 	event_sn  = new QSocketNotifier(wps_fd, QSocketNotifier::Read,NULL);
 	connect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
 	event_sn->setEnabled(true);
-	emit(opened());
 	wps_connected = true;
+	emit(opened());
 	printMessage(tr("wpa_supplicant connection established"));
 	return;
 }
