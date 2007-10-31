@@ -25,7 +25,7 @@ S=${WORKDIR}/${EGIT_PROJECT}
 
 pkg_setup() {
 	if ! built_with_use x11-libs/qt dbus ; then
-		eerror ">=qt4.3.2 requires bus"
+		eerror ">=qt4.3.2 requires dbus"
 		die "rebuild >=x11-libs/qt-4.3.2 with the dbus USE flag"
 	fi
 	enewgroup netdev
