@@ -677,13 +677,14 @@ void CWpa_Supplicant::Event_dispatcher(QString event) {
 //Public functions:
 CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) : QObject(parent), wpa_supplicant_path(wpa_supplicant_path), timerId(-1) {
 	wps_connected = false;
+	timerCount = 0;
 	log_enabled = true;
 	connect(QCoreApplication::instance(),SIGNAL(aboutToQuit ()),this,SLOT(wps_detach()));
 }
 CWpa_Supplicant::~CWpa_Supplicant() {
 	wps_close("destructor");
 }
-void CWpa_Supplicant::wps_open(bool timer_call) {
+void CWpa_Supplicant::wps_open(bool) {
 	if (timerId != -1) {
 		killTimer(timerId);
 		timerId = -1;
@@ -692,39 +693,31 @@ void CWpa_Supplicant::wps_open(bool timer_call) {
 	int status;
 	//Open wpa_supplicant control interface
 	if (!QFile::exists(wpa_supplicant_path)) {
-		printMessage(tr("Could not open wpa_supplicant socket"));
-		if (! timer_call) {
-			inConnectionPhase = true;
-			timerId = startTimer(1000);
-		}
+		printMessage(tr("Could not open wpa_supplicant socket") + QString::number(timerCount));
+		inConnectionPhase = true;
+		timerId = startTimer(wps_TimerTime(timerCount));
 		return;
 	}
 	cmd_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
 	event_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
 	if (cmd_ctrl == NULL and event_ctrl == NULL) {
 		printMessage(tr("Could not open wpa_supplicant control interface"));
-		if (! timer_call) {
-			inConnectionPhase = true;
-			timerId = startTimer(1000);
-		}
+		inConnectionPhase = true;
+		timerId = startTimer(wps_TimerTime(timerCount));
 		return;
 	}
 	if (cmd_ctrl == NULL) {
 		wpa_ctrl_close(event_ctrl);
 		printMessage(tr("Could not open wpa_supplicant control interface"));
-		if (! timer_call) {
-			inConnectionPhase = true;
-			timerId = startTimer(1000);
-		}
+		inConnectionPhase = true;
+		timerId = startTimer(wps_TimerTime(timerCount));
 		return;
 	}
 	if (event_ctrl == NULL) {
 		wpa_ctrl_close(cmd_ctrl);
 		printMessage(tr("Could not open wpa_supplicant control interface"));
-		if (! timer_call) {
-			inConnectionPhase = true;
-			timerId = startTimer(1000);
-		}
+		inConnectionPhase = true;
+		timerId = startTimer(wps_TimerTime(timerCount));
 		return;
 	}
 		
@@ -735,13 +728,12 @@ void CWpa_Supplicant::wps_open(bool timer_call) {
 		wpa_ctrl_close(event_ctrl);
 		wpa_ctrl_close(cmd_ctrl);
 		printMessage(tr("Could not attach to wpa_supplicant"));
-		if (! timer_call) {
-			inConnectionPhase = true;
-			timerId = startTimer(1000);
-		}
+		inConnectionPhase = true;
+		timerId = startTimer(wps_TimerTime(timerCount));
 		return;
 	}
 	inConnectionPhase = false;
+	timerCount = 0;
 	//Set socket notifier
 	wps_fd = wpa_ctrl_get_fd(event_ctrl);
 	event_sn  = new QSocketNotifier(wps_fd, QSocketNotifier::Read,NULL);
@@ -757,6 +749,7 @@ bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 		killTimer(timerId);
 		timerId = -1;
 		inConnectionPhase = false;
+		timerCount = 0;
 	}
 	if (wps_connected) {
 		if (event_sn != NULL) {
@@ -776,6 +769,25 @@ bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 	printMessage(tr("(%1)[%2] wpa_supplicant disconnected").arg(((internal) ? "internal" : "external"),call_func));
 	return true;
 }
+int CWpa_Supplicant::wps_TimerTime(int timerCount) {
+	if (timerCount > 0) { 
+		if (timerCount <= 5) {
+			return 1000;
+		}
+		if (timerCount <= 10) {
+			return 3000;
+		}
+		if (timerCount <= 15) {
+			return 10000;
+		}
+		return 30000;
+	}
+	else {
+		return 0;
+	}
+}
+
+
 //Slot is executed when aplication is about to quit;
 void CWpa_Supplicant::wps_detach() {
 	if (event_ctrl != NULL) {
@@ -786,10 +798,12 @@ void CWpa_Supplicant::wps_detach() {
 void CWpa_Supplicant::timerEvent(QTimerEvent *event) {
 	if (event->timerId() == timerId) {
 		if (!wps_connected) {
+			timerCount++;
 			wps_open(true);
 		} else {
 			killTimer(timerId);
 			timerId = -1;
+			timerCount = 0;
 		}
 	}
 }

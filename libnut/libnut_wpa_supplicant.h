@@ -33,6 +33,7 @@ namespace libnut {
 			bool log_enabled;
 			bool wps_connected;
 			int timerId;
+			int timerCount;
 			bool inConnectionPhase;
 			
 		//Abstracted Commands:
@@ -130,6 +131,7 @@ namespace libnut {
 
 			void wps_open(bool time_call);
 			bool wps_close(QString call_func, bool internal=true);
+			int wps_TimerTime(int timerCount);
 
 			//Edit/get network helper functions
 			wps_eap_network_config wps_getEapNetworkConfig(int id);
@@ -139,6 +141,7 @@ namespace libnut {
 			void wps_read(int socket);
 			void wps_detach();
 		protected:
+			//proposed time polling:
 			void timerEvent(QTimerEvent *event);
 			
 		public:
