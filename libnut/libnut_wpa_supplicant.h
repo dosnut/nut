@@ -99,6 +99,7 @@ namespace libnut {
 			wps_pairwise_ciphers parsePairwiseCiphers(QString str);
 			wps_group_ciphers parseGroupCiphers(QString str);
 			wps_eapol_flags parseEapolFlags(QString str);
+			wps_eap_method parseEapMethod(QString str);
 			
 			
 
@@ -129,6 +130,11 @@ namespace libnut {
 
 			void wps_open(bool time_call);
 			bool wps_close(QString call_func, bool internal=true);
+
+			//Edit/get network helper functions
+			wps_eap_network_config wps_getEapNetworkConfig(int id);
+			wps_eap_netconfig_failures wps_editEapNetwork(int netid, wps_eap_network_config config);
+
 		private slots:
 			void wps_read(int socket);
 			void wps_detach();
@@ -163,8 +169,9 @@ namespace libnut {
 			void preauth(nut::MacAddress bssid);
 			int addNetwork(); //return -1 if failed, otherwise return network id
 			wps_netconfig_status addNetwork(wps_network_config config); //return -1 if failed, otherwise return network id
-			wps_netconfig_failures editNetwork(int netid, wps_network_config config);
+			wps_netconfig_status editNetwork(int netid, wps_network_config config);
 			wps_network_config getNetworkConfig(int id);
+			
 			void removeNetwork(int id);
 			void setBssid(int id, nut::MacAddress bssid);
 
