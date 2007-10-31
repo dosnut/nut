@@ -33,7 +33,7 @@ namespace libnut {
 	typedef enum {EAPF_UNDEFINED=-1, EAPF_WIRED=0,EAPF_DYN_UNICAST_WEP=1, EAPF_BCAST_WEP=2,EAPF_DEFAULT=3} wps_eapol_flags;
 
 	//Default: all build in
-	typedef enum {EAPM_UNDEFINED=0, EAPM_MD5=1,EAPM_MSCHAPV2=2,EAPM_OTP=4,EAPM_GTC=8,EAPM_TLS=16,EAPM_PEAP=32,EAPM_TTLS=64,EAPM_ALL=127} wps_eap_method;
+	typedef enum {EAPM_UNDEFINED=0, EAPM_MD5=1,EAPM_MSCHAPV2=2,EAPM_OTP=4,EAPM_GTC=8,EAPM_TLS=16,EAPM_PEAP=32,EAPM_TTLS=64,EAPM_ALL=127, EAPM_AKA=128, EAPM_FAST=256, EAPM_LEAP=512} wps_eap_method;
 
 	//0001 = 1
 	//0010 = 2
@@ -64,6 +64,14 @@ namespace libnut {
 		wps_netconfig_failures failures;
 		wps_eap_netconfig_failures eap_failures;
 		int id;
+	};
+	struct wps_capabilities {
+		wps_eap_method eap;
+		wps_pairwise_ciphers pairwise;
+		wps_group_ciphers group;
+		wps_key_management keyManagement;
+		wps_protocols proto;
+		wps_auth_algs auth_alg;
 	};
 
 	struct wps_scan {

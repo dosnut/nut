@@ -185,11 +185,12 @@ namespace libnut {
 			QList<wps_network> listNetworks();
 			QList<wps_scan> scanResults();
 			wps_status status();
-
-			//Future functions:
+			
+			//Seldomly used functions
+			wps_MIB getMIBVariables();
+			wps_capabilities getCapabilities();
+			//Future functions: (these may never be implemented as noone realy needs them
 			/*
-			QList<QStringList> getMIBVariables();
-			getCapability(QString option, bool strict);
 			QString wps_cmd_PMKSA();
 			//Maybe variable/value as new wps_variable / wps_net_variable class
 			void setVariable(wps_var var);

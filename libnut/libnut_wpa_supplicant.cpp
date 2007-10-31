@@ -303,8 +303,14 @@ wps_eapol_flags CWpa_Supplicant::parseEapolFlags(QString str) {
 wps_eap_method CWpa_Supplicant::parseEapMethod(QString str) {
 	//{EAPM_UNDEFINED=0, EAPM_MD5=1,EAPM_MSCHAPV2=2,EAPM_OTP=4,EAPM_GTC=8,EAPM_TLS=16,EAPM_PEAP=32,EAPM_TTLS=64,EAPM_ALL=127} wps_eap_method;
 	int method = EAPM_UNDEFINED;
-	if (str.contains("MD5")) {
-		method = (method | EAPM_MD5);
+	if (str.contains("AKA")) {
+		method = (method | EAPM_AKA);
+	}
+	if (str.contains("FAST")) {
+		method = (method | EAPM_FAST);
+	}
+	if (str.contains("LEAP")) {
+		method = (method | EAPM_LEAP);
 	}
 	if (str.contains("MSCHAPV2")) {
 		method = (method | EAPM_MSCHAPV2);
@@ -1470,6 +1476,51 @@ wps_status CWpa_Supplicant::status() {
 		wps_status dummy;
 		return dummy;
 	}
+}
+wps_MIB CWpa_Supplicant::getMIBVariables() {
+	QString reply = wps_cmd_MIB();
+	if (!reply.isEmpty()) {
+		return parseMIB(sliceMessage(reply));
+	}
+	else {
+		return (wps_MIB) QList<wps_variable>();
+	}
+}
+
+wps_capabilities CWpa_Supplicant::getCapabilities() {
+	wps_capabilities caps;
+	caps.eap = EAPM_UNDEFINED;
+	caps.pairwise = WPC_UNDEFINED;
+	caps.group = WGC_UNDEFINED;
+	caps.keyManagement = WKM_UNDEFINED;
+	caps.proto = WP_UNDEFINED;
+	caps.auth_alg = WAA_UNDEFINED;
+	QString response;
+	response = wps_cmd_GET_CAPABILITY("eap",false);
+	if ("FAIL\n" != response) {
+		caps.eap = parseEapMethod(response);
+	}
+	response = wps_cmd_GET_CAPABILITY("pairwise",false);
+	if ("FAIL\n" != response) {
+		caps.pairwise = parsePairwiseCiphers(response);
+	}
+	response = wps_cmd_GET_CAPABILITY("group",false);
+	if ("FAIL\n" != response) {
+		caps.group = parseGroupCiphers(response);
+	}
+	response = wps_cmd_GET_CAPABILITY("key_mgmt",false);
+	if ("FAIL\n" != response) {
+		caps.keyManagement = parseKeyMgmt(response);
+	}
+	response = wps_cmd_GET_CAPABILITY("proto",false);
+	if ("FAIL\n" != response) {
+		caps.proto = parseProtocols(response);
+	}
+	response = wps_cmd_GET_CAPABILITY("auth_alg",false);
+	if ("FAIL\n" != response) {
+		caps.auth_alg = parseAuthAlg(response);
+	}
+	return caps;
 }
 
 
