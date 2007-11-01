@@ -685,7 +685,7 @@ CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) 
 	wps_connected = false;
 	timerCount = 0;
 	log_enabled = true;
-	connect(QCoreApplication::instance(),SIGNAL(aboutToQuit ()),this,SLOT(wps_detach()));
+	//connect(QCoreApplication::instance(),SIGNAL(aboutToQuit ()),this,SLOT(wps_detach()));
 }
 CWpa_Supplicant::~CWpa_Supplicant() {
 	wps_close("destructor");
@@ -764,6 +764,14 @@ bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 			event_sn = NULL;
 		}
 		//Detaching takes place if program is about to quit
+		/*
+		found this in a "documentation" when to use wpa_ctrl_detach:
+		Once the control interface connection is not needed anymore, it should
+		be closed by calling wpa_ctrl_close(). If the connection was used for
+		unsolicited event messages, it should be first detached by calling
+		wpa_ctrl_detach().
+		*/
+		wps_detach();
 		//Close control connections
 		wpa_ctrl_close(event_ctrl);
 		wpa_ctrl_close(cmd_ctrl);
