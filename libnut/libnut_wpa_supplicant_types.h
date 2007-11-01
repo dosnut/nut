@@ -24,14 +24,16 @@ namespace libnut {
 	typedef enum {WGC_UNDEFINED=0, WGC_CCMP=2, WGC_TKIP=4, WGC_WEP104=8, WGC_WEP40=16, WGC_DEF=30} wps_group_ciphers;
 	typedef enum {WPC_UNDEFINED=0, WPC_NONE=1, WPC_CCMP=2, WPC_TKIP=4, WPC_DEF=6} wps_pairwise_ciphers;
 	typedef enum {WKM_UNDEFINED=0, WKM_NONE=1, WKM_WPA_PSK=2, WKM_WPA_EAP=4, WKM_IEEE8021X=8, WKM_DEF=6} wps_key_management;
-	typedef enum {WAA_UNDEFINED=0, WAA_OPEN=1, WAA_SHARED=2, WAA_LEAP=4} wps_auth_algs;
+	typedef enum {WAA_UNDEFINED=0, WAA_OPEN=1, WAA_SHARED=2, WAA_LEAP=4} wps_auth_algs; //Default: automatic selection
 
 	typedef enum {WI_MSG, WI_REQ,WI_EVENT} wps_interact_type;
 	typedef enum {WR_FAIL, WR_PASSWORD, WR_IDENTITY, WR_NEW_PASSWORD, WR_PIN, WR_OTP, WR_PASSPHRASE} wps_req_type;
 	typedef enum {WE_OTHER, WE_DISCONNECTED, WE_CONNECTED, WE_TERMINATING, WE_PASSWORD_CHANGED, WE_EAP_NOTIFICATION, WE_EAP_STARTED, WE_EAP_METHOD, WE_EAP_SUCCESS, WE_EAP_FAILURE } wps_event_type;
 
 	typedef enum {EAPF_UNDEFINED=-1, EAPF_WIRED=0,EAPF_DYN_UNICAST_WEP=1, EAPF_BCAST_WEP=2,EAPF_DEFAULT=3} wps_eapol_flags;
-	typedef enum {EAPM_UNDEFINED=0, EAPM_MD5=1,EAPM_MSCHAPV2=2,EAPM_OTP=4,EAPM_GTC=8,EAPM_TLS=16,EAPM_PEAP=32,EAPM_TTLS=64,EAPM_ALL=127} wps_eap_method;
+
+	//Default: all build in
+	typedef enum {EAPM_UNDEFINED=0, EAPM_MD5=1,EAPM_MSCHAPV2=2,EAPM_OTP=4,EAPM_GTC=8,EAPM_TLS=16,EAPM_PEAP=32,EAPM_TTLS=64,EAPM_ALL=127, EAPM_AKA=128, EAPM_FAST=256, EAPM_LEAP=512} wps_eap_method;
 
 	//0001 = 1
 	//0010 = 2
@@ -44,12 +46,32 @@ namespace libnut {
 	WCF_PROTO=256, WCF_KEYMGMT=512, WCF_AUTH_ALG=1024, WCF_PAIRWISE=2048,
 	WCF_GROUP=0x0000001000, WCF_PSK=0x0000002000, WCF_EAPOL_FLAGS=0x0000004000, WCF_MIXED_CELL=0x0000008000,
 	WCF_PROA_KEY_CACHING=0x00000010000, WCF_WEP_KEY0=0x0000020000, WCF_WEP_KEY1=0x0000040000, WCF_WEP_KEY2=0x0000080000,
-	WCF_WEP_KEY3=0x0000100000, WCF_WEP_KEY_IDX=0x0000200000, WCF_PEERKEY=0x0000400000, WCF_ALL=0x0000FFFFFF
+	WCF_WEP_KEY3=0x0000100000, WCF_WEP_KEY_IDX=0x0000200000, WCF_PEERKEY=0x0000400000, WCF_ALL=0x00007FFFFF
 	}wps_netconfig_failures;
+
+	typedef enum {
+	WECF_NONE=0, WECF_EAP=1,WECF_IDENTITY=2,WECF_ANON_IDENTITY=4,WECF_PASSWD=8,
+	WECF_CA_CERT=16, WECF_CA_PATH=32, WECF_CLIENT_CERT=64, WECF_PRIVATE_KEY=128,
+	WECF_PRIVATE_KEY_PASSWD=256, WECF_DH_FILE=512, WECF_SUBJECT_MATCH=1024, WECF_ALTSUBJECT_MATCH=2048,
+	WECF_PHASE1=0x0000001000, WECF_PHASE2=0x0000002000, WECF_CA_CERT2=0x0000004000, WECF_CA_PATH2=0x0000008000,
+	WECF_CLIENT_CERT2=0x00000010000, WECF_PRIVATE_KEY2=0x0000020000,
+	WECF_PRIVATE_KEY2_PASSWD=0x0000040000, WECF_DH_FILE2=0x0000080000, WECF_SUBJECT_MATCH2=0x0000100000,
+	WECF_ALTSUBJECT_MATCH2=0x0000200000, WECF_FRAGMENT_SIZE=0x0000400000, WECF_EAPPSK=0x0000800000,
+	WECF_NAI=0x00001000000, WECF_PAC_FILE=0x00002000000, WECF_ALL=0x00003FFFFFF
+	} wps_eap_netconfig_failures;
 
 	struct wps_netconfig_status {
 		wps_netconfig_failures failures;
+		wps_eap_netconfig_failures eap_failures;
 		int id;
+	};
+	struct wps_capabilities {
+		wps_eap_method eap;
+		wps_pairwise_ciphers pairwise;
+		wps_group_ciphers group;
+		wps_key_management keyManagement;
+		wps_protocols proto;
+		wps_auth_algs auth_alg;
 	};
 
 	struct wps_scan {
@@ -160,6 +182,40 @@ namespace libnut {
 		nut::MacAddress bssid;
 		wps_network_flags flags;
 	};
+
+	class wps_eap_network_config {
+		public:
+			wps_eap_network_config();
+			~wps_eap_network_config();
+			//Following fields are only used with internal EAP implementation.
+			wps_eap_method eap; //space-separated list of accepted EAP methods TODO: implement
+			QString identity; //Identity string for EAP
+			QString anonymous_identity; //Anonymous identity string for EAP;
+			QString password; //Password string for EAP.
+			QString ca_cert; //File path to CA certificate file (PEM/DER).
+			QString ca_path; //Directory path for CA certificate files (PEM).
+			QString client_cert; //File path to client certificate file (PEM/DER)
+			QString private_key; //File path to client private key file (PEM/DER/PFX)
+			QString private_key_passwd; //Password for private key file
+			QString dh_file; //File path to DH/DSA parameters file (in PEM format)
+			QString subject_match; //Substring to be matched against the subject of the authentication server certificate.
+			QString altsubject_match; //Semicolon separated string of entries to be matched against the alternative subject name of the authentication server certificate.
+			QString phase1; //Phase1 (outer authentication, i.e., TLS tunnel) parameters (string with field-value pairs, e.g., "peapver=0" or	"peapver=1 peaplabel=1")
+			QString phase2; //Phase2 (inner authentication with TLS tunnel) parameters
+			QString ca_cert2; //File path to CA certificate file.
+			QString ca_path2; //Directory path for CA certificate files (PEM)
+			QString client_cert2; //File path to client certificate file
+			QString private_key2; //File path to client private key file
+			QString private_key2_passwd; //Password for private key file
+			QString dh_file2; //File path to DH/DSA parameters file (in PEM format)
+			QString subject_match2; //Substring to be matched against the subject of the authentication server certificate.
+			QString altsubject_match2; //Substring to be matched against the alternative subject name of the authentication server certificate.
+			int fragment_size; //Maximum EAP fragment size in bytes (default 1398);
+			QString eappsk; //16-byte (128-bit, 32 hex digits) pre-shared key in hex format
+			QString nai; //user NAI
+			QString pac_file; //File path for the PAC entries.
+	};
+
 	class wps_network_config { //All without linebreak
 		public:
 			wps_network_config();
@@ -187,38 +243,8 @@ namespace libnut {
 			QString wep_key3;
 			char wep_tx_keyidx; //Default WEP key index (TX) (0..3) TODO: implement
 			bool peerkey; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
+			wps_eap_network_config eap_config;
 	};
-	class wps_eap_network_config: wps_network_config {
-		public:
-			//Following fields are only used with internal EAP implementation.
-			wps_eap_method eap; //space-separated list of accepted EAP methods TODO: implement
-			QString identity; //Identity string for EAP
-			QString anonymous_identity; //Anonymous identity string for EAP;
-			QString password; //Password string for EAP.
-			QString ca_cert; //File path to CA certificate file (PEM/DER).
-			QString ca_path; //Directory path for CA certificate files (PEM).
-			QString client_cert; //File path to client certificate file (PEM/DER)
-			QString private_key; //File path to client private key file (PEM/DER/PFX)
-			QString private_key_passwd; //Password for private key file
-			QString dh_file; //File path to DH/DSA parameters file (in PEM format)
-			QString subject_match; //Substring to be matched against the subject of the authentication server certificate.
-			QString altsubject_match; //Semicolon separated string of entries to be matched against the alternative subject name of the authentication server certificate.
-			QString phase1; //Phase1 (outer authentication, i.e., TLS tunnel) parameters (string with field-value pairs, e.g., "peapver=0" or	"peapver=1 peaplabel=1")
-			QString phase2; //Phase2 (inner authentication with TLS tunnel) parameters
-			QString ca_cert2; //File path to CA certificate file.
-			QString ca_path2; //Directory path for CA certificate files (PEM)
-			QString client_cert2; //File path to client certificate file
-			QString private_key2; //File path to client private key file
-			QString private_key2_passwd; //Password for private key file
-			QString dh_file2; //File path to DH/DSA parameters file (in PEM format)
-			QString subject_match2; //Substring to be matched against the subject of the authentication server certificate.
-			QString altsubject_match2; //Substring to be matched against the alternative subject name of the authentication server certificate.
-			int fragment_size; //Maximum EAP fragment size in bytes (default 1398);
-			QString eappsk; //16-byte (128-bit, 32 hex digits) pre-shared key in hex format
-			int nai; //user NAI
-			int pac_file; //File path for the PAC entries.
-	};
-
 
 }
 #endif

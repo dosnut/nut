@@ -266,4 +266,11 @@ wps_network_config::wps_network_config() {
 }
 wps_network_config::~wps_network_config() {
 }
+wps_eap_network_config::wps_eap_network_config() {
+			eap = EAPM_UNDEFINED; //space-separated list of accepted EAP methods TODO: implement
+			fragment_size = -1; //Maximum EAP fragment size in bytes (default 1398);
+			nai = -1; //user NAI
+}
+wps_eap_network_config::~wps_eap_network_config() {}
+
 }

@@ -1,0 +1,25 @@
+device "eth0" {
+	dhcp;
+	static {
+		ip 192.168.0.50;
+		netmask 255.255.255.0;
+		gateway 192.168.0.1;
+		dns-server 192.168.0.1;
+	};
+};
+device "eth1" {
+	no-auto-start;
+	wpa-supplicant config "/etc/wpa_supplicant/wpa_supplicant.conf" driver "wext";
+	environment "static" {
+		static {
+			ip 192.168.0.61
+			netmask 255.255.255.0
+			gateway 192.168.0.1
+			dns-server 192.168.0.1
+		};
+	};
+	environment "dynamic" {
+		dhcp;
+	}
+
+};

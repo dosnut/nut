@@ -33,6 +33,7 @@ namespace libnut {
 			bool log_enabled;
 			bool wps_connected;
 			int timerId;
+			int timerCount;
 			bool inConnectionPhase;
 			
 		//Abstracted Commands:
@@ -99,6 +100,7 @@ namespace libnut {
 			wps_pairwise_ciphers parsePairwiseCiphers(QString str);
 			wps_group_ciphers parseGroupCiphers(QString str);
 			wps_eapol_flags parseEapolFlags(QString str);
+			wps_eap_method parseEapMethod(QString str);
 			
 			
 
@@ -129,10 +131,17 @@ namespace libnut {
 
 			void wps_open(bool time_call);
 			bool wps_close(QString call_func, bool internal=true);
+			int wps_TimerTime(int timerCount);
+
+			//Edit/get network helper functions
+			wps_eap_network_config wps_getEapNetworkConfig(int id);
+			wps_eap_netconfig_failures wps_editEapNetwork(int netid, wps_eap_network_config config);
+
 		private slots:
 			void wps_read(int socket);
 			void wps_detach();
 		protected:
+			//proposed time polling:
 			void timerEvent(QTimerEvent *event);
 			
 		public:
@@ -163,8 +172,9 @@ namespace libnut {
 			void preauth(nut::MacAddress bssid);
 			int addNetwork(); //return -1 if failed, otherwise return network id
 			wps_netconfig_status addNetwork(wps_network_config config); //return -1 if failed, otherwise return network id
-			wps_netconfig_failures editNetwork(int netid, wps_network_config config);
+			wps_netconfig_status editNetwork(int netid, wps_network_config config);
 			wps_network_config getNetworkConfig(int id);
+			
 			void removeNetwork(int id);
 			void setBssid(int id, nut::MacAddress bssid);
 
@@ -175,11 +185,12 @@ namespace libnut {
 			QList<wps_network> listNetworks();
 			QList<wps_scan> scanResults();
 			wps_status status();
-
-			//Future functions:
+			
+			//Seldomly used functions
+			wps_MIB getMIBVariables();
+			wps_capabilities getCapabilities();
+			//Future functions: (these may never be implemented as noone realy needs them
 			/*
-			QList<QStringList> getMIBVariables();
-			getCapability(QString option, bool strict);
 			QString wps_cmd_PMKSA();
 			//Maybe variable/value as new wps_variable / wps_net_variable class
 			void setVariable(wps_var var);
