@@ -150,10 +150,10 @@ namespace qnut {
 		}
 		
 		if (currentID > -1) {
-			status = supplicant->addNetwork(config);
+			status = supplicant->editNetwork(currentID, config);status = supplicant->addNetwork(config);
 		}
 		else {
-			status = supplicant->editNetwork(currentID, config);
+			status = supplicant->addNetwork(config);
 		}
 		
 		if (status.failures != WCF_NONE) {
