@@ -10,6 +10,7 @@
 //
 //
 #include <QHeaderView>
+#include <QMessageBox>
 #include "wirelesssettings.h"
 #include "managedapmodel.h"
 #include "common.h"
@@ -44,6 +45,7 @@ namespace qnut {
 		
 		connect(ui.switchButton, SIGNAL(clicked()), this, SLOT(switchToSelectedNetwork()));
 		connect(ui.rescanButton, SIGNAL(clicked()), device->wpa_supplicant, SLOT(scan()));
+		//connect(ui.rescanButton, SIGNAL(clicked()), ui.managedView->model(), SLOT(reloadNetworks())); //debug
 		connect(ui.addButton, SIGNAL(clicked()), this, SLOT(addSelectedScanResult()));
 		connect(ui.availableView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(addSelectedScanResult()));
 		
@@ -93,17 +95,29 @@ namespace qnut {
 		QModelIndexList selectedIndexes = ui.availableView->selectionModel()->selectedIndexes();
 		CAccessPointConfig dialog(device->wpa_supplicant, this);
 		wps_scan * scan = static_cast<wps_scan *>(selectedIndexes[0].internalPointer());
-		dialog.execute(*scan);
+		
+		if (dialog.execute(*scan))
+			static_cast<CManagedAPModel *>(ui.managedView->model())->reloadNetworks();
 	}
 	
 	void CWirelessSettings::removeSelectedNetwork() {
+		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
+		CAccessPointConfig dialog(device->wpa_supplicant, this);
+		wps_network * network = static_cast<wps_network *>(selectedIndexes[0].internalPointer());
 		
+		if (QMessageBox::question(this, tr("Removing a managed network"), tr("Are you sure to remove \"%1\"?").arg(network->ssid),
+			QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes) {
+			device->wpa_supplicant->removeNetwork(network->id);
+			static_cast<CManagedAPModel *>(ui.managedView->model())->reloadNetworks();
+		}
 	}
 	
 	void CWirelessSettings::configureSelectedNetwork() {
 		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
 		CAccessPointConfig dialog(device->wpa_supplicant, this);
 		wps_network * network = static_cast<wps_network *>(selectedIndexes[0].internalPointer());
-		dialog.execute(network->id);
+		
+		if (dialog.execute(network->id))
+			static_cast<CManagedAPModel *>(ui.managedView->model())->reloadNetworks();
 	}
 };

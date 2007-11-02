@@ -61,14 +61,7 @@ namespace qnut {
 			this, SLOT(uiSelectedDeviceChanged(const QItemSelection &, const QItemSelection &)));
 		
 		trayicon.show();
-		try {
-			deviceManager.init(&logFile);
-		}
-		catch (Exception & e) {
-			logFile << tr("ERROR") + ": " + QString(e.what());
-			refreshDevicesAction->setEnabled(false);
-		}
-		
+		deviceManager.init(&logFile);
 	}
 	
 	CConnectionManager::~CConnectionManager() {
@@ -244,7 +237,7 @@ namespace qnut {
 			disableDeviceAction->setDisabled(selectedDevice->state == DS_DEACTIVATED);
 			deviceSettingsAction->setEnabled(true);
 			ipConfigurationAction->setEnabled(selectedDevice->state == DS_UNCONFIGURED);
-			wirelessSettingsAction->setEnabled((selectedDevice->type == DT_AIR) && (selectedDevice->state != DS_DEACTIVATED));
+			wirelessSettingsAction->setEnabled(selectedDevice->type == DT_AIR);
 		}
 		else {
 			enableDeviceAction->setEnabled(false);
@@ -272,10 +265,10 @@ namespace qnut {
 		enableDeviceAction->setDisabled(state == DS_UP);
 		disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
 		ipConfigurationAction->setEnabled(state == DS_UNCONFIGURED);
-		//TODO: folgendes Ekelhafte durch was sinnvolleres ersetzen
+/*		//TODO: folgendes Ekelhafte durch was sinnvolleres ersetzen
 		QModelIndexList selectedIndexes = overView.selectionModel()->selectedIndexes();
 		CDevice * currentDevice = static_cast<CDevice *>(selectedIndexes[0].internalPointer());
-		wirelessSettingsAction->setEnabled((currentDevice->type == DT_AIR) && (state != DS_DEACTIVATED));
+		wirelessSettingsAction->setEnabled((currentDevice->type == DT_AIR) && (state != DS_DEACTIVATED));*/
 	}
 	
 	void CConnectionManager::uiHandleShowLogToggle(bool state) {
