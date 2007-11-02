@@ -685,7 +685,6 @@ CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) 
 	wps_connected = false;
 	timerCount = 0;
 	log_enabled = true;
-	//connect(QCoreApplication::instance(),SIGNAL(aboutToQuit ()),this,SLOT(wps_detach()));
 }
 CWpa_Supplicant::~CWpa_Supplicant() {
 	wps_close("destructor");
@@ -714,6 +713,7 @@ void CWpa_Supplicant::wps_open(bool) {
 	}
 	if (cmd_ctrl == NULL) {
 		wpa_ctrl_close(event_ctrl);
+		event_ctrl = NULL;
 		printMessage(tr("Could not open wpa_supplicant control interface"));
 		inConnectionPhase = true;
 		timerId = startTimer(wps_TimerTime(timerCount));
@@ -721,6 +721,7 @@ void CWpa_Supplicant::wps_open(bool) {
 	}
 	if (event_ctrl == NULL) {
 		wpa_ctrl_close(cmd_ctrl);
+		cmd_ctrl = NULL;
 		printMessage(tr("Could not open wpa_supplicant control interface"));
 		inConnectionPhase = true;
 		timerId = startTimer(wps_TimerTime(timerCount));
@@ -733,6 +734,8 @@ void CWpa_Supplicant::wps_open(bool) {
 	if (status != 0) {
 		wpa_ctrl_close(event_ctrl);
 		wpa_ctrl_close(cmd_ctrl);
+		event_ctrl = NULL;
+		cmd_ctrl = NULL;
 		printMessage(tr("Could not attach to wpa_supplicant"));
 		inConnectionPhase = true;
 		timerId = startTimer(wps_TimerTime(timerCount));
