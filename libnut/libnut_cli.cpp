@@ -277,6 +277,10 @@ void CDeviceManager::refreshAll() {
 }
 
 void CDeviceManager::rebuild() {
+	//Do not rebuild if nuts is not running
+	if (!nutsstate) {
+		return;
+	}
 	QDBusReply<QList<QDBusObjectPath> > replydevs = dbusDevmgr->getDeviceList();
 	if (replydevs.isValid()) {
 		rebuild(replydevs.value());
