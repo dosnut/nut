@@ -248,10 +248,10 @@ namespace nuts {
 	void HardwareManager::read_netlinkmsgs() {
 		struct sockaddr_nl peer;
 		unsigned char *msg;
-		int n;
+		int n, msgsize;
 		struct nlmsghdr *hdr;
 		
-		n = nl_recv(nlh, &peer, &msg, 0);
+		msgsize = n = nl_recv(nlh, &peer, &msg, 0);
 		for (hdr = (struct nlmsghdr*) msg; nlmsg_ok(hdr, n); hdr = (struct nlmsghdr*) nlmsg_next(hdr, &n)) {
 //			log << QString("Message type 0x%1").arg(hdr->nlmsg_type, 0, 16) << endl;
 			switch (hdr->nlmsg_type) {
@@ -310,6 +310,7 @@ namespace nuts {
 					} break;
 			}
 		}
+		if (msgsize > 0) free(msg);
 	}
 	bool HardwareManager::isControlled(int ifIndex) {
 		if (ifIndex < 0) return false;

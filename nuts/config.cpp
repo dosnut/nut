@@ -39,26 +39,55 @@ namespace nuts {
 	}
 	
 	bool ConfigParser::newDevice(const QString &name) {
+		m_def_env = 0; m_curdevconfig = 0;
 		if (!m_config->m_devices.contains(name)) {
 			m_curdevconfig = new nut::DeviceConfig();
 			m_config->m_devices.insert(name, m_curdevconfig);
 			m_curdevconfig->m_environments.push_back(new nut::EnvironmentConfig(""));
+			m_def_env = new local_env_config();
 			return true;
 		}
 		return false;
+	}
+	
+	bool ConfigParser::finishDevice() {
+		if (!m_curdevconfig) return true;
+		if (!m_curdevconfig->m_environments.count() > 0) return false;
+		finishEnvironment(m_curdevconfig->m_environments[0], m_def_env);
+		delete m_def_env;
+		m_def_env = 0; m_curdevconfig = 0;
+		return true;
+	}
+	
+	bool ConfigParser::finishEnvironment(nut::EnvironmentConfig *envc, local_env_config *l_envc) {
+		if ((envc->m_ipv4Interfaces.size() == 0) && (!l_envc->no_def_dhcp)) {
+			envc->m_ipv4Interfaces.push_back(new nut::IPv4Config());
+		}
+		return true;
 	}
 	
 	bool ConfigParser::devDefaultEnvironment() {
 		if (!m_curdevconfig) return false;
 		if (!m_curdevconfig->m_environments.count() > 0) return false;
 		m_curenvconfig = m_curdevconfig->m_environments[0];
+		m_cur_env = m_def_env;
 		return true;
 	}
 	
 	bool ConfigParser::devEnvironment(const QString &name) {
+		m_cur_env = 0; m_curenvconfig = 0;
 		if (!m_curdevconfig) return false;
 		m_curenvconfig = new nut::EnvironmentConfig(name);
 		m_curdevconfig->m_environments.push_back(m_curenvconfig);
+		m_cur_env = new local_env_config();
+		return true;
+	}
+	
+	bool ConfigParser::finishEnvironment() {
+		if (!m_curenvconfig) return true;
+		finishEnvironment(m_curenvconfig, m_cur_env);
+		delete m_cur_env;
+		m_cur_env = 0; m_curenvconfig = 0;
 		return true;
 	}
 	
@@ -75,6 +104,12 @@ namespace nuts {
 		return true;
 	}
 	
+	bool ConfigParser::envNoDHCP() {
+		if (!m_curenvconfig) return false;
+		m_cur_env->no_def_dhcp = true;
+		return true;
+	}
+	
 	bool ConfigParser::envSelect() {
 		if (!m_curenvconfig) return false;
 		// Only one select block per environment
@@ -83,18 +118,40 @@ namespace nuts {
 		return true;
 	}
 	
+	bool ConfigParser::finishSelect() {
+		// TODO
+		return true;
+	}
+	
 	bool ConfigParser::envDHCP() {
+		m_curipv4config = 0;
 		if (!m_curenvconfig) return false;
-		if (m_curenvconfig->m_dhcp) return false;
-		m_curipv4config = m_curenvconfig->m_dhcp = new nut::IPv4Config();
+		if (m_cur_env->m_hasdhcp) return false;
+		m_curipv4config = new nut::IPv4Config();
+		return true;
+	}
+	
+	bool ConfigParser::finishDHCP() {
+		if (!m_curenvconfig) return false;
+		if (!m_curipv4config) return false;
+		m_cur_env->m_hasdhcp = true;
 		m_curenvconfig->m_ipv4Interfaces.push_back(m_curipv4config);
+		m_curipv4config = 0;
 		return true;
 	}
 	
 	bool ConfigParser::envStatic() {
+		m_curipv4config = 0;
 		if (!m_curenvconfig) return false;
 		m_curipv4config = new nut::IPv4Config(nut::IPv4Config::DO_STATIC);
+		return true;
+	}
+	
+	bool ConfigParser::finishStatic() {
+		if (!m_curenvconfig) return false;
+		if (!m_curipv4config) return false;
 		m_curenvconfig->m_ipv4Interfaces.push_back(m_curipv4config);
+		m_curipv4config = 0;
 		return true;
 	}
 	

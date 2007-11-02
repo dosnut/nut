@@ -11,8 +11,7 @@
 
 using namespace nuts;
 
-int main(int argc, char* argv[]) {
-	common::init();
+int mainApp(int argc, char* argv[]) {
 	QCoreApplication app(argc, argv);
 	SigHandler *sighandler;
 	DeviceManager *devManager;
@@ -20,7 +19,7 @@ int main(int argc, char* argv[]) {
 	try {
 		sighandler = new SigHandler();
 		devManager = new DeviceManager(argc > 1 ? argv[1] : "/etc/nuts/nuts.config");
-		new DBusDeviceManager(devManager);
+		devManager->dbus_devMan = new DBusDeviceManager(devManager);
 	} catch (Exception &e) {
 		err << "Initialize failed:" << endl
 		          << "    " << e.msg() << endl;
@@ -41,4 +40,12 @@ int main(int argc, char* argv[]) {
 		return -3;
 	}
 	return 0;
+}
+
+int main(int argc, char* argv[]) {
+	common::init();
+	LogInit();
+	int res = mainApp(argc, argv);
+	LogDestroy();
+	return res;
 }

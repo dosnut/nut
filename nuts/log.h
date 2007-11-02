@@ -27,6 +27,9 @@ namespace nuts {
 		@author Stefan Bühler <stbuehler@web.de>
 	*/
 	extern QTextStream err, log;
+
+	void LogInit();
+	void LogDestroy();
 };
 
 #endif

@@ -41,6 +41,8 @@ namespace nuts {
 		public:
 			DBusDeviceManager(DeviceManager *devmgr);
 			virtual ~DBusDeviceManager();
+			
+			void stopDBus();
 	
 		public slots:
 			QList<QDBusObjectPath> getDeviceList();

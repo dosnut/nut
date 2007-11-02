@@ -37,6 +37,11 @@ namespace nuts {
 		dbus_connection.unregisterService(NUT_DBUS_URL);
 	}
 	
+	void DBusDeviceManager::stopDBus() {
+		dbus_connection.unregisterService(NUT_DBUS_URL);
+		dbus_connection.unregisterObject(dbus_path);
+	}
+	
 	//SLOT: Inserts device into device hash
 	void DBusDeviceManager::devAdded(QString devName, Device *dev) {
 		DBusDevice *dbus_device = new DBusDevice(dev, &dbus_connection, dbus_devices_path);

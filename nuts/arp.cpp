@@ -304,20 +304,23 @@ namespace nuts {
 	}
 	
 	void ARP::stop() {
-		if (m_arp_read_nf) {
-			m_arp_read_nf->deleteLater();
-			m_arp_read_nf = 0;
-		}
-		if (m_arp_write_nf) {
-			m_arp_write_nf->deleteLater();
-			m_arp_write_nf = 0;
-		}
 		if (m_arp_socket != -1) {
+			if (m_arp_read_nf) {
+				delete m_arp_read_nf;
+				m_arp_read_nf = 0;
+			}
+			if (m_arp_write_nf) {
+				delete m_arp_write_nf;
+				m_arp_write_nf = 0;
+			}
 			close(m_arp_socket);
 			m_arp_socket = -1;
 		}
-		foreach (ARPTimer *t, m_arp_timers)
+		m_probes.clear(); m_requests.clear();
+		foreach (ARPTimer *t, m_arp_timers) {
+			t->m_arp = 0;
 			delete t;
+		}
 	}
 	
 	ARPRequest *ARP::requestIPv4(const QHostAddress &source_addr, const QHostAddress &target_addr) {

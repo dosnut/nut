@@ -12,6 +12,13 @@ namespace nuts {
 namespace nuts {
 	class ConfigParser {
 		private:
+			struct local_env_config {
+				bool m_hasdhcp, no_def_dhcp;
+				
+				local_env_config()
+				: m_hasdhcp(false), no_def_dhcp(false) { }
+			};
+		
 			bool failed;
 			QString m_configFile;
 		
@@ -21,8 +28,12 @@ namespace nuts {
 			nut::IPv4Config *m_curipv4config;
 			QStack<size_t> m_selBlocks;
 			
+			local_env_config *m_cur_env, *m_def_env;
+			
 			void selectAdd(const nut::SelectRule &rule);
 		
+			bool finishEnvironment(nut::EnvironmentConfig *envc, local_env_config *l_envc);
+
 		public:
 			ConfigParser(const QString &configFile);
 			~ConfigParser();
@@ -33,14 +44,25 @@ namespace nuts {
 			void parseError(int lineNum, const QString &msg);
 			
 			bool newDevice(const QString &name);
-			bool devDefaultEnvironment();
+			bool finishDevice();
+			
 			bool devEnvironment(const QString &name);
+			bool finishEnvironment();
+			
+			bool devDefaultEnvironment();
 			bool devNoAutoStart();
 			bool devWPASuppConfig(const QString &driver, const QString &config);
 			
+			bool envNoDHCP();
+			
 			bool envSelect();
+			bool finishSelect();
+			
 			bool envDHCP();
+			bool finishDHCP();
+			
 			bool envStatic();
+			bool finishStatic();
 			
 			bool staticIP(const QHostAddress &addr);
 			bool staticNetmak(const QHostAddress &addr);

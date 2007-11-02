@@ -1,5 +1,6 @@
 
 #include "device.h"
+#include "dbus.h"
 #include "log.h"
 #include <QMutableListIterator>
 #include <QProcess>
@@ -74,6 +75,7 @@ namespace nuts {
 	}
 	
 	DeviceManager::~DeviceManager() {
+		dbus_devMan->stopDBus();
 		// manually deleting devices so HardwareManager is available for their destruction;
 		// in ~QObject  (deleteChildren) it is too late for them.
 		foreach (Device* device, devices)
