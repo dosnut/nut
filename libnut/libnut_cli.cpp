@@ -103,6 +103,7 @@ void CDeviceManager::init(CLog * inlog) {
 	dbusDevmgr = new DBusDeviceManagerInterface(NUT_DBUS_URL, "/manager",dbusConnection, this);
 	if (nutsstate) {
 		setInformation();
+		emit(stateChanged(true));
 	}
 	connect(dbusConnectionInterface, SIGNAL(serviceOwnerChanged(const QString &, const QString &, const QString &)), this, SLOT(dbusServiceOwnerChanged(const QString &, const QString &, const QString &)));
 	//Connect dbus-signals to own slots:
@@ -192,6 +193,7 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 			else {
 				nutsstate = true;
 				setInformation();
+				emit(stateChanged(true));
 			}
 			connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 			connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
@@ -201,6 +203,7 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 			if (nutsstate) {
 				nutsstate = false;
 				clearInformation();
+				emit(stateChanged(false));
 			}
 			disconnect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 			disconnect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));

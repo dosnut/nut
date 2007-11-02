@@ -101,6 +101,7 @@ namespace libnut {
 	signals:
 		void deviceAdded(CDevice * device);
 		void deviceRemoved(CDevice * device); //nach entfernen aus der liste aber vor dem löschen
+		void stateChanged(bool state);
 	};
 
 	class CDevice : public CLibNut {
