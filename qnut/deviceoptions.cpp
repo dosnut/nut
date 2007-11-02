@@ -55,6 +55,10 @@ namespace qnut {
 	CDeviceOptions::~CDeviceOptions() {
 		disconnect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
 		writeSettings();
+		if (wirelessSettings) {
+			wirelessSettings->close();
+			delete wirelessSettings;
+		}
 		delete deviceMenu;
 	}
 	
@@ -107,7 +111,7 @@ namespace qnut {
 		disableDeviceAction->setDisabled(device->state == DS_DEACTIVATED);
 		ipConfigurationAction->setEnabled(false);
 		enterEnvironmentAction->setEnabled(false);
-		wirelessSettingsAction->setEnabled((device->type == DT_AIR) && (device->state != DS_DEACTIVATED));
+		wirelessSettingsAction->setEnabled(device->type == DT_AIR);
 	}
 	
 	inline void CDeviceOptions::createView() {
@@ -211,7 +215,6 @@ namespace qnut {
 		enableDeviceAction->setEnabled(state == DS_DEACTIVATED);
 		disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
 		ipConfigurationAction->setEnabled(state == DS_UNCONFIGURED);
-		wirelessSettingsAction->setEnabled((device->type == DT_AIR) && (state != DS_DEACTIVATED));
 
 		if (!ui.environmentTree->selectionModel()->selectedIndexes().isEmpty()) {
 			QModelIndex targetIndex = ui.environmentTree->selectionModel()->selectedIndexes()[0];

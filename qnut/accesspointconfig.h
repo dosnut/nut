@@ -28,7 +28,10 @@ namespace qnut {
 		
 		CWpa_Supplicant * supplicant;
 		
+		int currentID;
+		
 		inline void convertLineEditText(QLineEdit * lineEdit, bool hex);
+		inline void writeEAPConfig(wps_eap_network_config &eap_config);
 	public:
 		bool execute(wps_scan scanResult);
 		bool execute(int id);
@@ -36,13 +39,20 @@ namespace qnut {
 		CAccessPointConfig(CWpa_Supplicant * wpa_supplicant, QWidget * parent = 0);
 		~CAccessPointConfig();
 	private slots:
-		void uiHandleAuthChanged(int type);
-		void uiHandleEncChanged(QString text);
+		void setAuthConfig(int type);
+		void setEncConfig(QString text);
+		void verifyConfiguration();
+		void countPskChars(QString psk);
+		void togglePlainPSK(bool show);
 		void convertSSID(bool hex);
 		void convertWEPKey0(bool hex);
 		void convertWEPKey1(bool hex);
 		void convertWEPKey2(bool hex);
 		void convertWEPKey3(bool hex);
+		
+		void selectCAFile();
+		void selectClientFile();
+		void selectKeyFile();
 	};
 }
 

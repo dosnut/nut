@@ -15,8 +15,8 @@
 
 #define MANAP_MOD_ID    0
 #define MANAP_MOD_SSID  1
-#define MANAP_MOD_BSSID 3
 #define MANAP_MOD_FLAG  2
+#define MANAP_MOD_BSSID 3
 
 namespace qnut {
 	using namespace nut;
@@ -75,7 +75,10 @@ namespace qnut {
 		case MANAP_MOD_SSID:
 			return networks[index.row()].ssid;
 		case MANAP_MOD_BSSID:
-			return networks[index.row()].bssid.toString();
+			if (networks[index.row()].bssid.zero())
+				return tr("any");
+			else
+				return networks[index.row()].bssid.toString();
 		case MANAP_MOD_FLAG:
 			return (networks[index.row()].flags == WNF_CURRENT) ? QString('*') : QVariant();
 		default:

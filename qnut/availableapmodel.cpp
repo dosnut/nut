@@ -16,9 +16,9 @@
 #define AVLAP_MOD_SSID    0
 #define AVLAP_MOD_FREQ    1
 #define AVLAP_MOD_KEYMGMT 2
-#define AVLAP_MOD_BSSID   3
-#define AVLAP_MOD_LEVEL   4
-#define AVLAP_MOD_CIPHERS 5
+#define AVLAP_MOD_BSSID   4
+#define AVLAP_MOD_LEVEL   5
+#define AVLAP_MOD_CIPHERS 3
 
 namespace qnut {
 	using namespace nut;
@@ -47,7 +47,7 @@ namespace qnut {
 		if (supplicant == NULL)
 			return 0;
 		else
-			return 6;
+			return 5;
 	}
 	
 	int CAvailableAPModel::rowCount(const QModelIndex & parent) const {
@@ -78,13 +78,18 @@ namespace qnut {
 			return QString::number(scans[index.row()].freq);
 		case AVLAP_MOD_KEYMGMT: {
 				int keyFlags = scans[index.row()].keyManagement;
+				
+				if (keyFlags == WKM_UNDEFINED)
+					return tr("undefined");
+				
 				int protocolFlags = scans[index.row()].protocols;
-				if (keyFlags & WKM_NONE)
-					return tr("plain or WEP");
 				
 				QStringList results;
 				QStringList wpaPrefixes;
 				
+				if (keyFlags & WKM_NONE)
+					results << tr("plain or WEP");
+					
 				if (protocolFlags & WP_WPA)
 					wpaPrefixes << "WPA";
 				
@@ -117,15 +122,11 @@ namespace qnut {
 				QStringList results;
 				
 				if (flags & WC_CCMP)
-					results << tr("CCMP");
+					results << "CCMP";
 				if (flags & WC_TKIP)
-					results << tr("TKIP");
-				if (flags & WC_WEP104)
-					results << tr("WEP 104");
-				if (flags & WC_WEP40)
-					results << tr("WEP 40");
-				if (flags & WC_WEP)
-					results << tr("WEP");
+					results << "TKIP";
+				if ((flags & WC_WEP104) || (flags & WC_WEP40))
+					results << "WEP";
 				
 				return results.join(", ");
 			}
@@ -156,17 +157,17 @@ namespace qnut {
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
 			case AVLAP_MOD_SSID:
-				return tr("ssid");
+				return tr("SSID");
 			case AVLAP_MOD_FREQ:
-				return tr("frequency");
+				return tr("Frequency");
 			case AVLAP_MOD_KEYMGMT:
-				return tr("key management");
+				return tr("Key management");
 			case AVLAP_MOD_BSSID:
-				return tr("bssid");
+				return tr("BSSID");
 			case AVLAP_MOD_LEVEL:
-				return tr("level");
+				return tr("Level");
 			case AVLAP_MOD_CIPHERS:
-				return tr("ciphers");
+				return tr("Encryption");
 			default:
 				break;
 			}
