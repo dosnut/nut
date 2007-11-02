@@ -19,7 +19,7 @@ int mainApp(int argc, char* argv[]) {
 	try {
 		sighandler = new SigHandler();
 		devManager = new DeviceManager(argc > 1 ? argv[1] : "/etc/nuts/nuts.config");
-		new DBusDeviceManager(devManager);
+		devManager->dbus_devMan = new DBusDeviceManager(devManager);
 	} catch (Exception &e) {
 		err << "Initialize failed:" << endl
 		          << "    " << e.msg() << endl;

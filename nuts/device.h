@@ -16,6 +16,8 @@
 #include <common/types.h>
 
 namespace nuts {
+	class DBusDeviceManager;
+	
 	class DeviceManager;
 	class Device;
 	class Environment;
@@ -74,6 +76,7 @@ namespace nuts {
 			void delDevice(const QString &ifname);
 		
 		public:
+			DBusDeviceManager *dbus_devMan;
 			/**
 			 * @brief Constructs the DeviceManager
 			 * @param configFile Path to the configfile.
