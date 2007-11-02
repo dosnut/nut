@@ -150,19 +150,47 @@ namespace qnut {
 		}
 		
 		if (currentID > -1) {
-			supplicant->addNetwork(config);
+			status = supplicant->addNetwork(config);
 		}
 		else {
-			supplicant->editNetwork(currentID, config);
+			status = supplicant->editNetwork(currentID, config);
 		}
 		
 		if (status.failures != WCF_NONE) {
-			
+/*	WCF_NONE=0, WCF_SSID=1,WCF_BSSID=2,WCF_DISABLED=4,WCF_ID_STR=8,
+	WCF_SCAN_SSID=16, WCF_PRIORITY=32, WCF_MODE=64, WCF_FREQ=128,
+	WCF_PROTO=256, WCF_KEYMGMT=512, WCF_AUTH_ALG=1024, WCF_PAIRWISE=2048,
+	WCF_GROUP=0x0000001000, WCF_PSK=0x0000002000, WCF_EAPOL_FLAGS=0x0000004000, WCF_MIXED_CELL=0x0000008000,
+	WCF_PROA_KEY_CACHING=0x00000010000, WCF_WEP_KEY0=0x0000020000, WCF_WEP_KEY1=0x0000040000, WCF_WEP_KEY2=0x0000080000,
+	WCF_WEP_KEY3=0x0000100000, WCF_WEP_KEY_IDX=0x0000200000, WCF_PEERKEY=0x0000400000, WCF_ALL=0x00007FFFFF*/
+			if (status.failures & WCF_SSID)             qDebug("WCF_SSID");
+			if (status.failures & WCF_BSSID)            qDebug("WCF_BSSID");
+			if (status.failures & WCF_DISABLED)         qDebug("WCF_DISABLED");
+			if (status.failures & WCF_ID_STR)           qDebug("WCF_ID_STR");
+			if (status.failures & WCF_SCAN_SSID)        qDebug("WCF_SCAN_SSID");
+			if (status.failures & WCF_PRIORITY)         qDebug("WCF_PRIORITY");
+			if (status.failures & WCF_MODE)             qDebug("WCF_MODE");
+			if (status.failures & WCF_FREQ)             qDebug("WCF_FREQ");
+			if (status.failures & WCF_PROTO)            qDebug("WCF_PROTO");
+			if (status.failures & WCF_KEYMGMT)          qDebug("WCF_KEYMGMT");
+			if (status.failures & WCF_AUTH_ALG)         qDebug("WCF_AUTH_ALG");
+			if (status.failures & WCF_PAIRWISE)         qDebug("WCF_PAIRWISE");
+			if (status.failures & WCF_GROUP)            qDebug("WCF_GROUP");
+			if (status.failures & WCF_PSK)              qDebug("WCF_PSK");
+			if (status.failures & WCF_EAPOL_FLAGS)      qDebug("WCF_EAPOL_FLAGS");
+			if (status.failures & WCF_MIXED_CELL)       qDebug("WCF_MIXED_CELL");
+			if (status.failures & WCF_PROA_KEY_CACHING) qDebug("WCF_PROA_KEY_CACHING");
+			if (status.failures & WCF_WEP_KEY0)         qDebug("WCF_WEP_KEY0");
+			if (status.failures & WCF_WEP_KEY1)         qDebug("WCF_WEP_KEY1");
+			if (status.failures & WCF_WEP_KEY2)         qDebug("WCF_WEP_KEY2");
+			if (status.failures & WCF_WEP_KEY3)         qDebug("WCF_WEP_KEY3");
+			if (status.failures & WCF_WEP_KEY_IDX)      qDebug("WCF_WEP_KEY_IDX");
+			if (status.failures & WCF_PEERKEY)          qDebug("WCF_PEERKEY");
 			return;
 		}
 		
 		if (status.eap_failures != WECF_NONE) {
-			
+			qDebug("eap failures");
 			return;
 		}
 		
