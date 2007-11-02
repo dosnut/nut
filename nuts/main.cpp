@@ -11,8 +11,7 @@
 
 using namespace nuts;
 
-int main(int argc, char* argv[]) {
-	common::init();
+int mainApp(int argc, char* argv[]) {
 	QCoreApplication app(argc, argv);
 	SigHandler *sighandler;
 	DeviceManager *devManager;
@@ -41,4 +40,12 @@ int main(int argc, char* argv[]) {
 		return -3;
 	}
 	return 0;
+}
+
+int main(int argc, char* argv[]) {
+	common::init();
+	LogInit();
+	int res = mainApp(argc, argv);
+	LogDestroy();
+	return res;
 }

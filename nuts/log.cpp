@@ -15,9 +15,12 @@ namespace nuts {
 	QTextStream err;
 	QTextStream log;
 
-	class LogInit {
+	class CLogInit {
+		private:
+			QFile *ferr, *fout;
 		public:
-			LogInit() {
+			CLogInit()
+			: ferr(0), fout(0) {
 				int fd1 = dup(1), fd2 = dup(2);
 				close(fd1); close(fd2);
 				if (fd1 == -1 || fd2 == -1) {
@@ -28,13 +31,25 @@ namespace nuts {
 					err.setDevice(f);
 					log.setDevice(f);
 				} else {
-					QFile *ferr = new QFile(); ferr->open(2, QIODevice::WriteOnly);
+					ferr = new QFile(); ferr->open(2, QIODevice::WriteOnly);
 					err.setDevice(ferr);
-					QFile *fout = new QFile(); fout->open(1, QIODevice::WriteOnly);
+					fout = new QFile(); fout->open(1, QIODevice::WriteOnly);
 					log.setDevice(fout);
 				}
 			}
+			
+			~CLogInit() {
+				delete ferr; delete fout;
+			}
 	};
 	
-	static LogInit loginit;
+	static CLogInit *loginit;
+	void LogInit() {
+		loginit = new CLogInit();
+	}
+	
+	void LogDestroy() {
+		delete loginit;
+		loginit = 0;
+	}
 };

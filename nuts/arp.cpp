@@ -306,11 +306,11 @@ namespace nuts {
 	void ARP::stop() {
 		if (m_arp_socket != -1) {
 			if (m_arp_read_nf) {
-				m_arp_read_nf->deleteLater();
+				delete m_arp_read_nf;
 				m_arp_read_nf = 0;
 			}
 			if (m_arp_write_nf) {
-				m_arp_write_nf->deleteLater();
+				delete m_arp_write_nf;
 				m_arp_write_nf = 0;
 			}
 			close(m_arp_socket);
