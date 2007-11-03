@@ -11,7 +11,6 @@ LICENSE="GPL-2.0"
 SLOT="0"
 KEYWORDS="~x86"
 IUSE="X"
-RESTRICT="test" #72375
 
 RDEPEND=">=x11-libs/qt-4.3.2
 		sys-apps/dbus"
