@@ -928,7 +928,7 @@ wps_netconfig_status CWpa_Supplicant::addNetwork(wps_network_config config) {
 	}
 	else {
 		status = editNetwork(netid,config);
-		if ( (status.eap_failures != WECF_NONE) && (WCF_NONE != status.failures) ) {
+		if ( (status.eap_failures != WECF_NONE) || (WCF_NONE != status.failures) ) {
 			removeNetwork(netid);
 			status.id = -1;
 		}
@@ -1170,6 +1170,10 @@ wps_network_config CWpa_Supplicant::getNetworkConfig(int id) {
 	response = wps_cmd_GET_NETWORK(id,"peerkey");
 	if ("FAIL\n" != response) {
 		config.peerkey = toBool(response);
+	}
+	//Check if we need to fetch wpa_settings
+	if ( config.keyManagement & (WKM_IEEE8021X | WKM_WPA_EAP)) {
+		config.eap_config = wps_getEapNetworkConfig(id);
 	}
 	return config;
 }
