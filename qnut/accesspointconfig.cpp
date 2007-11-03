@@ -150,7 +150,7 @@ namespace qnut {
 		}
 		
 		if (currentID > -1) {
-			status = supplicant->editNetwork(currentID, config);status = supplicant->addNetwork(config);
+			status = supplicant->editNetwork(currentID, config);
 		}
 		else {
 			status = supplicant->addNetwork(config);
