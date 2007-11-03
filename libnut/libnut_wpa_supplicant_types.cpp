@@ -238,15 +238,25 @@ QString toString(wps_req_type reqt) {
 	return QString();
 }
 
+QString toNumberString(wps_bool b) {
+	return ( (b == WB_UNDEFINED) ? "-1" : ( (b == WB_TRUE) ? "1" : "0")); 
+}
+bool toBool(wps_bool b) {
+	return (b == WB_TRUE);
+}
+wps_bool toWpsBool(bool b) {
+	return ( b ? WB_TRUE : WB_FALSE);
+}
+
 wps_network_config::wps_network_config() {
 			//Set default values
 			ssid = QString();
 			bssid = nut::MacAddress();
-			disabled = 0;
+			disabled = WB_UNDEFINED;
 			id_str = QString();
-			scan_ssid = false; // (do not) scan with SSID-specific Probe Request frames
+			scan_ssid = WB_UNDEFINED; // (do not) scan with SSID-specific Probe Request frames
 			priority = -1;
-			mode = false; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
+			mode = WB_UNDEFINED; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
 			frequency = 0; //no default, but 0 is not a working value
 			protocols = WP_UNDEFINED; //list of accepted protocols TODO: implement
 			keyManagement = WKM_UNDEFINED; // list of accepted authenticated key management protocols
@@ -255,14 +265,14 @@ wps_network_config::wps_network_config() {
 			group = WGC_UNDEFINED; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
 			QString psk = QString(); //WPA preshared key; 256-bit pre-shared key
 			eapol_flags = EAPF_UNDEFINED;
-			mixed_cell = false; //This option can be used to configure whether so called mixed
-			proactive_key_caching = false; //Enable/disable opportunistic PMKSA caching for WPA2.
+			mixed_cell = WB_UNDEFINED; //This option can be used to configure whether so called mixed
+			proactive_key_caching = WB_UNDEFINED; //Enable/disable opportunistic PMKSA caching for WPA2.
 			wep_key0 = QString(); //Static WEP key (ASCII in double quotation, hex without)
 			wep_key1 = QString();
 			wep_key2 = QString();
 			wep_key3 = QString();
 			wep_tx_keyidx = -1; //Default WEP key index (TX) (0..3) TODO: implement
-			peerkey = false; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
+			peerkey = WB_UNDEFINED; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
 }
 wps_network_config::~wps_network_config() {
 }

@@ -59,6 +59,10 @@ namespace libnut {
 	WECF_NAI=0x00001000000, WECF_PAC_FILE=0x00002000000, WECF_ALL=0x00003FFFFFF
 	} wps_eap_netconfig_failures;
 
+	typedef enum {
+		WB_UNDEFINED=-1, WB_FALSE=0,WB_TRUE=1
+	} wps_bool;
+
 	struct wps_netconfig_status {
 		wps_netconfig_failures failures;
 		wps_eap_netconfig_failures eap_failures;
@@ -174,6 +178,28 @@ namespace libnut {
 	QString toString(wps_eap_method method);
 	
 
+	QString toNumberString(wps_bool b);
+	bool toBool(wps_bool b);
+	wps_bool toWpsBool(bool b);
+
+	inline int toNumber(bool b) {
+		return ((b)? 1 : 0);
+	}
+	inline int toNumber(wps_bool b) {
+		return ( (b == WB_UNDEFINED) ? -1 : ( (b == WB_TRUE) ? 1 : 0)); 
+	}
+	inline bool toBool(QString str) {
+		return ( ("0" == str) ? true : false);
+	}
+	inline wps_bool toWpsBool(QString str) {
+		if ("0" == str) {
+			return WB_FALSE;
+		}
+		else if ("1" == str) {
+			return WB_TRUE;
+		}
+		return WB_UNDEFINED;
+	}
 	
 	struct wps_network {
 		int id;
@@ -221,11 +247,11 @@ namespace libnut {
 			~wps_network_config();
 			QString ssid;
 			nut::MacAddress bssid;
-			bool disabled;
+			wps_bool disabled;
 			QString id_str; // Network identifier string for external scripts
-			bool scan_ssid; // (do not) scan with SSID-specific Probe Request frames
+			wps_bool scan_ssid; // (do not) scan with SSID-specific Probe Request frames
 			int priority;
-			bool mode; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
+			wps_bool mode; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
 			int frequency;
 			wps_protocols protocols; //list of accepted protocols TODO: implement
 			wps_key_management keyManagement; // list of accepted authenticated key management protocols
@@ -234,14 +260,14 @@ namespace libnut {
 			wps_group_ciphers group; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
 			QString psk; //WPA preshared key; 256-bit pre-shared key
 			wps_eapol_flags eapol_flags; // IEEE 802.1X/EAPOL options (bit field) TODO:implement
-			bool mixed_cell; //This option can be used to configure whether so called mixed
-			bool proactive_key_caching; //Enable/disable opportunistic PMKSA caching for WPA2.
+			wps_bool mixed_cell; //This option can be used to configure whether so called mixed
+			wps_bool proactive_key_caching; //Enable/disable opportunistic PMKSA caching for WPA2.
 			QString wep_key0; //Static WEP key (ASCII in double quotation, hex without)
 			QString wep_key1;
 			QString wep_key2;
 			QString wep_key3;
 			char wep_tx_keyidx; //Default WEP key index (TX) (0..3) TODO: implement
-			bool peerkey; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
+			wps_bool peerkey; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
 			wps_eap_network_config eap_config;
 	};
 
