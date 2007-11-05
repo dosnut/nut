@@ -90,7 +90,7 @@ namespace qnut {
 					}
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC) {
 						result = tr("static");
-						if (interface->getConfig().getFlags() & IPv4Config::MAY_USERSTATIC) {
+						if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC) {
 							return result + " (" + tr("customizable") + ')';
 						}
 					}

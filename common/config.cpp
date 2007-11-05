@@ -143,7 +143,6 @@ namespace nut {
 	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4Config &data) {
 		argument.beginStructure();
 		argument << (quint32) data.getFlags() << (quint32) data.getOverwriteFlags()
-			<< data.m_canUserEnable
 			<< data.m_static_ip
 			<< data.m_static_netmask
 			<< data.m_static_gateway
@@ -158,11 +157,24 @@ namespace nut {
 		argument >> flags >> oFlags;
 		data.m_flags = (IPv4Config::Flags) flags;
 		data.m_overwriteFlags = (IPv4Config::OverwriteFlags) oFlags;
-		argument >> data.m_canUserEnable
+		argument
 			>> data.m_static_ip
 			>> data.m_static_netmask
 			>> data.m_static_gateway
 			>> data.m_static_dnsservers;
+		argument.endStructure();
+		return argument;
+	}
+	
+	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4UserConfig &data) {
+		argument.beginStructure();
+		argument << data.m_ip << data.m_netmask << data.m_gateway << data.m_dnsservers;
+		argument.endStructure();
+		return argument;
+	}
+	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4UserConfig &data) {
+		argument.beginStructure();
+		argument >> data.m_ip >> data.m_netmask >> data.m_gateway >> data.m_dnsservers;
 		argument.endStructure();
 		return argument;
 	}
@@ -202,6 +214,6 @@ namespace nut {
 	}
 	
 	IPv4Config::IPv4Config(int flags, int overwriteFlags)
-	: m_flags(flags), m_overwriteFlags(overwriteFlags), m_canUserEnable(false) {
+	: m_flags(flags), m_overwriteFlags(overwriteFlags) {
 	}
 }

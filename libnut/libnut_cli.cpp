@@ -882,5 +882,35 @@ void CInterface::setNetmask(QHostAddress & address) {
 void CInterface::setGateway(QHostAddress & address) {
 	dbusInterface->setGateway(address.toIPv4Address());
 }
+bool CInterface::needUserSetup() {
+	QDBusReply<bool> reply = dbusInterface->needUserSetup();
+	if (reply.isValid()) {
+		return reply.value();
+	}
+	else {
+		*log << (tr("Error while interface->needUserSetup at: ") + dbusPath.path());
+	}
+	return false;
+}
+bool CInterface::setUserConfig(const nut::IPv4UserConfig &userConfig) {
+	QDBusReply<bool> reply = dbusInterface->setUserConfig(userConfig);
+	if (reply.isValid()) {
+		return reply.value();
+	}
+	else {
+		*log << (tr("Error while interface->setUserConfig at: ") + dbusPath.path());
+	}
+	return false;
+}
+nut::IPv4UserConfig CInterface::getUserConfig() {
+	QDBusReply<nut::IPv4UserConfig> reply = dbusInterface->getUserConfig();
+	if (reply.isValid()) {
+		return reply.value();
+	}
+	else {
+		*log << (tr("Error while interface->getUserConfig at: ") + dbusPath.path());
+	}
+	return nut::IPv4UserConfig();
+}
 
 };

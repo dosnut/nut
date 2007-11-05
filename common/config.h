@@ -253,18 +253,19 @@ namespace nut {
 	
 	class IPv4Config {
 		public:
+			// assert(USERSTATIC xor (DHCP or (ZEROCONF xor STATIC)))
 			typedef enum {
 				DO_DHCP      = 1,
 				DO_ZEROCONF  = 2,
 				DO_STATIC    = 4,
-				MAY_USERSTATIC = 8
+				DO_USERSTATIC = 8,	// Exclusive
 			} Flags;
 			
 			typedef enum {
 				OW_IP        = 1,
 				OW_NETMASK   = 2,
 				OW_GATEWAY   = 4,
-				OW_DNSSERVER = 8
+				OW_DNSSERVER = 8,
 			} OverwriteFlags;
 		
 		protected:
@@ -277,7 +278,6 @@ namespace nut {
 			
 			int m_flags;
 			int m_overwriteFlags;
-			bool m_canUserEnable;
 		
 		public:	
 			IPv4Config(int flags = IPv4Config::DO_DHCP | IPv4Config::DO_ZEROCONF, int overwriteFlags = 0);
@@ -287,11 +287,34 @@ namespace nut {
 			const QHostAddress& getStaticGateway() const { return m_static_gateway; }
 			const QList<QHostAddress>& getStaticDNS() const { return m_static_dnsservers; }
 			
-			
 			Flags getFlags() const { return (Flags) m_flags; }
 			OverwriteFlags getOverwriteFlags() const { return (OverwriteFlags) m_overwriteFlags; }
-			bool getCanUserEnable() const { return m_canUserEnable; }
+	};
+	
+	class IPv4UserConfig {
+		protected:
+			friend QDBusArgument &operator<< (QDBusArgument &argument, const IPv4UserConfig &data);
+			friend const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4UserConfig &data);
 			
+			QHostAddress m_ip, m_netmask, m_gateway;
+			QList<QHostAddress> m_dnsservers;
+		
+		public:
+			const QHostAddress& ip() const { return m_ip; }
+			bool setIP(const QHostAddress &ip) { m_ip = ip; return true; }
+		
+			const QHostAddress& netmask() const { return m_netmask; }
+			bool setNetmask(const QHostAddress &netmask) { m_netmask = netmask; return true; }
+		
+			const QHostAddress& gateway() const { return m_gateway; }
+			bool setGateway(const QHostAddress &gateway) { m_gateway = gateway; return true; }
+		
+			const QList<QHostAddress>& dnsservers() const { return m_dnsservers; }
+			bool setDnsservers(const QList<QHostAddress>& dnsservers) { m_dnsservers = dnsservers; return true; }
+			
+			bool valid() {
+				return !m_ip.isNull();
+			}
 	};
 }
 
@@ -302,6 +325,7 @@ Q_DECLARE_METATYPE(nut::SelectRule);
 Q_DECLARE_METATYPE(nut::SelectConfig);
 Q_DECLARE_METATYPE(nut::EnvironmentConfig);
 Q_DECLARE_METATYPE(nut::IPv4Config);
+Q_DECLARE_METATYPE(nut::IPv4UserConfig);
 Q_DECLARE_METATYPE(QVector< quint32 >);
 Q_DECLARE_METATYPE(QVector< QVector< quint32 > >);
 

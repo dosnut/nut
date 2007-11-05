@@ -11,7 +11,7 @@ namespace nut {
 		return names[(int) type];
 	}
 	QString toString(enum libnut::InterfaceState state) {
-		const char* names[] = { "off", "static", "dhcp", "zeroconf" };
+		const char* names[] = { "off", "static", "dhcp", "zeroconf", "waitforconfig" };
 		return names[(int) state];
 	}
 }
@@ -97,6 +97,7 @@ namespace nut {
 		qRegisterMetaType<SelectConfig>("nut::SelectConfig");
 		qRegisterMetaType<EnvironmentConfig>("nut::EnvironmentConfig");
 		qRegisterMetaType<IPv4Config>("nut::IPv4Config");
+		qRegisterMetaType<IPv4UserConfig>("nut::IPv4UserConfig");
 		qRegisterMetaType< QVector< quint32 > >("QVector< quint32 >");
 		qRegisterMetaType< QVector< QVector< quint32 > > >("QVector< QVector< quint32 > >");
 	
@@ -107,6 +108,7 @@ namespace nut {
 		qDBusRegisterMetaType<SelectConfig>();
 		qDBusRegisterMetaType<EnvironmentConfig>();
 		qDBusRegisterMetaType<IPv4Config>();
+		qDBusRegisterMetaType<IPv4UserConfig>();
 		qDBusRegisterMetaType< QVector< quint32 > >();
 		qDBusRegisterMetaType< QVector< QVector< quint32 > > >();
 	}

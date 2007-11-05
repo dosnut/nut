@@ -155,6 +155,12 @@ namespace nuts {
 		return true;
 	}
 	
+	bool ConfigParser::staticUser() {
+		if (!m_curipv4config) return false;
+		m_curipv4config->m_flags = nut::IPv4Config::DO_USERSTATIC;
+		return true;
+	}
+	
 	bool ConfigParser::staticIP(const QHostAddress &addr) {
 		if (!m_curipv4config) return false;
 		if (!m_curipv4config->m_static_ip.isNull()) return false;
