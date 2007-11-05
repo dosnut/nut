@@ -11,6 +11,7 @@
 //
 #include "accesspointconfig.h"
 #include <QFileDialog>
+#include <QToolTip>
 
 namespace qnut {
 	CAccessPointConfig::CAccessPointConfig(CWpa_Supplicant * wpa_supplicant, QWidget *parent) : QDialog(parent) {
@@ -101,17 +102,38 @@ namespace qnut {
 		
 		config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
 		
+		config.disabled = (wps_bool)ui.autoEnableCheck->isChecked();
+		
 		if (ui.encCombo->currentText() == "WEP") {
 			config.group = (wps_group_ciphers)(WGC_WEP104 | WGC_WEP40);
+			config.pairwise = WPC_NONE;
+			
 			config.wep_key0 = ui.wepKey0HexCheck->isChecked() ? ui.wepKey0Edit->text() : '\"' + ui.wepKey0Edit->text() + '\"';
 			config.wep_key1 = ui.wepKey1HexCheck->isChecked() ? ui.wepKey1Edit->text() : '\"' + ui.wepKey1Edit->text() + '\"';
 			config.wep_key2 = ui.wepKey2HexCheck->isChecked() ? ui.wepKey2Edit->text() : '\"' + ui.wepKey2Edit->text() + '\"';
 			config.wep_key3 = ui.wepKey3HexCheck->isChecked() ? ui.wepKey3Edit->text() : '\"' + ui.wepKey3Edit->text() + '\"';
+			
+			if (ui.wepKey0Radio->isChecked())
+				config.wep_tx_keyidx = 0;
+			else if (ui.wepKey1Radio->isChecked())
+				config.wep_tx_keyidx = 1;
+			else if (ui.wepKey2Radio->isChecked())
+				config.wep_tx_keyidx = 2;
+			else if (ui.wepKey3Radio->isChecked())
+				config.wep_tx_keyidx = 3;
 		}
-		else if (ui.encCombo->currentText() == "CCMP")
+		else if (ui.encCombo->currentText() == "CCMP") {
 			config.group = WGC_CCMP;
-		else if (ui.encCombo->currentText() == "TKIP")
+			config.pairwise = WPC_CCMP;
+		}
+		else if (ui.encCombo->currentText() == "TKIP") {
 			config.group = WGC_TKIP;
+			config.pairwise = WPC_TKIP;
+		}
+		else {
+			config.wep_tx_keyidx = -1;
+			config.pairwise = WPC_NONE;
+		}
 		
 		switch (ui.keyManagementCombo->currentIndex()) {
 		case 0:
@@ -157,12 +179,8 @@ namespace qnut {
 		}
 		
 		if (status.failures != WCF_NONE) {
-/*	WCF_NONE=0, WCF_SSID=1,WCF_BSSID=2,WCF_DISABLED=4,WCF_ID_STR=8,
-	WCF_SCAN_SSID=16, WCF_PRIORITY=32, WCF_MODE=64, WCF_FREQ=128,
-	WCF_PROTO=256, WCF_KEYMGMT=512, WCF_AUTH_ALG=1024, WCF_PAIRWISE=2048,
-	WCF_GROUP=0x0000001000, WCF_PSK=0x0000002000, WCF_EAPOL_FLAGS=0x0000004000, WCF_MIXED_CELL=0x0000008000,
-	WCF_PROA_KEY_CACHING=0x00000010000, WCF_WEP_KEY0=0x0000020000, WCF_WEP_KEY1=0x0000040000, WCF_WEP_KEY2=0x0000080000,
-	WCF_WEP_KEY3=0x0000100000, WCF_WEP_KEY_IDX=0x0000200000, WCF_PEERKEY=0x0000400000, WCF_ALL=0x00007FFFFF*/
+			qDebug("general failures:");
+			if (status.failures & WECF_ALL)             qDebug("WCF_ALL");
 			if (status.failures & WCF_SSID)             qDebug("WCF_SSID");
 			if (status.failures & WCF_BSSID)            qDebug("WCF_BSSID");
 			if (status.failures & WCF_DISABLED)         qDebug("WCF_DISABLED");
@@ -186,12 +204,37 @@ namespace qnut {
 			if (status.failures & WCF_WEP_KEY3)         qDebug("WCF_WEP_KEY3");
 			if (status.failures & WCF_WEP_KEY_IDX)      qDebug("WCF_WEP_KEY_IDX");
 			if (status.failures & WCF_PEERKEY)          qDebug("WCF_PEERKEY");
-			return;
 		}
 		
 		if (status.eap_failures != WECF_NONE) {
-			qDebug("eap failures");
-			return;
+			qDebug("eap failures:");
+			if (status.eap_failures & WECF_ALL)                 qDebug("WECF_ALL");
+			if (status.eap_failures & WECF_EAP)                 qDebug("WECF_EAP");
+			if (status.eap_failures & WECF_IDENTITY)            qDebug("WECF_IDENTITY");
+			if (status.eap_failures & WECF_ANON_IDENTITY)       qDebug("WECF_ANON_IDENTITY");
+			if (status.eap_failures & WECF_PASSWD)              qDebug("WECF_PASSWD");
+			if (status.eap_failures & WECF_CA_CERT)             qDebug("WECF_CA_CERT");
+			if (status.eap_failures & WECF_CA_PATH)             qDebug("WECF_CA_PATH");
+			if (status.eap_failures & WECF_CLIENT_CERT)         qDebug("WECF_CLIENT_CERT");
+			if (status.eap_failures & WECF_PRIVATE_KEY)         qDebug("WECF_PRIVATE_KEY");
+			if (status.eap_failures & WECF_PRIVATE_KEY_PASSWD)  qDebug("WECF_PRIVATE_KEY_PASSWD");
+			if (status.eap_failures & WECF_DH_FILE)             qDebug("WECF_DH_FILE");
+			if (status.eap_failures & WECF_SUBJECT_MATCH)       qDebug("WECF_SUBJECT_MATCH");
+			if (status.eap_failures & WECF_ALTSUBJECT_MATCH)    qDebug("WECF_ALTSUBJECT_MATCH");
+			if (status.eap_failures & WECF_PHASE1)              qDebug("WECF_PHASE1");
+			if (status.eap_failures & WECF_PHASE2)              qDebug("WECF_PHASE2");
+			if (status.eap_failures & WECF_CA_CERT2)            qDebug("WECF_CA_CERT2");
+			if (status.eap_failures & WECF_CA_PATH2)            qDebug("WECF_CA_PATH2");
+			if (status.eap_failures & WECF_CLIENT_CERT2)        qDebug("WECF_CLIENT_CERT2");
+			if (status.eap_failures & WECF_PRIVATE_KEY2)        qDebug("WECF_PRIVATE_KEY2");
+			if (status.eap_failures & WECF_PRIVATE_KEY2_PASSWD) qDebug("WECF_PRIVATE_KEY2_PASSWD");
+			if (status.eap_failures & WECF_DH_FILE2)            qDebug("WECF_DH_FILE2");
+			if (status.eap_failures & WECF_SUBJECT_MATCH2)      qDebug("WECF_SUBJECT_MATCH2");
+			if (status.eap_failures & WECF_ALTSUBJECT_MATCH2)   qDebug("WECF_ALTSUBJECT_MATCH2");
+			if (status.eap_failures & WECF_FRAGMENT_SIZE)       qDebug("WECF_FRAGMENT_SIZE");
+			if (status.eap_failures & WECF_EAPPSK)              qDebug("WECF_EAPPSK");
+			if (status.eap_failures & WECF_NAI)                 qDebug("WECF_NAI");
+			if (status.eap_failures & WECF_PAC_FILE)            qDebug("WECF_PAC_FILE");
 		}
 		
 		accept();
@@ -247,15 +290,22 @@ namespace qnut {
 			ui.keyManagementCombo->setCurrentIndex(0);
 		
 		if (
-			(config.group & WC_WEP40) ||
-			(config.group & WC_WEP104) ||
-			(config.group & WC_CCMP)
-		)
+			(config.group & WC_CCMP) ||
+			((config.wep_tx_keyidx >= 0) && ((config.group & WC_WEP40) || (config.group & WC_WEP104)))
+		) {
 			ui.encCombo->setCurrentIndex(1);
+			switch (config.wep_tx_keyidx) {
+			default: ui.wepKey0Radio->setChecked(true); break;
+			case 1:  ui.wepKey1Radio->setChecked(true); break;
+			case 2:  ui.wepKey2Radio->setChecked(true); break;
+			case 3:  ui.wepKey3Radio->setChecked(true); break;
+			}
+		}
 		else
 			ui.encCombo->setCurrentIndex(0);
 		
 		ui.rsnCheck->setChecked(config.protocols & WP_RSN);
+		ui.autoEnableCheck->setChecked(config.disabled);
 		
 		currentID = id;
 		

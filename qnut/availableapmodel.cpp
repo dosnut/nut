@@ -165,7 +165,7 @@ namespace qnut {
 			case AVLAP_MOD_BSSID:
 				return tr("BSSID");
 			case AVLAP_MOD_LEVEL:
-				return tr("Level");
+				return tr("Signal level");
 			case AVLAP_MOD_CIPHERS:
 				return tr("Encryption");
 			default:
