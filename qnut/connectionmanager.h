@@ -31,6 +31,8 @@ namespace qnut {
 		QAction * ipConfigurationAction;
 		QAction * wirelessSettingsAction;
 		
+		QAction * clearLogAction;
+		
 		QTabWidget tabWidget;
 		QTreeView overView;
 		QTextEdit logEdit;

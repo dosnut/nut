@@ -54,7 +54,6 @@ namespace qnut {
 		connect(ui.actionShowLog, SIGNAL(toggled(bool)), this, SLOT(uiHandleShowLogToggle(bool)));
 		connect(ui.actionAboutQt, SIGNAL(triggered()), qApp , SLOT(aboutQt()));
 		connect(ui.actionAboutQNUT, SIGNAL(triggered()), this , SLOT(uiShowAbout()));
-		connect(refreshDevicesAction, SIGNAL(triggered()), &deviceManager, SLOT(rebuild()));
 		connect(&tabWidget, SIGNAL(currentChanged(int)), this, SLOT(uiCurrentTabChanged(int)));
 		connect(&trayicon, SIGNAL(messageClicked()), this, SLOT(show()));
 		connect(overView.selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
@@ -76,6 +75,7 @@ namespace qnut {
 		deviceSettingsAction   = new QAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("Scripting settings..."), this);
 		ipConfigurationAction  = new QAction(QIcon(UI_ICON_EDIT), tr("Set IP Configuration..."), this);
 		wirelessSettingsAction = new QAction(QIcon(UI_ICON_AIR_SETTINGS), tr("Wireless settings..."), this);
+		clearLogAction         = new QAction(QIcon(UI_ICON_CLEAR), tr("Clear log"), this);
 		
 		enableDeviceAction->setEnabled(false);
 		disableDeviceAction->setEnabled(false);
@@ -92,6 +92,9 @@ namespace qnut {
 		overView.addAction(ipConfigurationAction);
 		overView.addAction(getSeparator(this));
 		overView.addAction(wirelessSettingsAction);
+		
+		connect(refreshDevicesAction, SIGNAL(triggered()), &deviceManager, SLOT(rebuild()));
+		connect(clearLogAction, SIGNAL(triggered()), &logEdit, SLOT(clear()));
 	}
 	
 	void CConnectionManager::distributeActions(int mode) {
@@ -102,6 +105,8 @@ namespace qnut {
 			break;
 		case 1:
 			ui.menuDevice->addAction(refreshDevicesAction);
+			ui.menuDevice->addSeparator();
+			ui.menuDevice->addAction(clearLogAction);
 			break;
 		case 2: {
 			ui.menuDevice->addAction(refreshDevicesAction);
