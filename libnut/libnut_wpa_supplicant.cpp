@@ -685,6 +685,7 @@ CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) 
 	wps_connected = false;
 	timerCount = 0;
 	log_enabled = true;
+	connect(QCoreApplication::instance(),SIGNAL(aboutToQuit ()),this,SLOT(wps_detach()));
 }
 CWpa_Supplicant::~CWpa_Supplicant() {
 	wps_close("destructor");
@@ -767,14 +768,6 @@ bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 			event_sn = NULL;
 		}
 		//Detaching takes place if program is about to quit
-		/*
-		found this in a "documentation" when to use wpa_ctrl_detach:
-		Once the control interface connection is not needed anymore, it should
-		be closed by calling wpa_ctrl_close(). If the connection was used for
-		unsolicited event messages, it should be first detached by calling
-		wpa_ctrl_detach().
-		*/
-		wps_detach();
 		//Close control connections
 		wpa_ctrl_close(event_ctrl);
 		wpa_ctrl_close(cmd_ctrl);
@@ -1171,6 +1164,9 @@ wps_network_config CWpa_Supplicant::getNetworkConfig(int id) {
 	response = wps_cmd_GET_NETWORK(id,"wep_tx_keyidx");
 	if ("FAIL\n" != response) {
 		config.wep_tx_keyidx = response.toInt();
+		if ( (0 == config.wep_tx_keyidx) && config.wep_key0.isEmpty() ) {
+			config.wep_tx_keyidx = -1;
+		}
 	}
 
 	response = wps_cmd_GET_NETWORK(id,"peerkey");
@@ -1309,7 +1305,7 @@ wps_eap_network_config CWpa_Supplicant::wps_getEapNetworkConfig(int id) {
 	return config;
 }
 wps_eap_netconfig_failures CWpa_Supplicant::wps_editEapNetwork(int netid, wps_eap_network_config config) {
-	wps_eap_netconfig_failures eap_failures;
+	wps_eap_netconfig_failures eap_failures = WECF_NONE;
 	if (EAPM_UNDEFINED != config.eap) {
 		if (!setNetworkVariable(netid,"eap",toString(config.eap)) ) {
 			eap_failures= (wps_eap_netconfig_failures) (eap_failures | WECF_EAP);
