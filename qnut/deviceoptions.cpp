@@ -171,7 +171,7 @@ namespace qnut {
 				enterEnvironmentAction->setDisabled(target == device->activeEnvironment);
 				ui.detailsView->setRootIsDecorated(true);
 				ui.detailsView->setModel(new CEnvironmentDetailsModel((CEnvironment *)(targetIndex.internalPointer())));
-				//ui.detailsView->expandAll();
+				ui.detailsView->expandAll();
 			}
 			else {
 				enterEnvironmentAction->setEnabled(false);

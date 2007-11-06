@@ -32,11 +32,11 @@ namespace qnut {
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
 	private:
-		void fillParentBlocks(quint32 start = 0);
+		void fillParentRules(quint32 start = 0);
 		
 		CEnvironment * environment;
 		nut::SelectConfig selectConfig;
-		QVector<quint32> parentBlocks;
+		QVector<quint32> parentRules;
 	};
 }
 
