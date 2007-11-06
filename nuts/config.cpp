@@ -63,6 +63,10 @@ namespace nuts {
 		if ((envc->m_ipv4Interfaces.size() == 0) && (!l_envc->no_def_dhcp)) {
 			envc->m_ipv4Interfaces.push_back(new nut::IPv4Config());
 		}
+		// Append "select user;" if no select config was given.
+		if (envc->m_select.filters.size() == 0) {
+			envc->m_select.filters.append(nut::SelectRule());
+		}
 		return true;
 	}
 	
