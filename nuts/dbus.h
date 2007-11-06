@@ -37,12 +37,13 @@ namespace nuts {
 		private slots:
 			void devAdded(QString devName, Device *dev);
 			void devRemoved(QString devName, Device *dev);
+			
+			friend int mainApp(int argc, char* argv[]);
+			void stopDBus();
 		
 		public:
 			DBusDeviceManager(DeviceManager *devmgr);
 			virtual ~DBusDeviceManager();
-			
-			void stopDBus();
 	
 		public slots:
 			QList<QDBusObjectPath> getDeviceList();
