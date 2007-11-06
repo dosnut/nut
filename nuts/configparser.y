@@ -97,6 +97,7 @@ dhcpconfig: DHCP { CHECK(envDHCP()); } ';' { CHECK(finishDHCP()); }
 ;
 
 static: STATIC { CHECK(envStatic());  } staticconfig { CHECK(finishStatic()); }
+	| STATIC USER  { CHECK(envStatic()); CHECK(staticUser()); } ';'  { CHECK(finishStatic()); }
 ;
 
 staticconfig: '{' staticoptions '}'

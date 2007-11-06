@@ -230,6 +230,9 @@ namespace libnut {
 		void setIP(QHostAddress & address);
 		void setNetmask(QHostAddress & address);
 		void setGateway(QHostAddress & address);
+		bool needUserSetup();
+		bool setUserConfig(const nut::IPv4UserConfig &userConfig);
+		nut::IPv4UserConfig getUserConfig();
 		
 	signals:
 		void stateChanged(InterfaceState state);

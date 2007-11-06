@@ -465,10 +465,11 @@ namespace nuts {
 
 	
 	Environment::Environment(Device *device, nut::EnvironmentConfig *config, int id)
-	: QObject(device), device(device), config(config), envIsUp(false), envStart(false), m_id(id), selArpWaiting(0) {
+	: QObject(device), device(device), config(config), envIsUp(false), envStart(false), m_id(id), selArpWaiting(0), m_needUserSetup(false) {
 		foreach (nut::IPv4Config *ic, config->getIPv4Interfaces())
 			ifs.push_back(new Interface_IPv4(this, ifs.size(), ic));
 		ifUpStatus.fill(false, ifs.size());
+		updateNeedUserSetup();
 	}
 	Environment::~Environment() {
 		foreach (Interface* iface, ifs)
@@ -541,7 +542,8 @@ namespace nuts {
 				case nut::SelectRule::SEL_ESSID:
 					m_selectResults[i] = (filters[i].essid == device->essid()) ? nut::SelectResult::True : nut::SelectResult::False;
 					break;
-				case nut::SelectRule::SEL_BLOCK:
+				case nut::SelectRule::SEL_AND_BLOCK:
+				case nut::SelectRule::SEL_OR_BLOCK:
 					break;
 			}
 		}
@@ -566,28 +568,22 @@ namespace nuts {
 			return;
 		}
 		for (int i = c-1; i >= 0; i--) {
-			if (filters[i].selType == nut::SelectRule::SEL_BLOCK) {
+			if (filters[i].selType == nut::SelectRule::SEL_AND_BLOCK) {
 				const QVector<quint32> &block = blocks[filters[i].block];
-				int d = block.size();
-				if (d == 0)
-					m_selectResults[i] = nut::SelectResult::False;
-				else {
-					if (block[0] == 0) { // AND
-						nut::SelectResult tmp = nut::SelectResult::True;
-						for (int j = 1; j < d; j++) {
-							tmp = tmp && m_selectResults[block[j]];
-							if (tmp == nut::SelectResult::False) break;
-						}
-						m_selectResults[i] = tmp;
-					} else { // OR
-						nut::SelectResult tmp = nut::SelectResult::False;
-						for (int j = 1; j < d; j++) {
-							tmp = tmp || m_selectResults[block[j]];
-							if (tmp == nut::SelectResult::True) break;
-						}
-						m_selectResults[i] = tmp;
-					}
+				nut::SelectResult tmp = nut::SelectResult::True;
+				foreach (quint32 j, block) {
+					tmp = tmp && m_selectResults[j];
+					if (tmp == nut::SelectResult::False) break;
 				}
+				m_selectResults[i] = tmp;
+			} else if (filters[i].selType == nut::SelectRule::SEL_OR_BLOCK) {
+				const QVector<quint32> &block = blocks[filters[i].block];
+				nut::SelectResult tmp = nut::SelectResult::False;
+				foreach (quint32 j, block) {
+					tmp = tmp || m_selectResults[j];
+					if (tmp == nut::SelectResult::True) break;
+				}
+				m_selectResults[i] = tmp;
 			}
 		}
 		m_selectResult = m_selectResults[0];
@@ -625,11 +621,30 @@ namespace nuts {
 		checkSelectState();
 	}
 	
+	void Environment::updateNeedUserSetup() {
+//		bool prev = m_needUserSetup;
+		m_needUserSetup = false;
+		foreach (Interface *iface, ifs) {
+			if (iface->needUserSetup()) {
+				m_needUserSetup = true;
+				break;
+			}
+		}
+//		if (prev != m_needUserSetup)
+			// TODO ?
+	}
+	
 	Interface::Interface(Environment *env, int index) : QObject(env), m_env(env), m_index(index) { }
 	Interface::~Interface() { }
 	
+	void Interface::updateNeedUserSetup(bool needUserSetup) {
+		m_needUserSetup = needUserSetup;
+		m_env->updateNeedUserSetup();
+	}
+	
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, nut::IPv4Config *config)
 	: Interface(env, index), dhcp_timer_id(-1), dm(env->device->dm), dhcp_xid(0), dhcpstate(DHCPS_OFF), m_config(config), m_ifstate(libnut::IFS_OFF) {
+		m_needUserSetup = config->getFlags() & nut::IPv4Config::DO_USERSTATIC;
 		connect(this, SIGNAL(interfaceUp(Interface_IPv4*)), &m_env->device->dm->m_events, SLOT(interfaceUp(Interface_IPv4*)));
 		connect(this, SIGNAL(interfaceDown(Interface_IPv4*)), &m_env->device->dm->m_events, SLOT(interfaceDown(Interface_IPv4*)));
 	}
@@ -873,13 +888,28 @@ namespace nuts {
 		m_ifstate = libnut::IFS_STATIC;
 		systemUp();
 	}
+	void Interface_IPv4::startUserStatic() {
+		ip = m_userConfig.ip();
+		netmask = m_userConfig.netmask();
+		gateway = m_userConfig.gateway();
+		dnsserver = m_userConfig.dnsservers();
+		m_ifstate = libnut::IFS_STATIC;
+		systemUp();
+	}
 
 	void Interface_IPv4::start() {
 		log << "Interface_IPv4::start" << endl;
-		if (m_config->getFlags() & nut::IPv4Config::DO_DHCP)
+		if (m_config->getFlags() & nut::IPv4Config::DO_DHCP) {
 			startDHCP();
-		else
+		} else if (m_config->getFlags() & nut::IPv4Config::DO_USERSTATIC) {
+			if (m_needUserSetup) {
+				m_ifstate = libnut::IFS_WAITFORCONFIG;
+			} else {
+				startUserStatic();
+			}
+		} else {
 			startStatic();
+		}
 	}
 	
 	void Interface_IPv4::stop() {
@@ -1118,4 +1148,12 @@ namespace nuts {
 		dhcpAction(packet);
 		delete packet;
 	}
+	
+	bool Interface_IPv4::setUserConfig(const nut::IPv4UserConfig &userConfig) {
+		if (m_config->getFlags() && nut::IPv4Config::DO_USERSTATIC) return false;
+		m_userConfig = userConfig;
+		updateNeedUserSetup(m_userConfig.valid());
+		return true;
+	}
+
 }
