@@ -340,7 +340,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	QDBusReply<nut::DeviceConfig> replyconf = dbusDevice->getConfig();
 	if (replyconf.isValid()) {
 		dbusConfig = replyconf.value();
-		need_wpa_supplicant = !(dbusConfig.wpaConfigFile().isNull());
+		need_wpa_supplicant = !(dbusConfig.wpaConfigFile().isEmpty());
 		*log << tr("wpa_supplicant config file at: %1").arg(dbusConfig.wpaConfigFile());
 	}
 	else {
