@@ -20,6 +20,7 @@ int mainApp(int argc, char* argv[]) {
 		sighandler = new SigHandler();
 		devManager = new DeviceManager(argc > 1 ? argv[1] : "/etc/nuts/nuts.config");
 		devManager->dbus_devMan = new DBusDeviceManager(devManager);
+		QObject::connect(sighandler, SIGNAL(appQuit()), devManager->dbus_devMan, SLOT(stopDBus()));
 	} catch (Exception &e) {
 		err << "Initialize failed:" << endl
 		          << "    " << e.msg() << endl;

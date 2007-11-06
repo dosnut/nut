@@ -32,6 +32,7 @@ namespace nuts {
 		
 		signals:
 			void gotSignal(int signum);
+			void appQuit();
 	};
 };
 
