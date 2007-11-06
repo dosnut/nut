@@ -317,7 +317,9 @@ namespace nuts {
 			m_arp_socket = -1;
 		}
 		m_probes.clear(); m_requests.clear();
-		foreach (ARPTimer *t, m_arp_timers) {
+		QLinkedList<ARPTimer*> arp_timers(m_arp_timers);
+		m_arp_timers.clear();
+		foreach (ARPTimer *t, arp_timers) {
 			t->m_arp = 0;
 			delete t;
 		}
