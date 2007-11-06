@@ -341,7 +341,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	if (replyconf.isValid()) {
 		dbusConfig = replyconf.value();
 		need_wpa_supplicant = !(dbusConfig.wpaConfigFile().isEmpty());
-		*log << tr("wpa_supplicant config file at: %1").arg(dbusConfig.wpaConfigFile());
+		*log << tr("(%2) wpa_supplicant config file at: %1").arg(dbusConfig.wpaConfigFile(),name);
 	}
 	else {
 		throw CLI_DevConnectionException(tr("(%2) Error(%1) while retrieving device config").arg(replyconf.error().name(),name));
