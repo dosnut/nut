@@ -257,6 +257,9 @@ namespace nuts {
 			bool startSelect();
 			void checkSelectState();
 			
+			bool m_needUserSetup;
+			void updateNeedUserSetup();
+		
 		private slots:
 			void selectArpRequestTimeout(QHostAddress ip);
 			void selectArpRequestFoundMac(nut::MacAddress mac, QHostAddress ip);
@@ -284,6 +287,9 @@ namespace nuts {
 			Environment *m_env;
 			int m_index;
 			
+			bool m_needUserSetup;
+			void updateNeedUserSetup(bool needUserSetup);
+			
 		public:
 			Interface(Environment *env, int index);
 			virtual ~Interface();
@@ -292,6 +298,8 @@ namespace nuts {
 			virtual void stop() = 0;
 			
 			int getIndex() { return m_index; }
+			
+			bool needUserSetup() { return m_needUserSetup; }
 			
 			Environment *getEnvironment() { return m_env; }
 	};
@@ -330,6 +338,8 @@ namespace nuts {
 			
 			libnut::InterfaceState m_ifstate;
 			
+			nut::IPv4UserConfig m_userConfig;
+			
 			void dhcp_send_discover();
 			void dhcp_send_request(DHCPPacket *offer);
 			void dhcp_send_renew();
@@ -342,6 +352,7 @@ namespace nuts {
 			void stopDHCP();
 			void startZeroconf();
 			void startStatic();
+			void startUserStatic();
 			
 			void systemUp();
 			void systemDown();
@@ -374,6 +385,9 @@ namespace nuts {
 			
 			const nut::IPv4Config& getConfig() { return *m_config; }
 			libnut::InterfaceState getState() { return m_ifstate; }
+			
+			bool setUserConfig(const nut::IPv4UserConfig &userConfig);
+			const nut::IPv4UserConfig &getUserConfig() { return m_userConfig; }
 			
 		signals:
 			void interfaceUp(Interface_IPv4* iface);

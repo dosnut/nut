@@ -239,9 +239,23 @@ public Q_SLOTS: // METHODS
 
     inline QDBusReply<void> setDynamic()
     {
-        QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::NoBlock, QLatin1String("setDynamic"), argumentList);
+		QList<QVariant> argumentList;
+		return callWithArgumentList(QDBus::NoBlock, QLatin1String("setDynamic"), argumentList);
     }
+
+	inline QDBusReply<bool> needUserSetup() {
+		QList<QVariant> argumentList;
+		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("needUserSetup"), argumentList);
+	}
+	inline QDBusReply<bool> setUserConfig(nut::IPv4UserConfig userConfig) {
+		QList<QVariant> argumentList;
+		argumentList << qVariantFromValue(userConfig);
+		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("setUserConfig"), argumentList);
+	}
+	inline QDBusReply<nut::IPv4UserConfig> getUserConfig() {
+		QList<QVariant> argumentList;
+		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getUserConfig"), argumentList);
+	}
 
 Q_SIGNALS: // SIGNALS
     void stateChanged(const InterfaceProperties &properties);

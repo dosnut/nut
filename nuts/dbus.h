@@ -37,12 +37,13 @@ namespace nuts {
 		private slots:
 			void devAdded(QString devName, Device *dev);
 			void devRemoved(QString devName, Device *dev);
+			
+			friend int mainApp(int argc, char* argv[]);
+			void stopDBus();
 		
 		public:
 			DBusDeviceManager(DeviceManager *devmgr);
 			virtual ~DBusDeviceManager();
-			
-			void stopDBus();
 	
 		public slots:
 			QList<QDBusObjectPath> getDeviceList();
@@ -145,6 +146,11 @@ namespace nuts {
 			Q_NOREPLY void setNetmask(quint32 Netmask);
 			Q_NOREPLY void setGateway(quint32 Gateway);
  			void setDNS(QList<QHostAddress> dns);
+		
+			bool needUserSetup() { return s_interface->needUserSetup(); }
+			bool setUserConfig(nut::IPv4UserConfig userConfig) { return s_interface->setUserConfig(userConfig); }
+			nut::IPv4UserConfig getUserConfig() { return s_interface->getUserConfig(); }
+		
 		signals:
 			void stateChanged(const libnut::InterfaceProperties &properties);
 	};

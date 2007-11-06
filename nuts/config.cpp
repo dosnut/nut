@@ -63,6 +63,10 @@ namespace nuts {
 		if ((envc->m_ipv4Interfaces.size() == 0) && (!l_envc->no_def_dhcp)) {
 			envc->m_ipv4Interfaces.push_back(new nut::IPv4Config());
 		}
+		// Append "select user;" if no select config was given.
+		if (envc->m_select.filters.size() == 0) {
+			envc->m_select.filters.append(nut::SelectRule());
+		}
 		return true;
 	}
 	
@@ -155,6 +159,12 @@ namespace nuts {
 		return true;
 	}
 	
+	bool ConfigParser::staticUser() {
+		if (!m_curipv4config) return false;
+		m_curipv4config->m_flags = nut::IPv4Config::DO_USERSTATIC;
+		return true;
+	}
+	
 	bool ConfigParser::staticIP(const QHostAddress &addr) {
 		if (!m_curipv4config) return false;
 		if (!m_curipv4config->m_static_ip.isNull()) return false;
@@ -193,16 +203,16 @@ namespace nuts {
 	bool ConfigParser::selectAndBlock() {
 		if (!m_curenvconfig) return false;
 		quint32 blockid = m_curenvconfig->m_select.blocks.size();
-		selectAdd(nut::SelectRule(blockid));
-		m_curenvconfig->m_select.blocks.append(QVector<quint32>(1, 0)); // [ 0 ]
+		selectAdd(nut::SelectRule(blockid, nut::SelectRule::SEL_AND_BLOCK));
+		m_curenvconfig->m_select.blocks.append(QVector<quint32>());
 		return true;
 	}
 	
 	bool ConfigParser::selectOrBlock() {
 		if (!m_curenvconfig) return false;
 		quint32 blockid = m_curenvconfig->m_select.blocks.size();
-		selectAdd(nut::SelectRule(blockid));
-		m_curenvconfig->m_select.blocks.append(QVector<quint32>(1, 1)); // [ 1 ]
+		selectAdd(nut::SelectRule(blockid, nut::SelectRule::SEL_OR_BLOCK));
+		m_curenvconfig->m_select.blocks.append(QVector<quint32>());
 		return true;
 	}
 	

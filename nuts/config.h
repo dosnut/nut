@@ -64,6 +64,8 @@ namespace nuts {
 			bool envStatic();
 			bool finishStatic();
 			
+			bool staticUser();
+			
 			bool staticIP(const QHostAddress &addr);
 			bool staticNetmak(const QHostAddress &addr);
 			bool staticGateway(const QHostAddress &addr);

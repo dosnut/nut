@@ -1,7 +1,7 @@
 #ifndef QNUT_CONSTANTS_H
 #define QNUT_CONSTANTS_H
 
-#define UI_VERSION                      "0.1.1"
+#define UI_VERSION                      "0.3.0-rc1"
 #define UI_NAME                         tr("QNUT - Qt client for Network UTility Server (NUTS)")
 
 //#ifdef QNUT_RELEASE

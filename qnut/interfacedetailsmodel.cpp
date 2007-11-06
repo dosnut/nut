@@ -18,7 +18,6 @@
 
 namespace qnut {
 	using namespace nut;
-	//TODO: liste der dns server
 
 	CInterfaceDetailsModel::CInterfaceDetailsModel(CInterface * data, QObject * parent) : QAbstractItemModel(parent) {
 		interface = data;
@@ -42,7 +41,7 @@ namespace qnut {
 			return 0;
 		
 		if (!parent.isValid())
-			return 4;
+			return 4 + interface->dnsserver.size();
 		else {
 			return 0;
 		}
@@ -70,6 +69,9 @@ namespace qnut {
 			case 3:
 				return tr("Gateway");
 			default:
+				if (!interface->dnsserver.isEmpty())
+					return tr("DNS sever #%1").arg(index.row()-4);
+				
 				break;
 			}
 			break;
@@ -90,7 +92,7 @@ namespace qnut {
 					}
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC) {
 						result = tr("static");
-						if (interface->getConfig().getFlags() & IPv4Config::MAY_USERSTATIC) {
+						if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC) {
 							return result + " (" + tr("customizable") + ')';
 						}
 					}
@@ -150,10 +152,13 @@ namespace qnut {
 				else
 					return interface->gateway.toString();
 			default:
+				if (!interface->dnsserver.isEmpty())
+					return interface->dnsserver[index.row()-4].toString();
+				
 				break;
 			}
 			break;
-			}
+		}
 		default:
 			break;
 		}
@@ -200,7 +205,7 @@ namespace qnut {
 		
 		
 		if (!parent.isValid()) {
-			if (row <= 4)
+			if (row < 4 + interface->dnsserver.size())
 				return createIndex(row, column, (void *)NULL);
 		}
 		

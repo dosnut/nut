@@ -16,7 +16,7 @@
 #include "deviceoptions.h"
 #include "environmenttreemodel.h"
 #include "interfacedetailsmodel.h"
-//#include "environmentdetailsmodel.h"
+#include "environmentdetailsmodel.h"
 #include "ipconfiguration.h"
 #include "scriptsettings.h"
 #include "wirelesssettings.h"
@@ -169,11 +169,13 @@ namespace qnut {
 				connect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
 				
 				enterEnvironmentAction->setDisabled(target == device->activeEnvironment);
-				//workarround für environment details model
-				ui.detailsView->setModel(new CInterfaceDetailsModel(NULL));
+				ui.detailsView->setRootIsDecorated(true);
+				ui.detailsView->setModel(new CEnvironmentDetailsModel((CEnvironment *)(targetIndex.internalPointer())));
+				ui.detailsView->expandAll();
 			}
 			else {
 				enterEnvironmentAction->setEnabled(false);
+				ui.detailsView->setRootIsDecorated(false);
 				ui.detailsView->setModel(new CInterfaceDetailsModel((CInterface *)(targetIndex.internalPointer())));
 			}
 		}
