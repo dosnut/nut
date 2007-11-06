@@ -199,14 +199,15 @@ namespace nut {
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, SelectRule &data);
 
 		public:
-			typedef enum { SEL_USER, SEL_ARP, SEL_ESSID, SEL_BLOCK } SelectType;
+			typedef enum { SEL_USER, SEL_ARP, SEL_ESSID, SEL_AND_BLOCK, SEL_OR_BLOCK } SelectType;
 			
-			SelectRule() : selType(SEL_USER) { }
-			SelectRule(const QHostAddress &ipAddr) : selType(SEL_ARP), ipAddr(ipAddr) { }
-			SelectRule(const QHostAddress &ipAddr, const nut::MacAddress &macAddr) : selType(SEL_ARP), ipAddr(ipAddr), macAddr(macAddr) { }
-			SelectRule(const QString &essid) : selType(SEL_ESSID), essid(essid) { }
-			SelectRule(quint32 block) : selType(SEL_BLOCK), block(block) { }
+			SelectRule() : invert(false), selType(SEL_USER) { }
+			SelectRule(const QHostAddress &ipAddr, bool invert = false) : invert(invert), selType(SEL_ARP), ipAddr(ipAddr) { }
+			SelectRule(const QHostAddress &ipAddr, const nut::MacAddress &macAddr, bool invert = false) : invert(invert), selType(SEL_ARP), ipAddr(ipAddr), macAddr(macAddr) { }
+			SelectRule(const QString &essid, bool invert = false) : invert(invert), selType(SEL_ESSID), essid(essid) { }
+			SelectRule(quint32 block, SelectType blockType, bool invert = false) : invert(invert), selType(blockType), block(block) { }
 			
+			bool invert;
 			SelectType selType;
 			quint32 block;
 			QString essid;
@@ -224,9 +225,7 @@ namespace nut {
 			
 			// List of filters; the first rule (if it exists) always references the global block.
 			QVector<SelectRule> filters;
-			// List of blocks: each block contains at the first position the type:
-			//  0 = AND, 1 = OR
-			// followed by the list of filter ids for the block.
+			// List of blocks; each block is a list of fileder ids. The type of the block (AND/OR) is specified in the rule
 			QVector< QVector<quint32> > blocks;
 	};
 	

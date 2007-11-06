@@ -89,14 +89,14 @@ namespace nut {
 	
 	QDBusArgument &operator<< (QDBusArgument &argument, const SelectRule &data) {
 		argument.beginStructure();
-		argument << (quint8) data.selType << data.block << data.essid << data.ipAddr << data.macAddr;
+		argument << data.invert << (quint8) data.selType << data.block << data.essid << data.ipAddr << data.macAddr;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectRule &data) {
 		argument.beginStructure();
 		quint8 selType;
-		argument >> selType >> data.block >> data.essid >> data.ipAddr >> data.macAddr;
+		argument >> data.invert >> selType >> data.block >> data.essid >> data.ipAddr >> data.macAddr;
 		data.selType = (SelectRule::SelectType) selType;
 		argument.endStructure();
 		return argument;

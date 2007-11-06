@@ -199,16 +199,16 @@ namespace nuts {
 	bool ConfigParser::selectAndBlock() {
 		if (!m_curenvconfig) return false;
 		quint32 blockid = m_curenvconfig->m_select.blocks.size();
-		selectAdd(nut::SelectRule(blockid));
-		m_curenvconfig->m_select.blocks.append(QVector<quint32>(1, 0)); // [ 0 ]
+		selectAdd(nut::SelectRule(blockid, nut::SelectRule::SEL_AND_BLOCK));
+		m_curenvconfig->m_select.blocks.append(QVector<quint32>());
 		return true;
 	}
 	
 	bool ConfigParser::selectOrBlock() {
 		if (!m_curenvconfig) return false;
 		quint32 blockid = m_curenvconfig->m_select.blocks.size();
-		selectAdd(nut::SelectRule(blockid));
-		m_curenvconfig->m_select.blocks.append(QVector<quint32>(1, 1)); // [ 1 ]
+		selectAdd(nut::SelectRule(blockid, nut::SelectRule::SEL_OR_BLOCK));
+		m_curenvconfig->m_select.blocks.append(QVector<quint32>());
 		return true;
 	}
 	

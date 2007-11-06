@@ -542,7 +542,8 @@ namespace nuts {
 				case nut::SelectRule::SEL_ESSID:
 					m_selectResults[i] = (filters[i].essid == device->essid()) ? nut::SelectResult::True : nut::SelectResult::False;
 					break;
-				case nut::SelectRule::SEL_BLOCK:
+				case nut::SelectRule::SEL_AND_BLOCK:
+				case nut::SelectRule::SEL_OR_BLOCK:
 					break;
 			}
 		}
@@ -567,28 +568,22 @@ namespace nuts {
 			return;
 		}
 		for (int i = c-1; i >= 0; i--) {
-			if (filters[i].selType == nut::SelectRule::SEL_BLOCK) {
+			if (filters[i].selType == nut::SelectRule::SEL_AND_BLOCK) {
 				const QVector<quint32> &block = blocks[filters[i].block];
-				int d = block.size();
-				if (d == 0)
-					m_selectResults[i] = nut::SelectResult::False;
-				else {
-					if (block[0] == 0) { // AND
-						nut::SelectResult tmp = nut::SelectResult::True;
-						for (int j = 1; j < d; j++) {
-							tmp = tmp && m_selectResults[block[j]];
-							if (tmp == nut::SelectResult::False) break;
-						}
-						m_selectResults[i] = tmp;
-					} else { // OR
-						nut::SelectResult tmp = nut::SelectResult::False;
-						for (int j = 1; j < d; j++) {
-							tmp = tmp || m_selectResults[block[j]];
-							if (tmp == nut::SelectResult::True) break;
-						}
-						m_selectResults[i] = tmp;
-					}
+				nut::SelectResult tmp = nut::SelectResult::True;
+				foreach (quint32 j, block) {
+					tmp = tmp && m_selectResults[j];
+					if (tmp == nut::SelectResult::False) break;
 				}
+				m_selectResults[i] = tmp;
+			} else if (filters[i].selType == nut::SelectRule::SEL_OR_BLOCK) {
+				const QVector<quint32> &block = blocks[filters[i].block];
+				nut::SelectResult tmp = nut::SelectResult::False;
+				foreach (quint32 j, block) {
+					tmp = tmp || m_selectResults[j];
+					if (tmp == nut::SelectResult::True) break;
+				}
+				m_selectResults[i] = tmp;
 			}
 		}
 		m_selectResult = m_selectResults[0];
