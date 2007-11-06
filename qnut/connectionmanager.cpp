@@ -267,7 +267,7 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::uiHandleDeviceStateChanged(DeviceState state) {
-		enableDeviceAction->setDisabled(state == DS_UP);
+		enableDeviceAction->setEnabled(state == DS_DEACTIVATED);
 		disableDeviceAction->setDisabled(state == DS_DEACTIVATED);
 		ipConfigurationAction->setEnabled(state == DS_UNCONFIGURED);
 /*		//TODO: folgendes Ekelhafte durch was sinnvolleres ersetzen
