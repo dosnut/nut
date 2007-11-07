@@ -727,6 +727,11 @@ nut::EnvironmentConfig CEnvironment::getConfig() {
 	return config;
 }
 
+nut::SelectResult CEnvironment::getSelectResult() {
+	//Check if this is the active Environment;
+	return nut::SelectResult();
+}
+
 ////////////
 //CInterface
 ////////////
@@ -757,6 +762,7 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	else {
 		throw CLI_IfConnectionException(tr("Error while retrieving interface config") + replyconf.error().name());
 	}
+	getUserConfig(true); //Function will updated userConfig
 
 	connect(dbusInterface, SIGNAL(stateChanged(const InterfaceProperties &)), this, SLOT(dbusstateChanged(const InterfaceProperties &)));
 }
@@ -771,6 +777,7 @@ void CInterface::refreshAll() {
 		netmask = replyprops.value().netmask;
 		gateway = replyprops.value().gateway;
 		dnsserver = replyprops.value().dns;
+		getUserConfig(true); //Function will updated userConfig
 	}
 	else {
 		*log << (tr("Error while refreshing interface at: ") + dbusPath.path());
@@ -787,6 +794,7 @@ void CInterface::dbusstateChanged(const InterfaceProperties &properties) {
 	ip = properties.ip;
 	netmask = properties.netmask;
 	gateway = properties.gateway;
+	getUserConfig(true); //Function will updated userConfig
 	emit(ipconfigChanged(ip,netmask,gateway));
 }
 //CInterface SLOTS
@@ -806,25 +814,32 @@ bool CInterface::needUserSetup() {
 	}
 	return false;
 }
-bool CInterface::setUserConfig(const nut::IPv4UserConfig &userConfig) {
-	QDBusReply<bool> reply = dbusInterface->setUserConfig(userConfig);
+bool CInterface::setUserConfig(const nut::IPv4UserConfig &cuserConfig) {
+	QDBusReply<bool> reply = dbusInterface->setUserConfig(cuserConfig);
 	if (reply.isValid()) {
-		return reply.value();
+		if (reply.value()) {
+			userConfig = cuserConfig;
+			return true;
+		}
+		return false;
 	}
 	else {
 		*log << (tr("Error while interface->setUserConfig at: ") + dbusPath.path());
 	}
 	return false;
 }
-nut::IPv4UserConfig CInterface::getUserConfig() {
-	QDBusReply<nut::IPv4UserConfig> reply = dbusInterface->getUserConfig();
-	if (reply.isValid()) {
-		return reply.value();
+nut::IPv4UserConfig CInterface::getUserConfig(bool refresh) {
+	if (refresh) {
+		QDBusReply<nut::IPv4UserConfig> reply = dbusInterface->getUserConfig();
+		if (reply.isValid()) {
+			userConfig = reply.value();
+		}
+		else {
+			*log << (tr("Error while interface->getUserConfig at: ") + dbusPath.path());
+			userConfig = nut::IPv4UserConfig();
+		}
 	}
-	else {
-		*log << (tr("Error while interface->getUserConfig at: ") + dbusPath.path());
-	}
-	return nut::IPv4UserConfig();
+	return userConfig;
 }
 
 };

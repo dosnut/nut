@@ -198,6 +198,7 @@ namespace libnut {
 		CLog * log;
 		DBusInterfaceInterface_IPv4 * dbusInterface;
 		nut::IPv4Config dbusConfig;
+		nut::IPv4UserConfig userConfig;
 		void refreshAll();
 	private slots:
 		void dbusstateChanged(const InterfaceProperties &properties);
@@ -208,7 +209,7 @@ namespace libnut {
 		QHostAddress gateway;
 		QList<QHostAddress> dnsserver;
 		
-		nut::IPv4UserConfig getUserConfig();
+		nut::IPv4UserConfig getUserConfig(bool refresh=true);
 		nut::IPv4Config getConfig() { return dbusConfig; }
 		nut::IPv4Config config() { return dbusConfig; } //wants qnut wants it like that
 
@@ -218,7 +219,7 @@ namespace libnut {
 		void activate();
 		void deactivate();
 		bool needUserSetup();
-		bool setUserConfig(const nut::IPv4UserConfig &userConfig);
+		bool setUserConfig(const nut::IPv4UserConfig &cuserConfig);
 		
 	signals:
 		void stateChanged(InterfaceState state);
