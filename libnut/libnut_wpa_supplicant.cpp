@@ -677,7 +677,7 @@ void CWpa_Supplicant::Event_dispatcher(QString event) {
 }
 
 //Public functions:
-CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), wpa_supplicant_path("/var/run/wpa_supplicant/"+ifname), event_sn(0), wext_sn(0), timerId(-1), wextTimerId(-1), ifname(ifname) {
+CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), wpa_supplicant_path("/var/run/wpa_supplicant/"+ifname), event_sn(0), wext_sn(0), timerId(-1), wextTimerId(-1), wextTimerRate(10000), ifname(ifname) {
 	wps_connected = false;
 	timerCount = 0;
 	log_enabled = true;

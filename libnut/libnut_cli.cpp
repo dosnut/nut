@@ -376,12 +376,6 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	connect(dbusDevice, SIGNAL(environmentChangedActive(const QDBusObjectPath &)),
 			this, SLOT(environmentChangedActive(const QDBusObjectPath &)));
 
-	connect(dbusDevice, SIGNAL(environmentRemoved(const QDBusObjectPath &)),
-			this, SLOT(environmentRemoved(const QDBusObjectPath &)));
-
-	connect(dbusDevice, SIGNAL(environmentAdded(const QDBusObjectPath &)),
-			this, SLOT(environmentAdded(const QDBusObjectPath &)));
-
 	connect(dbusDevice, SIGNAL(stateChanged(int , int)),
 			this, SLOT(dbusstateChanged(int, int)));
 
@@ -631,8 +625,6 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	else {
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment's interfaces"));
 	}
-	connect(dbusEnvironment, SIGNAL(interfaceAdded(const QDBusObjectPath &)), this, SLOT(dbusinterfaceAdded(const QDBusObjectPath &)));
-	connect(dbusEnvironment, SIGNAL(interfaceRemoved(const QDBusObjectPath &)), this, SLOT(dbusinterfaceRemoved(const QDBusObjectPath &)));
 	connect(dbusEnvironment, SIGNAL(stateChanged(bool )), this, SLOT(dbusstateChanged(bool )));
 }
 CEnvironment::~CEnvironment() {
