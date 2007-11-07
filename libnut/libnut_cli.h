@@ -165,6 +165,8 @@ namespace libnut {
 		DBusEnvironmentInterface * dbusEnvironment;
 		bool active;
 		nut::EnvironmentConfig config;
+		nut::SelectResult selectResult;
+		QVector<nut::SelectResult> selectResults;
 		
 		void refreshAll();
 		void rebuild(const QList<QDBusObjectPath> &paths);
@@ -179,7 +181,8 @@ namespace libnut {
 	public slots:
 		void enter();
 		nut::EnvironmentConfig getConfig();
-		nut::SelectResult getSelectResult();
+		nut::SelectResult getSelectResult(bool refresh=false);
+		QVector<nut::SelectResult> getSelectResults(bool refresh=false);
 		
 	signals:
 		void activeChanged(bool active);
@@ -209,7 +212,7 @@ namespace libnut {
 		QHostAddress gateway;
 		QList<QHostAddress> dnsserver;
 		
-		nut::IPv4UserConfig getUserConfig(bool refresh=true);
+		nut::IPv4UserConfig getUserConfig(bool refresh=false);
 		nut::IPv4Config getConfig() { return dbusConfig; }
 		nut::IPv4Config config() { return dbusConfig; } //wants qnut wants it like that
 

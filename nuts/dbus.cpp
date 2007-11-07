@@ -201,6 +201,23 @@ namespace nuts {
 		#endif
 		return paths;
 	}
+	nut::SelectResult DBusEnvironment::getSelectResult() {
+		if (s_environment->selectionDone()) {
+			return s_environment->getSelectResult();
+		}
+		else {
+			return nut::SelectResult();
+		}
+	}
+	QVector<nut::SelectResult> DBusEnvironment::getSelectResults() {
+		if (s_environment->selectionDone()) {
+			return s_environment->getSelectResults();
+		}
+		else {
+			return QVector<nut::SelectResult>();
+		}
+	}
+
 
 	DBusInterface_IPv4::DBusInterface_IPv4(Interface_IPv4 *iface, QDBusConnection *connection, const QString &path)
 	: QDBusAbstractAdaptor(iface), s_interface(iface), dbus_connection(connection) {

@@ -376,12 +376,6 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	connect(dbusDevice, SIGNAL(environmentChangedActive(const QDBusObjectPath &)),
 			this, SLOT(environmentChangedActive(const QDBusObjectPath &)));
 
-	connect(dbusDevice, SIGNAL(environmentRemoved(const QDBusObjectPath &)),
-			this, SLOT(environmentRemoved(const QDBusObjectPath &)));
-
-	connect(dbusDevice, SIGNAL(environmentAdded(const QDBusObjectPath &)),
-			this, SLOT(environmentAdded(const QDBusObjectPath &)));
-
 	connect(dbusDevice, SIGNAL(stateChanged(int , int)),
 			this, SLOT(dbusstateChanged(int, int)));
 
@@ -608,6 +602,10 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	else {
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment config") + replyconf.error().name());
 	}
+	//Get select results
+	getSelectResult(true); //functions saves SelectResult
+	getSelectResults(true); //functions saves SelectResults
+
 	//Get Interfaces
  	QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnvironment->getInterfaces();
 	if (replyifs.isValid()) {
@@ -627,8 +625,6 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	else {
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment's interfaces"));
 	}
-	connect(dbusEnvironment, SIGNAL(interfaceAdded(const QDBusObjectPath &)), this, SLOT(dbusinterfaceAdded(const QDBusObjectPath &)));
-	connect(dbusEnvironment, SIGNAL(interfaceRemoved(const QDBusObjectPath &)), this, SLOT(dbusinterfaceRemoved(const QDBusObjectPath &)));
 	connect(dbusEnvironment, SIGNAL(stateChanged(bool )), this, SLOT(dbusstateChanged(bool )));
 }
 CEnvironment::~CEnvironment() {
@@ -659,6 +655,8 @@ void CEnvironment::refreshAll() {
 	else {
 		*log << tr("Error while refreshing environment properties");
 	}
+	getSelectResult(true); //functions saves SelectResult
+	getSelectResults(true); //functions saves SelectResults
 	QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnvironment->getInterfaces();
 	if (replyifs.isValid()) {
 		//Check if we need to rebuild the interface list or just refresh them:
@@ -710,6 +708,8 @@ void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 		dbusInterfaces.insert(i,interface);
 		interfaces.append(interface);
 	}
+	getSelectResult(true); //functions saves SelectResult
+	getSelectResults(true); //functions saves SelectResults
 }
 
 //CEnvironment private slots:
@@ -727,9 +727,32 @@ nut::EnvironmentConfig CEnvironment::getConfig() {
 	return config;
 }
 
-nut::SelectResult CEnvironment::getSelectResult() {
-	//Check if this is the active Environment;
-	return nut::SelectResult();
+nut::SelectResult CEnvironment::getSelectResult(bool refresh) {
+	if (refresh) {
+		QDBusReply<nut::SelectResult> reply = dbusEnvironment->getSelectResult();
+		if (reply.isValid()) {
+			selectResult = reply.value();
+		}
+		else {
+			*log << tr("Error while trying to get SelectResult");
+			selectResult = nut::SelectResult();
+		}
+	}
+	return selectResult;
+}
+
+QVector<nut::SelectResult> CEnvironment::getSelectResults(bool refresh) {
+	if (refresh) {
+		QDBusReply<QVector<nut::SelectResult> > reply = dbusEnvironment->getSelectResults();
+		if (reply.isValid()) {
+			selectResults = reply.value();
+		}
+		else {
+			*log << tr("Error while trying to get SelectResults");
+			selectResults = QVector<nut::SelectResult>();
+		}
+	}
+	return selectResults;
 }
 
 ////////////

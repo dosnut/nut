@@ -133,6 +133,16 @@ public Q_SLOTS: // METHODS
 		QList<QVariant> argumentList;
 		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList);
 	}
+	inline QDBusReply<nut::SelectResult> getSelectResult()
+	{
+		QList<QVariant> argumentList;
+		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getSelectResult"), argumentList);
+	}
+	inline QDBusReply<QVector<nut::SelectResult> > getSelectResults()
+	{
+		QList<QVariant> argumentList;
+		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getSelectResults"), argumentList);
+	}
 
 Q_SIGNALS: // SIGNALS
     void stateChanged(bool state);
