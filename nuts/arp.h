@@ -254,7 +254,7 @@ namespace nuts {
 			
 		signals:
 			void conflict(QHostAddress ip, nut::MacAddress mac);
-			void timeout(QHostAddress ip);
+			void ready(QHostAddress ip);
 	};
 }
 

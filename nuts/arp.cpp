@@ -216,16 +216,23 @@ namespace nuts {
 		finish();
 	}
 	
+	void ARPProbe::setReserve(bool reserve) {
+		m_reserve = reserve;
+	}
+	
 	bool ARPProbe::timeEvent() {
 		if (m_state == CONFLICT) return false;
 		if (m_remaining_trys <= 0 && !m_reserve) {
 			m_state = RESERVING;
 			finish();
-			emit timeout(m_ip);
+			emit ready(m_ip);
 			return false;
 		} else {
 			if (m_remaining_trys <= 0) {
-				m_state = RESERVING;
+				if (m_state != RESERVING) {
+					m_state = RESERVING;
+					emit ready(m_ip);
+				}
 			} else {
 				--m_remaining_trys;
 			}

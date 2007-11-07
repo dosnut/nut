@@ -148,7 +148,7 @@ namespace nuts {
 		m_curipv4config = 0;
 		if (!m_curenvconfig) return false;
 		if (m_cur_env->m_haszeroconf) return false;
-		m_curipv4config = new nut::IPv4Config();
+		m_curipv4config = new nut::IPv4Config(nut::IPv4Config::DO_ZEROCONF);
 		return true;
 	}
 	
