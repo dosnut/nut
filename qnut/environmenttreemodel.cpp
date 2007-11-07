@@ -95,7 +95,7 @@ namespace qnut {
 			}
 			break;
 		case ENVTREE_MOD_STATUS:
-			if (role == Qt::DisplayRole)
+			if (role != Qt::DisplayRole)
 				break;
 			
 			if (data->parent() == device) {
@@ -119,7 +119,7 @@ namespace qnut {
 			}
 			break;
 		case ENVTREE_MOD_IP:
-			if (role == Qt::DisplayRole)
+			if (role != Qt::DisplayRole)
 				break;
 			
 			if (data->parent() == device) {
