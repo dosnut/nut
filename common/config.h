@@ -10,8 +10,8 @@
 //
 //
 
-#ifndef _NUT_CONFIG_H
-#define _NUT_CONFIG_H
+#ifndef NUT_COMMON_CONFIG_H
+#define NUT_COMMON_CONFIG_H
 
 #include <QObject>
 #include <QString>

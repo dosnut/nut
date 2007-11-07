@@ -1,5 +1,5 @@
-#ifndef libnut_libnut_types
-#define libnut_libnut_types
+#ifndef NUT_COMMON_TYPES_H
+#define NUT_COMMON_TYPES_H
 
 #include <QString>
 #include <QTranslator>
@@ -7,9 +7,8 @@
 #include <QHostAddress>
 #include <QtDBus>
 #include <QMetaType>
-
+#include <QHash>
 #include "macaddress.h"
-
 
 //Functions that need to be defined outside of own namespace:
 
@@ -21,10 +20,6 @@ inline uint qHash(const QDBusObjectPath &key) {
 	return qHash(key.path());
 }
 
-inline uint qHash(const nut::MacAddress &key) {
-	quint8 data[8] = { key.data[0], key.data[2], key.data[3], key.data[4], key.data[5], key.data[6], 0, 0};
-	return qHash( *((quint64*)data) );
-}
 
 QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress &data);
 const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &data);
