@@ -873,15 +873,6 @@ void CInterface::activate() {
 void CInterface::deactivate() {
 	dbusInterface->deactivate();
 }
-void CInterface::setIP(QHostAddress & address) {
-	dbusInterface->setIP(address.toIPv4Address());
-}
-void CInterface::setNetmask(QHostAddress & address) {
-	dbusInterface->setNetmask(address.toIPv4Address());
-}
-void CInterface::setGateway(QHostAddress & address) {
-	dbusInterface->setGateway(address.toIPv4Address());
-}
 bool CInterface::needUserSetup() {
 	QDBusReply<bool> reply = dbusInterface->needUserSetup();
 	if (reply.isValid()) {

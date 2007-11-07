@@ -226,9 +226,6 @@ namespace libnut {
 	public slots:
 		void activate();
 		void deactivate();
-		void setIP(QHostAddress & address);
-		void setNetmask(QHostAddress & address);
-		void setGateway(QHostAddress & address);
 		bool needUserSetup();
 		bool setUserConfig(const nut::IPv4UserConfig &userConfig);
 		
