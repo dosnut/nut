@@ -754,7 +754,6 @@ void CWpa_Supplicant::wps_open(bool) {
 	//NEW FEATURE: Signal level retrieving:
 	
 	//Get file Descriptor to NET kernel
-	int wext_fd;
 	if ( (wext_fd = iw_sockets_open()) < 0) {
 		wext_sn = NULL;
 		printMessage("ERROR: Could not open socket to net kernel");
