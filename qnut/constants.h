@@ -54,6 +54,7 @@
 #define UI_ICON_EDIT                    UI_DIR_ICONS "edit.png"
 #define UI_ICON_REFRESH                 UI_DIR_ICONS "refresh.png"
 #define UI_ICON_CLEAR                   UI_DIR_ICONS "clear.png"
+#define UI_ICON_WARNING                 UI_DIR_ICONS "warning.png"
 
 #define UI_FLAG_SCRIPT_NONE             0x00
 #define UI_FLAG_SCRIPT_UP               0x01

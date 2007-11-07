@@ -14,13 +14,14 @@
 #include <QInputDialog>
 #include <QProcess>
 #include "deviceoptions.h"
+#include "common.h"
 #include "environmenttreemodel.h"
 #include "interfacedetailsmodel.h"
 #include "environmentdetailsmodel.h"
 #include "ipconfiguration.h"
 #include "scriptsettings.h"
 #include "wirelesssettings.h"
-#include "common.h"
+#include "ipconfiguration"
 
 namespace qnut {
 	CDeviceOptions::CDeviceOptions(CDevice * parentDevice, QWidget * parent) :
@@ -164,22 +165,26 @@ namespace qnut {
 		if (!selectedIndexes.isEmpty()) {
 			QModelIndex targetIndex = selectedIndexes[0];
 			if (!targetIndex.parent().isValid()) {
-				CEnvironment * target = (CEnvironment *)(targetIndex.internalPointer());
+				CEnvironment * target = static_cast<CEnvironment *>(targetIndex.internalPointer());
 				connect(target, SIGNAL(activeChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
 				connect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
 				
+				ipConfigurationAction->setEnabled(false);
 				enterEnvironmentAction->setDisabled(target == device->activeEnvironment);
 				ui.detailsView->setRootIsDecorated(true);
-				ui.detailsView->setModel(new CEnvironmentDetailsModel((CEnvironment *)(targetIndex.internalPointer())));
+				ui.detailsView->setModel(new CEnvironmentDetailsModel(target));
 				ui.detailsView->expandAll();
 			}
 			else {
+				CInterface * target = static_cast<CInterface *>(targetIndex.internalPointer());
+				ipConfigurationAction->setEnabled(target->getConfig().getFlags() &  nut::DO_USERSTATIC);
 				enterEnvironmentAction->setEnabled(false);
 				ui.detailsView->setRootIsDecorated(false);
-				ui.detailsView->setModel(new CInterfaceDetailsModel((CInterface *)(targetIndex.internalPointer())));
+				ui.detailsView->setModel(new CInterfaceDetailsModel(target));
 			}
 		}
 		else {
+			ipConfigurationAction->setEnabled(false);
 			enterEnvironmentAction->setEnabled(false);
 			//workarround für leeres model
 			ui.detailsView->setModel(new CInterfaceDetailsModel(NULL));
@@ -192,8 +197,13 @@ namespace qnut {
 	void CDeviceOptions::uiChangeIPConfiguration() {
 		CIPConfiguration dialog(this);
 		QModelIndex selectedIndex = (ui.environmentTree->selectionModel()->selection().indexes())[0];
-
-		dialog.execute((CInterface *)(selectedIndex.internalPointer()));
+		
+		CInterface * interface = dynamic_cast<CInterface *>(selectedIndex.internalPointer());
+		if (interface) {
+			nut::IPv4UserConfig config = interface->getUserConfig(true);
+			if (dialog.execute(config))
+				interface->setUserConfig(config);
+		}
 	}
 	
 	void CDeviceOptions::uiChangeDeviceSettings() {

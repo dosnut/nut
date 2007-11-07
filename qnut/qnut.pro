@@ -33,7 +33,9 @@ HEADERS += connectionmanager.h trayicon.h \
  environmenttreemodel.h \
  availableapmodel.h \
  accesspointconfig.h \
- environmentdetailsmodel.h
+ environmentdetailsmodel.h \
+ dnslistmodel.h \
+ ipeditdelegate.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  overviewmodel.cpp \
  deviceoptions.cpp \
@@ -46,7 +48,9 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  environmenttreemodel.cpp \
  availableapmodel.cpp \
  accesspointconfig.cpp \
- environmentdetailsmodel.cpp
+ environmentdetailsmodel.cpp \
+ dnslistmodel.cpp \
+ ipeditdelegate.cpp
 DESTDIR = .
 
 target.path = /usr/bin

@@ -41,7 +41,9 @@ namespace qnut {
 			return 0;
 		
 		if (!parent.isValid())
-			if (interface->state != IFS_OFF)
+			if (interface->state == IFS_WAITFORCONFIG)
+				return 4 + interface->getUserConfig().dnsservers().size();
+			else if (interface->state != IFS_OFF)
 				return 4 + interface->dnsserver.size();
 			else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 				return 4 + interface->getConfig().getStaticDNS().size();
@@ -110,11 +112,13 @@ namespace qnut {
 						return tr("zeroconf (fallback)");
 					else
 						return tr("zeroconf");
+				case IFS_WAITFORCONFIG:
+					return tr("unconfigured");
 				default:
 					break;
 				}
 			case 1:
-				if (interface->state == IFS_OFF) {
+				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
 					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("none");
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
@@ -127,7 +131,7 @@ namespace qnut {
 				else
 					return interface->ip.toString();
 			case 2:
-				if (interface->state == IFS_OFF) {
+				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
 					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("none");
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
@@ -140,7 +144,7 @@ namespace qnut {
 				else
 					return interface->netmask.toString();
 			case 3:
-				if (interface->state == IFS_OFF) {
+				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
 					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("none");
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
@@ -153,10 +157,16 @@ namespace qnut {
 				else
 					return interface->gateway.toString();
 			default:
-				if (interface->state != IFS_OFF)
-					return interface->dnsserver[index.row()-4].toString();
+				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
+					if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
+						return interface->getConfig().getStaticDNS()[index.row()-4].toString();
+					else if (interface->getConfig().getFlags() ? IPv4Config::DO_USERSTATIC)
+						return interface->getUserConfig().dnsservers()[index.row()-4].toString();
+					else
+						break;
+				}
 				else
-					return interface->getConfig().getStaticDNS()[index.row()-4].toString();
+					return interface->dnsserver[index.row()-4].toString();
 			}
 			break;
 		}
