@@ -83,20 +83,36 @@ namespace qnut {
 		
 		switch (index.column()) {
 			case ENVDET_MOD_STATEMENT:
-				switch (selectConfig.filters[index.internalId()].selType) {
-				case SelectRule::SEL_USER:
-					return tr("user");
-				case SelectRule::SEL_ARP:
-					return tr("arp");
-				case SelectRule::SEL_ESSID:
-					return tr("ssid");
-				case SelectRule::SEL_AND_BLOCK:
-					return tr("AND");
-				case SelectRule::SEL_OR_BLOCK:
-					return tr("OR");
-				default:
-					break;
-				}
+				if (selectConfig.filters[index.internalId()].invert)
+					switch (selectConfig.filters[index.internalId()].selType) {
+					case SelectRule::SEL_USER:
+						return tr("not by user");
+					case SelectRule::SEL_ARP:
+						return tr("not by arp");
+					case SelectRule::SEL_ESSID:
+						return tr("not by ssid");
+					case SelectRule::SEL_AND_BLOCK:
+						return tr("at least one not");
+					case SelectRule::SEL_OR_BLOCK:
+						return tr("all not");
+					default:
+						break;
+					}
+				else
+					switch (selectConfig.filters[index.internalId()].selType) {
+					case SelectRule::SEL_USER:
+						return tr("by user");
+					case SelectRule::SEL_ARP:
+						return tr("by arp");
+					case SelectRule::SEL_ESSID:
+						return tr("by ssid");
+					case SelectRule::SEL_AND_BLOCK:
+						return tr("all");
+					case SelectRule::SEL_OR_BLOCK:
+						return tr("at least one");
+					default:
+						break;
+					}
 				break;
 			case ENVDET_MOD_VALUE:
 				switch (selectConfig.filters[index.internalId()].selType) {
