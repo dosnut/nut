@@ -123,8 +123,6 @@ namespace libnut {
 
 	private slots:
 		void environmentChangedActive(const QDBusObjectPath &newenv);
-		void environmentAdded(const QDBusObjectPath &path);
-		void environmentRemoved(const QDBusObjectPath &path);
 		void dbusstateChanged(int newState, int oldState);
 	public:
 		CEnvironmentList environments;
@@ -143,15 +141,13 @@ namespace libnut {
 	public slots:
 		void enable();
 		void disable();
-		void addEnvironment(QString name);
-		void removeEnvironment(CEnvironment * environment);
 		void setEnvironment(CEnvironment * environment);
 		
 	signals:
 		void environmentChangedActive(CEnvironment * current, CEnvironment * previous);
-		void environmentsUpdated();
-		void environmentAdded(CEnvironment * environment);
-		void environmentRemoved(CEnvironment * environment);
+// 		void environmentsUpdated(); //Pending for removal
+// 		void environmentAdded(CEnvironment * environment); //Pending for removal
+// 		void environmentRemoved(CEnvironment * environment); //Pending for removal
 		void stateChanged(DeviceState newState);
 	};
 	
@@ -185,6 +181,7 @@ namespace libnut {
 	public slots:
 		void enter();
 		nut::EnvironmentConfig getConfig();
+		nut::SelectResult getSelectResult();
 		void addInterface(nut::IPv4Config config);
 		void removeInterface(CInterface * interface);
 		

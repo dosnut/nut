@@ -403,7 +403,7 @@ CDevice::~CDevice() {
 	CEnvironment * env;
 	while (!environments.isEmpty()) {
 		env = environments.takeFirst();
-		emit(environmentsUpdated());
+// 		emit(environmentsUpdated()); //Pending for removal
 		delete env;
 	}
 }
@@ -481,7 +481,7 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 	CEnvironment * env;
 	while ( !environments.isEmpty() ) {
 		env = environments.takeFirst();
-		emit(environmentRemoved(env));
+// 		emit(environmentRemoved(env)); //Pending for removal
 		delete env;
 	}
 	//now rebuild:
@@ -496,7 +496,7 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 		dbusEnvironments.insert(i,env);
 		environments.append(env);
 	}
-	emit(environmentsUpdated());
+// 	emit(environmentsUpdated()); //Pending for removal
 }
 
 //CDevice private slots:
@@ -504,37 +504,6 @@ void CDevice::environmentChangedActive(const QDBusObjectPath &newenv) {
 	CEnvironment * oldenv = activeEnvironment;
 	activeEnvironment = dbusEnvironments.value(newenv, 0);
 	emit(environmentChangedActive(activeEnvironment, oldenv));
-}
-void CDevice::environmentAdded(const QDBusObjectPath &path) {
-	if (!dbusEnvironments.contains(path)) {
-		CEnvironment * env;
-		try {
-			env = new CEnvironment(this,path);
-		}
-		catch (CLI_ConnectionException &e) {
-			*log << e.what();
-			return;
-		}
-		dbusEnvironments.insert(path,env);
-		emit(environmentsUpdated());
-		emit(environmentAdded(env));
-	}
-	else {
-		dbusEnvironments.value(path)->refreshAll();
-		emit(environmentsUpdated());
-	}
-}
-void CDevice::environmentRemoved(const QDBusObjectPath &path) {
-	if (dbusEnvironments.contains(path)) {
-		CEnvironment * env = dbusEnvironments.take(path);
-		environments.removeAll(env);
-		emit(environmentRemoved(env));
-		delete env;
-		emit(environmentsUpdated());
-	}
-	else {
-		*log << tr("Tried to remove non-existing environment");
-	}
 }
 //Every time our device changed from anything to active, our active environment may have changed
 void CDevice::dbusstateChanged(int newState, int oldState) {
@@ -599,15 +568,6 @@ void CDevice::setEnvironment(CEnvironment * environment) {
 }
 nut::DeviceConfig CDevice::getConfig() {
 	return dbusConfig;
-}
-
-void CDevice::addEnvironment(QString name) {
-	EnvironmentProperties props;
-	props.name = name;
-	dbusDevice->addEnvironment(props);
-}
-void CDevice::removeEnvironment(CEnvironment * environment) {
-	dbusDevice->removeEnvironment(dbusEnvironments.key(environment));
 }
 
 //////////////

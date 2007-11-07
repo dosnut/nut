@@ -90,8 +90,6 @@ namespace nuts {
 		signals:
 			void stateChanged(int newState, int oldState);
 			void environmentChangedActive(const QDBusObjectPath &objectpath);
-			void environmentRemoved(const QDBusObjectPath &objectpath);
-			void environmentAdded(const QDBusObjectPath &objectpath);
 	};
 	
 	class DBusEnvironment: public QDBusAbstractAdaptor {
