@@ -7,6 +7,7 @@
 #include <QStringList>
 #include <QTimerEvent>
 #include "dhcppacket.h"
+#include "random.h"
 
 extern "C" {
 #include <asm/types.h>
@@ -643,7 +644,7 @@ namespace nuts {
 	}
 	
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, nut::IPv4Config *config)
-	: Interface(env, index), dhcp_timer_id(-1), dm(env->device->dm), dhcp_xid(0), dhcpstate(DHCPS_OFF), m_config(config), m_ifstate(libnut::IFS_OFF) {
+	: Interface(env, index), dhcp_timer_id(-1), dm(env->device->dm), dhcp_xid(0), dhcpstate(DHCPS_OFF), zc_state(ZCS_OFF), zc_arp_probe(0), m_config(config), m_ifstate(libnut::IFS_OFF) {
 		m_needUserSetup = config->getFlags() & nut::IPv4Config::DO_USERSTATIC;
 		connect(this, SIGNAL(interfaceUp(Interface_IPv4*)), &m_env->device->dm->m_events, SLOT(interfaceUp(Interface_IPv4*)));
 		connect(this, SIGNAL(interfaceDown(Interface_IPv4*)), &m_env->device->dm->m_events, SLOT(interfaceDown(Interface_IPv4*)));
@@ -717,11 +718,103 @@ namespace nuts {
 			dhcp_timer_id = -1;
 	}
 	
+	void Interface_IPv4::zeroconf_setup_interface() {
+		if (m_ifstate != libnut::IFS_OFF) return;
+		ip = zc_probe_ip;
+		netmask = QHostAddress((quint32) 0xFFFF0000);
+		gateway = QHostAddress((quint32) 0);
+		dnsserver.clear();
+		m_ifstate = libnut::IFS_ZEROCONF;
+		systemUp();
+	}
+	
+	quint16 hashMac(const nut::MacAddress &addr) {
+		quint16 *ptr = (quint16*) addr.data;
+		return (quint16) (ptr[0] ^ ptr[1] ^ ptr[2]);
+	}
+	
+	void Interface_IPv4::zeroconfProbe() {   // select new ip and start probe it
+		zeroconfFree();
+		quint32 lastip = zc_probe_ip.toIPv4Address();
+		const quint32 baseip = 0xA9FE0000; // 169.254.0.0
+		const quint32 mask = 0xFFFF;
+		quint32 rnd = hashMac(m_env->device->getMacAddress()), ip;
+		do {
+			while ((rnd >> 8) == 0 || (rnd >> 8) == 0xFF)
+				rnd = getRandomUInt32() & mask;
+			ip = baseip | rnd;
+		} while (ip == lastip);
+		zc_probe_ip = QHostAddress(ip);
+		zc_arp_probe = m_env->device->m_arp.probeIPv4(zc_probe_ip);
+		if (zc_arp_probe->getState() != ARPProbe::PROBING) {
+			err << "ARPProbe failed" << endl;
+			return;
+		}
+		zc_arp_probe->setReserve(m_config->getFlags() & nut::IPv4Config::DO_DHCP);
+		connect(zc_arp_probe, SIGNAL(conflict(QHostAddress, nut::MacAddress)), SLOT(zc_conflict()));
+		connect(zc_arp_probe, SIGNAL(ready(QHostAddress)), SLOT(zc_ready()));
+	}
+	
+	void Interface_IPv4::zeroconfFree() {    // free ARPProbe and ARPWatch
+		if (zc_arp_probe) {
+			delete zc_arp_probe;
+			zc_arp_probe = 0;
+		}
+	}
+	
+	void Interface_IPv4::zeroconfAction() {
+		if (!(m_config->getFlags() & nut::IPv4Config::DO_ZEROCONF))
+			return;
+		switch (zc_state) {
+			case ZCS_OFF:
+				zeroconfFree();
+				break;
+			case ZCS_START:
+				zc_probe_ip = QHostAddress((quint32) 0);
+				zeroconfProbe();
+				zc_state = ZCS_PROBING;
+				break;
+			case ZCS_PROBING:
+				break;
+			case ZCS_RESERVING:
+				if (dhcp_retry > 3) {
+					delete zc_arp_probe;
+					zc_arp_probe = 0;
+				}
+				break;
+			case ZCS_ANNOUNCING:
+				break;
+			case ZCS_BOUND:
+				break;
+			case ZCS_CONFLICT:
+				zeroconfProbe();
+				zc_state = ZCS_PROBING;
+				break;
+		}
+	}
+	
+	void Interface_IPv4::zc_conflict() {
+		zc_arp_probe = 0;
+		zc_state = ZCS_CONFLICT;
+		zeroconfAction();
+	}
+	
+	void Interface_IPv4::zc_ready() {
+		if (m_config->getFlags() & nut::IPv4Config::DO_DHCP) {
+			zc_state = ZCS_RESERVING;
+			zeroconfAction();
+		} else {
+			zc_arp_probe = 0;
+			// TODO: Announce
+			zc_state = ZCS_BOUND;
+			zeroconf_setup_interface();
+		}
+	}
+	
 	void Interface_IPv4::dhcpAction(DHCPPacket *source) {
 		for (;;) {
 			switch (dhcpstate) {
 				case DHCPS_OFF:
-				case DHCPS_FAILED:
 					releaseXID();
 					return;
 				case DHCPS_INIT_START:
@@ -729,12 +822,8 @@ namespace nuts {
 					// fall through:
 					// dhcpstate = DHCPS_INIT;
 				case DHCPS_INIT:
-					if (++dhcp_retry >= 5) {
-						dhcpstate = DHCPS_FAILED;
-					} else {
-						dhcp_send_discover();
-						dhcpstate = DHCPS_SELECTING;
-					}
+					dhcp_send_discover();
+					dhcpstate = DHCPS_SELECTING;
 					break;
 				case DHCPS_SELECTING:
 					if (source) {
@@ -744,8 +833,15 @@ namespace nuts {
 							dhcpstate = DHCPS_REQUESTING;
 						}
 					} else {
-						// 0, 500, 2500, 4500, 6500 [ms]
-						dhcp_set_timeout(500 + (dhcp_retry-1) * 2000);
+						if (dhcp_retry < 5) {
+							dhcp_retry++;
+							// send 6 packets with short interval
+							// 0, 500, 2500, 4500, 6500, 8500 [ms]
+							dhcp_set_timeout(500 + (dhcp_retry-1) * 2000);
+						} else {
+							// 1 min
+							dhcp_set_timeout(1 * 60 * 1000);
+						}
 						return;
 					}
 				case DHCPS_REQUESTING:
@@ -863,7 +959,6 @@ namespace nuts {
 			case DHCPS_REBOOTING:  // nothing to do ??
 			
 			case DHCPS_OFF: // should not happen
-			case DHCPS_FAILED: // nothing to do
 			case DHCPS_INIT_START: // should not happen
 			case DHCPS_INIT: // should not happen
 			case DHCPS_SELECTING: // normal cleanup
@@ -879,6 +974,8 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::startZeroconf() {
+		zc_state = ZCS_START;
+		zeroconfAction();
 	}
 	void Interface_IPv4::startStatic() {
 		ip = m_config->getStaticIP();
@@ -907,6 +1004,8 @@ namespace nuts {
 			} else {
 				startUserStatic();
 			}
+		} else if (m_config->getFlags() & nut::IPv4Config::DO_ZEROCONF) {
+			startZeroconf();
 		} else {
 			startStatic();
 		}
@@ -916,6 +1015,7 @@ namespace nuts {
 		log << "Interface_IPv4::stop" << endl;
 		if (dhcpstate != DHCPS_OFF)
 			stopDHCP();
+		zeroconfFree();
 		systemDown();
 	}
 	

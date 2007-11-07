@@ -1,5 +1,5 @@
 //
-// C++ Interface: ipconf
+// C++ Interface: ipconfiguration
 //
 // Description: 
 //
@@ -23,9 +23,9 @@ namespace qnut {
 		Q_OBJECT
 	private:
 		Ui::ipconf ui;
-	public:
-		bool execute(CInterface * interface);
 		
+	public:
+		bool execute(nut::IPv4UserConfig & config);
 		CIPConfiguration(QWidget * parent = 0);
 		~CIPConfiguration();
 	};

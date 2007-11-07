@@ -81,7 +81,6 @@ namespace nuts {
 		foreach (Environment *env, s_device->getEnvironments()) {
 			DBusEnvironment *dbus_env = new DBusEnvironment(env, dbus_connection, dbus_path);
 			dbus_environments.append(dbus_env);
-			emit(environmentAdded(QDBusObjectPath(dbus_env->getPath())));
 		}
 
 		//Set active Environment

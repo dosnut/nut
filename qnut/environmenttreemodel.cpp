@@ -84,7 +84,11 @@ namespace qnut {
 				case Qt::DisplayRole:
 					return tr("#%1").arg(environment->interfaces.indexOf(interface));
 				case Qt::DecorationRole:
-					return QIcon((interface->state == IFS_OFF) ? UI_ICON_INTERFACE_INACTIVE : UI_ICON_INTERFACE_ACTIVE);
+					return QIcon((interface->state == IFS_OFF) ?
+						UI_ICON_INTERFACE_INACTIVE :
+						((interface->state == IFS_WAITFORCONFIG) ?
+							UI_ICON_WARNING :
+							UI_ICON_INTERFACE_ACTIVE));
 				default:
 					break;
 				}
@@ -107,6 +111,8 @@ namespace qnut {
 					return tr("dynamic");
 				case IFS_ZEROCONF:
 					return tr("zeroconf");
+				case IFS_WAITFORCONFIG:
+					return tr("unconfigured");
 				default:
 					break;
 				}
@@ -121,7 +127,7 @@ namespace qnut {
 			}
 			else {
 				CInterface * interface = static_cast<CInterface *>(data);
-				if (interface->state == IFS_OFF) {
+				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
 					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("none");
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)

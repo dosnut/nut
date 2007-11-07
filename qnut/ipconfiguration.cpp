@@ -1,5 +1,5 @@
 //
-// C++ Implementation: ipconf
+// C++ Implementation: ipconfiguration
 //
 // Description: 
 //
@@ -10,36 +10,35 @@
 //
 //
 #include "ipconfiguration.h"
+#include "dnslistmodel.h"
+#include "ipeditdelegate.h"
 
 namespace qnut {
-
-	bool CIPConfiguration::execute(CInterface * interface) {
-		ui.ipEdit->setText(interface->ip.toString());
-		ui.gatewayEdit->setText(interface->gateway.toString());
-		ui.netmaskEdit->setText(interface->netmask.toString());
-		if (exec() == QDialog::Accepted) {
-			QHostAddress tempAddr;
-			
-			tempAddr.setAddress(ui.ipEdit->text());
-			interface->setIP(tempAddr);
-			
-			tempAddr.setAddress(ui.gatewayEdit->text());
-			interface->setGateway(tempAddr);
-			
-			tempAddr.setAddress(ui.netmaskEdit->text());
-			interface->setNetmask(tempAddr);
-			
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-	
 	CIPConfiguration::CIPConfiguration(QWidget * parent) : QDialog(parent) {
 		ui.setupUi(this);
 	}
 	
 	CIPConfiguration::~CIPConfiguration() {
+	}
+	
+	bool CIPConfiguration::execute(nut::IPv4UserConfig & config) {
+		ui.ipEdit->setText(config.ip().toString());
+		ui.netmaskEdit->setText(config.netmask().toString());
+		ui.gatewayEdit->setText(config.gateway().toString());
+		
+		QList<QHostAddress> dnsList;
+		
+		ui.dnsList->setModel(new CDNSListModel(&dnsList));
+		ui.dnsList->setItemDelegate(new CIPEditDelegate());
+		
+		if (exec()) {
+			config.setIP(QHostAddress(ui.ipEdit->text()));
+			config.setNetmask(QHostAddress(ui.netmaskEdit->text()));
+			config.setGateway(QHostAddress(ui.gatewayEdit->text()));
+			config.setDnsservers(dnsList);
+			return true;
+		}
+		else
+			return false;
 	}
 };
