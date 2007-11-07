@@ -1699,7 +1699,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 	wrq.u.data.flags = 0;
 	wrq.u.data.length = buflen;
 	//Get information
-	if (iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCSIWSTATS, &wrq) < 0) {
+	if (iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
 		printMessage(QString("(%1) Error occured while trying to receive wireless info").arg(QString(strerror(errno))));
 		free(buffer);
 		return;
