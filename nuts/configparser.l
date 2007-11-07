@@ -65,8 +65,8 @@ driver      return DRIVER;
 \n         ++line_num;
 "//".*\n   ++line_num;
 [a-zA-Z0-9]+  printf("Unexpected keyword, ignoring\n");
-[{};/]     return yytext[0];
-.          /* ignore */
+[!{};/]     return yytext[0];
+.          /* ignore. TODO: only ignore whitespaces*/
 
 <String>{
 	\"          { BEGIN(INITIAL); return STRING; }	

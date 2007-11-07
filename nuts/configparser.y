@@ -88,12 +88,16 @@ environmentoptions:
 ;
 
 environmentoption: dhcpconfig
+	| zeroconf
 	| static
 	| { CHECK(envSelect()); } select { CHECK(finishSelect()); }
 	| NODHCP { CHECK(envNoDHCP()); }
 ;
 
 dhcpconfig: DHCP { CHECK(envDHCP()); } ';' { CHECK(finishDHCP()); }
+;
+
+zeroconf: ZEROCONF { CHECK(envZeroconf()); } ';' { CHECK(finishZeroconf()); }
 ;
 
 static: STATIC { CHECK(envStatic());  } staticconfig { CHECK(finishStatic()); }
