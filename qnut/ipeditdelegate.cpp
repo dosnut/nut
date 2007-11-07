@@ -10,6 +10,8 @@
 //
 //
 #include "ipeditdelegate.h"
+#include <QAbstractItemModel>
+#include <QLineEdit>
 
 namespace qnut {
 	CIPEditDelegate::CIPEditDelegate(QObject * parent) : QItemDelegate(parent) {
@@ -18,14 +20,14 @@ namespace qnut {
 	CIPEditDelegate::~CIPEditDelegate() {
 	}
 	
-	QWidget * CIPEditDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const {
+	QWidget * CIPEditDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem &, const QModelIndex &) const {
 		QLineEdit * editor = new QLineEdit(parent);
 		editor->setInputMask("000.000.000.000;_");
 		return editor;
 	}
 	
-	void CIPEditDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const {
-		int value = index.model()->data(index, Qt::DisplayRole).toInt();
+	void CIPEditDelegate::setEditorData(QWidget * editor, const QModelIndex & index) const {
+		QString value = index.data().toString();
 		
 		QLineEdit * lineEdit = static_cast<QLineEdit *>(editor);
 		lineEdit->setText(value);
@@ -38,7 +40,7 @@ namespace qnut {
 		model->setData(index, value, Qt::EditRole);
 	}
 	
-	void CIPEditDelegate::updateEditorGeometry(QWidget * editor, const QStyleOptionViewItem & option, const QModelIndex & index) const {
+	void CIPEditDelegate::updateEditorGeometry(QWidget * editor, const QStyleOptionViewItem & option, const QModelIndex &) const {
 		editor->setGeometry(option.rect);
 	}
 };

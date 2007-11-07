@@ -160,7 +160,7 @@ namespace qnut {
 				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
 					if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return interface->getConfig().getStaticDNS()[index.row()-4].toString();
-					else if (interface->getConfig().getFlags() ? IPv4Config::DO_USERSTATIC)
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
 						return interface->getUserConfig().dnsservers()[index.row()-4].toString();
 					else
 						break;

@@ -21,7 +21,7 @@
 #include "ipconfiguration.h"
 #include "scriptsettings.h"
 #include "wirelesssettings.h"
-#include "ipconfiguration"
+#include "ipconfiguration.h"
 
 namespace qnut {
 	CDeviceOptions::CDeviceOptions(CDevice * parentDevice, QWidget * parent) :
@@ -177,7 +177,7 @@ namespace qnut {
 			}
 			else {
 				CInterface * target = static_cast<CInterface *>(targetIndex.internalPointer());
-				ipConfigurationAction->setEnabled(target->getConfig().getFlags() &  nut::DO_USERSTATIC);
+				ipConfigurationAction->setEnabled(target->getConfig().getFlags() &  nut::IPv4Config::DO_USERSTATIC);
 				enterEnvironmentAction->setEnabled(false);
 				ui.detailsView->setRootIsDecorated(false);
 				ui.detailsView->setModel(new CInterfaceDetailsModel(target));
@@ -198,7 +198,7 @@ namespace qnut {
 		CIPConfiguration dialog(this);
 		QModelIndex selectedIndex = (ui.environmentTree->selectionModel()->selection().indexes())[0];
 		
-		CInterface * interface = dynamic_cast<CInterface *>(selectedIndex.internalPointer());
+		CInterface * interface = dynamic_cast<CInterface *>(static_cast<QObject *>(selectedIndex.internalPointer()));
 		if (interface) {
 			nut::IPv4UserConfig config = interface->getUserConfig(true);
 			if (dialog.execute(config))
@@ -323,7 +323,7 @@ namespace qnut {
 				QStringList env;
 				QProcess process;
 				env << "QNUT_DEV_NAME="  + device->name;
-				env << "QNUT_DEV_STATE=" + toString(state);
+				env << "QNUT_DEV_STATE=" + nut::toString(state);
 				//activeEnvironment workarround
 				if ((state == DS_UP) && (device->activeEnvironment != NULL)) {
 					env << "QNUT_ENV_NAME=" + device->activeEnvironment->name;
