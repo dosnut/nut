@@ -116,6 +116,8 @@ namespace nuts {
 			libnut::EnvironmentProperties getProperties();
 			nut::EnvironmentConfig getConfig();
 			QList<QDBusObjectPath> getInterfaces();
+			nut::SelectResult getSelectResult();
+			QVector<nut::SelectResult> getSelectResults();
 		signals:
 			void interfaceAdded(const QDBusObjectPath &objectpath);
 			void interfaceRemoved(const QDBusObjectPath &objectpath);
