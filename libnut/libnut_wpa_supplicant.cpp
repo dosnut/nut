@@ -677,7 +677,7 @@ void CWpa_Supplicant::Event_dispatcher(QString event) {
 }
 
 //Public functions:
-CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), wpa_supplicant_path("/var/run/wpa_supplicant/"+ifname), event_sn(0), wext_sn(0), timerId(-1), ifname(ifname) {
+CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), wpa_supplicant_path("/var/run/wpa_supplicant/"+ifname), event_sn(0), wext_sn(0), timerId(-1), wextTimerId(-1), ifname(ifname) {
 	wps_connected = false;
 	timerCount = 0;
 	log_enabled = true;
@@ -690,6 +690,10 @@ void CWpa_Supplicant::wps_open(bool) {
 	if (timerId != -1) {
 		killTimer(timerId);
 		timerId = -1;
+	}
+	if (wextTimerId != -1) {
+		killTimer(wextTimerId);
+		wextTimerId = -1;
 	}
 	if (wps_connected) return;
 	int status;
@@ -758,11 +762,15 @@ void CWpa_Supplicant::wps_open(bool) {
 	else { //Socket is set up, now set SocketNotifier
 		wext_sn = new QSocketNotifier(wext_fd, QSocketNotifier::Read, NULL);
 	}
+	//Start timer for reading wireless info (like in /proc/net/wireless)
+	wextTimerId = startTimer(wextTimerRate);
+	
 	//Continue of ol features:
 	emit(opened());
 	printMessage(tr("wpa_supplicant connection established"));
 	return;
 }
+
 bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 	if (timerId != -1) {
 		killTimer(timerId);
@@ -867,6 +875,11 @@ void CWpa_Supplicant::timerEvent(QTimerEvent *event) {
 			timerCount = 0;
 		}
 	}
+	else if (event->timerId() == wextTimerId) {
+		if (wext_fd != 0) {
+			readWirelessInfo();
+		}
+	}
 }
 
 bool CWpa_Supplicant::connected() {
@@ -880,6 +893,19 @@ bool CWpa_Supplicant::connected() {
 
 //Public slots
 
+
+void CWpa_Supplicant::setSignalQualityPollRate(int msec) {
+	if (wextTimerId != -1) {
+		killTimer(wextTimerId);
+		wextTimerId = startTimer(wextTimerRate);
+	}
+	else {
+		wextTimerRate = msec;
+	}
+}
+int CWpa_Supplicant::getSignalQualityPollRate() {
+	return wextTimerRate;
+}
 
 void CWpa_Supplicant::setLog(bool enabled) {
 	log_enabled = enabled;
@@ -1491,6 +1517,9 @@ wps_eap_netconfig_failures CWpa_Supplicant::wps_editEapNetwork(int netid, wps_ea
 }
 
 QList<wps_wext_scan> CWpa_Supplicant::wps_getWextScan() {
+	if (wext_fd == 0) {
+		return QList<wps_wext_scan>();
+	}
 	struct iwreq wrq;
 	unsigned char * buffer = NULL;		/* Results */
 	int buflen = IW_SCAN_MAX_DATA; /* Min for compat WE<17 */
@@ -1562,14 +1591,26 @@ QList<wps_wext_scan> CWpa_Supplicant::wps_getWextScan() {
 		singleres.quality.qual = 0;
 		singleres.quality.noise = 0;
 		singleres.quality.updated = 0;
-		singleres.maxquality.level = range.max_qual.level;
-		singleres.maxquality.qual = range.max_qual.qual;
-		singleres.maxquality.noise = range.max_qual.noise;
-		singleres.maxquality.updated = range.max_qual.updated;
-		singleres.avgquality.level = range.avg_qual.level;
-		singleres.avgquality.qual = range.avg_qual.qual;
-		singleres.avgquality.noise = range.avg_qual.noise;
-		singleres.avgquality.updated = range.avg_qual.updated;
+		if (has_range) {
+			singleres.maxquality.level = range.max_qual.level;
+			singleres.maxquality.qual = range.max_qual.qual;
+			singleres.maxquality.noise = range.max_qual.noise;
+			singleres.maxquality.updated = range.max_qual.updated;
+			singleres.avgquality.level = range.avg_qual.level;
+			singleres.avgquality.qual = range.avg_qual.qual;
+			singleres.avgquality.noise = range.avg_qual.noise;
+			singleres.avgquality.updated = range.avg_qual.updated;
+		}
+		else {
+			singleres.maxquality.level = 0;
+			singleres.maxquality.qual = 0;
+			singleres.maxquality.noise = 0;
+			singleres.maxquality.updated = 0;
+			singleres.avgquality.level = 0;
+			singleres.avgquality.qual = 0;
+			singleres.avgquality.noise = 0;
+			singleres.avgquality.updated = 0;
+		}
 
 		//Init event stream
 		iw_init_event_stream(&stream, (char *) buffer, wrq.u.data.length);
@@ -1609,6 +1650,59 @@ QList<wps_wext_scan> CWpa_Supplicant::wps_getWextScan() {
 
 	free(buffer);
 	return res;
+}
+
+void CWpa_Supplicant::readWirelessInfo() {
+	struct iwreq wrq;
+	unsigned char * buffer = NULL;		/* Results */
+	int buflen = 2048; /* Min for compat WE<17 */
+	struct iw_range range;
+	int has_range;
+	wps_wext_scan res;
+
+	/* Get range stuff */
+	has_range = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
+	if (has_range) {
+		res.maxquality.level = range.max_qual.level;
+		res.maxquality.qual = range.max_qual.qual;
+		res.maxquality.noise = range.max_qual.noise;
+		res.maxquality.updated = range.max_qual.updated;
+	}
+	else {
+		res.maxquality.level = 0;
+		res.maxquality.qual = 0;
+		res.maxquality.noise = 0;
+		res.maxquality.updated = 0;
+	}
+	unsigned char * newbuf;
+	//Allocate newbuffer 
+	newbuf = (uchar*) realloc(buffer, buflen);
+	if(newbuf == NULL) {
+		if (buffer) {
+			free(buffer);
+		}
+		printMessage("Allocating buffer for Wext failed");
+		return;
+	}
+	buffer = newbuf;
+		
+	//Set Request variables:
+	wrq.u.data.pointer = buffer;
+	wrq.u.data.flags = 0;
+	wrq.u.data.length = buflen;
+	//Get information
+	if (iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCSIWSTATS, &wrq) < 0) {
+		printMessage("Error occured while trying to receive wireless info");
+		free(buffer);
+		return;
+	}
+	else { //data fetched
+		res.quality.level = wrq.u.qual.level;
+		res.quality.qual = wrq.u.qual.qual;
+		res.quality.noise = wrq.u.qual.noise;
+		res.quality.updated = wrq.u.qual.updated;
+		emit signalQualityUpdated(res);
+	}
 }
 
 
@@ -1706,6 +1800,4 @@ wps_capabilities CWpa_Supplicant::getCapabilities() {
 	}
 	return caps;
 }
-
-
 }

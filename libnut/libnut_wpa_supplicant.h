@@ -16,9 +16,9 @@
 #include <common/macaddress.h>
 #include <QCoreApplication>
 
-extern "C" {
 #include <iwlib.h>
-#include <linux/wireless.h>
+extern "C" {
+// #include <linux/wireless.h>
 #include <sys/time.h>
 #include <string.h>
 #include <stdlib.h>
@@ -35,17 +35,18 @@ namespace libnut {
 			struct wpa_ctrl *cmd_ctrl, *event_ctrl;
 			QString wpa_supplicant_path;
 			int wps_fd, wext_fd;
-			QString wps_ctrl_command(QString cmd);
 			QSocketNotifier *event_sn, *wext_sn;
 			bool log_enabled;
 			bool wps_connected;
 			int timerId;
+			int wextTimerId;
+			int wextTimerRate;
 			int timerCount;
 			bool inConnectionPhase;
 			QString ifname;
-
 			QList<wps_scan> wpsScanResults;
-			
+
+			QString wps_ctrl_command(QString cmd);
 		//Abstracted Commands:
 			inline QString wps_cmd_PING() { return wps_ctrl_command("PING"); }
 			inline QString wps_cmd_MIB() { return wps_ctrl_command("MIB"); }
@@ -137,11 +138,6 @@ namespace libnut {
 			void Event_dispatcher(wps_event_type event);
 			void Event_dispatcher(QString event);
 
-			inline void printMessage(QString msg);
-
-			void wps_open(bool time_call);
-			bool wps_close(QString call_func, bool internal=true);
-			int wps_TimerTime(int timerCount);
 
 			//Edit/get network helper functions
 			wps_eap_network_config wps_getEapNetworkConfig(int id);
@@ -149,6 +145,14 @@ namespace libnut {
 
 			//Functions to get actual signal strength and/or signal strength for scan results:
 			QList<wps_wext_scan> wps_getWextScan();
+			void readWirelessInfo();
+
+			inline void printMessage(QString msg);
+
+			void wps_open(bool time_call);
+			bool wps_close(QString call_func, bool internal=true);
+			int wps_TimerTime(int timerCount);
+
 
 		private slots:
 			void wps_read(int socket);
@@ -196,6 +200,9 @@ namespace libnut {
 			bool setNetworkVariable(int id, QString var, QString val);
 			QString getNetworkVariable(int id, QString val);
 
+			void setSignalQualityPollRate(int msec);
+			int getSignalQualityPollRate();
+
 			QList<wps_network> listNetworks();
 			QList<wps_scan> scanResults();
 			wps_status status();
@@ -222,7 +229,7 @@ namespace libnut {
 			void scanCompleted();
 			void message(QString msg);
 			void eventMessage(wps_event_type type);
-			void SignalQuality(wps_signal_quality qual);
+			void signalQualityUpdated(wps_wext_scan scan);
 	};
 
 }
