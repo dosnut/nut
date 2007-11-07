@@ -11,7 +11,7 @@
 //
 #include <QIcon>
 #include "interfacedetailsmodel.h"
-#include "constants.h"
+#include "common.h"
 
 #define IFDET_MOD_ITEM   0
 #define IFDET_MOD_VALUE  1
@@ -112,8 +112,6 @@ namespace qnut {
 						return tr("zeroconf (fallback)");
 					else
 						return tr("zeroconf");
-				case IFS_WAITFORCONFIG:
-					return tr("unconfigured");
 				default:
 					break;
 				}
@@ -122,40 +120,40 @@ namespace qnut {
 					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("none");
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
-						return interface->getConfig().getStaticIP().toString();
+						return toStringDefault(interface->getConfig().getStaticIP());
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
-						return interface->getUserConfig().ip().toString();
+						return toStringDefault(interface->getUserConfig().ip());
 					else
 						return tr("unknown");
 				}
 				else
-					return interface->ip.toString();
+					return toStringDefault(interface->ip);
 			case 2:
 				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
 					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("none");
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
-						return interface->getConfig().getStaticNetmask().toString();
+						return toStringDefault(interface->getConfig().getStaticNetmask());
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
-						return interface->getUserConfig().netmask().toString();
+						return toStringDefault(interface->getUserConfig().netmask());
 					else
 						return tr("unknown");
 				}
 				else
-					return interface->netmask.toString();
+					return toStringDefault(interface->netmask);
 			case 3:
 				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
 					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("none");
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
-						return interface->getConfig().getStaticGateway().toString();
+						return toStringDefault(interface->getConfig().getStaticGateway());
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
-						return interface->getUserConfig().gateway().toString();
+						return toStringDefault(interface->getUserConfig().gateway());
 					else
 						return tr("unknown");
 				}
 				else
-					return interface->gateway.toString();
+					return toStringDefault(interface->gateway);
 			default:
 				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
 					if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)

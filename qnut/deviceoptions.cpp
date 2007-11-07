@@ -22,6 +22,7 @@
 #include "scriptsettings.h"
 #include "wirelesssettings.h"
 #include "ipconfiguration.h"
+#include <QDebug>
 
 namespace qnut {
 	CDeviceOptions::CDeviceOptions(CDevice * parentDevice, QWidget * parent) :
@@ -32,6 +33,7 @@ namespace qnut {
 		
 		if (device->type == DT_AIR) {
 			wirelessSettings = new CWirelessSettings(device);
+			device->wpa_supplicant->setSignalQualityPollRate(10000);
 		}
 		else
 			wirelessSettings = NULL;
@@ -198,11 +200,15 @@ namespace qnut {
 		CIPConfiguration dialog(this);
 		QModelIndex selectedIndex = (ui.environmentTree->selectionModel()->selection().indexes())[0];
 		
-		CInterface * interface = dynamic_cast<CInterface *>(static_cast<QObject *>(selectedIndex.internalPointer()));
-		if (interface) {
-			nut::IPv4UserConfig config = interface->getUserConfig(true);
-			if (dialog.execute(config))
-				interface->setUserConfig(config);
+		CInterface * interface = static_cast<CInterface *>(selectedIndex.internalPointer());
+		nut::IPv4UserConfig config = interface->getUserConfig(true);
+		if (dialog.execute(config)) {
+			if (!interface->setUserConfig(config)) {
+				qDebug() << "setting user config failed:";
+				qDebug() << "ip: " << toStringDefault(config.ip());
+				qDebug() << "netmask: " << toStringDefault(config.netmask());
+				qDebug() << "gateway: " << toStringDefault(config.gateway());
+			}
 		}
 	}
 	
