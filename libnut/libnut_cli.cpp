@@ -734,7 +734,7 @@ nut::SelectResult CEnvironment::getSelectResult(bool refresh) {
 			selectResult = reply.value();
 		}
 		else {
-			*log << tr("Error while trying to get SelectResult");
+			*log << tr("(%1) Error while trying to get SelectResult").arg(toString(reply.error()));
 			selectResult = nut::SelectResult();
 		}
 	}
@@ -748,7 +748,7 @@ QVector<nut::SelectResult> CEnvironment::getSelectResults(bool refresh) {
 			selectResults = reply.value();
 		}
 		else {
-			*log << tr("Error while trying to get SelectResults");
+			*log << tr("(%1) Error while trying to get SelectResults").arg(toString(reply.error()));
 			selectResults = QVector<nut::SelectResult>();
 		}
 	}

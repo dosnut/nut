@@ -778,6 +778,10 @@ bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 		inConnectionPhase = false;
 		timerCount = 0;
 	}
+	if (wextTimerId != -1) {
+		killTimer(wextTimerId);
+		wextTimerId = -1;
+	}
 	if (wps_connected) {
 		if (event_sn != NULL) {
 			disconnect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));

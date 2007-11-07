@@ -320,6 +320,7 @@ namespace nut {
 Q_DECLARE_METATYPE(nut::Config);
 Q_DECLARE_METATYPE(nut::DeviceConfig);
 Q_DECLARE_METATYPE(nut::SelectResult);
+Q_DECLARE_METATYPE(QVector< nut::SelectResult >);
 Q_DECLARE_METATYPE(nut::SelectRule);
 Q_DECLARE_METATYPE(nut::SelectConfig);
 Q_DECLARE_METATYPE(nut::EnvironmentConfig);
