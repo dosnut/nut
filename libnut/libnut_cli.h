@@ -169,8 +169,6 @@ namespace libnut {
 		void refreshAll();
 		void rebuild(const QList<QDBusObjectPath> &paths);
 	private slots:
-		void dbusinterfaceAdded(const QDBusObjectPath &path);
-		void dbusinterfaceRemoved(const QDBusObjectPath &path);
 		void dbusstateChanged(bool state);
 	public:
 		QString name;
@@ -182,14 +180,10 @@ namespace libnut {
 		void enter();
 		nut::EnvironmentConfig getConfig();
 		nut::SelectResult getSelectResult();
-		void addInterface(nut::IPv4Config config);
-		void removeInterface(CInterface * interface);
 		
 	signals:
 		void activeChanged(bool active);
 		void interfacesUpdated();
-		void interfaceAdded(CInterface * interface);
-		void interfaceRemoved(CInterface * interface);
 	};
 	
 	class CInterface : public CLibNut {

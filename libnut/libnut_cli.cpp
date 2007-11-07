@@ -635,7 +635,6 @@ CEnvironment::~CEnvironment() {
 	CInterface * interface;
 	while (!interfaces.isEmpty()) {
 		interface = interfaces.takeFirst();
-		emit(interfaceRemoved(interface));
 		emit(interfacesUpdated());
 		delete interface;
 	}
@@ -696,7 +695,6 @@ void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 	CInterface * interface;
 	while (!interfaces.isEmpty()) {
 		interface = interfaces.takeFirst();
-		emit(interfaceRemoved(interface));
 		emit(interfacesUpdated());
 		delete interface;
 	}
@@ -715,35 +713,6 @@ void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 }
 
 //CEnvironment private slots:
-void CEnvironment::dbusinterfaceAdded(const QDBusObjectPath &path) {
-	if (!dbusInterfaces.contains(path)) {
-		CInterface * interface;
-		try {
-			interface = new CInterface(this,path);
-		}
-		catch (CLI_IfConnectionException e){
-			*log << e.what();
-			return;
-		}
-		dbusInterfaces.insert(path,interface);
-		interfaces.append(interface);
-	}
-	else {
-		dbusInterfaces.value(path)->refreshAll();
-	}
-}
-void CEnvironment::dbusinterfaceRemoved(const QDBusObjectPath &path) {
-	if (dbusInterfaces.contains(path)) {
-		CInterface * interface = dbusInterfaces.take(path);
-		interfaces.removeAll(interface);
-		emit(interfaceRemoved(interface));
-		delete interface;
-		emit(interfacesUpdated());
-	}
-	else {
-		*log << tr("Tried to remove non-existing interface");
-	}
-}
 void CEnvironment::dbusstateChanged(bool state) {
 	active = state;
 	emit(activeChanged(state));
@@ -756,12 +725,6 @@ void CEnvironment::enter() {
 }
 nut::EnvironmentConfig CEnvironment::getConfig() {
 	return config;
-}
-void CEnvironment::addInterface(nut::IPv4Config config) {
-	dbusEnvironment->addInterface(config);
-}
-void CEnvironment::removeInterface(CInterface * interface) {
-	dbusEnvironment->removeInterface(dbusInterfaces.key(interface));
 }
 
 ////////////
