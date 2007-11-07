@@ -11,7 +11,7 @@
 //
 #include <QIcon>
 #include "environmenttreemodel.h"
-#include "constants.h"
+#include "common.h"
 
 #define ENVTREE_MOD_ITEM    0
 #define ENVTREE_MOD_STATUS  1
@@ -131,14 +131,14 @@ namespace qnut {
 					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("none");
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
-						return interface->getConfig().getStaticIP().toString();
+						return toStringDefault(interface->getConfig().getStaticIP());
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
-						return interface->getUserConfig().ip().toString();
+						return toStringDefault(interface->getUserConfig().ip());
 					else
 						return tr("unknown");
 				}
 				else
-					return interface->ip.toString();
+					return toStringDefault(interface->ip);
 			}
 			break;
 		default:

@@ -1,4 +1,5 @@
 #include "common.h"
+#include <QObject>
 
 namespace qnut {
 	QString iconFile(CDevice * device) {
