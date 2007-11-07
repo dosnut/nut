@@ -760,7 +760,9 @@ void CWpa_Supplicant::wps_open(bool) {
 		printMessage("ERROR: Could not open socket to net kernel");
 	}
 	else { //Socket is set up, now set SocketNotifier
+		printMessage(QString("File Descriptor for Wext is: %1").arg(QString::number(wext_fd)));
 		wext_sn = new QSocketNotifier(wext_fd, QSocketNotifier::Read, NULL);
+		wext_sn->setEnabled(true);
 	}
 	//Start timer for reading wireless info (like in /proc/net/wireless)
 	wextTimerId = startTimer(wextTimerRate);
@@ -1534,6 +1536,7 @@ QList<wps_wext_scan> CWpa_Supplicant::wps_getWextScan() {
 
 	/* Get range stuff */
 	has_range = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
+	printMessage(QString(strerror(errno)));
 	
 	unsigned char * newbuf;
 	for (int i=0; i <= 16; i++) { //realloc
@@ -1666,6 +1669,8 @@ void CWpa_Supplicant::readWirelessInfo() {
 
 	/* Get range stuff */
 	has_range = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
+	printMessage(QString("(%1) May be an error occured while getting range").arg(QString(strerror(errno))));
+
 	if (has_range) {
 		res.maxquality.level = range.max_qual.level;
 		res.maxquality.qual = range.max_qual.qual;
@@ -1696,7 +1701,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 	wrq.u.data.length = buflen;
 	//Get information
 	if (iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCSIWSTATS, &wrq) < 0) {
-		printMessage("Error occured while trying to receive wireless info");
+		printMessage(QString("(%1) Error occured while trying to receive wireless info").arg(QString(strerror(errno))));
 		free(buffer);
 		return;
 	}
