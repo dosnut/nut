@@ -818,6 +818,7 @@ void CWpa_Supplicant::wps_detach() {
 		wpa_ctrl_detach(event_ctrl);
 	}
 }
+
 void CWpa_Supplicant::wps_scanResultsAvailable(int socket) {
 	if (socket != wext_fd) {
 		return;
@@ -833,11 +834,11 @@ void CWpa_Supplicant::wps_scanResultsAvailable(int socket) {
 		//Now get the scan results from wext:
 		QList<wps_wext_scan> wextScanResults = wps_getWextScan();
 		//This max not be possible as qHash references an namespace that is unknown to qt TODO:CHECK!
-// 		QHash<nut::MacAddress,wps_wext_scan> wextScanHash; //Namespace problem
-		QHash<QString,wps_wext_scan> wextScanHash;
+		QHash<uint,wps_wext_scan> wextScanHash; //Namespace problem
+// 		QHash<QString,wps_wext_scan> wextScanHash;
 		foreach(wps_wext_scan i, wextScanResults) {
-// 			wextScanHash.insert(i.bssid, i);
-			wextScanHash.insert(i.bssid.toString(), i);
+			wextScanHash.insert(qHash(i.bssid), i);
+// 			wextScanHash.insert(i.bssid.toString(), i);
 		}
 		wps_wext_scan dummy;
 		dummy.bssid = nut::MacAddress();
@@ -847,7 +848,7 @@ void CWpa_Supplicant::wps_scanResultsAvailable(int socket) {
 		dummy.quality.noise = 0;
 		//Set the signal quality
 		for (QList<wps_scan>::Iterator i = wpsScanResults.begin(); i != wpsScanResults.end(); ++i ) {
-			i->quality = wextScanHash.value(i->bssid.toString(), dummy).quality;
+			i->quality = wextScanHash.value(qHash(i->bssid), dummy).quality;
 		}
 		//Now the complete list is done;
 		emit(scanCompleted());
@@ -1561,14 +1562,14 @@ QList<wps_wext_scan> CWpa_Supplicant::wps_getWextScan() {
 		singleres.quality.qual = 0;
 		singleres.quality.noise = 0;
 		singleres.quality.updated = 0;
-		singleres.maxquality.level = range.max_quality.level;
-		singleres.maxquality.qual = range.max_quality.qual;
-		singleres.maxquality.noise = range.max_quality.noise;
-		singleres.maxquality.updated = range.max_quality.updated;
-		singleres.avgquality.level = range.avg_quality.level;
-		singleres.avgquality.qual = range.avg_quality.qual;
-		singleres.avgquality.noise = range.avg_quality.noise;
-		singleres.avgquality.updated = range.avg_quality.updated;
+		singleres.maxquality.level = range.max_qual.level;
+		singleres.maxquality.qual = range.max_qual.qual;
+		singleres.maxquality.noise = range.max_qual.noise;
+		singleres.maxquality.updated = range.max_qual.updated;
+		singleres.avgquality.level = range.avg_qual.level;
+		singleres.avgquality.qual = range.avg_qual.qual;
+		singleres.avgquality.noise = range.avg_qual.noise;
+		singleres.avgquality.updated = range.avg_qual.updated;
 
 		//Init event stream
 		iw_init_event_stream(&stream, (char *) buffer, wrq.u.data.length);

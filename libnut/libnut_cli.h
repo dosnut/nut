@@ -1,20 +1,18 @@
 #ifndef LIBNUT_LIBNUT_CLI_H
 #define LIBNUT_LIBNUT_CLI_H
-#include <iostream>
 #include <QObject>
 #include <QList>
 #include <QHostAddress>
-#include <common/types.h>
-#include <common/config.h>
-#include "libnut_server_proxy.h"
-#include "libnut_exceptions.h"
-#include "libnut_wpa_supplicant.h"
 #include <QDBusConnectionInterface>
 #include <QDBusReply>
 #include <QDBusObjectPath>
 #include <QFile>
 #include <QTextStream>
-#include <QHash>
+#include <common/types.h>
+#include <common/config.h>
+#include "libnut_server_proxy.h"
+#include "libnut_exceptions.h"
+#include "libnut_wpa_supplicant.h"
 
 namespace libnut {
 	class CDeviceManager;

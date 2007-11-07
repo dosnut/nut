@@ -15,7 +15,6 @@
 #include <QTimerEvent>
 #include <common/macaddress.h>
 #include <QCoreApplication>
-#include <QHash>
 
 extern "C" {
 #include <iwlib.h>

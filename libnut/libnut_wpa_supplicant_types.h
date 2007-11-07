@@ -2,10 +2,9 @@
 #define LIBNUT_LIBNUT_WPA_SUPPLICANT_TYPES_H
 
 #include <QString>
-#include <QByteArray>
 #include <QList>
-#include <common/macaddress.h>
 #include <QHostAddress>
+#include <common/macaddress.h>
 
 namespace libnut {
 
