@@ -144,6 +144,23 @@ namespace nuts {
 		return true;
 	}
 	
+	bool ConfigParser::envZeroconf() {
+		m_curipv4config = 0;
+		if (!m_curenvconfig) return false;
+		if (m_cur_env->m_haszeroconf) return false;
+		m_curipv4config = new nut::IPv4Config();
+		return true;
+	}
+	
+	bool ConfigParser::finishZeroconf() {
+		if (!m_curenvconfig) return false;
+		if (!m_curipv4config) return false;
+		m_cur_env->m_haszeroconf = true;
+		m_curenvconfig->m_ipv4Interfaces.push_back(m_curipv4config);
+		m_curipv4config = 0;
+		return true;
+	}
+	
 	bool ConfigParser::envStatic() {
 		m_curipv4config = 0;
 		if (!m_curenvconfig) return false;
