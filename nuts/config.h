@@ -13,10 +13,10 @@ namespace nuts {
 	class ConfigParser {
 		private:
 			struct local_env_config {
-				bool m_hasdhcp, no_def_dhcp;
+				bool m_hasdhcp, m_haszeroconf, no_def_dhcp;
 				
 				local_env_config()
-				: m_hasdhcp(false), no_def_dhcp(false) { }
+				: m_hasdhcp(false), m_haszeroconf(false), no_def_dhcp(false) { }
 			};
 		
 			bool failed;
@@ -60,6 +60,9 @@ namespace nuts {
 			
 			bool envDHCP();
 			bool finishDHCP();
+			
+			bool envZeroconf();
+			bool finishZeroconf();
 			
 			bool envStatic();
 			bool finishStatic();

@@ -1,20 +1,18 @@
 #ifndef LIBNUT_LIBNUT_CLI_H
 #define LIBNUT_LIBNUT_CLI_H
-#include <iostream>
 #include <QObject>
 #include <QList>
 #include <QHostAddress>
-#include <common/types.h>
-#include <common/config.h>
-#include "libnut_server_proxy.h"
-#include "libnut_exceptions.h"
-#include "libnut_wpa_supplicant.h"
 #include <QDBusConnectionInterface>
 #include <QDBusReply>
 #include <QDBusObjectPath>
 #include <QFile>
 #include <QTextStream>
-#include <QHash>
+#include <common/types.h>
+#include <common/config.h>
+#include "libnut_server_proxy.h"
+#include "libnut_exceptions.h"
+#include "libnut_wpa_supplicant.h"
 
 namespace libnut {
 	class CDeviceManager;
@@ -125,8 +123,6 @@ namespace libnut {
 
 	private slots:
 		void environmentChangedActive(const QDBusObjectPath &newenv);
-		void environmentAdded(const QDBusObjectPath &path);
-		void environmentRemoved(const QDBusObjectPath &path);
 		void dbusstateChanged(int newState, int oldState);
 	public:
 		CEnvironmentList environments;
@@ -145,15 +141,13 @@ namespace libnut {
 	public slots:
 		void enable();
 		void disable();
-		void addEnvironment(QString name);
-		void removeEnvironment(CEnvironment * environment);
 		void setEnvironment(CEnvironment * environment);
 		
 	signals:
 		void environmentChangedActive(CEnvironment * current, CEnvironment * previous);
-		void environmentsUpdated();
-		void environmentAdded(CEnvironment * environment);
-		void environmentRemoved(CEnvironment * environment);
+// 		void environmentsUpdated(); //Pending for removal
+// 		void environmentAdded(CEnvironment * environment); //Pending for removal
+// 		void environmentRemoved(CEnvironment * environment); //Pending for removal
 		void stateChanged(DeviceState newState);
 	};
 	
@@ -175,8 +169,6 @@ namespace libnut {
 		void refreshAll();
 		void rebuild(const QList<QDBusObjectPath> &paths);
 	private slots:
-		void dbusinterfaceAdded(const QDBusObjectPath &path);
-		void dbusinterfaceRemoved(const QDBusObjectPath &path);
 		void dbusstateChanged(bool state);
 	public:
 		QString name;
@@ -187,14 +179,11 @@ namespace libnut {
 	public slots:
 		void enter();
 		nut::EnvironmentConfig getConfig();
-		void addInterface(nut::IPv4Config config);
-		void removeInterface(CInterface * interface);
+		nut::SelectResult getSelectResult();
 		
 	signals:
 		void activeChanged(bool active);
 		void interfacesUpdated();
-		void interfaceAdded(CInterface * interface);
-		void interfaceRemoved(CInterface * interface);
 	};
 	
 	class CInterface : public CLibNut {
@@ -209,6 +198,7 @@ namespace libnut {
 		CLog * log;
 		DBusInterfaceInterface_IPv4 * dbusInterface;
 		nut::IPv4Config dbusConfig;
+		nut::IPv4UserConfig userConfig;
 		void refreshAll();
 	private slots:
 		void dbusstateChanged(const InterfaceProperties &properties);
@@ -219,7 +209,7 @@ namespace libnut {
 		QHostAddress gateway;
 		QList<QHostAddress> dnsserver;
 		
-		nut::IPv4UserConfig getUserConfig();
+		nut::IPv4UserConfig getUserConfig(bool refresh=true);
 		nut::IPv4Config getConfig() { return dbusConfig; }
 		nut::IPv4Config config() { return dbusConfig; } //wants qnut wants it like that
 
@@ -228,11 +218,8 @@ namespace libnut {
 	public slots:
 		void activate();
 		void deactivate();
-		void setIP(QHostAddress & address);
-		void setNetmask(QHostAddress & address);
-		void setGateway(QHostAddress & address);
 		bool needUserSetup();
-		bool setUserConfig(const nut::IPv4UserConfig &userConfig);
+		bool setUserConfig(const nut::IPv4UserConfig &cuserConfig);
 		
 	signals:
 		void stateChanged(InterfaceState state);

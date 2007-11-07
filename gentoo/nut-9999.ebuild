@@ -45,10 +45,10 @@ src_install() {
 	
 	make INSTALL_ROOT="${D}" install || die
 
-    exeinto /etc/init.d/
-    newexe "${S}"/debian/nuts.init nuts
-    insinto /etc/
-    newins "${S}"/gentoo/nuts.config.example nuts.config.example
+	exeinto /etc/init.d/
+	newexe "${S}"/debian/nuts.init nuts
+	insinto /etc/
+	newins "${S}"/gentoo/nuts.config.example nuts.config.example
 
 	insinto /etc/dbus-1/system.d/
 	newins "${S}"/debian/nuts-dbus.conf nuts-dbus.conf
@@ -64,3 +64,4 @@ pkg_postinst() {
 	elog "To start nuts add nuts to your default runlevel:"
 	elog "rc-update add nuts default"
 }
+

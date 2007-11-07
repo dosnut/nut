@@ -204,11 +204,7 @@ QList<wps_scan> CWpa_Supplicant::parseScanResult(QStringList list) {
 			worked = true;
 			continue;
 		}
-		scanresult.level = line[2].toInt(&worked);
-		if (!worked) {
-			worked = true;
-			continue;
-		}
+		//Quality will come directly from wext
 		scanAuth = parseScanAuth(line[3]);
 		scanresult.ciphers = parseScanCiphers(line[3]);
 		scanresult.protocols = toProtocols(scanAuth);
@@ -681,7 +677,7 @@ void CWpa_Supplicant::Event_dispatcher(QString event) {
 }
 
 //Public functions:
-CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path) : QObject(parent), cmd_ctrl(0), event_ctrl(0), wpa_supplicant_path(wpa_supplicant_path), timerId(-1) {
+CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), wpa_supplicant_path("/var/run/wpa_supplicant/"+ifname), event_sn(0), wext_sn(0), timerId(-1), wextTimerId(-1), ifname(ifname) {
 	wps_connected = false;
 	timerCount = 0;
 	log_enabled = true;
@@ -694,6 +690,10 @@ void CWpa_Supplicant::wps_open(bool) {
 	if (timerId != -1) {
 		killTimer(timerId);
 		timerId = -1;
+	}
+	if (wextTimerId != -1) {
+		killTimer(wextTimerId);
+		wextTimerId = -1;
 	}
 	if (wps_connected) return;
 	int status;
@@ -750,10 +750,27 @@ void CWpa_Supplicant::wps_open(bool) {
 	connect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
 	event_sn->setEnabled(true);
 	wps_connected = true;
+
+	//NEW FEATURE: Signal level retrieving:
+	
+	//Get file Descriptor to NET kernel
+	int wext_fd;
+	if ( (wext_fd = iw_sockets_open()) < 0) {
+		wext_sn = NULL;
+		printMessage("ERROR: Could not open socket to net kernel");
+	}
+	else { //Socket is set up, now set SocketNotifier
+		wext_sn = new QSocketNotifier(wext_fd, QSocketNotifier::Read, NULL);
+	}
+	//Start timer for reading wireless info (like in /proc/net/wireless)
+	wextTimerId = startTimer(wextTimerRate);
+	
+	//Continue of ol features:
 	emit(opened());
 	printMessage(tr("wpa_supplicant connection established"));
 	return;
 }
+
 bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 	if (timerId != -1) {
 		killTimer(timerId);
@@ -766,6 +783,11 @@ bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 			disconnect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
 			delete event_sn;
 			event_sn = NULL;
+		}
+		if (wext_sn != NULL) {
+			disconnect(wext_sn,SIGNAL(activated(int)), this, SLOT(wps_scanResultsAvailable(int)));
+			delete wext_sn;
+			wext_sn = NULL;
 		}
 		//Detaching takes place if program is about to quit
 		//Close control connections
@@ -805,6 +827,43 @@ void CWpa_Supplicant::wps_detach() {
 	}
 }
 
+void CWpa_Supplicant::wps_scanResultsAvailable(int socket) {
+	if (socket != wext_fd) {
+		return;
+	}
+	QString response = wps_cmd_SCAN_RESULTS();
+	if (response.isEmpty()) {
+		wpsScanResults = QList<wps_scan>();
+		return;
+	}
+	else {
+		//Set scan results from wpa_supplicant:
+		wpsScanResults = parseScanResult(sliceMessage(response));
+		//Now get the scan results from wext:
+		QList<wps_wext_scan> wextScanResults = wps_getWextScan();
+		//This max not be possible as qHash references an namespace that is unknown to qt TODO:CHECK!
+		QHash<uint,wps_wext_scan> wextScanHash; //Namespace problem
+// 		QHash<QString,wps_wext_scan> wextScanHash;
+		foreach(wps_wext_scan i, wextScanResults) {
+			wextScanHash.insert(qHash(i.bssid), i);
+// 			wextScanHash.insert(i.bssid.toString(), i);
+		}
+		wps_wext_scan dummy;
+		dummy.bssid = nut::MacAddress();
+		dummy.quality.level = 0;
+		dummy.quality.qual = 0;
+		dummy.quality.updated = 0;
+		dummy.quality.noise = 0;
+		//Set the signal quality
+		for (QList<wps_scan>::Iterator i = wpsScanResults.begin(); i != wpsScanResults.end(); ++i ) {
+			i->quality = wextScanHash.value(qHash(i->bssid), dummy).quality;
+		}
+		//Now the complete list is done;
+		emit(scanCompleted());
+	}
+}
+
+
 void CWpa_Supplicant::timerEvent(QTimerEvent *event) {
 	if (event->timerId() == timerId) {
 		if (!wps_connected) {
@@ -814,6 +873,11 @@ void CWpa_Supplicant::timerEvent(QTimerEvent *event) {
 			killTimer(timerId);
 			timerId = -1;
 			timerCount = 0;
+		}
+	}
+	else if (event->timerId() == wextTimerId) {
+		if (wext_fd != 0) {
+			readWirelessInfo();
 		}
 	}
 }
@@ -829,6 +893,19 @@ bool CWpa_Supplicant::connected() {
 
 //Public slots
 
+
+void CWpa_Supplicant::setSignalQualityPollRate(int msec) {
+	if (wextTimerId != -1) {
+		killTimer(wextTimerId);
+		wextTimerId = startTimer(wextTimerRate);
+	}
+	else {
+		wextTimerRate = msec;
+	}
+}
+int CWpa_Supplicant::getSignalQualityPollRate() {
+	return wextTimerRate;
+}
 
 void CWpa_Supplicant::setLog(bool enabled) {
 	log_enabled = enabled;
@@ -1439,6 +1516,196 @@ wps_eap_netconfig_failures CWpa_Supplicant::wps_editEapNetwork(int netid, wps_ea
 	return eap_failures;
 }
 
+QList<wps_wext_scan> CWpa_Supplicant::wps_getWextScan() {
+	if (wext_fd == 0) {
+		return QList<wps_wext_scan>();
+	}
+	struct iwreq wrq;
+	unsigned char * buffer = NULL;		/* Results */
+	int buflen = IW_SCAN_MAX_DATA; /* Min for compat WE<17 */
+	struct iw_range range;
+	int has_range;
+
+	QList<wps_wext_scan> res = QList<wps_wext_scan>();
+
+	/* Get range stuff */
+	has_range = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
+	
+	unsigned char * newbuf;
+	for (int i=0; i <= 16; i++) { //realloc
+		//Allocate newbuffer 
+		newbuf = (uchar*) realloc(buffer, buflen);
+		if(newbuf == NULL) {
+			if (buffer) {
+				free(buffer);
+			}
+			printMessage("Allocating buffer for Wext failed");
+			return res;
+		}
+		buffer = newbuf;
+		
+		//Set Request variables:
+		wrq.u.data.pointer = buffer;
+		wrq.u.data.flags = 0;
+		wrq.u.data.length = buflen;
+		
+		//Get the data:
+		if (iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWSCAN, &wrq) < 0) {
+			//Buffer is too small
+			if((errno == E2BIG) && (range.we_version_compiled > 16)) {
+				
+				//check if driver gives any hints about scan length:
+				if (wrq.u.data.length > buflen) {
+					buflen = wrq.u.data.length;
+				}
+				else { //If not, double the length
+					buflen *= 2;
+				}
+				//Start from the beginning:
+				continue;
+			}
+			//No range error occured or kernel has wireless extension < 16
+			if (errno == EAGAIN) {
+				printMessage("Scan results not available yet (this should not happen)");
+			}
+			
+			//Bad error occured
+			free(buffer);
+			printMessage(QString("(%1) Failed to read scan data : %2").arg(ifname, QString(strerror(errno))));
+		}
+		else { //Results are there
+			break;
+		}
+	}
+
+	//Now read the data:
+	if (wrq.u.data.length) {
+
+		struct iw_event iwe;
+		struct stream_descr stream;
+		int ret;
+		
+		wps_wext_scan singleres;
+		singleres.bssid = nut::MacAddress();
+		singleres.quality.level = 0;
+		singleres.quality.qual = 0;
+		singleres.quality.noise = 0;
+		singleres.quality.updated = 0;
+		if (has_range) {
+			singleres.maxquality.level = range.max_qual.level;
+			singleres.maxquality.qual = range.max_qual.qual;
+			singleres.maxquality.noise = range.max_qual.noise;
+			singleres.maxquality.updated = range.max_qual.updated;
+			singleres.avgquality.level = range.avg_qual.level;
+			singleres.avgquality.qual = range.avg_qual.qual;
+			singleres.avgquality.noise = range.avg_qual.noise;
+			singleres.avgquality.updated = range.avg_qual.updated;
+		}
+		else {
+			singleres.maxquality.level = 0;
+			singleres.maxquality.qual = 0;
+			singleres.maxquality.noise = 0;
+			singleres.maxquality.updated = 0;
+			singleres.avgquality.level = 0;
+			singleres.avgquality.qual = 0;
+			singleres.avgquality.noise = 0;
+			singleres.avgquality.updated = 0;
+		}
+
+		//Init event stream
+		iw_init_event_stream(&stream, (char *) buffer, wrq.u.data.length);
+		do {
+			/* Extract an event and parse it*/
+			ret = iw_extract_event_stream(&stream, &iwe, range.we_version_compiled);
+			if(ret > 0) {
+				//Now parse our scan event:
+				nut::MacAddress tmpMac;
+				switch(iwe.cmd) {
+					case SIOCGIWAP:
+						//ap_addr has type socketaddr
+						tmpMac = nut::MacAddress( QString::fromUtf8(iwe.u.ap_addr.sa_data,14));
+						break;
+					case IWEVQUAL: //Quality event:
+						singleres.quality.qual = (quint8) iwe.u.qual.qual;
+						singleres.quality.level = (quint8) iwe.u.qual.level;
+						singleres.quality.noise = (quint8) iwe.u.qual.noise;
+						singleres.quality.updated = (quint8) iwe.u.qual.updated;
+
+						// if our last bssid is different from the actual one, then we have to append it to our scanlist
+						if ( (singleres.bssid != tmpMac) && !singleres.bssid.zero() )  {
+							singleres.bssid = tmpMac;
+							res.append(singleres);
+						}
+					default: //Ignore all other event types. Maybe we need them later?
+						break;
+				}
+			}
+		} while(ret > 0);
+		free(buffer);
+		return res;
+	}
+	else {
+		printMessage("NO Scanresults available");
+	}
+
+	free(buffer);
+	return res;
+}
+
+void CWpa_Supplicant::readWirelessInfo() {
+	struct iwreq wrq;
+	unsigned char * buffer = NULL;		/* Results */
+	int buflen = 2048; /* Min for compat WE<17 */
+	struct iw_range range;
+	int has_range;
+	wps_wext_scan res;
+
+	/* Get range stuff */
+	has_range = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
+	if (has_range) {
+		res.maxquality.level = range.max_qual.level;
+		res.maxquality.qual = range.max_qual.qual;
+		res.maxquality.noise = range.max_qual.noise;
+		res.maxquality.updated = range.max_qual.updated;
+	}
+	else {
+		res.maxquality.level = 0;
+		res.maxquality.qual = 0;
+		res.maxquality.noise = 0;
+		res.maxquality.updated = 0;
+	}
+	unsigned char * newbuf;
+	//Allocate newbuffer 
+	newbuf = (uchar*) realloc(buffer, buflen);
+	if(newbuf == NULL) {
+		if (buffer) {
+			free(buffer);
+		}
+		printMessage("Allocating buffer for Wext failed");
+		return;
+	}
+	buffer = newbuf;
+		
+	//Set Request variables:
+	wrq.u.data.pointer = buffer;
+	wrq.u.data.flags = 0;
+	wrq.u.data.length = buflen;
+	//Get information
+	if (iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCSIWSTATS, &wrq) < 0) {
+		printMessage("Error occured while trying to receive wireless info");
+		free(buffer);
+		return;
+	}
+	else { //data fetched
+		res.quality.level = wrq.u.qual.level;
+		res.quality.qual = wrq.u.qual.qual;
+		res.quality.noise = wrq.u.qual.noise;
+		res.quality.updated = wrq.u.qual.updated;
+		emit signalQualityUpdated(res);
+	}
+}
+
+
 void CWpa_Supplicant::removeNetwork(int id) {
 	wps_cmd_REMOVE_NETWORK(id);
 }
@@ -1476,13 +1743,7 @@ QList<wps_network> CWpa_Supplicant::listNetworks() {
 }
 
 QList<wps_scan> CWpa_Supplicant::scanResults() {
-	QString reply = wps_cmd_SCAN_RESULTS();
-	if (!reply.isEmpty()) {
-		return parseScanResult(sliceMessage(reply));
-	}
-	else {
-		return QList<wps_scan>();
-	}
+	return wpsScanResults;
 }
 wps_status CWpa_Supplicant::status() {
 	QString reply = wps_cmd_STATUS(true);
@@ -1539,6 +1800,4 @@ wps_capabilities CWpa_Supplicant::getCapabilities() {
 	}
 	return caps;
 }
-
-
 }

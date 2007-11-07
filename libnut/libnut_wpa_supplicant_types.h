@@ -2,10 +2,9 @@
 #define LIBNUT_LIBNUT_WPA_SUPPLICANT_TYPES_H
 
 #include <QString>
-#include <QByteArray>
 #include <QList>
-#include <common/macaddress.h>
 #include <QHostAddress>
+#include <common/macaddress.h>
 
 namespace libnut {
 
@@ -79,11 +78,25 @@ namespace libnut {
 		wps_auth_algs auth_alg;
 	};
 
+	struct	wps_signal_quality {
+		quint8 qual;	/* link quality (%retries, SNR, %missed beacons or better...) */
+		quint8 level;		/* signal level (dBm) */
+		quint8 noise;		/* noise level (dBm) */
+		quint8 updated;	/* Flags to know if updated */
+	};
+
+	struct wps_wext_scan {
+		nut::MacAddress bssid;
+		wps_signal_quality quality;
+		wps_signal_quality maxquality;
+		wps_signal_quality avgquality;
+	};
+
 	struct wps_scan {
 		nut::MacAddress bssid;
 		QString ssid;
 		int freq;
-		int level;
+		wps_signal_quality quality;
 		wps_ciphers ciphers;
 		wps_key_management keyManagement;
 		wps_protocols protocols;

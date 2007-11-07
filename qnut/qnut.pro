@@ -63,10 +63,13 @@ shortcuttarget.files = qnut.desktop
 
 INSTALLS += target iconstarget langtarget shortcuttarget
 
+
+
 INCLUDEPATH += ..
 
 LIBS += ../common/libnutcommon.a \
-../libnut/libnut.a
+../libnut/libnut.a \
+-L/lib \
+-liw
 TARGETDEPS += ../common/libnutcommon.a \
 ../libnut/libnut.a
-

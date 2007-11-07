@@ -264,13 +264,5 @@ namespace nuts {
 	nut::IPv4Config DBusInterface_IPv4::getConfig() {
 		return (s_interface->getConfig());
 	}
-	void DBusInterface_IPv4::setIP(quint32 /*HostAddress*/) {
-	}
-	void DBusInterface_IPv4::setNetmask(quint32 /*Netmask*/) {
-	}
-	void DBusInterface_IPv4::setGateway(quint32 /*Gateway*/) {
-	}
-	void DBusInterface_IPv4::setDNS(QList<QHostAddress> /*DNS*/) {
-	}
 
 }
