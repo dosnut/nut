@@ -1561,6 +1561,15 @@ QList<wps_wext_scan> CWpa_Supplicant::wps_getWextScan() {
 		singleres.quality.qual = 0;
 		singleres.quality.noise = 0;
 		singleres.quality.updated = 0;
+		singleres.maxquality.level = range.max_quality.level;
+		singleres.maxquality.qual = range.max_quality.qual;
+		singleres.maxquality.noise = range.max_quality.noise;
+		singleres.maxquality.updated = range.max_quality.updated;
+		singleres.avgquality.level = range.avg_quality.level;
+		singleres.avgquality.qual = range.avg_quality.qual;
+		singleres.avgquality.noise = range.avg_quality.noise;
+		singleres.avgquality.updated = range.avg_quality.updated;
+
 		//Init event stream
 		iw_init_event_stream(&stream, (char *) buffer, wrq.u.data.length);
 		do {

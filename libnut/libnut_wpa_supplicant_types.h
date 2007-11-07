@@ -89,6 +89,8 @@ namespace libnut {
 	struct wps_wext_scan {
 		nut::MacAddress bssid;
 		wps_signal_quality quality;
+		wps_signal_quality maxquality;
+		wps_signal_quality avgquality;
 	};
 
 	struct wps_scan {
