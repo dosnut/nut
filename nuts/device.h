@@ -314,7 +314,7 @@ namespace nuts {
 		
 		protected:
 			enum dhcp_state {
-				DHCPS_OFF, DHCPS_FAILED,
+				DHCPS_OFF,
 				DHCPS_INIT_START,  // reset dhcp_retry, -> DHCPS_INIT
 				DHCPS_INIT,        // (++dhcp_retry >= 5) -> failed, Discover all -> selecting
 	 			DHCPS_SELECTING,   // Waiting for offer; request a offer -> requesting, timeout -> init
@@ -325,7 +325,19 @@ namespace nuts {
 				DHCPS_INITREBOOT,  // request last ip -> rebooting
 				DHCPS_REBOOTING    // wait for ack -> bound, timeout/nak -> init
 			};
+			enum zeroconf_state {
+				ZCS_OFF,           // No zeroconf activity
+				ZCS_START,         // Start Probing
+				ZCS_PROBING,       // Startet ARPProbes
+				ZCS_RESERVING,     // Probing was successful, now reserve address (more Probes) until
+				                   // we really want to use it (wait for DHCP e.g.)
+				ZCS_ANNOUNCING,    // Announce Address
+				ZCS_BOUND,         // Announce was successful. Listen for conflicting ARP Packets.
+				ZCS_CONFLICT,      // Conflict detected, select new address and restart Probing.
+			};
+			
 			DeviceManager *dm;
+			
 			quint32 dhcp_xid;
 			bool dhcp_xid_unicast;
 			int dhcp_unicast_socket;
@@ -334,6 +346,11 @@ namespace nuts {
 			QHostAddress dhcp_server_ip;
 			QVector<quint8> dhcp_server_identifier;
 			quint32 dhcp_lease_time;
+			
+			zeroconf_state zc_state;
+			QHostAddress zc_probe_ip;
+			ARPProbe *zc_arp_probe;
+			
 			nut::IPv4Config *m_config;
 			
 			libnut::InterfaceState m_ifstate;
@@ -347,6 +364,11 @@ namespace nuts {
 			void dhcp_send_release();
 			void dhcp_setup_interface(DHCPPacket *ack, bool renewing = false);
 			void dhcpAction(DHCPPacket *source = 0);
+			
+			void zeroconf_setup_interface();
+			void zeroconfProbe();   // select new ip and start probe it
+			void zeroconfFree();    // free ARPProbe and ARPWatch
+			void zeroconfAction();  // automaton
 			
 			void startDHCP();
 			void stopDHCP();
@@ -372,6 +394,9 @@ namespace nuts {
 		
 		protected slots:
 			void readDHCPUnicastClientSocket();
+			
+			void zc_conflict();
+			void zc_ready();
 		
 		public:
 			Interface_IPv4(Environment *env, int index, nut::IPv4Config *config);
