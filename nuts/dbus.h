@@ -39,6 +39,7 @@ namespace nuts {
 			void devRemoved(QString devName, Device *dev);
 			
 			friend int mainApp(int argc, char* argv[]);
+			friend class DeviceManager;
 			void stopDBus();
 		
 		public:
