@@ -16,8 +16,15 @@
 #include <common/macaddress.h>
 #include <QCoreApplication>
 
-//TODO:Check if we can start multiple wpa_supplicants for multiple devices and test behavior
+#include <iwlib.h>
+extern "C" {
+// #include <linux/wireless.h>
+#include <sys/time.h>
+#include <string.h>
+#include <stdlib.h>
+}
 
+//TODO:Check if we can start multiple wpa_supplicants for multiple devices and test behavior
 
 
 namespace libnut {
@@ -27,15 +34,19 @@ namespace libnut {
 		private:
 			struct wpa_ctrl *cmd_ctrl, *event_ctrl;
 			QString wpa_supplicant_path;
-			int wps_fd;
-			QString wps_ctrl_command(QString cmd);
-			QSocketNotifier *event_sn;
+			int wps_fd, wext_fd;
+			QSocketNotifier *event_sn, *wext_sn;
 			bool log_enabled;
 			bool wps_connected;
 			int timerId;
+			int wextTimerId;
+			int wextTimerRate;
 			int timerCount;
 			bool inConnectionPhase;
-			
+			QString ifname;
+			QList<wps_scan> wpsScanResults;
+
+			QString wps_ctrl_command(QString cmd);
 		//Abstracted Commands:
 			inline QString wps_cmd_PING() { return wps_ctrl_command("PING"); }
 			inline QString wps_cmd_MIB() { return wps_ctrl_command("MIB"); }
@@ -127,25 +138,32 @@ namespace libnut {
 			void Event_dispatcher(wps_event_type event);
 			void Event_dispatcher(QString event);
 
+
+			//Edit/get network helper functions
+			wps_eap_network_config wps_getEapNetworkConfig(int id);
+			wps_eap_netconfig_failures wps_editEapNetwork(int netid, wps_eap_network_config config);
+
+			//Functions to get actual signal strength and/or signal strength for scan results:
+			QList<wps_wext_scan> wps_getWextScan();
+			void readWirelessInfo();
+
 			inline void printMessage(QString msg);
 
 			void wps_open(bool time_call);
 			bool wps_close(QString call_func, bool internal=true);
 			int wps_TimerTime(int timerCount);
 
-			//Edit/get network helper functions
-			wps_eap_network_config wps_getEapNetworkConfig(int id);
-			wps_eap_netconfig_failures wps_editEapNetwork(int netid, wps_eap_network_config config);
 
 		private slots:
 			void wps_read(int socket);
 			void wps_detach();
+			void wps_scanResultsAvailable(int socket);
 		protected:
 			//proposed time polling:
 			void timerEvent(QTimerEvent *event);
 			
 		public:
-			CWpa_Supplicant(QObject * parent, QString wpa_supplicant_path);
+			CWpa_Supplicant(QObject * parent, QString ifname);
 			~CWpa_Supplicant();
 			inline void open() { wps_open(false); }
 			inline bool close() {return wps_close("libnut",false); }
@@ -182,6 +200,9 @@ namespace libnut {
 			bool setNetworkVariable(int id, QString var, QString val);
 			QString getNetworkVariable(int id, QString val);
 
+			void setSignalQualityPollRate(int msec);
+			int getSignalQualityPollRate();
+
 			QList<wps_network> listNetworks();
 			QList<wps_scan> scanResults();
 			wps_status status();
@@ -208,6 +229,7 @@ namespace libnut {
 			void scanCompleted();
 			void message(QString msg);
 			void eventMessage(wps_event_type type);
+			void signalQualityUpdated(wps_wext_scan scan);
 	};
 
 }

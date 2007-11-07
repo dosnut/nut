@@ -13,19 +13,15 @@
 #include "environmenttreemodel.h"
 #include "constants.h"
 
-#define DEVOP_MOD_ITEM    0
-#define DEVOP_MOD_STATUS  1
-#define DEVOP_MOD_IP      2
-#define DEVOP_MOD_NETMASK 3
-#define DEVOP_MOD_GATEWAY 4
-#define DEVOP_MOD_CONFIG  5
+#define ENVTREE_MOD_ITEM    0
+#define ENVTREE_MOD_STATUS  1
+#define ENVTREE_MOD_IP      2
 
 namespace qnut {
 	using namespace nut;
 	CEnvironmentTreeModel::CEnvironmentTreeModel(CDevice * data, QObject * parent) : QAbstractItemModel(parent) {
 		device = data;
 		if (data) {
-			//connect(device, SIGNAL(environmentsUpdated()), this, SLOT(layoutChanged()));
 			foreach(CEnvironment * environment, device->environments) {
 				//connect(environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
 				foreach(CInterface * interface, environment->interfaces) {
@@ -53,9 +49,9 @@ namespace qnut {
 		if (!parent.isValid())
 			return device->environments.count();
 		else {
-			QObject * parentData = (QObject *)(parent.internalPointer());
+			QObject * parentData = static_cast<QObject *>(parent.internalPointer());
 			if (parentData->parent() == device)
-				return ((CEnvironment *)parentData)->interfaces.count();
+				return static_cast<CEnvironment *>(parentData)->interfaces.count();
 			else
 				return 0;
 		}
@@ -68,80 +64,79 @@ namespace qnut {
 		if (!index.isValid())
 			return QVariant();
 		
-		QObject * data = (QObject *)(index.internalPointer());
+		QObject * data = static_cast<QObject *>(index.internalPointer());
 		switch (index.column()) {
-			case DEVOP_MOD_ITEM:
-				if (data->parent() == device) {
-					switch (role) {
-					case Qt::DisplayRole:
-						return ((CEnvironment *)data)->name;
-					case Qt::DecorationRole:
-						return QIcon(UI_ICON_ENVIRONMENT);
-					default:
-						break;
-					}
+		case ENVTREE_MOD_ITEM:
+			if (data->parent() == device) {
+				switch (role) {
+				case Qt::DisplayRole:
+					return static_cast<CEnvironment *>(data)->name;
+				case Qt::DecorationRole:
+					return QIcon(UI_ICON_ENVIRONMENT);
+				default:
+					break;
 				}
-				
-				if (data->parent()->parent() == device) {
-					CInterface * interface = (CInterface *)data;
-					CEnvironment * environment = (CEnvironment *)(((QObject *)interface)->parent());
-					switch (role) {
-					case Qt::DisplayRole:
-						return '#' + QString::number(environment->interfaces.indexOf(interface));// +
-							//' ' + (interface->isStatic ? tr("static") : tr("dynamic"));
-					case Qt::DecorationRole:
-						return QIcon(UI_ICON_INTERFACE);
-					default:
-						break;
-					}
+			}
+			else {
+				CInterface * interface = static_cast<CInterface *>(data);
+				CEnvironment * environment = static_cast<CEnvironment *>(interface->parent());
+				switch (role) {
+				case Qt::DisplayRole:
+					return tr("#%1").arg(environment->interfaces.indexOf(interface));
+				case Qt::DecorationRole:
+					return QIcon((interface->state == IFS_OFF) ? UI_ICON_INTERFACE_INACTIVE : UI_ICON_INTERFACE_ACTIVE);
+				default:
+					break;
 				}
+			}
+			break;
+		case ENVTREE_MOD_STATUS:
+			if (role == Qt::DisplayRole)
 				break;
-			case DEVOP_MOD_STATUS:
-				if (role == Qt::DisplayRole) {
-					if (data->parent() == device) {
-						return (static_cast<CEnvironment *>(data) == device->activeEnvironment) ? tr("active") : QString('-');
-					}
-					
-					if (data->parent()->parent() == device) {
-						switch (static_cast<CInterface *>(data)->state) {
-						case IFS_OFF:
-							return tr("off");
-						case IFS_STATIC:
-							return tr("static");
-						case IFS_DHCP:
-							return tr("dynamic");
-						case IFS_ZEROCONF:
-							return tr("zeroconf");
-						default:
-							break;
-						}
-					}
+			
+			if (data->parent() == device) {
+				return (static_cast<CEnvironment *>(data) == device->activeEnvironment) ? tr("active") : QString('-');
+			}
+			else {
+				switch (static_cast<CInterface *>(data)->state) {
+				case IFS_OFF:
+					return tr("off");
+				case IFS_STATIC:
+					return tr("static");
+				case IFS_DHCP:
+					return tr("dynamic");
+				case IFS_ZEROCONF:
+					return tr("zeroconf");
+				default:
+					break;
 				}
+			}
+			break;
+		case ENVTREE_MOD_IP:
+			if (role == Qt::DisplayRole)
 				break;
-			case DEVOP_MOD_IP:
-				if (role == Qt::DisplayRole) {
-					if (data->parent() == device) {
-						return QString('-');
-					}
-					
-					if (data->parent()->parent() == device) {
-						if (static_cast<CInterface *>(data)->state == IFS_OFF) {
-							if (static_cast<CInterface *>(data)->getConfig().getFlags() & IPv4Config::DO_DHCP) {
-								return tr("none");
-							}
-							else if (static_cast<CInterface *>(data)->getConfig().getFlags() & IPv4Config::DO_STATIC) {
-								return static_cast<CInterface *>(data)->getConfig().getStaticIP().toString();
-							}
-							else
-								return tr("unknown");
-						}
-						else
-							return static_cast<CInterface *>(data)->ip.toString();
-					}
+			
+			if (data->parent() == device) {
+				return QString('-');
+			}
+			else {
+				CInterface * interface = static_cast<CInterface *>(data);
+				if (interface->state == IFS_OFF) {
+					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
+						return tr("none");
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
+						return interface->getConfig().getStaticIP().toString();
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
+						return interface->getUserConfig().ip().toString();
+					else
+						return tr("unknown");
 				}
-				break;
-			default:
-				break;
+				else
+					return interface->ip.toString();
+			}
+			break;
+		default:
+			break;
 		}
 		
 		return QVariant();
@@ -166,18 +161,12 @@ namespace qnut {
 		
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
-			case DEVOP_MOD_ITEM:
+			case ENVTREE_MOD_ITEM:
 				return tr("Item");
-			case DEVOP_MOD_STATUS:
+			case ENVTREE_MOD_STATUS:
 				return tr("Status");
-			case DEVOP_MOD_CONFIG:
-				return tr("Config");
-			case DEVOP_MOD_IP:
+			case ENVTREE_MOD_IP:
 				return tr("IP-Address");
-			case DEVOP_MOD_NETMASK:
-				return tr("Netmask");
-			case DEVOP_MOD_GATEWAY:
-				return tr("Gateway");
 			default:
 				break;
 			}
@@ -192,15 +181,12 @@ namespace qnut {
 		if (!hasIndex(row, column, parent))
 			return QModelIndex();
 		
-		
 		if (!parent.isValid()) {
-			if (row < device->environments.count())
-				return createIndex(row, column, device->environments[row]);
+			return createIndex(row, column, device->environments[row]);
 		}
 		else {
-			QObject * parentData = (QObject *)(parent.internalPointer());
-			if ((parentData->parent() == device) && (row < ((CEnvironment *)(parentData))->interfaces.count()))
-				return createIndex(row, column, ((CEnvironment *)(parent.internalPointer()))->interfaces[row]);
+			CEnvironment * parentData = static_cast<CEnvironment *>(parent.internalPointer());
+			return createIndex(row, column, parentData->interfaces[row]);
 		}
 		
 		return QModelIndex();
@@ -216,12 +202,11 @@ namespace qnut {
 		if (index.internalPointer() == NULL)
 			return QModelIndex();
 		
-		QObject * parentData = ((QObject *)(index.internalPointer()))->parent();
+		QObject * parentData = static_cast<QObject *>(index.internalPointer())->parent();
 		
 		if (parentData->parent() == device)
-			return createIndex(device->environments.indexOf((CEnvironment *)(parentData)), 0, (void *)(parentData));
+			return createIndex(device->environments.indexOf(static_cast<CEnvironment *>(parentData)), 0, (void *)(parentData));
 		else
 			return QModelIndex();
-		
 	}
 };

@@ -41,7 +41,12 @@ namespace qnut {
 			return 0;
 		
 		if (!parent.isValid())
-			return 4 + interface->dnsserver.size();
+			if (interface->state != IFS_OFF)
+				return 4 + interface->dnsserver.size();
+			else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
+				return 4 + interface->getConfig().getStaticDNS().size();
+			else
+				return 4;
 		else {
 			return 0;
 		}
@@ -69,10 +74,7 @@ namespace qnut {
 			case 3:
 				return tr("Gateway");
 			default:
-				if (!interface->dnsserver.isEmpty())
-					return tr("DNS sever #%1").arg(index.row()-4);
-				
-				break;
+				return tr("DNS sever #%1").arg(index.row()-4);
 			}
 			break;
 		case IFDET_MOD_VALUE: {
@@ -81,7 +83,9 @@ namespace qnut {
 			case 0:
 				switch (interface->state) {
 				case IFS_OFF:
-					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP) {
+					if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
+						return tr("user defined static");
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP) {
 						result = tr("dynamic (DHCP)");
 						if (interface->getConfig().getFlags() & IPv4Config::DO_ZEROCONF) {
 							return result + ' ' + tr("fallback: zeroconf");
@@ -91,10 +95,7 @@ namespace qnut {
 						}
 					}
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC) {
-						result = tr("static");
-						if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC) {
-							return result + " (" + tr("customizable") + ')';
-						}
+						return tr("static");
 					}
 					return result;
 				case IFS_STATIC:
@@ -114,12 +115,12 @@ namespace qnut {
 				}
 			case 1:
 				if (interface->state == IFS_OFF) {
-					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP) {
+					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("none");
-					}
-					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC) {
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return interface->getConfig().getStaticIP().toString();
-					}
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
+						return interface->getUserConfig().ip().toString();
 					else
 						return tr("unknown");
 				}
@@ -127,12 +128,12 @@ namespace qnut {
 					return interface->ip.toString();
 			case 2:
 				if (interface->state == IFS_OFF) {
-					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP) {
+					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("none");
-					}
-					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC) {
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return interface->getConfig().getStaticNetmask().toString();
-					}
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
+						return interface->getUserConfig().netmask().toString();
 					else
 						return tr("unknown");
 				}
@@ -140,22 +141,22 @@ namespace qnut {
 					return interface->netmask.toString();
 			case 3:
 				if (interface->state == IFS_OFF) {
-					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP) {
+					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("none");
-					}
-					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC) {
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return interface->getConfig().getStaticGateway().toString();
-					}
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
+						return interface->getUserConfig().gateway().toString();
 					else
 						return tr("unknown");
 				}
 				else
 					return interface->gateway.toString();
 			default:
-				if (!interface->dnsserver.isEmpty())
+				if (interface->state != IFS_OFF)
 					return interface->dnsserver[index.row()-4].toString();
-				
-				break;
+				else
+					return interface->getConfig().getStaticDNS()[index.row()-4].toString();
 			}
 			break;
 		}
@@ -203,10 +204,9 @@ namespace qnut {
 		if (!hasIndex(row, column, parent))
 			return QModelIndex();
 		
-		
 		if (!parent.isValid()) {
-			if (row < 4 + interface->dnsserver.size())
-				return createIndex(row, column, (void *)NULL);
+			//if (row < 4 + interface->dnsserver.size())
+			return createIndex(row, column, (void *)NULL);
 		}
 		
 		return QModelIndex();

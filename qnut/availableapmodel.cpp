@@ -110,8 +110,8 @@ namespace qnut {
 			}
 		case AVLAP_MOD_BSSID:
 			return scans[index.row()].bssid.toString();
-		case AVLAP_MOD_LEVEL:
-			return QString::number(scans[index.row()].level);
+/*		case AVLAP_MOD_LEVEL: //TODO:signal level
+			return QString::number(scans[index.row()].level);*/
 		case AVLAP_MOD_CIPHERS: {
 				int flags = scans[index.row()].ciphers;
 				if (flags == WC_UNDEFINED)

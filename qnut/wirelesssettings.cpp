@@ -18,9 +18,7 @@
 #include "accesspointconfig.h"
 
 namespace qnut {
-	CWirelessSettings::CWirelessSettings(CDevice * wireless, QWidget * parent) : QWidget(parent) {
-		device = wireless;
-		
+	CWirelessSettings::CWirelessSettings(CDevice * wireless, QWidget * parent) : QWidget(parent), device(wireless) {
 		ui.setupUi(this);
 		
 		setWindowTitle(tr("Wireless Settings for \"%1\"").arg(device->name));

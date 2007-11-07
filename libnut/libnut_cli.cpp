@@ -298,7 +298,7 @@ void CDeviceManager::rebuild() {
 /////////
 //CDevice
 /////////
-CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(parent), parent(parent), dbusPath(dbusPath) {
+CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ dbusPath(dbusPath) {
 	log = parent->log;
 	//get dbusConnection from parent:
 	dbusConnection = &(parent->dbusConnection);
@@ -387,7 +387,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 
 	//Only use wpa_supplicant if we need one
 	if (need_wpa_supplicant) {
-		wpa_supplicant = new CWpa_Supplicant(this,"/var/run/wpa_supplicant/"+name);
+		wpa_supplicant = new CWpa_Supplicant(this,name);
 		connect(wpa_supplicant,SIGNAL(message(QString)),log,SLOT(log(QString)));
 		//Connect to wpa_supplicant only if device is not deactivated
 		if (! (DS_DEACTIVATED == state) ) {
@@ -614,7 +614,7 @@ void CDevice::removeEnvironment(CEnvironment * environment) {
 //CEnvironment
 //////////////
 
-CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut(parent), parent(parent), dbusPath(dbusPath) {
+CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ dbusPath(dbusPath) {
 	//Set log.
 	log = parent->log;
 	//First attach to dbus
@@ -687,14 +687,14 @@ void CEnvironment::refreshAll() {
 	//Retrieve properties and select config, then interfaces:
 	QDBusReply<EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
 	if (replyprop.isValid()) {
-		if (parent->environments[0] == this)
+		if (static_cast<CDevice *>(parent())->environments[0] == this)
 			//standard environment
 			name = tr("default");
 		else {
 			name = replyprop.value().name;
 			//environment untitled
 			if (name.length() == 0)
-				name = tr("untitled (%1)").arg(parent->environments.size());
+				name = tr("untitled (%1)").arg(static_cast<CDevice *>(parent())->environments.size());
 		}
 	}
 	else {
@@ -792,7 +792,7 @@ void CEnvironment::dbusstateChanged(bool state) {
 
 //CEnvironment SLOTS
 void CEnvironment::enter() {
-	parent->setEnvironment(this);
+	static_cast<CDevice *>(parent())->setEnvironment(this);
 }
 nut::EnvironmentConfig CEnvironment::getConfig() {
 	return config;
@@ -807,7 +807,7 @@ void CEnvironment::removeInterface(CInterface * interface) {
 ////////////
 //CInterface
 ////////////
-CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNut(parent), parent(parent), dbusPath(dbusPath) {
+CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ dbusPath(dbusPath) {
 	log = parent->log;
 	//Attach to dbus
 	dbusConnection = parent->dbusConnection;

@@ -1,20 +1,18 @@
 #ifndef LIBNUT_LIBNUT_CLI_H
 #define LIBNUT_LIBNUT_CLI_H
-#include <iostream>
 #include <QObject>
 #include <QList>
 #include <QHostAddress>
-#include <common/types.h>
-#include <common/config.h>
-#include "libnut_server_proxy.h"
-#include "libnut_exceptions.h"
-#include "libnut_wpa_supplicant.h"
 #include <QDBusConnectionInterface>
 #include <QDBusReply>
 #include <QDBusObjectPath>
 #include <QFile>
 #include <QTextStream>
-#include <QHash>
+#include <common/types.h>
+#include <common/config.h>
+#include "libnut_server_proxy.h"
+#include "libnut_exceptions.h"
+#include "libnut_wpa_supplicant.h"
 
 namespace libnut {
 	class CDeviceManager;
@@ -111,7 +109,7 @@ namespace libnut {
 		friend class CInterface;
 		friend class DBusDeviceInterface;
 	private:
-		CDeviceManager * parent;
+		//CDeviceManager * parent;
 		QDBusObjectPath dbusPath;
 		QDBusObjectPath dbusActiveEnvironment;
 		QHash<QDBusObjectPath, CEnvironment*> dbusEnvironments;
@@ -164,7 +162,7 @@ namespace libnut {
 		friend class CInterface;
 		friend class DBusEnvironmentInterface;
 	private:
-		CDevice * parent;
+		//CDevice * parent;
 		QDBusObjectPath dbusPath;
 		CLog * log;
 		QHash<QDBusObjectPath, CInterface *> dbusInterfaces;
@@ -204,7 +202,7 @@ namespace libnut {
 		friend class CEnvironment;
 		friend class DBusInterfaceInterface_IPv4;
 	private:
-		CEnvironment * parent;
+		//CEnvironment * parent;
 		QDBusObjectPath dbusPath;
 		CLog * log;
 		DBusInterfaceInterface_IPv4 * dbusInterface;
@@ -218,7 +216,8 @@ namespace libnut {
 		QHostAddress netmask;
 		QHostAddress gateway;
 		QList<QHostAddress> dnsserver;
-
+		
+		nut::IPv4UserConfig getUserConfig();
 		nut::IPv4Config getConfig() { return dbusConfig; }
 		nut::IPv4Config config() { return dbusConfig; } //wants qnut wants it like that
 
@@ -232,7 +231,6 @@ namespace libnut {
 		void setGateway(QHostAddress & address);
 		bool needUserSetup();
 		bool setUserConfig(const nut::IPv4UserConfig &userConfig);
-		nut::IPv4UserConfig getUserConfig();
 		
 	signals:
 		void stateChanged(InterfaceState state);
