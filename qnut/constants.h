@@ -47,8 +47,8 @@
 #define UI_ICON_ENVIRONMENT_ENTER       UI_DIR_ICONS "environment_enter.png"
 
 #define UI_ICON_INTERFACE               UI_DIR_ICONS "interface.png"
-#define UI_ICON_INTERFACE_ACTIVATE      UI_DIR_ICONS "interface_activate.png"
-#define UI_ICON_INTERFACE_DEACTIVATE    UI_DIR_ICONS "interface_deactivate.png"
+#define UI_ICON_INTERFACE_ACTIVE        UI_DIR_ICONS "interface_active.png"
+#define UI_ICON_INTERFACE_INACTIVE      UI_DIR_ICONS "interface_inactive.png"
 
 #define UI_ICON_SCRIPT_SETTINGS         UI_DIR_ICONS "script_settings.png"
 #define UI_ICON_EDIT                    UI_DIR_ICONS "edit.png"
