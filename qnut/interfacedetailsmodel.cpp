@@ -119,7 +119,7 @@ namespace qnut {
 						return tr("none");
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return interface->getConfig().getStaticIP().toString();
-					else if (interface->getConfig().getFlags() ? IPv4Config::DO_USERSTATIC)
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
 						return interface->getUserConfig().ip().toString();
 					else
 						return tr("unknown");
@@ -132,7 +132,7 @@ namespace qnut {
 						return tr("none");
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return interface->getConfig().getStaticNetmask().toString();
-					else if (interface->getConfig().getFlags() ? IPv4Config::DO_USERSTATIC)
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
 						return interface->getUserConfig().netmask().toString();
 					else
 						return tr("unknown");
@@ -145,7 +145,7 @@ namespace qnut {
 						return tr("none");
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return interface->getConfig().getStaticGateway().toString();
-					else if (interface->getConfig().getFlags() ? IPv4Config::DO_USERSTATIC)
+					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
 						return interface->getUserConfig().gateway().toString();
 					else
 						return tr("unknown");
