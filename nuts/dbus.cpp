@@ -235,8 +235,7 @@ namespace nuts {
 		else {
 			dbus_properties.dns = QList<QHostAddress>();
 		}
-		connect(s_interface,SIGNAL(interfaceUp(Interface_IPv4*)),this,SLOT(interfaceUp()));
-		connect(s_interface,SIGNAL(interfaceDown(Interface_IPv4*)),this,SLOT(interfaceDown()));
+		connect(s_interface,SIGNAL(statusChanged(libnut::InterfaceState, Interface_IPv4*)),SLOT(interfaceStatusChanged(libnut::InterfaceState)));
 	}
 	
 	DBusInterface_IPv4::~DBusInterface_IPv4() {
@@ -247,21 +246,13 @@ namespace nuts {
 	}
 	//Private SLOTS:
 
-	void DBusInterface_IPv4::interfaceUp() {
+	void DBusInterface_IPv4::interfaceStatusChanged(libnut::InterfaceState) {
 		dbus_properties.ip = s_interface->ip;
 		dbus_properties.gateway = s_interface->gateway;
 		dbus_properties.netmask = s_interface->netmask;
 		dbus_properties.ifState = s_interface->getState();
 		emit stateChanged(dbus_properties);
 	}
-	void DBusInterface_IPv4::interfaceDown() {
-		dbus_properties.ip = s_interface->ip;
-		dbus_properties.gateway = s_interface->gateway;
-		dbus_properties.netmask = s_interface->netmask;
-		dbus_properties.ifState = s_interface->getState();
-		emit(stateChanged(dbus_properties));
-	}
-
 
 	libnut::InterfaceProperties DBusInterface_IPv4::getProperties() {
 		dbus_properties.ip = s_interface->ip;

@@ -93,7 +93,23 @@ namespace nuts {
 		}
 		start(e, nState, dev->getName(), envName);
 	}
-	void Events::interfaceUp(Interface_IPv4* iface) {
+	void Events::interfaceStatusChanged(libnut::InterfaceState state, Interface_IPv4* iface) {
+		QString event;
+		switch (state) {
+			case libnut::IFS_OFF:
+				event = "ifdown";
+				break;
+			case libnut::IFS_STATIC:
+			case libnut::IFS_DHCP:
+			case libnut::IFS_ZEROCONF:
+				event = "ifup";
+				break;
+			case libnut::IFS_WAITFORCONFIG:
+				event = "ifwaitforconfig";
+				break;
+			default:
+				return;
+		}
 		QStringList e;
 		Environment *env = iface->getEnvironment();
 		Device *dev = env->getDevice();
@@ -102,15 +118,5 @@ namespace nuts {
 		setupEnvironment(e, env);
 		setupEnvironment(e, iface);
 		start(e, "ifup", dev->getName(), env->getName(), iface->getIndex());
-	}
-	void Events::interfaceDown(Interface_IPv4* iface) {
-		QStringList e;
-		Environment *env = iface->getEnvironment();
-		Device *dev = env->getDevice();
-		setupEnvironment(e);
-		setupEnvironment(e, dev);
-		setupEnvironment(e, env);
-		setupEnvironment(e, iface);
-		start(e, "ifdown", dev->getName(), env->getName(), iface->getIndex());
 	}
 }

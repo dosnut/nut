@@ -168,6 +168,7 @@ namespace nuts {
 			// Called from Environment
 			void envUp(Environment*);
 			void envDown(Environment*);
+			void envNeedUserSetup(Environment*);
 			void selectDone(Environment*);
 			
 			void setEnvironment(int env); //!< Select specific environment
@@ -415,8 +416,7 @@ namespace nuts {
 			const nut::IPv4UserConfig &getUserConfig() { return m_userConfig; }
 			
 		signals:
-			void interfaceUp(Interface_IPv4* iface);
-			void interfaceDown(Interface_IPv4* iface);
+			void statusChanged(libnut::InterfaceState state, Interface_IPv4* iface);
 	};
 };
 
