@@ -23,7 +23,7 @@ namespace qnut {
 		device = data;
 		if (data) {
 			foreach(CEnvironment * environment, device->environments) {
-				//connect(environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
+				connect(environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
 				foreach(CInterface * interface, environment->interfaces) {
 					connect(interface, SIGNAL(stateChanged(InterfaceState)), this, SIGNAL(layoutChanged()));
 				}
@@ -58,51 +58,40 @@ namespace qnut {
 	}
 	
 	QVariant CEnvironmentTreeModel::data(const QModelIndex & index, int role) const {
-		if (device == NULL)
+		if ((device == NULL) || (!index.isValid()))
 			return QVariant();
 		
-		if (!index.isValid())
+		QObject * currentData = static_cast<QObject *>(index.internalPointer());
+		
+		if ((role == Qt::DecorationRole) && (index.column() == ENVTREE_MOD_ITEM)) {
+			if (currentData->parent() == device)
+				return QIcon(UI_ICON_ENVIRONMENT);
+			else
+				switch (static_cast<CInterface *>(currentData)->state) {
+				case IFS_OFF:
+					return QIcon(UI_ICON_INTERFACE);
+				case IFS_WAITFORCONFIG:
+					return QIcon(UI_ICON_WARNING);
+				default:
+					return QIcon(UI_ICON_INTERFACE_ACTIVE);
+				}
+		}
+		
+		if (role != Qt::DisplayRole)
 			return QVariant();
 		
-		QObject * data = static_cast<QObject *>(index.internalPointer());
 		switch (index.column()) {
 		case ENVTREE_MOD_ITEM:
-			if (data->parent() == device) {
-				switch (role) {
-				case Qt::DisplayRole:
-					return static_cast<CEnvironment *>(data)->name;
-				case Qt::DecorationRole:
-					return QIcon(UI_ICON_ENVIRONMENT);
-				default:
-					break;
-				}
-			}
-			else {
-				CInterface * interface = static_cast<CInterface *>(data);
-				CEnvironment * environment = static_cast<CEnvironment *>(interface->parent());
-				switch (role) {
-				case Qt::DisplayRole:
-					return tr("#%1").arg(environment->interfaces.indexOf(interface));
-				case Qt::DecorationRole:
-					return QIcon((interface->state == IFS_OFF) ?
-						UI_ICON_INTERFACE_INACTIVE :
-						((interface->state == IFS_WAITFORCONFIG) ?
-							UI_ICON_WARNING :
-							UI_ICON_INTERFACE_ACTIVE));
-				default:
-					break;
-				}
-			}
-			break;
+			if (currentData->parent() == device)
+				return static_cast<CEnvironment *>(currentData)->name;
+			else
+				return tr("#%1").arg(static_cast<CInterface *>(currentData)->index);
 		case ENVTREE_MOD_STATUS:
-			if (role != Qt::DisplayRole)
-				break;
-			
-			if (data->parent() == device) {
-				return (static_cast<CEnvironment *>(data) == device->activeEnvironment) ? tr("active") : QString('-');
+			if (currentData->parent() == device) {
+				return (static_cast<CEnvironment *>(currentData)->active) ? tr("active") : QString('-');
 			}
 			else {
-				switch (static_cast<CInterface *>(data)->state) {
+				switch (static_cast<CInterface *>(currentData)->state) {
 				case IFS_OFF:
 					return tr("off");
 				case IFS_STATIC:
@@ -119,14 +108,11 @@ namespace qnut {
 			}
 			break;
 		case ENVTREE_MOD_IP:
-			if (role != Qt::DisplayRole)
-				break;
-			
-			if (data->parent() == device) {
+			if (currentData->parent() == device) {
 				return QString('-');
 			}
 			else {
-				CInterface * interface = static_cast<CInterface *>(data);
+				CInterface * interface = static_cast<CInterface *>(currentData);
 				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
 					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("none");
@@ -140,7 +126,6 @@ namespace qnut {
 				else
 					return toStringDefault(interface->ip);
 			}
-			break;
 		default:
 			break;
 		}
@@ -211,7 +196,7 @@ namespace qnut {
 		QObject * parentData = static_cast<QObject *>(index.internalPointer())->parent();
 		
 		if (parentData->parent() == device)
-			return createIndex(device->environments.indexOf(static_cast<CEnvironment *>(parentData)), 0, (void *)(parentData));
+			return createIndex(static_cast<CEnvironment *>(parentData)->index, 0, (void *)(parentData));
 		else
 			return QModelIndex();
 	}

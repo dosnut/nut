@@ -18,6 +18,7 @@
 #define OV_MOD_TYPE    2
 #define OV_MOD_ENV     3
 #define OV_MOD_IP      4
+#define OV_MOD_SIG     5
 
 namespace qnut {
 	COverViewModel::COverViewModel(CDeviceManager * deviceManager, QObject * parent) : QAbstractItemModel(parent) {
@@ -26,9 +27,6 @@ namespace qnut {
 			
 			connect(deviceManager, SIGNAL(deviceAdded(CDevice *)), this, SLOT(deviceAdded(CDevice *)));
 			connect(deviceManager, SIGNAL(deviceRemoved(CDevice *)), this, SLOT(deviceRemoved(CDevice *)));
-/*			foreach (CDevice * i, *devices) {
-				connect(i, SIGNAL(stateChanged(DeviceState)), this, SIGNAL(layoutChanged()));
-			}*/
 		}
 		else
 			devices = NULL;
@@ -40,11 +38,15 @@ namespace qnut {
 	
 	void COverViewModel::deviceAdded(CDevice * device) {
 		connect(device, SIGNAL(stateChanged(DeviceState)), this, SIGNAL(layoutChanged()));
+		if (device->type == DT_AIR)
+			connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated()), this, SIGNAL(layoutChanged()));
 		emit layoutChanged();
 	}
 	
 	void COverViewModel::deviceRemoved(CDevice * device) {
 		disconnect(device, SIGNAL(stateChanged(DeviceState)), this, SIGNAL(layoutChanged()));
+		if (device->type == DT_AIR)
+			disconnect(device->wpa_supplicant, SIGNAL(signalQualityUpdated()), this, SIGNAL(layoutChanged()));
 		emit layoutChanged();
 	}
 	
@@ -69,14 +71,14 @@ namespace qnut {
 		if (parent.isValid())
 			return 0;
 		
-		return 5;
+		return 6;
 	}
 	
 	QModelIndex COverViewModel::index(int row, int column, const QModelIndex & parent) const {
-		if ((devices != NULL) && (row < devices->count()) && (!parent.isValid()))
-			return createIndex(row, column, (void *)(devices->at(row)));
-		else
+		if ((devices == NULL) || (parent.isValid()) || (row >= devices->size()))
 			return QModelIndex();
+		else
+			return createIndex(row, column, (void *)(devices->at(row)));
 	}
 	
 	int COverViewModel::rowCount(const QModelIndex & parent) const {
@@ -96,8 +98,8 @@ namespace qnut {
 		if (!index.isValid())
 			return QVariant();
 		
-		if (index.row() >= devices->size())
-			return QVariant();
+/*		if (index.row() >= devices->size())
+			return QVariant();*/
 		
 		CDevice * data = (CDevice *)(index.internalPointer());
 		
@@ -115,13 +117,17 @@ namespace qnut {
 					else
 						return activeIP(data);
 				}
-			case OV_MOD_ENV: {
-					//activeEnvironment workarround
-					if ((data->state == DS_UP) && (data->activeEnvironment != NULL))
-						return data->activeEnvironment->name;
-					else
-						return tr("none");
+			case OV_MOD_ENV:
+				if (data->state >= DS_UNCONFIGURED)
+					return data->activeEnvironment->name;
+				else
+					return tr("none");
+			case OV_MOD_SIG:
+				if (data->type == DT_AIR) {
+					return signalSummary(data->wpa_supplicant->getSignalQuality());
 				}
+				else
+					return QString('-');
 			default:
 				break;
 			}
@@ -153,6 +159,8 @@ namespace qnut {
 				return tr("assigned IP-Address");
 			case OV_MOD_ENV:
 				return tr("Environment");
+			case OV_MOD_SIG:
+				return tr("Signal (Quality, Level, Noise)");
 			default:
 				break;
 			}

@@ -63,20 +63,18 @@ namespace qnut {
 		
 		CDeviceOptions(CDevice * parentDevice, QWidget * parent = 0);
 		~CDeviceOptions();
-		
 	private slots:
-		void uiHandleTrayActivated(QSystemTrayIcon::ActivationReason);
-		
+		void handleTrayActivated(QSystemTrayIcon::ActivationReason);
+		void showTheeseOptions();
+		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+		void handleDeviceStateChange(DeviceState state);
+		void openIPConfiguration();
 	public slots:
-		void uiShowThisTab();
-		void uiSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-		void uiChangeIPConfiguration();
-		void uiChangeDeviceSettings();
-		void uiHandleStateChange(DeviceState state);
-		void uiOpenWirelessSettings();
+		void openDeviceSettings();
+		void openWirelessSettings();
 	signals:
-		void showMessage(QSystemTrayIcon * trayIcon, QString title, QString message);
-		void showOptions(QWidget * widget);
+		void showMessageRequested(QString title, QString message, QSystemTrayIcon * trayIcon = NULL);
+		void showOptionsRequested(QWidget * widget);
 	};
 };
 

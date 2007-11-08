@@ -72,11 +72,17 @@ namespace qnut {
 	}
 	
 	QVariant CEnvironmentDetailsModel::data(const QModelIndex & index, int role) const {
-		if (environment == NULL)
+		if ((environment == NULL) || (!index.isValid()))
 			return QVariant();
 		
-		if (!index.isValid())
-			return QVariant();
+		if ((role == Qt::DecorationRole) && (index.column() == ENVDET_MOD_STATEMENT)) {
+			CDevice * device = static_cast<CDevice *>(environment->parent());
+			if (environment == device->activeEnvironment) {
+				if ((qint8)(environment->getSelectResults()[index.internalId()]))
+					return QIcon(UI_ICON_SELECTED);
+			}
+			return QIcon(UI_ICON_UNSELECTED);
+		}
 		
 		if (role != Qt::DisplayRole)
 			return QVariant();
@@ -113,7 +119,6 @@ namespace qnut {
 					default:
 						break;
 					}
-				break;
 			case ENVDET_MOD_VALUE:
 				switch (selectConfig.filters[index.internalId()].selType) {
 				case SelectRule::SEL_ARP:
@@ -127,7 +132,6 @@ namespace qnut {
 				default:
 					break;
 				}
-				break;
 			default:
 				break;
 		}

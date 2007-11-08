@@ -20,47 +20,41 @@ namespace qnut {
 		CDeviceManager deviceManager;
 		CLog logFile;
 		CDeviceOptionsHash deviceOptions;
+		QSettings settings;
 		
 		CTrayIcon trayicon;
-		
-		QAction * refreshDevicesAction;
-		QAction * enableDeviceAction;
-		QAction * disableDeviceAction;
-		
-		QAction * deviceSettingsAction;
-		QAction * ipConfigurationAction;
-		QAction * wirelessSettingsAction;
-		
-		QAction * clearLogAction;
-		
 		QTabWidget tabWidget;
 		QTreeView overView;
 		QTextEdit logEdit;
 		
-		QSettings settings;
+		QAction * refreshDevicesAction;
+		QAction * clearLogAction;
 		
-		bool showBalloonTips;
+		QAction * enableDeviceAction;
+		QAction * disableDeviceAction;
+		
+		QAction * deviceSettingsAction;
+		QAction * wirelessSettingsAction;
 		
 		inline void createActions();
-		void distributeActions(int mode = 0);
+		inline void distributeActions(int mode = 0);
 		
 		inline void readSettings();
 		inline void writeSettings();
 	public:
 		CConnectionManager(QWidget * parent = 0);
 		~CConnectionManager();
-		
 	public slots:
-		void uiUpdateTrayIconInfo();
-		void uiAddedDevice(CDevice * dev);
-		void uiRemovedDevice(CDevice * dev);
-		void uiCurrentTabChanged(int index);
-		void uiSelectedDeviceChanged(const QItemSelection & selected, const QItemSelection & deselected);
-		void uiShowMessage(QSystemTrayIcon * trayIcon, QString title, QString message);
-		void uiShowAbout();
-		void uiHandleDeviceStateChanged(DeviceState state);
-		void uiHandleShowLogToggle(bool state);
-		void uiShowOptions(QWidget * widget);
+		void updateTrayIconInfo();
+		void addUiDevice(CDevice * dev);
+		void removeUiDevice(CDevice * dev);
+		void handleTabChanged(int index);
+		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+		void showMessage(QString title, QString message, QSystemTrayIcon * trayIcon = NULL);
+		void showAbout();
+		void handleDeviceStateChange(DeviceState state);
+		void showLog(bool doShow);
+		void showDeviceOptions(QWidget * widget);
 	};
 };
 

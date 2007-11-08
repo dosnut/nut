@@ -5,11 +5,11 @@
 #define UI_NAME                         tr("QNUT - Qt client for Network UTility Server (NUTS)")
 
 //#ifdef QNUT_RELEASE
-#define UI_DIR_ICONS                    "/usr/share/qnut/icons/"
-#define UI_DIR_TRANSLATIONS             "/usr/share/qnut/lang/"
+//#define UI_DIR_ICONS                    "/usr/share/qnut/icons/"
+//#define UI_DIR_TRANSLATIONS             "/usr/share/qnut/lang/"
 //#else
-//#define UI_DIR_ICONS                    "res/"
-//#define UI_DIR_TRANSLATIONS             ""
+#define UI_DIR_ICONS                    "res/"
+#define UI_DIR_TRANSLATIONS             ""
 //#endif
 #define UI_DIR_WORK                     ".qnut/"
 #define UI_PATH_WORK                    (QDir::toNativeSeparators(QDir::homePath()) + "/" UI_DIR_WORK)
@@ -46,15 +46,17 @@
 #define UI_ICON_ENVIRONMENT             UI_DIR_ICONS "environment.png"
 #define UI_ICON_ENVIRONMENT_ENTER       UI_DIR_ICONS "environment_enter.png"
 
-#define UI_ICON_INTERFACE               UI_DIR_ICONS "interface.png"
+#define UI_ICON_INTERFACE               UI_DIR_ICONS "interface_inactive.png"
 #define UI_ICON_INTERFACE_ACTIVE        UI_DIR_ICONS "interface_active.png"
-#define UI_ICON_INTERFACE_INACTIVE      UI_DIR_ICONS "interface_inactive.png"
+//#define UI_ICON_INTERFACE_INACTIVE      UI_DIR_ICONS "interface_inactive.png"
 
 #define UI_ICON_SCRIPT_SETTINGS         UI_DIR_ICONS "script_settings.png"
 #define UI_ICON_EDIT                    UI_DIR_ICONS "edit.png"
 #define UI_ICON_REFRESH                 UI_DIR_ICONS "refresh.png"
 #define UI_ICON_CLEAR                   UI_DIR_ICONS "clear.png"
 #define UI_ICON_WARNING                 UI_DIR_ICONS "warning.png"
+#define UI_ICON_SELECTED                UI_DIR_ICONS "selected.png"
+#define UI_ICON_UNSELECTED              UI_DIR_ICONS "unselected.png"
 
 #define UI_FLAG_SCRIPT_NONE             0x00
 #define UI_FLAG_SCRIPT_UP               0x01
@@ -62,5 +64,9 @@
 #define UI_FLAG_SCRIPT_CARRIER          0x04
 #define UI_FLAG_SCRIPT_ACTIVATED        0x08
 #define UI_FLAG_SCRIPT_DEACTIVATED      0x10
+
+#define UI_ACTIONS_OVERVIEW             0x00
+#define UI_ACTIONS_LOG                  0x01
+#define UI_ACTIONS_DEVICE               0x02
 
 #endif

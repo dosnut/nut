@@ -11,13 +11,13 @@
 //
 #include <QIcon>
 #include "availableapmodel.h"
-#include "constants.h"
+#include "common.h"
 
 #define AVLAP_MOD_SSID    0
 #define AVLAP_MOD_FREQ    1
 #define AVLAP_MOD_KEYMGMT 2
 #define AVLAP_MOD_BSSID   4
-#define AVLAP_MOD_LEVEL   5
+#define AVLAP_MOD_SIGNAL  5
 #define AVLAP_MOD_CIPHERS 3
 
 namespace qnut {
@@ -47,7 +47,7 @@ namespace qnut {
 		if (supplicant == NULL)
 			return 0;
 		else
-			return 5;
+			return 6;
 	}
 	
 	int CAvailableAPModel::rowCount(const QModelIndex & parent) const {
@@ -110,8 +110,8 @@ namespace qnut {
 			}
 		case AVLAP_MOD_BSSID:
 			return scans[index.row()].bssid.toString();
-/*		case AVLAP_MOD_LEVEL: //TODO:signal level
-			return QString::number(scans[index.row()].level);*/
+		case AVLAP_MOD_SIGNAL:
+			return qualitySummary(scans[index.row()].quality);
 		case AVLAP_MOD_CIPHERS: {
 				int flags = scans[index.row()].ciphers;
 				if (flags == WC_UNDEFINED)
@@ -164,8 +164,8 @@ namespace qnut {
 				return tr("Key management");
 			case AVLAP_MOD_BSSID:
 				return tr("BSSID");
-			case AVLAP_MOD_LEVEL:
-				return tr("Signal level");
+			case AVLAP_MOD_SIGNAL:
+				return tr("Signal (Quality, Level, Noise)");
 			case AVLAP_MOD_CIPHERS:
 				return tr("Encryption");
 			default:
