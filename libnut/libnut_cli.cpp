@@ -137,6 +137,7 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 		}
 		dbusDevices.insert(i, device);
 		devices.append(device);
+		device->index = devices.indexOf(device); // Set device index;
 		emit(deviceAdded(device));
 	}
 }
@@ -166,6 +167,7 @@ void CDeviceManager::setInformation() {
 			continue;
 		}
 		devices.append(device);
+		device->index = devices.indexOf(device); // Set device index;
 		dbusDevices.insert(i, device);
 		emit(deviceAdded(device));
 	}
@@ -225,6 +227,7 @@ void CDeviceManager::dbusDeviceAdded(const QDBusObjectPath &objectpath) {
 		}
 		dbusDevices.insert(objectpath,device);
 		devices.append(device);
+		device->index = devices.indexOf(device); // Set device index;
 		emit(deviceAdded(device));
 		}
 	else {
@@ -365,6 +368,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		}
 		dbusEnvironments.insert(i,env);
 		environments.append(env);
+		env->index = environments.indexOf(env);
 	}
 	
 	if (!replyProp.value().activeEnvironment.isEmpty()) {
@@ -489,6 +493,7 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 		}
 		dbusEnvironments.insert(i,env);
 		environments.append(env);
+		env->index = environments.indexOf(env);
 	}
 // 	emit(environmentsUpdated()); //Pending for removal
 }
@@ -620,6 +625,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 			}
 			dbusInterfaces.insert(i,interface);
 			interfaces.append(interface);
+			interface->index = interfaces.indexOf(interface);
 		}
 	}
 	else {
@@ -707,6 +713,7 @@ void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 		}
 		dbusInterfaces.insert(i,interface);
 		interfaces.append(interface);
+		interface->index = interfaces.indexOf(interface);
 	}
 	getSelectResult(true); //functions saves SelectResult
 	getSelectResults(true); //functions saves SelectResults

@@ -133,6 +133,7 @@ namespace libnut {
 		DeviceType type;
 		CEnvironment * activeEnvironment;
 		CWpa_Supplicant * wpa_supplicant;
+		int index;
 		
 		CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);
 		~CDevice();
@@ -163,7 +164,6 @@ namespace libnut {
 		CLog * log;
 		QHash<QDBusObjectPath, CInterface *> dbusInterfaces;
 		DBusEnvironmentInterface * dbusEnvironment;
-		bool active;
 		nut::EnvironmentConfig config;
 		nut::SelectResult selectResult;
 		QVector<nut::SelectResult> selectResults;
@@ -175,6 +175,8 @@ namespace libnut {
 	public:
 		QString name;
 		CInterfaceList interfaces;
+		bool active;
+		int index;
 		
 		CEnvironment(CDevice * parent, QDBusObjectPath dbusPath);
 		~CEnvironment();
@@ -211,6 +213,7 @@ namespace libnut {
 		QHostAddress netmask;
 		QHostAddress gateway;
 		QList<QHostAddress> dnsserver;
+		int index;
 		
 		nut::IPv4UserConfig getUserConfig(bool refresh=false);
 		nut::IPv4Config getConfig() { return dbusConfig; }
