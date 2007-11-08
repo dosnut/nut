@@ -50,14 +50,16 @@ namespace qnut {
 		connect(ui.removeButton, SIGNAL(clicked()), this, SLOT(removeSelectedNetwork()));
 		connect(ui.configureButton, SIGNAL(clicked()), this, SLOT(configureSelectedNetwork()));
 		connect(ui.managedView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(configureSelectedNetwork()));
+		connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated()), this, SLOT(setHeadInfo()));
 	}
 	
 	CWirelessSettings::~CWirelessSettings() {
 	}
 	
-	inline void CWirelessSettings::setHeadInfo() {
+	void CWirelessSettings::setHeadInfo() {
 		ui.iconLabel->setPixmap(QPixmap(iconFile(device)));
-		ui.statusLabel->setText(toString(device->state));
+		ui.statusLabel->setText(tr("%1, Signal (Quality, Level, Noise): %2")
+			.arg(toString(device->state), signalSummary(device->wpa_supplicant->getSignalQuality())));
 	}
 	
 	void CWirelessSettings::uiHandleManagedAPSelectionChanged(const QItemSelection & selected) {

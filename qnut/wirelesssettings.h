@@ -25,7 +25,6 @@ namespace qnut {
 		Ui::airset ui;
 		CDevice * device;
 		
-		inline void setHeadInfo();
 	public:
 		CWirelessSettings(CDevice * wireless, QWidget *parent = 0);
 		~CWirelessSettings();
@@ -35,6 +34,7 @@ namespace qnut {
 		void uiHandleAvailableAPSelectionChanged(const QItemSelection & selected);
 		void uiHandleStateChange(DeviceState state);
 	private slots:
+		void setHeadInfo();
 		void switchToSelectedNetwork();
 		void addSelectedScanResult();
 		void removeSelectedNetwork();
