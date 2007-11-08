@@ -377,8 +377,8 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		*log << (tr("Active Environement") + ": " + dbusActiveEnvironment.path());
 	}
 	//connect signals to slots
-	connect(dbusDevice, SIGNAL(environmentChangedActive(const QDBusObjectPath &)),
-			this, SLOT(environmentChangedActive(const QDBusObjectPath &)));
+	connect(dbusDevice, SIGNAL(environmentChangedActive(const QString &)),
+			this, SLOT(environmentChangedActive(const QString &)));
 
 	connect(dbusDevice, SIGNAL(stateChanged(int , int)),
 			this, SLOT(dbusstateChanged(int, int)));
@@ -499,9 +499,14 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 }
 
 //CDevice private slots:
-void CDevice::environmentChangedActive(const QDBusObjectPath &newenv) {
+void CDevice::environmentChangedActive(const QString &newenv) {
 	CEnvironment * oldenv = activeEnvironment;
-	activeEnvironment = dbusEnvironments.value(newenv, 0);
+	if (newenv.isEmpty()) { //No active Environment is set.
+		activeEnvironment = NULL;
+	}
+	else {
+		activeEnvironment = dbusEnvironments.value(QDBusObjectPath(newenv), 0);
+	}
 	emit(environmentChangedActive(activeEnvironment, oldenv));
 }
 //Every time our device changed from anything to active, our active environment may have changed
@@ -521,20 +526,6 @@ void CDevice::dbusstateChanged(int newState, int oldState) {
 	}
 	state = (DeviceState) newState;
 	//Workaround so far, as nuts does not send any environment changed information
-	if (state == DS_UP) {
-		QDBusReply<libnut::DeviceProperties> replyprop = dbusDevice->getProperties();
-		if (replyprop.isValid()) {
-			dbusActiveEnvironment = QDBusObjectPath(replyprop.value().activeEnvironment);
-			activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment, 0);
-			if (activeEnvironment != 0) {
-				activeEnvironment->refreshAll();
-			}
-		}
-	}
-	else {
-		dbusActiveEnvironment = QDBusObjectPath();
-		activeEnvironment = 0;
-	}
 	if (DT_AIR == type && !(newState == DS_DEACTIVATED) ) {
 		QDBusReply<QString> replyessid = dbusDevice->getEssid();
 		if (replyessid.isValid()) {
@@ -595,6 +586,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 				name = tr("untitled (%1)").arg(parent->environments.size());
 		}
 		*log << "Environmentname" + name;
+		active = replyprop.value().active;
 	}
 	else {
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment properties").arg(toString(replyprop.error())));

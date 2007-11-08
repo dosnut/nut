@@ -43,6 +43,7 @@ namespace libnut {
 	
 	struct EnvironmentProperties {
 		QString name;
+		bool active;
 	};
 	
 	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentProperties &envprop);

@@ -122,7 +122,7 @@ namespace libnut {
 		void rebuild(QList<QDBusObjectPath> paths);
 
 	private slots:
-		void environmentChangedActive(const QDBusObjectPath &newenv);
+		void environmentChangedActive(const QString &newenv);
 		void dbusstateChanged(int newState, int oldState);
 	public:
 		CEnvironmentList environments;

@@ -52,12 +52,14 @@ namespace libnut {
 	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentProperties &envprop) {
 		argument.beginStructure();
 		argument << envprop.name;
+		argument << envprop.active;
 		argument.endStructure();
 		return argument;
 	};
 	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentProperties &envprop) {
 		argument.beginStructure();
 		argument >> envprop.name;
+		argument >> envprop.active;
 		return argument;
 	}
 	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop) {
@@ -93,6 +95,7 @@ namespace nut {
 		qRegisterMetaType<Config>("nut::Config");
 		qRegisterMetaType<DeviceConfig>("nut::DeviceConfig");
 		qRegisterMetaType<SelectResult>("nut::SelectResult");
+		qRegisterMetaType< QVector< SelectResult > >("QVector<nut::SelectRule>");
 		qRegisterMetaType<SelectRule>("nut::SelectRule");
 		qRegisterMetaType<SelectConfig>("nut::SelectConfig");
 		qRegisterMetaType<EnvironmentConfig>("nut::EnvironmentConfig");
@@ -104,6 +107,7 @@ namespace nut {
 		qDBusRegisterMetaType<Config>();
 		qDBusRegisterMetaType<DeviceConfig>();
 		qDBusRegisterMetaType<SelectResult>();
+		qDBusRegisterMetaType< QVector< SelectResult > >();
 		qDBusRegisterMetaType<SelectRule>();
 		qDBusRegisterMetaType<SelectConfig>();
 		qDBusRegisterMetaType<EnvironmentConfig>();
