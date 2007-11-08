@@ -207,7 +207,7 @@ public Q_SLOTS: // METHODS
 	}
 
 Q_SIGNALS: // SIGNALS
-    void stateChanged(const InterfaceProperties &properties);
+    void stateChanged(libnut::InterfaceProperties properties);
 };
 /*
 namespace DBus {

@@ -31,6 +31,15 @@ QString toString(DeviceType type) {
 		default:     return QString();
 	}
 }
+QString toString(InterfaceState state) {
+	switch (state) {
+		case IFS_OFF: return QObject::tr("OFF");
+		case IFS_STATIC: return QObject::tr("STATIC");
+		case IFS_DHCP: return QObject::tr("ZEROCONF");
+		case IFS_WAITFORCONFIG: return QObject::tr("WAITFORCONFIG");
+		default: return QString();
+	}
+}
 QString toString(QDBusError error) {
 	return QDBusError::errorString(error.type());
 }
@@ -86,7 +95,7 @@ CDeviceManager::~CDeviceManager() {
 	}
 }
 
-void CDeviceManager::init(CLog * inlog) {
+bool CDeviceManager::init(CLog * inlog) {
 	nutsstate = true;
 	log = inlog;
 	//setup dbus connections
@@ -109,6 +118,7 @@ void CDeviceManager::init(CLog * inlog) {
 	//Connect dbus-signals to own slots:
 	connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 	connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+	return nutsstate;
 }
 
 //CDeviceManager private functions:
@@ -185,7 +195,7 @@ void CDeviceManager::clearInformation() {
 
 //CDeviceManager private slots:
 void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner) {
-	if (NUT_DBUS_URL == name) {
+	if (NUT_DBUS_URL == name) { //nuts starts
 		if (oldOwner.isEmpty()) {
 			*log << tr("NUTS has been started");
 			if (nutsstate) {
@@ -200,7 +210,7 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 			connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 			connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
 		}
-		else if (newOwner.isEmpty()) {
+		else if (newOwner.isEmpty()) { //nuts stops
 			*log << tr("NUTS has been stopped");
 			if (nutsstate) {
 				nutsstate = false;
@@ -786,7 +796,7 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	}
 	getUserConfig(true); //Function will updated userConfig
 
-	connect(dbusInterface, SIGNAL(stateChanged(const InterfaceProperties &)), this, SLOT(dbusstateChanged(const InterfaceProperties &)));
+	connect(dbusInterface, SIGNAL(stateChanged(libnut::InterfaceProperties)), this, SLOT(dbusstateChanged(libnut::InterfaceProperties)));
 }
 CInterface::~CInterface() {
 }
@@ -806,13 +816,14 @@ void CInterface::refreshAll() {
 	}
 }
 //CInterface private slots
-void CInterface::dbusstateChanged(const InterfaceProperties &properties) {
+void CInterface::dbusstateChanged(libnut::InterfaceProperties properties) {
 	//Check changes:
 	state = properties.ifState;
 	ip = properties.ip;
 	netmask = properties.netmask;
 	gateway = properties.gateway;
 	getUserConfig(true); //Function will updated userConfig
+	*log << tr("Interface state of %1 has changed to %2").arg(dbusPath.path(),toString(state));
 	emit(stateChanged(state));
 }
 //CInterface SLOTS
