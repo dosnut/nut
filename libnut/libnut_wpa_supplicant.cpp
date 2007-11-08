@@ -1694,14 +1694,14 @@ void CWpa_Supplicant::readWirelessInfo() {
 	if ( (wext_fd == -1) || !wps_connected) {
 		return;
 	}
-	unsigned char * buffer = NULL;		/* Results */
-	int buflen = IW_SCAN_MAX_DATA*8; /* Min for compat WE<17 */
+	qDebug() << "Executing readWirelessInfo()";
 	struct iw_range range;
 	int hasRange;
-	iwstats * stats;
+	iwstats stats;
 	wps_wext_scan res;
 
 	/* Get range stuff */
+	qDebug() << "Getting range stuff";
 	hasRange = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
 	if (errno == EAGAIN) {
 		return;
@@ -1721,22 +1721,24 @@ void CWpa_Supplicant::readWirelessInfo() {
 	}
 	if( (hasRange) && (range.we_version_compiled > 11) ) {
 		struct iwreq wrq;
-		wrq.u.data.pointer = (caddr_t) stats;
+		wrq.u.data.pointer = (caddr_t) &stats;
 		wrq.u.data.length = sizeof(struct iw_statistics);
 		wrq.u.data.flags = 1; // Clear updated flag
 		strncpy(wrq.ifr_name, ifname.toAscii().data(), IFNAMSIZ);
-
+		
+		qDebug() << "Getting wireless stats";
 		if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
 			qDebug() << "Error occured while fetching wireless info" << strerror(errno);
 		}
 		else { //Stats fetched
 			qDebug() << "Stats fetched";
-			res.quality.level = (quint8) stats->qual.level;
-			res.quality.qual = (quint8) stats->qual.qual;
-			res.quality.noise = (quint8) stats->qual.noise;
-			res.quality.updated = (quint8) stats->qual.updated;
+			res.quality.level = (quint8) stats.qual.level;
+			res.quality.qual = (quint8) stats.qual.qual;
+			res.quality.noise = (quint8) stats.qual.noise;
+			res.quality.updated = (quint8) stats.qual.updated;
 			qDebug() << res.quality.level << res.quality.qual << res.quality.noise << res.quality.updated;
 			signalQuality = res;
+			qDebug() << "Emittig signalQualityUpdated()";
 			emit signalQualityUpdated();
 		}
 	}
@@ -1746,6 +1748,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 	}
 	else {
 		qDebug() << "Error while trying to fetch wireless information" << strerror(errno);
+		qDebug() << "Wireless Extension socket file descriptor was: " << wext_fd;
 	}
 }
 

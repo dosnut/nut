@@ -78,6 +78,36 @@ namespace libnut {
 		wps_auth_algs auth_alg;
 	};
 
+	/* Copied from iwlib.c (29) line 1355
+	* People are very often confused by the 8 bit arithmetic happening
+	* here.
+	* All the values here are encoded in a 8 bit integer. 8 bit integers
+	* are either unsigned [0 ; 255], signed [-128 ; +127] or
+	* negative [-255 ; 0].
+	* Further, on 8 bits, 0x100 == 256 == 0.
+	*
+	* Relative/percent values are always encoded unsigned, between 0 and 255.
+	* Absolute/dBm values are always encoded between -192 and 63.
+	* (Note that up to version 28 of Wireless Tools, dBm used to be
+	*  encoded always negative, between -256 and -1).
+	*
+	* How do we separate relative from absolute values ?
+	* The old way is to use the range to do that. As of WE-19, we have
+	* an explicit IW_QUAL_DBM flag in updated...
+	* The range allow to specify the real min/max of the value. As the
+	* range struct only specify one bound of the value, we assume that
+	* the other bound is 0 (zero).
+	* For relative values, range is [0 ; range->max].
+	* For absolute values, range is [range->max ; 63].
+	*
+	* Let's take two example :
+	* 1) value is 75%. qual->value = 75 ; range->max_qual.value = 100
+	* 2) value is -54dBm. noise floor of the radio is -104dBm.
+	*    qual->value = -54 = 202 ; range->max_qual.value = -104 = 152
+	*
+	* Jean II
+	*/
+
 	struct	wps_signal_quality {
 		quint8 qual;	/* link quality (%retries, SNR, %missed beacons or better...) */
 		quint8 level;		/* signal level (dBm) */
