@@ -89,7 +89,7 @@ namespace libnut {
 		void dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner);
 	public:
 		CDeviceList devices;
-		void init(CLog * inlog);
+		bool init(CLog * inlog);
 
 		CDeviceManager(QObject * parent);
 		~CDeviceManager();
@@ -99,7 +99,7 @@ namespace libnut {
 	signals:
 		void deviceAdded(CDevice * device);
 		void deviceRemoved(CDevice * device); //nach entfernen aus der liste aber vor dem löschen
-		void stateChanged(bool state);
+		void stateChanged(bool state); //Information about server state
 	};
 
 	class CDevice : public CLibNut {

@@ -86,7 +86,7 @@ CDeviceManager::~CDeviceManager() {
 	}
 }
 
-void CDeviceManager::init(CLog * inlog) {
+bool CDeviceManager::init(CLog * inlog) {
 	nutsstate = true;
 	log = inlog;
 	//setup dbus connections
@@ -109,6 +109,7 @@ void CDeviceManager::init(CLog * inlog) {
 	//Connect dbus-signals to own slots:
 	connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 	connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+	return nutsstate;
 }
 
 //CDeviceManager private functions:
@@ -185,7 +186,7 @@ void CDeviceManager::clearInformation() {
 
 //CDeviceManager private slots:
 void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner) {
-	if (NUT_DBUS_URL == name) {
+	if (NUT_DBUS_URL == name) { //nuts starts
 		if (oldOwner.isEmpty()) {
 			*log << tr("NUTS has been started");
 			if (nutsstate) {
@@ -200,7 +201,7 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 			connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 			connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
 		}
-		else if (newOwner.isEmpty()) {
+		else if (newOwner.isEmpty()) { //nuts stops
 			*log << tr("NUTS has been stopped");
 			if (nutsstate) {
 				nutsstate = false;
