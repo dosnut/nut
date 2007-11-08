@@ -1,7 +1,7 @@
 #ifndef QNUT_CONSTANTS_H
 #define QNUT_CONSTANTS_H
 
-#define UI_VERSION                      "0.3.0-rc1"
+#define UI_VERSION                      "0.3.0-rc2"
 #define UI_NAME                         tr("QNUT - Qt client for Network UTility Server (NUTS)")
 
 //#ifdef QNUT_RELEASE
@@ -48,7 +48,6 @@
 
 #define UI_ICON_INTERFACE               UI_DIR_ICONS "interface_inactive.png"
 #define UI_ICON_INTERFACE_ACTIVE        UI_DIR_ICONS "interface_active.png"
-//#define UI_ICON_INTERFACE_INACTIVE      UI_DIR_ICONS "interface_inactive.png"
 
 #define UI_ICON_SCRIPT_SETTINGS         UI_DIR_ICONS "script_settings.png"
 #define UI_ICON_EDIT                    UI_DIR_ICONS "edit.png"
