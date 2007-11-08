@@ -904,6 +904,9 @@ void CWpa_Supplicant::setSignalQualityPollRate(int msec) {
 int CWpa_Supplicant::getSignalQualityPollRate() {
 	return wextTimerRate;
 }
+wps_wext_scan CWpa_Supplicant::getSignalQuality() {
+	return signalQuality;
+}
 
 void CWpa_Supplicant::setLog(bool enabled) {
 	log_enabled = enabled;
@@ -928,6 +931,12 @@ void CWpa_Supplicant::disableNetwork(int id) {
 }
 void CWpa_Supplicant::scan() {
 	if (0 == wps_cmd_SCAN().indexOf("OK")) {
+		//Check if we're already scanning:
+		if (ScanTimerId != -1) {
+			killTimer(ScanTimerId);
+			ScanTimerId = -1;
+			printMessage("THIS IS USELESS!!! We're already scanning");
+		}
 		ScanTimerId = startTimer(CWPA_SCAN_TIMER_TIME);
 	}
 }
@@ -1521,6 +1530,11 @@ void CWpa_Supplicant::wps_tryScanResults() {
 	//Kill Timer:
 	if (ScanTimerId != -1) {
 		killTimer(ScanTimerId);
+		ScanTimerId = -1;
+	}
+	else { //This is not a timer call; this should not happen
+		printMessage("Warning, no timer present while trying to get scan results");
+		return;
 	}
 	struct iwreq wrq;
 	unsigned char * buffer = NULL;		/* Results */
@@ -1717,7 +1731,8 @@ void CWpa_Supplicant::readWirelessInfo() {
 		res.quality.qual = wrq.u.qual.qual;
 		res.quality.noise = wrq.u.qual.noise;
 		res.quality.updated = wrq.u.qual.updated;
-		emit signalQualityUpdated(res);
+		signalQuality = res;
+		emit signalQualityUpdated();
 	}
 }
 

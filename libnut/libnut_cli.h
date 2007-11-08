@@ -226,7 +226,6 @@ namespace libnut {
 		
 	signals:
 		void stateChanged(InterfaceState state);
-		void ipconfigChanged(QHostAddress ip, QHostAddress netmask, QHostAddress gateway);
 	};
 };
 

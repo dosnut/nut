@@ -13,7 +13,7 @@
 #include <QTimerEvent>
 #include <common/macaddress.h>
 #include <QCoreApplication>
-#define CWPA_SCAN_TIMER_TIME 400
+#define CWPA_SCAN_TIMER_TIME 700
 
 #include <iwlib.h>
 extern "C" {
@@ -45,6 +45,7 @@ namespace libnut {
 			bool inConnectionPhase;
 			QString ifname;
 			QList<wps_scan> wpsScanResults;
+			wps_wext_scan signalQuality; //bssid is zero
 
 			QString wps_ctrl_command(QString cmd);
 		//Abstracted Commands:
@@ -203,6 +204,7 @@ namespace libnut {
 
 			void setSignalQualityPollRate(int msec);
 			int getSignalQualityPollRate();
+			wps_wext_scan getSignalQuality();
 
 			QList<wps_network> listNetworks();
 			QList<wps_scan> scanResults();
@@ -230,7 +232,7 @@ namespace libnut {
 			void scanCompleted();
 			void message(QString msg);
 			void eventMessage(wps_event_type type);
-			void signalQualityUpdated(wps_wext_scan scan);
+			void signalQualityUpdated();
 	};
 
 }

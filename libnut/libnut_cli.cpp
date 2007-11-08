@@ -809,16 +809,12 @@ void CInterface::refreshAll() {
 //CInterface private slots
 void CInterface::dbusstateChanged(const InterfaceProperties &properties) {
 	//Check changes:
-	if (properties.ifState != state) {
-		state = properties.ifState;
-		emit(stateChanged(state));
-	}
 	state = properties.ifState;
 	ip = properties.ip;
 	netmask = properties.netmask;
 	gateway = properties.gateway;
 	getUserConfig(true); //Function will updated userConfig
-	emit(ipconfigChanged(ip,netmask,gateway));
+	emit(stateChanged(state));
 }
 //CInterface SLOTS
 void CInterface::activate() {
@@ -847,7 +843,7 @@ bool CInterface::setUserConfig(const nut::IPv4UserConfig &cuserConfig) {
 		return false;
 	}
 	else {
-		*log << (tr("Error while interface->setUserConfig at: ") + dbusPath.path());
+		*log << tr("(%1) Error while interface->setUserConfig at: %2").arg(toString(reply.error()),dbusPath.path());
 	}
 	return false;
 }
