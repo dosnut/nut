@@ -31,6 +31,16 @@ QString toString(DeviceType type) {
 		default:     return QString();
 	}
 }
+QString toString(InterfaceState state) {
+	switch (state) {
+	enum InterfaceState { IFS_OFF, IFS_STATIC, IFS_DHCP, IFS_ZEROCONF, IFS_WAITFORCONFIG };
+		case IFS_OFF: return QObject::tr("OFF");
+		case IFS_STATIC: return QObject::tr("STATIC");
+		case IFS_DHCP: return QObject::tr("ZEROCONF");
+		case IFS_WAITFORCONFIG: return QObject::tr("WAITFORCONFIG");
+		default: return QString();
+	}
+}
 QString toString(QDBusError error) {
 	return QDBusError::errorString(error.type());
 }
@@ -814,6 +824,7 @@ void CInterface::dbusstateChanged(const InterfaceProperties &properties) {
 	netmask = properties.netmask;
 	gateway = properties.gateway;
 	getUserConfig(true); //Function will updated userConfig
+	*log << tr("Interface state of %1 has changed to %2").arg(dbusPath.path(),toString(state));
 	emit(stateChanged(state));
 }
 //CInterface SLOTS
