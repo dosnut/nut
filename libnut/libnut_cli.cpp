@@ -33,7 +33,6 @@ QString toString(DeviceType type) {
 }
 QString toString(InterfaceState state) {
 	switch (state) {
-	enum InterfaceState { IFS_OFF, IFS_STATIC, IFS_DHCP, IFS_ZEROCONF, IFS_WAITFORCONFIG };
 		case IFS_OFF: return QObject::tr("OFF");
 		case IFS_STATIC: return QObject::tr("STATIC");
 		case IFS_DHCP: return QObject::tr("ZEROCONF");
