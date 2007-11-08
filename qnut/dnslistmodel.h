@@ -26,6 +26,8 @@ namespace qnut {
 		QVariant data(const QModelIndex & index, int role) const;
 		Qt::ItemFlags flags(const QModelIndex & index) const;
 		bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
+		bool appendRow(QHostAddress address);
+		bool removeRows(int position, int rows, const QModelIndex & parent = QModelIndex());
 	private:
 		QList<QHostAddress> * dnsList;
 	};

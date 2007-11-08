@@ -1,3 +1,14 @@
+nut (0.3.0-rc2) unstable; urgency=low
+
+  * Many bug fixes
+  * New Features:
+  * Client should support many WPA configurations (cannot add new AdHoc).
+  * User can configure special "static user" interfaces.
+  * Some basic Zeroconf support. Does not announce/watch for conflicts.
+  * Compile in release mode.
+
+ -- Stefan Bühler <stbuehler@web.de>  Thu, 08 Nov 2007 14:52:39 +0100
+
 nut (0.3.0-rc1) unstable; urgency=low
 
   * New Features:
@@ -6,7 +17,6 @@ nut (0.3.0-rc1) unstable; urgency=low
   * server and client can start scripts on events
   * client shows many informations
   * server supports auto-select of environment based on essid/arp infos.
-  * 
 
  -- Stefan Bühler <stbuehler@web.de>  Mon, 29 Oct 2007 23:25:03 +0100
 

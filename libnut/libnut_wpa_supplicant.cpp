@@ -1,4 +1,5 @@
 #include "libnut_wpa_supplicant.h"
+#include <QDebug>
 
 namespace libnut {
 
