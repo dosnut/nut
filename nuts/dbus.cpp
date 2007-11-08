@@ -79,12 +79,12 @@ namespace nuts {
 		
 		//Add Environments
 		foreach (Environment *env, s_device->getEnvironments()) {
-			DBusEnvironment *dbus_env = new DBusEnvironment(env, dbus_connection, dbus_path);
+			DBusEnvironment *dbus_env = new DBusEnvironment(env, dbus_connection, dbus_path,s_device);
 			dbus_environments.append(dbus_env);
 		}
 
 		//Set active Environment
-		int active_environment = s_device->getEnvironment();
+		active_environment = s_device->getEnvironment();
 		if (active_environment >= 0) {
 			dbus_properties.activeEnvironment = dbus_environments[active_environment]->getPath();
 		}
@@ -103,6 +103,27 @@ namespace nuts {
 		return dbus_path;
 	}
 
+	void DBusDevice::stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState) {
+		//Check if active environment has changed:
+		if (active_environment != s_device->getEnvironment() ) {
+			int oldActive = active_environment;
+			active_environment = s_device->getEnvironment();
+			if (0 <= oldActive) {
+				emit(dbus_environments[oldActive]->emitChange(false));
+			}
+			if (0 <= active_environment) {
+				emit(dbus_environments[active_environment]->emitChange(true));
+			}
+			//active Environment has changed for device:
+			if (0 > active_environment) {
+				emit( environmentChangedActive(QString()) );
+			}
+			else {
+				emit( environmentChangedActive( dbus_environments[active_environment]->getPath() ) );
+			}
+		}
+		emit(stateChanged((int) newState, (int) oldState));
+	}
 	libnut::DeviceProperties DBusDevice::getProperties() {
 		dbus_properties.state = s_device->getState();
 		dbus_properties.type = s_device->hasWLAN() ? libnut::DT_AIR : libnut::DT_ETH;
@@ -143,12 +164,12 @@ namespace nuts {
 		s_device->disable();
 	}
 
-	DBusEnvironment::DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path)
-	: QDBusAbstractAdaptor(env), s_environment(env), dbus_connection(connection) {
+	DBusEnvironment::DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path, Device * dev)
+	: QDBusAbstractAdaptor(env), s_environment(env), dbus_connection(connection), s_device(dev) {
 		//Set dbus path an register object
 		dbus_path = path + QString("/%1").arg(s_environment->getID());
 		dbus_connection->registerObject(dbus_path, s_environment);
-
+		
 		//Insert interfaces
 		foreach (Interface *interface, s_environment->getInterfaces()) {
 			//Check if interface is IPv4 or IPv6
@@ -181,6 +202,7 @@ namespace nuts {
 	
 	libnut::EnvironmentProperties DBusEnvironment::getProperties() {
 		dbus_properties.name = s_environment->getName();
+		dbus_properties.active = (s_device->getEnvironment() == s_environment->getID());
 		return dbus_properties;
 	}
 	nut::EnvironmentConfig DBusEnvironment::getConfig() {

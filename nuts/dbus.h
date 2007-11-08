@@ -62,11 +62,10 @@ namespace nuts {
 			QList<DBusEnvironment* > dbus_environments;
 			QString dbus_path;
 			libnut::DeviceProperties dbus_properties;
+			int active_environment;
 		
 		private slots:
-			void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState) {
-				emit(stateChanged((int) newState, (int) oldState));
-			}
+			void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState);
 		
 		public:
 			DBusDevice(Device *dev, QDBusConnection *connection, const QString &path);
@@ -89,7 +88,7 @@ namespace nuts {
 		
 		signals:
 			void stateChanged(int newState, int oldState);
-			void environmentChangedActive(const QDBusObjectPath &objectpath);
+			void environmentChangedActive(const QString &objectpath);
 	};
 	
 	class DBusEnvironment: public QDBusAbstractAdaptor {
@@ -104,13 +103,15 @@ namespace nuts {
 			#endif
 			QString dbus_path;
 			libnut::EnvironmentProperties dbus_properties;
+			Device * s_device;
 		
 		public:
-			DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path);
+			DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path, Device* dev);
 			virtual ~DBusEnvironment();
 			inline Environment * getEnvironment() const { return s_environment; }
 	
 			QString getPath();
+			void emitChange(bool change) { emit stateChanged(change); }
 	
 		public slots:
 			libnut::EnvironmentProperties getProperties();
@@ -121,6 +122,7 @@ namespace nuts {
 		signals:
 			void interfaceAdded(const QDBusObjectPath &objectpath);
 			void interfaceRemoved(const QDBusObjectPath &objectpath);
+			void stateChanged(bool state);
 	};
 
 	class DBusInterface_IPv4: public QDBusAbstractAdaptor {
