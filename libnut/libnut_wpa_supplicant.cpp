@@ -1546,7 +1546,11 @@ void CWpa_Supplicant::wps_tryScanResults() {
 
 	/* Get range stuff */
 	has_range = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
-	printMessage(QString(strerror(errno)));
+	if (errno == EAGAIN) {
+		printMessage("Scan results not available yet");
+		ScanTimerId = startTimer(200);
+		return;
+	}
 	
 	unsigned char * newbuf;
 	for (int i=0; i <= 16; i++) { //realloc (don't do this forever)
@@ -1690,7 +1694,9 @@ void CWpa_Supplicant::readWirelessInfo() {
 
 	/* Get range stuff */
 	has_range = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
-	printMessage(QString("(%1) May be an error occured while getting range").arg(QString(strerror(errno))));
+	if (errno == EAGAIN) {
+		return;
+	}
 
 	if (has_range) {
 		res.maxquality.level = range.max_qual.level;
