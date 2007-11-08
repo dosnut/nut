@@ -48,10 +48,33 @@ namespace qnut {
 	
 	bool CDNSListModel::setData(const QModelIndex & index, const QVariant & value, int role) {
 		if (index.isValid() && role == Qt::EditRole) {
+			QHostAddress address = QHostAddress(value.toString());
+			if (address.isNull())
+				return false;
 			dnsList->replace(index.row(), QHostAddress(value.toString()));
 			emit dataChanged(index, index);
 			return true;
 		}
 		return false;
+	}
+	
+	bool CDNSListModel::appendRow(QHostAddress address) {
+		beginInsertRows(QModelIndex(), dnsList->size(), dnsList->size());
+		
+		*dnsList << address;
+		
+		endInsertRows();
+		return true;
+	}
+	
+	bool CDNSListModel::removeRows(int position, int rows, const QModelIndex & parent) {
+		beginRemoveRows(QModelIndex(), position, position+rows-1);
+	
+		for (int row = 0; row < rows; ++row) {
+			dnsList->removeAt(position);
+		}
+	
+		endRemoveRows();
+		return true;
 	}
 };

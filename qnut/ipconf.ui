@@ -108,6 +108,9 @@
        <layout class="QHBoxLayout" >
         <item>
          <widget class="QPushButton" name="addButton" >
+          <property name="enabled" >
+           <bool>true</bool>
+          </property>
           <property name="text" >
            <string>Add</string>
           </property>
@@ -140,7 +143,10 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="deleteButton" >
+         <widget class="QPushButton" name="removeButton" >
+          <property name="enabled" >
+           <bool>false</bool>
+          </property>
           <property name="text" >
            <string>Remove</string>
           </property>

@@ -9,13 +9,16 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
+#include <QMessageBox>
 #include "ipconfiguration.h"
 #include "dnslistmodel.h"
 #include "ipeditdelegate.h"
-#include <QDebug>
+
 namespace qnut {
 	CIPConfiguration::CIPConfiguration(QWidget * parent) : QDialog(parent) {
 		ui.setupUi(this);
+		connect(ui.addButton, SIGNAL(clicked()), this, SLOT(addDNS()));
+		connect(ui.removeButton, SIGNAL(clicked()), this, SLOT(removeDNS()));
 	}
 	
 	CIPConfiguration::~CIPConfiguration() {
@@ -26,10 +29,13 @@ namespace qnut {
 		ui.netmaskEdit->setText(config.netmask().toString());
 		ui.gatewayEdit->setText(config.gateway().toString());
 		
-		QList<QHostAddress> dnsList;
+		dnsList = config.dnsservers();
 		
 		ui.dnsList->setModel(new CDNSListModel(&dnsList));
 		ui.dnsList->setItemDelegate(new CIPEditDelegate());
+		
+		connect(ui.dnsList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+			this, SLOT(handleSelectionChanged(const QItemSelection &, const QItemSelection &)));
 		
 		if (exec()) {
 			config.setIP(QHostAddress(ui.ipEdit->text()));
@@ -40,5 +46,24 @@ namespace qnut {
 		}
 		else
 			return false;
+	}
+	
+	void CIPConfiguration::addDNS() {
+		QHostAddress address = QHostAddress(ui.dnsEdit->text());
+		if (address.isNull())
+			QMessageBox::information(this, tr("Faild to add dns server"), tr("Address is invalid."));
+		else
+			dynamic_cast<CDNSListModel *>(ui.dnsList->model())->appendRow(address);
+	}
+	
+	void CIPConfiguration::removeDNS() {
+		QModelIndexList selectedIndexes = ui.dnsList->selectionModel()->selectedIndexes();
+		ui.dnsList->model()->removeRow(selectedIndexes[0].row());
+	}
+	
+	void CIPConfiguration::handleSelectionChanged(const QItemSelection & selected, const QItemSelection &) {
+		QModelIndexList selectedIndexes = selected.indexes();
+		//QModelIndexList deselectedIndexes = deselected.indexes();
+		ui.removeButton->setDisabled(selectedIndexes.isEmpty());
 	}
 };

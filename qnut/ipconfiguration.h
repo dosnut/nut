@@ -23,11 +23,15 @@ namespace qnut {
 		Q_OBJECT
 	private:
 		Ui::ipconf ui;
-		
+		QList<QHostAddress> dnsList;
 	public:
 		bool execute(nut::IPv4UserConfig & config);
 		CIPConfiguration(QWidget * parent = 0);
 		~CIPConfiguration();
+	private slots:
+		void addDNS();
+		void removeDNS();
+		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection &);
 	};
 
 };
