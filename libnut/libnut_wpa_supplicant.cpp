@@ -1718,11 +1718,11 @@ void CWpa_Supplicant::readWirelessInfo() {
 		res.maxquality.noise = 0;
 		res.maxquality.updated = 0;
 	}
-	if((hasRange) && (range.we_version_compiled > 11)) {
-		struct iwreq		wrq;
+	if( (hasRange) && (range.we_version_compiled > 11) ) {
+		struct iwreq wrq;
 		wrq.u.data.pointer = (caddr_t) stats;
 		wrq.u.data.length = sizeof(struct iw_statistics);
-		wrq.u.data.flags = 1;		/* Clear updated flag */
+		wrq.u.data.flags = 1; // Clear updated flag
 		strncpy(wrq.ifr_name, ifname.toAscii().data(), IFNAMSIZ);
 
 		if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
