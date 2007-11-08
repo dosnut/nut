@@ -16,7 +16,6 @@ namespace qnut {
 		CTrayIcon(QObject * parent = 0);
 
 	public slots:
-		void nothingHere();
 		void handleClicks(QSystemTrayIcon::ActivationReason reason);
 	};
 };
