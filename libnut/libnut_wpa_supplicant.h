@@ -1,7 +1,5 @@
 #ifndef LIBNUT_LIBNUT_WPA_SUPPLICANT_H
 #define LIBNUT_LIBNUT_WPA_SUPPLICANT_H
-// #define CONFIG_CTRL_IFACE
-// #define CONFIG_CTRL_IFACE_UNIX
 #include <QHostAddress>
 #include <common/types.h>
 #include <common/config.h>
@@ -15,6 +13,7 @@
 #include <QTimerEvent>
 #include <common/macaddress.h>
 #include <QCoreApplication>
+#define CWPA_SCAN_TIMER_TIME 400
 
 #include <iwlib.h>
 extern "C" {
@@ -35,11 +34,12 @@ namespace libnut {
 			struct wpa_ctrl *cmd_ctrl, *event_ctrl;
 			QString wpa_supplicant_path;
 			int wps_fd, wext_fd;
-			QSocketNotifier *event_sn, *wext_sn;
+			QSocketNotifier *event_sn;
 			bool log_enabled;
 			bool wps_connected;
 			int timerId;
 			int wextTimerId;
+			int ScanTimerId;
 			int wextTimerRate;
 			int timerCount;
 			bool inConnectionPhase;
@@ -144,7 +144,9 @@ namespace libnut {
 			wps_eap_netconfig_failures wps_editEapNetwork(int netid, wps_eap_network_config config);
 
 			//Functions to get actual signal strength and/or signal strength for scan results:
-			QList<wps_wext_scan> wps_getWextScan();
+			//And set scanresults
+			void wps_setScanResults(QList<wps_wext_scan> wextScanResults);
+			void wps_tryScanResults();
 			void readWirelessInfo();
 
 			inline void printMessage(QString msg);
@@ -157,7 +159,6 @@ namespace libnut {
 		private slots:
 			void wps_read(int socket);
 			void wps_detach();
-			void wps_scanResultsAvailable(int socket);
 		protected:
 			//proposed time polling:
 			void timerEvent(QTimerEvent *event);

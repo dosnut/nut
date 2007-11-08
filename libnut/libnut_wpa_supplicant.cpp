@@ -677,7 +677,7 @@ void CWpa_Supplicant::Event_dispatcher(QString event) {
 }
 
 //Public functions:
-CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), wpa_supplicant_path("/var/run/wpa_supplicant/"+ifname), event_sn(0), wext_sn(0), timerId(-1), wextTimerId(-1), wextTimerRate(10000), ifname(ifname) {
+CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), wpa_supplicant_path("/var/run/wpa_supplicant/"+ifname), event_sn(0), timerId(-1), wextTimerId(-1), ScanTimerId(-1), wextTimerRate(10000), ifname(ifname) {
 	wps_connected = false;
 	timerCount = 0;
 	log_enabled = true;
@@ -755,13 +755,10 @@ void CWpa_Supplicant::wps_open(bool) {
 	
 	//Get file Descriptor to NET kernel
 	if ( (wext_fd = iw_sockets_open()) < 0) {
-		wext_sn = NULL;
 		printMessage("ERROR: Could not open socket to net kernel");
 	}
 	else { //Socket is set up, now set SocketNotifier
 		printMessage(QString("File Descriptor for Wext is: %1").arg(QString::number(wext_fd)));
-		wext_sn = new QSocketNotifier(wext_fd, QSocketNotifier::Read, NULL);
-		wext_sn->setEnabled(true);
 	}
 	//Start timer for reading wireless info (like in /proc/net/wireless)
 	wextTimerId = startTimer(wextTimerRate);
@@ -788,11 +785,6 @@ bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 			disconnect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
 			delete event_sn;
 			event_sn = NULL;
-		}
-		if (wext_sn != NULL) {
-			disconnect(wext_sn,SIGNAL(activated(int)), this, SLOT(wps_scanResultsAvailable(int)));
-			delete wext_sn;
-			wext_sn = NULL;
 		}
 		//Detaching takes place if program is about to quit
 		//Close control connections
@@ -832,10 +824,7 @@ void CWpa_Supplicant::wps_detach() {
 	}
 }
 
-void CWpa_Supplicant::wps_scanResultsAvailable(int socket) {
-	if (socket != wext_fd) {
-		return;
-	}
+void CWpa_Supplicant::wps_setScanResults(QList<wps_wext_scan> wextScanResults) {
 	QString response = wps_cmd_SCAN_RESULTS();
 	if (response.isEmpty()) {
 		wpsScanResults = QList<wps_scan>();
@@ -844,9 +833,7 @@ void CWpa_Supplicant::wps_scanResultsAvailable(int socket) {
 	else {
 		//Set scan results from wpa_supplicant:
 		wpsScanResults = parseScanResult(sliceMessage(response));
-		//Now get the scan results from wext:
-		QList<wps_wext_scan> wextScanResults = wps_getWextScan();
-		//This max not be possible as qHash references an namespace that is unknown to qt TODO:CHECK!
+		//This may not be possible as qHash references an namespace that is unknown to qt TODO:CHECK!
 		QHash<uint,wps_wext_scan> wextScanHash; //Namespace problem
 // 		QHash<QString,wps_wext_scan> wextScanHash;
 		foreach(wps_wext_scan i, wextScanResults) {
@@ -863,14 +850,20 @@ void CWpa_Supplicant::wps_scanResultsAvailable(int socket) {
 		for (QList<wps_scan>::Iterator i = wpsScanResults.begin(); i != wpsScanResults.end(); ++i ) {
 			i->quality = wextScanHash.value(qHash(i->bssid), dummy).quality;
 		}
-		//Now the complete list is done;
+		//The complete list is done;
 		emit(scanCompleted());
 	}
 }
 
 
+
 void CWpa_Supplicant::timerEvent(QTimerEvent *event) {
-	if (event->timerId() == timerId) {
+	if (event->timerId() == wextTimerId) {
+		if ( (wext_fd != -1) && wps_connected) {
+			readWirelessInfo();
+		}
+	}
+	else if (event->timerId() == timerId) {
 		if (!wps_connected) {
 			timerCount++;
 			wps_open(true);
@@ -880,9 +873,9 @@ void CWpa_Supplicant::timerEvent(QTimerEvent *event) {
 			timerCount = 0;
 		}
 	}
-	else if (event->timerId() == wextTimerId) {
-		if (wext_fd != 0) {
-			readWirelessInfo();
+	else if (event->timerId() == ScanTimerId) {
+		if ( (wext_fd != -1) && wps_connected) {
+			wps_tryScanResults();
 		}
 	}
 }
@@ -935,7 +928,7 @@ void CWpa_Supplicant::disableNetwork(int id) {
 }
 void CWpa_Supplicant::scan() {
 	if (0 == wps_cmd_SCAN().indexOf("OK")) {
-		emit(scanCompleted());
+		ScanTimerId = startTimer(CWPA_SCAN_TIMER_TIME);
 	}
 }
 void CWpa_Supplicant::ap_scan(int type) {
@@ -1521,9 +1514,13 @@ wps_eap_netconfig_failures CWpa_Supplicant::wps_editEapNetwork(int netid, wps_ea
 	return eap_failures;
 }
 
-QList<wps_wext_scan> CWpa_Supplicant::wps_getWextScan() {
+void CWpa_Supplicant::wps_tryScanResults() {
 	if (wext_fd == 0) {
-		return QList<wps_wext_scan>();
+		return;
+	}
+	//Kill Timer:
+	if (ScanTimerId != -1) {
+		killTimer(ScanTimerId);
 	}
 	struct iwreq wrq;
 	unsigned char * buffer = NULL;		/* Results */
@@ -1538,15 +1535,16 @@ QList<wps_wext_scan> CWpa_Supplicant::wps_getWextScan() {
 	printMessage(QString(strerror(errno)));
 	
 	unsigned char * newbuf;
-	for (int i=0; i <= 16; i++) { //realloc
+	for (int i=0; i <= 16; i++) { //realloc (don't do this forever)
 		//Allocate newbuffer 
 		newbuf = (uchar*) realloc(buffer, buflen);
 		if(newbuf == NULL) {
 			if (buffer) {
 				free(buffer);
+				buffer = NULL;
 			}
 			printMessage("Allocating buffer for Wext failed");
-			return res;
+			return;
 		}
 		buffer = newbuf;
 		
@@ -1572,11 +1570,16 @@ QList<wps_wext_scan> CWpa_Supplicant::wps_getWextScan() {
 			}
 			//No range error occured or kernel has wireless extension < 16
 			if (errno == EAGAIN) {
-				printMessage("Scan results not available yet (this should not happen)");
+				printMessage("Scan results not available yet");
+				ScanTimerId = startTimer(200);
+				return;
 			}
 			
 			//Bad error occured
-			free(buffer);
+			if (buffer) {
+				free(buffer);
+				buffer = NULL;
+			}
 			printMessage(QString("(%1) Failed to read scan data : %2").arg(ifname, QString(strerror(errno))));
 		}
 		else { //Results are there
@@ -1647,15 +1650,20 @@ QList<wps_wext_scan> CWpa_Supplicant::wps_getWextScan() {
 				}
 			}
 		} while(ret > 0);
-		free(buffer);
-		return res;
+		if (buffer) {
+			free(buffer);
+			buffer = NULL;
+		}
+		//We have the data, now construct complete wps_scan
+		wps_setScanResults(res);
 	}
 	else {
 		printMessage("NO Scanresults available");
 	}
-
-	free(buffer);
-	return res;
+	if (buffer) {
+		free(buffer);
+		buffer = NULL;
+	}
 }
 
 void CWpa_Supplicant::readWirelessInfo() {
