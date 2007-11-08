@@ -1261,7 +1261,7 @@ namespace nuts {
 	}
 	
 	bool Interface_IPv4::setUserConfig(const nut::IPv4UserConfig &userConfig) {
-		if (m_config->getFlags() && nut::IPv4Config::DO_USERSTATIC) return false;
+		if (!(m_config->getFlags() & nut::IPv4Config::DO_USERSTATIC)) return false;
 		m_userConfig = userConfig;
 		updateNeedUserSetup(m_userConfig.valid());
 		return true;

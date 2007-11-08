@@ -15,11 +15,11 @@
 namespace qnut {
 	bool CScriptSettings::execute(CDeviceOptions * deviceoptions) {
 		quint8 flags = deviceoptions->scriptFlags;
-		ui.upCheck->setChecked(flags && UI_FLAG_SCRIPT_UP);
-		ui.unconfiguredCheck->setChecked(flags && UI_FLAG_SCRIPT_UNCONFIGURED);
-		ui.carrierCheck->setChecked(flags && UI_FLAG_SCRIPT_CARRIER);
-		ui.activatedCheck->setChecked(flags && UI_FLAG_SCRIPT_ACTIVATED);
-		ui.deactivatedCheck->setChecked(flags && UI_FLAG_SCRIPT_DEACTIVATED);
+		ui.upCheck->setChecked(flags & UI_FLAG_SCRIPT_UP);
+		ui.unconfiguredCheck->setChecked(flags & UI_FLAG_SCRIPT_UNCONFIGURED);
+		ui.carrierCheck->setChecked(flags & UI_FLAG_SCRIPT_CARRIER);
+		ui.activatedCheck->setChecked(flags & UI_FLAG_SCRIPT_ACTIVATED);
+		ui.deactivatedCheck->setChecked(flags & UI_FLAG_SCRIPT_DEACTIVATED);
 		if (exec() == QDialog::Accepted) {
 			flags = UI_FLAG_SCRIPT_NONE;
 			
