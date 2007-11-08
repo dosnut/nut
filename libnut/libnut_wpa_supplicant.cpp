@@ -29,7 +29,7 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 	command_len = strlen(command);
 	int status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);
 	if ( (status != 0) or (QString::fromUtf8(reply, reply_len) != "PONG\n") ) {
-		printMessage(QString("(status=%2)PING COMMAND RESPONSE: %1").arg(QString::fromUtf8(reply, reply_len),QString::number(status)));
+		qDebug(QString("(status=%2)PING COMMAND RESPONSE: %1").arg(QString::fromUtf8(reply, reply_len),QString::number(status)));
 		//TODO: Maybe we need to detach and close wpa_supplicant:
 		wps_close("wps_ctrl_command/nopong");
 		return QString();
@@ -623,7 +623,7 @@ void CWpa_Supplicant::wps_read(int socket) {
 				Event_dispatcher(QString::fromUtf8(reply, reply_len));
 			}
 			else if (-1 == status) {
-				printMessage("Error while trying to receive messages from wpa_supplicant");
+				qDebug("Error while trying to receive messages from wpa_supplicant");
 			}
 		}
 	}
@@ -699,7 +699,7 @@ void CWpa_Supplicant::wps_open(bool) {
 	int status;
 	//Open wpa_supplicant control interface
 	if (!QFile::exists(wpa_supplicant_path)) {
-		printMessage(tr("Could not open wpa_supplicant socket") + QString::number(timerCount));
+		qDebug(tr("Could not open wpa_supplicant socket") + QString::number(timerCount));
 		inConnectionPhase = true;
 		timerId = startTimer(wps_TimerTime(timerCount));
 		return;
@@ -707,7 +707,7 @@ void CWpa_Supplicant::wps_open(bool) {
 	cmd_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
 	event_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
 	if (cmd_ctrl == NULL and event_ctrl == NULL) {
-		printMessage(tr("Could not open wpa_supplicant control interface"));
+		qDebug(tr("Could not open wpa_supplicant control interface"));
 		inConnectionPhase = true;
 		timerId = startTimer(wps_TimerTime(timerCount));
 		return;
@@ -715,7 +715,7 @@ void CWpa_Supplicant::wps_open(bool) {
 	if (cmd_ctrl == NULL) {
 		wpa_ctrl_close(event_ctrl);
 		event_ctrl = NULL;
-		printMessage(tr("Could not open wpa_supplicant control interface"));
+		qDebug(tr("Could not open wpa_supplicant control interface"));
 		inConnectionPhase = true;
 		timerId = startTimer(wps_TimerTime(timerCount));
 		return;
@@ -723,7 +723,7 @@ void CWpa_Supplicant::wps_open(bool) {
 	if (event_ctrl == NULL) {
 		wpa_ctrl_close(cmd_ctrl);
 		cmd_ctrl = NULL;
-		printMessage(tr("Could not open wpa_supplicant control interface"));
+		qDebug(tr("Could not open wpa_supplicant control interface"));
 		inConnectionPhase = true;
 		timerId = startTimer(wps_TimerTime(timerCount));
 		return;
@@ -737,7 +737,7 @@ void CWpa_Supplicant::wps_open(bool) {
 		wpa_ctrl_close(cmd_ctrl);
 		event_ctrl = NULL;
 		cmd_ctrl = NULL;
-		printMessage(tr("Could not attach to wpa_supplicant"));
+		qDebug(tr("Could not attach to wpa_supplicant"));
 		inConnectionPhase = true;
 		timerId = startTimer(wps_TimerTime(timerCount));
 		return;
@@ -755,10 +755,10 @@ void CWpa_Supplicant::wps_open(bool) {
 	
 	//Get file Descriptor to NET kernel
 	if ( (wext_fd = iw_sockets_open()) < 0) {
-		printMessage("ERROR: Could not open socket to net kernel");
+		qDebug("ERROR: Could not open socket to net kernel");
 	}
 	else { //Socket is set up, now set SocketNotifier
-		printMessage(QString("File Descriptor for Wext is: %1").arg(QString::number(wext_fd)));
+		qDebug(QString("File Descriptor for Wext is: %1").arg(QString::number(wext_fd)));
 	}
 	//Start timer for reading wireless info (like in /proc/net/wireless)
 	wextTimerId = startTimer(wextTimerRate);
@@ -935,7 +935,7 @@ void CWpa_Supplicant::scan() {
 		if (ScanTimerId != -1) {
 			killTimer(ScanTimerId);
 			ScanTimerId = -1;
-			printMessage("THIS IS USELESS!!! We're already scanning");
+			printMessage("We're already scanning!");
 		}
 		ScanTimerId = startTimer(CWPA_SCAN_TIMER_TIME);
 	}
@@ -1533,7 +1533,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 		ScanTimerId = -1;
 	}
 	else { //This is not a timer call; this should not happen
-		printMessage("Warning, no timer present while trying to get scan results");
+		qDebug("Warning, no timer present while trying to get scan results");
 		return;
 	}
 	struct iwreq wrq;
@@ -1547,7 +1547,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 	/* Get range stuff */
 	has_range = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
 	if (errno == EAGAIN) {
-		printMessage("Scan results not available yet");
+		qDebug("Scan results not available yet");
 		ScanTimerId = startTimer(200);
 		return;
 	}
@@ -1561,7 +1561,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 				free(buffer);
 				buffer = NULL;
 			}
-			printMessage("Allocating buffer for Wext failed");
+			qDebug("Allocating buffer for Wext failed");
 			return;
 		}
 		buffer = newbuf;
@@ -1588,7 +1588,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 			}
 			//No range error occured or kernel has wireless extension < 16
 			if (errno == EAGAIN) {
-				printMessage("Scan results not available yet");
+				qDebug("Scan results not available yet");
 				ScanTimerId = startTimer(200);
 				return;
 			}
@@ -1598,7 +1598,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 				free(buffer);
 				buffer = NULL;
 			}
-			printMessage(QString("(%1) Failed to read scan data : %2").arg(ifname, QString(strerror(errno))));
+			qDebug(QString("(%1) Failed to read scan data : %2").arg(ifname, QString(strerror(errno))));
 		}
 		else { //Results are there
 			break;
@@ -1676,7 +1676,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 		wps_setScanResults(res);
 	}
 	else {
-		printMessage("NO Scanresults available");
+		qDebug("No Scanresults available");
 	}
 	if (buffer) {
 		free(buffer);
@@ -1717,7 +1717,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 		if (buffer) {
 			free(buffer);
 		}
-		printMessage("Allocating buffer for Wext failed");
+		qDebug("Allocating buffer for Wext failed");
 		return;
 	}
 	buffer = newbuf;
@@ -1728,7 +1728,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 	wrq.u.data.length = buflen;
 	//Get information
 	if (iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
-		printMessage(QString("(%1) Error occured while trying to receive wireless info").arg(QString(strerror(errno))));
+		qDebug(QString("(%1) Error occured while trying to receive wireless info").arg(QString(strerror(errno))));
 		free(buffer);
 		return;
 	}
