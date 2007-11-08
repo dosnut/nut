@@ -142,7 +142,7 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 			device = new CDevice(this, i);
 		}
 		catch (CLI_ConnectionException &e) {
-			*log << e.what();
+			qDebug() << e.what();
 			continue;
 		}
 		dbusDevices.insert(i, device);
@@ -173,7 +173,7 @@ void CDeviceManager::setInformation() {
 			device = new CDevice(this, i);
 		}
 		catch (CLI_DevConnectionException e) {
-			*log << e.msg();
+			qDebug() << e.msg();
 			continue;
 		}
 		devices.append(device);
@@ -197,7 +197,7 @@ void CDeviceManager::clearInformation() {
 void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner) {
 	if (NUT_DBUS_URL == name) { //nuts starts
 		if (oldOwner.isEmpty()) {
-			qDebug() << tr("NUTS has been started");
+			*log << tr("NUTS has been started");
 			if (nutsstate) {
 				clearInformation();
 				setInformation();
@@ -211,7 +211,7 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 			connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
 		}
 		else if (newOwner.isEmpty()) { //nuts stops
-			qDebug() << tr("NUTS has been stopped");
+			*log<< tr("NUTS has been stopped");
 			if (nutsstate) {
 				nutsstate = false;
 				clearInformation();
@@ -232,7 +232,7 @@ void CDeviceManager::dbusDeviceAdded(const QDBusObjectPath &objectpath) {
 			device = new CDevice(this, objectpath);
 		}
 		catch (CLI_DevConnectionException e) {
-			*log << e.msg();
+			qDebug() << e.msg();
 			return;
 		}
 		dbusDevices.insert(objectpath,device);
@@ -329,10 +329,10 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		type = replyProp.value().type;
 		state = (DeviceState) replyProp.value().state;
 		activeEnvironment = 0;
-		*log << (tr("Device properties fetched"));
-		*log << (tr("Name") + ": " + QString(name));
-		*log << (tr("Type") + ": " + toString(type));
-		*log << (tr("State") + ": " + toString(state));
+		qDebug() << (tr("Device properties fetched"));
+		qDebug() << (tr("Name") + ": " + QString(name));
+		qDebug() << (tr("Type") + ": " + toString(type));
+		qDebug() << (tr("State") + ": " + toString(state));
 	}
 	else {
 		throw CLI_DevConnectionException(tr("(%1) Error while retrieving dbus' device information").arg(toString(replyProp.error())));
@@ -344,7 +344,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 			essid = replyessid.value();
 		}
 		else {
-			*log << tr("(%1) Could not refresh device essid").arg(toString(replyessid.error()));
+			qDebug() << tr("(%1) Could not refresh device essid").arg(toString(replyessid.error()));
 			essid = QString();
 		}
 	}
@@ -368,12 +368,12 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	//poppulate own Environmentlist
 	CEnvironment * env;
 	foreach(QDBusObjectPath i, replyEnv.value()) {
-		*log << (tr("Adding Environment at: ") + i.path());
+		qDebug() << (tr("Adding Environment at: ") + i.path());
 		try {
 			env = new CEnvironment(this,i);
 		}
 		catch (CLI_EnvConnectionException e) {
-			*log << e.msg();
+			qDebug() << e.msg();
 			continue;
 		}
 		dbusEnvironments.insert(i,env);
@@ -498,7 +498,7 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 			env = new CEnvironment(this,i);
 		}
 		catch (CLI_ConnectionException &e) {
-			*log << e.what();
+			qDebug() << e.what();
 			continue;
 		}
 		dbusEnvironments.insert(i,env);
@@ -622,7 +622,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 				interface = new CInterface(this,i);
 			}
 			catch (CLI_ConnectionException &e) {
-				*log << e.what();
+				qDebug() << e.what();
 				continue;
 			}
 			dbusInterfaces.insert(i,interface);
@@ -710,7 +710,7 @@ void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 			interface = new CInterface(this,i);
 		}
 		catch (CLI_ConnectionException &e) {
-			*log << e.what();
+			qDebug() << e.what();
 			continue;
 		}
 		dbusInterfaces.insert(i,interface);
