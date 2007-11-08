@@ -15,6 +15,9 @@
 #include <QString>
 #include <QDBusArgument>
 #include <QHash>
+extern "C" {
+#include <net/ethernet.h>
+}
 namespace nut {
 	class MacAddress;
 
@@ -31,6 +34,7 @@ namespace nut {
 			MacAddress() { clear(); }
 			MacAddress(const QString &str);
 			MacAddress(const quint8 *d);
+			MacAddress(const ether_addr * eth);
 			quint8 data[6];
 			
 			inline bool operator==(const MacAddress &ma) const {

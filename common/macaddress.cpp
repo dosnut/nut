@@ -87,4 +87,12 @@ namespace nut {
 				data[i] = d[i];
 		}
 	}
+	MacAddress::MacAddress(const ether_addr * eth) {
+		data[0] = (quint8) eth->ether_addr_octet[0];
+		data[1] = (quint8) eth->ether_addr_octet[1];
+		data[2] = (quint8) eth->ether_addr_octet[2];
+		data[3] = (quint8) eth->ether_addr_octet[3];
+		data[4] = (quint8) eth->ether_addr_octet[4];
+		data[5] = (quint8) eth->ether_addr_octet[5];
+	}
 }
