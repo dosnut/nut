@@ -827,6 +827,7 @@ void CInterface::dbusstateChanged(libnut::InterfaceProperties properties) {
 	ip = properties.ip;
 	netmask = properties.netmask;
 	gateway = properties.gateway;
+	dnsserver = properties.dns;
 	getUserConfig(true); //Function will updated userConfig
 	qDebug() << tr("Interface state of %1 has changed to %2").arg(dbusPath.path(),toString(state));
 	emit(stateChanged(state));
