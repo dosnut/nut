@@ -174,8 +174,12 @@
  </widget>
  <tabstops>
   <tabstop>ipEdit</tabstop>
-  <tabstop>gatewayEdit</tabstop>
   <tabstop>netmaskEdit</tabstop>
+  <tabstop>gatewayEdit</tabstop>
+  <tabstop>dnsList</tabstop>
+  <tabstop>addButton</tabstop>
+  <tabstop>dnsEdit</tabstop>
+  <tabstop>removeButton</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
