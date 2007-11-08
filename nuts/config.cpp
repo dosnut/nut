@@ -123,7 +123,6 @@ namespace nuts {
 	}
 	
 	bool ConfigParser::finishSelect() {
-		// TODO
 		return true;
 	}
 	

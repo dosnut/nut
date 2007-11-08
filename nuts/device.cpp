@@ -634,7 +634,6 @@ namespace nuts {
 	}
 	
 	void Environment::updateNeedUserSetup() {
-//		bool prev = m_needUserSetup;
 		m_needUserSetup = false;
 		foreach (Interface *iface, ifs) {
 			if (iface->needUserSetup()) {
@@ -642,8 +641,6 @@ namespace nuts {
 				break;
 			}
 		}
-//		if (prev != m_needUserSetup)
-			// TODO ?
 	}
 	
 	Interface::Interface(Environment *env, int index) : QObject(env), m_env(env), m_index(index) { }
