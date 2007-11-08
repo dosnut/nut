@@ -13,8 +13,8 @@
 #include <QTimerEvent>
 #include <common/macaddress.h>
 #include <QCoreApplication>
-#define CWPA_SCAN_TIMER_TIME 700
-#define CWPA_SCAN_RETRY_TIMER_TIME 500
+#define CWPA_SCAN_TIMER_TIME 1000
+#define CWPA_SCAN_RETRY_TIMER_TIME 1000
 
 #include <iwlib.h>
 extern "C" {

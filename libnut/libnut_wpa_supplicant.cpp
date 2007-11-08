@@ -835,11 +835,8 @@ void CWpa_Supplicant::wps_setScanResults(QList<wps_wext_scan> wextScanResults) {
 		wpsScanResults = parseScanResult(sliceMessage(response));
 		//This may not be possible as qHash references an namespace that is unknown to qt TODO:CHECK!
 		QHash<QString,wps_wext_scan> wextScanHash; //Namespace problem
-// 		QHash<QString,wps_wext_scan> wextScanHash;
 		foreach(wps_wext_scan i, wextScanResults) {
 			wextScanHash.insert(i.bssid.toString(), i);
-			qDebug() << "Adding ScanResultsQuality:" << i.bssid.toString() << i.quality.qual;
-// 			wextScanHash.insert(i.bssid.toString(), i);
 		}
 		wps_wext_scan dummy;
 		dummy.bssid = nut::MacAddress();
@@ -849,12 +846,6 @@ void CWpa_Supplicant::wps_setScanResults(QList<wps_wext_scan> wextScanResults) {
 		dummy.quality.noise = 0;
 		//Set the signal quality
 		for (QList<wps_scan>::Iterator i = wpsScanResults.begin(); i != wpsScanResults.end(); ++i ) {
-			if (wextScanHash.contains(i->bssid.toString())) {
-				qDebug() << "Found: " << i->bssid.toString();
-			}
-			else {
-				qDebug() << "Did not find:" << i->bssid.toString();
-			}
 			i->quality = wextScanHash.value(i->bssid.toString(), dummy).quality;
 		}
 		//The complete list is done;
@@ -1653,7 +1644,6 @@ void CWpa_Supplicant::wps_tryScanResults() {
 		//Init event stream
 		QByteArray test;
 		char buffer2[128];
-		const ether_addr * eth;
 		nut::MacAddress tmpMac;
 		iw_init_event_stream(&stream, (char *) buffer, wrq.u.data.length);
 		do {
@@ -1664,31 +1654,19 @@ void CWpa_Supplicant::wps_tryScanResults() {
 				switch(iwe.cmd) {
 					case SIOCGIWAP:
 						//ap_addr has type socketaddr
-						tmpMac = nut::MacAddress(iwe.u.ap_addr.sa_data);
-						test = QByteArray(iwe.u.ap_addr.sa_data,14);
-						qDebug() << "Parsed BSSID(";
-						qDebug() << "): " << tmpMac.toString() << "DIRECT:";
-						qDebug() << iw_saether_ntop(&(iwe.u.ap_addr), buffer2);
-						tmpMac = nut::MacAddress();
-						eth = (const struct ether_addr *) &(iwe.u.ap_addr);
-						tmpMac = nut::MacAddress(eth);
-						qDebug() << "JETZT NEU" << tmpMac.toString();
+						iw_saether_ntop(&(iwe.u.ap_addr), buffer2);
 						tmpMac = nut::MacAddress(QString::fromAscii(buffer2,128));
-						qDebug() << "JETZT NOCH NEUER:" << tmpMac.toString();
-
 						break;
 					case IWEVQUAL: //Quality event:
 						singleres.quality.qual = (quint8) iwe.u.qual.qual;
 						singleres.quality.level = (quint8) iwe.u.qual.level;
 						singleres.quality.noise = (quint8) iwe.u.qual.noise;
 						singleres.quality.updated = (quint8) iwe.u.qual.updated;
-						qDebug() << "Signal Quality for " << tmpMac.toString() << QString::number(singleres.quality.qual);
 
 						// if our last bssid is different from the actual one, then we have to append it to our scanlist
 						if ( (singleres.bssid != tmpMac) )  {
 							singleres.bssid = tmpMac;
 							res.append(singleres);
-							qDebug() << "Adding:" << tmpMac.toString() << QString::number(singleres.quality.qual);
 						}
 					default: //Ignore all other event types. Maybe we need them later?
 						break;
@@ -1715,24 +1693,24 @@ void CWpa_Supplicant::readWirelessInfo() {
 	if ( (wext_fd == -1) || !wps_connected) {
 		return;
 	}
-	struct iwreq wrq;
 	unsigned char * buffer = NULL;		/* Results */
-	int buflen = 4096; /* Min for compat WE<17 */
+	int buflen = IW_SCAN_MAX_DATA*8; /* Min for compat WE<17 */
 	struct iw_range range;
-	int has_range;
+	int hasRange;
+	iwstats * stats;
 	wps_wext_scan res;
 
 	/* Get range stuff */
-	has_range = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
+	hasRange = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
 	if (errno == EAGAIN) {
 		return;
 	}
 
-	if (has_range) {
-		res.maxquality.level = range.max_qual.level;
-		res.maxquality.qual = range.max_qual.qual;
-		res.maxquality.noise = range.max_qual.noise;
-		res.maxquality.updated = range.max_qual.updated;
+	if (hasRange) {
+		res.maxquality.level = (quint8) range.max_qual.level;
+		res.maxquality.qual = (quint8) range.max_qual.qual;
+		res.maxquality.noise = (quint8) range.max_qual.noise;
+		res.maxquality.updated = (quint8) range.max_qual.updated;
 	}
 	else {
 		res.maxquality.level = 0;
@@ -1751,24 +1729,60 @@ void CWpa_Supplicant::readWirelessInfo() {
 		return;
 	}
 	buffer = newbuf;
-		
+	
 	//Set Request variables:
+	struct iwreq wrq;
 	wrq.u.data.pointer = buffer;
 	wrq.u.data.flags = 0;
 	wrq.u.data.length = buflen;
-	//Get information
+	
+	//Get the data:
 	if (iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
-		qDebug() << QString("(%1) Error occured while trying to receive wireless info").arg(QString(strerror(errno)));
-		free(buffer);
-		return;
+		qDebug() << "Error occured while testing wireless stats" << strerror(errno);
 	}
-	else { //data fetched
-		res.quality.level = wrq.u.qual.level;
-		res.quality.qual = wrq.u.qual.qual;
-		res.quality.noise = wrq.u.qual.noise;
-		res.quality.updated = wrq.u.qual.updated;
+	else {
+		qDebug() << "Test passed";
+	}
+	
+	//Get information
+	if (iw_get_stats(wext_fd, ifname.toAscii().data(), stats, &range, hasRange) < 0) {
+		qDebug() << "Error occured while trying to fetch wireless stats" << strerror(errno);
+		qDebug() << "wext_fd=" << wext_fd;
+	}
+	else { //Stats fetched
+		qDebug() << "Stats fetched";
+		res.quality.level = (quint8) stats->qual.level;
+		res.quality.qual = (quint8) stats->qual.qual;
+		res.quality.noise = (quint8) stats->qual.noise;
+		res.quality.updated = (quint8) stats->qual.updated;
+		qDebug() << res.quality.level << res.quality.qual << res.quality.noise << res.quality.updated;
 		signalQuality = res;
 		emit signalQualityUpdated();
+	}
+	if (buffer) {
+		free(buffer);
+		buffer = NULL;
+	}
+	unsigned char * newbuf2;
+	//Allocate newbuffer 
+	newbuf2 = (uchar*) realloc(buffer, buflen);
+	if(newbuf2 == NULL) {
+		if (buffer) {
+			free(buffer);
+		}
+		qDebug() << "Allocating buffer for Wext failed";
+		return;
+	}
+	buffer = newbuf2;
+	if (iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
+		qDebug() << "Error occured while testing wireless stats" << strerror(errno);
+	}
+	else {
+		qDebug() << "Test passed again";
+	}
+	if (buffer) {
+		free(buffer);
+		buffer = NULL;
 	}
 }
 
