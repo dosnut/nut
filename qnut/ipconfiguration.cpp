@@ -12,7 +12,7 @@
 #include "ipconfiguration.h"
 #include "dnslistmodel.h"
 #include "ipeditdelegate.h"
-
+#include <QDebug>
 namespace qnut {
 	CIPConfiguration::CIPConfiguration(QWidget * parent) : QDialog(parent) {
 		ui.setupUi(this);

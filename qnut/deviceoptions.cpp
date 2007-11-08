@@ -160,6 +160,12 @@ namespace qnut {
 				disconnect(target, SIGNAL(activeChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
 				disconnect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
 			}
+			else {
+				CInterface * target = static_cast<CInterface *>(targetIndex.internalPointer());
+				CEnvironment * parentEnvironment = dynamic_cast<CEnvironment *>(target->parent());
+				disconnect(parentEnvironment, SIGNAL(activeChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
+				disconnect(enterEnvironmentAction, SIGNAL(triggered()), parentEnvironment, SLOT(enter()));
+			}
 			
 		}
 		
@@ -174,15 +180,19 @@ namespace qnut {
 				connect(enterEnvironmentAction, SIGNAL(triggered()), target, SLOT(enter()));
 				
 				ipConfigurationAction->setEnabled(false);
-				enterEnvironmentAction->setDisabled(target == device->activeEnvironment);
+				enterEnvironmentAction->setDisabled(target->active);
 				ui.detailsView->setRootIsDecorated(true);
 				ui.detailsView->setModel(new CEnvironmentDetailsModel(target));
 				ui.detailsView->expandAll();
 			}
 			else {
 				CInterface * target = static_cast<CInterface *>(targetIndex.internalPointer());
+				CEnvironment * parentEnvironment = dynamic_cast<CEnvironment *>(target->parent());
+				connect(parentEnvironment, SIGNAL(activeChanged(bool)), enterEnvironmentAction, SLOT(setDisabled(bool)));
+				connect(enterEnvironmentAction, SIGNAL(triggered()), parentEnvironment, SLOT(enter()));
+				
 				ipConfigurationAction->setEnabled(target->getConfig().getFlags() &  nut::IPv4Config::DO_USERSTATIC);
-				enterEnvironmentAction->setEnabled(false);
+				enterEnvironmentAction->setDisabled(parentEnvironment->active);
 				ui.detailsView->setRootIsDecorated(false);
 				ui.detailsView->setModel(new CInterfaceDetailsModel(target));
 			}
