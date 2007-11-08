@@ -5,11 +5,11 @@
 #define UI_NAME                         tr("QNUT - Qt client for Network UTility Server (NUTS)")
 
 //#ifdef QNUT_RELEASE
-//#define UI_DIR_ICONS                    "/usr/share/qnut/icons/"
-//#define UI_DIR_TRANSLATIONS             "/usr/share/qnut/lang/"
+#define UI_DIR_ICONS                    "/usr/share/qnut/icons/"
+#define UI_DIR_TRANSLATIONS             "/usr/share/qnut/lang/"
 //#else
-#define UI_DIR_ICONS                    "res/"
-#define UI_DIR_TRANSLATIONS             ""
+//#define UI_DIR_ICONS                    "res/"
+//#define UI_DIR_TRANSLATIONS             ""
 //#endif
 #define UI_DIR_WORK                     ".qnut/"
 #define UI_PATH_WORK                    (QDir::toNativeSeparators(QDir::homePath()) + "/" UI_DIR_WORK)
