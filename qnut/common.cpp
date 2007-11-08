@@ -39,7 +39,7 @@ namespace qnut {
 	}
 
 	QString activeIP(CDevice * device) {
-		if ((device->activeEnvironment == NULL) || (device->state != DS_UP))
+		if (device->state < DS_UNCONFIGURED)
 			return QString('-');
 		
 		QString result = QString("");

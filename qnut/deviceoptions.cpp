@@ -31,10 +31,8 @@ namespace qnut {
 	{
 		device = parentDevice;
 		
-		if (device->type == DT_AIR) {
+		if (device->type == DT_AIR)
 			wirelessSettings = new CWirelessSettings(device);
-			device->wpa_supplicant->setSignalQualityPollRate(10000);
-		}
 		else
 			wirelessSettings = NULL;
 		
@@ -43,20 +41,20 @@ namespace qnut {
 		
 		trayIcon->setToolTip(shortSummary(device));
 		trayIcon->setContextMenu(deviceMenu);
-		connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(uiShowThisTab()));
+		connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(showTheeseOptions()));
 		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-			this, SLOT(uiHandleTrayActivated(QSystemTrayIcon::ActivationReason)));
+			this, SLOT(handleTrayActivated(QSystemTrayIcon::ActivationReason)));
 		
 		readSettings();
 		
-		connect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
+		connect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(handleDeviceStateChange(DeviceState)));
 		
 		if (device->state == DS_UP)
 			ui.environmentTree->expand(ui.environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
 	}
 	
 	CDeviceOptions::~CDeviceOptions() {
-		disconnect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(uiHandleStateChange(DeviceState)));
+		disconnect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(handleDeviceStateChange(DeviceState)));
 		writeSettings();
 		if (wirelessSettings) {
 			wirelessSettings->close();
@@ -98,23 +96,27 @@ namespace qnut {
 	
 	inline void CDeviceOptions::createActions() {
 		deviceMenu = new QMenu(device->name, NULL);
-		enableDeviceAction     = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_ENABLE) , tr("Enable device") , device, SLOT(enable()));
-		disableDeviceAction    = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"), device, SLOT(disable()));
+		enableDeviceAction = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_ENABLE), tr("Enable device"), device, SLOT(enable()));
+		disableDeviceAction = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable device"), device, SLOT(disable()));
 		deviceMenu->addSeparator();
-		showAction             = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(uiShowThisTab()));
-		deviceSettingsAction   = deviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("Scripting settings..."), this, SLOT(uiChangeDeviceSettings()));
-		ipConfigurationAction  = deviceMenu->addAction(QIcon(UI_ICON_EDIT), tr("Set IP configuration..."), this, SLOT(uiChangeIPConfiguration()));
+		showAction = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."), this, SLOT(showTheeseOptions()));
+		deviceSettingsAction = deviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("Scripting settings..."), this, SLOT(openDeviceSettings()));
 		deviceMenu->addSeparator();
-		wirelessSettingsAction = deviceMenu->addAction(QIcon(UI_ICON_AIR_SETTINGS), tr("Wireless settings..."), this, SLOT(uiOpenWirelessSettings()));
+		wirelessSettingsAction = deviceMenu->addAction(QIcon(UI_ICON_AIR_SETTINGS), tr("Wireless settings..."), this, SLOT(openWirelessSettings()));
 		
 		enterEnvironmentAction = new QAction(QIcon(UI_ICON_ENVIRONMENT_ENTER), tr("Enter environment"), this);
+		ipConfigurationAction  = new QAction(QIcon(UI_ICON_EDIT), tr("Set IP configuration..."), this);
 		ui.environmentTree->addAction(enterEnvironmentAction);
-		
+		ui.environmentTree->addAction(ipConfigurationAction);
+		ui.environmentTree->setContextMenuPolicy(Qt::ActionsContextMenu);
+
 		enableDeviceAction->setEnabled(device->state == DS_DEACTIVATED);
 		disableDeviceAction->setDisabled(device->state == DS_DEACTIVATED);
 		ipConfigurationAction->setEnabled(false);
 		enterEnvironmentAction->setEnabled(false);
 		wirelessSettingsAction->setEnabled(device->type == DT_AIR);
+		
+		connect(ipConfigurationAction, SIGNAL(triggered()), this, SLOT(openIPConfiguration()));
 	}
 	
 	inline void CDeviceOptions::createView() {
@@ -128,7 +130,7 @@ namespace qnut {
 		ui.environmentTree->header()->setResizeMode(QHeaderView::ResizeToContents);
 		
 		connect(ui.environmentTree->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-			this, SLOT(uiSelectionChanged(const QItemSelection &, const QItemSelection &)));
+			this, SLOT(handleSelectionChanged(const QItemSelection &, const QItemSelection &)));
 		setHeadInfo();
 	}
 	
@@ -137,17 +139,17 @@ namespace qnut {
 		ui.statusLabel->setText(toString(device->state));
 	}
 	
-	void CDeviceOptions::uiHandleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
+	void CDeviceOptions::handleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
 		if (reason == QSystemTrayIcon::Trigger) {
 			showAction->trigger();
 		}
 	}
 	
-	void CDeviceOptions::uiShowThisTab() {
-		emit showOptions(this);
+	void CDeviceOptions::showTheeseOptions() {
+		emit showOptionsRequested(this);
 	}
 	
-	void CDeviceOptions::uiSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
+	void CDeviceOptions::handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
 		QModelIndexList deselectedIndexes = deselected.indexes();
 		QModelIndexList selectedIndexes = selected.indexes();
 		
@@ -196,7 +198,7 @@ namespace qnut {
 		delete oldItemModel;
 	}
 	
-	void CDeviceOptions::uiChangeIPConfiguration() {
+	void CDeviceOptions::openIPConfiguration() {
 		CIPConfiguration dialog(this);
 		QModelIndex selectedIndex = (ui.environmentTree->selectionModel()->selection().indexes())[0];
 		
@@ -212,22 +214,22 @@ namespace qnut {
 		}
 	}
 	
-	void CDeviceOptions::uiChangeDeviceSettings() {
+	void CDeviceOptions::openDeviceSettings() {
 		CScriptSettings dialog(this);
 		dialog.execute(this);
 	}
 	
-	void CDeviceOptions::uiOpenWirelessSettings() {
+	void CDeviceOptions::openWirelessSettings() {
 		if (wirelessSettings) {
 			wirelessSettings->show();
 			wirelessSettings->activateWindow();
 		}
 	}
 	
-	void CDeviceOptions::uiHandleStateChange(DeviceState state) {
+	void CDeviceOptions::handleDeviceStateChange(DeviceState state) {
 		setHeadInfo();
 		ui.environmentTree->collapseAll();
-		if (state == DS_UP)
+		if (state >= DS_UNCONFIGURED)
 			ui.environmentTree->expand(ui.environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
 		
 		enableDeviceAction->setEnabled(state == DS_DEACTIVATED);
@@ -253,20 +255,20 @@ namespace qnut {
 			
 			switch (state) {
 			case DS_UP:
-				emit showMessage(trayIcon, tr("QNUT - %1...").arg(device->name),
-					tr("...is now up and running."));
+				emit showMessageRequested(tr("QNUT - %1...").arg(device->name),
+					tr("...is now up and running."), trayIcon);
 				break;
 			case DS_UNCONFIGURED:
-				emit showMessage(trayIcon, tr("QNUT - %1...").arg(device->name),
-					tr("...got carrier but needs configuration.\n\nKlick here to open the configuration dialog."));
+				emit showMessageRequested(tr("QNUT - %1...").arg(device->name),
+					tr("...got carrier but needs configuration.\n\nKlick here to open the configuration dialog."), trayIcon);
 				break;
 			case DS_ACTIVATED:
-				emit showMessage(trayIcon, tr("QNUT - %1...").arg(device->name),
-					tr("...is now activated an waits for carrier."));
+				emit showMessageRequested(tr("QNUT - %1...").arg(device->name),
+					tr("...is now activated an waits for carrier."), trayIcon);
 				break;
 			case DS_DEACTIVATED: 
-				emit showMessage(trayIcon, tr("QNUT - %1...").arg(device->name),
-					tr("...is now deactivated"));
+				emit showMessageRequested(tr("QNUT - %1...").arg(device->name),
+					tr("...is now deactivated"), trayIcon);
 				break;
 			default:
 				break;
@@ -275,19 +277,19 @@ namespace qnut {
 		else {
 			switch (state) {
 			case DS_UP:
-				emit showMessage(NULL, tr("QNUT"),
+				emit showMessageRequested(tr("QNUT"),
 					tr("%1 is now up and running.").arg(device->name));
 				break;
 			case DS_UNCONFIGURED:
-				emit showMessage(NULL, tr("QNUT"),
+				emit showMessageRequested(tr("QNUT"),
 					tr("%1 got carrier but needs configuration.\n\nKlick here to open the configuration dialog.").arg(device->name));
 				break;
 			case DS_ACTIVATED:
-				emit showMessage(NULL, tr("QNUT"),
+				emit showMessageRequested(tr("QNUT"),
 					tr("%1 is now activated an waits for carrier.").arg(device->name));
 				break;
 			case DS_DEACTIVATED:
-				emit showMessage(NULL, tr("QNUT"),
+				emit showMessageRequested(tr("QNUT"),
 					tr("%1 is now deactivated").arg(device->name));
 				break;
 			default:
