@@ -6,19 +6,17 @@
 #include <libnut/libnut_cli.h>
 #include "ui/ui_connman.h"
 #include "trayicon.h"
-#include "overviewmodel.h"
 #include "deviceoptions.h"
 
 namespace qnut {
-	using namespace libnut;
-	
 	class CConnectionManager : public QMainWindow {
 		Q_OBJECT
 	private:
 		Ui::connMan ui;
 		
-		CDeviceManager deviceManager;
-		CLog logFile;
+		libnut::CDeviceManager deviceManager;
+		libnut::CLog logFile;
+		
 		CDeviceOptionsHash deviceOptions;
 		QSettings settings;
 		
@@ -44,16 +42,17 @@ namespace qnut {
 	public:
 		CConnectionManager(QWidget * parent = 0);
 		~CConnectionManager();
-	public slots:
-		void updateTrayIconInfo();
-		void addUiDevice(CDevice * dev);
-		void removeUiDevice(CDevice * dev);
+	private slots:
 		void handleTabChanged(int index);
 		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+		void showLog(bool doShow);
+	public slots:
+		void updateTrayIconInfo();
+		void addUiDevice(libnut::CDevice * device);
+		void removeUiDevice(libnut::CDevice * device);
 		void showMessage(QString title, QString message, QSystemTrayIcon * trayIcon = NULL);
 		void showAbout();
-		void handleDeviceStateChange(DeviceState state);
-		void showLog(bool doShow);
+		void handleDeviceStateChange(libnut::DeviceState state);
 		void showDeviceOptions(QWidget * widget);
 	};
 };

@@ -17,19 +17,15 @@
 #include "deviceoptions.h"
 
 namespace qnut {
-	using namespace libnut;
-	
 	class CScriptSettings : public QDialog {
 		Q_OBJECT
 	private:
 		Ui::scrset ui;
 	public:
 		bool execute(CDeviceOptions * deviceoptions);
-	
+		
 		CScriptSettings(QWidget *parent = 0);
-	
 		~CScriptSettings();
-	
 	};
 };
 

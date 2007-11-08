@@ -25,6 +25,8 @@
 #include <QDebug>
 
 namespace qnut {
+	using namespace libnut;
+	
 	CDeviceOptions::CDeviceOptions(CDevice * parentDevice, QWidget * parent) :
 		QWidget(parent),
 		settings(UI_PATH_DEV(parentDevice->name) + "dev.conf", QSettings::IniFormat, this)
@@ -47,14 +49,14 @@ namespace qnut {
 		
 		readSettings();
 		
-		connect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(handleDeviceStateChange(DeviceState)));
+		connect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SLOT(handleDeviceStateChange(libnut::DeviceState)));
 		
 		if (device->state == DS_UP)
 			ui.environmentTree->expand(ui.environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
 	}
 	
 	CDeviceOptions::~CDeviceOptions() {
-		disconnect(device, SIGNAL(stateChanged(DeviceState)), this, SLOT(handleDeviceStateChange(DeviceState)));
+		disconnect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SLOT(handleDeviceStateChange(libnut::DeviceState)));
 		writeSettings();
 		if (wirelessSettings) {
 			wirelessSettings->close();

@@ -17,8 +17,6 @@
 #include "ui/ui_ipconf.h"
 
 namespace qnut {
-	using namespace libnut;
-
 	class CIPConfiguration : public QDialog {
 		Q_OBJECT
 	private:
@@ -31,7 +29,7 @@ namespace qnut {
 	private slots:
 		void addDNS();
 		void removeDNS();
-		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection &);
+		void handleSelectionChanged(const QItemSelection & selected);
 	};
 
 };

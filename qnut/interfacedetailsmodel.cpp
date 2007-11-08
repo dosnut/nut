@@ -18,11 +18,14 @@
 
 namespace qnut {
 	using namespace nut;
+	using namespace libnut;
 
 	CInterfaceDetailsModel::CInterfaceDetailsModel(CInterface * data, QObject * parent) : QAbstractItemModel(parent) {
 		interface = data;
-		if (interface)
-			connect(interface, SIGNAL(stateChanged(InterfaceState)), this, SIGNAL(layoutChanged()));
+		if (interface) {
+			connect(interface, SIGNAL(stateChanged(libnut::InterfaceState)), this, SIGNAL(layoutChanged()));
+			//connect(interface, SIGNAL(userConfigApplied()), this, SIGNAL(layoutChanged()));
+		}
 	}
 	
 	CInterfaceDetailsModel::~CInterfaceDetailsModel() {

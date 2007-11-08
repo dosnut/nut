@@ -16,12 +16,10 @@
 #include <libnut/libnut_cli.h>
 
 namespace qnut {
-	using namespace libnut;
-	
 	class CInterfaceDetailsModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		CInterfaceDetailsModel(CInterface * data = NULL, QObject * parent = 0);
+		CInterfaceDetailsModel(libnut::CInterface * data = NULL, QObject * parent = 0);
 		~CInterfaceDetailsModel();
 		
 		QVariant data(const QModelIndex & index, int role) const;
@@ -32,7 +30,7 @@ namespace qnut {
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
 	private:
-		CInterface * interface;
+		libnut::CInterface * interface;
 	};
 }
 

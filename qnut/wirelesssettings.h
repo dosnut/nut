@@ -17,22 +17,20 @@
 #include "ui/ui_airset.h"
 
 namespace qnut {
-	using namespace libnut;
-	
 	class CWirelessSettings : public QWidget {
 		Q_OBJECT
 	private:
 		Ui::airset ui;
-		CDevice * device;
+		libnut::CDevice * device;
 		
 	public:
-		CWirelessSettings(CDevice * wireless, QWidget *parent = 0);
+		CWirelessSettings(libnut::CDevice * wireless, QWidget * parent = 0);
 		~CWirelessSettings();
 		
 	public slots:
-		void uiHandleManagedAPSelectionChanged(const QItemSelection & selected);
-		void uiHandleAvailableAPSelectionChanged(const QItemSelection & selected);
-		void uiHandleStateChange(DeviceState state);
+		void handleManagedAPSelectionChanged(const QItemSelection & selected);
+		void handleAvailableAPSelectionChanged(const QItemSelection & selected);
+		void handleDeviceStateChange(libnut::DeviceState state);
 	private slots:
 		void setHeadInfo();
 		void switchToSelectedNetwork();

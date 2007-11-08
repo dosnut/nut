@@ -21,12 +21,14 @@
 #define OV_MOD_SIG     5
 
 namespace qnut {
+	using namespace libnut;
+	
 	COverViewModel::COverViewModel(CDeviceManager * deviceManager, QObject * parent) : QAbstractItemModel(parent) {
 		if (deviceManager) {
 			devices = &(deviceManager->devices);
 			
-			connect(deviceManager, SIGNAL(deviceAdded(CDevice *)), this, SLOT(deviceAdded(CDevice *)));
-			connect(deviceManager, SIGNAL(deviceRemoved(CDevice *)), this, SLOT(deviceRemoved(CDevice *)));
+			connect(deviceManager, SIGNAL(deviceAdded(libnut::CDevice *)), this, SLOT(deviceAdded(libnut::CDevice *)));
+			connect(deviceManager, SIGNAL(deviceRemoved(libnut::CDevice *)), this, SLOT(deviceRemoved(libnut::CDevice *)));
 		}
 		else
 			devices = NULL;
@@ -37,14 +39,14 @@ namespace qnut {
 	}
 	
 	void COverViewModel::deviceAdded(CDevice * device) {
-		connect(device, SIGNAL(stateChanged(DeviceState)), this, SIGNAL(layoutChanged()));
+		connect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SIGNAL(layoutChanged()));
 		if (device->type == DT_AIR)
 			connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated()), this, SIGNAL(layoutChanged()));
 		emit layoutChanged();
 	}
 	
 	void COverViewModel::deviceRemoved(CDevice * device) {
-		disconnect(device, SIGNAL(stateChanged(DeviceState)), this, SIGNAL(layoutChanged()));
+		disconnect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SIGNAL(layoutChanged()));
 		if (device->type == DT_AIR)
 			disconnect(device->wpa_supplicant, SIGNAL(signalQualityUpdated()), this, SIGNAL(layoutChanged()));
 		emit layoutChanged();

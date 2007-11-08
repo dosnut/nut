@@ -15,6 +15,8 @@
 #include "ipeditdelegate.h"
 
 namespace qnut {
+	using namespace libnut;
+	
 	CIPConfiguration::CIPConfiguration(QWidget * parent) : QDialog(parent) {
 		ui.setupUi(this);
 		connect(ui.addButton, SIGNAL(clicked()), this, SLOT(addDNS()));
@@ -35,7 +37,7 @@ namespace qnut {
 		ui.dnsList->setItemDelegate(new CIPEditDelegate());
 		
 		connect(ui.dnsList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-			this, SLOT(handleSelectionChanged(const QItemSelection &, const QItemSelection &)));
+			this, SLOT(handleSelectionChanged(const QItemSelection &)));
 		
 		if (exec()) {
 			config.setIP(QHostAddress(ui.ipEdit->text()));
@@ -61,9 +63,8 @@ namespace qnut {
 		ui.dnsList->model()->removeRow(selectedIndexes[0].row());
 	}
 	
-	void CIPConfiguration::handleSelectionChanged(const QItemSelection & selected, const QItemSelection &) {
+	void CIPConfiguration::handleSelectionChanged(const QItemSelection & selected) {
 		QModelIndexList selectedIndexes = selected.indexes();
-		//QModelIndexList deselectedIndexes = deselected.indexes();
 		ui.removeButton->setDisabled(selectedIndexes.isEmpty());
 	}
 };

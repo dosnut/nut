@@ -20,6 +20,7 @@
 
 namespace qnut {
 	using namespace nut;
+	using namespace libnut;
 	
 	CManagedAPModel::CManagedAPModel(CWpa_Supplicant * data, QObject * parent) : QAbstractItemModel(parent) {
 		supplicant = data;
