@@ -3,7 +3,7 @@
 */
 #include "libnut_cli.h"
 #include <common/dbus.h>
-
+#include <QDebug>
 
 //things that may need to be changed:
 //-Check if dev/env/if is already in list (maybe refresh then)
