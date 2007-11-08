@@ -1718,71 +1718,33 @@ void CWpa_Supplicant::readWirelessInfo() {
 		res.maxquality.noise = 0;
 		res.maxquality.updated = 0;
 	}
-	unsigned char * newbuf;
-	//Allocate newbuffer 
-	newbuf = (uchar*) realloc(buffer, buflen);
-	if(newbuf == NULL) {
-		if (buffer) {
-			free(buffer);
+	if((hasRange) && (range.we_version_compiled > 11)) {
+		struct iwreq		wrq;
+		wrq.u.data.pointer = (caddr_t) stats;
+		wrq.u.data.length = sizeof(struct iw_statistics);
+		wrq.u.data.flags = 1;		/* Clear updated flag */
+		strncpy(wrq.ifr_name, ifname.toAscii().data(), IFNAMSIZ);
+
+		if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
+			qDebug() << "Error occured while fetching wireless info" << strerror(errno);
 		}
-		qDebug() << "Allocating buffer for Wext failed";
-		return;
+		else { //Stats fetched
+			qDebug() << "Stats fetched";
+			res.quality.level = (quint8) stats->qual.level;
+			res.quality.qual = (quint8) stats->qual.qual;
+			res.quality.noise = (quint8) stats->qual.noise;
+			res.quality.updated = (quint8) stats->qual.updated;
+			qDebug() << res.quality.level << res.quality.qual << res.quality.noise << res.quality.updated;
+			signalQuality = res;
+			emit signalQualityUpdated();
+		}
 	}
-	buffer = newbuf;
-	
-	//Set Request variables:
-	struct iwreq wrq;
-	wrq.u.data.pointer = buffer;
-	wrq.u.data.flags = 0;
-	wrq.u.data.length = buflen;
-	
-	//Get the data:
-	if (iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
-		qDebug() << "Error occured while testing wireless stats" << strerror(errno);
+	else if (range.we_version_compiled <= 11) {
+		printMessage(tr("Cannot fetch wireless information as your wireless extension is too old"));
+		printMessage(tr("Think about updating your kernel (it's way too old)"));
 	}
 	else {
-		qDebug() << "Test passed";
-	}
-	
-	//Get information
-	if (iw_get_stats(wext_fd, ifname.toAscii().data(), stats, &range, hasRange) < 0) {
-		qDebug() << "Error occured while trying to fetch wireless stats" << strerror(errno);
-		qDebug() << "wext_fd=" << wext_fd;
-	}
-	else { //Stats fetched
-		qDebug() << "Stats fetched";
-		res.quality.level = (quint8) stats->qual.level;
-		res.quality.qual = (quint8) stats->qual.qual;
-		res.quality.noise = (quint8) stats->qual.noise;
-		res.quality.updated = (quint8) stats->qual.updated;
-		qDebug() << res.quality.level << res.quality.qual << res.quality.noise << res.quality.updated;
-		signalQuality = res;
-		emit signalQualityUpdated();
-	}
-	if (buffer) {
-		free(buffer);
-		buffer = NULL;
-	}
-	unsigned char * newbuf2;
-	//Allocate newbuffer 
-	newbuf2 = (uchar*) realloc(buffer, buflen);
-	if(newbuf2 == NULL) {
-		if (buffer) {
-			free(buffer);
-		}
-		qDebug() << "Allocating buffer for Wext failed";
-		return;
-	}
-	buffer = newbuf2;
-	if (iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
-		qDebug() << "Error occured while testing wireless stats" << strerror(errno);
-	}
-	else {
-		qDebug() << "Test passed again";
-	}
-	if (buffer) {
-		free(buffer);
-		buffer = NULL;
+		qDebug() << "Error while trying to fetch wireless information" << strerror(errno);
 	}
 }
 
