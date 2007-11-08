@@ -36,8 +36,6 @@
 %token <macAddr> MACADDR
 %token <i> INTEGER
 
-%destructor { delete ($$); } STRING IPv4_VAL MACADDR
-
 %error-verbose
 
 %parse-param {ConfigParser *cp};
