@@ -97,8 +97,8 @@ namespace libnut {
 		void refreshAll();
 		void rebuild();
 	signals:
-		void deviceAdded(CDevice * device);
-		void deviceRemoved(CDevice * device); //nach entfernen aus der liste aber vor dem löschen
+		void deviceAdded(libnut::CDevice * device);
+		void deviceRemoved(libnut::CDevice * device); //nach entfernen aus der liste aber vor dem löschen
 		void stateChanged(bool state); //Information about server state
 	};
 
@@ -145,11 +145,11 @@ namespace libnut {
 		void setEnvironment(CEnvironment * environment);
 		
 	signals:
-		void environmentChangedActive(CEnvironment * current, CEnvironment * previous);
+		void environmentChangedActive(libnut::CEnvironment * current, libnut::CEnvironment * previous);
 // 		void environmentsUpdated(); //Pending for removal
 // 		void environmentAdded(CEnvironment * environment); //Pending for removal
 // 		void environmentRemoved(CEnvironment * environment); //Pending for removal
-		void stateChanged(DeviceState newState);
+		void stateChanged(libnut::DeviceState newState);
 	};
 	
 	class CEnvironment : public CLibNut {
@@ -228,7 +228,7 @@ namespace libnut {
 		bool setUserConfig(const nut::IPv4UserConfig &cuserConfig);
 		
 	signals:
-		void stateChanged(InterfaceState state);
+		void stateChanged(libnut::InterfaceState state);
 	};
 };
 
