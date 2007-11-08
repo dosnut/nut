@@ -39,8 +39,7 @@ namespace nuts {
 			void deviceAdded(QString devName, Device *dev);
 			void deviceRemoved(QString devName, Device *dev);
 			void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState, Device* device);
-			void interfaceUp(Interface_IPv4* iface);
-			void interfaceDown(Interface_IPv4* iface);
+			void interfaceStatusChanged(libnut::InterfaceState state, Interface_IPv4* iface);
 	};
 }
 

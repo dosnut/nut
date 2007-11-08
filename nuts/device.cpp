@@ -216,6 +216,12 @@ namespace nuts {
 		if (activeEnv != -1)
 			envs[activeEnv]->start();
 	}
+	void Device::envNeedUserSetup(Environment* env) {
+		if (envs[activeEnv] != env) return;
+		setState(libnut::DS_UNCONFIGURED);
+		log << "Device(" << name << ") needs user configuration!" << endl;
+	}
+	
 	void Device::gotCarrier(int ifIndex, const QString &essid) {
 		interfaceIndex = ifIndex;
 		m_essid = essid;
@@ -496,8 +502,13 @@ namespace nuts {
 	void Environment::start() {
 		if (envStart) return;
 		envStart = true; envIsUp = false;
-		foreach (Interface* i, ifs)
+		bool needUserSetup = false;
+		foreach (Interface* i, ifs) {
 			i->start();
+			needUserSetup |= i->needUserSetup();
+		}
+		if (needUserSetup)
+			device->envNeedUserSetup(this);
 		checkStatus();
 	}
 	void Environment::stop() {
@@ -646,8 +657,7 @@ namespace nuts {
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, nut::IPv4Config *config)
 	: Interface(env, index), dhcp_timer_id(-1), dm(env->device->dm), dhcp_xid(0), dhcpstate(DHCPS_OFF), zc_state(ZCS_OFF), zc_arp_probe(0), m_config(config), m_ifstate(libnut::IFS_OFF) {
 		m_needUserSetup = config->getFlags() & nut::IPv4Config::DO_USERSTATIC;
-		connect(this, SIGNAL(interfaceUp(Interface_IPv4*)), &m_env->device->dm->m_events, SLOT(interfaceUp(Interface_IPv4*)));
-		connect(this, SIGNAL(interfaceDown(Interface_IPv4*)), &m_env->device->dm->m_events, SLOT(interfaceDown(Interface_IPv4*)));
+		connect(this, SIGNAL(statusChanged(libnut::InterfaceState, Interface_IPv4*)), &m_env->device->dm->m_events, SLOT(interfaceStatusChanged(libnut::InterfaceState, Interface_IPv4*)));
 	}
 	
 	Interface_IPv4::~Interface_IPv4() {
@@ -1001,6 +1011,7 @@ namespace nuts {
 		} else if (m_config->getFlags() & nut::IPv4Config::DO_USERSTATIC) {
 			if (m_needUserSetup) {
 				m_ifstate = libnut::IFS_WAITFORCONFIG;
+				emit statusChanged(m_ifstate, this);
 			} else {
 				startUserStatic();
 			}
@@ -1100,7 +1111,7 @@ namespace nuts {
 			proc->waitForFinished(-1);
 			delete proc; // waits for process
 		}
-		emit interfaceUp(this);
+		emit statusChanged(m_ifstate, this);
 		m_env->ifUp(this);
 	}
 	void Interface_IPv4::systemDown() {
@@ -1141,7 +1152,7 @@ namespace nuts {
 		rtnl_addr_put(addr);
 		nl_addr_put(local);
 		m_ifstate = libnut::IFS_OFF;
-		emit interfaceDown(this);
+		emit statusChanged(m_ifstate, this);
 		m_env->ifDown(this);
 	}
 	
