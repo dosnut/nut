@@ -787,7 +787,7 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	}
 	getUserConfig(true); //Function will updated userConfig
 
-	connect(dbusInterface, SIGNAL(stateChanged(const InterfaceProperties &)), this, SLOT(dbusstateChanged(const InterfaceProperties &)));
+	connect(dbusInterface, SIGNAL(stateChanged(libnut::InterfaceProperties)), this, SLOT(dbusstateChanged(libnut::InterfaceProperties)));
 }
 CInterface::~CInterface() {
 }
@@ -807,7 +807,7 @@ void CInterface::refreshAll() {
 	}
 }
 //CInterface private slots
-void CInterface::dbusstateChanged(const InterfaceProperties &properties) {
+void CInterface::dbusstateChanged(libnut::InterfaceProperties properties) {
 	//Check changes:
 	state = properties.ifState;
 	ip = properties.ip;

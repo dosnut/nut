@@ -206,7 +206,7 @@ namespace libnut {
 		nut::IPv4UserConfig userConfig;
 		void refreshAll();
 	private slots:
-		void dbusstateChanged(const InterfaceProperties &properties);
+		void dbusstateChanged(libnut::InterfaceProperties properties);
 	public:
 		InterfaceState state;
 		QHostAddress ip;
