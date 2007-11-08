@@ -548,6 +548,11 @@ void CDevice::dbusstateChanged(int newState, int oldState) {
 	else {
 		essid = QString();
 	}
+	if ( (DT_AIR == type) && (newState >= DS_CARRIER ) ) {
+		if (wpa_supplicant != NULL) {
+			wpa_supplicant->readWirelessInfo();
+		}
+	}
 
 	emit(stateChanged(state));
 }

@@ -14,6 +14,7 @@
 #include <common/macaddress.h>
 #include <QCoreApplication>
 #define CWPA_SCAN_TIMER_TIME 700
+#define CWPA_SCAN_RETRY_TIMER_TIME 500
 
 #include <iwlib.h>
 extern "C" {
@@ -148,7 +149,7 @@ namespace libnut {
 			//And set scanresults
 			void wps_setScanResults(QList<wps_wext_scan> wextScanResults);
 			void wps_tryScanResults();
-			void readWirelessInfo();
+
 
 			inline void printMessage(QString msg);
 
@@ -170,6 +171,7 @@ namespace libnut {
 			inline void open() { wps_open(false); }
 			inline bool close() {return wps_close("libnut",false); }
 			bool connected();
+			void readWirelessInfo();
 	
 		public slots:
 			void setLog(bool enabled);

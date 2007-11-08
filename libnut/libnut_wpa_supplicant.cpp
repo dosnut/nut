@@ -834,10 +834,11 @@ void CWpa_Supplicant::wps_setScanResults(QList<wps_wext_scan> wextScanResults) {
 		//Set scan results from wpa_supplicant:
 		wpsScanResults = parseScanResult(sliceMessage(response));
 		//This may not be possible as qHash references an namespace that is unknown to qt TODO:CHECK!
-		QHash<uint,wps_wext_scan> wextScanHash; //Namespace problem
+		QHash<QString,wps_wext_scan> wextScanHash; //Namespace problem
 // 		QHash<QString,wps_wext_scan> wextScanHash;
 		foreach(wps_wext_scan i, wextScanResults) {
-			wextScanHash.insert(qHash(i.bssid), i);
+			wextScanHash.insert(i.bssid.toString(), i);
+			qDebug() << "Adding ScanResultsQuality:" << i.bssid.toString() << i.quality.qual;
 // 			wextScanHash.insert(i.bssid.toString(), i);
 		}
 		wps_wext_scan dummy;
@@ -848,7 +849,13 @@ void CWpa_Supplicant::wps_setScanResults(QList<wps_wext_scan> wextScanResults) {
 		dummy.quality.noise = 0;
 		//Set the signal quality
 		for (QList<wps_scan>::Iterator i = wpsScanResults.begin(); i != wpsScanResults.end(); ++i ) {
-			i->quality = wextScanHash.value(qHash(i->bssid), dummy).quality;
+			if (wextScanHash.contains(i->bssid.toString())) {
+				qDebug() << "Found: " << i->bssid.toString();
+			}
+			else {
+				qDebug() << "Did not find:" << i->bssid.toString();
+			}
+			i->quality = wextScanHash.value(i->bssid.toString(), dummy).quality;
 		}
 		//The complete list is done;
 		emit(scanCompleted());
@@ -1548,8 +1555,11 @@ void CWpa_Supplicant::wps_tryScanResults() {
 	has_range = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
 	if (errno == EAGAIN) {
 		qDebug() << "Scan results not available yet";
-		ScanTimerId = startTimer(200);
+		ScanTimerId = startTimer(CWPA_SCAN_RETRY_TIMER_TIME);
 		return;
+	}
+	else {
+		qDebug() << "Range stuff got";
 	}
 	
 	unsigned char * newbuf;
@@ -1584,12 +1594,13 @@ void CWpa_Supplicant::wps_tryScanResults() {
 					buflen *= 2;
 				}
 				//Start from the beginning:
+				qDebug() << "Buffer was too small";
 				continue;
 			}
 			//No range error occured or kernel has wireless extension < 16
 			if (errno == EAGAIN) {
 				qDebug() << "Scan results not available yet";
-				ScanTimerId = startTimer(200);
+				ScanTimerId = startTimer(CWPA_SCAN_RETRY_TIMER_TIME);
 				return;
 			}
 			
@@ -1614,54 +1625,70 @@ void CWpa_Supplicant::wps_tryScanResults() {
 		
 		wps_wext_scan singleres;
 		singleres.bssid = nut::MacAddress();
-		singleres.quality.level = 0;
-		singleres.quality.qual = 0;
-		singleres.quality.noise = 0;
-		singleres.quality.updated = 0;
+		singleres.quality.level = -1;
+		singleres.quality.qual = -1;
+		singleres.quality.noise = -1;
+		singleres.quality.updated = -1;
 		if (has_range) {
-			singleres.maxquality.level = range.max_qual.level;
-			singleres.maxquality.qual = range.max_qual.qual;
-			singleres.maxquality.noise = range.max_qual.noise;
-			singleres.maxquality.updated = range.max_qual.updated;
-			singleres.avgquality.level = range.avg_qual.level;
-			singleres.avgquality.qual = range.avg_qual.qual;
-			singleres.avgquality.noise = range.avg_qual.noise;
-			singleres.avgquality.updated = range.avg_qual.updated;
+			singleres.maxquality.level = (quint8) range.max_qual.level;
+			singleres.maxquality.qual = (quint8) range.max_qual.qual;
+			singleres.maxquality.noise = (quint8) range.max_qual.noise;
+			singleres.maxquality.updated = (quint8) range.max_qual.updated;
+			singleres.avgquality.level = (quint8) range.avg_qual.level;
+			singleres.avgquality.qual = (quint8) range.avg_qual.qual;
+			singleres.avgquality.noise = (quint8) range.avg_qual.noise;
+			singleres.avgquality.updated = (quint8) range.avg_qual.updated;
 		}
 		else {
-			singleres.maxquality.level = 0;
-			singleres.maxquality.qual = 0;
-			singleres.maxquality.noise = 0;
-			singleres.maxquality.updated = 0;
-			singleres.avgquality.level = 0;
-			singleres.avgquality.qual = 0;
-			singleres.avgquality.noise = 0;
-			singleres.avgquality.updated = 0;
+			singleres.maxquality.level = -1;
+			singleres.maxquality.qual = -1;
+			singleres.maxquality.noise = -1;
+			singleres.maxquality.updated = -1;
+			singleres.avgquality.level = -1;
+			singleres.avgquality.qual = -1;
+			singleres.avgquality.noise = -1;
+			singleres.avgquality.updated = -1;
 		}
 
 		//Init event stream
+		QByteArray test;
+		char buffer2[128];
+		const ether_addr * eth;
+		nut::MacAddress tmpMac;
 		iw_init_event_stream(&stream, (char *) buffer, wrq.u.data.length);
 		do {
 			/* Extract an event and parse it*/
 			ret = iw_extract_event_stream(&stream, &iwe, range.we_version_compiled);
 			if(ret > 0) {
 				//Now parse our scan event:
-				nut::MacAddress tmpMac;
 				switch(iwe.cmd) {
 					case SIOCGIWAP:
 						//ap_addr has type socketaddr
-						tmpMac = nut::MacAddress( QString::fromUtf8(iwe.u.ap_addr.sa_data,14));
+						tmpMac = nut::MacAddress(iwe.u.ap_addr.sa_data);
+						test = QByteArray(iwe.u.ap_addr.sa_data,14);
+						qDebug() << "Parsed BSSID(";
+						qDebug() << "): " << tmpMac.toString() << "DIRECT:";
+						qDebug() << iw_saether_ntop(&(iwe.u.ap_addr), buffer2);
+						tmpMac = nut::MacAddress();
+						eth = (const struct ether_addr *) &(iwe.u.ap_addr);
+						tmpMac = nut::MacAddress(eth);
+						qDebug() << "JETZT NEU" << tmpMac.toString();
+						tmpMac = nut::MacAddress(QString::fromAscii(buffer2,128));
+						qDebug() << "JETZT NOCH NEUER:" << tmpMac.toString();
+
 						break;
 					case IWEVQUAL: //Quality event:
 						singleres.quality.qual = (quint8) iwe.u.qual.qual;
 						singleres.quality.level = (quint8) iwe.u.qual.level;
 						singleres.quality.noise = (quint8) iwe.u.qual.noise;
 						singleres.quality.updated = (quint8) iwe.u.qual.updated;
+						qDebug() << "Signal Quality for " << tmpMac.toString() << QString::number(singleres.quality.qual);
 
 						// if our last bssid is different from the actual one, then we have to append it to our scanlist
-						if ( (singleres.bssid != tmpMac) && !singleres.bssid.zero() )  {
+						if ( (singleres.bssid != tmpMac) )  {
 							singleres.bssid = tmpMac;
 							res.append(singleres);
+							qDebug() << "Adding:" << tmpMac.toString() << QString::number(singleres.quality.qual);
 						}
 					default: //Ignore all other event types. Maybe we need them later?
 						break;
@@ -1685,9 +1712,12 @@ void CWpa_Supplicant::wps_tryScanResults() {
 }
 
 void CWpa_Supplicant::readWirelessInfo() {
+	if ( (wext_fd == -1) || !wps_connected) {
+		return;
+	}
 	struct iwreq wrq;
 	unsigned char * buffer = NULL;		/* Results */
-	int buflen = 2048; /* Min for compat WE<17 */
+	int buflen = 4096; /* Min for compat WE<17 */
 	struct iw_range range;
 	int has_range;
 	wps_wext_scan res;
