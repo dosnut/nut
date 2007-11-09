@@ -267,6 +267,43 @@ namespace nuts {
 		deleteLater();
 	}
 	
+	ARPAnnounce::ARPAnnounce(ARP *arp, const QHostAddress &ip)
+	: ARPTimer(arp), m_ip(ip), m_remaining_announces(ARPConst::ANNOUNCE_NUM) {
+		timeEvent();
+	}
+	ARPAnnounce::~ARPAnnounce() {
+		if (m_arp)
+			m_arp->arpTimerDelete(this);
+	}
+	bool ARPAnnounce::timeEvent() {
+		if (m_remaining_announces == 0) {
+			m_arp->arpTimerDelete(this);
+			m_arp = 0;
+			emit ready(m_ip);
+			deleteLater();
+			return false;
+		}
+		m_remaining_announces--;
+		
+		arp_packet_ipv4 packet;
+		arp_ipv4_request(packet, m_arp->m_device->getMacAddress(), m_ip, m_ip);
+		m_arp->arpWrite(QByteArray((const char*) &packet, sizeof(packet)));
+		
+		m_nextTimeout = Time::wait(ARPConst::ANNOUNCE_INTERVAL);
+		return true;
+	}
+	
+	ARPWatch::~ARPWatch() {
+		if (m_arp) m_arp->m_watches.remove(m_ip);
+	}
+	
+	void ARPWatch::gotPacket(const nut::MacAddress &mac) {
+		if (m_arp) m_arp->m_watches.remove(m_ip);
+		m_arp = 0;
+		emit conflict(m_ip, mac);
+		deleteLater();
+	}
+	
 	ARP::ARP(Device* device)
 	: QObject(device), m_device(device), m_arp_socket(-1), m_timer_id(0) {
 	}
@@ -323,6 +360,10 @@ namespace nuts {
 			close(m_arp_socket);
 			m_arp_socket = -1;
 		}
+		if (m_timer_id) {
+			killTimer(m_timer_id);
+			m_timer_id = 0;
+		}
 		m_probes.clear(); m_requests.clear();
 		QLinkedList<ARPTimer*> arp_timers(m_arp_timers);
 		m_arp_timers.clear();
@@ -352,6 +393,22 @@ namespace nuts {
 		return p;
 	}
 	
+	ARPAnnounce* ARP::announceIPv4(const QHostAddress &addr) {
+		if (m_arp_socket == -1) return 0;
+		ARPAnnounce *a;
+		a = new ARPAnnounce(this, addr);
+		arpTimerAdd(a);
+		return a;
+	}
+	
+	ARPWatch* ARP::watchIPv4(const QHostAddress &addr) {
+		if (m_arp_socket == -1) return 0;
+		ARPWatch *w;
+		w = new ARPWatch(this, addr);
+		m_watches.insert(addr, w);
+		return w;
+	}
+	
 	void ARP::arpReadNF() {
 		QByteArray data = readARPPacket(m_arp_socket);
 		quint8 proto_len;
@@ -366,10 +423,13 @@ namespace nuts {
 					return;
 				ARPRequest *r;
 				ARPProbe *p;
+				ARPWatch *w;
 				if (0 != (r = m_requests.value(sender_ip, 0)))
 					r->gotPacket(sender_mac);
 				if (0 != (p = m_probes.value(sender_ip, 0)))
 					p->gotPacket(sender_mac);
+				if (0 != (w = m_watches.value(sender_ip, 0)))
+					w->gotPacket(sender_mac);
 				switch (op) {
 					case ARP_REQUEST:
 						if ((sender_ip.toIPv4Address() == 0) && (sender_mac != m_device->getMacAddress())
