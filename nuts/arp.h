@@ -22,9 +22,11 @@
 
 namespace nuts {
 	class ARP;
+	class ARPWatch;
 	class ARPTimer;
 	class ARPRequest;
 	class ARPProbe;
+	class ARPAnnounce;
 	
 	class Device;
 }
@@ -143,6 +145,7 @@ namespace nuts {
 			
 			QHash<QHostAddress, ARPProbe*> m_probes;
 			QHash<QHostAddress, ARPRequest*> m_requests;
+			QHash<QHostAddress, ARPWatch*> m_watches;
 			
 		public:
 			ARP(Device* device);
@@ -158,6 +161,10 @@ namespace nuts {
 				Prepare a probe for an IPv4 address. (Needed for zeroconf)
 			*/
 			ARPProbe* probeIPv4(const QHostAddress &addr);
+			
+			ARPAnnounce* announceIPv4(const QHostAddress &addr);
+			
+			ARPWatch* watchIPv4(const QHostAddress &addr);
 
 		private slots:
 			void arpReadNF();
@@ -166,6 +173,8 @@ namespace nuts {
 		private:
 			friend class ARPRequest;
 			friend class ARPProbe;
+			friend class ARPAnnounce;
+			friend class ARPWatch;
 			
 			void arpWrite(const QByteArray &buf);
 			
@@ -179,7 +188,27 @@ namespace nuts {
 			bool start();
 			void stop();
 	};
+	
+	class ARPWatch : public QObject {
+		Q_OBJECT
+		protected:
+			friend class ARP;
+			
+			ARPWatch(ARP *arp, const QHostAddress &ip) : m_arp(arp), m_ip(ip) { }
+			
+			ARP *m_arp;
+			QHostAddress m_ip;
+			
+			// got ARP Packet which resolves watched ip to mac
+			void gotPacket(const nut::MacAddress &mac);
+			
+		public:
+			virtual ~ARPWatch();
 
+		signals:
+			void conflict(QHostAddress ip, nut::MacAddress mac);
+	};
+	
 	class ARPTimer : public QObject {
 		Q_OBJECT
 		protected:
@@ -230,6 +259,7 @@ namespace nuts {
 			
 			virtual ~ARPProbe();
 			void setReserve(bool reserve);
+			bool getReserve() { return m_reserve; }
 			ARPProbeState getState() { return m_state; }
 			
 		protected:
@@ -254,6 +284,25 @@ namespace nuts {
 			
 		signals:
 			void conflict(QHostAddress ip, nut::MacAddress mac);
+			void ready(QHostAddress ip);
+	};
+	
+	class ARPAnnounce : public ARPTimer {
+		Q_OBJECT
+		public:
+			virtual ~ARPAnnounce();
+		
+		protected:
+			friend class ARP;
+			
+			QHostAddress m_ip;
+			int m_remaining_announces;
+			
+			ARPAnnounce(ARP *arp, const QHostAddress &ip);
+			
+			virtual bool timeEvent();
+		
+		signals:
 			void ready(QHostAddress ip);
 	};
 }
