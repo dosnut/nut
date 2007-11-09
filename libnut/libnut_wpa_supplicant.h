@@ -234,7 +234,7 @@ namespace libnut {
 			void scanCompleted();
 			void message(QString msg);
 			void eventMessage(libnut::wps_event_type type);
-			void signalQualityUpdated();
+			void signalQualityUpdated(wps_wext_scan scan);
 	};
 
 }

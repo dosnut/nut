@@ -1739,7 +1739,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 			qDebug() << res.quality.level << res.quality.qual << res.quality.noise << res.quality.updated;
 			signalQuality = res;
 			qDebug() << "Emittig signalQualityUpdated()";
-			emit signalQualityUpdated();
+			emit signalQualityUpdated(signalQuality);
 		}
 	}
 	else if (range.we_version_compiled <= 11) {
