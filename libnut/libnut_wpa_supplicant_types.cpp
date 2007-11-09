@@ -252,12 +252,13 @@ wps_bool toWpsBool(bool b) {
 //We don't care whether information was updated or not. Just convert it
 wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 	wps_wext_scan_readable res;
+	res.encoding = WSIG_QUALITY_ALLABS;
 	if ( scan.hasRange && ((scan.quality.level != 0) || (scan.quality.updated & (IW_QUAL_DBM | IW_QUAL_RCPI))) ) {
 		/* Deal with quality : always a relative value */
 		if ( !(scan.quality.updated & IW_QUAL_QUAL_INVALID) ) {
 			res.quality.qual = scan.quality.qual;
 			res.maxquality.qual = scan.maxquality.qual;
-			res.signalEncoding = WPSIG_QUALITY_REL;
+			res.encoding = (wps_signal_quality_encoding) (res.encoding | WSIG_QUALITY_REL);
 
 // 			len = snprintf(buffer, buflen, "Quality%c%d/%d  ",
 // 			qual->updated & IW_QUAL_QUAL_UPDATED ? '=' : ':',
@@ -272,7 +273,6 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 		/* RCPI = int{(Power in dBm +110)*2} for 0dbm > Power > -110dBm */
 			if ( !(scan.quality.updated & IW_QUAL_LEVEL_INVALID) ) {
 				res.quality.level = (int) ((scan.quality.level / 2.0) - 110.0);
-				res.signalEncoding = WPSIG_LEVEL_ABS;
 
 // 				double	rcpilevel = (qual->level / 2.0) - 110.0;
 // 				len = snprintf(buffer, buflen, "Signal level%c%g dBm  ",
@@ -285,7 +285,6 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 			/* Deal with noise level in dBm (absolute power measurement) */
 			if ( !(scan.quality.updated & IW_QUAL_NOISE_INVALID) ) {
 				res.quality.noise = (int) ((scan.quality.noise / 2.0) - 110.0);
-				res.signalEncoding = WPSIG_NOISE_ABS;
 				
 // 				double	rcpinoise = (scan.quality.noise / 2.0) - 110.0;
 // 				len = snprintf(buffer, buflen, "Noise level%c%g dBm",
@@ -304,7 +303,6 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 						dblevel -= 0x100;
 					}
 					res.quality.level = (int) dblevel;
-					res.signalEncoding = WPSIG_LEVEL_ABS;
 
 // 					len = snprintf(buffer, buflen, "Signal level%c%d dBm  ",
 // 					scan.quality.updated & IW_QUAL_LEVEL_UPDATED ? '=' : ':',
@@ -321,7 +319,6 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 						dbnoise -= 0x100;
 					}
 					res.quality.noise = dbnoise;
-					res.signalEncoding = WPSIG_NOISE_ABS;
 
 // 					len = snprintf(buffer, buflen, "Noise level%c%d dBm",
 // 					scan.quality.updated & IW_QUAL_NOISE_UPDATED ? '=' : ':',
@@ -332,7 +329,7 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 				/* Deal with signal level as relative value (0 -> max) */
 				if ( !(scan.quality.updated & IW_QUAL_LEVEL_INVALID) ) {
 					res.quality.level = (int) ((char) scan.quality.level);
-					res.signalEncoding = WPSIG_LEVEL_REL;
+					res.encoding = (wps_signal_quality_encoding) (res.encoding | WSIG_LEVEL_REL);
 					res.maxquality.level = (int) ((char) scan.maxquality.level);
 
 // 					len = snprintf(buffer, buflen, "Signal level%c%d/%d  ",
@@ -345,6 +342,7 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 				/* Deal with noise level as relative value (0 -> max) */
 				if ( !(scan.quality.updated & IW_QUAL_NOISE_INVALID) ) {
 					res.quality.noise = (int) ((char) scan.quality.noise);
+					res.encoding = (wps_signal_quality_encoding) (res.encoding | WSIG_NOISE_REL);
 					res.maxquality.noise = (int) ((char) scan.maxquality.noise);
 					
 // 					len = snprintf(buffer, buflen, "Noise level%c%d/%d",
@@ -359,7 +357,7 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 		res.quality = scan.quality;
 		res.maxquality = scan.maxquality;
 		res.avgquality = scan.avgquality;
-		res.signalEncoding = WPSIG_UNKNOWN;
+		res.encoding = WSIG_UNKNOWN;
 
 	}
 	return res;

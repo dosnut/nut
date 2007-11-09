@@ -132,12 +132,11 @@ namespace libnut {
 	};
 
 	typedef enum {
-		WPSIG_UNKNOWN=0, WPSIG_QUALITY_ABS=1, WPSIG_QUALITY_REL=2,
-		WPSIG_LEVEL_ABS=4, WPSIG_LEVEL_REL=8, WPSIG_NOISE_ABS=16, WPSIG_NOISE_REL=32
+		WSIG_QUALITY_ALLABS=0, WSIG_QUALITY_REL=1, WSIG_LEVEL_REL=2, WSIG_NOISE_REL=4, WSIG_UNKNOWN=8
 	} wps_signal_quality_encoding; 
 
 	struct wps_wext_scan_readable : public wps_wext_scan {
-		wps_signal_quality_encoding signalEncoding;
+		wps_signal_quality_encoding encoding;
 	};
 
 	struct wps_scan {
