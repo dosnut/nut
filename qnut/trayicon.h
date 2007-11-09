@@ -1,8 +1,6 @@
 #ifndef QNUT_TRAYICON_H
 #define QNUT_TRAYICON_H
 
-#include <QtGui>
-#include <QTranslator>
 #include <QSystemTrayIcon>
 #include <QMenu>
 

@@ -11,8 +11,9 @@
 //
 
 #include <QHeaderView>
-#include <QInputDialog>
 #include <QProcess>
+#include <QDir>
+#include <QMenu>
 #include "deviceoptions.h"
 #include "common.h"
 #include "environmenttreemodel.h"
@@ -21,8 +22,6 @@
 #include "ipconfiguration.h"
 #include "scriptsettings.h"
 #include "wirelesssettings.h"
-#include "ipconfiguration.h"
-#include <QDebug>
 
 namespace qnut {
 	using namespace libnut;

@@ -1,3 +1,5 @@
+#include <QtGui>
+#include <QTranslator>
 #include "trayicon.h"
 #include "constants.h"
 

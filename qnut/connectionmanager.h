@@ -2,7 +2,6 @@
 #define QNUT_CONNECTIONMANAGER_H
 
 #include <QtGui>
-#include <QHash>
 #include <libnut/libnut_cli.h>
 #include "ui/ui_connman.h"
 #include "trayicon.h"

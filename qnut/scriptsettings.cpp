@@ -10,6 +10,7 @@
 //
 //
 #include "scriptsettings.h"
+#include "deviceoptions.h"
 #include "constants.h"
 
 namespace qnut {

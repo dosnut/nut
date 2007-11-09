@@ -12,17 +12,13 @@
 #ifndef QNUT_DEVICEOPTIONS_H
 #define QNUT_DEVICEOPTIONS_H
 
-#include <QTreeView>
-#include <QMenu>
-#include <QCheckBox>
 #include <QSystemTrayIcon>
 #include <QSettings>
-#include <QLabel>
 #include <libnut/libnut_cli.h>
 #include "ui/ui_devopt.h"
-#include "wirelesssettings.h"
 
 namespace qnut {
+	class CWirelessSettings;
 	class CDeviceOptions;
 	typedef QHash<libnut::CDevice *, CDeviceOptions *> CDeviceOptionsHash;
 		
