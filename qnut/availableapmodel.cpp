@@ -22,19 +22,24 @@
 
 namespace qnut {
 	using namespace nut;
+	using namespace libnut;
 	
-	CAvailableAPModel::CAvailableAPModel(CWpa_Supplicant * data, QObject * parent) : QAbstractItemModel(parent) {
-		supplicant = data;
-		if (supplicant) {
-			scans = supplicant->scanResults();
-			connect(supplicant, SIGNAL(opened()), this, SLOT(reloadScans()));
-			connect(supplicant, SIGNAL(closed()), this, SLOT(reloadScans()));
-			connect(supplicant, SIGNAL(scanCompleted()), this, SLOT(reloadScans()));
-		}
+	CAvailableAPModel::CAvailableAPModel(CWpa_Supplicant * wpaSupplicant, QObject * parent) : QAbstractItemModel(parent) {
+		setWpaSupplicant(wpaSupplicant);
 	}
 	
 	CAvailableAPModel::~CAvailableAPModel() {
 		supplicant = NULL;
+	}
+	
+	void CAvailableAPModel::setWpaSupplicant(libnut::CWpa_Supplicant * wpaSupplicant) {
+		supplicant = wpaSupplicant;
+		if (supplicant) {
+			reloadScans();
+			connect(supplicant, SIGNAL(opened()), this, SLOT(reloadScans()));
+			connect(supplicant, SIGNAL(closed()), this, SLOT(reloadScans()));
+			connect(supplicant, SIGNAL(scanCompleted()), this, SLOT(reloadScans()));
+		}
 	}
 	
 	void CAvailableAPModel::reloadScans() {
@@ -44,25 +49,18 @@ namespace qnut {
 	}
 	
 	int CAvailableAPModel::columnCount(const QModelIndex &) const {
-		if (supplicant == NULL)
-			return 0;
-		else
-			return 6;
+		return 6;
 	}
 	
 	int CAvailableAPModel::rowCount(const QModelIndex & parent) const {
-		if (supplicant == NULL)
-			return 0;
-		
 		if (!parent.isValid())
 			return scans.count();
-		else {
+		else
 			return 0;
-		}
 	}
 	
 	QVariant CAvailableAPModel::data(const QModelIndex & index, int role) const {
-		if (supplicant == NULL)
+		if (scans.isEmpty())
 			return QVariant();
 		
 		if (!index.isValid())
@@ -138,19 +136,13 @@ namespace qnut {
 	}
 	
 	Qt::ItemFlags CAvailableAPModel::flags(const QModelIndex & index) const {
-		if (supplicant == NULL)
-			return 0;
-		
-		if (!index.isValid())
+		if ((scans.isEmpty()) || (!index.isValid()))
 			return 0;
 		
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	}
 	
 	QVariant CAvailableAPModel::headerData(int section, Qt::Orientation orientation, int role) const {
-		if (supplicant == NULL)
-			return QVariant();
-		
 		if (role != Qt::DisplayRole)
 			return QVariant();
 		
@@ -176,12 +168,11 @@ namespace qnut {
 	}
 	
 	QModelIndex CAvailableAPModel::index(int row, int column, const QModelIndex & parent) const {
-		if (supplicant == NULL)
+		if (scans.isEmpty())
 			return QModelIndex();
 		
 		if (!hasIndex(row, column, parent))
 			return QModelIndex();
-		
 		
 		if (!parent.isValid()) {
 			if (row < scans.count())

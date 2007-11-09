@@ -19,7 +19,7 @@ namespace qnut {
 	class CManagedAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		CManagedAPModel(libnut::CWpa_Supplicant * data = NULL, QObject * parent = 0);
+		CManagedAPModel(libnut::CWpa_Supplicant * wpaSupplicant = NULL, QObject * parent = 0);
 		~CManagedAPModel();
 		
 		QVariant data(const QModelIndex & index, int role) const;
@@ -29,6 +29,8 @@ namespace qnut {
 		QModelIndex parent(const QModelIndex & index) const;
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
+		
+		void setWpaSupplicant(libnut::CWpa_Supplicant * wpaSupplicant);
 	public slots:
 		void reloadNetworks();
 	private:

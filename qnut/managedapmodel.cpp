@@ -22,18 +22,22 @@ namespace qnut {
 	using namespace nut;
 	using namespace libnut;
 	
-	CManagedAPModel::CManagedAPModel(CWpa_Supplicant * data, QObject * parent) : QAbstractItemModel(parent) {
-		supplicant = data;
-		if (supplicant) {
-			networks = supplicant->listNetworks();
-			connect(supplicant, SIGNAL(opened()), this, SLOT(reloadNetworks()));
-			connect(supplicant, SIGNAL(closed()), this, SLOT(reloadNetworks()));
-			connect(supplicant, SIGNAL(stateChanged(bool)), this, SLOT(reloadNetworks()));
-		}
+	CManagedAPModel::CManagedAPModel(CWpa_Supplicant * wpaSupplicant, QObject * parent) : QAbstractItemModel(parent) {
+		setWpaSupplicant(wpaSupplicant);
 	}
 	
 	CManagedAPModel::~CManagedAPModel() {
 		supplicant = NULL;
+	}
+	
+	void CManagedAPModel::setWpaSupplicant(libnut::CWpa_Supplicant * wpaSupplicant) {
+		supplicant = wpaSupplicant;
+		if (supplicant) {
+			reloadNetworks();
+			connect(supplicant, SIGNAL(opened()), this, SLOT(reloadNetworks()));
+			connect(supplicant, SIGNAL(closed()), this, SLOT(reloadNetworks()));
+			connect(supplicant, SIGNAL(stateChanged(bool)), this, SLOT(reloadNetworks()));
+		}
 	}
 	
 	void CManagedAPModel::reloadNetworks() {
@@ -43,28 +47,18 @@ namespace qnut {
 	}
 	
 	int CManagedAPModel::columnCount(const QModelIndex &) const {
-		if (supplicant == NULL)
-			return 0;
-		else
-			return 4;
+		return 4;
 	}
 	
 	int CManagedAPModel::rowCount(const QModelIndex & parent) const {
-		if (supplicant == NULL)
-			return 0;
-		
 		if (!parent.isValid())
 			return networks.count();
-		else {
+		else
 			return 0;
-		}
 	}
 	
 	QVariant CManagedAPModel::data(const QModelIndex & index, int role) const {
-		if (supplicant == NULL)
-			return QVariant();
-		
-		if (!index.isValid())
+		if ((networks.isEmpty()) || (!index.isValid()))
 			return QVariant();
 		
 		if (role != Qt::DisplayRole)
@@ -90,17 +84,14 @@ namespace qnut {
 	}
 	
 	Qt::ItemFlags CManagedAPModel::flags(const QModelIndex & index) const {
-		if (supplicant == NULL)
-			return 0;
-		
-		if (!index.isValid())
+		if ((networks.isEmpty()) || (!index.isValid()))
 			return 0;
 		
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	}
 	
 	QVariant CManagedAPModel::headerData(int section, Qt::Orientation orientation, int role) const {
-		if (supplicant == NULL)
+		if (networks.isEmpty())
 			return QVariant();
 		
 		if (role != Qt::DisplayRole)
@@ -124,12 +115,11 @@ namespace qnut {
 	}
 	
 	QModelIndex CManagedAPModel::index(int row, int column, const QModelIndex & parent) const {
-		if (supplicant == NULL)
+		if (networks.isEmpty())
 			return QModelIndex();
 		
 		if (!hasIndex(row, column, parent))
 			return QModelIndex();
-		
 		
 		if (!parent.isValid()) {
 			if (row < networks.count())

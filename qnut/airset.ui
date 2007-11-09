@@ -29,8 +29,8 @@
       </widget>
      </item>
      <item>
-      <layout class="QVBoxLayout" >
-       <item>
+      <layout class="QGridLayout" >
+       <item row="0" column="0" colspan="2" >
         <widget class="QLabel" name="nameLabel" >
          <property name="font" >
           <font>
@@ -43,10 +43,23 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QLabel" name="statusLabel" >
+       <item row="1" column="0" >
+        <widget class="QLabel" name="stateLabel" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text" >
-          <string>status</string>
+          <string>state</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" >
+        <widget class="QLabel" name="signalLabel" >
+         <property name="text" >
+          <string>-</string>
          </property>
         </widget>
        </item>
@@ -193,7 +206,10 @@
  <tabstops>
   <tabstop>managedView</tabstop>
   <tabstop>switchButton</tabstop>
+  <tabstop>configureButton</tabstop>
+  <tabstop>removeButton</tabstop>
   <tabstop>availableView</tabstop>
+  <tabstop>addButton</tabstop>
   <tabstop>rescanButton</tabstop>
  </tabstops>
  <resources/>

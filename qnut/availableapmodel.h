@@ -16,12 +16,10 @@
 #include <libnut/libnut_cli.h>
 
 namespace qnut {
-	using namespace libnut;
-
 	class CAvailableAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		CAvailableAPModel(CWpa_Supplicant * data = NULL, QObject * parent = 0);
+		CAvailableAPModel(libnut::CWpa_Supplicant * data = NULL, QObject * parent = 0);
 		~CAvailableAPModel();
 		
 		QVariant data(const QModelIndex & index, int role) const;
@@ -31,11 +29,13 @@ namespace qnut {
 		QModelIndex parent(const QModelIndex & index) const;
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
-	public slots:
+		
+		void setWpaSupplicant(libnut::CWpa_Supplicant * wpaSupplicant);
+	private slots:
 		void reloadScans();
 	private:
-		CWpa_Supplicant * supplicant;
-		QList<wps_scan> scans;
+		libnut::CWpa_Supplicant * supplicant;
+		QList<libnut::wps_scan> scans;
 	};
 }
 

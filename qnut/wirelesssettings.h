@@ -22,17 +22,15 @@ namespace qnut {
 	private:
 		Ui::airset ui;
 		libnut::CDevice * device;
-		
 	public:
 		CWirelessSettings(libnut::CDevice * wireless, QWidget * parent = 0);
 		~CWirelessSettings();
-		
 	public slots:
 		void handleManagedAPSelectionChanged(const QItemSelection & selected);
 		void handleAvailableAPSelectionChanged(const QItemSelection & selected);
-		void handleDeviceStateChange(libnut::DeviceState state);
+		void updateUi(libnut::DeviceState state);
 	private slots:
-		void setHeadInfo();
+		void updateSignalInfo(libnut::wps_wext_scan_readable signal);
 		void switchToSelectedNetwork();
 		void addSelectedScanResult();
 		void removeSelectedNetwork();

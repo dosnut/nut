@@ -41,14 +41,14 @@ namespace qnut {
 	void COverViewModel::deviceAdded(CDevice * device) {
 		connect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SIGNAL(layoutChanged()));
 		if (device->type == DT_AIR)
-			connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated()), this, SIGNAL(layoutChanged()));
+			connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnut::wps_wext_scan_readable)), this, SIGNAL(layoutChanged()));
 		emit layoutChanged();
 	}
 	
 	void COverViewModel::deviceRemoved(CDevice * device) {
 		disconnect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SIGNAL(layoutChanged()));
 		if (device->type == DT_AIR)
-			disconnect(device->wpa_supplicant, SIGNAL(signalQualityUpdated()), this, SIGNAL(layoutChanged()));
+			disconnect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnut::wps_wext_scan_readable)), this, SIGNAL(layoutChanged()));
 		emit layoutChanged();
 	}
 	

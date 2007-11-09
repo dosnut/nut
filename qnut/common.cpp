@@ -61,4 +61,15 @@ namespace qnut {
 		else
 			return QString('-');
 	}
+	
+	QString signalSummary(libnut::wps_wext_scan_readable signal) {
+		QString quality = QString::number(signal.quality.qual)  +
+			((signal.encoding & WSIG_QUALITY_REL) ? '/' + QString::number(signal.maxquality.qual)  : QString());
+		QString level   = QString::number(signal.quality.level) +
+			((signal.encoding & WSIG_LEVEL_REL)   ? '/' + QString::number(signal.maxquality.level) : QString());
+		QString noise   = QString::number(signal.quality.noise) +
+			((signal.encoding & WSIG_NOISE_REL)   ? '/' + QString::number(signal.maxquality.noise) : QString());
+		
+		return QString("%1, %2dBm, %3dBm").arg(quality, level, noise);
+	}
 };

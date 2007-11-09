@@ -26,42 +26,38 @@ namespace qnut {
 		setWindowTitle(tr("Wireless Settings for \"%1\"").arg(device->name));
 		setWindowIcon(QIcon(UI_ICON_AIR_SETTINGS));
 		
-		
 		ui.nameLabel->setText(device->name);
-		handleDeviceStateChange(device->state);
-		setHeadInfo();
+		
+		ui.managedView->setModel(new CManagedAPModel());
+		ui.availableView->setModel(new CAvailableAPModel());
 		ui.managedView->header()->setResizeMode(QHeaderView::ResizeToContents);
-		ui.managedView->setModel(new CManagedAPModel(device->wpa_supplicant));
 		//ui.availableView->header()->setResizeMode(QHeaderView::ResizeToContents);
-		ui.availableView->setModel(new CAvailableAPModel(device->wpa_supplicant));
+		
+		updateUi(device->state);
+		
+		connect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SLOT(updateUi(libnut::DeviceState)));
 		
 		connect(ui.managedView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(handleManagedAPSelectionChanged(const QItemSelection &)));
-		
 		connect(ui.availableView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(handleAvailableAPSelectionChanged(const QItemSelection &)));
 		
-		connect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SLOT(handleDeviceStateChange(libnut::DeviceState)));
+		connect(ui.availableView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(addSelectedScanResult()));
+		connect(ui.managedView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(configureSelectedNetwork()));
 		
 		connect(ui.switchButton, SIGNAL(clicked()), this, SLOT(switchToSelectedNetwork()));
 		connect(ui.rescanButton, SIGNAL(clicked()), device->wpa_supplicant, SLOT(scan()));
-		//connect(ui.rescanButton, SIGNAL(clicked()), ui.managedView->model(), SLOT(reloadNetworks())); //debug
 		connect(ui.addButton, SIGNAL(clicked()), this, SLOT(addSelectedScanResult()));
-		connect(ui.availableView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(addSelectedScanResult()));
 		
 		connect(ui.removeButton, SIGNAL(clicked()), this, SLOT(removeSelectedNetwork()));
 		connect(ui.configureButton, SIGNAL(clicked()), this, SLOT(configureSelectedNetwork()));
-		connect(ui.managedView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(configureSelectedNetwork()));
-		connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated()), this, SLOT(setHeadInfo()));
 	}
 	
 	CWirelessSettings::~CWirelessSettings() {
 	}
 	
-	void CWirelessSettings::setHeadInfo() {
-		ui.iconLabel->setPixmap(QPixmap(iconFile(device)));
-		ui.statusLabel->setText(tr("%1, Signal (Quality, Level, Noise): %2")
-			.arg(toString(device->state), signalSummary(device->wpa_supplicant->getSignalQuality())));
+	void CWirelessSettings::updateSignalInfo(wps_wext_scan_readable signal) {
+		ui.signalLabel->setText(tr("Signal (Quality, Level, Noise): %1").arg(signalSummary(signal)));
 	}
 	
 	void CWirelessSettings::handleManagedAPSelectionChanged(const QItemSelection & selected) {
@@ -78,11 +74,22 @@ namespace qnut {
 		ui.addButton->setDisabled(selectedIndexes.isEmpty());
 	}
 	
-	void CWirelessSettings::handleDeviceStateChange(DeviceState state) {
+	void CWirelessSettings::updateUi(DeviceState state) {
 		ui.managedGroup->setEnabled(state != DS_DEACTIVATED);
 		ui.availableGroup->setEnabled(state != DS_DEACTIVATED);
 		
-		setHeadInfo();
+		ui.iconLabel->setPixmap(QPixmap(iconFile(device)));
+		ui.stateLabel->setText(toString(device->state));
+		
+		if (state <= DS_ACTIVATED)
+			ui.signalLabel->setText("not assigned to accesspoint");
+		
+		if (state != DS_DEACTIVATED)
+			connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnut::wps_wext_scan_readable)),
+				this, SLOT(updateSignalInfo(libnut::wps_wext_scan_readable)));
+		
+		dynamic_cast<CAvailableAPModel *>(ui.availableView->model())->setWpaSupplicant(device->wpa_supplicant);
+		dynamic_cast<CManagedAPModel *>(ui.managedView->model())->setWpaSupplicant(device->wpa_supplicant);
 	}
 	
 	void CWirelessSettings::switchToSelectedNetwork() {

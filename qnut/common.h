@@ -20,15 +20,7 @@ namespace qnut {
 			return address.toString();
 	}
 	
-	inline QString signalSummary(libnut::wps_wext_scan signal) {
-		return QString("%1/%2, %3/%4dBm, %5/%6dBm")
-			.arg(signal.quality.qual)
-			.arg(signal.maxquality.qual)
-			.arg(signal.quality.level)
-			.arg(signal.maxquality.level)
-			.arg(signal.quality.noise)
-			.arg(signal.maxquality.noise);
-	}
+	QString signalSummary(libnut::wps_wext_scan_readable signal);
 	
 	inline QString qualitySummary(libnut::wps_signal_quality quality) {
 		return QString("%1, %2dBm, %3dBm")
