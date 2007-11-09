@@ -195,7 +195,6 @@ namespace nuts {
 			friend class ARP;
 			
 			ARPWatch(ARP *arp, const QHostAddress &ip) : m_arp(arp), m_ip(ip) { }
-			virtual ~ARPWatch();
 			
 			ARP *m_arp;
 			QHostAddress m_ip;
@@ -203,6 +202,9 @@ namespace nuts {
 			// got ARP Packet which resolves watched ip to mac
 			void gotPacket(const nut::MacAddress &mac);
 			
+		public:
+			virtual ~ARPWatch();
+
 		signals:
 			void conflict(QHostAddress ip, nut::MacAddress mac);
 	};
@@ -257,6 +259,7 @@ namespace nuts {
 			
 			virtual ~ARPProbe();
 			void setReserve(bool reserve);
+			bool getReserve() { return m_reserve; }
 			ARPProbeState getState() { return m_state; }
 			
 		protected:

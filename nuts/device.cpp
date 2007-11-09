@@ -741,7 +741,6 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::zeroconfProbe() {   // select new ip and start probe it
-		zeroconfFree();
 		quint32 lastip = zc_probe_ip.toIPv4Address();
 		const quint32 baseip = 0xA9FE0000; // 169.254.0.0
 		const quint32 mask = 0xFFFF;
@@ -753,13 +752,22 @@ namespace nuts {
 		} while (ip == lastip);
 		zc_probe_ip = QHostAddress(ip);
 		zc_arp_probe = m_env->device->m_arp.probeIPv4(zc_probe_ip);
-		if (zc_arp_probe->getState() != ARPProbe::PROBING) {
+		if (!zc_arp_probe || zc_arp_probe->getState() != ARPProbe::PROBING) {
 			err << "ARPProbe failed" << endl;
+			zc_state =ZCS_OFF;
 			return;
 		}
 		zc_arp_probe->setReserve(m_config->getFlags() & nut::IPv4Config::DO_DHCP);
-		connect(zc_arp_probe, SIGNAL(conflict(QHostAddress, nut::MacAddress)), SLOT(zc_conflict()));
-		connect(zc_arp_probe, SIGNAL(ready(QHostAddress)), SLOT(zc_ready()));
+		connect(zc_arp_probe, SIGNAL(conflict(QHostAddress, nut::MacAddress)), SLOT(zc_probe_conflict()));
+		connect(zc_arp_probe, SIGNAL(ready(QHostAddress)), SLOT(zc_probe_ready()));
+	}
+	void Interface_IPv4::zeroconfWatch() {
+		zc_arp_watch = m_env->device->m_arp.watchIPv4(zc_probe_ip);
+		connect(zc_arp_watch, SIGNAL(conflict(QHostAddress, nut::MacAddress)), SLOT(zc_watch_conflict()));
+	}
+	void Interface_IPv4::zeroconfAnnounce() {
+		zc_arp_announce = m_env->device->m_arp.announceIPv4(zc_probe_ip);
+		connect(zc_arp_announce, SIGNAL(ready(QHostAddress)), SLOT(zc_announce_ready()));
 	}
 	
 	void Interface_IPv4::zeroconfFree() {    // free ARPProbe and ARPWatch
@@ -767,55 +775,85 @@ namespace nuts {
 			delete zc_arp_probe;
 			zc_arp_probe = 0;
 		}
+		if (zc_arp_announce) {
+			delete zc_arp_announce;
+			zc_arp_announce = 0;
+		}
+		if (zc_arp_watch) {
+			delete zc_arp_watch;
+			zc_arp_watch = 0;
+		}
 	}
 	
 	void Interface_IPv4::zeroconfAction() {
 		if (!(m_config->getFlags() & nut::IPv4Config::DO_ZEROCONF))
 			return;
-		switch (zc_state) {
-			case ZCS_OFF:
-				zeroconfFree();
-				break;
-			case ZCS_START:
-				zc_probe_ip = QHostAddress((quint32) 0);
-				zeroconfProbe();
-				zc_state = ZCS_PROBING;
-				break;
-			case ZCS_PROBING:
-				break;
-			case ZCS_RESERVING:
-				if (dhcp_retry > 3) {
-					delete zc_arp_probe;
-					zc_arp_probe = 0;
-				}
-				break;
-			case ZCS_ANNOUNCING:
-				break;
-			case ZCS_BOUND:
-				break;
-			case ZCS_CONFLICT:
-				zeroconfProbe();
-				zc_state = ZCS_PROBING;
-				break;
+		bool hasDHCP = (m_config->getFlags() & nut::IPv4Config::DO_DHCP);
+		if (m_ifstate == libnut::IFS_DHCP)
+			zc_state = ZCS_OFF;
+		for (;;) {
+			switch (zc_state) {
+				case ZCS_OFF:
+					zeroconfFree();
+					return;
+				case ZCS_START:
+					zc_probe_ip = QHostAddress((quint32) 0);
+					zc_state = ZCS_PROBE;
+				case ZCS_PROBE:
+					zeroconfProbe();
+					zc_state = ZCS_PROBING;
+				case ZCS_PROBING:
+					return;
+				case ZCS_RESERVING:
+					if (!hasDHCP || dhcp_retry > 3) {
+						if (zc_arp_probe != 0){
+							delete zc_arp_probe;
+							zc_arp_probe = 0;
+						}
+						zc_state = ZCS_ANNOUNCE;
+					} else {
+						return;
+					}
+				case ZCS_ANNOUNCE:
+					zeroconfWatch();
+					zeroconfAnnounce();
+					zc_state = ZCS_ANNOUNCING;
+				case ZCS_ANNOUNCING:
+					return;
+				case ZCS_BIND:
+					zeroconf_setup_interface();
+					zc_state = ZCS_BOUND;
+				case ZCS_BOUND:
+					return;
+				case ZCS_CONFLICT:
+					zeroconfFree();
+					zc_state = ZCS_PROBE;
+					break;
+			}
 		}
 	}
 	
-	void Interface_IPv4::zc_conflict() {
-		zc_arp_probe = 0;
+	void Interface_IPv4::zc_probe_conflict() {
+		zc_arp_probe = 0; // Deletes itself
 		zc_state = ZCS_CONFLICT;
 		zeroconfAction();
 	}
-	
-	void Interface_IPv4::zc_ready() {
-		if (m_config->getFlags() & nut::IPv4Config::DO_DHCP) {
-			zc_state = ZCS_RESERVING;
-			zeroconfAction();
-		} else {
-			zc_arp_probe = 0;
-			// TODO: Announce
-			zc_state = ZCS_BOUND;
-			zeroconf_setup_interface();
-		}
+	void Interface_IPv4::zc_probe_ready() {
+		if (!zc_arp_probe->getReserve())
+			zc_arp_probe = 0; // Deletes itself
+		zc_state = ZCS_RESERVING;
+		zeroconfAction();
+	}
+	void Interface_IPv4::zc_announce_ready() {
+		zc_arp_announce = 0; // Deletes itself
+		zc_state = ZCS_BIND;
+		zeroconfAction();
+	}
+	void Interface_IPv4::zc_watch_conflict() {
+		zc_arp_watch = 0; // Deletes itself
+		if (m_ifstate == libnut::IFS_ZEROCONF) systemDown();
+		zc_state = ZCS_CONFLICT;
+		zeroconfAction();
 	}
 	
 	void Interface_IPv4::dhcpAction(DHCPPacket *source) {
@@ -1023,7 +1061,10 @@ namespace nuts {
 		log << "Interface_IPv4::stop" << endl;
 		if (dhcpstate != DHCPS_OFF)
 			stopDHCP();
-		zeroconfFree();
+		if (zc_state != ZCS_OFF) {
+			zc_state = ZCS_OFF;
+			zeroconfAction();
+		}
 		systemDown();
 	}
 	
@@ -1068,6 +1109,10 @@ namespace nuts {
 		rtnl_addr_set_family(addr, AF_INET);
 		rtnl_addr_set_local(addr, local);
 		rtnl_addr_set_broadcast(addr, bcast);
+		if (m_ifstate == libnut::IFS_ZEROCONF) {
+			rtnl_addr_set_scope(addr, RT_SCOPE_LINK);
+			rtnl_addr_set_flags(addr, IFA_F_PERMANENT);
+		}
 #if 0
 		log << "systemUp: addr_add = " << rtnl_addr_add(dm->hwman.getNLHandle(), addr, 0) << endl;
 #else

@@ -328,12 +328,15 @@ namespace nuts {
 			};
 			enum zeroconf_state {
 				ZCS_OFF,           // No zeroconf activity
-				ZCS_START,         // Start Probing
+				ZCS_START,         // Start Probing with address based on MAC (set last to 0)
+				ZCS_PROBE,         // Probe a new address (if last is 0, take hash of the mac)
 				ZCS_PROBING,       // Startet ARPProbes
 				ZCS_RESERVING,     // Probing was successful, now reserve address (more Probes) until
 				                   // we really want to use it (wait for DHCP e.g.)
-				ZCS_ANNOUNCING,    // Announce Address
-				ZCS_BOUND,         // Announce was successful. Listen for conflicting ARP Packets.
+				ZCS_ANNOUNCE,      // Announce Address (and start watching for conflicts, as probe is deleted)
+				ZCS_ANNOUNCING,    // Announced Address
+				ZCS_BIND,          // Announce was successful, bind address.
+				ZCS_BOUND,         // Listen for conflicting ARP Packets.
 				ZCS_CONFLICT,      // Conflict detected, select new address and restart Probing.
 			};
 			
@@ -351,6 +354,8 @@ namespace nuts {
 			zeroconf_state zc_state;
 			QHostAddress zc_probe_ip;
 			ARPProbe *zc_arp_probe;
+			ARPWatch *zc_arp_watch;
+			ARPAnnounce *zc_arp_announce;
 			
 			nut::IPv4Config *m_config;
 			
@@ -368,7 +373,9 @@ namespace nuts {
 			
 			void zeroconf_setup_interface();
 			void zeroconfProbe();   // select new ip and start probe it
-			void zeroconfFree();    // free ARPProbe and ARPWatch
+			void zeroconfFree();    // free ARPProbe, ARPAnnounce and ARPWatch
+			void zeroconfWatch();   // setup ARPWatch
+			void zeroconfAnnounce();// setup ARPAnnounce
 			void zeroconfAction();  // automaton
 			
 			void startDHCP();
@@ -396,8 +403,10 @@ namespace nuts {
 		protected slots:
 			void readDHCPUnicastClientSocket();
 			
-			void zc_conflict();
-			void zc_ready();
+			void zc_probe_conflict();
+			void zc_probe_ready();
+			void zc_announce_ready();
+			void zc_watch_conflict();
 		
 		public:
 			Interface_IPv4(Environment *env, int index, nut::IPv4Config *config);
