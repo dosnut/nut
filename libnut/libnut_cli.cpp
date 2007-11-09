@@ -248,6 +248,10 @@ void CDeviceManager::dbusDeviceRemoved(const QDBusObjectPath &objectpath) {
 	//remove devices from devicelist
 	CDevice * device = dbusDevices.take(objectpath);
 	devices.removeAll(device);
+	//Rebuild device->index for qnut
+	foreach(CDevice * dev, devices) {
+		dev->index = devices.indexOf(dev);
+	}
 	emit(deviceRemoved(device));
 	delete device;
 }

@@ -248,6 +248,163 @@ wps_bool toWpsBool(bool b) {
 	return ( b ? WB_TRUE : WB_FALSE);
 }
 
+//Modified iw_print_stats function from iwlib.c
+//We don't care whether information was updated or not. Just convert it
+wps_wext_scan_readable convertValues(wps_wext_scan scan) {
+	wps_wext_scan_readable res;
+	if ( scan.hasRange && ((scan.quality.level != 0) || (scan.quality.updated & (IW_QUAL_DBM | IW_QUAL_RCPI))) ) {
+		/* Deal with quality : always a relative value */
+		if ( !(scan.quality.updated & IW_QUAL_QUAL_INVALID) ) {
+			res.quality.qual = scan.quality.qual;
+			res.maxquality.qual = scan.maxquality.qual;
+			res.signalEncoding = WPSIG_QUALITY_REL;
+
+// 			len = snprintf(buffer, buflen, "Quality%c%d/%d  ",
+// 			qual->updated & IW_QUAL_QUAL_UPDATED ? '=' : ':',
+// 			qual->qual, range->max_qual.qual);
+// 			buffer += len;
+// 			buflen -= len;
+		}
+
+		/* Check if the statistics are in RCPI (IEEE 802.11k) */
+		if (scan.quality.updated & IW_QUAL_RCPI) {
+		/* Deal with signal level in RCPI */
+		/* RCPI = int{(Power in dBm +110)*2} for 0dbm > Power > -110dBm */
+			if ( !(scan.quality.updated & IW_QUAL_LEVEL_INVALID) ) {
+				res.quality.level = (int) ((scan.quality.level / 2.0) - 110.0);
+				res.signalEncoding = WPSIG_LEVEL_ABS;
+
+// 				double	rcpilevel = (qual->level / 2.0) - 110.0;
+// 				len = snprintf(buffer, buflen, "Signal level%c%g dBm  ",
+// 				scan.quality.updated & IW_QUAL_LEVEL_UPDATED ? '=' : ':',
+// 				rcpilevel);
+// 				buffer += len;
+// 				buflen -= len;
+			}
+
+			/* Deal with noise level in dBm (absolute power measurement) */
+			if ( !(scan.quality.updated & IW_QUAL_NOISE_INVALID) ) {
+				res.quality.noise = (int) ((scan.quality.noise / 2.0) - 110.0);
+				res.signalEncoding = WPSIG_NOISE_ABS;
+				
+// 				double	rcpinoise = (scan.quality.noise / 2.0) - 110.0;
+// 				len = snprintf(buffer, buflen, "Noise level%c%g dBm",
+// 				scan.quality.updated & IW_QUAL_NOISE_UPDATED ? '=' : ':',
+// 				rcpinoise);
+			}
+		}
+		else {
+			/* Check if the statistics are in dBm */
+			if ( (scan.quality.updated & IW_QUAL_DBM) || (scan.quality.level > scan.maxquality.level) ) {
+				/* Deal with signal level in dBm  (absolute power measurement) */
+				if ( !(scan.quality.updated & IW_QUAL_LEVEL_INVALID) ) {
+					int	dblevel = scan.quality.level;
+					/* Implement a range for dBm [-192; 63] */
+					if (scan.quality.level >= 64) {
+						dblevel -= 0x100;
+					}
+					res.quality.level = (int) dblevel;
+					res.signalEncoding = WPSIG_LEVEL_ABS;
+
+// 					len = snprintf(buffer, buflen, "Signal level%c%d dBm  ",
+// 					scan.quality.updated & IW_QUAL_LEVEL_UPDATED ? '=' : ':',
+// 					dblevel);
+// 					buffer += len;
+// 					buflen -= len;
+				}
+			
+				/* Deal with noise level in dBm (absolute power measurement) */
+				if ( !(scan.quality.updated & IW_QUAL_NOISE_INVALID) ) {
+					int	dbnoise = scan.quality.noise;
+					/* Implement a range for dBm [-192; 63] */
+					if (scan.quality.noise >= 64) {
+						dbnoise -= 0x100;
+					}
+					res.quality.noise = dbnoise;
+					res.signalEncoding = WPSIG_NOISE_ABS;
+
+// 					len = snprintf(buffer, buflen, "Noise level%c%d dBm",
+// 					scan.quality.updated & IW_QUAL_NOISE_UPDATED ? '=' : ':',
+// 					dbnoise);
+				}
+			}
+			else {
+				/* Deal with signal level as relative value (0 -> max) */
+				if ( !(scan.quality.updated & IW_QUAL_LEVEL_INVALID) ) {
+					res.quality.level = (int) ((char) scan.quality.level);
+					res.signalEncoding = WPSIG_LEVEL_REL;
+					res.maxquality.level = (int) ((char) scan.maxquality.level);
+
+// 					len = snprintf(buffer, buflen, "Signal level%c%d/%d  ",
+// 					scan.quality.updated & IW_QUAL_LEVEL_UPDATED ? '=' : ':',
+// 					scan.quality.level, scan.maxquality.level);
+// 					buffer += len;
+// 					buflen -= len;
+				}
+
+				/* Deal with noise level as relative value (0 -> max) */
+				if ( !(scan.quality.updated & IW_QUAL_NOISE_INVALID) ) {
+					res.quality.noise = (int) ((char) scan.quality.noise);
+					res.maxquality.noise = (int) ((char) scan.maxquality.noise);
+					
+// 					len = snprintf(buffer, buflen, "Noise level%c%d/%d",
+// 					scan.quality.updated & IW_QUAL_NOISE_UPDATED ? '=' : ':',
+// 					scan.quality.noise, scan.maxquality.noise);
+				}
+			}
+		}
+	}
+	else {
+		/* We can't read the range, so we don't know... */
+		res.quality = scan.quality;
+		res.maxquality = scan.maxquality;
+		res.avgquality = scan.avgquality;
+		res.signalEncoding = WPSIG_UNKNOWN;
+
+	}
+	return res;
+}
+QString SignalQualitytoString(wps_wext_scan scan) {
+	char buffer[128];
+	iw_range range;
+	iw_quality qual;
+	QString ret;
+	//Set range information for iw_print_stats
+	//Only the following information are needed
+	range.max_qual.qual = scan.maxquality.qual;
+	range.max_qual.level = scan.maxquality.level;
+	range.max_qual.noise = scan.maxquality.noise;
+	range.max_qual.updated = scan.maxquality.updated;
+	//Set quality stats:
+	qual.qual = scan.quality.qual;
+	qual.level = scan.quality.level;
+	qual.noise = scan.quality.noise;
+	qual.updated = scan.quality.updated;
+	
+	iw_print_stats(buffer, sizeof(buffer),&qual,&range,scan.hasRange);
+	if (qstrlen(buffer) < 128) {
+		ret = QString::fromAscii(buffer);
+	}
+	else {
+		ret = QString::fromAscii(buffer,128);
+	}
+	return ret;
+}
+QStringList signalQualityToStringList(wps_wext_scan scan) {
+	QString sigstr = signalQualityToString(scan);
+	QStringList tmp;
+	QStringList ret;
+	tmp = sigstr.split(' ');
+	foreach(QString i, tmp) {
+		if (i.contains('=')) {
+			ret.append(i.split('=')[1]);
+		}
+	}
+	return ret;
+}
+
+
+
 wps_network_config::wps_network_config() {
 			//Set default values
 			ssid = QString();

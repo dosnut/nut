@@ -5,6 +5,13 @@
 #include <QList>
 #include <QHostAddress>
 #include <common/macaddress.h>
+#include <iwlib.h>
+extern "C" {
+// #include <linux/wireless.h>
+#include <sys/time.h>
+#include <string.h>
+#include <stdlib.h>
+}
 
 namespace libnut {
 
@@ -120,6 +127,17 @@ namespace libnut {
 		wps_signal_quality quality;
 		wps_signal_quality maxquality;
 		wps_signal_quality avgquality;
+		int hasRange;
+		int we_version_compiled;
+	};
+
+	typedef enum {
+		WPSIG_UNKNOWN=0, WPSIG_QUALITY_ABS=1, WPSIG_QUALITY_REL=2,
+		WPSIG_LEVEL_ABS=4, WPSIG_LEVEL_REL=8, WPSIG_NOISE_ABS=16, WPSIG_NOISE_REL=32
+	} wps_signal_quality_encoding; 
+
+	struct wps_wext_scan_readable : public wps_wext_scan {
+		wps_signal_quality_encoding signalEncoding;
 	};
 
 	struct wps_scan {
@@ -221,6 +239,11 @@ namespace libnut {
 	
 	QString toString(wps_eapol_flags flags);
 	QString toString(wps_eap_method method);
+
+	//Function converts the encoded scan values to real values
+	wps_wext_scan_readable convertValues(wps_wext_scan scan);
+	QString signalQualityToString(wps_wext_scan scan);
+	QStringList signalQualityToStringList(wps_wext_scan);
 	
 
 	QString toNumberString(wps_bool b);

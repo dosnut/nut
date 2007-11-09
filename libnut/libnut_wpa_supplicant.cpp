@@ -42,7 +42,7 @@ QString CWpa_Supplicant::wps_ctrl_command(QString cmd = "PING") {
 		
 		status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);
 		if (0 == status) {
-			printMessage(cmd + ":" + QString::fromUtf8(reply, reply_len) + "\nEOC");
+			qDebug() << cmd << ":" << QString::fromUtf8(reply, reply_len) << "\nEOC";
 			if (reply_len > 0) {
 				//TODO:Check if reply is \0 terminated
 				return QString::fromUtf8(reply, reply_len);
@@ -843,12 +843,17 @@ void CWpa_Supplicant::wps_setScanResults(QList<wps_wext_scan> wextScanResults) {
 		dummy.bssid = nut::MacAddress();
 		dummy.quality.level = 0;
 		dummy.quality.qual = 0;
-		dummy.quality.updated = 0;
+		dummy.quality.updated = 1;
 		dummy.quality.noise = 0;
+		int count = 0;
 		//Set the signal quality
 		for (QList<wps_scan>::Iterator i = wpsScanResults.begin(); i != wpsScanResults.end(); ++i ) {
 			i->quality = wextScanHash.value(i->bssid.toString(), dummy).quality;
+			if (wextScanHash.contains(i->bssid.toString())) {
+				count++;
+			}
 		}
+		qDebug() << "Found " << count << "BSSIDs; " << wextScanHash.size() << " in Hash; " << wpsScanResults.size() << " in wpa_supplicant list";
 		//The complete list is done;
 		emit(scanCompleted());
 	}
@@ -1550,6 +1555,9 @@ void CWpa_Supplicant::wps_tryScanResults() {
 		ScanTimerId = startTimer(CWPA_SCAN_RETRY_TIMER_TIME);
 		return;
 	}
+	else if (errno != 0) {
+		qDebug() << "Error occured while trying to get Scanresults: " << strerror(errno);
+	}
 	else {
 		qDebug() << "Range stuff got";
 	}
@@ -1621,6 +1629,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 		singleres.quality.qual = -1;
 		singleres.quality.noise = -1;
 		singleres.quality.updated = -1;
+		singleres.hasRange = has_range;
 		if (has_range) {
 			singleres.maxquality.level = (quint8) range.max_qual.level;
 			singleres.maxquality.qual = (quint8) range.max_qual.qual;
@@ -1630,16 +1639,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 			singleres.avgquality.qual = (quint8) range.avg_qual.qual;
 			singleres.avgquality.noise = (quint8) range.avg_qual.noise;
 			singleres.avgquality.updated = (quint8) range.avg_qual.updated;
-		}
-		else {
-			singleres.maxquality.level = -1;
-			singleres.maxquality.qual = -1;
-			singleres.maxquality.noise = -1;
-			singleres.maxquality.updated = -1;
-			singleres.avgquality.level = -1;
-			singleres.avgquality.qual = -1;
-			singleres.avgquality.noise = -1;
-			singleres.avgquality.updated = -1;
+			singleres.we_version_compiled = range.we_version_compiled;
 		}
 
 		//Init event stream
