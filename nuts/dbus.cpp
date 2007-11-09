@@ -273,6 +273,8 @@ namespace nuts {
 		dbus_properties.gateway = s_interface->gateway;
 		dbus_properties.netmask = s_interface->netmask;
 		dbus_properties.ifState = s_interface->getState();
+		dbus_properties.dns = s_interface->dnsserver;
+
 		emit stateChanged(dbus_properties);
 	}
 
@@ -281,13 +283,7 @@ namespace nuts {
 		dbus_properties.gateway = s_interface->gateway;
 		dbus_properties.netmask = s_interface->netmask;
 		dbus_properties.ifState = s_interface->getState();
-	
-		if (!s_interface->dnsserver.isEmpty()) {
-			dbus_properties.dns = s_interface->dnsserver;
-		}
-		else {
-			dbus_properties.dns = QList<QHostAddress>();
-		}
+		dbus_properties.dns = s_interface->dnsserver;
 		return dbus_properties;
 	}
 	nut::IPv4Config DBusInterface_IPv4::getConfig() {
