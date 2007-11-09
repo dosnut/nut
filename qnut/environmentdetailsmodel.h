@@ -16,12 +16,10 @@
 #include <libnut/libnut_cli.h>
 
 namespace qnut {
-	using namespace libnut;
-
 	class CEnvironmentDetailsModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		CEnvironmentDetailsModel(CEnvironment * data = NULL, QObject * parent = 0);
+		CEnvironmentDetailsModel(libnut::CEnvironment * data = NULL, QObject * parent = 0);
 		~CEnvironmentDetailsModel();
 		
 		QVariant data(const QModelIndex & index, int role) const;
@@ -34,7 +32,7 @@ namespace qnut {
 	private:
 		void fillParentRules(quint32 start = 0);
 		
-		CEnvironment * environment;
+		libnut::CEnvironment * environment;
 		nut::SelectConfig selectConfig;
 		QVector<quint32> parentRules;
 	};

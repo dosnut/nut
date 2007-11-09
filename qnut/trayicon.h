@@ -1,8 +1,6 @@
 #ifndef QNUT_TRAYICON_H
 #define QNUT_TRAYICON_H
 
-#include <QtGui>
-#include <QTranslator>
 #include <QSystemTrayIcon>
 #include <QMenu>
 
@@ -16,7 +14,6 @@ namespace qnut {
 		CTrayIcon(QObject * parent = 0);
 
 	public slots:
-		void nothingHere();
 		void handleClicks(QSystemTrayIcon::ActivationReason reason);
 	};
 };

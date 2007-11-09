@@ -18,6 +18,7 @@
 
 namespace qnut {
 	using namespace nut;
+	using namespace libnut;
 	
 	void CEnvironmentDetailsModel::fillParentRules(quint32 start) {
 		if ((selectConfig.filters[start].selType == SelectRule::SEL_AND_BLOCK) ||

@@ -12,21 +12,15 @@
 #ifndef QNUT_DEVICEOPTIONS_H
 #define QNUT_DEVICEOPTIONS_H
 
-#include <QTreeView>
-#include <QMenu>
-#include <QCheckBox>
 #include <QSystemTrayIcon>
 #include <QSettings>
-#include <QLabel>
 #include <libnut/libnut_cli.h>
 #include "ui/ui_devopt.h"
-#include "wirelesssettings.h"
 
 namespace qnut {
-	using namespace libnut;
-	
+	class CWirelessSettings;
 	class CDeviceOptions;
-	typedef QHash<CDevice *, CDeviceOptions *> CDeviceOptionsHash;
+	typedef QHash<libnut::CDevice *, CDeviceOptions *> CDeviceOptionsHash;
 		
 	class CDeviceOptions : public QWidget {
 		Q_OBJECT
@@ -45,7 +39,7 @@ namespace qnut {
 	public:
 		quint8 scriptFlags;
 		
-		CDevice * device;
+		libnut::CDevice * device;
 		
 		QSystemTrayIcon * trayIcon;
 		
@@ -61,13 +55,13 @@ namespace qnut {
 		
 		QAction * showAction;
 		
-		CDeviceOptions(CDevice * parentDevice, QWidget * parent = 0);
+		CDeviceOptions(libnut::CDevice * parentDevice, QWidget * parent = 0);
 		~CDeviceOptions();
 	private slots:
 		void handleTrayActivated(QSystemTrayIcon::ActivationReason);
 		void showTheeseOptions();
 		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-		void handleDeviceStateChange(DeviceState state);
+		void handleDeviceStateChange(libnut::DeviceState state);
 		void openIPConfiguration();
 	public slots:
 		void openDeviceSettings();

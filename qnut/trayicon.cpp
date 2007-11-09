@@ -1,3 +1,5 @@
+#include <QtGui>
+#include <QTranslator>
 #include "trayicon.h"
 #include "constants.h"
 
@@ -7,7 +9,7 @@ namespace qnut {
 	CTrayIcon::CTrayIcon (QObject * parent) : QSystemTrayIcon(QIcon(UI_ICON_SYSTRAY), parent) {
 		devicesMenu.setTitle (tr("Network &Devices"));
 
-		trayMenu.setTitle("KNut");
+		trayMenu.setTitle("QNUT");
 		trayMenu.addAction(tr("Open Connection &Manager"), parent, SLOT(show()));
 
 		trayMenu.addMenu(&devicesMenu);
@@ -42,9 +44,5 @@ namespace qnut {
 			default:
 				break;
 		}
-	}
-
-	void CTrayIcon::nothingHere(){
-		showMessage(tr("rno Function here"), tr("This Funktion is not implemented yet"));
 	}
 };

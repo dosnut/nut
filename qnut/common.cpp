@@ -2,6 +2,8 @@
 #include <QObject>
 
 namespace qnut {
+	using namespace libnut;
+	
 	QString iconFile(CDevice * device) {
 		switch (device->type) {
 		case DT_ETH:

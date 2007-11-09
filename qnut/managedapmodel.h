@@ -16,12 +16,10 @@
 #include <libnut/libnut_cli.h>
 
 namespace qnut {
-	using namespace libnut;
-
 	class CManagedAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		CManagedAPModel(CWpa_Supplicant * data = NULL, QObject * parent = 0);
+		CManagedAPModel(libnut::CWpa_Supplicant * data = NULL, QObject * parent = 0);
 		~CManagedAPModel();
 		
 		QVariant data(const QModelIndex & index, int role) const;
@@ -34,8 +32,8 @@ namespace qnut {
 	public slots:
 		void reloadNetworks();
 	private:
-		CWpa_Supplicant * supplicant;
-		QList<wps_network> networks;
+		libnut::CWpa_Supplicant * supplicant;
+		QList<libnut::wps_network> networks;
 	};
 }
 

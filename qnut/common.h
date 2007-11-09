@@ -1,19 +1,18 @@
 #ifndef QNUT_COMMON_H
 #define QNUT_COMMON_H
 
-#include <libnut/libnut_cli.h>
-#include <QString>
 #include <QAction>
+#include <QString>
 #include <QHostAddress>
-#include <QDir>
+#include <libnut/libnut_cli.h>
 #include "constants.h"
 
 namespace qnut {
-	using namespace libnut;
-	QString iconFile(CDevice * device);
+	QString iconFile(libnut::CDevice * device);
 	QAction * getSeparator(QObject * parent);
-	QString shortSummary(CDevice * device);
-	QString activeIP(CDevice * device);
+	QString shortSummary(libnut::CDevice * device);
+	QString activeIP(libnut::CDevice * device);
+	
 	inline QString toStringDefault(QHostAddress address) {
 		if (address.isNull())
 			return QObject::tr("none");
@@ -21,7 +20,7 @@ namespace qnut {
 			return address.toString();
 	}
 	
-	inline QString signalSummary(wps_wext_scan signal) {
+	inline QString signalSummary(libnut::wps_wext_scan signal) {
 		return QString("%1/%2, %3/%4dBm, %5/%6dBm")
 			.arg(signal.quality.qual)
 			.arg(signal.maxquality.qual)
@@ -31,7 +30,7 @@ namespace qnut {
 			.arg(signal.maxquality.noise);
 	}
 	
-	inline QString qualitySummary(wps_signal_quality quality) {
+	inline QString qualitySummary(libnut::wps_signal_quality quality) {
 		return QString("%1, %2dBm, %3dBm")
 			.arg(quality.qual)
 			.arg(quality.level)

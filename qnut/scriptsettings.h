@@ -14,10 +14,9 @@
 
 #include <QDialog>
 #include "ui/ui_scrset.h"
-#include "deviceoptions.h"
 
 namespace qnut {
-	using namespace libnut;
+	class CDeviceOptions;
 	
 	class CScriptSettings : public QDialog {
 		Q_OBJECT
@@ -25,11 +24,9 @@ namespace qnut {
 		Ui::scrset ui;
 	public:
 		bool execute(CDeviceOptions * deviceoptions);
-	
+		
 		CScriptSettings(QWidget *parent = 0);
-	
 		~CScriptSettings();
-	
 	};
 };
 

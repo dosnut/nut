@@ -10,9 +10,12 @@
 //
 //
 #include "scriptsettings.h"
+#include "deviceoptions.h"
 #include "constants.h"
 
 namespace qnut {
+	using namespace libnut;
+	
 	bool CScriptSettings::execute(CDeviceOptions * deviceoptions) {
 		quint8 flags = deviceoptions->scriptFlags;
 		ui.upCheck->setChecked(flags & UI_FLAG_SCRIPT_UP);
@@ -42,7 +45,7 @@ namespace qnut {
 			return false;
 	}
 	
-	CScriptSettings::CScriptSettings(QWidget *parent) : QDialog(parent) {
+	CScriptSettings::CScriptSettings(QWidget * parent) : QDialog(parent) {
 		ui.setupUi(this);
 	}
 	

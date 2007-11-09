@@ -228,12 +228,12 @@ namespace libnut {
 			
 		signals:
 			void stateChanged(bool state);
-			void request(wps_req req);
+			void request(libnut::wps_req req);
 			void closed();
 			void opened();
 			void scanCompleted();
 			void message(QString msg);
-			void eventMessage(wps_event_type type);
+			void eventMessage(libnut::wps_event_type type);
 			void signalQualityUpdated();
 	};
 
