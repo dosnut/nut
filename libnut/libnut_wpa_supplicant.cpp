@@ -908,7 +908,7 @@ void CWpa_Supplicant::setSignalQualityPollRate(int msec) {
 int CWpa_Supplicant::getSignalQualityPollRate() {
 	return wextTimerRate;
 }
-wps_wext_scan CWpa_Supplicant::getSignalQuality() {
+wps_wext_scan_readable CWpa_Supplicant::getSignalQuality() {
 	return signalQuality;
 }
 
@@ -1737,9 +1737,9 @@ void CWpa_Supplicant::readWirelessInfo() {
 			res.quality.noise = (quint8) stats.qual.noise;
 			res.quality.updated = (quint8) stats.qual.updated;
 			qDebug() << res.quality.level << res.quality.qual << res.quality.noise << res.quality.updated;
-			signalQuality = res;
+			signalQuality = convertValues(res);
 			qDebug() << "Emittig signalQualityUpdated()";
-			emit signalQualityUpdated();
+			emit signalQualityUpdated(signalQuality);
 		}
 	}
 	else if (range.we_version_compiled <= 11) {

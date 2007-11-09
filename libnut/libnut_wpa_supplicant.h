@@ -46,7 +46,7 @@ namespace libnut {
 			bool inConnectionPhase;
 			QString ifname;
 			QList<wps_scan> wpsScanResults;
-			wps_wext_scan signalQuality; //bssid is zero
+			wps_wext_scan_readable signalQuality; //bssid is zero
 
 			QString wps_ctrl_command(QString cmd);
 		//Abstracted Commands:
@@ -172,7 +172,7 @@ namespace libnut {
 			inline bool close() {return wps_close("libnut",false); }
 			bool connected();
 			void readWirelessInfo();
-	
+			
 		public slots:
 			void setLog(bool enabled);
 			//Functions to react to request made from wpa_supplicant:
@@ -206,7 +206,7 @@ namespace libnut {
 
 			void setSignalQualityPollRate(int msec);
 			int getSignalQualityPollRate();
-			wps_wext_scan getSignalQuality();
+			wps_wext_scan_readable getSignalQuality();
 
 			QList<wps_network> listNetworks();
 			QList<wps_scan> scanResults();
@@ -234,7 +234,7 @@ namespace libnut {
 			void scanCompleted();
 			void message(QString msg);
 			void eventMessage(libnut::wps_event_type type);
-			void signalQualityUpdated();
+			void signalQualityUpdated(libnut::wps_wext_scan_readable signal);
 	};
 
 }
