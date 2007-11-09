@@ -243,7 +243,7 @@ namespace libnut {
 	//Function converts the encoded scan values to real values
 	wps_wext_scan_readable convertValues(wps_wext_scan scan);
 	QString signalQualityToString(wps_wext_scan scan);
-	QStringList signalQualityToStringList(wps_wext_scan);
+	QStringList signalQualityToStringList(wps_wext_scan scan);
 	
 
 	QString toNumberString(wps_bool b);

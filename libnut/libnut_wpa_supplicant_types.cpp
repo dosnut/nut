@@ -364,7 +364,7 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 	}
 	return res;
 }
-QString SignalQualitytoString(wps_wext_scan scan) {
+QString signalQualityToString(wps_wext_scan scan) {
 	char buffer[128];
 	iw_range range;
 	iw_quality qual;
