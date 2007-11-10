@@ -131,14 +131,40 @@ namespace libnut {
 		int we_version_compiled;
 	};
 
+// 	typedef enum {
+// 		WSIG_QUALITY_ALLABS=0, WSIG_LEVEL_REL=1, WSIG_NOISE_REL=2, WSIG_UNKNOWN=4
+// 	} wps_signal_quality_encoding; 
+
+// 	struct wps_wext_scan_readable : public wps_wext_scan {
+// 		wps_signal_quality_encoding encoding;
+// 	};
+	
 	typedef enum {
-		WSIG_QUALITY_ALLABS=0, WSIG_QUALITY_REL=1, WSIG_LEVEL_REL=2, WSIG_NOISE_REL=4, WSIG_UNKNOWN=8
-	} wps_signal_quality_encoding; 
+		WSR_UNKNOWN=0, WSR_RCPI=1, WSR_ABSOLUTE=2, WSR_RELATIVE=3
+	} wps_wext_scan_readable_type; 
 
-	struct wps_wext_scan_readable : public wps_wext_scan {
-		wps_signal_quality_encoding encoding;
+	struct wps_wext_scan_readable {
+		wps_wext_scan_readable_type type;
+		struct {
+			quint8 value;
+			quint8 maximum;
+		} quality;
+		union {
+			qfloat rcpi;
+			struct {
+				qint16 value;
+				qunit8 maximum;
+			} nonrcpi;
+		} noise;
+		union {
+			qfloat rcpi;
+			struct {
+				qint16 value;
+				qunit8 maximum;
+			} nonrcpi;
+		} level;
 	};
-
+	
 	struct wps_scan {
 		nut::MacAddress bssid;
 		QString ssid;
