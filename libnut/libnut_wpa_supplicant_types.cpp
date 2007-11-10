@@ -283,7 +283,7 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 // 				rcpilevel);
 // 				buffer += len;
 // 				buflen -= len;
-				res.level.rcpi = ((qfloat) scan.quality.level / 2.0) - 110.0;
+				res.level.rcpi = ((qreal) scan.quality.level / 2.0) - 110.0;
 			}
 
 			/* Deal with noise level in dBm (absolute power measurement) */
@@ -294,7 +294,7 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 // 				len = snprintf(buffer, buflen, "Noise level%c%g dBm",
 // 				scan.quality.updated & IW_QUAL_NOISE_UPDATED ? '=' : ':',
 // 				rcpinoise);
-				res.noise.rcpi = ((qfloat) scan.quality.level / 2.0) - 110.0;
+				res.noise.rcpi = ((qreal) scan.quality.level / 2.0) - 110.0;
 			}
 		}
 		else {

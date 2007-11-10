@@ -150,17 +150,17 @@ namespace libnut {
 			quint8 maximum;
 		} quality;
 		union {
-			qfloat rcpi;
+			qreal rcpi;
 			struct {
 				qint16 value;
-				qunit8 maximum;
+				quint8 maximum;
 			} nonrcpi;
 		} noise;
 		union {
-			qfloat rcpi;
+			qreal rcpi;
 			struct {
 				qint16 value;
-				qunit8 maximum;
+				quint8 maximum;
 			} nonrcpi;
 		} level;
 	};
