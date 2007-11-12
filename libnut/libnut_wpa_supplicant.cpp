@@ -1556,8 +1556,26 @@ void CWpa_Supplicant::wps_tryScanResults() {
 	struct iw_range range;
 	int has_range;
 
-	QList<wps_wext_scan> res = QList<wps_wext_scan>();
-
+	QList<wps_wext_scan> res;
+	
+	/* workaround */
+	struct wireless_config b;
+	/* Get basic information */ 
+	if(iw_get_basic_config(wext_fd, ifname.toAscii().data(), &b) < 0) {
+		/* If no wireless name : no wireless extensions */ 
+		/* But let's check if the interface exists at all */ 
+		struct ifreq ifr; 
+	
+		strncpy(ifr.ifr_name, ifname.toAscii().data(), IFNAMSIZ); 
+		if(ioctl(wext_fd, SIOCGIFFLAGS, &ifr) < 0) 
+			qDebug() << "no device";
+		else
+			qDebug() << "not supported";
+		return;
+	}
+	qDebug() << "Fetched basic config.";
+	/* workaround */
+	
 	/* Get range stuff */
 	has_range = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
 	if (errno == EAGAIN) {
