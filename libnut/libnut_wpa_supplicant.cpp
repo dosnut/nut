@@ -1541,7 +1541,7 @@ wps_eap_netconfig_failures CWpa_Supplicant::wps_editEapNetwork(int netid, wps_ea
 }
 
 void CWpa_Supplicant::wps_tryScanResults() {
-	if (wext_fd == -1) {
+	if (wext_fd == -1 || !wps_connected) {
 		return;
 	}
 	//Kill Timer:
