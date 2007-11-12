@@ -256,17 +256,9 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 	if ( scan.hasRange && ((scan.quality.level != 0) || (scan.quality.updated & (IW_QUAL_DBM | IW_QUAL_RCPI))) ) {
 		/* Deal with quality : always a relative value */
 		if ( !(scan.quality.updated & IW_QUAL_QUAL_INVALID) ) {
-// 			res.quality.qual = scan.quality.qual;
-// 			res.maxquality.qual = scan.maxquality.qual;
-// 			res.encoding = (wps_signal_quality_encoding) (res.encoding | WSIG_QUALITY_REL);
-
-// 			len = snprintf(buffer, buflen, "Quality%c%d/%d  ",
-// 			qual->updated & IW_QUAL_QUAL_UPDATED ? '=' : ':',
-// 			qual->qual, range->max_qual.qual);
-// 			buffer += len;
-// 			buflen -= len;
 			res.quality.value = scan.quality.qual;
 			res.quality.maximum = scan.maxquality.qual;
+			qDebug() << "Converting: Quality Relative:" << res.quality.value << "from" << scan.quality.qual;
 		}
 
 		/* Check if the statistics are in RCPI (IEEE 802.11k) */
@@ -275,26 +267,14 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 		/* RCPI = int{(Power in dBm +110)*2} for 0dbm > Power > -110dBm */
 			res.type = WSR_RCPI;
 			if ( !(scan.quality.updated & IW_QUAL_LEVEL_INVALID) ) {
-// 				res.quality.level = (int) ((scan.quality.level / 2.0) - 110.0);
-
-// 				double	rcpilevel = (qual->level / 2.0) - 110.0;
-// 				len = snprintf(buffer, buflen, "Signal level%c%g dBm  ",
-// 				scan.quality.updated & IW_QUAL_LEVEL_UPDATED ? '=' : ':',
-// 				rcpilevel);
-// 				buffer += len;
-// 				buflen -= len;
 				res.level.rcpi = ((qreal) scan.quality.level / 2.0) - 110.0;
+				qDebug() << "Converting: Level RCPI:" << res.level.rcpi << "from" << scan.quality.level;
 			}
 
 			/* Deal with noise level in dBm (absolute power measurement) */
 			if ( !(scan.quality.updated & IW_QUAL_NOISE_INVALID) ) {
-// 				res.quality.noise = (int) ((scan.quality.noise / 2.0) - 110.0);
-
-// 				double	rcpinoise = (scan.quality.noise / 2.0) - 110.0;
-// 				len = snprintf(buffer, buflen, "Noise level%c%g dBm",
-// 				scan.quality.updated & IW_QUAL_NOISE_UPDATED ? '=' : ':',
-// 				rcpinoise);
-				res.noise.rcpi = ((qreal) scan.quality.level / 2.0) - 110.0;
+				res.noise.rcpi = ((qreal) scan.quality.noise / 2.0) - 110.0;
+				qDebug() << "Converting: NOISE RCPI:" << res.noise.rcpi << "from" << scan.quality.noise;
 			}
 		}
 		else {
@@ -303,74 +283,39 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 				res.type = WSR_ABSOLUTE;
 				/* Deal with signal level in dBm  (absolute power measurement) */
 				if ( !(scan.quality.updated & IW_QUAL_LEVEL_INVALID) ) {
-//					int	dblevel = scan.quality.level;
 					/* Implement a range for dBm [-192; 63] */
-// 					if (scan.quality.level >= 64) {
-// 						dblevel -= 0x100;
-// 					}
-// 					res.quality.level = (int) dblevel;
-
-// 					len = snprintf(buffer, buflen, "Signal level%c%d dBm  ",
-// 					scan.quality.updated & IW_QUAL_LEVEL_UPDATED ? '=' : ':',
-// 					dblevel);
-// 					buffer += len;
-// 					buflen -= len;
 					res.level.nonrcpi.value = (scan.quality.level >= 64) ? scan.quality.level - 0x100 : scan.quality.level;
+					qDebug() << "Converting: LEVEL ABS:" << res.level.nonrcpi.value << "from" << scan.quality.level;
 				}
 			
 				/* Deal with noise level in dBm (absolute power measurement) */
 				if ( !(scan.quality.updated & IW_QUAL_NOISE_INVALID) ) {
-// 					int	dbnoise = scan.quality.noise;
-					/* Implement a range for dBm [-192; 63] */
-// 					if (scan.quality.noise >= 64) {
-// 						dbnoise -= 0x100;
-// 					}
-// 					res.quality.noise = dbnoise;
 
-// 					len = snprintf(buffer, buflen, "Noise level%c%d dBm",
-// 					scan.quality.updated & IW_QUAL_NOISE_UPDATED ? '=' : ':',
-// 					dbnoise);
 					res.noise.nonrcpi.value = (scan.quality.noise >= 64) ? scan.quality.noise - 0x100 : scan.quality.noise;
+					qDebug() << "Converting: NOISE ABS:" << res.noise.nonrcpi.value << "from" << scan.quality.noise;
 				}
 			}
 			else {
 				/* Deal with signal level as relative value (0 -> max) */
 				res.type = WSR_RELATIVE;
 				if ( !(scan.quality.updated & IW_QUAL_LEVEL_INVALID) ) {
-// 					res.quality.level = (int) ((char) scan.quality.level);
-// 					res.encoding = (wps_signal_quality_encoding) (res.encoding | WSIG_LEVEL_REL);
-// 					res.maxquality.level = (int) ((char) scan.maxquality.level);
 
-// 					len = snprintf(buffer, buflen, "Signal level%c%d/%d  ",
-// 					scan.quality.updated & IW_QUAL_LEVEL_UPDATED ? '=' : ':',
-// 					scan.quality.level, scan.maxquality.level);
-// 					buffer += len;
-// 					buflen -= len;
 					res.level.nonrcpi.value = scan.quality.level;
 					res.level.nonrcpi.maximum = scan.maxquality.level;
+					qDebug() << "Converting: LEVEL REL:" << res.level.nonrcpi.value << "/" << res.level.nonrcpi.maximum;
 				}
 
 				/* Deal with noise level as relative value (0 -> max) */
 				if ( !(scan.quality.updated & IW_QUAL_NOISE_INVALID) ) {
-// 					res.quality.noise = (int) ((char) scan.quality.noise);
-// 					res.encoding = (wps_signal_quality_encoding) (res.encoding | WSIG_NOISE_REL);
-// 					res.maxquality.noise = (int) ((char) scan.maxquality.noise);
-
-// 					len = snprintf(buffer, buflen, "Noise level%c%d/%d",
-// 					scan.quality.updated & IW_QUAL_NOISE_UPDATED ? '=' : ':',
-// 					scan.quality.noise, scan.maxquality.noise);
 					res.noise.nonrcpi.value = scan.quality.noise;
 					res.noise.nonrcpi.maximum = scan.maxquality.noise;
+					qDebug() << "Converting: NOISE REL:" << res.noise.nonrcpi.value << "/" << res.noise.nonrcpi.maximum;
 				}
 			}
 		}
 	}
 	else {
 		/* We can't read the range, so we don't know... */
-// 		res.quality = scan.quality;
-// 		res.maxquality = scan.maxquality;
-// 		res.avgquality = scan.avgquality;
-// 		res.encoding = WSIG_UNKNOWN;
 		res.type = WSR_UNKNOWN;
 		res.quality.value = scan.quality.qual;
 		res.quality.maximum = scan.maxquality.qual;
@@ -378,6 +323,7 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 		res.level.nonrcpi.maximum = scan.maxquality.level;
 		res.noise.nonrcpi.value = scan.quality.noise;
 		res.noise.nonrcpi.maximum = scan.maxquality.noise;
+		qDebug() << "CONVERTING: ALL UNKNOWN";
 	}
 	return res;
 }

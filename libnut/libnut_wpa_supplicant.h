@@ -47,6 +47,8 @@ namespace libnut {
 			QString ifname;
 			QList<wps_scan> wpsScanResults;
 			wps_wext_scan_readable signalQuality; //bssid is zero
+			int ScanTimeoutCount;
+			int wextPollTimeoutCount;
 
 			QString wps_ctrl_command(QString cmd);
 		//Abstracted Commands:

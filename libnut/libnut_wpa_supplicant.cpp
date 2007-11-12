@@ -678,7 +678,7 @@ void CWpa_Supplicant::Event_dispatcher(QString event) {
 }
 
 //Public functions:
-CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), wpa_supplicant_path("/var/run/wpa_supplicant/"+ifname), event_sn(0), timerId(-1), wextTimerId(-1), ScanTimerId(-1), wextTimerRate(10000), ifname(ifname) {
+CWpa_Supplicant::CWpa_Supplicant(QObject * parent, QString ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), wpa_supplicant_path("/var/run/wpa_supplicant/"+ifname), wps_fd(-1), wext_fd(-1), event_sn(0), timerId(-1), wextTimerId(-1), ScanTimerId(-1), wextTimerRate(10000), ifname(ifname), ScanTimeoutCount(0),wextPollTimeoutCount(0) {
 	wps_connected = false;
 	timerCount = 0;
 	log_enabled = true;
@@ -756,6 +756,7 @@ void CWpa_Supplicant::wps_open(bool) {
 	
 	//Get file Descriptor to NET kernel
 	if ( (wext_fd = iw_sockets_open()) < 0) {
+		wext_fd = -1;
 		qDebug() << "ERROR: Could not open socket to net kernel";
 	}
 	else { //Socket is set up, now set SocketNotifier
@@ -786,6 +787,10 @@ bool CWpa_Supplicant::wps_close(QString call_func, bool internal) {
 			disconnect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
 			delete event_sn;
 			event_sn = NULL;
+		}
+		if (-1 != wext_fd) {
+			iw_sockets_close(wext_fd);
+			wext_fd = -1;
 		}
 		//Detaching takes place if program is about to quit
 		//Close control connections
@@ -897,11 +902,15 @@ bool CWpa_Supplicant::connected() {
 
 
 void CWpa_Supplicant::setSignalQualityPollRate(int msec) {
+	wextPollTimeoutCount = 0;
 	if (wextTimerId != -1) {
+		qDebug() << "Setting signal quality polling (restarting timer)";
 		killTimer(wextTimerId);
+		wextTimerRate = msec;
 		wextTimerId = startTimer(wextTimerRate);
 	}
 	else {
+		qDebug() << "Setting signal quality polling (starting timer)";
 		wextTimerRate = msec;
 	}
 }
@@ -941,6 +950,7 @@ void CWpa_Supplicant::scan() {
 			ScanTimerId = -1;
 			printMessage("We're already scanning!");
 		}
+		ScanTimeoutCount = 0;
 		ScanTimerId = startTimer(CWPA_SCAN_TIMER_TIME);
 	}
 }
@@ -1528,7 +1538,7 @@ wps_eap_netconfig_failures CWpa_Supplicant::wps_editEapNetwork(int netid, wps_ea
 }
 
 void CWpa_Supplicant::wps_tryScanResults() {
-	if (wext_fd == 0) {
+	if (wext_fd == -1) {
 		return;
 	}
 	//Kill Timer:
@@ -1552,6 +1562,11 @@ void CWpa_Supplicant::wps_tryScanResults() {
 	has_range = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
 	if (errno == EAGAIN) {
 		qDebug() << "Scan results not available yet";
+		ScanTimeoutCount++;
+		if (ScanTimeoutCount == 10) {
+			wps_setScanResults(res);
+			return;
+		}
 		ScanTimerId = startTimer(CWPA_SCAN_RETRY_TIMER_TIME);
 		return;
 	}
@@ -1704,8 +1719,20 @@ void CWpa_Supplicant::readWirelessInfo() {
 	qDebug() << "Getting range stuff";
 	hasRange = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
 	if (errno == EAGAIN) {
+		wextPollTimeoutCount++;
+		qDebug() << QString("Getting range stuff failed (%1)").arg(strerror(errno));
+		if ( (wextPollTimeoutCount > 10) && wextTimerRate < 1000) {
+			setSignalQualityPollRate(10000);
+		}
+		else if (wextPollTimeoutCount > 20) { //Fast polling disabled, but still EAGAIN errors
+			//Seems the kernel does not care about our calls
+			killTimer(wextTimerId);
+			wextTimerId = -1;
+		}
 		return;
 	}
+	
+	qDebug() << "Got range stuff";
 
 	if (hasRange) {
 		res.maxquality.level = (quint8) range.max_qual.level;
@@ -1718,8 +1745,9 @@ void CWpa_Supplicant::readWirelessInfo() {
 		res.maxquality.qual = 0;
 		res.maxquality.noise = 0;
 		res.maxquality.updated = 0;
+		qDebug() << "Range information are not available";
 	}
-	if( (hasRange) && (range.we_version_compiled > 11) ) {
+	if ( (hasRange) && (range.we_version_compiled > 11) ) {
 		struct iwreq wrq;
 		wrq.u.data.pointer = (caddr_t) &stats;
 		wrq.u.data.length = sizeof(struct iw_statistics);
@@ -1739,6 +1767,10 @@ void CWpa_Supplicant::readWirelessInfo() {
 			qDebug() << res.quality.level << res.quality.qual << res.quality.noise << res.quality.updated;
 			signalQuality = convertValues(res);
 			qDebug() << "Emittig signalQualityUpdated()";
+			if (wextTimerRate < 1000) {
+				wextTimerRate = 10000;
+				qDebug() << "Auto-resetting timer to 10 seconds";
+			}
 			emit signalQualityUpdated(signalQuality);
 		}
 	}
