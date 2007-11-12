@@ -63,12 +63,28 @@ namespace qnut {
 	}
 	
 	QString signalSummary(libnut::wps_wext_scan_readable signal) {
-		QString quality = QString::number(signal.quality.qual)  +
-			((signal.encoding & WSIG_QUALITY_REL) ? '/' + QString::number(signal.maxquality.qual)  : QString());
-		QString level   = QString::number(signal.quality.level) +
-			((signal.encoding & WSIG_LEVEL_REL)   ? '/' + QString::number(signal.maxquality.level) : QString());
-		QString noise   = QString::number(signal.quality.noise) +
-			((signal.encoding & WSIG_NOISE_REL)   ? '/' + QString::number(signal.maxquality.noise) : QString());
+		QString quality = QString::number(signal.quality.value) + '/' + QString::number(signal.quality.maximum);
+		QString level/* = QString::number(signal.quality.level) +
+			((signal.encoding & WSIG_LEVEL_REL)   ? '/' + QString::number(signal.maxquality.level) : QString())*/;
+		QString noise/* = QString::number(signal.quality.noise) +
+			((signal.encoding & WSIG_NOISE_REL)   ? '/' + QString::number(signal.maxquality.noise) : QString())*/;
+		
+		switch (signal.type) {
+		case WSR_RCPI:
+			level = QString::number(signal.level.rcpi);
+			noise = QString::number(signal.noise.rcpi);
+			break;
+		case WSR_ABSOLUTE:
+			level = QString::number(signal.level.nonrcpi.value);
+			noise = QString::number(signal.noise.nonrcpi.value);
+			break;
+		case WSR_RELATIVE:
+			level = QString::number(signal.level.nonrcpi.value) + '/' + QString::number(signal.level.nonrcpi.maximum);
+			noise = QString::number(signal.noise.nonrcpi.value) + '/' + QString::number(signal.noise.nonrcpi.maximum);
+			break;
+		default:
+			return QObject::tr("unknown");
+		}
 		
 		return QString("%1, %2dBm, %3dBm").arg(quality, level, noise);
 	}
