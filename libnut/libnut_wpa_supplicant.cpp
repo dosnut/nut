@@ -119,6 +119,9 @@ wps_network_flags CWpa_Supplicant::parseNetworkFlags(QString str) {
 	if (str.contains("CURRENT",Qt::CaseInsensitive)) {
 		return WNF_CURRENT;
 	}
+	if (str.contains("DISABLED",Qt::CaseInsensitive)) {
+		return WNF_DISABLED;
+	}
 	return WNF_NONE;
 }
 //network id / ssid / bssid / flags
