@@ -342,7 +342,7 @@ namespace qnut {
 			return text;
 	}
 	
-	inline void CAccessPointConfig::writeEAPConfig(wps_eap_network_config &eap_config) {
+	inline void CAccessPointConfig::readEAPConfig(wps_eap_network_config &eap_config) {
 		if (eap_config.eap & EAPM_LEAP)
 			ui.encCombo->setCurrentIndex(7);
 		else if (eap_config.eap & EAPM_OTP)
@@ -361,8 +361,8 @@ namespace qnut {
 			ui.encCombo->setCurrentIndex(0);
 		
 		ui.identificationEdit->setText(convertQuoted(eap_config.identity));
-		ui.caEdit->setText(covertQuoted(eap_config.ca_cert));
-		ui.clientEdit->setText(convertQuoted(ap_config.client_cert));
+		ui.caEdit->setText(convertQuoted(eap_config.ca_cert));
+		ui.clientEdit->setText(convertQuoted(eap_config.client_cert));
 		ui.keyFileEdit->setText(convertQuoted(eap_config.private_key));
 		ui.passwordEdit->setText(convertQuoted(eap_config.private_key_passwd));
 	}
