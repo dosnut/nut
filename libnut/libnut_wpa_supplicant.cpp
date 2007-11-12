@@ -1709,7 +1709,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 	if ( (wext_fd == -1) || !wps_connected) {
 		return;
 	}
-	qDebug() << "Executing readWirelessInfo()";
+	qDebug() << "Executing readWirelessInfo() with TimerRate of" << wextTimerRate;
 	struct iw_range range;
 	int hasRange = 0;
 	iwstats stats;
@@ -1746,7 +1746,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 		if ( (wextPollTimeoutCount > 10) && wextTimerRate < 1000) {
 			setSignalQualityPollRate(10000);
 		}
-		else if (wextPollTimeoutCount > 20) { //Fast polling disabled, but still EAGAIN errors
+		else if (wextPollTimeoutCount > 10) { //Fast polling disabled, but still EAGAIN errors
 			//Seems the kernel does not care about our calls
 			killTimer(wextTimerId);
 			wextTimerId = -1;
@@ -1809,7 +1809,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 			signalQuality = convertValues(res);
 			qDebug() << "Emittig signalQualityUpdated()";
 			if (wextTimerRate < 1000) {
-				wextTimerRate = 10000;
+				setSignalQualityPollRate(10000);
 				qDebug() << "Auto-resetting timer to 10 seconds";
 			}
 			emit signalQualityUpdated(signalQuality);
