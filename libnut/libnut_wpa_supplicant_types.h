@@ -15,7 +15,7 @@ extern "C" {
 
 namespace libnut {
 
-	typedef enum {WNF_NONE=0, WNF_CURRENT=1} wps_network_flags;
+	typedef enum {WNF_NONE, WNF_CURRENT, WNF_DISABLED} wps_network_flags;
 
 	typedef enum {WC_UNDEFINED=0, WC_NONE=1, WC_CCMP=2, WC_TKIP=4, WC_WEP104=8, WC_WEP40=16, WC_WEP=24} wps_ciphers;
 	typedef enum {WA_UNDEFINED=0, WA_PLAIN=1,WA_WPA_PSK=2,WA_WPA2_PSK=4, WA_WPA_EAP=8, WA_WPA2_EAP=16, WA_IEEE8021X=32, WA_DEF=62} wps_authentication;

@@ -406,7 +406,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 			wpa_supplicant->open();
 		}
 		if (DT_AIR == type && DS_CARRIER <= state && wpa_supplicant != NULL) {
-			wpa_supplicant->readWirelessInfo();
+			wpa_supplicant->setSignalQualityPollRate(500);
 		}
 	}
 	else {
@@ -489,7 +489,7 @@ void CDevice::refreshAll() {
 		}
 	}
 	if (DT_AIR == type && DS_CARRIER <= state && wpa_supplicant != NULL) {
-		wpa_supplicant->readWirelessInfo();
+		wpa_supplicant->setSignalQualityPollRate(500);
 	}
 }
 //Rebuilds the environment list
@@ -559,7 +559,7 @@ void CDevice::dbusstateChanged(int newState, int oldState) {
 		essid = QString();
 	}
 	if (DT_AIR == type && DS_CARRIER <= state && wpa_supplicant != NULL) {
-		wpa_supplicant->readWirelessInfo();
+		wpa_supplicant->setSignalQualityPollRate(500);
 	}
 	emit(stateChanged(state));
 }
