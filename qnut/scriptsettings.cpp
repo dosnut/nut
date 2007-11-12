@@ -9,6 +9,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
+#include <QDir>
 #include "scriptsettings.h"
 #include "deviceoptions.h"
 #include "constants.h"
@@ -24,18 +25,34 @@ namespace qnut {
 		ui.activatedCheck->setChecked(flags & UI_FLAG_SCRIPT_ACTIVATED);
 		ui.deactivatedCheck->setChecked(flags & UI_FLAG_SCRIPT_DEACTIVATED);
 		if (exec() == QDialog::Accepted) {
+			QDir workdir(UI_PATH_DEV(deviceoptions->device->name));
 			flags = UI_FLAG_SCRIPT_NONE;
 			
-			if (ui.upCheck->isChecked())
+			if (ui.upCheck->isChecked()) {
 				flags = flags | UI_FLAG_SCRIPT_UP;
-			if (ui.unconfiguredCheck->isChecked())
+				if (!workdir.exists(UI_DIR_SCRIPT_UP))
+					workdir.mkdir(UI_DIR_SCRIPT_UP);
+			}
+			if (ui.unconfiguredCheck->isChecked()) {
 				flags = flags | UI_FLAG_SCRIPT_UNCONFIGURED;
-			if (ui.carrierCheck->isChecked())
+				if (!workdir.exists(UI_DIR_SCRIPT_UNCONFIGURED))
+					workdir.mkdir(UI_DIR_SCRIPT_UNCONFIGURED);
+			}
+			if (ui.carrierCheck->isChecked()) {
 				flags = flags | UI_FLAG_SCRIPT_CARRIER;
-			if (ui.activatedCheck->isChecked())
+				if (!workdir.exists(UI_DIR_SCRIPT_CARRIER))
+					workdir.mkdir(UI_DIR_SCRIPT_CARRIER);
+			}
+			if (ui.activatedCheck->isChecked()) {
 				flags = flags | UI_FLAG_SCRIPT_ACTIVATED;
-			if (ui.deactivatedCheck->isChecked())
+				if (!workdir.exists(UI_DIR_SCRIPT_ACTIVATED))
+					workdir.mkdir(UI_DIR_SCRIPT_ACTIVATED);
+			}
+			if (ui.deactivatedCheck->isChecked()) {
 				flags = flags | UI_FLAG_SCRIPT_DEACTIVATED;
+				if (!workdir.exists(UI_DIR_SCRIPT_DEACTIVATED))
+					workdir.mkdir(UI_DIR_SCRIPT_DEACTIVATED);
+			}
 			
 			deviceoptions->scriptFlags = flags;
 			

@@ -291,7 +291,6 @@ namespace qnut {
 				break;
 			}
 		}
-		
 		if (scriptFlags) {//TODO: scripts testen
 			QDir workdir(UI_PATH_DEV(device->name));
 			bool doExecuteScripts = false;
@@ -342,7 +341,7 @@ namespace qnut {
 				process.setEnvironment(env);
 				workdir.cd(targetDir);
 				foreach(QString i, workdir.entryList()) {
-					process.startDetached(workdir.path() + i);
+					process.startDetached(workdir.path() + '/' + i);
 				}
 			}
 		}
