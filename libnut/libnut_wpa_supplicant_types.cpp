@@ -253,6 +253,7 @@ wps_bool toWpsBool(bool b) {
 wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 	wps_wext_scan_readable res;
 // 	res.encoding = WSIG_QUALITY_ALLABS;
+	qDebug() << "hasRange:" << scan.hasRange;
 	if ( scan.hasRange && ((scan.quality.level != 0) || (scan.quality.updated & (IW_QUAL_DBM | IW_QUAL_RCPI))) ) {
 		/* Deal with quality : always a relative value */
 		if ( !(scan.quality.updated & IW_QUAL_QUAL_INVALID) ) {
