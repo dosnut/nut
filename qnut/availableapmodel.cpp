@@ -109,7 +109,7 @@ namespace qnut {
 		case AVLAP_MOD_BSSID:
 			return scans[index.row()].bssid.toString();
 		case AVLAP_MOD_SIGNAL:
-			return qualitySummary(scans[index.row()].quality);
+			return qualitySummary(scans[index.row()].signal);
 		case AVLAP_MOD_CIPHERS: {
 				int flags = scans[index.row()].ciphers;
 				if (flags == WC_UNDEFINED)
