@@ -405,7 +405,9 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		if (! (DS_DEACTIVATED == state) ) {
 			wpa_supplicant->open();
 		}
-
+		if (DT_AIR == type && DS_CARRIER <= state && wpa_supplicant != NULL) {
+			wpa_supplicant->readWirelessInfo();
+		}
 	}
 	else {
 		wpa_supplicant = NULL;
@@ -486,6 +488,9 @@ void CDevice::refreshAll() {
 			wpa_supplicant->open();
 		}
 	}
+	if (DT_AIR == type && DS_CARRIER <= state && wpa_supplicant != NULL) {
+		wpa_supplicant->readWirelessInfo();
+	}
 }
 //Rebuilds the environment list
 void CDevice::rebuild(QList<QDBusObjectPath> paths) {
@@ -552,6 +557,9 @@ void CDevice::dbusstateChanged(int newState, int oldState) {
 	}
 	else {
 		essid = QString();
+	}
+	if (DT_AIR == type && DS_CARRIER <= state && wpa_supplicant != NULL) {
+		wpa_supplicant->readWirelessInfo();
 	}
 	emit(stateChanged(state));
 }
