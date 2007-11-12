@@ -1563,7 +1563,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 	if (errno == EAGAIN) {
 		qDebug() << "Scan results not available yet";
 		ScanTimeoutCount++;
-		if (ScanTimeoutCount == 10) {
+		if (ScanTimeoutCount == 5) {
 			wps_setScanResults(res);
 			return;
 		}
