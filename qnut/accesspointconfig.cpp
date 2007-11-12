@@ -18,6 +18,7 @@ namespace qnut {
 		supplicant = wpa_supplicant;
 		
 		ui.setupUi(this);
+		ui.warningLabel->setVisible(false);
 		setAuthConfig(0);
 		
 		QRegExp regexp("[0123456789abcdefABCDEF]*");
@@ -278,14 +279,17 @@ namespace qnut {
 		
 		if (config.keyManagement & WKM_WPA_EAP) {
 			ui.keyManagementCombo->setCurrentIndex(3);
-			
+			readEAPConfig(config.eap_config);
 		}
 		else if (config.keyManagement & WKM_WPA_PSK) {
 			ui.keyManagementCombo->setCurrentIndex(2);
 			ui.pskEdit->setText("");
+			ui.warningLabel->setVisible(true);
 		}
-		else if (config.keyManagement & WKM_IEEE8021X)
+		else if (config.keyManagement & WKM_IEEE8021X) {
 			ui.keyManagementCombo->setCurrentIndex(1);
+			readEAPConfig(config.eap_config);
+		}
 		else
 			ui.keyManagementCombo->setCurrentIndex(0);
 		
@@ -329,6 +333,38 @@ namespace qnut {
 		eap_config.client_cert = '\"' + ui.clientEdit->text() + '\"';
 		eap_config.private_key = '\"' + ui.keyFileEdit->text() + '\"';
 		eap_config.private_key_passwd = '\"' + ui.passwordEdit->text() + '\"';
+	}
+	
+	inline QString CAccessPointConfig::convertQuoted(QString text) {
+		if (text[0] == '\"')
+			return text.mid(1, text.length()-2);
+		else
+			return text;
+	}
+	
+	inline void CAccessPointConfig::writeEAPConfig(wps_eap_network_config &eap_config) {
+		if (eap_config.eap & EAPM_LEAP)
+			ui.encCombo->setCurrentIndex(7);
+		else if (eap_config.eap & EAPM_OTP)
+			ui.encCombo->setCurrentIndex(6);
+		else if (eap_config.eap & EAPM_GTC)
+			ui.encCombo->setCurrentIndex(5);
+		else if (eap_config.eap & EAPM_TTLS)
+			ui.encCombo->setCurrentIndex(4);
+		else if (eap_config.eap & EAPM_PEAP)
+			ui.encCombo->setCurrentIndex(3);
+		else if (eap_config.eap & EAPM_MSCHAPV2)
+			ui.encCombo->setCurrentIndex(2);
+		else if (eap_config.eap & EAPM_TLS)
+			ui.encCombo->setCurrentIndex(1);
+		else
+			ui.encCombo->setCurrentIndex(0);
+		
+		ui.identificationEdit->setText(convertQuoted(eap_config.identity));
+		ui.caEdit->setText(covertQuoted(eap_config.ca_cert));
+		ui.clientEdit->setText(convertQuoted(ap_config.client_cert));
+		ui.keyFileEdit->setText(convertQuoted(eap_config.private_key));
+		ui.passwordEdit->setText(convertQuoted(eap_config.private_key_passwd));
 	}
 	
 	inline void CAccessPointConfig::convertLineEditText(QLineEdit * lineEdit, bool hex) {

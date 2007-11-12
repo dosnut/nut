@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>611</width>
+    <width>577</width>
     <height>562</height>
    </rect>
   </property>
@@ -127,12 +127,37 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QToolButton" name="clearButton" >
+           <property name="text" >
+            <string>Clear</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
         <widget class="QCheckBox" name="showPlainPSKCheck" >
          <property name="text" >
           <string>Show key as plain text</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="warningLabel" >
+         <property name="font" >
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text" >
+          <string>Warning:
+The key is not readable from wpa supplicant thus the field above is empty. You can set a new key by entering something into the edit field.
+If you want to leave the key unchanged clear the field above.</string>
+         </property>
+         <property name="wordWrap" >
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -425,12 +450,28 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>284</x>
-     <y>566</y>
+     <x>293</x>
+     <y>552</y>
     </hint>
     <hint type="destinationlabel" >
      <x>286</x>
      <y>189</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clearButton</sender>
+   <signal>clicked()</signal>
+   <receiver>pskEdit</receiver>
+   <slot>clear()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>513</x>
+     <y>213</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>442</x>
+     <y>218</y>
     </hint>
    </hints>
   </connection>

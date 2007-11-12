@@ -31,7 +31,9 @@ namespace qnut {
 		int currentID;
 		
 		inline void convertLineEditText(QLineEdit * lineEdit, bool hex);
+		inline QString convertQuoted(QString text);
 		inline void writeEAPConfig(wps_eap_network_config &eap_config);
+		inline void readEAPConfig(wps_eap_network_config &eap_config);
 	public:
 		bool execute(wps_scan scanResult);
 		bool execute(int id);
