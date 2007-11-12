@@ -83,9 +83,10 @@ namespace qnut {
 			noise = QString::number(signal.noise.nonrcpi.value) + '/' + QString::number(signal.noise.nonrcpi.maximum);
 			break;
 		default:
-			return QObject::tr("unknown");
+			level = '-';
+			noise = '-';
 		}
 		
-		return QString("%1, %2dBm, %3dBm").arg(quality, level, noise);
+		return QString("%1, %2 dBm, %3 dBm").arg(quality, level, noise);
 	}
 };

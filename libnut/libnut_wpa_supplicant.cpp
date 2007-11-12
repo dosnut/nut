@@ -1711,13 +1711,35 @@ void CWpa_Supplicant::readWirelessInfo() {
 	}
 	qDebug() << "Executing readWirelessInfo()";
 	struct iw_range range;
-	int hasRange;
+	int hasRange = 0;
 	iwstats stats;
 	wps_wext_scan res;
 
+	/* workaround */
+	struct wireless_config b;
+	/* Get basic information */ 
+	if(iw_get_basic_config(wext_fd, ifname.toAscii().data(), &b) < 0) {
+		/* If no wireless name : no wireless extensions */ 
+		/* But let's check if the interface exists at all */ 
+		struct ifreq ifr; 
+	
+		strncpy(ifr.ifr_name, ifname.toAscii().data(), IFNAMSIZ); 
+		if(ioctl(wext_fd, SIOCGIFFLAGS, &ifr) < 0) 
+			qDebug() << "no device";
+		else
+			qDebug() << "not supported";
+		return;
+	}
+	qDebug() << "Fetched basic config.";
+	/* workaround */
+
 	/* Get range stuff */
-	qDebug() << "Getting range stuff";
-	hasRange = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
+	qDebug() << QString("Getting range stuff for %1").arg(ifname.toAscii().data());
+	if (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0)
+		hasRange = 1;
+	else
+		qDebug() << QString("Error \"hasRange == 0\" (%1)").arg(strerror(errno));
+	res.hasRange = hasRange;
 	if (errno == EAGAIN) {
 		wextPollTimeoutCount++;
 		qDebug() << QString("Getting range stuff failed (%1)").arg(strerror(errno));
@@ -1733,6 +1755,25 @@ void CWpa_Supplicant::readWirelessInfo() {
 	}
 	
 	qDebug() << "Got range stuff";
+
+	/* workaround */
+	struct iwreq wrq;
+	/* Get AP address */
+	if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWAP, &wrq) >= 0) {
+		qDebug() << "Got AP";
+	}
+	
+	/* Get bit rate */
+	if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWRATE, &wrq) >= 0) {
+		qDebug() << "Got bit rate";
+	}
+	
+	/* Get Power Management settings */
+	wrq.u.power.flags = 0;
+	if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWPOWER, &wrq) >= 0) {
+		qDebug() << "Got power";
+	}
+	/* workaround */
 
 	if (hasRange) {
 		res.maxquality.level = (quint8) range.max_qual.level;
