@@ -154,41 +154,41 @@ bssid / frequency / signal level / flags / ssid
 02:55:24:33:77:a3	2462	187	[WPA-PSK-TKIP]	testing
 00:09:5b:95:e0:4f	2412	209		jkm guest
 */
-wps_ciphers CWpa_Supplicant::parseScanCiphers(QString str) {
-	wps_ciphers cip = CI_NONE;
+ScanCiphers CWpa_Supplicant::parseScanCiphers(QString str) {
+	ScanCiphers cip = CI_NONE;
 	if (str.contains("CCMP")) {
-		cip = (wps_ciphers) (cip | CI_CCMP);
+		cip = (ScanCiphers) (cip | CI_CCMP);
 	}
 	if (str.contains("TKIP")) {
-		cip = (wps_ciphers) (cip | CI_TKIP);
+		cip = (ScanCiphers) (cip | CI_TKIP);
 	}
 	if (str.contains("WEP104")) {
-		cip = (wps_ciphers) (cip | CI_WEP104);
+		cip = (ScanCiphers) (cip | CI_WEP104);
 	}
 	if (str.contains("WEP40")) {
-		cip = (wps_ciphers) (cip | CI_WEP40);
+		cip = (ScanCiphers) (cip | CI_WEP40);
 	}
 	if (str.contains("WEP")) {
-		cip = (wps_ciphers) (cip | CI_WEP);
+		cip = (ScanCiphers) (cip | CI_WEP);
 	}
 	return cip;
 }
-wps_authentication CWpa_Supplicant::parseScanAuth(QString str) {
-	wps_authentication key = AUTH_UNDEFINED;
+ScanAuthentication CWpa_Supplicant::parseScanAuth(QString str) {
+	ScanAuthentication key = AUTH_UNDEFINED;
 	if (str.contains("WPA-PSK")) {
-		key = (wps_authentication) (key | AUTH_WPA_PSK);
+		key = (ScanAuthentication) (key | AUTH_WPA_PSK);
 	}
 	if (str.contains("WPA2-EAP")) {
-		key = (wps_authentication) (key | AUTH_WPA2_EAP);
+		key = (ScanAuthentication) (key | AUTH_WPA2_EAP);
 	}
 	if (str.contains("WPA2-PSK")) {
-		key = (wps_authentication) (key | AUTH_WPA2_PSK);
+		key = (ScanAuthentication) (key | AUTH_WPA2_PSK);
 	}
 	if (str.contains("WPA-EAP")) {
-		key = (wps_authentication) (key | AUTH_WPA_EAP);
+		key = (ScanAuthentication) (key | AUTH_WPA_EAP);
 	}
 	if (str.contains("IEEE8021X")) {
-		key = (wps_authentication) (key | AUTH_IEEE8021X);
+		key = (ScanAuthentication) (key | AUTH_IEEE8021X);
 	}
 	return key;
 }
@@ -199,7 +199,7 @@ QList<wps_scan> CWpa_Supplicant::parseScanResult(QStringList list) {
 	QStringList line;
 	wps_scan scanresult;
 	bool worked = true;
-	wps_authentication scanAuth;
+	ScanAuthentication scanAuth;
 	foreach(QString str, list) {
 		line = str.split('\t',QString::KeepEmptyParts);
 		scanresult.bssid = nut::MacAddress(line[0]);
@@ -221,72 +221,72 @@ QList<wps_scan> CWpa_Supplicant::parseScanResult(QStringList list) {
 
 //parse config
 wps_protocols CWpa_Supplicant::parseProtocols(QString str) {
-	int proto = WP_UNDEFINED;
+	int proto = PROTO_UNDEFINED;
 	if (str.contains("RSN")) {
-		proto = (proto | WP_RSN);
+		proto = (proto | PROTO_RSN);
 	}
 	if (str.contains("WPA")) {
-		proto = (proto | WP_WPA);
+		proto = (proto | PROTO_WPA);
 	}
 	return (wps_protocols) proto;
 }
 
 wps_key_management CWpa_Supplicant::parseKeyMgmt(QString str) {
-	int key = WKM_UNDEFINED;
+	int key = KM_UNDEFINED;
 	if (str.contains("NONE")) {
-		key = (key | WKM_NONE);
+		key = (key | KM_NONE);
 	}
 	if (str.contains("WPA-PSK")) {
-		key = (key | WKM_WPA_PSK);
+		key = (key | KM_WPA_PSK);
 	}
 	if (str.contains("WPA-EAP")) {
-		key = (key | WKM_WPA_EAP);
+		key = (key | KM_WPA_EAP);
 	}
 	if (str.contains("IEEE8021X")) {
-		key = (key | WKM_IEEE8021X);
+		key = (key | KM_IEEE8021X);
 	}
 	return (wps_key_management) key;
 }
 
 wps_auth_algs CWpa_Supplicant::parseAuthAlg(QString str) {
-	int auth = WAA_UNDEFINED;
+	int auth = AUTHALG_UNDEFINED;
 	if (str.contains("OPEN")) {
-		auth = (auth | WAA_OPEN);
+		auth = (auth | AUTHALG_OPEN);
 	}
 	if (str.contains("SHARED")) {
-		auth = (auth | WAA_SHARED);
+		auth = (auth | AUTHALG_SHARED);
 	}
 	if (str.contains("LEAP")) {
-		auth = (auth | WAA_LEAP);
+		auth = (auth | AUTHALG_LEAP);
 	}
 	return (wps_auth_algs) auth;
 }
 wps_pairwise_ciphers CWpa_Supplicant::parsePairwiseCiphers(QString str) {
-	int cip = WPC_UNDEFINED;
+	int cip = PCI_UNDEFINED;
 	if (str.contains("NONE")) {
-		cip = (cip | WPC_NONE);
+		cip = (cip | PCI_NONE);
 	}
 	if (str.contains("CCMP")) {
-		cip = (cip | WPC_CCMP);
+		cip = (cip | PCI_CCMP);
 	}
 	if (str.contains("TKIP")) {
-		cip = (cip | WPC_TKIP);
+		cip = (cip | PCI_TKIP);
 	}
 	return (wps_pairwise_ciphers) cip;
 }
 wps_group_ciphers CWpa_Supplicant::parseGroupCiphers(QString str) {
-	int cip = WGC_UNDEFINED;
+	int cip = GCI_UNDEFINED;
 	if (str.contains("CCMP")) {
-		cip = (cip | WGC_CCMP);
+		cip = (cip | GCI_CCMP);
 	}
 	if (str.contains("TKIP")) {
-		cip = (cip | WGC_TKIP);
+		cip = (cip | GCI_TKIP);
 	}
 	if (str.contains("WEP104")) {
-		cip = (cip | WGC_WEP104);
+		cip = (cip | GCI_WEP104);
 	}
 	if (str.contains("WEP40")) {
-		cip = (cip | WGC_WEP40);
+		cip = (cip | GCI_WEP40);
 	}
 	return (wps_group_ciphers) cip;
 }
@@ -515,13 +515,13 @@ wps_status::DECISION CWpa_Supplicant::parseDecision(QString str) {
 //
 wps_interact_type CWpa_Supplicant::parseInteract(QString str) {
 	if (str.contains("CTRL-EVENT")) {
-		return WI_EVENT;
+		return INTERACT_EVENT;
 	}
 	else if (str.contains("CTRL-REQ")) {
-		return WI_REQ;
+		return INTERACT_REQ;
 	}
 	else {
-		return WI_MSG;
+		return INTERACT_MSG;
 	}
 }
 /*
@@ -535,24 +535,24 @@ PASSPHRASE (passphrase for a private key file)
 */
 wps_req_type CWpa_Supplicant::parseReqType(QString str) {
 	if (str.contains("IDENTITY")) {
-		return WR_IDENTITY;
+		return REQ_IDENTITY;
 	}
 	if (str.contains("PASSWORD")) {
-		return WR_PASSWORD;
+		return REQ_PASSWORD;
 	}
 	if (str.contains("NEW_PASSWORD")) {
-		return WR_NEW_PASSWORD;
+		return REQ_NEW_PASSWORD;
 	}
 	if (str.contains("PIN")) {
-		return WR_PIN;
+		return REQ_PIN;
 	}
 	if (str.contains("OTP")) {
-		return WR_OTP;
+		return REQ_OTP;
 	}
 	if (str.contains("PASSPHRASE")) {
-		return WR_PASSPHRASE;
+		return REQ_PASSPHRASE;
 	}
-	return WR_FAIL;
+	return REQ_FAIL;
 }
 wps_req CWpa_Supplicant::parseReq(QString str) {
 	bool ok = true;
@@ -569,33 +569,33 @@ wps_req CWpa_Supplicant::parseReq(QString str) {
 
 wps_event_type CWpa_Supplicant::parseEvent(QString str) {
 	if (str.contains("CONNECTED") ) {
-		return WE_CONNECTED;
+		return EVENT_CONNECTED;
 	}
 	if (str.contains("DISCONNECTED") ) {
-		return WE_DISCONNECTED;
+		return EVENT_DISCONNECTED;
 	}
 	if (str.contains("TERMINATING")) {
-		return WE_TERMINATING;
+		return EVENT_TERMINATING;
 	}
 	if (str.contains("PASSWORD_CHANGED")) {
-		return WE_PASSWORD_CHANGED;
+		return EVENT_PASSWORD_CHANGED;
 	}
 	if (str.contains("WEAP_NOTIFICATION") ){
-		return WE_EAP_NOTIFICATION;
+		return EVENT_EAP_NOTIFICATION;
 	}
 	if (str.contains("EAP_STARTED") ) {
-		return WE_EAP_STARTED;
+		return EVENT_EAP_STARTED;
 	}
 	if (str.contains("EAP_METHOD") ) {
-		return WE_EAP_METHOD;
+		return EVENT_EAP_METHOD;
 	}
 	if (str.contains("EAP_SUCCESS") ) {
-		return WE_EAP_SUCCESS;
+		return EVENT_EAP_SUCCESS;
 	}
 	if (str.contains("EAP_FAILURE") ) {
-		return 	WE_EAP_FAILURE;
+		return 	EVENT_EAP_FAILURE;
 	}
-	return WE_OTHER;
+	return EVENT_OTHER;
 }
 
 void CWpa_Supplicant::printMessage(QString msg) {
@@ -642,18 +642,18 @@ CTRL-EVENT-DISCONNECTED
 CTRL-EVENT-CONNECTED
 */
 void CWpa_Supplicant::Event_dispatcher(wps_req req) {
-	if (req.type != WR_FAIL) {
+	if (req.type != REQ_FAIL) {
 		emit(request(req));
 	}
 }
 void CWpa_Supplicant::Event_dispatcher(wps_event_type event) {
-	if (event == WE_CONNECTED) {
+	if (event == EVENT_CONNECTED) {
 		emit(stateChanged(true));
 	}
-	else if (event == WE_DISCONNECTED) {
+	else if (event == EVENT_DISCONNECTED) {
 		emit(stateChanged(false));
 	}
-	else if (event == WE_TERMINATING) {
+	else if (event == EVENT_TERMINATING) {
 		wps_close("event-dispatcher/wpa-TERMINATING");
 	}
 	else {
@@ -667,10 +667,10 @@ void CWpa_Supplicant::Event_dispatcher(QString event) {
 	foreach(QString str, str_list) {
 		type = parseInteract(str);
 		switch (type) {
-			case (WI_REQ):
+			case (INTERACT_REQ):
 				Event_dispatcher(parseReq(str));
 				break;
-			case (WI_EVENT):
+			case (INTERACT_EVENT):
 				Event_dispatcher(parseEvent(str));
 				break;
 			default:
@@ -1003,18 +1003,18 @@ int CWpa_Supplicant::addNetwork() {
 
 wps_netconfig_status CWpa_Supplicant::addNetwork(wps_network_config config) {
 	wps_netconfig_status status;
-	status.failures = WCF_NONE;
-	status.eap_failures = WECF_NONE;
+	status.failures = NCF_NONE;
+	status.eap_failures = ENCF_NONE;
 	int netid = addNetwork();
 	if (-1 == netid) {
-		status.failures = WCF_ALL;
-		status.eap_failures = WECF_ALL;
+		status.failures = NCF_ALL;
+		status.eap_failures = ENCF_ALL;
 		status.id = -1;
 		return status;
 	}
 	else {
 		status = editNetwork(netid,config);
-		if ( (status.eap_failures != WECF_NONE) || (WCF_NONE != status.failures) ) {
+		if ( (status.eap_failures != ENCF_NONE) || (NCF_NONE != status.failures) ) {
 			removeNetwork(netid);
 			status.id = -1;
 		}
@@ -1025,127 +1025,127 @@ wps_netconfig_status CWpa_Supplicant::addNetwork(wps_network_config config) {
 
 wps_netconfig_status CWpa_Supplicant::editNetwork(int netid, wps_network_config config) {
 	wps_netconfig_status wps_fail_status;
-	wps_fail_status.failures = WCF_NONE;
-	wps_fail_status.eap_failures = WECF_NONE;
+	wps_fail_status.failures = NCF_NONE;
+	wps_fail_status.eap_failures = ENCF_NONE;
 	wps_fail_status.id = netid;
 	if (!setNetworkVariable(netid,"ssid",config.ssid) ) {
-		wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_SSID);
+		wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_SSID);
 	}
 	if (!config.bssid.zero()) {
 		if (! setNetworkVariable(netid,"bssid",config.bssid.toString()) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_BSSID);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_BSSID);
 		}
 	}
-	if (config.disabled != WB_UNDEFINED) {
+	if (config.disabled != BOOL_UNDEFINED) {
 		if (!setNetworkVariable(netid,"disabled",toNumberString(config.disabled)) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_DISABLED);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_DISABLED);
 		}
 	}
 	if (!config.id_str.isEmpty()) {
 		if ( setNetworkVariable(netid,"id_str",config.id_str) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_ID_STR);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_ID_STR);
 		}
 	}
-	if (config.scan_ssid != WB_UNDEFINED) {
+	if (config.scan_ssid != BOOL_UNDEFINED) {
 		if (!setNetworkVariable(netid,"scan_ssid",toNumberString(config.scan_ssid)) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_SCAN_SSID);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_SCAN_SSID);
 		}
 	}
 	if (config.priority >= 0) {
 		if (!setNetworkVariable(netid,"priority",QString::number(config.priority)) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_PRIORITY);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_PRIORITY);
 		}
 	}
-	if (config.mode != WB_UNDEFINED) {
+	if (config.mode != BOOL_UNDEFINED) {
 		if (!setNetworkVariable(netid,"mode",toNumberString(config.mode)) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_MODE);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_MODE);
 		}
 	}
 	if (0 != config.frequency) {
 		if (!setNetworkVariable(netid,"frequency",QString::number(config.frequency)) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_FREQ);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_FREQ);
 		}
 	}
-	if (! (WP_UNDEFINED == config.protocols) ) {
+	if (! (PROTO_UNDEFINED == config.protocols) ) {
 		if ( !setNetworkVariable(netid,"proto",toString(config.protocols)) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_PROTO);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_PROTO);
 		}
 	}
-	if (! (WKM_UNDEFINED == config.keyManagement) ) {
+	if (! (KM_UNDEFINED == config.keyManagement) ) {
 		if ( !setNetworkVariable(netid,"key_mgmt",toString(config.keyManagement)) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_KEYMGMT);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_KEYMGMT);
 		}
 	}
-	if (! (WAA_UNDEFINED == config.auth_alg) ) {
+	if (! (AUTHALG_UNDEFINED == config.auth_alg) ) {
 		if ( !setNetworkVariable(netid,"auth_alg",toString(config.auth_alg) )) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_AUTH_ALG);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_AUTH_ALG);
 		}
 	}
-	if (! (WPC_UNDEFINED == config.pairwise) ) {
+	if (! (PCI_UNDEFINED == config.pairwise) ) {
 		if ( !setNetworkVariable(netid,"pairwise",toString(config.pairwise) )) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_PAIRWISE);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_PAIRWISE);
 		}
 	}
-	if (! (WGC_UNDEFINED == config.group) ) {
+	if (! (GCI_UNDEFINED == config.group) ) {
 		if ( !setNetworkVariable(netid,"group",toString(config.group) )) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_GROUP);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_GROUP);
 		}
 	}
 	if (!config.psk.isEmpty()) {
 		if ( !setNetworkVariable(netid,"psk",config.psk)) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_PSK);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_PSK);
 		}
 	}
 	if (! EAPF_UNDEFINED == config.eapol_flags ) {
 		if ( !setNetworkVariable(netid,"eapol_flags",toString(config.eapol_flags))) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_EAPOL_FLAGS);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_EAPOL_FLAGS);
 		}
 	}
-	if (config.mixed_cell != WB_UNDEFINED) {
+	if (config.mixed_cell != BOOL_UNDEFINED) {
 		if ( !setNetworkVariable(netid,"mixed_cell",toNumberString(config.mixed_cell)) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_MIXED_CELL);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_MIXED_CELL);
 		}
 	}
-	if (config.proactive_key_caching != WB_UNDEFINED) {
+	if (config.proactive_key_caching != BOOL_UNDEFINED) {
 		if ( !setNetworkVariable(netid,"proactive_key_caching",toNumberString(config.proactive_key_caching)) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_PROA_KEY_CACHING);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_PROA_KEY_CACHING);
 		}
 	}
 	if (!config.wep_key0.isEmpty()) {
 		if ( !setNetworkVariable(netid,"wep_key0",config.wep_key0) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_WEP_KEY0);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_WEP_KEY0);
 		}	
 	}
 	if (!config.wep_key1.isEmpty()) {
 		if ( !setNetworkVariable(netid,"wep_key1",config.wep_key1)) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_WEP_KEY1);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_WEP_KEY1);
 		}	
 	}
 	if (!config.wep_key2.isEmpty()) {
 		if ( !setNetworkVariable(netid,"wep_key2",config.wep_key2) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_WEP_KEY2);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_WEP_KEY2);
 		}	
 	}
 	if (!config.wep_key3.isEmpty()) {
 		if ( !setNetworkVariable(netid,"wep_key3",config.wep_key3) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_WEP_KEY3);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_WEP_KEY3);
 		}	
 	}
 	if (config.wep_tx_keyidx <= 3 && config.wep_tx_keyidx >= 0) {
 		if ( !setNetworkVariable(netid,"wep_tx_keyidx",QString::number(config.wep_tx_keyidx)) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_WEP_KEY_IDX);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_WEP_KEY_IDX);
 		}
 	}
 	else if (config.wep_tx_keyidx != -1) {
-		wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_WEP_KEY_IDX);
+		wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_WEP_KEY_IDX);
 	}
-	if (config.peerkey != WB_UNDEFINED) {
+	if (config.peerkey != BOOL_UNDEFINED) {
 		if ( !setNetworkVariable(netid,"peerkey",toNumberString(config.peerkey)) ) {
-			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | WCF_PEERKEY);
+			wps_fail_status.failures = (wps_netconfig_failures) (wps_fail_status.failures | NCF_PEERKEY);
 		}
 	}
 	//Check if we have an EAP network
-	if ((config.keyManagement & (WKM_WPA_EAP | WKM_IEEE8021X) ) || config.keyManagement == WKM_UNDEFINED) {
+	if ((config.keyManagement & (KM_WPA_EAP | KM_IEEE8021X) ) || config.keyManagement == KM_UNDEFINED) {
 		wps_fail_status.eap_failures = wps_editEapNetwork(netid,config.eap_config);
 	}
 	return wps_fail_status;
@@ -1273,7 +1273,7 @@ wps_network_config CWpa_Supplicant::getNetworkConfig(int id) {
 		config.peerkey = toWpsBool(response);
 	}
 	//Check if we need to fetch wpa_settings
-	if ( config.keyManagement & (WKM_IEEE8021X | WKM_WPA_EAP)) {
+	if ( config.keyManagement & (KM_IEEE8021X | KM_WPA_EAP)) {
 		config.eap_config = wps_getEapNetworkConfig(id);
 	}
 	return config;
@@ -1286,7 +1286,7 @@ wps_eap_network_config CWpa_Supplicant::wps_getEapNetworkConfig(int id) {
 	//Check if the network uses EAP
 	response = wps_cmd_GET_NETWORK(id,"key_mgmt");
 	if ("FAIL\n" != response) {
-		if ( !(parseKeyMgmt(response) & (WKM_WPA_EAP | WKM_IEEE8021X) ) ) {
+		if ( !(parseKeyMgmt(response) & (KM_WPA_EAP | KM_IEEE8021X) ) ) {
 			return config;
 		}
 	}
@@ -1404,135 +1404,135 @@ wps_eap_network_config CWpa_Supplicant::wps_getEapNetworkConfig(int id) {
 	return config;
 }
 wps_eap_netconfig_failures CWpa_Supplicant::wps_editEapNetwork(int netid, wps_eap_network_config config) {
-	wps_eap_netconfig_failures eap_failures = WECF_NONE;
+	wps_eap_netconfig_failures eap_failures = ENCF_NONE;
 	if (EAPM_UNDEFINED != config.eap) {
 		if (!setNetworkVariable(netid,"eap",toString(config.eap)) ) {
-			eap_failures= (wps_eap_netconfig_failures) (eap_failures | WECF_EAP);
+			eap_failures= (wps_eap_netconfig_failures) (eap_failures | ENCF_EAP);
 		}
 	}
 	if (!config.identity.isEmpty()) {
 		if (!setNetworkVariable(netid,"identity",config.identity) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_IDENTITY);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_IDENTITY);
 		}
 	}
 	if (!config.anonymous_identity.isEmpty()) {
 		if (!setNetworkVariable(netid,"anonymous_identity",config.anonymous_identity) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_ANON_IDENTITY);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_ANON_IDENTITY);
 		}
 	}
 	if (!config.password.isEmpty()) {
 		if (!setNetworkVariable(netid,"password",config.password) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_PASSWD);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_PASSWD);
 		}
 	}
 	if (!config.ca_cert.isEmpty()) {
 		if (!setNetworkVariable(netid,"ca_cert",config.ca_cert) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_CA_CERT);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_CA_CERT);
 		}
 	}
 	if (!config.ca_path.isEmpty()) {
 		if (!setNetworkVariable(netid,"ca_path",config.ca_path) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_CA_PATH);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_CA_PATH);
 		}
 	}
 	if (!config.client_cert.isEmpty()) {
 		if (!setNetworkVariable(netid,"client_cert",config.client_cert) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_CLIENT_CERT);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_CLIENT_CERT);
 		}
 	}
 	if (!config.private_key.isEmpty()) {
 		if (!setNetworkVariable(netid,"private_key",config.private_key) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_PRIVATE_KEY);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_PRIVATE_KEY);
 		}
 	}
 	if (!config.private_key_passwd.isEmpty()) {
 		if (!setNetworkVariable(netid,"private_key_passwd",config.private_key_passwd) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_PRIVATE_KEY_PASSWD);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_PRIVATE_KEY_PASSWD);
 		}
 	}
 	if (!config.dh_file.isEmpty()) {
 		if (!setNetworkVariable(netid,"dh_file",config.dh_file) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_DH_FILE);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_DH_FILE);
 		}
 	}
 	if (!config.subject_match.isEmpty()) {
 		if (!setNetworkVariable(netid,"subject_match",config.subject_match) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_SUBJECT_MATCH);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_SUBJECT_MATCH);
 		}
 	}
 	if (!config.altsubject_match.isEmpty()) {
 		if (!setNetworkVariable(netid,"altsubject_match",config.altsubject_match) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_ALTSUBJECT_MATCH);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_ALTSUBJECT_MATCH);
 		}
 	}
 	if (!config.phase1.isEmpty()) {
 		if (!setNetworkVariable(netid,"phase1",config.phase1) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_PHASE1);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_PHASE1);
 		}
 	}
 	if (!config.phase2.isEmpty()) {
 		if (!setNetworkVariable(netid,"phase2",config.phase2) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_PHASE2);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_PHASE2);
 		}
 	}
 	if (!config.ca_cert2.isEmpty()) {
 		if (!setNetworkVariable(netid,"ca_cert2",config.ca_cert2) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_CA_CERT2);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_CA_CERT2);
 		}
 	}
 	if (!config.ca_path2.isEmpty()) {
 		if (!setNetworkVariable(netid,"ca_path2",config.ca_path2) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_CA_PATH2);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_CA_PATH2);
 		}
 	}
 	if (!config.client_cert2.isEmpty()) {
 		if (!setNetworkVariable(netid,"client_cert2",config.client_cert2) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_CLIENT_CERT2);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_CLIENT_CERT2);
 		}
 	}
 	if (!config.private_key2.isEmpty()) {
 		if (!setNetworkVariable(netid,"private_key2",config.private_key2) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_PRIVATE_KEY2);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_PRIVATE_KEY2);
 		}
 	}
 	if (!config.private_key2_passwd.isEmpty()) {
 		if (!setNetworkVariable(netid,"private_key2_passwd",config.private_key2_passwd) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_PRIVATE_KEY2_PASSWD);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_PRIVATE_KEY2_PASSWD);
 		}
 	}
 	if (!config.dh_file2.isEmpty()) {
 		if (!setNetworkVariable(netid,"dh_file2",config.dh_file2) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_DH_FILE2);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_DH_FILE2);
 		}
 	}
 	if (!config.subject_match2.isEmpty()) {
 		if (!setNetworkVariable(netid,"subject_match2",config.subject_match2) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_SUBJECT_MATCH);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_SUBJECT_MATCH);
 		}
 	}
 	if (!config.altsubject_match2.isEmpty()) {
 		if (!setNetworkVariable(netid,"altsubject_match2",config.altsubject_match2) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_ALTSUBJECT_MATCH);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_ALTSUBJECT_MATCH);
 		}
 	}
 	if (-1 != config.fragment_size) {
 		if (!setNetworkVariable(netid,"altsubject_match2",QString::number(config.fragment_size)) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_FRAGMENT_SIZE);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_FRAGMENT_SIZE);
 		}
 	}
 	if (!config.eappsk.isEmpty()) {
 		if (!setNetworkVariable(netid,"eappsk",config.eappsk) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_EAPPSK);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_EAPPSK);
 		}
 	}
 	if (!config.nai.isEmpty()) {
 		if (!setNetworkVariable(netid,"nai",config.nai) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_NAI);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_NAI);
 		}
 	}
 	if (!config.pac_file.isEmpty()) {
 		if (!setNetworkVariable(netid,"pac_file",config.pac_file) ) {
-			eap_failures = (wps_eap_netconfig_failures) (eap_failures | WECF_PAC_FILE);
+			eap_failures = (wps_eap_netconfig_failures) (eap_failures | ENCF_PAC_FILE);
 		}
 	}
 	return eap_failures;
@@ -1927,11 +1927,11 @@ wps_MIB CWpa_Supplicant::getMIBVariables() {
 wps_capabilities CWpa_Supplicant::getCapabilities() {
 	wps_capabilities caps;
 	caps.eap = EAPM_UNDEFINED;
-	caps.pairwise = WPC_UNDEFINED;
-	caps.group = WGC_UNDEFINED;
-	caps.keyManagement = WKM_UNDEFINED;
-	caps.proto = WP_UNDEFINED;
-	caps.auth_alg = WAA_UNDEFINED;
+	caps.pairwise = PCI_UNDEFINED;
+	caps.group = GCI_UNDEFINED;
+	caps.keyManagement = KM_UNDEFINED;
+	caps.proto = PROTO_UNDEFINED;
+	caps.auth_alg = AUTHALG_UNDEFINED;
 	QString response;
 	response = wps_cmd_GET_CAPABILITY("eap",false);
 	if ("FAIL\n" != response) {

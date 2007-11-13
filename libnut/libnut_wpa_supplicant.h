@@ -104,8 +104,8 @@ namespace libnutws {
 
 
 			//parse scan results
-			wps_ciphers parseScanCiphers(QString str);
-			wps_authentication parseScanAuth(QString str);
+			ScanCiphers parseScanCiphers(QString str);
+			ScanAuthentication parseScanAuth(QString str);
 			QList<wps_scan> parseScanResult(QStringList list);
 
 			//parse config

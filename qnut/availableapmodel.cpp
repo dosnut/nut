@@ -77,7 +77,7 @@ namespace qnut {
 		case AVLAP_MOD_KEYMGMT: {
 				int keyFlags = scans[index.row()].keyManagement;
 				
-				if (keyFlags == WKM_UNDEFINED)
+				if (keyFlags == KM_UNDEFINED)
 					return tr("undefined");
 				
 				int protocolFlags = scans[index.row()].protocols;
@@ -85,22 +85,22 @@ namespace qnut {
 				QStringList results;
 				QStringList wpaPrefixes;
 				
-				if (keyFlags & WKM_NONE)
+				if (keyFlags & KM_NONE)
 					results << tr("plain or WEP");
 					
-				if (protocolFlags & WP_WPA)
+				if (protocolFlags & PROTO_WPA)
 					wpaPrefixes << "WPA";
 				
-				if (protocolFlags & WP_RSN)
+				if (protocolFlags & PROTO_RSN)
 					wpaPrefixes << "WPA2";
 				
-				if (keyFlags & WKM_WPA_PSK) {
+				if (keyFlags & KM_WPA_PSK) {
 					results << wpaPrefixes.join("/") + " PSK";
 				}
-				if (keyFlags & WKM_WPA_EAP) {
+				if (keyFlags & KM_WPA_EAP) {
 					results << wpaPrefixes.join("/") + " EAP";
 				}
-				if (keyFlags & WKM_IEEE8021X) {
+				if (keyFlags & KM_IEEE8021X) {
 					results << "IEEE 802.1X";
 				}
 				
