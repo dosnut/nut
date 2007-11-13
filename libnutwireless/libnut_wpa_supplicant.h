@@ -5,11 +5,10 @@
 #include <libnutcommon/config.h>
 //#include "libnut_server_proxy.h"
 //#include "libnut_exceptions.h"
-#include "libnut_wpa_supplicant_types.h"
+#include "libnutwireless_parsers.h"
 #include "wpa_ctrl.h"
 #include <QFile>
 #include <QSocketNotifier>
-#include <QStringList>
 #include <QTimerEvent>
 #include <libnutcommon/macaddress.h>
 #include <QCoreApplication>
@@ -29,7 +28,7 @@ extern "C" {
 
 namespace libnutwireless {
 
-	class CWpa_Supplicant: public QObject {
+	class CWpa_Supplicant: public QObject, public CWpa_SupplicantParsers {
 			Q_OBJECT
 		private:
 			struct wpa_ctrl *cmd_ctrl, *event_ctrl;
@@ -80,7 +79,7 @@ namespace libnutwireless {
 			inline QString wps_cmd_SET_NETWORK(int id, QString var, QString val) { return wps_ctrl_command(QString("SET_NETWORK %1 %2 %3").arg(QString::number(id),var,val));}
 			//get network variable
 			inline QString wps_cmd_GET_NETWORK(int id, QString var) { return wps_ctrl_command(QString("GET_NETWORK %1 %2").arg(QString::number(id), var)); }
-			inline void wps_cmd_SAVE_CONFIG() { wps_ctrl_command("SAVE_CONFIG"); }
+			inline QString wps_cmd_SAVE_CONFIG() { return wps_ctrl_command("SAVE_CONFIG"); }
 			inline void wps_cmd_CTRL_RSP(QString field_name, int id, QString val) { wps_ctrl_command(QString("CTRL-RSP-%1-%2-%3").arg(field_name,QString::number(id), val)); }
 			inline QString wps_cmd_GET_CAPABILITY(QString option, bool strict) { return (strict) ? wps_ctrl_command(QString("GET_CAPABILITY %1 strict").arg(option)) : wps_ctrl_command(QString("GET_CAPABILITY %1").arg(option));}
 			//Change ap_scan value: 0 = no scanning,
@@ -90,53 +89,6 @@ namespace libnutwireless {
 			inline QString wps_cmd_INTERFACES() { return wps_ctrl_command("INTERFACES"); }
 			
 			//Parser Functions
-
-			
-			QStringList sliceMessage(QString str);
-			
-			//Parse MIB Variables
-			MIBVariables parseMIB(QStringList list);
-			MIBVariable::MIBVariable_type parseMIBType(QString str);
-			
-			//parse list network
-			QList<ShortNetworkInfo> parseListNetwork(QStringList list);
-			NetworkFlags parseNetworkFlags(QString str);
-
-
-			//parse scan results
-			ScanCiphers parseScanCiphers(QString str);
-			ScanAuthentication parseScanAuth(QString str);
-			QList<ScanResult> parseScanResult(QStringList list);
-
-			//parse config
-			Protocols parseProtocols(QString str);
-			KeyManagement parseKeyMgmt(QString str);
-			AuthenticationAlgs parseAuthAlg(QString str);
-			PairwiseCiphers parsePairwiseCiphers(QString str);
-			GroupCiphers parseGroupCiphers(QString str);
-			EapolFlags parseEapolFlags(QString str);
-			EapMethod parseEapMethod(QString str);
-			
-			
-
-			//parse Status with helper functionss
-			Status parseStatus(QStringList list);
-			Status::WPA_STATE parseWpaState(QString str);
-			Status::PAE_STATE parsePaeState(QString str);
-			Status::PORT_STATUS parsePortStatus(QString str);
-			Status::PORT_CONTROL parsePortControl(QString str);
-			Status::BACKEND_STATE parseBackendState(QString str);
-			Status::EAP_STATE parseEapState(QString str);
-			Status::METHOD_STATE parseMethodState(QString str);
-			Status::DECISION parseDecision(QString str);
-
-			
-			//parse Event
-			EventType parseEvent(QString str);
-			Request parseReq(QString str);
-			RequestType parseReqType(QString str);
-			InteractiveType parseInteract(QString str);
-
 			//Event helper functions:
 			void Event_dispatcher(Request req);
 			void Event_dispatcher(EventType event);
@@ -158,7 +110,6 @@ namespace libnutwireless {
 			void wps_open(bool time_call);
 			bool wps_close(QString call_func, bool internal=true);
 			int wps_TimerTime(int timerCount);
-
 
 		private slots:
 			void wps_read(int socket);
@@ -185,7 +136,7 @@ namespace libnutwireless {
 			void disableNetwork(int id);
 			void scan();
 			void ap_scan(int type=1);
-			void save_config();
+			bool save_config();
 			void disconnect_device();
 			void logon();
 			void logoff();
