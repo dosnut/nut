@@ -20,7 +20,7 @@ namespace qnut {
 			return address.toString();
 	}
 	
-	QString signalSummary(libnutws::wps_wext_signal_readable signal);
+	QString signalSummary(libnutws::WextSignal signal);
 	
 };
 

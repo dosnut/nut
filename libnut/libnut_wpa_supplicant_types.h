@@ -68,14 +68,14 @@ namespace libnutws {
 
 	typedef enum {
 		BOOL_UNDEFINED=-1, BOOL_FALSE=0,BOOL_TRUE=1
-	} wps_bool;
+	} BOOL;
 
-	struct wps_netconfig_status {
+	struct NetconfigStatus {
 		NetconfigFailures failures;
 		EapNetconfigFailures eap_failures;
 		int id;
 	};
-	struct wps_capabilities {
+	struct Capabilities {
 		EapMethod eap;
 		PairwiseCiphers pairwise;
 		GroupCiphers group;
@@ -84,18 +84,18 @@ namespace libnutws {
 		AuthenticationAlgs auth_alg;
 	};
 
-	struct	wps_raw_signal_quality {
+	struct	WextRawSignal {
 		quint8 qual;	/* link quality (%retries, SNR, %missed beacons or better...) */
 		quint8 level;		/* signal level (dBm) */
 		quint8 noise;		/* noise level (dBm) */
 		quint8 updated;	/* Flags to know if updated */
 	};
 
-	struct wps_wext_raw_scan {
+	struct WextRawScan {
 		nut::MacAddress bssid;
-		wps_raw_signal_quality quality;
-		wps_raw_signal_quality maxquality;
-		wps_raw_signal_quality avgquality;
+		WextRawSignal quality;
+		WextRawSignal maxquality;
+		WextRawSignal avgquality;
 		int hasRange;
 		int we_version_compiled;
 	};
@@ -104,16 +104,16 @@ namespace libnutws {
 // 		WSIG_QUALITY_ALLABS=0, WSIG_LEVEL_REL=1, WSIG_NOISE_REL=2, WSIG_UNKNOWN=4
 // 	} wps_signal_quality_encoding; 
 
-// 	struct wps_wext_scan_readable : public wps_wext_scan {
+// 	struct WextScan : public wps_wext_scan {
 // 		wps_signal_quality_encoding encoding;
 // 	};
 	
 	typedef enum {
 		WSR_UNKNOWN=0, WSR_RCPI=1, WSR_ABSOLUTE=2, WSR_RELATIVE=3
-	} wps_wext_signal_readable_type; 
+	} WextSignal_type; 
 
-	struct wps_wext_signal_readable {
-		wps_wext_signal_readable_type type;
+	struct WextSignal {
+		WextSignal_type type;
 		struct {
 			quint8 value;
 			quint8 maximum;
@@ -134,16 +134,16 @@ namespace libnutws {
 		} level;
 	};
 
-	struct wps_wext_scan_readable {
+	struct WextScan {
 		nut::MacAddress bssid;
-		wps_wext_signal_readable signal;
+		WextSignal signal;
 	};
 	
 	struct wps_scan {
 		nut::MacAddress bssid;
 		QString ssid;
 		int freq;
-		wps_wext_signal_readable signal;
+		WextSignal signal;
 		ScanCiphers ciphers;
 		KeyManagement keyManagement;
 		Protocols protocols;
@@ -240,25 +240,25 @@ namespace libnutws {
 	QString toString(EapMethod method);
 
 	//Function converts the encoded scan values to real values
-	wps_wext_signal_readable convertValues(wps_wext_raw_scan scan);
-	QString signalQualityToString(wps_wext_raw_scan scan);
-	QStringList signalQualityToStringList(wps_wext_raw_scan scan);
+	WextSignal convertValues(WextRawScan scan);
+	QString signalQualityToString(WextRawScan scan);
+	QStringList signalQualityToStringList(WextRawScan scan);
 	
 
-	QString toNumberString(wps_bool b);
-	bool toBool(wps_bool b);
-	wps_bool toWpsBool(bool b);
+	QString toNumberString(BOOL b);
+	bool toBool(BOOL b);
+	BOOL toWpsBool(bool b);
 
 	inline int toNumber(bool b) {
 		return ((b)? 1 : 0);
 	}
-	inline int toNumber(wps_bool b) {
+	inline int toNumber(BOOL b) {
 		return ( (b == BOOL_UNDEFINED) ? -1 : ( (b == BOOL_TRUE) ? 1 : 0)); 
 	}
 	inline bool toBool(QString str) {
 		return ( ("0" == str) ? true : false);
 	}
-	inline wps_bool toWpsBool(QString str) {
+	inline BOOL toWpsBool(QString str) {
 		if ("0" == str) {
 			return BOOL_FALSE;
 		}
@@ -314,11 +314,11 @@ namespace libnutws {
 			~wps_network_config();
 			QString ssid;
 			nut::MacAddress bssid;
-			wps_bool disabled;
+			BOOL disabled;
 			QString id_str; // Network identifier string for external scripts
-			wps_bool scan_ssid; // (do not) scan with SSID-specific Probe Request frames
+			BOOL scan_ssid; // (do not) scan with SSID-specific Probe Request frames
 			int priority;
-			wps_bool mode; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
+			BOOL mode; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
 			int frequency;
 			Protocols protocols; //list of accepted protocols TODO: implement
 			KeyManagement keyManagement; // list of accepted authenticated key management protocols
@@ -327,14 +327,14 @@ namespace libnutws {
 			GroupCiphers group; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
 			QString psk; //WPA preshared key; 256-bit pre-shared key
 			EapolFlags eapol_flags; // IEEE 802.1X/EAPOL options (bit field) TODO:implement
-			wps_bool mixed_cell; //This option can be used to configure whether so called mixed
-			wps_bool proactive_key_caching; //Enable/disable opportunistic PMKSA caching for WPA2.
+			BOOL mixed_cell; //This option can be used to configure whether so called mixed
+			BOOL proactive_key_caching; //Enable/disable opportunistic PMKSA caching for WPA2.
 			QString wep_key0; //Static WEP key (ASCII in double quotation, hex without)
 			QString wep_key1;
 			QString wep_key2;
 			QString wep_key3;
 			char wep_tx_keyidx; //Default WEP key index (TX) (0..3) TODO: implement
-			wps_bool peerkey; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
+			BOOL peerkey; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
 			wps_eap_network_config eap_config;
 	};
 }

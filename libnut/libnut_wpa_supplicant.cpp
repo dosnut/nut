@@ -836,7 +836,7 @@ void CWpa_Supplicant::wps_detach() {
 	}
 }
 
-void CWpa_Supplicant::wps_setScanResults(QList<wps_wext_raw_scan> &wextScanResults) {
+void CWpa_Supplicant::wps_setScanResults(QList<WextRawScan> &wextScanResults) {
 	QString response = wps_cmd_SCAN_RESULTS();
 	if (response.isEmpty()) {
 		wpsScanResults = QList<wps_scan>();
@@ -846,11 +846,11 @@ void CWpa_Supplicant::wps_setScanResults(QList<wps_wext_raw_scan> &wextScanResul
 		//Set scan results from wpa_supplicant:
 		wpsScanResults = parseScanResult(sliceMessage(response));
 		//This may not be possible as qHash references an namespace that is unknown to qt TODO:CHECK!
-		QHash<QString,wps_wext_signal_readable> wextScanHash; //Namespace problem
-		foreach(wps_wext_raw_scan i, wextScanResults) {
+		QHash<QString,WextSignal> wextScanHash; //Namespace problem
+		foreach(WextRawScan i, wextScanResults) {
 			wextScanHash.insert(i.bssid.toString(), convertValues(i));
 		}
-		wps_wext_signal_readable dummy;
+		WextSignal dummy;
 		int count = 0;
 		//Set the signal quality
 		for (QList<wps_scan>::Iterator i = wpsScanResults.begin(); i != wpsScanResults.end(); ++i ) {
@@ -918,7 +918,7 @@ void CWpa_Supplicant::setSignalQualityPollRate(int msec) {
 int CWpa_Supplicant::getSignalQualityPollRate() {
 	return wextTimerRate;
 }
-wps_wext_signal_readable CWpa_Supplicant::getSignalQuality() {
+WextSignal CWpa_Supplicant::getSignalQuality() {
 	return signalQuality;
 }
 
@@ -1001,8 +1001,8 @@ int CWpa_Supplicant::addNetwork() {
 }
 
 
-wps_netconfig_status CWpa_Supplicant::addNetwork(wps_network_config config) {
-	wps_netconfig_status status;
+NetconfigStatus CWpa_Supplicant::addNetwork(wps_network_config config) {
+	NetconfigStatus status;
 	status.failures = NCF_NONE;
 	status.eap_failures = ENCF_NONE;
 	int netid = addNetwork();
@@ -1023,8 +1023,8 @@ wps_netconfig_status CWpa_Supplicant::addNetwork(wps_network_config config) {
 }
 
 
-wps_netconfig_status CWpa_Supplicant::editNetwork(int netid, wps_network_config config) {
-	wps_netconfig_status wps_fail_status;
+NetconfigStatus CWpa_Supplicant::editNetwork(int netid, wps_network_config config) {
+	NetconfigStatus wps_fail_status;
 	wps_fail_status.failures = NCF_NONE;
 	wps_fail_status.eap_failures = ENCF_NONE;
 	wps_fail_status.id = netid;
@@ -1556,8 +1556,8 @@ void CWpa_Supplicant::wps_tryScanResults() {
 	int buflen = IW_SCAN_MAX_DATA; /* Min for compat WE<17 */
 	struct iw_range range;
 	int has_range;
-	QList<wps_wext_raw_scan> res;
-	wps_wext_raw_scan singleres;
+	QList<WextRawScan> res;
+	WextRawScan singleres;
 	singleres.bssid = nut::MacAddress();
 	/* workaround */
 	struct wireless_config b;
@@ -1751,7 +1751,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 	struct iw_range range;
 	int hasRange = 0;
 	iwstats stats;
-	wps_wext_raw_scan res;
+	WextRawScan res;
 	/* workaround */
 	struct wireless_config b;
 	/* Get basic information */ 
@@ -1924,8 +1924,8 @@ wps_MIB CWpa_Supplicant::getMIBVariables() {
 	}
 }
 
-wps_capabilities CWpa_Supplicant::getCapabilities() {
-	wps_capabilities caps;
+Capabilities CWpa_Supplicant::getCapabilities() {
+	Capabilities caps;
 	caps.eap = EAPM_UNDEFINED;
 	caps.pairwise = PCI_UNDEFINED;
 	caps.group = GCI_UNDEFINED;

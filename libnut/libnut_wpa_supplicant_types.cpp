@@ -238,20 +238,20 @@ QString toString(RequestType reqt) {
 	return QString();
 }
 
-QString toNumberString(wps_bool b) {
+QString toNumberString(BOOL b) {
 	return ( (b == BOOL_UNDEFINED) ? "-1" : ( (b == BOOL_TRUE) ? "1" : "0")); 
 }
-bool toBool(wps_bool b) {
+bool toBool(BOOL b) {
 	return (b == BOOL_TRUE);
 }
-wps_bool toWpsBool(bool b) {
+BOOL toWpsBool(bool b) {
 	return ( b ? BOOL_TRUE : BOOL_FALSE);
 }
 
 //Modified iw_print_stats function from iwlib.c
 //We don't care whether information was updated or not. Just convert it
-wps_wext_signal_readable convertValues(wps_wext_raw_scan scan) {
-	wps_wext_signal_readable res;
+WextSignal convertValues(WextRawScan scan) {
+	WextSignal res;
 // 	res.encoding = WSIG_QUALITY_ALLABS;
 	qDebug() << "hasRange:" << scan.hasRange;
 	if ( scan.hasRange && ((scan.quality.level != 0) || (scan.quality.updated & (IW_QUAL_DBM | IW_QUAL_RCPI))) ) {
@@ -328,7 +328,7 @@ wps_wext_signal_readable convertValues(wps_wext_raw_scan scan) {
 	}
 	return res;
 }
-QString signalQualityToString(wps_wext_raw_scan scan) {
+QString signalQualityToString(WextRawScan scan) {
 	char buffer[128];
 	iw_range range;
 	iw_quality qual;
@@ -354,7 +354,7 @@ QString signalQualityToString(wps_wext_raw_scan scan) {
 	}
 	return ret;
 }
-QStringList signalQualityToStringList(wps_wext_raw_scan scan) {
+QStringList signalQualityToStringList(WextRawScan scan) {
 	QString sigstr = signalQualityToString(scan);
 	QStringList tmp;
 	QStringList ret;

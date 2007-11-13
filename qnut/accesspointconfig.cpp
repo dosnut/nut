@@ -99,12 +99,12 @@ namespace qnut {
 	}
 		
 	void CAccessPointConfig::verifyConfiguration() {
-		wps_netconfig_status status;
+		NetconfigStatus status;
 		wps_network_config config;
 		
 		config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
 		
-		config.disabled = (wps_bool)ui.autoEnableCheck->isChecked();
+		config.disabled = (BOOL)ui.autoEnableCheck->isChecked();
 		
 		if (ui.encCombo->currentText() == "WEP") {
 			config.group = (GroupCiphers)(GCI_WEP104 | GCI_WEP40);

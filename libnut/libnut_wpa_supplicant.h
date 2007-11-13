@@ -46,7 +46,7 @@ namespace libnutws {
 			bool inConnectionPhase;
 			QString ifname;
 			QList<wps_scan> wpsScanResults;
-			wps_wext_signal_readable signalQuality; //bssid is zero
+			WextSignal signalQuality; //bssid is zero
 			int ScanTimeoutCount;
 			int wextPollTimeoutCount;
 
@@ -149,7 +149,7 @@ namespace libnutws {
 
 			//Functions to get actual signal strength and/or signal strength for scan results:
 			//And set scanresults
-			void wps_setScanResults(QList<wps_wext_raw_scan> &wextScanResults);
+			void wps_setScanResults(QList<WextRawScan> &wextScanResults);
 			void wps_tryScanResults();
 
 
@@ -195,8 +195,8 @@ namespace libnutws {
 			void terminate();
 			void preauth(nut::MacAddress bssid);
 			int addNetwork(); //return -1 if failed, otherwise return network id
-			wps_netconfig_status addNetwork(wps_network_config config); //return -1 if failed, otherwise return network id
-			wps_netconfig_status editNetwork(int netid, wps_network_config config);
+			NetconfigStatus addNetwork(wps_network_config config); //return -1 if failed, otherwise return network id
+			NetconfigStatus editNetwork(int netid, wps_network_config config);
 			wps_network_config getNetworkConfig(int id);
 			
 			void removeNetwork(int id);
@@ -208,7 +208,7 @@ namespace libnutws {
 
 			void setSignalQualityPollRate(int msec);
 			int getSignalQualityPollRate();
-			wps_wext_signal_readable getSignalQuality();
+			WextSignal getSignalQuality();
 
 			QList<wps_network> listNetworks();
 			QList<wps_scan> scanResults();
@@ -216,7 +216,7 @@ namespace libnutws {
 			
 			//Seldomly used functions
 			wps_MIB getMIBVariables();
-			wps_capabilities getCapabilities();
+			Capabilities getCapabilities();
 			//Future functions: (these may never be implemented as noone realy needs them
 			/*
 			QString wps_cmd_PMKSA();
@@ -236,7 +236,7 @@ namespace libnutws {
 			void scanCompleted();
 			void message(QString msg);
 			void eventMessage(libnutws::EventType type);
-			void signalQualityUpdated(libnutws::wps_wext_signal_readable signal);
+			void signalQualityUpdated(libnutws::WextSignal signal);
 	};
 
 }
