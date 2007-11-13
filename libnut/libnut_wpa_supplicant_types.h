@@ -139,7 +139,7 @@ namespace libnutws {
 		WextSignal signal;
 	};
 	
-	struct wps_scan {
+	struct ScanResult {
 		nut::MacAddress bssid;
 		QString ssid;
 		int freq;
@@ -148,10 +148,10 @@ namespace libnutws {
 		KeyManagement keyManagement;
 		Protocols protocols;
 	};
-	struct wps_variable;
-	typedef QList<wps_variable> wps_MIB;
+	struct MIBVariable;
+	typedef QList<MIBVariable> MIBVariables;
 	//enums are NOT complete, but maybe we schould change this to QString
-	struct wps_status {
+	struct Status {
 // 		typedef enum {COMPLETED} WPA_STATE;
 // 		typedef enum {AUTHENTICATED} PAE_STATE;
 // 		typedef enum {AUTHORIZED} PORT_STATUS;
@@ -192,9 +192,9 @@ namespace libnutws {
 		int ClientTimeout;
 	};
 
-	struct wps_variable {
-		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} wps_variable_type;
-		wps_variable_type type;
+	struct MIBVariable {
+		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} MIBVariable_type;
+		MIBVariable_type type;
 		QString name;
 		union {
 			qint32 * num;
@@ -202,7 +202,7 @@ namespace libnutws {
 			bool * logic;
 		} value;
 	};
-	struct wps_net_var {
+	struct NetworkVariable {
 		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} Type;
 		QString name;
 		union {
@@ -211,7 +211,7 @@ namespace libnutws {
 			bool * logic;
 		} value;
 	};
-	struct wps_req {
+	struct Request {
 		RequestType type;
 		int id;
 	};
@@ -268,17 +268,17 @@ namespace libnutws {
 		return BOOL_UNDEFINED;
 	}
 	
-	struct wps_network {
+	struct ShortNetworkInfo {
 		int id;
 		QString ssid;
 		nut::MacAddress bssid;
 		NetworkFlags flags;
 	};
 
-	class wps_eap_network_config {
+	class EapNetworkConfig {
 		public:
-			wps_eap_network_config();
-			~wps_eap_network_config();
+			EapNetworkConfig();
+			~EapNetworkConfig();
 			//Following fields are only used with internal EAP implementation.
 			EapMethod eap; //space-separated list of accepted EAP methods TODO: implement
 			QString identity; //Identity string for EAP
@@ -308,10 +308,10 @@ namespace libnutws {
 			QString pac_file; //File path for the PAC entries.
 	};
 
-	class wps_network_config { //All without linebreak
+	class NetworkConfig { //All without linebreak
 		public:
-			wps_network_config();
-			~wps_network_config();
+			NetworkConfig();
+			~NetworkConfig();
 			QString ssid;
 			nut::MacAddress bssid;
 			BOOL disabled;
@@ -335,7 +335,7 @@ namespace libnutws {
 			QString wep_key3;
 			char wep_tx_keyidx; //Default WEP key index (TX) (0..3) TODO: implement
 			BOOL peerkey; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
-			wps_eap_network_config eap_config;
+			EapNetworkConfig eap_config;
 	};
 }
 

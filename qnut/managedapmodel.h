@@ -35,7 +35,7 @@ namespace qnut {
 		void reloadNetworks();
 	private:
 		libnutws::CWpa_Supplicant * supplicant;
-		QList<libnutws::wps_network> networks;
+		QList<libnutws::ShortNetworkInfo> networks;
 	};
 }
 

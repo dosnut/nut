@@ -71,48 +71,48 @@ QStringList CWpa_Supplicant::sliceMessage(QString str) {
 //(dot11|dot1x)VARIABLENAME=<value>
 //<value> = (TRUE|FALSE) | <Integer> | <String> | <other?>
 //so far we do not care about <other> => <other> <-> <string>
-wps_MIB CWpa_Supplicant::parseMIB(QStringList list) {
+MIBVariables CWpa_Supplicant::parseMIB(QStringList list) {
 	//First strip dot11 or dot1x
-	//create new wps_variable
-	//append to wps_MIB
-	QList<wps_variable> wpsMIB;
+	//create new MIBVariable
+	//append to MIBVariables
+	QList<MIBVariable> wpsMIB;
 	QStringList tmp_strlist;
-	wps_variable var;
+	MIBVariable var;
 	foreach(QString str, list) {
 		tmp_strlist = (str.remove(0,5)).split('=',QString::KeepEmptyParts);
 		var.name = tmp_strlist[0];
 		var.type = parseMIBType(tmp_strlist[1]);
 		var.value.num = 0;
-		if (wps_variable::PLAIN == var.type || wps_variable::STRING == var.type) {
+		if (MIBVariable::PLAIN == var.type || MIBVariable::STRING == var.type) {
 			var.value.str = new QString(tmp_strlist[0]);
 		}
-		if (wps_variable::NUMBER == var.type) {
+		if (MIBVariable::NUMBER == var.type) {
 			bool ok = true;
 			var.value.num = new qint32(tmp_strlist[1].toInt(&ok));
 			if (!ok) {
 				*(var.value.num) = -1;
 			}
 		}
-		if (wps_variable::LOGIC == var.type) {
+		if (MIBVariable::LOGIC == var.type) {
 			var.value.logic = new bool((tmp_strlist[1] == "TRUE"));
 		}
 		wpsMIB.append(var);
 	}
-	return ((wps_MIB) wpsMIB);
+	return ((MIBVariables) wpsMIB);
 }
-wps_variable::wps_variable_type CWpa_Supplicant::parseMIBType(QString str) {
+MIBVariable::MIBVariable_type CWpa_Supplicant::parseMIBType(QString str) {
 	bool ok;
 	str.toInt(&ok);
 	if (ok) {
-		return wps_variable::NUMBER;
+		return MIBVariable::NUMBER;
 	}
 	if ( (0 == str.indexOf("TRUE")) || (0 == str.indexOf("FALSE")) ) {
-		return wps_variable::LOGIC;
+		return MIBVariable::LOGIC;
 	}
 	if (str.contains(":") || str.contains("-")) {
-		return wps_variable::PLAIN;
+		return MIBVariable::PLAIN;
 	}
-	return wps_variable::STRING;
+	return MIBVariable::STRING;
 }
 
 NetworkFlags CWpa_Supplicant::parseNetworkFlags(QString str) {
@@ -126,11 +126,11 @@ NetworkFlags CWpa_Supplicant::parseNetworkFlags(QString str) {
 }
 //network id / ssid / bssid / flags
 //0 example network	any	[CURRENT]
-QList<wps_network> CWpa_Supplicant::parseListNetwork(QStringList list) {
+QList<ShortNetworkInfo> CWpa_Supplicant::parseListNetwork(QStringList list) {
 	list.removeFirst();
-	QList<wps_network> networks;
+	QList<ShortNetworkInfo> networks;
 	QStringList line;
-	wps_network net;
+	ShortNetworkInfo net;
 	bool worked = true;
 	foreach(QString str, list) {
 		line = str.split('\t',QString::KeepEmptyParts);
@@ -193,11 +193,11 @@ ScanAuthentication CWpa_Supplicant::parseScanAuth(QString str) {
 	return key;
 }
 
-QList<wps_scan> CWpa_Supplicant::parseScanResult(QStringList list) {
+QList<ScanResult> CWpa_Supplicant::parseScanResult(QStringList list) {
 	list.removeFirst();
-	QList<wps_scan> scanresults;
+	QList<ScanResult> scanresults;
 	QStringList line;
-	wps_scan scanresult;
+	ScanResult scanresult;
 	bool worked = true;
 	ScanAuthentication scanAuth;
 	foreach(QString str, list) {
@@ -359,8 +359,8 @@ decision=COND_SUCC
 ClientTimeout=60
 */
 //Always parse as if status verbose
-wps_status CWpa_Supplicant::parseStatus(QStringList list) {
-	wps_status status;
+Status CWpa_Supplicant::parseStatus(QStringList list) {
+	Status status;
 	bool ok = true;
 	foreach(QString str, list) {
 		if (0 == str.indexOf("bssid=")) {
@@ -480,36 +480,36 @@ wps_status CWpa_Supplicant::parseStatus(QStringList list) {
 }
 //parseStatus helper parsers (that's crazy)
 //So far they dont really parse
-wps_status::WPA_STATE CWpa_Supplicant::parseWpaState(QString str) {
-	wps_status::WPA_STATE dummy = str;
+Status::WPA_STATE CWpa_Supplicant::parseWpaState(QString str) {
+	Status::WPA_STATE dummy = str;
 	return dummy;
 }
-wps_status::PAE_STATE CWpa_Supplicant::parsePaeState(QString str) {
-	wps_status::PAE_STATE dummy = str;
+Status::PAE_STATE CWpa_Supplicant::parsePaeState(QString str) {
+	Status::PAE_STATE dummy = str;
 	return dummy;
 }
-wps_status::PORT_STATUS CWpa_Supplicant::parsePortStatus(QString str) {
-	wps_status::PORT_STATUS dummy = str;
+Status::PORT_STATUS CWpa_Supplicant::parsePortStatus(QString str) {
+	Status::PORT_STATUS dummy = str;
 	return dummy;
 }
-wps_status::PORT_CONTROL CWpa_Supplicant::parsePortControl(QString str) {
-	wps_status::PORT_CONTROL dummy = str;
+Status::PORT_CONTROL CWpa_Supplicant::parsePortControl(QString str) {
+	Status::PORT_CONTROL dummy = str;
 	return dummy;
 }
-wps_status::BACKEND_STATE CWpa_Supplicant::parseBackendState(QString str) {
-	wps_status::BACKEND_STATE dummy = str;
+Status::BACKEND_STATE CWpa_Supplicant::parseBackendState(QString str) {
+	Status::BACKEND_STATE dummy = str;
 	return dummy;
 }
-wps_status::EAP_STATE CWpa_Supplicant::parseEapState(QString str) {
-	wps_status::EAP_STATE dummy = str;
+Status::EAP_STATE CWpa_Supplicant::parseEapState(QString str) {
+	Status::EAP_STATE dummy = str;
 	return dummy;
 }
-wps_status::METHOD_STATE CWpa_Supplicant::parseMethodState(QString str) {
-	wps_status::METHOD_STATE dummy = str;
+Status::METHOD_STATE CWpa_Supplicant::parseMethodState(QString str) {
+	Status::METHOD_STATE dummy = str;
 	return dummy;
 }
-wps_status::DECISION CWpa_Supplicant::parseDecision(QString str) {
-	wps_status::DECISION dummy = str;
+Status::DECISION CWpa_Supplicant::parseDecision(QString str) {
+	Status::DECISION dummy = str;
 	return dummy;
 }
 //
@@ -554,9 +554,9 @@ RequestType CWpa_Supplicant::parseReqType(QString str) {
 	}
 	return REQ_FAIL;
 }
-wps_req CWpa_Supplicant::parseReq(QString str) {
+Request CWpa_Supplicant::parseReq(QString str) {
 	bool ok = true;
-	wps_req req;
+	Request req;
 	//Check request type:
 	req.type = parseReqType(str);
 	//get network id:
@@ -641,7 +641,7 @@ void CWpa_Supplicant::wps_read(int socket) {
 CTRL-EVENT-DISCONNECTED
 CTRL-EVENT-CONNECTED
 */
-void CWpa_Supplicant::Event_dispatcher(wps_req req) {
+void CWpa_Supplicant::Event_dispatcher(Request req) {
 	if (req.type != REQ_FAIL) {
 		emit(request(req));
 	}
@@ -839,7 +839,7 @@ void CWpa_Supplicant::wps_detach() {
 void CWpa_Supplicant::wps_setScanResults(QList<WextRawScan> &wextScanResults) {
 	QString response = wps_cmd_SCAN_RESULTS();
 	if (response.isEmpty()) {
-		wpsScanResults = QList<wps_scan>();
+		wpsScanResults = QList<ScanResult>();
 		return;
 	}
 	else {
@@ -853,7 +853,7 @@ void CWpa_Supplicant::wps_setScanResults(QList<WextRawScan> &wextScanResults) {
 		WextSignal dummy;
 		int count = 0;
 		//Set the signal quality
-		for (QList<wps_scan>::Iterator i = wpsScanResults.begin(); i != wpsScanResults.end(); ++i ) {
+		for (QList<ScanResult>::Iterator i = wpsScanResults.begin(); i != wpsScanResults.end(); ++i ) {
 			i->signal = wextScanHash.value(i->bssid.toString(), dummy); //convert to readable format
 			if (wextScanHash.contains(i->bssid.toString())) {
 				count++;
@@ -926,7 +926,7 @@ void CWpa_Supplicant::setLog(bool enabled) {
 	log_enabled = enabled;
 }
 //Function to respond to ctrl requests from wpa_supplicant
-void CWpa_Supplicant::response(wps_req request, QString msg) {
+void CWpa_Supplicant::response(Request request, QString msg) {
 	QString cmd = toString(request.type);
 	if (!cmd.isEmpty()) {
 		wps_cmd_CTRL_RSP(cmd,request.id,msg);
@@ -1001,7 +1001,7 @@ int CWpa_Supplicant::addNetwork() {
 }
 
 
-NetconfigStatus CWpa_Supplicant::addNetwork(wps_network_config config) {
+NetconfigStatus CWpa_Supplicant::addNetwork(NetworkConfig config) {
 	NetconfigStatus status;
 	status.failures = NCF_NONE;
 	status.eap_failures = ENCF_NONE;
@@ -1023,7 +1023,7 @@ NetconfigStatus CWpa_Supplicant::addNetwork(wps_network_config config) {
 }
 
 
-NetconfigStatus CWpa_Supplicant::editNetwork(int netid, wps_network_config config) {
+NetconfigStatus CWpa_Supplicant::editNetwork(int netid, NetworkConfig config) {
 	NetconfigStatus wps_fail_status;
 	wps_fail_status.failures = NCF_NONE;
 	wps_fail_status.eap_failures = ENCF_NONE;
@@ -1151,8 +1151,8 @@ NetconfigStatus CWpa_Supplicant::editNetwork(int netid, wps_network_config confi
 	return wps_fail_status;
 }
 
-wps_network_config CWpa_Supplicant::getNetworkConfig(int id) {
-	wps_network_config config;
+NetworkConfig CWpa_Supplicant::getNetworkConfig(int id) {
+	NetworkConfig config;
 	QString response;
 
 	response = wps_cmd_GET_NETWORK(id,"ssid");
@@ -1279,8 +1279,8 @@ wps_network_config CWpa_Supplicant::getNetworkConfig(int id) {
 	return config;
 }
 
-wps_eap_network_config CWpa_Supplicant::wps_getEapNetworkConfig(int id) {
-	wps_eap_network_config config;
+EapNetworkConfig CWpa_Supplicant::wps_getEapNetworkConfig(int id) {
+	EapNetworkConfig config;
 	bool ok;
 	QString response;
 	//Check if the network uses EAP
@@ -1403,7 +1403,7 @@ wps_eap_network_config CWpa_Supplicant::wps_getEapNetworkConfig(int id) {
 	}
 	return config;
 }
-EapNetconfigFailures CWpa_Supplicant::wps_editEapNetwork(int netid, wps_eap_network_config config) {
+EapNetconfigFailures CWpa_Supplicant::wps_editEapNetwork(int netid, EapNetworkConfig config) {
 	EapNetconfigFailures eap_failures = ENCF_NONE;
 	if (EAPM_UNDEFINED != config.eap) {
 		if (!setNetworkVariable(netid,"eap",toString(config.eap)) ) {
@@ -1731,7 +1731,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 			free(buffer);
 			buffer = NULL;
 		}
-		//We have the data, now construct complete wps_scan
+		//We have the data, now construct complete ScanResult
 		wps_setScanResults(res);
 	}
 	else {
@@ -1891,36 +1891,36 @@ QString CWpa_Supplicant::getNetworkVariable(int id, QString val) {
 }
 
 //Functions with a lot more functionality  (in the parser functions :)
-QList<wps_network> CWpa_Supplicant::listNetworks() {
+QList<ShortNetworkInfo> CWpa_Supplicant::listNetworks() {
 	QString reply = wps_cmd_LIST_NETWORKS();
 	if (!reply.isEmpty()) {
 		return parseListNetwork(sliceMessage(reply));
 	}
 	else {
-		return QList<wps_network>();
+		return QList<ShortNetworkInfo>();
 	}
 }
 
-QList<wps_scan> CWpa_Supplicant::scanResults() {
+QList<ScanResult> CWpa_Supplicant::scanResults() {
 	return wpsScanResults;
 }
-wps_status CWpa_Supplicant::status() {
+Status CWpa_Supplicant::status() {
 	QString reply = wps_cmd_STATUS(true);
 	if (!reply.isEmpty()) {
 		return parseStatus(sliceMessage(reply));
 	}
 	else {
-		wps_status dummy;
+		Status dummy;
 		return dummy;
 	}
 }
-wps_MIB CWpa_Supplicant::getMIBVariables() {
+MIBVariables CWpa_Supplicant::getMIBVariables() {
 	QString reply = wps_cmd_MIB();
 	if (!reply.isEmpty()) {
 		return parseMIB(sliceMessage(reply));
 	}
 	else {
-		return (wps_MIB) QList<wps_variable>();
+		return (MIBVariables) QList<MIBVariable>();
 	}
 }
 

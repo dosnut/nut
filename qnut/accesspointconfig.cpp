@@ -100,7 +100,7 @@ namespace qnut {
 		
 	void CAccessPointConfig::verifyConfiguration() {
 		NetconfigStatus status;
-		wps_network_config config;
+		NetworkConfig config;
 		
 		config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
 		
@@ -242,7 +242,7 @@ namespace qnut {
 		accept();
 	}
 	
-	bool CAccessPointConfig::execute(wps_scan scanResult) {
+	bool CAccessPointConfig::execute(ScanResult scanResult) {
 		if (scanResult.keyManagement & KM_WPA_EAP)
 			ui.keyManagementCombo->setCurrentIndex(3);
 		else if (scanResult.keyManagement & KM_WPA_PSK)
@@ -271,7 +271,7 @@ namespace qnut {
 	}
 	
 	bool CAccessPointConfig::execute(int id) {
-		wps_network_config config = supplicant->getNetworkConfig(id);
+		NetworkConfig config = supplicant->getNetworkConfig(id);
 		
 		if (config.ssid[0] == '\"')
 			ui.ssidEdit->setText(config.ssid.mid(1, config.ssid.length()-2));
@@ -317,7 +317,7 @@ namespace qnut {
 		return exec();
 	}
 	
-	inline void CAccessPointConfig::writeEAPConfig(wps_eap_network_config &eap_config) {
+	inline void CAccessPointConfig::writeEAPConfig(EapNetworkConfig &eap_config) {
 		switch (ui.encCombo->currentIndex()) {
 		case 0: eap_config.eap = EAPM_MD5; break;
 		case 1: eap_config.eap = EAPM_TLS; break;
@@ -343,7 +343,7 @@ namespace qnut {
 			return text;
 	}
 	
-	inline void CAccessPointConfig::readEAPConfig(wps_eap_network_config &eap_config) {
+	inline void CAccessPointConfig::readEAPConfig(EapNetworkConfig &eap_config) {
 		if (eap_config.eap & EAPM_LEAP)
 			ui.encCombo->setCurrentIndex(7);
 		else if (eap_config.eap & EAPM_OTP)

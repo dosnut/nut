@@ -369,7 +369,7 @@ QStringList signalQualityToStringList(WextRawScan scan) {
 
 
 
-wps_network_config::wps_network_config() {
+NetworkConfig::NetworkConfig() {
 			//Set default values
 			ssid = QString();
 			bssid = nut::MacAddress();
@@ -395,13 +395,13 @@ wps_network_config::wps_network_config() {
 			wep_tx_keyidx = -1; //Default WEP key index (TX) (0..3) TODO: implement
 			peerkey = BOOL_UNDEFINED; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
 }
-wps_network_config::~wps_network_config() {
+NetworkConfig::~NetworkConfig() {
 }
-wps_eap_network_config::wps_eap_network_config() {
+EapNetworkConfig::EapNetworkConfig() {
 			eap = EAPM_UNDEFINED; //space-separated list of accepted EAP methods TODO: implement
 			fragment_size = -1; //Maximum EAP fragment size in bytes (default 1398);
 			nai = QString(); //user NAI
 }
-wps_eap_network_config::~wps_eap_network_config() {}
+EapNetworkConfig::~EapNetworkConfig() {}
 
 }
