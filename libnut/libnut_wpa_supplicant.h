@@ -46,7 +46,7 @@ namespace libnut {
 			bool inConnectionPhase;
 			QString ifname;
 			QList<wps_scan> wpsScanResults;
-			wps_wext_scan_readable signalQuality; //bssid is zero
+			wps_wext_signal_readable signalQuality; //bssid is zero
 			int ScanTimeoutCount;
 			int wextPollTimeoutCount;
 
@@ -149,7 +149,7 @@ namespace libnut {
 
 			//Functions to get actual signal strength and/or signal strength for scan results:
 			//And set scanresults
-			void wps_setScanResults(QList<wps_wext_scan> wextScanResults);
+			void wps_setScanResults(QList<wps_wext_raw_scan> &wextScanResults);
 			void wps_tryScanResults();
 
 
@@ -208,7 +208,7 @@ namespace libnut {
 
 			void setSignalQualityPollRate(int msec);
 			int getSignalQualityPollRate();
-			wps_wext_scan_readable getSignalQuality();
+			wps_wext_signal_readable getSignalQuality();
 
 			QList<wps_network> listNetworks();
 			QList<wps_scan> scanResults();
@@ -236,7 +236,7 @@ namespace libnut {
 			void scanCompleted();
 			void message(QString msg);
 			void eventMessage(libnut::wps_event_type type);
-			void signalQualityUpdated(libnut::wps_wext_scan_readable signal);
+			void signalQualityUpdated(libnut::wps_wext_signal_readable signal);
 	};
 
 }

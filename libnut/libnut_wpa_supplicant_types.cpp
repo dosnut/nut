@@ -250,8 +250,8 @@ wps_bool toWpsBool(bool b) {
 
 //Modified iw_print_stats function from iwlib.c
 //We don't care whether information was updated or not. Just convert it
-wps_wext_scan_readable convertValues(wps_wext_scan scan) {
-	wps_wext_scan_readable res;
+wps_wext_signal_readable convertValues(wps_wext_raw_scan scan) {
+	wps_wext_signal_readable res;
 // 	res.encoding = WSIG_QUALITY_ALLABS;
 	qDebug() << "hasRange:" << scan.hasRange;
 	if ( scan.hasRange && ((scan.quality.level != 0) || (scan.quality.updated & (IW_QUAL_DBM | IW_QUAL_RCPI))) ) {
@@ -328,7 +328,7 @@ wps_wext_scan_readable convertValues(wps_wext_scan scan) {
 	}
 	return res;
 }
-QString signalQualityToString(wps_wext_scan scan) {
+QString signalQualityToString(wps_wext_raw_scan scan) {
 	char buffer[128];
 	iw_range range;
 	iw_quality qual;
@@ -354,7 +354,7 @@ QString signalQualityToString(wps_wext_scan scan) {
 	}
 	return ret;
 }
-QStringList signalQualityToStringList(wps_wext_scan scan) {
+QStringList signalQualityToStringList(wps_wext_raw_scan scan) {
 	QString sigstr = signalQualityToString(scan);
 	QStringList tmp;
 	QStringList ret;

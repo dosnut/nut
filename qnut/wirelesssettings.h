@@ -30,7 +30,7 @@ namespace qnut {
 		void handleAvailableAPSelectionChanged(const QItemSelection & selected);
 		void updateUi(libnut::DeviceState state);
 	private slots:
-		void updateSignalInfo(libnut::wps_wext_scan_readable signal);
+		void updateSignalInfo(libnut::wps_wext_signal_readable signal);
 		void switchToSelectedNetwork();
 		void addSelectedScanResult();
 		void removeSelectedNetwork();

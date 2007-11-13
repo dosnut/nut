@@ -836,7 +836,7 @@ void CWpa_Supplicant::wps_detach() {
 	}
 }
 
-void CWpa_Supplicant::wps_setScanResults(QList<wps_wext_scan> wextScanResults) {
+void CWpa_Supplicant::wps_setScanResults(QList<wps_wext_raw_scan> &wextScanResults) {
 	QString response = wps_cmd_SCAN_RESULTS();
 	if (response.isEmpty()) {
 		wpsScanResults = QList<wps_scan>();
@@ -846,20 +846,15 @@ void CWpa_Supplicant::wps_setScanResults(QList<wps_wext_scan> wextScanResults) {
 		//Set scan results from wpa_supplicant:
 		wpsScanResults = parseScanResult(sliceMessage(response));
 		//This may not be possible as qHash references an namespace that is unknown to qt TODO:CHECK!
-		QHash<QString,wps_wext_scan> wextScanHash; //Namespace problem
-		foreach(wps_wext_scan i, wextScanResults) {
-			wextScanHash.insert(i.bssid.toString(), i);
+		QHash<QString,wps_wext_signal_readable> wextScanHash; //Namespace problem
+		foreach(wps_wext_raw_scan i, wextScanResults) {
+			wextScanHash.insert(i.bssid.toString(), convertValues(i));
 		}
-		wps_wext_scan dummy;
-		dummy.bssid = nut::MacAddress();
-		dummy.quality.level = 0;
-		dummy.quality.qual = 0;
-		dummy.quality.updated = 1;
-		dummy.quality.noise = 0;
+		wps_wext_signal_readable dummy;
 		int count = 0;
 		//Set the signal quality
 		for (QList<wps_scan>::Iterator i = wpsScanResults.begin(); i != wpsScanResults.end(); ++i ) {
-			i->quality = wextScanHash.value(i->bssid.toString(), dummy).quality;
+			i->signal = wextScanHash.value(i->bssid.toString(), dummy); //convert to readable format
 			if (wextScanHash.contains(i->bssid.toString())) {
 				count++;
 			}
@@ -923,7 +918,7 @@ void CWpa_Supplicant::setSignalQualityPollRate(int msec) {
 int CWpa_Supplicant::getSignalQualityPollRate() {
 	return wextTimerRate;
 }
-wps_wext_scan_readable CWpa_Supplicant::getSignalQuality() {
+wps_wext_signal_readable CWpa_Supplicant::getSignalQuality() {
 	return signalQuality;
 }
 
@@ -1561,9 +1556,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 	int buflen = IW_SCAN_MAX_DATA; /* Min for compat WE<17 */
 	struct iw_range range;
 	int has_range;
-
-	QList<wps_wext_scan> res;
-
+	QList<wps_wext_raw_scan> res;
 	/* workaround */
 	struct wireless_config b;
 	/* Get basic information */ 
@@ -1612,6 +1605,11 @@ void CWpa_Supplicant::wps_tryScanResults() {
 	}
 	else if (errno != 0) {
 		qDebug() << "Error occured while trying to get Scanresults: " << strerror(errno);
+		ScanTimeoutCount++;
+		if (ScanTimeoutCount <= 5) {
+			ScanTimerId = startTimer(CWPA_SCAN_RETRY_TIMER_TIME);
+			return;
+		}
 	}
 	else {
 		qDebug() << "Range stuff got";
@@ -1678,12 +1676,12 @@ void CWpa_Supplicant::wps_tryScanResults() {
 		struct stream_descr stream;
 		int ret;
 		
-		wps_wext_scan singleres;
+		wps_wext_raw_scan singleres;
 		singleres.bssid = nut::MacAddress();
-		singleres.quality.level = -1;
-		singleres.quality.qual = -1;
-		singleres.quality.noise = -1;
-		singleres.quality.updated = -1;
+		singleres.quality.level = 0;
+		singleres.quality.qual = 0;
+		singleres.quality.noise = 0;
+		singleres.quality.updated = 0;
 		singleres.hasRange = has_range;
 		if (has_range) {
 			singleres.maxquality.level = (quint8) range.max_qual.level;
@@ -1710,6 +1708,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 				switch(iwe.cmd) {
 					case SIOCGIWAP:
 						//ap_addr has type socketaddr
+						//Workaround for macaddress
 						iw_saether_ntop(&(iwe.u.ap_addr), buffer2);
 						tmpMac = nut::MacAddress(QString::fromAscii(buffer2,128));
 						break;
@@ -1753,8 +1752,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 	struct iw_range range;
 	int hasRange = 0;
 	iwstats stats;
-	wps_wext_scan res;
-	
+	wps_wext_raw_scan res;
 	/* workaround */
 	struct wireless_config b;
 	/* Get basic information */ 
@@ -1792,10 +1790,12 @@ void CWpa_Supplicant::readWirelessInfo() {
 		
 	/* Get range stuff */
 	qDebug() << QString("Getting range stuff for %1").arg(ifname.toAscii().data());
-	if (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0)
+	if (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0) {
 		hasRange = 1;
-	else
+	}
+	else {
 		qDebug() << QString("Error \"hasRange == 0\" (%1)").arg(strerror(errno));
+	}
 	res.hasRange = hasRange;
 	if (errno == EAGAIN) {
 		wextPollTimeoutCount++;
