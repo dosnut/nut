@@ -19,7 +19,6 @@ namespace qnut {
 		supplicant = wpa_supplicant;
 		
 		ui.setupUi(this);
-		ui.warningLabel->setVisible(false);
 		setAuthConfig(0);
 		
 		QRegExp regexp("[0123456789abcdefABCDEF]*");
@@ -155,7 +154,7 @@ namespace qnut {
 			
 			if (ui.pskEdit->text().length() == 0)
 				config.psk = QString("");
-			else
+			else if (!ui.pskLeaveButton->isChecked())
 				config.psk = '\"' + ui.pskEdit->text() + '\"';
 			
 			break;
@@ -243,6 +242,11 @@ namespace qnut {
 	}
 	
 	bool CAccessPointConfig::execute(ScanResult scanResult) {
+		ui.pskLeaveButton->setVisible(false);
+		ui.pskLeaveButton->setChecked(false);
+		ui.passwordLeaveButton->setVisible(false);
+		ui.passwordLeaveButton->setChecked(false);
+		
 		if (scanResult.keyManagement & KM_WPA_EAP)
 			ui.keyManagementCombo->setCurrentIndex(3);
 		else if (scanResult.keyManagement & KM_WPA_PSK)
@@ -252,6 +256,8 @@ namespace qnut {
 		else
 			ui.keyManagementCombo->setCurrentIndex(0);
 		
+		ui.pskLeaveButton->setVisible(false);
+		ui.pskLeaveButton->setChecked(false);
 		ui.rsnCheck->setChecked(scanResult.protocols & PROTO_RSN);
 		
 		if (
@@ -281,18 +287,34 @@ namespace qnut {
 		if (config.keyManagement & KM_WPA_EAP) {
 			ui.keyManagementCombo->setCurrentIndex(3);
 			readEAPConfig(config.eap_config);
+			ui.pskLeaveButton->setVisible(false);
+			ui.pskLeaveButton->setChecked(false);
+			ui.passwordLeaveButton->setVisible(true);
+			ui.passwordLeaveButton->setChecked(true);
 		}
 		else if (config.keyManagement & KM_WPA_PSK) {
 			ui.keyManagementCombo->setCurrentIndex(2);
 			ui.pskEdit->setText("");
-			ui.warningLabel->setVisible(true);
+			ui.pskLeaveButton->setVisible(true);
+			ui.pskLeaveButton->setChecked(true);
+			ui.passwordLeaveButton->setVisible(false);
+			ui.passwordLeaveButton->setChecked(false);
 		}
 		else if (config.keyManagement & KM_IEEE8021X) {
 			ui.keyManagementCombo->setCurrentIndex(1);
 			readEAPConfig(config.eap_config);
+			ui.pskLeaveButton->setVisible(false);
+			ui.pskLeaveButton->setChecked(false);
+			ui.passwordLeaveButton->setVisible(true);
+			ui.passwordLeaveButton->setChecked(true);
 		}
-		else
+		else {
 			ui.keyManagementCombo->setCurrentIndex(0);
+			ui.pskLeaveButton->setVisible(false);
+			ui.pskLeaveButton->setChecked(false);
+			ui.passwordLeaveButton->setVisible(false);
+			ui.passwordLeaveButton->setChecked(false);
+		}
 		
 		if (
 			(config.group & CI_CCMP) ||
@@ -333,7 +355,9 @@ namespace qnut {
 		eap_config.ca_cert = '\"' + ui.caEdit->text() + '\"';
 		eap_config.client_cert = '\"' + ui.clientEdit->text() + '\"';
 		eap_config.private_key = '\"' + ui.keyFileEdit->text() + '\"';
-		eap_config.private_key_passwd = '\"' + ui.passwordEdit->text() + '\"';
+		
+		if (!ui.passwordLeaveButton->isChecked())
+			eap_config.private_key_passwd = '\"' + ui.passwordEdit->text() + '\"';
 	}
 	
 	inline QString CAccessPointConfig::convertQuoted(QString text) {
@@ -365,7 +389,7 @@ namespace qnut {
 		ui.caEdit->setText(convertQuoted(eap_config.ca_cert));
 		ui.clientEdit->setText(convertQuoted(eap_config.client_cert));
 		ui.keyFileEdit->setText(convertQuoted(eap_config.private_key));
-		ui.passwordEdit->setText(convertQuoted(eap_config.private_key_passwd));
+		ui.passwordEdit->setText("");//convertQuoted(eap_config.private_key_passwd));
 	}
 	
 	inline void CAccessPointConfig::convertLineEditText(QLineEdit * lineEdit, bool hex) {

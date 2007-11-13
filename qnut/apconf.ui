@@ -1,12 +1,13 @@
 <ui version="4.0" >
+ <author>Oliver Groß</author>
  <class>apconf</class>
  <widget class="QDialog" name="apconf" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>577</width>
-    <height>562</height>
+    <width>586</width>
+    <height>574</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -94,7 +95,7 @@
    <item>
     <widget class="QTabWidget" name="confTabs" >
      <property name="currentIndex" >
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="pskTab" >
       <attribute name="title" >
@@ -128,9 +129,12 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="clearButton" >
+          <widget class="QPushButton" name="pskLeaveButton" >
            <property name="text" >
-            <string>Clear</string>
+            <string>leave unchanged</string>
+           </property>
+           <property name="checkable" >
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -140,24 +144,6 @@
         <widget class="QCheckBox" name="showPlainPSKCheck" >
          <property name="text" >
           <string>Show key as plain text</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="warningLabel" >
-         <property name="font" >
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text" >
-          <string>Warning:
-The key is not readable from wpa supplicant thus the field above is empty. You can set a new key by entering something into the edit field.
-If you want to leave the key unchanged clear the field above.</string>
-         </property>
-         <property name="wordWrap" >
-          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -241,6 +227,12 @@ If you want to leave the key unchanged clear the field above.</string>
        </item>
        <item>
         <widget class="QGroupBox" name="certGroup" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title" >
           <string>Certificates</string>
          </property>
@@ -290,6 +282,12 @@ If you want to leave the key unchanged clear the field above.</string>
        </item>
        <item>
         <widget class="QGroupBox" name="privateKeyGroup" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title" >
           <string>Private Key</string>
          </property>
@@ -305,18 +303,14 @@ If you want to leave the key unchanged clear the field above.</string>
            </widget>
           </item>
           <item row="0" column="1" >
-           <layout class="QHBoxLayout" >
-            <item>
-             <widget class="QLineEdit" name="keyFileEdit" />
-            </item>
-            <item>
-             <widget class="QToolButton" name="keyBrowse" >
-              <property name="text" >
-               <string>...</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <widget class="QLineEdit" name="keyFileEdit" />
+          </item>
+          <item row="0" column="2" >
+           <widget class="QToolButton" name="keyBrowse" >
+            <property name="text" >
+             <string>...</string>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0" >
            <widget class="QLabel" name="passwordLabel" >
@@ -325,8 +319,22 @@ If you want to leave the key unchanged clear the field above.</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1" >
-           <widget class="QLineEdit" name="passwordEdit" />
+          <item row="1" column="1" colspan="2" >
+           <layout class="QHBoxLayout" >
+            <item>
+             <widget class="QLineEdit" name="passwordEdit" />
+            </item>
+            <item>
+             <widget class="QPushButton" name="passwordLeaveButton" >
+              <property name="text" >
+               <string>leave unchanged</string>
+              </property>
+              <property name="checkable" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -437,8 +445,37 @@ If you want to leave the key unchanged clear the field above.</string>
  </widget>
  <tabstops>
   <tabstop>ssidEdit</tabstop>
+  <tabstop>ssidHexCheck</tabstop>
   <tabstop>keyManagementCombo</tabstop>
+  <tabstop>rsnCheck</tabstop>
   <tabstop>encCombo</tabstop>
+  <tabstop>confTabs</tabstop>
+  <tabstop>pskEdit</tabstop>
+  <tabstop>pskLeaveButton</tabstop>
+  <tabstop>showPlainPSKCheck</tabstop>
+  <tabstop>eapCombo</tabstop>
+  <tabstop>identificationEdit</tabstop>
+  <tabstop>caEdit</tabstop>
+  <tabstop>caBrowse</tabstop>
+  <tabstop>clientEdit</tabstop>
+  <tabstop>clientBrowse</tabstop>
+  <tabstop>keyFileEdit</tabstop>
+  <tabstop>keyBrowse</tabstop>
+  <tabstop>passwordEdit</tabstop>
+  <tabstop>passwordLeaveButton</tabstop>
+  <tabstop>wepKey0Radio</tabstop>
+  <tabstop>wepKey0Edit</tabstop>
+  <tabstop>wepKey0HexCheck</tabstop>
+  <tabstop>wepKey1Radio</tabstop>
+  <tabstop>wepKey1Edit</tabstop>
+  <tabstop>wepKey1HexCheck</tabstop>
+  <tabstop>wepKey2Radio</tabstop>
+  <tabstop>wepKey2Edit</tabstop>
+  <tabstop>wepKey2HexCheck</tabstop>
+  <tabstop>wepKey3Radio</tabstop>
+  <tabstop>wepKey3Edit</tabstop>
+  <tabstop>wepKey3HexCheck</tabstop>
+  <tabstop>autoEnableCheck</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
@@ -450,8 +487,8 @@ If you want to leave the key unchanged clear the field above.</string>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>293</x>
-     <y>552</y>
+     <x>302</x>
+     <y>564</y>
     </hint>
     <hint type="destinationlabel" >
      <x>286</x>
@@ -460,18 +497,34 @@ If you want to leave the key unchanged clear the field above.</string>
    </hints>
   </connection>
   <connection>
-   <sender>clearButton</sender>
-   <signal>clicked()</signal>
-   <receiver>pskEdit</receiver>
-   <slot>clear()</slot>
+   <sender>passwordLeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>passwordEdit</receiver>
+   <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>513</x>
-     <y>213</y>
+     <x>437</x>
+     <y>457</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>442</x>
-     <y>218</y>
+     <x>417</x>
+     <y>455</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pskLeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pskEdit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>461</x>
+     <y>292</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>372</x>
+     <y>288</y>
     </hint>
    </hints>
   </connection>
