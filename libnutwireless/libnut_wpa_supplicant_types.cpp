@@ -1,6 +1,6 @@
 #include "libnut_wpa_supplicant_types.h"
 
-namespace libnutws {
+namespace libnutwireless {
 
 
 GroupCiphers toGroupCiphers(ScanCiphers cip) {
@@ -372,7 +372,7 @@ QStringList signalQualityToStringList(WextRawScan scan) {
 NetworkConfig::NetworkConfig() {
 			//Set default values
 			ssid = QString();
-			bssid = nut::MacAddress();
+			bssid = libnutcommon::MacAddress();
 			disabled = BOOL_UNDEFINED;
 			id_str = QString();
 			scan_ssid = BOOL_UNDEFINED; // (do not) scan with SSID-specific Probe Request frames

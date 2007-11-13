@@ -4,14 +4,14 @@
 #include <QAction>
 #include <QString>
 #include <QHostAddress>
-#include <libnut/libnut_cli.h>
+#include <libnutclient/libnut_client.h>
 #include "constants.h"
 
 namespace qnut {
-	QString iconFile(libnut::CDevice * device);
+	QString iconFile(libnutclient::CDevice * device);
 	QAction * getSeparator(QObject * parent);
-	QString shortSummary(libnut::CDevice * device);
-	QString activeIP(libnut::CDevice * device);
+	QString shortSummary(libnutclient::CDevice * device);
+	QString activeIP(libnutclient::CDevice * device);
 	
 	inline QString toStringDefault(QHostAddress address) {
 		if (address.isNull())
@@ -20,7 +20,7 @@ namespace qnut {
 			return address.toString();
 	}
 	
-	QString signalSummary(libnutws::WextSignal signal);
+	QString signalSummary(libnutwireless::WextSignal signal);
 	
 };
 

@@ -1,16 +1,16 @@
 #include "types.h"
 #include "config.h"
 
-namespace nut {
-	QString toString(enum libnut::DeviceState state) {
+namespace libnutcommon {
+	QString toString(enum DeviceState state) {
 		const char* names[] = { "deactivated", "activated", "carrier", "unconfigured", "up" };
 		return names[(int) state];
 	}
-	QString toString(enum libnut::DeviceType type) {
+	QString toString(enum DeviceType type) {
 		const char* names[] = { "eth", "air", "ppp" };
 		return names[(int) type];
 	}
-	QString toString(enum libnut::InterfaceState state) {
+	QString toString(enum InterfaceState state) {
 		const char* names[] = { "off", "static", "dhcp", "zeroconf", "waitforconfig" };
 		return names[(int) state];
 	}
@@ -31,7 +31,7 @@ const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &da
 	return argument;
 }
 
-namespace libnut {
+namespace libnutcommon {
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceProperties & devprop) {
 		argument.beginStructure();
 		argument << devprop.name << devprop.activeEnvironment << (int) devprop.state << (int) devprop.type;
@@ -78,8 +78,18 @@ namespace libnut {
 		argument.endStructure();
 		return argument;
 	}
-	
-	static void init() {
+
+
+	void init() {
+		static int done = 0;
+		if (done) return;
+		done = 1;
+		
+		qRegisterMetaType<QHostAddress>("QHostAddress");
+		qRegisterMetaType<QList<QHostAddress> >("QList<QHostAddress>");
+		qDBusRegisterMetaType<QHostAddress>();
+		qDBusRegisterMetaType<QList<QHostAddress> >();
+		
 		qRegisterMetaType<DeviceProperties>("DeviceProperties");
 		qRegisterMetaType<EnvironmentProperties>("EnvironmentProperties");
 		qRegisterMetaType<InterfaceProperties>("InterfaceProperties");
@@ -87,20 +97,16 @@ namespace libnut {
 		qDBusRegisterMetaType<DeviceProperties>();
 		qDBusRegisterMetaType<EnvironmentProperties>();
 		qDBusRegisterMetaType<InterfaceProperties>();
-	}
-}
-
-namespace nut {
-	static void init() {
-		qRegisterMetaType<Config>("nut::Config");
-		qRegisterMetaType<DeviceConfig>("nut::DeviceConfig");
-		qRegisterMetaType<SelectResult>("nut::SelectResult");
-		qRegisterMetaType< QVector< SelectResult > >("QVector<nut::SelectRule>");
-		qRegisterMetaType<SelectRule>("nut::SelectRule");
-		qRegisterMetaType<SelectConfig>("nut::SelectConfig");
-		qRegisterMetaType<EnvironmentConfig>("nut::EnvironmentConfig");
-		qRegisterMetaType<IPv4Config>("nut::IPv4Config");
-		qRegisterMetaType<IPv4UserConfig>("nut::IPv4UserConfig");
+		
+		qRegisterMetaType<Config>("libnutcommon::Config");
+		qRegisterMetaType<DeviceConfig>("libnutcommon::DeviceConfig");
+		qRegisterMetaType<SelectResult>("libnutcommon::SelectResult");
+		qRegisterMetaType< QVector< SelectResult > >("QVector<libnutcommon::SelectRule>");
+		qRegisterMetaType<SelectRule>("libnutcommon::SelectRule");
+		qRegisterMetaType<SelectConfig>("libnutcommon::SelectConfig");
+		qRegisterMetaType<EnvironmentConfig>("libnutcommon::EnvironmentConfig");
+		qRegisterMetaType<IPv4Config>("libnutcommon::IPv4Config");
+		qRegisterMetaType<IPv4UserConfig>("libnutcommon::IPv4UserConfig");
 		qRegisterMetaType< QVector< quint32 > >("QVector< quint32 >");
 		qRegisterMetaType< QVector< QVector< quint32 > > >("QVector< QVector< quint32 > >");
 	
@@ -115,21 +121,5 @@ namespace nut {
 		qDBusRegisterMetaType<IPv4UserConfig>();
 		qDBusRegisterMetaType< QVector< quint32 > >();
 		qDBusRegisterMetaType< QVector< QVector< quint32 > > >();
-	}
-}
-
-namespace common {
-	void init() {
-		static int done = 0;
-		if (done) return;
-		done = 1;
-		
-		qRegisterMetaType<QHostAddress>("QHostAddress");
-		qRegisterMetaType<QList<QHostAddress> >("QList<QHostAddress>");
-		qDBusRegisterMetaType<QHostAddress>();
-		qDBusRegisterMetaType<QList<QHostAddress> >();
-		
-		libnut::init();
-		nut::init();
 	}
 }

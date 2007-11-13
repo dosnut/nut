@@ -31,8 +31,8 @@ DESTDIR = .
 
 INCLUDEPATH += ../
 
-LIBS +=  -lnl ../common/libnutcommon.a
-TARGETDEPS += ../common/libnutcommon.a
+LIBS +=  -lnl ../libnutcommon/libnutcommon.a
+TARGETDEPS += ../libnutcommon/libnutcommon.a
 
 TARGET = nuts
 target.path = /usr/sbin/

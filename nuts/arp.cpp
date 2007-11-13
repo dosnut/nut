@@ -104,14 +104,14 @@ static void arp_base_request(Packet &packet, quint8 proto_len, nuts::ArpOperatio
 	packet.operation = htons((quint16) operation);
 }
 
-static void arp_ipv4_request(arp_packet_ipv4 &packet, const nut::MacAddress &sender_mac, const QHostAddress &sender_ip, const QHostAddress &target_ip) {
+static void arp_ipv4_request(arp_packet_ipv4 &packet, const libnutcommon::MacAddress &sender_mac, const QHostAddress &sender_ip, const QHostAddress &target_ip) {
 	arp_base_request(packet, 4, nuts::ARP_REQUEST);
 	memcpy(packet.sender_hw_addr, sender_mac.data, ETH_ALEN);
 	packet.sender_p_addr = htonl(sender_ip.toIPv4Address());
 	packet.target_p_addr = htonl(target_ip.toIPv4Address());
 }
 
-static bool arp_ipv4_parse(const QByteArray &data, nut::MacAddress &sender_mac, QHostAddress &sender_ip, nut::MacAddress &target_mac, QHostAddress &target_ip) {
+static bool arp_ipv4_parse(const QByteArray &data, libnutcommon::MacAddress &sender_mac, QHostAddress &sender_ip, libnutcommon::MacAddress &target_mac, QHostAddress &target_ip) {
 	if (data.size() < (int) sizeof(arp_packet_ipv4))
 		return false;
 	arp_packet_ipv4 *packet = (arp_packet_ipv4*) data.data();
@@ -120,9 +120,9 @@ static bool arp_ipv4_parse(const QByteArray &data, nut::MacAddress &sender_mac, 
 		|| (packet->hlen != ETH_ALEN)
 		|| (packet->plen != 4))
 		return false;
-	sender_mac = nut::MacAddress(packet->sender_hw_addr);
+	sender_mac = libnutcommon::MacAddress(packet->sender_hw_addr);
 	sender_ip = QHostAddress(ntohl(packet->sender_p_addr));
-	target_mac = nut::MacAddress(packet->target_hw_addr);
+	target_mac = libnutcommon::MacAddress(packet->target_hw_addr);
 	target_ip = QHostAddress(ntohl(packet->target_p_addr));
 	return true;
 }
@@ -193,7 +193,7 @@ namespace nuts {
 		}
 	}
 	
-	void ARPRequest::gotPacket(const nut::MacAddress &mac) {
+	void ARPRequest::gotPacket(const libnutcommon::MacAddress &mac) {
 		if (mac.zero()) return;
 		finish();
 		emit foundMac(mac, m_targetip);
@@ -246,14 +246,14 @@ namespace nuts {
 		}
 	}
 	
-	void ARPProbe::gotPacket(const nut::MacAddress &mac) {
+	void ARPProbe::gotPacket(const libnutcommon::MacAddress &mac) {
 		if (mac.zero()) return;
 		m_state = CONFLICT;
 		finish();
 		emit conflict(m_ip, mac);
 	}
 	
-	void ARPProbe::gotProbe(const nut::MacAddress &mac) {
+	void ARPProbe::gotProbe(const libnutcommon::MacAddress &mac) {
 		if (mac.zero()) return;
 		m_state = CONFLICT;
 		finish();
@@ -297,7 +297,7 @@ namespace nuts {
 		if (m_arp) m_arp->m_watches.remove(m_ip);
 	}
 	
-	void ARPWatch::gotPacket(const nut::MacAddress &mac) {
+	void ARPWatch::gotPacket(const libnutcommon::MacAddress &mac) {
 		if (m_arp) m_arp->m_watches.remove(m_ip);
 		m_arp = 0;
 		emit conflict(m_ip, mac);
@@ -417,7 +417,7 @@ namespace nuts {
 			return;
 		switch (proto_len) {
 			case 4: { // IPv4:
-				nut::MacAddress sender_mac, target_mac;
+				libnutcommon::MacAddress sender_mac, target_mac;
 				QHostAddress sender_ip, target_ip;
 				if (!arp_ipv4_parse(data, sender_mac, sender_ip, target_mac, target_ip))
 					return;

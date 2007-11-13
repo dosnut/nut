@@ -18,14 +18,14 @@
 extern "C" {
 #include <net/ethernet.h>
 }
-namespace nut {
+namespace libnutcommon {
 	class MacAddress;
 
 	QDBusArgument &operator<< (QDBusArgument &argument, const MacAddress &data);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, MacAddress &data);
 }
 
-namespace nut {
+namespace libnutcommon {
 	/**
 		@author Stefan Bühler <stbuehler@web.de>
 	*/
@@ -68,11 +68,11 @@ namespace nut {
 	};
 }
 
-inline uint qHash(const nut::MacAddress &key) {
+inline uint qHash(const libnutcommon::MacAddress &key) {
 	quint8 data[8] = { key.data[0], key.data[2], key.data[3], key.data[4], key.data[5], key.data[6], 0, 0};
 	return qHash(*((quint64*)data));
 }
 
-Q_DECLARE_METATYPE(nut::MacAddress);
+Q_DECLARE_METATYPE(libnutcommon::MacAddress);
 
 #endif

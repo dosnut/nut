@@ -13,7 +13,7 @@
 #include <libnutcommon/types.h>
 #include <libnutcommon/config.h>
 #include <QMetaType>
-namespace libnut {
+namespace libnutclient {
 /*
  * Proxy class for interface DBus.Device
  */
@@ -47,7 +47,7 @@ public Q_SLOTS: // METHODS
         QList<QVariant> argumentList;
         return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getEnvironments"), argumentList);
     }
-    inline QDBusReply<libnut::DeviceProperties> getProperties() {
+    inline QDBusReply<libnutcommon::DeviceProperties> getProperties() {
         QList<QVariant> argumentList;
         return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
     }
@@ -56,7 +56,7 @@ public Q_SLOTS: // METHODS
         return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getEssid"), argumentList);
     }
 	
-	inline QDBusReply<nut::DeviceConfig> getConfig()
+	inline QDBusReply<libnutcommon::DeviceConfig> getConfig()
 	{
 		QList<QVariant> argumentList;
 		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList);
@@ -123,22 +123,22 @@ public Q_SLOTS: // METHODS
         return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getInterfaces"), argumentList);
     }
 
-    inline QDBusReply<libnut::EnvironmentProperties> getProperties()
+    inline QDBusReply<libnutcommon::EnvironmentProperties> getProperties()
     {
         QList<QVariant> argumentList;
         return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
     }
-	inline QDBusReply<nut::EnvironmentConfig> getConfig()
+	inline QDBusReply<libnutcommon::EnvironmentConfig> getConfig()
 	{
 		QList<QVariant> argumentList;
 		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList);
 	}
-	inline QDBusReply<nut::SelectResult> getSelectResult()
+	inline QDBusReply<libnutcommon::SelectResult> getSelectResult()
 	{
 		QList<QVariant> argumentList;
 		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getSelectResult"), argumentList);
 	}
-	inline QDBusReply<QVector<nut::SelectResult> > getSelectResults()
+	inline QDBusReply<QVector<libnutcommon::SelectResult> > getSelectResults()
 	{
 		QList<QVariant> argumentList;
 		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getSelectResults"), argumentList);
@@ -176,12 +176,12 @@ public Q_SLOTS: // METHODS
         return callWithArgumentList(QDBus::NoBlock, QLatin1String("deactivate"), argumentList);
     }
 
-    inline QDBusReply<libnut::InterfaceProperties> getProperties()
+    inline QDBusReply<libnutcommon::InterfaceProperties> getProperties()
     {
         QList<QVariant> argumentList;
         return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
     }
-	inline QDBusReply<nut::IPv4Config> getConfig()
+	inline QDBusReply<libnutcommon::IPv4Config> getConfig()
 	{
 		QList<QVariant> argumentList;
 		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList); 
@@ -196,18 +196,18 @@ public Q_SLOTS: // METHODS
 		QList<QVariant> argumentList;
 		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("needUserSetup"), argumentList);
 	}
-	inline QDBusReply<bool> setUserConfig(nut::IPv4UserConfig userConfig) {
+	inline QDBusReply<bool> setUserConfig(libnutcommon::IPv4UserConfig userConfig) {
 		QList<QVariant> argumentList;
 		argumentList << qVariantFromValue(userConfig);
 		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("setUserConfig"), argumentList);
 	}
-	inline QDBusReply<nut::IPv4UserConfig> getUserConfig() {
+	inline QDBusReply<libnutcommon::IPv4UserConfig> getUserConfig() {
 		QList<QVariant> argumentList;
 		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getUserConfig"), argumentList);
 	}
 
 Q_SIGNALS: // SIGNALS
-    void stateChanged(libnut::InterfaceProperties properties);
+    void stateChanged(libnutcommon::InterfaceProperties properties);
 };
 /*
 namespace DBus {

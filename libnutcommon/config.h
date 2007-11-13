@@ -23,7 +23,7 @@
 #include "macaddress.h"
 #include "types.h"
 
-namespace nut {
+namespace libnutcommon {
 	class Config;
 	class DeviceConfig;
 	class SelectRule;
@@ -54,7 +54,7 @@ namespace nuts {
 	class ConfigParser;
 }
 
-namespace nut {
+namespace libnutcommon {
 	namespace internal {
 		/**
 		 * @brief Used as a member in other classes, it determines wheter that class is a original or a copy.
@@ -203,7 +203,7 @@ namespace nut {
 			
 			SelectRule() : invert(false), selType(SEL_USER) { }
 			SelectRule(const QHostAddress &ipAddr, bool invert = false) : invert(invert), selType(SEL_ARP), ipAddr(ipAddr) { }
-			SelectRule(const QHostAddress &ipAddr, const nut::MacAddress &macAddr, bool invert = false) : invert(invert), selType(SEL_ARP), ipAddr(ipAddr), macAddr(macAddr) { }
+			SelectRule(const QHostAddress &ipAddr, const libnutcommon::MacAddress &macAddr, bool invert = false) : invert(invert), selType(SEL_ARP), ipAddr(ipAddr), macAddr(macAddr) { }
 			SelectRule(const QString &essid, bool invert = false) : invert(invert), selType(SEL_ESSID), essid(essid) { }
 			SelectRule(quint32 block, SelectType blockType, bool invert = false) : invert(invert), selType(blockType), block(block) { }
 			
@@ -212,7 +212,7 @@ namespace nut {
 			quint32 block;
 			QString essid;
 			QHostAddress ipAddr;
-			nut::MacAddress macAddr;
+			libnutcommon::MacAddress macAddr;
 	};
 	
 	class SelectConfig {
@@ -317,15 +317,15 @@ namespace nut {
 	};
 }
 
-Q_DECLARE_METATYPE(nut::Config);
-Q_DECLARE_METATYPE(nut::DeviceConfig);
-Q_DECLARE_METATYPE(nut::SelectResult);
-Q_DECLARE_METATYPE(QVector< nut::SelectResult >);
-Q_DECLARE_METATYPE(nut::SelectRule);
-Q_DECLARE_METATYPE(nut::SelectConfig);
-Q_DECLARE_METATYPE(nut::EnvironmentConfig);
-Q_DECLARE_METATYPE(nut::IPv4Config);
-Q_DECLARE_METATYPE(nut::IPv4UserConfig);
+Q_DECLARE_METATYPE(libnutcommon::Config);
+Q_DECLARE_METATYPE(libnutcommon::DeviceConfig);
+Q_DECLARE_METATYPE(libnutcommon::SelectResult);
+Q_DECLARE_METATYPE(QVector< libnutcommon::SelectResult >);
+Q_DECLARE_METATYPE(libnutcommon::SelectRule);
+Q_DECLARE_METATYPE(libnutcommon::SelectConfig);
+Q_DECLARE_METATYPE(libnutcommon::EnvironmentConfig);
+Q_DECLARE_METATYPE(libnutcommon::IPv4Config);
+Q_DECLARE_METATYPE(libnutcommon::IPv4UserConfig);
 Q_DECLARE_METATYPE(QVector< quint32 >);
 Q_DECLARE_METATYPE(QVector< QVector< quint32 > >);
 

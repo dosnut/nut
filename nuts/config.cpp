@@ -18,7 +18,7 @@ extern FILE *configparserin;
 
 namespace nuts {
 	ConfigParser::ConfigParser(const QString &configFile)
-	: m_configFile(configFile), m_config(new nut::Config()) {
+	: m_configFile(configFile), m_config(new libnutcommon::Config()) {
 		failed = false;
 		configparserin = fopen(m_configFile.toUtf8().constData(), "r");
 		if (!configparserin)
@@ -41,9 +41,9 @@ namespace nuts {
 	bool ConfigParser::newDevice(const QString &name) {
 		m_def_env = 0; m_curdevconfig = 0;
 		if (!m_config->m_devices.contains(name)) {
-			m_curdevconfig = new nut::DeviceConfig();
+			m_curdevconfig = new libnutcommon::DeviceConfig();
 			m_config->m_devices.insert(name, m_curdevconfig);
-			m_curdevconfig->m_environments.push_back(new nut::EnvironmentConfig(""));
+			m_curdevconfig->m_environments.push_back(new libnutcommon::EnvironmentConfig(""));
 			m_def_env = new local_env_config();
 			return true;
 		}
@@ -59,13 +59,13 @@ namespace nuts {
 		return true;
 	}
 	
-	bool ConfigParser::finishEnvironment(nut::EnvironmentConfig *envc, local_env_config *l_envc) {
+	bool ConfigParser::finishEnvironment(libnutcommon::EnvironmentConfig *envc, local_env_config *l_envc) {
 		if ((envc->m_ipv4Interfaces.size() == 0) && (!l_envc->no_def_dhcp)) {
-			envc->m_ipv4Interfaces.push_back(new nut::IPv4Config());
+			envc->m_ipv4Interfaces.push_back(new libnutcommon::IPv4Config());
 		}
 		// Append "select user;" if no select config was given.
 		if (envc->m_select.filters.size() == 0) {
-			envc->m_select.filters.append(nut::SelectRule());
+			envc->m_select.filters.append(libnutcommon::SelectRule());
 		}
 		return true;
 	}
@@ -81,7 +81,7 @@ namespace nuts {
 	bool ConfigParser::devEnvironment(const QString &name) {
 		m_cur_env = 0; m_curenvconfig = 0;
 		if (!m_curdevconfig) return false;
-		m_curenvconfig = new nut::EnvironmentConfig(name);
+		m_curenvconfig = new libnutcommon::EnvironmentConfig(name);
 		m_curdevconfig->m_environments.push_back(m_curenvconfig);
 		m_cur_env = new local_env_config();
 		return true;
@@ -130,7 +130,7 @@ namespace nuts {
 		m_curipv4config = 0;
 		if (!m_curenvconfig) return false;
 		if (m_cur_env->m_hasdhcp) return false;
-		m_curipv4config = new nut::IPv4Config();
+		m_curipv4config = new libnutcommon::IPv4Config();
 		return true;
 	}
 	
@@ -147,7 +147,7 @@ namespace nuts {
 		m_curipv4config = 0;
 		if (!m_curenvconfig) return false;
 		if (m_cur_env->m_haszeroconf) return false;
-		m_curipv4config = new nut::IPv4Config(nut::IPv4Config::DO_ZEROCONF);
+		m_curipv4config = new libnutcommon::IPv4Config(libnutcommon::IPv4Config::DO_ZEROCONF);
 		return true;
 	}
 	
@@ -163,7 +163,7 @@ namespace nuts {
 	bool ConfigParser::envStatic() {
 		m_curipv4config = 0;
 		if (!m_curenvconfig) return false;
-		m_curipv4config = new nut::IPv4Config(nut::IPv4Config::DO_STATIC);
+		m_curipv4config = new libnutcommon::IPv4Config(libnutcommon::IPv4Config::DO_STATIC);
 		return true;
 	}
 	
@@ -177,7 +177,7 @@ namespace nuts {
 	
 	bool ConfigParser::staticUser() {
 		if (!m_curipv4config) return false;
-		m_curipv4config->m_flags = nut::IPv4Config::DO_USERSTATIC;
+		m_curipv4config->m_flags = libnutcommon::IPv4Config::DO_USERSTATIC;
 		return true;
 	}
 	
@@ -208,7 +208,7 @@ namespace nuts {
 		return true;
 	}
 	
-	void ConfigParser::selectAdd(const nut::SelectRule &rule) {
+	void ConfigParser::selectAdd(const libnutcommon::SelectRule &rule) {
 		m_curenvconfig->m_select.filters.append(rule);
 		if (!m_curenvconfig->m_select.blocks.isEmpty()) {
 			quint32 filterid = m_curenvconfig->m_select.filters.count() - 1;
@@ -219,7 +219,7 @@ namespace nuts {
 	bool ConfigParser::selectAndBlock() {
 		if (!m_curenvconfig) return false;
 		quint32 blockid = m_curenvconfig->m_select.blocks.size();
-		selectAdd(nut::SelectRule(blockid, nut::SelectRule::SEL_AND_BLOCK));
+		selectAdd(libnutcommon::SelectRule(blockid, libnutcommon::SelectRule::SEL_AND_BLOCK));
 		m_curenvconfig->m_select.blocks.append(QVector<quint32>());
 		return true;
 	}
@@ -227,32 +227,32 @@ namespace nuts {
 	bool ConfigParser::selectOrBlock() {
 		if (!m_curenvconfig) return false;
 		quint32 blockid = m_curenvconfig->m_select.blocks.size();
-		selectAdd(nut::SelectRule(blockid, nut::SelectRule::SEL_OR_BLOCK));
+		selectAdd(libnutcommon::SelectRule(blockid, libnutcommon::SelectRule::SEL_OR_BLOCK));
 		m_curenvconfig->m_select.blocks.append(QVector<quint32>());
 		return true;
 	}
 	
 	bool ConfigParser::selectUser() {
 		if (!m_curenvconfig) return false;
-		selectAdd(nut::SelectRule());
+		selectAdd(libnutcommon::SelectRule());
 		return true;
 	}
 	
 	bool ConfigParser::selectARP(const QHostAddress &addr) {
 		if (!m_curenvconfig) return false;
-		selectAdd(nut::SelectRule(addr));
+		selectAdd(libnutcommon::SelectRule(addr));
 		return true;
 	}
 	
-	bool ConfigParser::selectARP(const QHostAddress &addr, const nut::MacAddress &mac) {
+	bool ConfigParser::selectARP(const QHostAddress &addr, const libnutcommon::MacAddress &mac) {
 		if (!m_curenvconfig) return false;
-		selectAdd(nut::SelectRule(addr, mac));
+		selectAdd(libnutcommon::SelectRule(addr, mac));
 		return true;
 	}
 	
 	bool ConfigParser::selectESSID(const QString &essid) {
 		if (!m_curenvconfig) return false;
-		selectAdd(nut::SelectRule(essid));
+		selectAdd(libnutcommon::SelectRule(essid));
 		return true;
 	}
 };

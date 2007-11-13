@@ -13,13 +13,13 @@
 #define QNUT_OVERVIEWMODEL_H
 
 #include <QAbstractItemModel>
-#include <libnut/libnut_cli.h>
+#include <libnutclient/libnut_client.h>
 
 namespace qnut {
 	class COverViewModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		COverViewModel(libnut::CDeviceManager * deviceManager, QObject * parent = 0);
+		COverViewModel(libnutclient::CDeviceManager * deviceManager, QObject * parent = 0);
 		~COverViewModel();
 		
 		QVariant data(const QModelIndex & index, int role) const;
@@ -30,10 +30,10 @@ namespace qnut {
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
 	private:
-		libnut::CDeviceList * devices;
+		libnutclient::CDeviceList * devices;
 	private slots:
-		void deviceAdded(libnut::CDevice * device);
-		void deviceRemoved(libnut::CDevice * device);
+		void deviceAdded(libnutclient::CDevice * device);
+		void deviceRemoved(libnutclient::CDevice * device);
 	};
 
 };

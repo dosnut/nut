@@ -18,8 +18,8 @@
 #define ENVTREE_MOD_IP      2
 
 namespace qnut {
-	using namespace nut;
-	using namespace libnut;
+	using namespace libnutcommon;
+	using namespace libnutclient;
 	
 	CEnvironmentTreeModel::CEnvironmentTreeModel(CDevice * data, QObject * parent) : QAbstractItemModel(parent) {
 		device = data;
@@ -27,7 +27,7 @@ namespace qnut {
 			foreach(CEnvironment * environment, device->environments) {
 				connect(environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
 				foreach(CInterface * interface, environment->interfaces) {
-					connect(interface, SIGNAL(stateChanged(libnut::InterfaceState)), this, SIGNAL(layoutChanged()));
+					connect(interface, SIGNAL(stateChanged(libnutcommon::InterfaceState)), this, SIGNAL(layoutChanged()));
 				}
 			}
 		}

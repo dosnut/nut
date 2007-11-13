@@ -54,7 +54,7 @@ driver      return DRIVER;
             yylval.addr = new QHostAddress(QString(yytext)); return IPv4_VAL; }
 
 ([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2} {
-            yylval.macAddr = new nut::MacAddress(QString(yytext)); return MACADDR; }
+            yylval.macAddr = new libnutcommon::MacAddress(QString(yytext)); return MACADDR; }
 
 (-[[:blank:]]*)?[[:digit:]]+ {
             yylval.i = atoi(yytext); return INTEGER; }

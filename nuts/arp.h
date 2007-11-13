@@ -18,7 +18,7 @@
 #include <QLinkedList>
 #include <QByteArray>
 
-#include <common/macaddress.h>
+#include <libnutcommon/macaddress.h>
 
 namespace nuts {
 	class ARP;
@@ -200,13 +200,13 @@ namespace nuts {
 			QHostAddress m_ip;
 			
 			// got ARP Packet which resolves watched ip to mac
-			void gotPacket(const nut::MacAddress &mac);
+			void gotPacket(const libnutcommon::MacAddress &mac);
 			
 		public:
 			virtual ~ARPWatch();
 
 		signals:
-			void conflict(QHostAddress ip, nut::MacAddress mac);
+			void conflict(QHostAddress ip, libnutcommon::MacAddress mac);
 	};
 	
 	class ARPTimer : public QObject {
@@ -242,13 +242,13 @@ namespace nuts {
 			
 			virtual bool timeEvent();
 			// got ARP Packet which resolves m_targetip to mac
-			void gotPacket(const nut::MacAddress &mac);
+			void gotPacket(const libnutcommon::MacAddress &mac);
 			
 		private:
 			void finish();
 			
 		signals:
-			void foundMac(nut::MacAddress mac, QHostAddress ip);
+			void foundMac(libnutcommon::MacAddress mac, QHostAddress ip);
 			void timeout(QHostAddress ip);
 	};
 	
@@ -273,9 +273,9 @@ namespace nuts {
 			ARPProbe(ARP *arp, const QHostAddress &ip);
 			
 			// got ARP Packet which resolves m_ip to mac
-			void gotPacket(const nut::MacAddress &mac);
+			void gotPacket(const libnutcommon::MacAddress &mac);
 			// got ARP Probe from mac which probes for m_ip
-			void gotProbe(const nut::MacAddress &mac);
+			void gotProbe(const libnutcommon::MacAddress &mac);
 			
 			virtual bool timeEvent();
 			
@@ -283,7 +283,7 @@ namespace nuts {
 			void finish();
 			
 		signals:
-			void conflict(QHostAddress ip, nut::MacAddress mac);
+			void conflict(QHostAddress ip, libnutcommon::MacAddress mac);
 			void ready(QHostAddress ip);
 	};
 	

@@ -4,7 +4,8 @@
 #include "common.h"
 
 namespace qnut {
-	using namespace libnut;
+	using namespace libnutclient;
+	using namespace libnutcommon;
 	
 	CConnectionManager::CConnectionManager(QWidget * parent) :
 		QMainWindow(parent),
@@ -37,10 +38,10 @@ namespace qnut {
 		
 		ui.centralwidget->layout()->addWidget(&tabWidget);
 		
-		connect(&deviceManager, SIGNAL(deviceAdded(libnut::CDevice *)), this, SLOT(addUiDevice(libnut::CDevice *)));
-		connect(&deviceManager, SIGNAL(deviceAdded(libnut::CDevice *)), this, SLOT(updateTrayIconInfo()));
-		connect(&deviceManager, SIGNAL(deviceRemoved(libnut::CDevice *)), this, SLOT(removeUiDevice(libnut::CDevice *)));
-		connect(&deviceManager, SIGNAL(deviceRemoved(libnut::CDevice *)), this, SLOT(updateTrayIconInfo()));
+		connect(&deviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(addUiDevice(libnutclient::CDevice *)));
+		connect(&deviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
+		connect(&deviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(removeUiDevice(libnutclient::CDevice *)));
+		connect(&deviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
 		
 		if (logFile.error() != QFile::NoError)
 			logEdit.append(tr("ERROR:") + " " + tr("Cannot create/open log file."));
@@ -162,7 +163,7 @@ namespace qnut {
 		trayicon.devicesMenu.addMenu(newDeviceOptions->deviceMenu);
 		trayicon.devicesMenu.setEnabled(true);
 		
-		connect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SLOT(updateTrayIconInfo()));
+		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(updateTrayIconInfo()));
 		connect(newDeviceOptions, SIGNAL(showOptionsRequested(QWidget *)), this, SLOT(showDeviceOptions(QWidget *)));
 		connect(newDeviceOptions, SIGNAL(showMessageRequested(QString, QString, QSystemTrayIcon *)),
 		        this,             SLOT(showMessage(QString, QString, QSystemTrayIcon *)));
@@ -219,7 +220,7 @@ namespace qnut {
 		
 		if (!deselectedIndexes.isEmpty()) {
 			CDevice * deselectedDevice = static_cast<CDevice *>(deselectedIndexes[0].internalPointer());
-			disconnect(deselectedDevice, SIGNAL(stateChanged(libnut::DeviceState)), this, SLOT(handleDeviceStateChange(libnut::DeviceState)));
+			disconnect(deselectedDevice, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
 			disconnect(enableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(enable()));
 			disconnect(disableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(disable()));
 			disconnect(deviceSettingsAction, SIGNAL(triggered()), deviceOptions[deselectedDevice], SLOT(openDeviceSettings()));
@@ -228,7 +229,7 @@ namespace qnut {
 		
 		if (!selectedIndexes.isEmpty()) {
 			CDevice * selectedDevice = static_cast<CDevice *>(selectedIndexes[0].internalPointer());
-			connect(selectedDevice, SIGNAL(stateChanged(libnut::DeviceState)), this, SLOT(handleDeviceStateChange(libnut::DeviceState)));
+			connect(selectedDevice, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
 			connect(enableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(enable()));
 			connect(disableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(disable()));
 			connect(deviceSettingsAction, SIGNAL(triggered()), deviceOptions[selectedDevice], SLOT(openDeviceSettings()));

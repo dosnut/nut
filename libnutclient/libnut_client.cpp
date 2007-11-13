@@ -1,5 +1,5 @@
 /*
-	TRANSLATOR libnut::QObject
+	TRANSLATOR libnutclient::QObject
 */
 #include "libnut_client.h"
 #include <libnutcommon/dbus.h>
@@ -11,8 +11,8 @@
 //-When refreshing: send Changesignals?
 //-wlan sach
 //-more debugging output
-namespace libnut {
-
+namespace libnutclient {
+using namespace libnutcommon;
 QString toString(DeviceState state) {
 	switch (state) {
 		case DS_UP:             return QObject::tr("up");
@@ -335,8 +335,8 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		activeEnvironment = 0;
 		qDebug() << (tr("Device properties fetched"));
 		qDebug() << (tr("Name") + ": " + QString(name));
-		qDebug() << (tr("Type") + ": " + toString(type));
-		qDebug() << (tr("State") + ": " + toString(state));
+		qDebug() << (tr("Type") + ": " + libnutclient::toString(type));
+		qDebug() << (tr("State") + ": " + libnutclient::toString(state));
 	}
 	else {
 		throw CLI_DevConnectionException(tr("(%1) Error while retrieving dbus' device information").arg(toString(replyProp.error())));
@@ -354,7 +354,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	}
 
 	//get config and set wpa_supplicant variable
-	QDBusReply<nut::DeviceConfig> replyconf = dbusDevice->getConfig();
+	QDBusReply<libnutcommon::DeviceConfig> replyconf = dbusDevice->getConfig();
 	if (replyconf.isValid()) {
 		dbusConfig = replyconf.value();
 		need_wpa_supplicant = !(dbusConfig.wpaConfigFile().isEmpty());
@@ -399,7 +399,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 
 	//Only use wpa_supplicant if we need one
 	if (need_wpa_supplicant) {
-		wpa_supplicant = new libnutws::CWpa_Supplicant(this,name);
+		wpa_supplicant = new libnutwireless::CWpa_Supplicant(this,name);
 		connect(wpa_supplicant,SIGNAL(message(QString)),log,SLOT(log(QString)));
 		//Connect to wpa_supplicant only if device is not deactivated
 		if (! (DS_DEACTIVATED == state) ) {
@@ -578,7 +578,7 @@ void CDevice::setEnvironment(CEnvironment * environment) {
 	}
 	dbusDevice->setEnvironment(dbusEnvironments.key(environment));
 }
-nut::DeviceConfig CDevice::getConfig() {
+libnutcommon::DeviceConfig CDevice::getConfig() {
 	return dbusConfig;
 }
 
@@ -614,7 +614,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment properties").arg(toString(replyprop.error())));
 	}
 	//Get environment config
-	QDBusReply<nut::EnvironmentConfig> replyconf = dbusEnvironment->getConfig();
+	QDBusReply<libnutcommon::EnvironmentConfig> replyconf = dbusEnvironment->getConfig();
 	if (replyconf.isValid()) {
 		config = replyconf.value();
 	}
@@ -744,33 +744,33 @@ void CEnvironment::dbusstateChanged(bool state) {
 void CEnvironment::enter() {
 	static_cast<CDevice *>(parent())->setEnvironment(this);
 }
-nut::EnvironmentConfig CEnvironment::getConfig() {
+libnutcommon::EnvironmentConfig CEnvironment::getConfig() {
 	return config;
 }
 
-nut::SelectResult CEnvironment::getSelectResult(bool refresh) {
+libnutcommon::SelectResult CEnvironment::getSelectResult(bool refresh) {
 	if (refresh) {
-		QDBusReply<nut::SelectResult> reply = dbusEnvironment->getSelectResult();
+		QDBusReply<libnutcommon::SelectResult> reply = dbusEnvironment->getSelectResult();
 		if (reply.isValid()) {
 			selectResult = reply.value();
 		}
 		else {
 			qDebug() << tr("(%1) Error while trying to get SelectResult").arg(toString(reply.error()));
-			selectResult = nut::SelectResult();
+			selectResult = libnutcommon::SelectResult();
 		}
 	}
 	return selectResult;
 }
 
-QVector<nut::SelectResult> CEnvironment::getSelectResults(bool refresh) {
+QVector<libnutcommon::SelectResult> CEnvironment::getSelectResults(bool refresh) {
 	if (refresh) {
-		QDBusReply<QVector<nut::SelectResult> > reply = dbusEnvironment->getSelectResults();
+		QDBusReply<QVector<libnutcommon::SelectResult> > reply = dbusEnvironment->getSelectResults();
 		if (reply.isValid()) {
 			selectResults = reply.value();
 		}
 		else {
 			qDebug() << tr("(%1) Error while trying to get SelectResults").arg(toString(reply.error()));
-			selectResults = QVector<nut::SelectResult>();
+			selectResults = QVector<libnutcommon::SelectResult>();
 		}
 	}
 	return selectResults;
@@ -799,7 +799,7 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 		throw CLI_IfConnectionException(tr("Error while retrieving interface properties") + replyprops.error().name());
 	}
 	//Get Config
-	QDBusReply<nut::IPv4Config> replyconf = dbusInterface->getConfig();
+	QDBusReply<libnutcommon::IPv4Config> replyconf = dbusInterface->getConfig();
 	if (replyconf.isValid()) {
 		dbusConfig = replyconf.value();
 	}
@@ -808,7 +808,7 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	}
 	getUserConfig(true); //Function will updated userConfig
 
-	connect(dbusInterface, SIGNAL(stateChanged(libnut::InterfaceProperties)), this, SLOT(dbusstateChanged(libnut::InterfaceProperties)));
+	connect(dbusInterface, SIGNAL(stateChanged(libnutcommon::InterfaceProperties)), this, SLOT(dbusstateChanged(libnutcommon::InterfaceProperties)));
 }
 CInterface::~CInterface() {
 }
@@ -828,7 +828,7 @@ void CInterface::refreshAll() {
 	}
 }
 //CInterface private slots
-void CInterface::dbusstateChanged(libnut::InterfaceProperties properties) {
+void CInterface::dbusstateChanged(libnutcommon::InterfaceProperties properties) {
 	//Check changes:
 	state = properties.ifState;
 	ip = properties.ip;
@@ -836,7 +836,7 @@ void CInterface::dbusstateChanged(libnut::InterfaceProperties properties) {
 	gateway = properties.gateway;
 	dnsserver = properties.dns;
 	getUserConfig(true); //Function will updated userConfig
-	qDebug() << tr("Interface state of %1 has changed to %2").arg(dbusPath.path(),toString(state));
+	qDebug() << tr("Interface state of %1 has changed to %2").arg(dbusPath.path(),libnutclient::toString(state));
 	emit(stateChanged(state));
 }
 //CInterface SLOTS
@@ -856,7 +856,7 @@ bool CInterface::needUserSetup() {
 	}
 	return false;
 }
-bool CInterface::setUserConfig(const nut::IPv4UserConfig &cuserConfig) {
+bool CInterface::setUserConfig(const libnutcommon::IPv4UserConfig &cuserConfig) {
 	QDBusReply<bool> reply = dbusInterface->setUserConfig(cuserConfig);
 	if (reply.isValid()) {
 		if (reply.value()) {
@@ -870,15 +870,15 @@ bool CInterface::setUserConfig(const nut::IPv4UserConfig &cuserConfig) {
 	}
 	return false;
 }
-nut::IPv4UserConfig CInterface::getUserConfig(bool refresh) {
+libnutcommon::IPv4UserConfig CInterface::getUserConfig(bool refresh) {
 	if (refresh) {
-		QDBusReply<nut::IPv4UserConfig> reply = dbusInterface->getUserConfig();
+		QDBusReply<libnutcommon::IPv4UserConfig> reply = dbusInterface->getUserConfig();
 		if (reply.isValid()) {
 			userConfig = reply.value();
 		}
 		else {
 			qDebug() << (tr("Error while interface->getUserConfig at: ") + dbusPath.path());
-			userConfig = nut::IPv4UserConfig();
+			userConfig = libnutcommon::IPv4UserConfig();
 		}
 	}
 	return userConfig;

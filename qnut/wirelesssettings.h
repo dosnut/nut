@@ -13,7 +13,7 @@
 #define QNUT_WIRELESSSETTINGS_H
 
 #include <QDialog>
-#include <libnut/libnut_cli.h>
+#include <libnutclient/libnut_client.h>
 #include "ui/ui_airset.h"
 
 namespace qnut {
@@ -21,16 +21,16 @@ namespace qnut {
 		Q_OBJECT
 	private:
 		Ui::airset ui;
-		libnut::CDevice * device;
+		libnutclient::CDevice * device;
 	public:
-		CWirelessSettings(libnut::CDevice * wireless, QWidget * parent = 0);
+		CWirelessSettings(libnutclient::CDevice * wireless, QWidget * parent = 0);
 		~CWirelessSettings();
 	public slots:
 		void handleManagedAPSelectionChanged(const QItemSelection & selected);
 		void handleAvailableAPSelectionChanged(const QItemSelection & selected);
-		void updateUi(libnut::DeviceState state);
+		void updateUi(libnutcommon::DeviceState state);
 	private slots:
-		void updateSignalInfo(libnutws::WextSignal signal);
+		void updateSignalInfo(libnutwireless::WextSignal signal);
 		void switchToSelectedNetwork();
 		void addSelectedScanResult();
 		void removeSelectedNetwork();

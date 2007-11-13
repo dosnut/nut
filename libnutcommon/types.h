@@ -24,11 +24,9 @@ inline uint qHash(const QDBusObjectPath &key) {
 QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress &data);
 const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &data);
 
-namespace common {
+namespace libnutcommon {
 	void init();
-}
 
-namespace libnut {
 	enum DeviceState  { DS_DEACTIVATED, DS_ACTIVATED, DS_CARRIER, DS_UNCONFIGURED, DS_UP };
 	enum DeviceType {DT_ETH=0, DT_AIR=1, DT_PPP=2};
 	struct DeviceProperties {
@@ -61,18 +59,16 @@ namespace libnut {
 	
 	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceProperties &ifprop);
-};
 
-namespace nut {
-	QString toString(enum libnut::DeviceState state);
-	QString toString(enum libnut::DeviceType type);
-	QString toString(enum libnut::InterfaceState state);
+	QString toString(enum DeviceState state);
+	QString toString(enum DeviceType type);
+	QString toString(enum InterfaceState state);
 }
 
-Q_DECLARE_METATYPE(libnut::DeviceProperties);
-Q_DECLARE_METATYPE(libnut::DeviceState);
-Q_DECLARE_METATYPE(libnut::EnvironmentProperties);
-Q_DECLARE_METATYPE(libnut::InterfaceProperties);
+Q_DECLARE_METATYPE(libnutcommon::DeviceProperties);
+Q_DECLARE_METATYPE(libnutcommon::DeviceState);
+Q_DECLARE_METATYPE(libnutcommon::EnvironmentProperties);
+Q_DECLARE_METATYPE(libnutcommon::InterfaceProperties);
 Q_DECLARE_METATYPE(QHostAddress);
 Q_DECLARE_METATYPE(QList<QHostAddress>);
 #endif

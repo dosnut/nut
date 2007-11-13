@@ -221,17 +221,17 @@ namespace nuts {
 		return nlh;
 	}
 	
-	nut::MacAddress HardwareManager::getMacAddress(const QString &ifName) {
+	libnutcommon::MacAddress HardwareManager::getMacAddress(const QString &ifName) {
 		struct ifreq ifr;
 		if (!ifreq_init(ifr, ifName)) {
 			err << QString("Interface name too long") << endl;
-			return nut::MacAddress();
+			return libnutcommon::MacAddress();
 		}
 		if (ioctl(ethtool_fd, SIOCGIFHWADDR, &ifr) < 0) {
 			err << QString("Couldn't get hardware address of '%1'").arg(ifName) << endl;
-			return nut::MacAddress();
+			return libnutcommon::MacAddress();
 		}
-		return nut::MacAddress((quint8*) ifr.ifr_hwaddr.sa_data);
+		return libnutcommon::MacAddress((quint8*) ifr.ifr_hwaddr.sa_data);
 	}
 	
 	bool HardwareManager::ifreq_init(struct ifreq &ifr, const QString &ifname) {

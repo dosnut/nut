@@ -18,8 +18,9 @@
 #include "accesspointconfig.h"
 
 namespace qnut {
-	using namespace libnut;
-	using namespace libnutws;
+	using namespace libnutcommon;
+	using namespace libnutclient;
+	using namespace libnutwireless;
 	
 	CWirelessSettings::CWirelessSettings(CDevice * wireless, QWidget * parent) : QWidget(parent), device(wireless) {
 		ui.setupUi(this);
@@ -36,7 +37,7 @@ namespace qnut {
 		
 		updateUi(device->state);
 		
-		connect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SLOT(updateUi(libnut::DeviceState)));
+		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(updateUi(libnutcommon::DeviceState)));
 		
 		connect(ui.managedView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(handleManagedAPSelectionChanged(const QItemSelection &)));
@@ -80,14 +81,14 @@ namespace qnut {
 		ui.availableGroup->setEnabled(state != DS_DEACTIVATED);
 		
 		ui.iconLabel->setPixmap(QPixmap(iconFile(device)));
-		ui.stateLabel->setText(toString(device->state));
+		ui.stateLabel->setText(libnutclient::toString(device->state));
 		
 		if (state <= DS_ACTIVATED)
 			ui.signalLabel->setText("not assigned to accesspoint");
 		
 		if (state != DS_DEACTIVATED)
-			connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnutws::WextSignal)),
-				this, SLOT(updateSignalInfo(libnutws::WextSignal)));
+			connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)),
+				this, SLOT(updateSignalInfo(libnutwireless::WextSignal)));
 		
 		dynamic_cast<CAvailableAPModel *>(ui.availableView->model())->setWpaSupplicant(device->wpa_supplicant);
 		dynamic_cast<CManagedAPModel *>(ui.managedView->model())->setWpaSupplicant(device->wpa_supplicant);

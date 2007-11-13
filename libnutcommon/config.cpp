@@ -12,7 +12,7 @@
 
 #include "config.h"
 
-namespace nut {
+namespace libnutcommon {
 	QDBusArgument &operator<< (QDBusArgument &argument, const Config &data) {
 		argument.beginStructure();
 		argument.beginMap( QVariant::String, qMetaTypeId<DeviceConfig>() );

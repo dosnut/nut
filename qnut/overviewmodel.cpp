@@ -21,14 +21,15 @@
 #define OV_MOD_SIG     5
 
 namespace qnut {
-	using namespace libnut;
+	using namespace libnutclient;
+	using namespace libnutcommon;
 	
 	COverViewModel::COverViewModel(CDeviceManager * deviceManager, QObject * parent) : QAbstractItemModel(parent) {
 		if (deviceManager) {
 			devices = &(deviceManager->devices);
 			
-			connect(deviceManager, SIGNAL(deviceAdded(libnut::CDevice *)), this, SLOT(deviceAdded(libnut::CDevice *)));
-			connect(deviceManager, SIGNAL(deviceRemoved(libnut::CDevice *)), this, SLOT(deviceRemoved(libnut::CDevice *)));
+			connect(deviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(deviceAdded(libnutclient::CDevice *)));
+			connect(deviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(deviceRemoved(libnutclient::CDevice *)));
 		}
 		else
 			devices = NULL;
@@ -39,16 +40,16 @@ namespace qnut {
 	}
 	
 	void COverViewModel::deviceAdded(CDevice * device) {
-		connect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SIGNAL(layoutChanged()));
+		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SIGNAL(layoutChanged()));
 		if (device->type == DT_AIR)
-			connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnutws::WextSignal)), this, SIGNAL(layoutChanged()));
+			connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)), this, SIGNAL(layoutChanged()));
 		emit layoutChanged();
 	}
 	
 	void COverViewModel::deviceRemoved(CDevice * device) {
-		disconnect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SIGNAL(layoutChanged()));
+		disconnect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SIGNAL(layoutChanged()));
 		if (device->type == DT_AIR)
-			disconnect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnutws::WextSignal)), this, SIGNAL(layoutChanged()));
+			disconnect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)), this, SIGNAL(layoutChanged()));
 		emit layoutChanged();
 	}
 	
@@ -110,9 +111,9 @@ namespace qnut {
 			case OV_MOD_NAME:
 				return data->name;
 			case OV_MOD_STATUS:
-				return toString(data->state);
+				return libnutclient::toString(data->state);
 			case OV_MOD_TYPE:
-				return toString(data->type);
+				return libnutclient::toString(data->type);
 			case OV_MOD_IP: {
 					if (data->state != DS_UP)
 						return QString('-');

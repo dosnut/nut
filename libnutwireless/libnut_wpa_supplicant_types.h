@@ -12,7 +12,7 @@ extern "C" {
 #include <string.h>
 #include <stdlib.h>
 }
-namespace libnutws {
+namespace libnutwireless {
 
 	typedef enum {NF_NONE, NF_CURRENT, NF_DISABLED} NetworkFlags;
 
@@ -92,7 +92,7 @@ namespace libnutws {
 	};
 
 	struct WextRawScan {
-		nut::MacAddress bssid;
+		libnutcommon::MacAddress bssid;
 		WextRawSignal quality;
 		WextRawSignal maxquality;
 		WextRawSignal avgquality;
@@ -135,12 +135,12 @@ namespace libnutws {
 	};
 
 	struct WextScan {
-		nut::MacAddress bssid;
+		libnutcommon::MacAddress bssid;
 		WextSignal signal;
 	};
 	
 	struct ScanResult {
-		nut::MacAddress bssid;
+		libnutcommon::MacAddress bssid;
 		QString ssid;
 		int freq;
 		WextSignal signal;
@@ -169,7 +169,7 @@ namespace libnutws {
 		typedef QString EAP_STATE;
 		typedef QString METHOD_STATE;
 		typedef QString DECISION;
-		nut::MacAddress bssid;
+		libnutcommon::MacAddress bssid;
 		QString ssid;
 		int id;
 		PairwiseCiphers pairwise_cipher;
@@ -271,7 +271,7 @@ namespace libnutws {
 	struct ShortNetworkInfo {
 		int id;
 		QString ssid;
-		nut::MacAddress bssid;
+		libnutcommon::MacAddress bssid;
 		NetworkFlags flags;
 	};
 
@@ -313,7 +313,7 @@ namespace libnutws {
 			NetworkConfig();
 			~NetworkConfig();
 			QString ssid;
-			nut::MacAddress bssid;
+			libnutcommon::MacAddress bssid;
 			BOOL disabled;
 			QString id_str; // Network identifier string for external scripts
 			BOOL scan_ssid; // (do not) scan with SSID-specific Probe Request frames

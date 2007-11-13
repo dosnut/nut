@@ -17,8 +17,8 @@
 #define ENVDET_MOD_VALUE     1
 
 namespace qnut {
-	using namespace nut;
-	using namespace libnut;
+	using namespace libnutcommon;
+	using namespace libnutclient;
 	
 	void CEnvironmentDetailsModel::fillParentRules(quint32 start) {
 		if ((selectConfig.filters[start].selType == SelectRule::SEL_AND_BLOCK) ||

@@ -44,7 +44,7 @@ int mainApp(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
-	common::init();
+	libnutcommon::init();
 	LogInit();
 	int res = mainApp(argc, argv);
 	LogDestroy();

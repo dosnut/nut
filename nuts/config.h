@@ -3,7 +3,7 @@
 #define _NUTS_CONFIG_H
 
 #include <QStack>
-#include <common/config.h>
+#include <libnutcommon/config.h>
 
 namespace nuts {
 	class ConfigParser;
@@ -22,22 +22,22 @@ namespace nuts {
 			bool failed;
 			QString m_configFile;
 		
-			nut::Config *m_config;
-			nut::DeviceConfig *m_curdevconfig;
-			nut::EnvironmentConfig *m_curenvconfig;
-			nut::IPv4Config *m_curipv4config;
+			libnutcommon::Config *m_config;
+			libnutcommon::DeviceConfig *m_curdevconfig;
+			libnutcommon::EnvironmentConfig *m_curenvconfig;
+			libnutcommon::IPv4Config *m_curipv4config;
 			QStack<size_t> m_selBlocks;
 			
 			local_env_config *m_cur_env, *m_def_env;
 			
-			void selectAdd(const nut::SelectRule &rule);
+			void selectAdd(const libnutcommon::SelectRule &rule);
 		
-			bool finishEnvironment(nut::EnvironmentConfig *envc, local_env_config *l_envc);
+			bool finishEnvironment(libnutcommon::EnvironmentConfig *envc, local_env_config *l_envc);
 
 		public:
 			ConfigParser(const QString &configFile);
 			~ConfigParser();
-			nut::Config *getConfig() { return m_config; }
+			libnutcommon::Config *getConfig() { return m_config; }
 			
 		// internal functions for config parsing
 		// didn't get protected/friend working with extern "C"
@@ -79,7 +79,7 @@ namespace nuts {
 			
 			bool selectUser();
 			bool selectARP(const QHostAddress &addr);
-			bool selectARP(const QHostAddress &addr, const nut::MacAddress &mac);
+			bool selectARP(const QHostAddress &addr, const libnutcommon::MacAddress &mac);
 			bool selectESSID(const QString &essid);
 	};
 }

@@ -1,5 +1,5 @@
 #include "libnut_server_proxy.h"
-namespace libnut {
+namespace libnutclient {
 /*
  * Implementation of interface class DBusDeviceInterface
  */

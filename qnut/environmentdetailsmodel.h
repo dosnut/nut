@@ -13,13 +13,13 @@
 #define QNUT_ENVIRONMENTDETAILSMODEL_H
 
 #include <QAbstractItemModel>
-#include <libnut/libnut_cli.h>
+#include <libnutclient/libnut_client.h>
 
 namespace qnut {
 	class CEnvironmentDetailsModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		CEnvironmentDetailsModel(libnut::CEnvironment * data = NULL, QObject * parent = 0);
+		CEnvironmentDetailsModel(libnutclient::CEnvironment * data = NULL, QObject * parent = 0);
 		~CEnvironmentDetailsModel();
 		
 		QVariant data(const QModelIndex & index, int role) const;
@@ -32,8 +32,8 @@ namespace qnut {
 	private:
 		void fillParentRules(quint32 start = 0);
 		
-		libnut::CEnvironment * environment;
-		nut::SelectConfig selectConfig;
+		libnutclient::CEnvironment * environment;
+		libnutcommon::SelectConfig selectConfig;
 		QVector<quint32> parentRules;
 	};
 }

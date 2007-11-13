@@ -13,13 +13,13 @@
 #define QNUT_AVAILABLEAPMODEL_H
 
 #include <QAbstractItemModel>
-#include <libnut/libnut_cli.h>
+#include <libnutclient/libnut_client.h>
 
 namespace qnut {
 	class CAvailableAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		CAvailableAPModel(libnutws::CWpa_Supplicant * data = NULL, QObject * parent = 0);
+		CAvailableAPModel(libnutwireless::CWpa_Supplicant * data = NULL, QObject * parent = 0);
 		~CAvailableAPModel();
 		
 		QVariant data(const QModelIndex & index, int role) const;
@@ -30,12 +30,12 @@ namespace qnut {
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
 		
-		void setWpaSupplicant(libnutws::CWpa_Supplicant * wpaSupplicant);
+		void setWpaSupplicant(libnutwireless::CWpa_Supplicant * wpaSupplicant);
 	private slots:
 		void reloadScans();
 	private:
-		libnutws::CWpa_Supplicant * supplicant;
-		QList<libnutws::ScanResult> scans;
+		libnutwireless::CWpa_Supplicant * supplicant;
+		QList<libnutwireless::ScanResult> scans;
 	};
 }
 

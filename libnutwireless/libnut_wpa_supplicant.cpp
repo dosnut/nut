@@ -1,7 +1,7 @@
 #include "libnut_wpa_supplicant.h"
 #include <QDebug>
 
-namespace libnutws {
+namespace libnutwireless {
 
 //CWpa_supplicant
 
@@ -140,7 +140,7 @@ QList<ShortNetworkInfo> CWpa_Supplicant::parseListNetwork(QStringList list) {
 			continue;
 		}
 		net.ssid = line[1];
-		net.bssid = nut::MacAddress(line[2]);
+		net.bssid = libnutcommon::MacAddress(line[2]);
 		net.flags = parseNetworkFlags(line[3]);
 		networks.append(net);
 	}
@@ -202,7 +202,7 @@ QList<ScanResult> CWpa_Supplicant::parseScanResult(QStringList list) {
 	ScanAuthentication scanAuth;
 	foreach(QString str, list) {
 		line = str.split('\t',QString::KeepEmptyParts);
-		scanresult.bssid = nut::MacAddress(line[0]);
+		scanresult.bssid = libnutcommon::MacAddress(line[0]);
 		scanresult.freq = line[1].toInt(&worked);
 		if (!worked) {
 			worked = true;
@@ -364,7 +364,7 @@ Status CWpa_Supplicant::parseStatus(QStringList list) {
 	bool ok = true;
 	foreach(QString str, list) {
 		if (0 == str.indexOf("bssid=")) {
-			status.bssid = nut::MacAddress(str.split('=',QString::KeepEmptyParts)[1]);
+			status.bssid = libnutcommon::MacAddress(str.split('=',QString::KeepEmptyParts)[1]);
 			continue;
 		}
 		if (0 == str.indexOf("ssid=")) {
@@ -987,7 +987,7 @@ void CWpa_Supplicant::reconfigure() {
 void CWpa_Supplicant::terminate() {
 	wps_cmd_TERMINATE();
 }
-void CWpa_Supplicant::preauth(nut::MacAddress bssid) {
+void CWpa_Supplicant::preauth(libnutcommon::MacAddress bssid) {
 	wps_cmd_PREAUTH(bssid.toString());
 }
 int CWpa_Supplicant::addNetwork() {
@@ -1162,7 +1162,7 @@ NetworkConfig CWpa_Supplicant::getNetworkConfig(int id) {
 
 	response = wps_cmd_GET_NETWORK(id,"bssid");
 	if ("FAIL\n" != response) {
-		config.bssid = nut::MacAddress(response);
+		config.bssid = libnutcommon::MacAddress(response);
 	}
 
 	response = wps_cmd_GET_NETWORK(id,"disabled");
@@ -1558,7 +1558,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 	int has_range;
 	QList<WextRawScan> res;
 	WextRawScan singleres;
-	singleres.bssid = nut::MacAddress();
+	singleres.bssid = libnutcommon::MacAddress();
 	/* workaround */
 	struct wireless_config b;
 	/* Get basic information */ 
@@ -1696,7 +1696,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 		//Init event stream
 		QByteArray test;
 		char buffer2[128];
-		nut::MacAddress tmpMac;
+		libnutcommon::MacAddress tmpMac;
 		iw_init_event_stream(&stream, (char *) buffer, wrq.u.data.length);
 		do {
 			/* Extract an event and parse it*/
@@ -1708,7 +1708,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 						//ap_addr has type socketaddr
 						//Workaround for macaddress
 						iw_saether_ntop(&(iwe.u.ap_addr), buffer2);
-						tmpMac = nut::MacAddress(QString::fromAscii(buffer2,128));
+						tmpMac = libnutcommon::MacAddress(QString::fromAscii(buffer2,128));
 						break;
 					case IWEVQUAL: //Quality event:
 						singleres.quality.qual = (quint8) iwe.u.qual.qual;
@@ -1870,7 +1870,7 @@ void CWpa_Supplicant::removeNetwork(int id) {
 }
 
 //TODO:Check is id is in range
-void CWpa_Supplicant::setBssid(int id, nut::MacAddress bssid) {
+void CWpa_Supplicant::setBssid(int id, libnutcommon::MacAddress bssid) {
 	wps_cmd_BSSID(id,bssid.toString());
 }
 //Plain setVaraiable functions

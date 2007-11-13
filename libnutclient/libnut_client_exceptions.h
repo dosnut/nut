@@ -4,7 +4,7 @@
 #include <exception>
 #include <QString>
 
-namespace libnut {
+namespace libnutclient {
 //Copied from ../nuts/exception.h
     class Exception : public std::exception {
         private:

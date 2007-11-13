@@ -11,11 +11,11 @@
 //
 #include <QDir>
 #include "scriptsettings.h"
-#include "deviceoptions.h"
+#include "devicedetails.h"
 #include "constants.h"
 
 namespace qnut {
-	using namespace libnut;
+	using namespace libnutclient;
 	
 	bool CScriptSettings::execute(CDeviceDetails * deviceoptions) {
 		quint8 flags = deviceoptions->scriptFlags;

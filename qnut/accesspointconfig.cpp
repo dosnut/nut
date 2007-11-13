@@ -14,7 +14,7 @@
 #include <QToolTip>
 
 namespace qnut {
-	using namespace libnutws;
+	using namespace libnutwireless;
 	CAccessPointConfig::CAccessPointConfig(CWpa_Supplicant * wpa_supplicant, QWidget *parent) : QDialog(parent) {
 		supplicant = wpa_supplicant;
 		

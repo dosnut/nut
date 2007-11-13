@@ -13,7 +13,7 @@
 #define QNUT_IPCONFIGURATION_H
 
 #include <QDialog>
-#include <libnut/libnut_cli.h>
+#include <libnutclient/libnut_client.h>
 #include "ui/ui_ipconf.h"
 
 namespace qnut {
@@ -23,7 +23,7 @@ namespace qnut {
 		Ui::ipconf ui;
 		QList<QHostAddress> dnsList;
 	public:
-		bool execute(nut::IPv4UserConfig & config);
+		bool execute(libnutcommon::IPv4UserConfig & config);
 		CIPConfiguration(QWidget * parent = 0);
 		~CIPConfiguration();
 	private slots:

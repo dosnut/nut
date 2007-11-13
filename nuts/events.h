@@ -14,7 +14,7 @@
 
 #include <QObject>
 
-#include <common/common.h>
+#include <libnutcommon/common.h>
 
 namespace nuts {
 	class Device;
@@ -38,8 +38,8 @@ namespace nuts {
 		public slots:
 			void deviceAdded(QString devName, Device *dev);
 			void deviceRemoved(QString devName, Device *dev);
-			void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState, Device* device);
-			void interfaceStatusChanged(libnut::InterfaceState state, Interface_IPv4* iface);
+			void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState, Device* device);
+			void interfaceStatusChanged(libnutcommon::InterfaceState state, Interface_IPv4* iface);
 	};
 }
 

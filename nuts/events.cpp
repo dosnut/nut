@@ -55,7 +55,7 @@ namespace nuts {
 			<< QString("NUT_IP=%1").arg(iface->ip.toString())
 			<< QString("NUT_NETMASK=%1").arg(iface->netmask.toString())
 			<< QString("NUT_LOCALDOMAIN=%1").arg(iface->localdomain)
-			<< QString("NUT_STATUS=%1").arg(nut::toString(iface->getState()));
+			<< QString("NUT_STATUS=%1").arg(libnutcommon::toString(iface->getState()));
 		if (!iface->gateway.isNull())
 			environment << QString("NUT_GATEWAY=%1").arg(iface->gateway.toString());
 		QStringList dnsservers;
@@ -76,11 +76,11 @@ namespace nuts {
 		setupEnvironment(e, dev);
 		start(e, "deviceRemove", devName);
 	}
-	void Events::stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState, Device* dev) {
+	void Events::stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState, Device* dev) {
 		QStringList e;
 		setupEnvironment(e);
 		setupEnvironment(e, dev);
-		QString nState = nut::toString(newState), oState = nut::toString(oldState);
+		QString nState = libnutcommon::toString(newState), oState = libnutcommon::toString(oldState);
 		e << QString("NUT_OLD_STATE=%1").arg(oState)
 		  << QString("NUT_NEW_STATE=%1").arg(nState)
 		  << QString("NUT_STATE=%1").arg(nState);
@@ -93,18 +93,18 @@ namespace nuts {
 		}
 		start(e, nState, dev->getName(), envName);
 	}
-	void Events::interfaceStatusChanged(libnut::InterfaceState state, Interface_IPv4* iface) {
+	void Events::interfaceStatusChanged(libnutcommon::InterfaceState state, Interface_IPv4* iface) {
 		QString event;
 		switch (state) {
-			case libnut::IFS_OFF:
+			case libnutcommon::IFS_OFF:
 				event = "ifdown";
 				break;
-			case libnut::IFS_STATIC:
-			case libnut::IFS_DHCP:
-			case libnut::IFS_ZEROCONF:
+			case libnutcommon::IFS_STATIC:
+			case libnutcommon::IFS_DHCP:
+			case libnutcommon::IFS_ZEROCONF:
 				event = "ifup";
 				break;
-			case libnut::IFS_WAITFORCONFIG:
+			case libnutcommon::IFS_WAITFORCONFIG:
 				event = "ifwaitforconfig";
 				break;
 			default:

@@ -19,8 +19,8 @@
 #define MANAP_MOD_BSSID 3
 
 namespace qnut {
-	using namespace nut;
-	using namespace libnutws;
+	using namespace libnutcommon;
+	using namespace libnutwireless;
 	
 	CManagedAPModel::CManagedAPModel(CWpa_Supplicant * wpaSupplicant, QObject * parent) : QAbstractItemModel(parent) {
 		setWpaSupplicant(wpaSupplicant);

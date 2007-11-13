@@ -69,7 +69,7 @@ namespace nuts {
 	: QDBusAbstractAdaptor(dev), s_device(dev), dbus_connection(connection) {
 
 		//Set Device Properties
-		dbus_properties.type = s_device->hasWLAN() ? libnut::DT_AIR : libnut::DT_ETH;
+		dbus_properties.type = s_device->hasWLAN() ? libnutcommon::DT_AIR : libnutcommon::DT_ETH;
 		dbus_properties.name = s_device->getName();
 		dbus_properties.state = s_device->getState();
 
@@ -91,7 +91,7 @@ namespace nuts {
 		else {
 			dbus_properties.activeEnvironment = "";
 		}
-		connect(s_device,SIGNAL(stateChanged(libnut::DeviceState, libnut::DeviceState, Device*)),this,SLOT(stateChanged(libnut::DeviceState, libnut::DeviceState)));
+		connect(s_device,SIGNAL(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState, Device*)),this,SLOT(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState)));
 		setAutoRelaySignals(true);
 	}
 	
@@ -103,7 +103,7 @@ namespace nuts {
 		return dbus_path;
 	}
 
-	void DBusDevice::stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState) {
+	void DBusDevice::stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState) {
 		//Check if active environment has changed:
 		if (active_environment != s_device->getEnvironment() ) {
 			int oldActive = active_environment;
@@ -124,9 +124,9 @@ namespace nuts {
 		}
 		emit(stateChanged((int) newState, (int) oldState));
 	}
-	libnut::DeviceProperties DBusDevice::getProperties() {
+	libnutcommon::DeviceProperties DBusDevice::getProperties() {
 		dbus_properties.state = s_device->getState();
-		dbus_properties.type = s_device->hasWLAN() ? libnut::DT_AIR : libnut::DT_ETH;
+		dbus_properties.type = s_device->hasWLAN() ? libnutcommon::DT_AIR : libnutcommon::DT_ETH;
 		int active_environment = s_device->getEnvironment();
 		if (active_environment >= 0) {
 			dbus_properties.activeEnvironment = dbus_environments[active_environment]->getPath();
@@ -143,7 +143,7 @@ namespace nuts {
 		}
 		return paths;
 	}
-	nut::DeviceConfig DBusDevice::getConfig() {
+	libnutcommon::DeviceConfig DBusDevice::getConfig() {
 		return (s_device->getConfig());
 	}
 
@@ -200,12 +200,12 @@ namespace nuts {
 		return dbus_path;
 	}
 	
-	libnut::EnvironmentProperties DBusEnvironment::getProperties() {
+	libnutcommon::EnvironmentProperties DBusEnvironment::getProperties() {
 		dbus_properties.name = s_environment->getName();
 		dbus_properties.active = (s_device->getEnvironment() == s_environment->getID());
 		return dbus_properties;
 	}
-	nut::EnvironmentConfig DBusEnvironment::getConfig() {
+	libnutcommon::EnvironmentConfig DBusEnvironment::getConfig() {
 		return (s_environment->getConfig());
 	}
 	
@@ -223,20 +223,20 @@ namespace nuts {
 		#endif
 		return paths;
 	}
-	nut::SelectResult DBusEnvironment::getSelectResult() {
+	libnutcommon::SelectResult DBusEnvironment::getSelectResult() {
 		if (s_environment->selectionDone()) {
 			return s_environment->getSelectResult();
 		}
 		else {
-			return nut::SelectResult();
+			return libnutcommon::SelectResult();
 		}
 	}
-	QVector<nut::SelectResult> DBusEnvironment::getSelectResults() {
+	QVector<libnutcommon::SelectResult> DBusEnvironment::getSelectResults() {
 		if (s_environment->selectionDone()) {
 			return s_environment->getSelectResults();
 		}
 		else {
-			return QVector<nut::SelectResult>();
+			return QVector<libnutcommon::SelectResult>();
 		}
 	}
 
@@ -257,7 +257,7 @@ namespace nuts {
 		else {
 			dbus_properties.dns = QList<QHostAddress>();
 		}
-		connect(s_interface,SIGNAL(statusChanged(libnut::InterfaceState, Interface_IPv4*)),SLOT(interfaceStatusChanged(libnut::InterfaceState)));
+		connect(s_interface,SIGNAL(statusChanged(libnutcommon::InterfaceState, Interface_IPv4*)),SLOT(interfaceStatusChanged(libnutcommon::InterfaceState)));
 	}
 	
 	DBusInterface_IPv4::~DBusInterface_IPv4() {
@@ -268,7 +268,7 @@ namespace nuts {
 	}
 	//Private SLOTS:
 
-	void DBusInterface_IPv4::interfaceStatusChanged(libnut::InterfaceState) {
+	void DBusInterface_IPv4::interfaceStatusChanged(libnutcommon::InterfaceState) {
 		dbus_properties.ip = s_interface->ip;
 		dbus_properties.gateway = s_interface->gateway;
 		dbus_properties.netmask = s_interface->netmask;
@@ -278,7 +278,7 @@ namespace nuts {
 		emit stateChanged(dbus_properties);
 	}
 
-	libnut::InterfaceProperties DBusInterface_IPv4::getProperties() {
+	libnutcommon::InterfaceProperties DBusInterface_IPv4::getProperties() {
 		dbus_properties.ip = s_interface->ip;
 		dbus_properties.gateway = s_interface->gateway;
 		dbus_properties.netmask = s_interface->netmask;
@@ -286,7 +286,7 @@ namespace nuts {
 		dbus_properties.dns = s_interface->dnsserver;
 		return dbus_properties;
 	}
-	nut::IPv4Config DBusInterface_IPv4::getConfig() {
+	libnutcommon::IPv4Config DBusInterface_IPv4::getConfig() {
 		return (s_interface->getConfig());
 	}
 

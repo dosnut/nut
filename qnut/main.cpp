@@ -7,7 +7,7 @@ using namespace qnut;
 
 int main(int argc, char * argv[])
 {
-	common::init();
+	libnutcommon::init();
 	QApplication app(argc, argv);
 	
 	QString locale = QLocale::system().name();

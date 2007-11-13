@@ -118,7 +118,7 @@ namespace nuts {
 			
 			bool check();
 			
-			void setClientMac(const nut::MacAddress &chaddr);
+			void setClientMac(const libnutcommon::MacAddress &chaddr);
 			void setClientAddress(const QHostAddress &addr);
 			void setXID(quint32 xid);
 			void setOption(quint8 op, const QVector<quint8>& data);
@@ -130,7 +130,7 @@ namespace nuts {
 				setOption(op, (quint8*) &data, sizeof(data));
 			}
 			
-			nut::MacAddress getClientMac();
+			libnutcommon::MacAddress getClientMac();
 			inline quint32 getXID() {
 				return msg.xid;
 			}

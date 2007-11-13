@@ -13,7 +13,7 @@
 #define QNUT_ACCESSPOINTCONFIG_H
 
 #include <QDialog>
-#include <libnut/libnut_cli.h>
+#include <libnutclient/libnut_client.h>
 #include "ui/ui_apconf.h"
 
 namespace qnut {
@@ -24,19 +24,19 @@ namespace qnut {
 		
 		QRegExpValidator * hexValidator;
 		
-		libnutws::CWpa_Supplicant * supplicant;
+		libnutwireless::CWpa_Supplicant * supplicant;
 		
 		int currentID;
 		
 		inline void convertLineEditText(QLineEdit * lineEdit, bool hex);
 		inline QString convertQuoted(QString text);
-		inline void writeEAPConfig(libnutws::EapNetworkConfig &eap_config);
-		inline void readEAPConfig(libnutws::EapNetworkConfig &eap_config);
+		inline void writeEAPConfig(libnutwireless::EapNetworkConfig &eap_config);
+		inline void readEAPConfig(libnutwireless::EapNetworkConfig &eap_config);
 	public:
-		bool execute(libnutws::ScanResult scanResult);
+		bool execute(libnutwireless::ScanResult scanResult);
 		bool execute(int id);
 		
-		CAccessPointConfig(libnutws::CWpa_Supplicant * wpa_supplicant, QWidget * parent = 0);
+		CAccessPointConfig(libnutwireless::CWpa_Supplicant * wpa_supplicant, QWidget * parent = 0);
 		~CAccessPointConfig();
 	private slots:
 		void setAuthConfig(int type);

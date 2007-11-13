@@ -15,7 +15,7 @@
 %union {
 	QString *str;
 	QHostAddress *addr;
-	nut::MacAddress *macAddr;
+	libnutcommon::MacAddress *macAddr;
 	int i;
 }
 

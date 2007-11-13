@@ -14,13 +14,13 @@
 
 #include <QSystemTrayIcon>
 #include <QSettings>
-#include <libnut/libnut_cli.h>
+#include <libnutclient/libnut_client.h>
 #include "ui/ui_devopt.h"
 
 namespace qnut {
 	class CWirelessSettings;
 	class CDeviceDetails;
-	typedef QHash<libnut::CDevice *, CDeviceDetails *> CDeviceDetailsHash;
+	typedef QHash<libnutclient::CDevice *, CDeviceDetails *> CDeviceDetailsHash;
 		
 	class CDeviceDetails : public QWidget {
 		Q_OBJECT
@@ -39,7 +39,7 @@ namespace qnut {
 	public:
 		quint8 scriptFlags;
 		
-		libnut::CDevice * device;
+		libnutclient::CDevice * device;
 		
 		QSystemTrayIcon * trayIcon;
 		
@@ -55,13 +55,13 @@ namespace qnut {
 		
 		QAction * showAction;
 		
-		CDeviceDetails(libnut::CDevice * parentDevice, QWidget * parent = 0);
+		CDeviceDetails(libnutclient::CDevice * parentDevice, QWidget * parent = 0);
 		~CDeviceDetails();
 	private slots:
 		void handleTrayActivated(QSystemTrayIcon::ActivationReason);
 		void showTheeseDetails();
 		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-		void handleDeviceStateChange(libnut::DeviceState state);
+		void handleDeviceStateChange(libnutcommon::DeviceState state);
 		void openIPConfiguration();
 	public slots:
 		void openDeviceSettings();

@@ -21,8 +21,8 @@
 #define AVLAP_MOD_CIPHERS 3
 
 namespace qnut {
-	using namespace nut;
-	using namespace libnutws;
+	using namespace libnutcommon;
+	using namespace libnutwireless;
 	
 	CAvailableAPModel::CAvailableAPModel(CWpa_Supplicant * wpaSupplicant, QObject * parent) : QAbstractItemModel(parent) {
 		setWpaSupplicant(wpaSupplicant);

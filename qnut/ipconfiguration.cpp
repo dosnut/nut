@@ -15,7 +15,7 @@
 #include "ipeditdelegate.h"
 
 namespace qnut {
-	using namespace libnut;
+	using namespace libnutclient;
 	
 	CIPConfiguration::CIPConfiguration(QWidget * parent) : QDialog(parent) {
 		ui.setupUi(this);
@@ -26,7 +26,7 @@ namespace qnut {
 	CIPConfiguration::~CIPConfiguration() {
 	}
 	
-	bool CIPConfiguration::execute(nut::IPv4UserConfig & config) {
+	bool CIPConfiguration::execute(libnutcommon::IPv4UserConfig & config) {
 		ui.ipEdit->setText(config.ip().toString());
 		ui.netmaskEdit->setText(config.netmask().toString());
 		ui.gatewayEdit->setText(config.gateway().toString());

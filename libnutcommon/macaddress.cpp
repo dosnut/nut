@@ -12,7 +12,7 @@
 #include "macaddress.h"
 #include <QDebug>
 
-namespace nut {
+namespace libnutcommon {
 	QDBusArgument &operator<< (QDBusArgument &argument, const MacAddress &data) {
 		argument << data.toString();
 		return argument;

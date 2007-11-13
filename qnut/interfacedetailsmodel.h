@@ -13,13 +13,13 @@
 #define QNUT_INTERFACEDETAILSMODEL_H
 
 #include <QAbstractItemModel>
-#include <libnut/libnut_cli.h>
+#include <libnutclient/libnut_client.h>
 
 namespace qnut {
 	class CInterfaceDetailsModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		CInterfaceDetailsModel(libnut::CInterface * data = NULL, QObject * parent = 0);
+		CInterfaceDetailsModel(libnutclient::CInterface * data = NULL, QObject * parent = 0);
 		~CInterfaceDetailsModel();
 		
 		QVariant data(const QModelIndex & index, int role) const;
@@ -30,7 +30,7 @@ namespace qnut {
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
 	private:
-		libnut::CInterface * interface;
+		libnutclient::CInterface * interface;
 	};
 }
 

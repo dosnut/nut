@@ -27,7 +27,7 @@ extern "C" {
 //TODO:Check if we can start multiple wpa_supplicants for multiple devices and test behavior
 
 
-namespace libnutws {
+namespace libnutwireless {
 
 	class CWpa_Supplicant: public QObject {
 			Q_OBJECT
@@ -171,7 +171,7 @@ namespace libnutws {
 			CWpa_Supplicant(QObject * parent, QString ifname);
 			~CWpa_Supplicant();
 			inline void open() { wps_open(false); }
-			inline bool close() {return wps_close("libnut",false); }
+			inline bool close() {return wps_close("libnutclient",false); }
 			bool connected();
 			void readWirelessInfo();
 			
@@ -193,14 +193,14 @@ namespace libnutws {
 			void debug_level(int level);
 			void reconfigure();
 			void terminate();
-			void preauth(nut::MacAddress bssid);
+			void preauth(libnutcommon::MacAddress bssid);
 			int addNetwork(); //return -1 if failed, otherwise return network id
 			NetconfigStatus addNetwork(NetworkConfig config); //return -1 if failed, otherwise return network id
 			NetconfigStatus editNetwork(int netid, NetworkConfig config);
 			NetworkConfig getNetworkConfig(int id);
 			
 			void removeNetwork(int id);
-			void setBssid(int id, nut::MacAddress bssid);
+			void setBssid(int id, libnutcommon::MacAddress bssid);
 
 			void setVariable(QString var, QString val);
 			bool setNetworkVariable(int id, QString var, QString val);
@@ -230,13 +230,13 @@ namespace libnutws {
 			
 		signals:
 			void stateChanged(bool state);
-			void request(libnutws::Request req);
+			void request(libnutwireless::Request req);
 			void closed();
 			void opened();
 			void scanCompleted();
 			void message(QString msg);
-			void eventMessage(libnutws::EventType type);
-			void signalQualityUpdated(libnutws::WextSignal signal);
+			void eventMessage(libnutwireless::EventType type);
+			void signalQualityUpdated(libnutwireless::WextSignal signal);
 	};
 
 }

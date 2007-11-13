@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS = libnutcommon libnutclient libnutwireless nuts qnut
+SUBDIRS = libnutcommon libnutwireless libnutclient nuts qnut

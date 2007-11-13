@@ -6,9 +6,9 @@
 #include <QDBusObjectPath>
 #include <QHostAddress>
 
-#include <common/types.h>
-#include <common/dbus.h>
-#include <common/config.h>
+#include <libnutcommon/types.h>
+#include <libnutcommon/dbus.h>
+#include <libnutcommon/config.h>
 
 namespace nuts {
 	class DBusDeviceManager;
@@ -61,11 +61,11 @@ namespace nuts {
 			QDBusConnection *dbus_connection;
 			QList<DBusEnvironment* > dbus_environments;
 			QString dbus_path;
-			libnut::DeviceProperties dbus_properties;
+			libnutcommon::DeviceProperties dbus_properties;
 			int active_environment;
 		
 		private slots:
-			void stateChanged(libnut::DeviceState newState, libnut::DeviceState oldState);
+			void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState);
 		
 		public:
 			DBusDevice(Device *dev, QDBusConnection *connection, const QString &path);
@@ -74,9 +74,9 @@ namespace nuts {
 			QString getPath();
 	
 		public slots:
-			libnut::DeviceProperties getProperties();
+			libnutcommon::DeviceProperties getProperties();
 			QList<QDBusObjectPath> getEnvironments();
-			nut::DeviceConfig getConfig();
+			libnutcommon::DeviceConfig getConfig();
 			Q_NOREPLY void enable();
 			Q_NOREPLY void disable();
 			Q_NOREPLY void setEnvironment(const QDBusObjectPath &path);
@@ -102,7 +102,7 @@ namespace nuts {
 			QList<DBusInterface_IPv6*> dbus_interfaces_IPv6;
 			#endif
 			QString dbus_path;
-			libnut::EnvironmentProperties dbus_properties;
+			libnutcommon::EnvironmentProperties dbus_properties;
 			Device * s_device;
 		
 		public:
@@ -114,11 +114,11 @@ namespace nuts {
 			void emitChange(bool change) { emit stateChanged(change); }
 	
 		public slots:
-			libnut::EnvironmentProperties getProperties();
-			nut::EnvironmentConfig getConfig();
+			libnutcommon::EnvironmentProperties getProperties();
+			libnutcommon::EnvironmentConfig getConfig();
 			QList<QDBusObjectPath> getInterfaces();
-			nut::SelectResult getSelectResult();
-			QVector<nut::SelectResult> getSelectResults();
+			libnutcommon::SelectResult getSelectResult();
+			QVector<libnutcommon::SelectResult> getSelectResults();
 		signals:
 			void interfaceAdded(const QDBusObjectPath &objectpath);
 			void interfaceRemoved(const QDBusObjectPath &objectpath);
@@ -132,9 +132,9 @@ namespace nuts {
 			Interface_IPv4 *s_interface;
 			QDBusConnection *dbus_connection;
 			QString dbus_path;
-			libnut::InterfaceProperties dbus_properties;
+			libnutcommon::InterfaceProperties dbus_properties;
 		private slots:
-			void interfaceStatusChanged(libnut::InterfaceState state);
+			void interfaceStatusChanged(libnutcommon::InterfaceState state);
 		public:
 			DBusInterface_IPv4(Interface_IPv4 *iface, QDBusConnection *connection, const QString &path);
 			virtual ~DBusInterface_IPv4();
@@ -142,20 +142,20 @@ namespace nuts {
 			QString getPath();
 		
 		public slots:
-			libnut::InterfaceProperties getProperties();
-			nut::IPv4Config getConfig();
+			libnutcommon::InterfaceProperties getProperties();
+			libnutcommon::IPv4Config getConfig();
 	
 			bool needUserSetup() { return s_interface->needUserSetup(); }
-			bool setUserConfig(nut::IPv4UserConfig userConfig) { return s_interface->setUserConfig(userConfig); }
-			nut::IPv4UserConfig getUserConfig() { return s_interface->getUserConfig(); }
+			bool setUserConfig(libnutcommon::IPv4UserConfig userConfig) { return s_interface->setUserConfig(userConfig); }
+			libnutcommon::IPv4UserConfig getUserConfig() { return s_interface->getUserConfig(); }
 		
 		signals:
-			void stateChanged(const libnut::InterfaceProperties &properties);
+			void stateChanged(const libnutcommon::InterfaceProperties &properties);
 	};
 	#ifdef IPv6
 	class DBusInterface_IPv6: public QDBusAbstractAdaptor {
 		Q_OBJECT
-		Q_CLASSINFO("D-BUS Interface", "de.unistuttgart.de" ".Interface_IPv6");
+		Q_CLASSINFO("D-BUS Interface", "de.unistuttgart.nut" ".Interface_IPv6");
 		
 	}
 	#endif

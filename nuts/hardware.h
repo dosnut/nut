@@ -7,7 +7,7 @@
 #include <QList>
 #include <QVector>
 
-#include <common/macaddress.h>
+#include <libnutcommon/macaddress.h>
 
 extern "C" {
 	struct nl_handle;
@@ -62,7 +62,7 @@ namespace nuts {
 			
 			struct nl_handle *getNLHandle();
 			
-			nut::MacAddress getMacAddress(const QString &ifName);
+			libnutcommon::MacAddress getMacAddress(const QString &ifName);
 			
 			bool ifExists(const QString &ifName);
 			bool hasWLAN(const QString &ifName);

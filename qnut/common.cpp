@@ -2,8 +2,9 @@
 #include <QObject>
 
 namespace qnut {
-	using namespace libnut;
-	using namespace libnutws;
+	using namespace libnutcommon;
+	using namespace libnutclient;
+	using namespace libnutwireless;
 	
 	QString iconFile(CDevice * device) {
 		switch (device->type) {
@@ -38,7 +39,7 @@ namespace qnut {
 	}
 
 	QString shortSummary(CDevice * device) {
-		return device->name + ": " + toString(device->state) + ", " + activeIP(device);
+		return device->name + ": " + libnutclient::toString(device->state) + ", " + activeIP(device);
 	}
 
 	QString activeIP(CDevice * device) {
@@ -63,7 +64,7 @@ namespace qnut {
 			return QString('-');
 	}
 	
-	QString signalSummary(libnutws::WextSignal signal) {
+	QString signalSummary(libnutwireless::WextSignal signal) {
 		QString quality = QString::number(signal.quality.value) + '/' + QString::number(signal.quality.maximum);
 		QString level/* = QString::number(signal.quality.level) +
 			((signal.encoding & WSIG_LEVEL_REL)   ? '/' + QString::number(signal.maxquality.level) : QString())*/;

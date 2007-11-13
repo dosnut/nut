@@ -14,7 +14,7 @@
 #include "libnut_client_exceptions.h"
 #include <libnutwireless/libnut_wpa_supplicant.h>
 
-namespace libnut {
+namespace libnutclient {
 	class CDeviceManager;
 
 	class CLog;
@@ -27,10 +27,10 @@ namespace libnut {
 	typedef QList<CInterface *> CInterfaceList;
 };
 
-namespace libnut {
+namespace libnutclient {
 
-	QString toString(DeviceState state);
-	QString toString(DeviceType type);
+	QString toString(libnutcommon::DeviceState state);
+	QString toString(libnutcommon::DeviceType type);
 	QString toString(QDBusError error);
 
 	class CLog : public QObject {
@@ -97,8 +97,8 @@ namespace libnut {
 		void refreshAll();
 		void rebuild();
 	signals:
-		void deviceAdded(libnut::CDevice * device);
-		void deviceRemoved(libnut::CDevice * device); //nach entfernen aus der liste aber vor dem löschen
+		void deviceAdded(libnutclient::CDevice * device);
+		void deviceRemoved(libnutclient::CDevice * device); //nach entfernen aus der liste aber vor dem löschen
 		void stateChanged(bool state); //Information about server state
 	};
 
@@ -115,7 +115,7 @@ namespace libnut {
 		QHash<QDBusObjectPath, CEnvironment*> dbusEnvironments;
 		CLog * log;
 		DBusDeviceInterface * dbusDevice;
-		nut::DeviceConfig dbusConfig;
+		libnutcommon::DeviceConfig dbusConfig;
 		bool need_wpa_supplicant;
 		void refreshAll();
 		void setActiveEnvironment(CEnvironment * env, QDBusObjectPath dbusPath);
@@ -129,15 +129,15 @@ namespace libnut {
 		
 		QString name;
 		QString essid;
-		DeviceState state;
-		DeviceType type;
+		libnutcommon::DeviceState state;
+		libnutcommon::DeviceType type;
 		CEnvironment * activeEnvironment;
-		libnutws::CWpa_Supplicant * wpa_supplicant;
+		libnutwireless::CWpa_Supplicant * wpa_supplicant;
 		int index;
 		
 		CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);
 		~CDevice();
-		nut::DeviceConfig getConfig();
+		libnutcommon::DeviceConfig getConfig();
 
 	public slots:
 		void enable();
@@ -145,11 +145,11 @@ namespace libnut {
 		void setEnvironment(CEnvironment * environment);
 		
 	signals:
-		void environmentChangedActive(libnut::CEnvironment * current, libnut::CEnvironment * previous);
+		void environmentChangedActive(libnutclient::CEnvironment * current, libnutclient::CEnvironment * previous);
 // 		void environmentsUpdated(); //Pending for removal
 // 		void environmentAdded(CEnvironment * environment); //Pending for removal
 // 		void environmentRemoved(CEnvironment * environment); //Pending for removal
-		void stateChanged(libnut::DeviceState newState);
+		void stateChanged(libnutcommon::DeviceState newState);
 	};
 	
 	class CEnvironment : public CLibNut {
@@ -164,9 +164,9 @@ namespace libnut {
 		CLog * log;
 		QHash<QDBusObjectPath, CInterface *> dbusInterfaces;
 		DBusEnvironmentInterface * dbusEnvironment;
-		nut::EnvironmentConfig config;
-		nut::SelectResult selectResult;
-		QVector<nut::SelectResult> selectResults;
+		libnutcommon::EnvironmentConfig config;
+		libnutcommon::SelectResult selectResult;
+		QVector<libnutcommon::SelectResult> selectResults;
 		
 		void refreshAll();
 		void rebuild(const QList<QDBusObjectPath> &paths);
@@ -182,9 +182,9 @@ namespace libnut {
 		~CEnvironment();
 	public slots:
 		void enter();
-		nut::EnvironmentConfig getConfig();
-		nut::SelectResult getSelectResult(bool refresh=false);
-		QVector<nut::SelectResult> getSelectResults(bool refresh=false);
+		libnutcommon::EnvironmentConfig getConfig();
+		libnutcommon::SelectResult getSelectResult(bool refresh=false);
+		QVector<libnutcommon::SelectResult> getSelectResults(bool refresh=false);
 		
 	signals:
 		void activeChanged(bool active);
@@ -202,22 +202,22 @@ namespace libnut {
 		QDBusObjectPath dbusPath;
 		CLog * log;
 		DBusInterfaceInterface_IPv4 * dbusInterface;
-		nut::IPv4Config dbusConfig;
-		nut::IPv4UserConfig userConfig;
+		libnutcommon::IPv4Config dbusConfig;
+		libnutcommon::IPv4UserConfig userConfig;
 		void refreshAll();
 	private slots:
-		void dbusstateChanged(libnut::InterfaceProperties properties);
+		void dbusstateChanged(libnutcommon::InterfaceProperties properties);
 	public:
-		InterfaceState state;
+		libnutcommon::InterfaceState state;
 		QHostAddress ip;
 		QHostAddress netmask;
 		QHostAddress gateway;
 		QList<QHostAddress> dnsserver;
 		int index;
 		
-		nut::IPv4UserConfig getUserConfig(bool refresh=false);
-		nut::IPv4Config getConfig() { return dbusConfig; }
-		nut::IPv4Config config() { return dbusConfig; } //wants qnut wants it like that
+		libnutcommon::IPv4UserConfig getUserConfig(bool refresh=false);
+		libnutcommon::IPv4Config getConfig() { return dbusConfig; }
+		libnutcommon::IPv4Config config() { return dbusConfig; } //wants qnut wants it like that
 
 		CInterface(CEnvironment * parent, QDBusObjectPath dbusPath);
 		~CInterface();
@@ -225,10 +225,10 @@ namespace libnut {
 		void activate();
 		void deactivate();
 		bool needUserSetup();
-		bool setUserConfig(const nut::IPv4UserConfig &cuserConfig);
+		bool setUserConfig(const libnutcommon::IPv4UserConfig &cuserConfig);
 		
 	signals:
-		void stateChanged(libnut::InterfaceState state);
+		void stateChanged(libnutcommon::InterfaceState state);
 	};
 };
 

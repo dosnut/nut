@@ -13,13 +13,13 @@
 #define QNUT_ENVIRONMENTTREEMODEL_H
 
 #include <QAbstractItemModel>
-#include <libnut/libnut_cli.h>
+#include <libnutclient/libnut_client.h>
 
 namespace qnut {
 	class CEnvironmentTreeModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		CEnvironmentTreeModel(libnut::CDevice * data, QObject * parent = 0);
+		CEnvironmentTreeModel(libnutclient::CDevice * data, QObject * parent = 0);
 		~CEnvironmentTreeModel();
 		
 		QVariant data(const QModelIndex & index, int role) const;
@@ -30,7 +30,7 @@ namespace qnut {
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
 	private:
-		libnut::CDevice * device;
+		libnutclient::CDevice * device;
 	};
 };
 

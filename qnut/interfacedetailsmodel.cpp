@@ -17,13 +17,13 @@
 #define IFDET_MOD_VALUE  1
 
 namespace qnut {
-	using namespace nut;
-	using namespace libnut;
+	using namespace libnutcommon;
+	using namespace libnutclient;
 
 	CInterfaceDetailsModel::CInterfaceDetailsModel(CInterface * data, QObject * parent) : QAbstractItemModel(parent) {
 		interface = data;
 		if (interface) {
-			connect(interface, SIGNAL(stateChanged(libnut::InterfaceState)), this, SIGNAL(layoutChanged()));
+			connect(interface, SIGNAL(stateChanged(libnutcommon::InterfaceState)), this, SIGNAL(layoutChanged()));
 			//connect(interface, SIGNAL(userConfigApplied()), this, SIGNAL(layoutChanged()));
 		}
 	}

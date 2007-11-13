@@ -24,7 +24,8 @@
 #include "wirelesssettings.h"
 
 namespace qnut {
-	using namespace libnut;
+	using namespace libnutclient;
+	using namespace libnutcommon;
 	
 	CDeviceDetails::CDeviceDetails(CDevice * parentDevice, QWidget * parent) :
 		QWidget(parent),
@@ -48,14 +49,14 @@ namespace qnut {
 		
 		readSettings();
 		
-		connect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SLOT(handleDeviceStateChange(libnut::DeviceState)));
+		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
 		
 		if (device->state == DS_UP)
 			ui.environmentTree->expand(ui.environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
 	}
 	
 	CDeviceDetails::~CDeviceDetails() {
-		disconnect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SLOT(handleDeviceStateChange(libnut::DeviceState)));
+		disconnect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
 		writeSettings();
 		if (wirelessSettings) {
 			wirelessSettings->close();
@@ -144,7 +145,7 @@ namespace qnut {
 	
 	inline void CDeviceDetails::setHeadInfo() {
 		ui.iconLabel->setPixmap(QPixmap(iconFile(device)));
-		ui.statusLabel->setText(toString(device->state));
+		ui.statusLabel->setText(libnutclient::toString(device->state));
 	}
 	
 	void CDeviceDetails::handleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
@@ -190,7 +191,7 @@ namespace qnut {
 				CInterface * interface = static_cast<CInterface *>(targetIndex.internalPointer());
 				environment = dynamic_cast<CEnvironment *>(interface->parent());
 				
-				ipConfigurationAction->setEnabled(interface->getConfig().getFlags() & nut::IPv4Config::DO_USERSTATIC);
+				ipConfigurationAction->setEnabled(interface->getConfig().getFlags() & libnutcommon::IPv4Config::DO_USERSTATIC);
 				ui.detailsView->setRootIsDecorated(false);
 				ui.detailsView->setModel(new CInterfaceDetailsModel(interface));
 			}
@@ -220,7 +221,7 @@ namespace qnut {
 		QModelIndex selectedIndex = (ui.environmentTree->selectionModel()->selection().indexes())[0];
 		
 		CInterface * interface = static_cast<CInterface *>(selectedIndex.internalPointer());
-		nut::IPv4UserConfig config = interface->getUserConfig(true);
+		libnutcommon::IPv4UserConfig config = interface->getUserConfig(true);
 		if (dialog.execute(config))
 			interface->setUserConfig(config);
 	}
@@ -324,7 +325,7 @@ namespace qnut {
 				QStringList env;
 				QProcess process;
 				env << "QNUT_DEV_NAME="  + device->name;
-				env << "QNUT_DEV_STATE=" + nut::toString(state);
+				env << "QNUT_DEV_STATE=" + libnutcommon::toString(state);
 				
 				if (state >= DS_UNCONFIGURED)
 					env << "QNUT_ENV_NAME=" + device->activeEnvironment->name;
