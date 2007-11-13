@@ -107,7 +107,7 @@ namespace qnut {
 		config.disabled = (wps_bool)ui.autoEnableCheck->isChecked();
 		
 		if (ui.encCombo->currentText() == "WEP") {
-			config.group = (wps_group_ciphers)(GCI_WEP104 | GCI_WEP40);
+			config.group = (GroupCiphers)(GCI_WEP104 | GCI_WEP40);
 			config.pairwise = PCI_NONE;
 			
 			config.wep_key0 = ui.wepKey0HexCheck->isChecked() ? ui.wepKey0Edit->text() : '\"' + ui.wepKey0Edit->text() + '\"';

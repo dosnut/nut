@@ -109,13 +109,13 @@ namespace libnutws {
 			QList<wps_scan> parseScanResult(QStringList list);
 
 			//parse config
-			wps_protocols parseProtocols(QString str);
-			wps_key_management parseKeyMgmt(QString str);
-			wps_auth_algs parseAuthAlg(QString str);
-			wps_pairwise_ciphers parsePairwiseCiphers(QString str);
-			wps_group_ciphers parseGroupCiphers(QString str);
-			wps_eapol_flags parseEapolFlags(QString str);
-			wps_eap_method parseEapMethod(QString str);
+			Protocols parseProtocols(QString str);
+			KeyManagement parseKeyMgmt(QString str);
+			AuthenticationAlgs parseAuthAlg(QString str);
+			PairwiseCiphers parsePairwiseCiphers(QString str);
+			GroupCiphers parseGroupCiphers(QString str);
+			EapolFlags parseEapolFlags(QString str);
+			EapMethod parseEapMethod(QString str);
 			
 			
 
@@ -132,20 +132,20 @@ namespace libnutws {
 
 			
 			//parse Event
-			wps_event_type parseEvent(QString str);
+			EventType parseEvent(QString str);
 			wps_req parseReq(QString str);
-			wps_req_type parseReqType(QString str);
-			wps_interact_type parseInteract(QString str);
+			RequestType parseReqType(QString str);
+			InteractiveType parseInteract(QString str);
 
 			//Event helper functions:
 			void Event_dispatcher(wps_req req);
-			void Event_dispatcher(wps_event_type event);
+			void Event_dispatcher(EventType event);
 			void Event_dispatcher(QString event);
 
 
 			//Edit/get network helper functions
 			wps_eap_network_config wps_getEapNetworkConfig(int id);
-			wps_eap_netconfig_failures wps_editEapNetwork(int netid, wps_eap_network_config config);
+			EapNetconfigFailures wps_editEapNetwork(int netid, wps_eap_network_config config);
 
 			//Functions to get actual signal strength and/or signal strength for scan results:
 			//And set scanresults
@@ -235,7 +235,7 @@ namespace libnutws {
 			void opened();
 			void scanCompleted();
 			void message(QString msg);
-			void eventMessage(libnutws::wps_event_type type);
+			void eventMessage(libnutws::EventType type);
 			void signalQualityUpdated(libnutws::wps_wext_signal_readable signal);
 	};
 

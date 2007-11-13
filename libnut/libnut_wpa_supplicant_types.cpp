@@ -3,26 +3,26 @@
 namespace libnutws {
 
 
-wps_group_ciphers toGroupCiphers(ScanCiphers cip) {
-	//{GCI_CCMP=2, GCI_TKIP=4, GCI_WEP104=8, GCI_WEP40=16, GCI_ALL=31} wps_group_ciphers;
+GroupCiphers toGroupCiphers(ScanCiphers cip) {
+	//{GCI_CCMP=2, GCI_TKIP=4, GCI_WEP104=8, GCI_WEP40=16, GCI_ALL=31} GroupCiphers;
 	//{CI_UNDEFINED=0, CI_NONE=1, CI_CCMP=2, CI_TKIP=4, CI_WEP104=8, CI_WEP40=16, CI_WEP=24} ScanCiphers;
 	if ((int) cip >=2) {
-		return ((wps_group_ciphers) cip);
+		return ((GroupCiphers) cip);
 	}
 	else {
 		return GCI_DEF;
 	}
 }
-wps_pairwise_ciphers toPairwiseCiphers(ScanCiphers cip) {
-	//{PCI_NONE=1, PCI_CCMP=2, PCI_TKIP=4, PCI_DEF=6} wps_pairwise_ciphers;
+PairwiseCiphers toPairwiseCiphers(ScanCiphers cip) {
+	//{PCI_NONE=1, PCI_CCMP=2, PCI_TKIP=4, PCI_DEF=6} PairwiseCiphers;
 	if ((int) cip >= 1 && (int) cip <= 7) {
-		return ((wps_pairwise_ciphers) cip);
+		return ((PairwiseCiphers) cip);
 	}
 	else {
 		return PCI_DEF;
 	}
 }
-wps_key_management toKeyManagment(ScanAuthentication auth) {
+KeyManagement toKeyManagment(ScanAuthentication auth) {
 	//{AUTH_PLAIN=1,AUTH_WPA_PSK=2,AUTH_WPA2_PSK=4, AUTH_WPA_EAP=8, AUTH_WPA2_EAP=16, AUTH_IEEE8021X=32}
 	//{KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8} wps_key_managment;
 	int key = 0;
@@ -44,10 +44,10 @@ wps_key_management toKeyManagment(ScanAuthentication auth) {
 	if (AUTH_IEEE8021X & auth) {
 		key = (key | KM_IEEE8021X);
 	}
-	return ((wps_key_management) key);
+	return ((KeyManagement) key);
 }
-wps_auth_algs toAuthAlgs(ScanAuthentication auth) {
-	//{AUTHALG_UNDEFINED=0, AUTHALG_OPEN=1, AUTHALG_SHARED=2, AUTHALG_LEAP=4} wps_auth_algs;
+AuthenticationAlgs toAuthAlgs(ScanAuthentication auth) {
+	//{AUTHALG_UNDEFINED=0, AUTHALG_OPEN=1, AUTHALG_SHARED=2, AUTHALG_LEAP=4} AuthenticationAlgs;
 	int algs = 0;
 	if (AUTH_PLAIN & auth) {
 		algs = (algs  | AUTHALG_SHARED) ;
@@ -67,11 +67,11 @@ wps_auth_algs toAuthAlgs(ScanAuthentication auth) {
 	if (AUTH_IEEE8021X & auth) {
 		algs = (algs | (AUTHALG_OPEN | AUTHALG_LEAP) );
 	}
-	return ((wps_auth_algs) algs);
+	return ((AuthenticationAlgs) algs);
 	
 }
-wps_protocols toProtocols(ScanAuthentication auth) {
-	//{WKI_UNDEFINED=-1, WKI_WPA=1, WKI_RSN=2,WKI_DEF=3} wps_protocols;
+Protocols toProtocols(ScanAuthentication auth) {
+	//{WKI_UNDEFINED=-1, WKI_WPA=1, WKI_RSN=2,WKI_DEF=3} Protocols;
 	int proto = 0;
 	if (AUTH_PLAIN & auth) {
 		proto = (proto  | PROTO_DEFAULT) ;
@@ -91,7 +91,7 @@ wps_protocols toProtocols(ScanAuthentication auth) {
 	if (AUTH_IEEE8021X & auth) {
 		proto = (proto | PROTO_DEFAULT);
 	}
-	return ((wps_protocols) proto);
+	return ((Protocols) proto);
 }
 
 QString toString(ScanCiphers cip) {
@@ -114,8 +114,8 @@ QString toString(ScanCiphers cip) {
 	}
 	return ret;
 }
-QString toString(wps_group_ciphers cip) {
-	//{GCI_CCMP=2, GCI_TKIP=4, GCI_WEP104=8, GCI_WEP40=16, GCI_ALL=31} wps_group_ciphers;
+QString toString(GroupCiphers cip) {
+	//{GCI_CCMP=2, GCI_TKIP=4, GCI_WEP104=8, GCI_WEP40=16, GCI_ALL=31} GroupCiphers;
 	QString ret;
 	if (cip & GCI_CCMP) {
 		ret.append("CCMP ");
@@ -131,8 +131,8 @@ QString toString(wps_group_ciphers cip) {
 	}
 	return ret;
 }
-QString toString(wps_pairwise_ciphers cip) {
-	//{PCI_NONE=1, PCI_CCMP=2, PCI_TKIP=4} wps_pairwise_ciphers;
+QString toString(PairwiseCiphers cip) {
+	//{PCI_NONE=1, PCI_CCMP=2, PCI_TKIP=4} PairwiseCiphers;
 	QString ret;
 	if (cip & PCI_NONE) {
 		ret.append("NONE ");
@@ -145,7 +145,7 @@ QString toString(wps_pairwise_ciphers cip) {
 	}
 	return ret;
 }
-QString toString(wps_key_management keym) {
+QString toString(KeyManagement keym) {
 	//{KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8} wps_key_managment;
 	QString ret;
 	if (keym & KM_NONE) {
@@ -163,8 +163,8 @@ QString toString(wps_key_management keym) {
 	return ret;
 }
 
-QString toString(wps_auth_algs algs) {
-	//{AUTHALG_UNDEFINED=0, AUTHALG_OPEN=1, AUTHALG_SHARED=2, AUTHALG_LEAP=4} wps_auth_algs;
+QString toString(AuthenticationAlgs algs) {
+	//{AUTHALG_UNDEFINED=0, AUTHALG_OPEN=1, AUTHALG_SHARED=2, AUTHALG_LEAP=4} AuthenticationAlgs;
 	QString ret;
 	if (AUTHALG_OPEN & algs) {
 		ret.append("OPEN ");
@@ -178,16 +178,16 @@ QString toString(wps_auth_algs algs) {
 	return ret;
 }
 
-QString toString(wps_protocols proto) {
-//{WKI_UNDEFINED=0, WKI_WPA=1, WKI_RSN=2} wps_protocols;
+QString toString(Protocols proto) {
+//{WKI_UNDEFINED=0, WKI_WPA=1, WKI_RSN=2} Protocols;
 	return QString("%1 %2").arg(((PROTO_WPA == proto) ? "WPA" : ""),((PROTO_RSN == proto) ? "RSN" : ""));
 }
 
-QString toString(wps_eapol_flags flags) {
+QString toString(EapolFlags flags) {
 	return QString::number((int) flags);
 }
 
-QString toString(wps_eap_method method) {
+QString toString(EapMethod method) {
 	//{EAP_ALL=127, EAPM_MD5=1,EAPM_MSCHAPV2=2,EAPM_OTP=4,EAPM_GTC=8,EAPM_TLS=16,EAPM_PEAP=32,EAPM_TTLS=64} EAP_METHOD;
 	QString ret;
 	if (EAPM_MD5 & method) {
@@ -215,7 +215,7 @@ QString toString(wps_eap_method method) {
 }
 
 
-QString toString(wps_req_type reqt) {
+QString toString(RequestType reqt) {
 	switch (reqt) {
 		case (REQ_IDENTITY):
 			return QString("IDENTITY");
