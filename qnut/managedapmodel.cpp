@@ -20,7 +20,7 @@
 
 namespace qnut {
 	using namespace nut;
-	using namespace libnut;
+	using namespace libnutws;
 	
 	CManagedAPModel::CManagedAPModel(CWpa_Supplicant * wpaSupplicant, QObject * parent) : QAbstractItemModel(parent) {
 		setWpaSupplicant(wpaSupplicant);
@@ -30,7 +30,7 @@ namespace qnut {
 		supplicant = NULL;
 	}
 	
-	void CManagedAPModel::setWpaSupplicant(libnut::CWpa_Supplicant * wpaSupplicant) {
+	void CManagedAPModel::setWpaSupplicant(CWpa_Supplicant * wpaSupplicant) {
 		supplicant = wpaSupplicant;
 		if (supplicant) {
 			reloadNetworks();
@@ -75,7 +75,7 @@ namespace qnut {
 			else
 				return networks[index.row()].bssid.toString();
 		case MANAP_MOD_FLAG:
-			return (networks[index.row()].flags == WNF_CURRENT) ? QString('*') : QVariant();
+			return (networks[index.row()].flags == NF_CURRENT) ? QString('*') : QVariant();
 		default:
 			break;
 		}

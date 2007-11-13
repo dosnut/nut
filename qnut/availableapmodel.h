@@ -19,7 +19,7 @@ namespace qnut {
 	class CAvailableAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		CAvailableAPModel(libnut::CWpa_Supplicant * data = NULL, QObject * parent = 0);
+		CAvailableAPModel(libnutws::CWpa_Supplicant * data = NULL, QObject * parent = 0);
 		~CAvailableAPModel();
 		
 		QVariant data(const QModelIndex & index, int role) const;
@@ -30,12 +30,12 @@ namespace qnut {
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
 		
-		void setWpaSupplicant(libnut::CWpa_Supplicant * wpaSupplicant);
+		void setWpaSupplicant(libnutws::CWpa_Supplicant * wpaSupplicant);
 	private slots:
 		void reloadScans();
 	private:
-		libnut::CWpa_Supplicant * supplicant;
-		QList<libnut::wps_scan> scans;
+		libnutws::CWpa_Supplicant * supplicant;
+		QList<libnutws::wps_scan> scans;
 	};
 }
 
