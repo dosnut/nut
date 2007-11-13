@@ -12,18 +12,17 @@ extern "C" {
 #include <string.h>
 #include <stdlib.h>
 }
+namespace libnutws {
 
-namespace libnut {
+	typedef enum {NF_NONE, NF_CURRENT, NF_DISABLED} NetworkFlags;
 
-	typedef enum {WNF_NONE, WNF_CURRENT, WNF_DISABLED} wps_network_flags;
-
-	typedef enum {WC_UNDEFINED=0, WC_NONE=1, WC_CCMP=2, WC_TKIP=4, WC_WEP104=8, WC_WEP40=16, WC_WEP=24} wps_ciphers;
-	typedef enum {WA_UNDEFINED=0, WA_PLAIN=1,WA_WPA_PSK=2,WA_WPA2_PSK=4, WA_WPA_EAP=8, WA_WPA2_EAP=16, WA_IEEE8021X=32, WA_DEF=62} wps_authentication;
-	//WA_WPA_PSK = WAA_OPEN && WKI_WPA && KEYMGMT_WPA_PSK && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
-	//WA_WPA2_PSK = WAA_OPEN && WKI_RSN && KEYMGMT_WPA_PSK && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
-	//WA_WPA_EAP = (WAA_OPEN || WAA_LEAP) && KEYMGMT_WPA_EAP && WKI_WPA && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
-	//WA_WPA2_EAP = (WAA_OPEN || WAA_LEAP) && KEYMGMT_WPA_EAP && WKI_RSN && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
-	//WA_IEEE8021X = (WAA_OPEN || LEAP) && KEYMGMT_IEEE8021X && (WKI_RSN || WKI_WPA) // This is not very clear yet
+	typedef enum {CI_UNDEFINED=0, CI_NONE=1, CI_CCMP=2, CI_TKIP=4, CI_WEP104=8, CI_WEP40=16, CI_WEP=24} wps_ciphers;
+	typedef enum {AUTH_UNDEFINED=0, AUTH_PLAIN=1,AUTH_WPA_PSK=2,AUTH_WPA2_PSK=4, AUTH_WPA_EAP=8, AUTH_WPA2_EAP=16, AUTH_IEEE8021X=32, AUTH_DEFAULT=62} wps_authentication;
+	//AUTH_WPA_PSK = WAA_OPEN && WKI_WPA && KEYMGMT_WPA_PSK && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
+	//AUTH_WPA2_PSK = WAA_OPEN && WKI_RSN && KEYMGMT_WPA_PSK && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
+	//AUTH_WPA_EAP = (WAA_OPEN || WAA_LEAP) && KEYMGMT_WPA_EAP && WKI_WPA && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
+	//AUTH_WPA2_EAP = (WAA_OPEN || WAA_LEAP) && KEYMGMT_WPA_EAP && WKI_RSN && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
+	//AUTH_IEEE8021X = (WAA_OPEN || LEAP) && KEYMGMT_IEEE8021X && (WKI_RSN || WKI_WPA) // This is not very clear yet
 
 
 	typedef enum {WP_UNDEFINED=0, WP_WPA=1, WP_RSN=2, WP_DEF=3} wps_protocols; //RSN=WPA2
@@ -273,7 +272,7 @@ namespace libnut {
 		int id;
 		QString ssid;
 		nut::MacAddress bssid;
-		wps_network_flags flags;
+		NetworkFlags flags;
 	};
 
 	class wps_eap_network_config {
@@ -338,6 +337,6 @@ namespace libnut {
 			wps_bool peerkey; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
 			wps_eap_network_config eap_config;
 	};
-
 }
+
 #endif

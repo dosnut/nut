@@ -132,7 +132,7 @@ namespace libnut {
 		DeviceState state;
 		DeviceType type;
 		CEnvironment * activeEnvironment;
-		CWpa_Supplicant * wpa_supplicant;
+		libnutws::CWpa_Supplicant * wpa_supplicant;
 		int index;
 		
 		CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);

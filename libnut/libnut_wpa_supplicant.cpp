@@ -1,7 +1,7 @@
 #include "libnut_wpa_supplicant.h"
 #include <QDebug>
 
-namespace libnut {
+namespace libnutws {
 
 //CWpa_supplicant
 
@@ -115,14 +115,14 @@ wps_variable::wps_variable_type CWpa_Supplicant::parseMIBType(QString str) {
 	return wps_variable::STRING;
 }
 
-wps_network_flags CWpa_Supplicant::parseNetworkFlags(QString str) {
+NetworkFlags CWpa_Supplicant::parseNetworkFlags(QString str) {
 	if (str.contains("CURRENT",Qt::CaseInsensitive)) {
-		return WNF_CURRENT;
+		return NF_CURRENT;
 	}
 	if (str.contains("DISABLED",Qt::CaseInsensitive)) {
-		return WNF_DISABLED;
+		return NF_DISABLED;
 	}
-	return WNF_NONE;
+	return NF_NONE;
 }
 //network id / ssid / bssid / flags
 //0 example network	any	[CURRENT]
@@ -155,40 +155,40 @@ bssid / frequency / signal level / flags / ssid
 00:09:5b:95:e0:4f	2412	209		jkm guest
 */
 wps_ciphers CWpa_Supplicant::parseScanCiphers(QString str) {
-	wps_ciphers cip = WC_NONE;
+	wps_ciphers cip = CI_NONE;
 	if (str.contains("CCMP")) {
-		cip = (wps_ciphers) (cip | WC_CCMP);
+		cip = (wps_ciphers) (cip | CI_CCMP);
 	}
 	if (str.contains("TKIP")) {
-		cip = (wps_ciphers) (cip | WC_TKIP);
+		cip = (wps_ciphers) (cip | CI_TKIP);
 	}
 	if (str.contains("WEP104")) {
-		cip = (wps_ciphers) (cip | WC_WEP104);
+		cip = (wps_ciphers) (cip | CI_WEP104);
 	}
 	if (str.contains("WEP40")) {
-		cip = (wps_ciphers) (cip | WC_WEP40);
+		cip = (wps_ciphers) (cip | CI_WEP40);
 	}
 	if (str.contains("WEP")) {
-		cip = (wps_ciphers) (cip | WC_WEP);
+		cip = (wps_ciphers) (cip | CI_WEP);
 	}
 	return cip;
 }
 wps_authentication CWpa_Supplicant::parseScanAuth(QString str) {
-	wps_authentication key = WA_UNDEFINED;
+	wps_authentication key = AUTH_UNDEFINED;
 	if (str.contains("WPA-PSK")) {
-		key = (wps_authentication) (key | WA_WPA_PSK);
+		key = (wps_authentication) (key | AUTH_WPA_PSK);
 	}
 	if (str.contains("WPA2-EAP")) {
-		key = (wps_authentication) (key | WA_WPA2_EAP);
+		key = (wps_authentication) (key | AUTH_WPA2_EAP);
 	}
 	if (str.contains("WPA2-PSK")) {
-		key = (wps_authentication) (key | WA_WPA2_PSK);
+		key = (wps_authentication) (key | AUTH_WPA2_PSK);
 	}
 	if (str.contains("WPA-EAP")) {
-		key = (wps_authentication) (key | WA_WPA_EAP);
+		key = (wps_authentication) (key | AUTH_WPA_EAP);
 	}
 	if (str.contains("IEEE8021X")) {
-		key = (wps_authentication) (key | WA_IEEE8021X);
+		key = (wps_authentication) (key | AUTH_IEEE8021X);
 	}
 	return key;
 }
@@ -1537,7 +1537,7 @@ wps_eap_netconfig_failures CWpa_Supplicant::wps_editEapNetwork(int netid, wps_ea
 	}
 	return eap_failures;
 }
-
+//noise levels, returned by this functions, are invalid, don't use them
 void CWpa_Supplicant::wps_tryScanResults() {
 	if (wext_fd == -1 || !wps_connected) {
 		return;
@@ -1557,6 +1557,8 @@ void CWpa_Supplicant::wps_tryScanResults() {
 	struct iw_range range;
 	int has_range;
 	QList<wps_wext_raw_scan> res;
+	wps_wext_raw_scan singleres;
+	singleres.bssid = nut::MacAddress();
 	/* workaround */
 	struct wireless_config b;
 	/* Get basic information */ 
@@ -1592,7 +1594,16 @@ void CWpa_Supplicant::wps_tryScanResults() {
 	/* workaround */
 
 	/* Get range stuff */
-	has_range = (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0);
+	/* Get range stuff */
+	qDebug() << QString("Getting range stuff for %1").arg(ifname.toAscii().data());
+	if (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0) {
+		has_range = 1;
+		qDebug() << "Success readWirelessInfo getrange" << strerror(errno);
+	}
+	else { //This is VERY strange: we always get the "operation not permitted" error, although iw_get_range() worked
+		qDebug() << QString("Error \"hasRange == 0\" (%1)").arg(strerror(errno));
+	}
+	singleres.hasRange = has_range;
 	if (errno == EAGAIN) {
 		qDebug() << "Scan results not available yet";
 		ScanTimeoutCount++;
@@ -1603,18 +1614,24 @@ void CWpa_Supplicant::wps_tryScanResults() {
 		ScanTimerId = startTimer(CWPA_SCAN_RETRY_TIMER_TIME);
 		return;
 	}
-	else if (errno != 0) {
-		qDebug() << "Error occured while trying to get Scanresults: " << strerror(errno);
-		ScanTimeoutCount++;
-		if (ScanTimeoutCount <= 5) {
-			ScanTimerId = startTimer(CWPA_SCAN_RETRY_TIMER_TIME);
-			return;
-		}
+	
+	qDebug() << "Got range stuff";
+
+	if (has_range) {
+		singleres.maxquality.level = (quint8) range.max_qual.level;
+		singleres.maxquality.qual = (quint8) range.max_qual.qual;
+		singleres.maxquality.noise = (quint8) range.max_qual.noise;
+		singleres.maxquality.updated = (quint8) range.max_qual.updated;
+		qDebug() << "RANGE (scanresults): " << singleres.maxquality.level  << singleres.maxquality.qual << singleres.maxquality.noise << singleres.maxquality.updated;
 	}
 	else {
-		qDebug() << "Range stuff got";
+		singleres.maxquality.level = 0;
+		singleres.maxquality.qual = 0;
+		singleres.maxquality.noise = 0;
+		singleres.maxquality.updated = 0;
+		qDebug() << "Range information are not available";
 	}
-	
+
 	unsigned char * newbuf;
 	for (int i=0; i <= 16; i++) { //realloc (don't do this forever)
 		//Allocate newbuffer 
@@ -1676,25 +1693,6 @@ void CWpa_Supplicant::wps_tryScanResults() {
 		struct stream_descr stream;
 		int ret;
 		
-		wps_wext_raw_scan singleres;
-		singleres.bssid = nut::MacAddress();
-		singleres.quality.level = 0;
-		singleres.quality.qual = 0;
-		singleres.quality.noise = 0;
-		singleres.quality.updated = 0;
-		singleres.hasRange = has_range;
-		if (has_range) {
-			singleres.maxquality.level = (quint8) range.max_qual.level;
-			singleres.maxquality.qual = (quint8) range.max_qual.qual;
-			singleres.maxquality.noise = (quint8) range.max_qual.noise;
-			singleres.maxquality.updated = (quint8) range.max_qual.updated;
-			singleres.avgquality.level = (quint8) range.avg_qual.level;
-			singleres.avgquality.qual = (quint8) range.avg_qual.qual;
-			singleres.avgquality.noise = (quint8) range.avg_qual.noise;
-			singleres.avgquality.updated = (quint8) range.avg_qual.updated;
-			singleres.we_version_compiled = range.we_version_compiled;
-		}
-
 		//Init event stream
 		QByteArray test;
 		char buffer2[128];
@@ -1717,6 +1715,7 @@ void CWpa_Supplicant::wps_tryScanResults() {
 						singleres.quality.level = (quint8) iwe.u.qual.level;
 						singleres.quality.noise = (quint8) iwe.u.qual.noise;
 						singleres.quality.updated = (quint8) iwe.u.qual.updated;
+						qDebug() << "STATS (scanresults): " << singleres.quality.level << singleres.quality.qual << singleres.quality.noise << singleres.quality.updated;
 
 						// if our last bssid is different from the actual one, then we have to append it to our scanlist
 						if ( (singleres.bssid != tmpMac) )  {
@@ -1792,8 +1791,9 @@ void CWpa_Supplicant::readWirelessInfo() {
 	qDebug() << QString("Getting range stuff for %1").arg(ifname.toAscii().data());
 	if (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0) {
 		hasRange = 1;
+		qDebug() << "Success readWirelessInfo getrange" << strerror(errno);
 	}
-	else {
+	else { //This is VERY strange: we always get the "operation not permitted" error, although iw_get_range() worked
 		qDebug() << QString("Error \"hasRange == 0\" (%1)").arg(strerror(errno));
 	}
 	res.hasRange = hasRange;
@@ -1818,6 +1818,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 		res.maxquality.qual = (quint8) range.max_qual.qual;
 		res.maxquality.noise = (quint8) range.max_qual.noise;
 		res.maxquality.updated = (quint8) range.max_qual.updated;
+		qDebug() << "RANGE: " << res.maxquality.level  << res.maxquality.qual << res.maxquality.noise << res.maxquality.updated;
 	}
 	else {
 		res.maxquality.level = 0;
@@ -1843,7 +1844,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 			res.quality.qual = (quint8) stats.qual.qual;
 			res.quality.noise = (quint8) stats.qual.noise;
 			res.quality.updated = (quint8) stats.qual.updated;
-			qDebug() << res.quality.level << res.quality.qual << res.quality.noise << res.quality.updated;
+			qDebug() << "STATS: " << res.quality.level << res.quality.qual << res.quality.noise << res.quality.updated;
 			signalQuality = convertValues(res);
 			qDebug() << "Emittig signalQualityUpdated()";
 			if (wextTimerRate < 1000) {

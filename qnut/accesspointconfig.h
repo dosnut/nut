@@ -17,8 +17,6 @@
 #include "ui/ui_apconf.h"
 
 namespace qnut {
-	using namespace libnut;
-	
 	class CAccessPointConfig : public QDialog {
 		Q_OBJECT
 	private:
@@ -26,19 +24,19 @@ namespace qnut {
 		
 		QRegExpValidator * hexValidator;
 		
-		CWpa_Supplicant * supplicant;
+		libnutws::CWpa_Supplicant * supplicant;
 		
 		int currentID;
 		
 		inline void convertLineEditText(QLineEdit * lineEdit, bool hex);
 		inline QString convertQuoted(QString text);
-		inline void writeEAPConfig(wps_eap_network_config &eap_config);
-		inline void readEAPConfig(wps_eap_network_config &eap_config);
+		inline void writeEAPConfig(libnutws::wps_eap_network_config &eap_config);
+		inline void readEAPConfig(libnutws::wps_eap_network_config &eap_config);
 	public:
-		bool execute(wps_scan scanResult);
+		bool execute(libnutws::wps_scan scanResult);
 		bool execute(int id);
 		
-		CAccessPointConfig(CWpa_Supplicant * wpa_supplicant, QWidget * parent = 0);
+		CAccessPointConfig(libnutws::CWpa_Supplicant * wpa_supplicant, QWidget * parent = 0);
 		~CAccessPointConfig();
 	private slots:
 		void setAuthConfig(int type);

@@ -19,6 +19,7 @@
 
 namespace qnut {
 	using namespace libnut;
+	using namespace libnutws;
 	
 	CWirelessSettings::CWirelessSettings(CDevice * wireless, QWidget * parent) : QWidget(parent), device(wireless) {
 		ui.setupUi(this);
@@ -85,8 +86,8 @@ namespace qnut {
 			ui.signalLabel->setText("not assigned to accesspoint");
 		
 		if (state != DS_DEACTIVATED)
-			connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnut::wps_wext_signal_readable)),
-				this, SLOT(updateSignalInfo(libnut::wps_wext_signal_readable)));
+			connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnutws::wps_wext_signal_readable)),
+				this, SLOT(updateSignalInfo(libnutws::wps_wext_signal_readable)));
 		
 		dynamic_cast<CAvailableAPModel *>(ui.availableView->model())->setWpaSupplicant(device->wpa_supplicant);
 		dynamic_cast<CManagedAPModel *>(ui.managedView->model())->setWpaSupplicant(device->wpa_supplicant);

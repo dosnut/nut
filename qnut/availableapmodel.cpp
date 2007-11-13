@@ -22,7 +22,7 @@
 
 namespace qnut {
 	using namespace nut;
-	using namespace libnut;
+	using namespace libnutws;
 	
 	CAvailableAPModel::CAvailableAPModel(CWpa_Supplicant * wpaSupplicant, QObject * parent) : QAbstractItemModel(parent) {
 		setWpaSupplicant(wpaSupplicant);
@@ -32,7 +32,7 @@ namespace qnut {
 		supplicant = NULL;
 	}
 	
-	void CAvailableAPModel::setWpaSupplicant(libnut::CWpa_Supplicant * wpaSupplicant) {
+	void CAvailableAPModel::setWpaSupplicant(CWpa_Supplicant * wpaSupplicant) {
 		supplicant = wpaSupplicant;
 		if (supplicant) {
 			reloadScans();
@@ -109,21 +109,21 @@ namespace qnut {
 		case AVLAP_MOD_BSSID:
 			return scans[index.row()].bssid.toString();
 		case AVLAP_MOD_SIGNAL:
-			return qualitySummary(scans[index.row()].signal);
+			return signalSummary(scans[index.row()].signal);
 		case AVLAP_MOD_CIPHERS: {
 				int flags = scans[index.row()].ciphers;
-				if (flags == WC_UNDEFINED)
+				if (flags == CI_UNDEFINED)
 					return tr("undefined");
-				else if (flags == WC_NONE)
+				else if (flags == CI_NONE)
 					return tr("none");
 				
 				QStringList results;
 				
-				if (flags & WC_CCMP)
+				if (flags & CI_CCMP)
 					results << "CCMP";
-				if (flags & WC_TKIP)
+				if (flags & CI_TKIP)
 					results << "TKIP";
-				if ((flags & WC_WEP104) || (flags & WC_WEP40))
+				if ((flags & CI_WEP104) || (flags & CI_WEP40))
 					results << "WEP";
 				
 				return results.join(", ");

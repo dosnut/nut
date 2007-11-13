@@ -14,6 +14,7 @@
 #include <QToolTip>
 
 namespace qnut {
+	using namespace libnutws;
 	CAccessPointConfig::CAccessPointConfig(CWpa_Supplicant * wpa_supplicant, QWidget *parent) : QDialog(parent) {
 		supplicant = wpa_supplicant;
 		
@@ -254,9 +255,9 @@ namespace qnut {
 		ui.rsnCheck->setChecked(scanResult.protocols & WP_RSN);
 		
 		if (
-			(scanResult.ciphers & WC_WEP40) ||
-			(scanResult.ciphers & WC_WEP104) ||
-			(scanResult.ciphers & WC_CCMP)
+			(scanResult.ciphers & CI_WEP40) ||
+			(scanResult.ciphers & CI_WEP104) ||
+			(scanResult.ciphers & CI_CCMP)
 		)
 			ui.encCombo->setCurrentIndex(1);
 		else
@@ -294,8 +295,8 @@ namespace qnut {
 			ui.keyManagementCombo->setCurrentIndex(0);
 		
 		if (
-			(config.group & WC_CCMP) ||
-			((config.wep_tx_keyidx >= 0) && ((config.group & WC_WEP40) || (config.group & WC_WEP104)))
+			(config.group & CI_CCMP) ||
+			((config.wep_tx_keyidx >= 0) && ((config.group & CI_WEP40) || (config.group & CI_WEP104)))
 		) {
 			ui.encCombo->setCurrentIndex(1);
 			switch (config.wep_tx_keyidx) {

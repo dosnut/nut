@@ -1,6 +1,6 @@
 #include "libnut_wpa_supplicant_types.h"
 
-namespace libnut {
+namespace libnutws {
 
 
 wps_group_ciphers toGroupCiphers(wps_ciphers cip) {
@@ -23,25 +23,25 @@ wps_pairwise_ciphers toPairwiseCiphers(wps_ciphers cip) {
 	}
 }
 wps_key_management toKeyManagment(wps_authentication auth) {
-	//{WA_PLAIN=1,WA_WPA_PSK=2,WA_WPA2_PSK=4, WA_WPA_EAP=8, WA_WPA2_EAP=16, WA_IEEE8021X=32}
+	//{AUTH_PLAIN=1,AUTH_WPA_PSK=2,AUTH_WPA2_PSK=4, AUTH_WPA_EAP=8, AUTH_WPA2_EAP=16, AUTH_IEEE8021X=32}
 	//{WKM_NONE=1, WKM_WPA_PSK=2, WKM_WPA_EAP=4, WKM_IEEE8021X=8} wps_key_managment;
 	int key = 0;
-	if (WA_PLAIN & auth) {
+	if (AUTH_PLAIN & auth) {
 		key = (key  | WKM_NONE) ;
 	}
-	if (WA_WPA_PSK & auth) {
+	if (AUTH_WPA_PSK & auth) {
 		key = (key | WKM_WPA_PSK);
 	}
-	if (WA_WPA2_PSK & auth) {
+	if (AUTH_WPA2_PSK & auth) {
 		key = (key | WKM_WPA_PSK);
 	}
-	if (WA_WPA_EAP & auth) {
+	if (AUTH_WPA_EAP & auth) {
 		key = (key | WKM_WPA_EAP);
 	}
-	if (WA_WPA2_EAP & auth) {
+	if (AUTH_WPA2_EAP & auth) {
 		key = (key | WKM_WPA_EAP);
 	}
-	if (WA_IEEE8021X & auth) {
+	if (AUTH_IEEE8021X & auth) {
 		key = (key | WKM_IEEE8021X);
 	}
 	return ((wps_key_management) key);
@@ -49,22 +49,22 @@ wps_key_management toKeyManagment(wps_authentication auth) {
 wps_auth_algs toAuthAlgs(wps_authentication auth) {
 	//{WAA_UNDEFINED=0, WAA_OPEN=1, WAA_SHARED=2, WAA_LEAP=4} wps_auth_algs;
 	int algs = 0;
-	if (WA_PLAIN & auth) {
+	if (AUTH_PLAIN & auth) {
 		algs = (algs  | WAA_SHARED) ;
 	}
-	if (WA_WPA_PSK & auth) {
+	if (AUTH_WPA_PSK & auth) {
 		algs = (algs | WAA_OPEN);
 	}
-	if (WA_WPA2_PSK & auth) {
+	if (AUTH_WPA2_PSK & auth) {
 		algs = (algs | WAA_OPEN);
 	}
-	if (WA_WPA_EAP & auth) {
+	if (AUTH_WPA_EAP & auth) {
 		algs = (algs | (WAA_OPEN | WAA_LEAP) );
 	}
-	if (WA_WPA2_EAP & auth) {
+	if (AUTH_WPA2_EAP & auth) {
 		algs = (algs | (WAA_OPEN | WAA_LEAP) );
 	}
-	if (WA_IEEE8021X & auth) {
+	if (AUTH_IEEE8021X & auth) {
 		algs = (algs | (WAA_OPEN | WAA_LEAP) );
 	}
 	return ((wps_auth_algs) algs);
@@ -73,22 +73,22 @@ wps_auth_algs toAuthAlgs(wps_authentication auth) {
 wps_protocols toProtocols(wps_authentication auth) {
 	//{WKI_UNDEFINED=-1, WKI_WPA=1, WKI_RSN=2,WKI_DEF=3} wps_protocols;
 	int proto = 0;
-	if (WA_PLAIN & auth) {
+	if (AUTH_PLAIN & auth) {
 		proto = (proto  | WP_DEF) ;
 	}
-	if (WA_WPA_PSK & auth) {
+	if (AUTH_WPA_PSK & auth) {
 		proto = (proto | WP_WPA);
 	}
-	if (WA_WPA2_PSK & auth) {
+	if (AUTH_WPA2_PSK & auth) {
 		proto = (proto | WP_RSN);
 	}
-	if (WA_WPA_EAP & auth) {
+	if (AUTH_WPA_EAP & auth) {
 		proto = (proto | WP_WPA);
 	}
-	if (WA_WPA2_EAP & auth) {
+	if (AUTH_WPA2_EAP & auth) {
 		proto = (proto | WP_RSN);
 	}
-	if (WA_IEEE8021X & auth) {
+	if (AUTH_IEEE8021X & auth) {
 		proto = (proto | WP_DEF);
 	}
 	return ((wps_protocols) proto);
@@ -97,19 +97,19 @@ wps_protocols toProtocols(wps_authentication auth) {
 QString toString(wps_ciphers cip) {
 //{CI_UNDEFINED=0, CI_NONE=1, CI_CCMP=2, CI_TKIP=4, CI_WEP104=8, CI_WEP40=16, CI_WEP=32} CIPHERS;
 	QString ret = "";
-	if (WC_NONE & cip) {
+	if (CI_NONE & cip) {
 		ret.append("NONE ");
 	}
-	if (WC_CCMP & cip) {
+	if (CI_CCMP & cip) {
 		ret.append("CCMP ");
 	}
-	if (WC_TKIP & cip) {
+	if (CI_TKIP & cip) {
 		ret.append("TKIP ");
 	}
-	if (WC_WEP104 & cip) {
+	if (CI_WEP104 & cip) {
 		ret.append("WEP104 ");
 	}
-	if (WC_WEP40 & cip) {
+	if (CI_WEP40 & cip) {
 		ret.append("WEP40 ");
 	}
 	return ret;
