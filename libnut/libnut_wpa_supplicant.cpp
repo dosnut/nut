@@ -1759,6 +1759,7 @@ void CWpa_Supplicant::readWirelessInfo() {
 	qDebug() << QString("Getting range stuff for %1").arg(ifname.toAscii().data());
 	if (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0) {
 		hasRange = 1;
+		qDebug() << "Success readWirelessInfo getrange" << strerror(errno);
 	}
 	else {
 		qDebug() << QString("Error \"hasRange == 0\" (%1)").arg(strerror(errno));
