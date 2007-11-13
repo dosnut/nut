@@ -16,12 +16,14 @@ HEADERS += libnut_wpa_supplicant.h \
  common.h \
  os.h \
  libnut_wpa_supplicant_types.h \
- libnutwireless_parsers.h
+ libnutwireless_parsers.h \
+ libnutwireless_base.h
 SOURCES += libnut_wpa_supplicant.cpp \
  wpa_ctrl.c \
  common.c \
  libnut_wpa_supplicant_types.cpp \
- libnutwireless_parsers.cpp
+ libnutwireless_parsers.cpp \
+ libnutwireless_base.cpp
 
 OBJECTS_DIR = build/
 UI_DIR = build/
