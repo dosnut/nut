@@ -8,11 +8,11 @@
 #include <QDBusObjectPath>
 #include <QFile>
 #include <QTextStream>
-#include <common/types.h>
-#include <common/config.h>
+#include <libnutcommon/types.h>
+#include <libnutcommon/config.h>
 #include "libnut_server_proxy.h"
-#include "libnut_exceptions.h"
-#include "libnut_wpa_supplicant.h"
+#include "libnut_client_exceptions.h"
+#include <libnutwireless/libnut_wpa_supplicant.h>
 
 namespace libnut {
 	class CDeviceManager;

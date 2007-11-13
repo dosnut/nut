@@ -9,9 +9,9 @@
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
 #include <QtDBus/QtDBus>
-#include <common/dbus.h>
-#include <common/types.h>
-#include <common/config.h>
+#include <libnutcommon/dbus.h>
+#include <libnutcommon/types.h>
+#include <libnutcommon/config.h>
 #include <QMetaType>
 namespace libnut {
 /*

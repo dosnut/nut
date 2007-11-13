@@ -1,17 +1,17 @@
 #ifndef LIBNUT_LIBNUT_WPA_SUPPLICANT_H
 #define LIBNUT_LIBNUT_WPA_SUPPLICANT_H
 #include <QHostAddress>
-#include <common/types.h>
-#include <common/config.h>
-#include "libnut_server_proxy.h"
-#include "libnut_exceptions.h"
+#include <libnutcommon/types.h>
+#include <libnutcommon/config.h>
+//#include "libnut_server_proxy.h"
+//#include "libnut_exceptions.h"
 #include "libnut_wpa_supplicant_types.h"
 #include "wpa_ctrl.h"
 #include <QFile>
 #include <QSocketNotifier>
 #include <QStringList>
 #include <QTimerEvent>
-#include <common/macaddress.h>
+#include <libnutcommon/macaddress.h>
 #include <QCoreApplication>
 #define CWPA_SCAN_TIMER_TIME 1000
 #define CWPA_SCAN_RETRY_TIMER_TIME 1000

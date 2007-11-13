@@ -1,4 +1,3 @@
-
 TEMPLATE = lib
 CONFIG += staticlib create_prl
 TARGET = nutcommon
