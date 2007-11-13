@@ -1,3 +1,6 @@
+/*
+	TRANSLATOR qnut::QObject
+*/
 #ifndef QNUT_COMMON_H
 #define QNUT_COMMON_H
 

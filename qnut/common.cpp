@@ -1,5 +1,4 @@
 #include "common.h"
-#include <QObject>
 
 namespace qnut {
 	using namespace libnutcommon;
