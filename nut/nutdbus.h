@@ -1,1 +1,0 @@
-#define NUT_SERVICE_ADDRESS de.unistuttgart.nut
