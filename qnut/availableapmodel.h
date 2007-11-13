@@ -35,7 +35,7 @@ namespace qnut {
 		void reloadScans();
 	private:
 		libnutws::CWpa_Supplicant * supplicant;
-		QList<libnutws::wps_scan> scans;
+		QList<libnutws::ScanResult> scans;
 	};
 }
 

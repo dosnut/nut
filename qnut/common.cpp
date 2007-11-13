@@ -63,7 +63,7 @@ namespace qnut {
 			return QString('-');
 	}
 	
-	QString signalSummary(libnutws::wps_wext_signal_readable signal) {
+	QString signalSummary(libnutws::WextSignal signal) {
 		QString quality = QString::number(signal.quality.value) + '/' + QString::number(signal.quality.maximum);
 		QString level/* = QString::number(signal.quality.level) +
 			((signal.encoding & WSIG_LEVEL_REL)   ? '/' + QString::number(signal.maxquality.level) : QString())*/;

@@ -30,10 +30,10 @@ namespace qnut {
 		
 		inline void convertLineEditText(QLineEdit * lineEdit, bool hex);
 		inline QString convertQuoted(QString text);
-		inline void writeEAPConfig(libnutws::wps_eap_network_config &eap_config);
-		inline void readEAPConfig(libnutws::wps_eap_network_config &eap_config);
+		inline void writeEAPConfig(libnutws::EapNetworkConfig &eap_config);
+		inline void readEAPConfig(libnutws::EapNetworkConfig &eap_config);
 	public:
-		bool execute(libnutws::wps_scan scanResult);
+		bool execute(libnutws::ScanResult scanResult);
 		bool execute(int id);
 		
 		CAccessPointConfig(libnutws::CWpa_Supplicant * wpa_supplicant, QWidget * parent = 0);

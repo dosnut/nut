@@ -99,16 +99,16 @@ namespace qnut {
 	}
 		
 	void CAccessPointConfig::verifyConfiguration() {
-		wps_netconfig_status status;
-		wps_network_config config;
+		NetconfigStatus status;
+		NetworkConfig config;
 		
 		config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
 		
-		config.disabled = (wps_bool)ui.autoEnableCheck->isChecked();
+		config.disabled = (BOOL)ui.autoEnableCheck->isChecked();
 		
 		if (ui.encCombo->currentText() == "WEP") {
-			config.group = (wps_group_ciphers)(WGC_WEP104 | WGC_WEP40);
-			config.pairwise = WPC_NONE;
+			config.group = (GroupCiphers)(GCI_WEP104 | GCI_WEP40);
+			config.pairwise = PCI_NONE;
 			
 			config.wep_key0 = ui.wepKey0HexCheck->isChecked() ? ui.wepKey0Edit->text() : '\"' + ui.wepKey0Edit->text() + '\"';
 			config.wep_key1 = ui.wepKey1HexCheck->isChecked() ? ui.wepKey1Edit->text() : '\"' + ui.wepKey1Edit->text() + '\"';
@@ -125,33 +125,33 @@ namespace qnut {
 				config.wep_tx_keyidx = 3;
 		}
 		else if (ui.encCombo->currentText() == "CCMP") {
-			config.group = WGC_CCMP;
-			config.pairwise = WPC_CCMP;
+			config.group = GCI_CCMP;
+			config.pairwise = PCI_CCMP;
 		}
 		else if (ui.encCombo->currentText() == "TKIP") {
-			config.group = WGC_TKIP;
-			config.pairwise = WPC_TKIP;
+			config.group = GCI_TKIP;
+			config.pairwise = PCI_TKIP;
 		}
 		else {
 			config.wep_tx_keyidx = -1;
-			config.pairwise = WPC_NONE;
+			config.pairwise = PCI_NONE;
 		}
 		
 		switch (ui.keyManagementCombo->currentIndex()) {
 		case 0:
-			config.keyManagement = WKM_NONE;
+			config.keyManagement = KM_NONE;
 			break;
 		case 1:
-			config.keyManagement = WKM_IEEE8021X;
+			config.keyManagement = KM_IEEE8021X;
 			writeEAPConfig(config.eap_config);
 			break;
 		case 2:
-			config.keyManagement = WKM_WPA_PSK;
+			config.keyManagement = KM_WPA_PSK;
 			
 			if (ui.rsnCheck->isChecked())
-				config.protocols = WP_WPA;
+				config.protocols = PROTO_WPA;
 			else
-				config.protocols = WP_RSN;
+				config.protocols = PROTO_RSN;
 			
 			if (ui.pskEdit->text().length() == 0)
 				config.psk = QString("");
@@ -160,12 +160,12 @@ namespace qnut {
 			
 			break;
 		case 3:
-			config.keyManagement = WKM_WPA_EAP;
+			config.keyManagement = KM_WPA_EAP;
 			
 			if (ui.rsnCheck->isChecked())
-				config.protocols = WP_WPA;
+				config.protocols = PROTO_WPA;
 			else
-				config.protocols = WP_RSN;
+				config.protocols = PROTO_RSN;
 			
 			writeEAPConfig(config.eap_config);
 			break;
@@ -180,79 +180,79 @@ namespace qnut {
 			status = supplicant->addNetwork(config);
 		}
 		
-		if (status.failures != WCF_NONE) {
+		if (status.failures != NCF_NONE) {
 			qDebug("general failures:");
-			if (status.failures & WECF_ALL)             qDebug("WCF_ALL");
-			if (status.failures & WCF_SSID)             qDebug("WCF_SSID");
-			if (status.failures & WCF_BSSID)            qDebug("WCF_BSSID");
-			if (status.failures & WCF_DISABLED)         qDebug("WCF_DISABLED");
-			if (status.failures & WCF_ID_STR)           qDebug("WCF_ID_STR");
-			if (status.failures & WCF_SCAN_SSID)        qDebug("WCF_SCAN_SSID");
-			if (status.failures & WCF_PRIORITY)         qDebug("WCF_PRIORITY");
-			if (status.failures & WCF_MODE)             qDebug("WCF_MODE");
-			if (status.failures & WCF_FREQ)             qDebug("WCF_FREQ");
-			if (status.failures & WCF_PROTO)            qDebug("WCF_PROTO");
-			if (status.failures & WCF_KEYMGMT)          qDebug("WCF_KEYMGMT");
-			if (status.failures & WCF_AUTH_ALG)         qDebug("WCF_AUTH_ALG");
-			if (status.failures & WCF_PAIRWISE)         qDebug("WCF_PAIRWISE");
-			if (status.failures & WCF_GROUP)            qDebug("WCF_GROUP");
-			if (status.failures & WCF_PSK)              qDebug("WCF_PSK");
-			if (status.failures & WCF_EAPOL_FLAGS)      qDebug("WCF_EAPOL_FLAGS");
-			if (status.failures & WCF_MIXED_CELL)       qDebug("WCF_MIXED_CELL");
-			if (status.failures & WCF_PROA_KEY_CACHING) qDebug("WCF_PROA_KEY_CACHING");
-			if (status.failures & WCF_WEP_KEY0)         qDebug("WCF_WEP_KEY0");
-			if (status.failures & WCF_WEP_KEY1)         qDebug("WCF_WEP_KEY1");
-			if (status.failures & WCF_WEP_KEY2)         qDebug("WCF_WEP_KEY2");
-			if (status.failures & WCF_WEP_KEY3)         qDebug("WCF_WEP_KEY3");
-			if (status.failures & WCF_WEP_KEY_IDX)      qDebug("WCF_WEP_KEY_IDX");
-			if (status.failures & WCF_PEERKEY)          qDebug("WCF_PEERKEY");
+			if (status.failures & ENCF_ALL)             qDebug("NCF_ALL");
+			if (status.failures & NCF_SSID)             qDebug("NCF_SSID");
+			if (status.failures & NCF_BSSID)            qDebug("NCF_BSSID");
+			if (status.failures & NCF_DISABLED)         qDebug("NCF_DISABLED");
+			if (status.failures & NCF_ID_STR)           qDebug("NCF_ID_STR");
+			if (status.failures & NCF_SCAN_SSID)        qDebug("NCF_SCAN_SSID");
+			if (status.failures & NCF_PRIORITY)         qDebug("NCF_PRIORITY");
+			if (status.failures & NCF_MODE)             qDebug("NCF_MODE");
+			if (status.failures & NCF_FREQ)             qDebug("NCF_FREQ");
+			if (status.failures & NCF_PROTO)            qDebug("NCF_PROTO");
+			if (status.failures & NCF_KEYMGMT)          qDebug("NCF_KEYMGMT");
+			if (status.failures & NCF_AUTH_ALG)         qDebug("NCF_AUTH_ALG");
+			if (status.failures & NCF_PAIRWISE)         qDebug("NCF_PAIRWISE");
+			if (status.failures & NCF_GROUP)            qDebug("NCF_GROUP");
+			if (status.failures & NCF_PSK)              qDebug("NCF_PSK");
+			if (status.failures & NCF_EAPOL_FLAGS)      qDebug("NCF_EAPOL_FLAGS");
+			if (status.failures & NCF_MIXED_CELL)       qDebug("NCF_MIXED_CELL");
+			if (status.failures & NCF_PROA_KEY_CACHING) qDebug("NCF_PROA_KEY_CACHING");
+			if (status.failures & NCF_WEP_KEY0)         qDebug("NCF_WEP_KEY0");
+			if (status.failures & NCF_WEP_KEY1)         qDebug("NCF_WEP_KEY1");
+			if (status.failures & NCF_WEP_KEY2)         qDebug("NCF_WEP_KEY2");
+			if (status.failures & NCF_WEP_KEY3)         qDebug("NCF_WEP_KEY3");
+			if (status.failures & NCF_WEP_KEY_IDX)      qDebug("NCF_WEP_KEY_IDX");
+			if (status.failures & NCF_PEERKEY)          qDebug("NCF_PEERKEY");
 		}
 		
-		if (status.eap_failures != WECF_NONE) {
+		if (status.eap_failures != ENCF_NONE) {
 			qDebug("eap failures:");
-			if (status.eap_failures & WECF_ALL)                 qDebug("WECF_ALL");
-			if (status.eap_failures & WECF_EAP)                 qDebug("WECF_EAP");
-			if (status.eap_failures & WECF_IDENTITY)            qDebug("WECF_IDENTITY");
-			if (status.eap_failures & WECF_ANON_IDENTITY)       qDebug("WECF_ANON_IDENTITY");
-			if (status.eap_failures & WECF_PASSWD)              qDebug("WECF_PASSWD");
-			if (status.eap_failures & WECF_CA_CERT)             qDebug("WECF_CA_CERT");
-			if (status.eap_failures & WECF_CA_PATH)             qDebug("WECF_CA_PATH");
-			if (status.eap_failures & WECF_CLIENT_CERT)         qDebug("WECF_CLIENT_CERT");
-			if (status.eap_failures & WECF_PRIVATE_KEY)         qDebug("WECF_PRIVATE_KEY");
-			if (status.eap_failures & WECF_PRIVATE_KEY_PASSWD)  qDebug("WECF_PRIVATE_KEY_PASSWD");
-			if (status.eap_failures & WECF_DH_FILE)             qDebug("WECF_DH_FILE");
-			if (status.eap_failures & WECF_SUBJECT_MATCH)       qDebug("WECF_SUBJECT_MATCH");
-			if (status.eap_failures & WECF_ALTSUBJECT_MATCH)    qDebug("WECF_ALTSUBJECT_MATCH");
-			if (status.eap_failures & WECF_PHASE1)              qDebug("WECF_PHASE1");
-			if (status.eap_failures & WECF_PHASE2)              qDebug("WECF_PHASE2");
-			if (status.eap_failures & WECF_CA_CERT2)            qDebug("WECF_CA_CERT2");
-			if (status.eap_failures & WECF_CA_PATH2)            qDebug("WECF_CA_PATH2");
-			if (status.eap_failures & WECF_CLIENT_CERT2)        qDebug("WECF_CLIENT_CERT2");
-			if (status.eap_failures & WECF_PRIVATE_KEY2)        qDebug("WECF_PRIVATE_KEY2");
-			if (status.eap_failures & WECF_PRIVATE_KEY2_PASSWD) qDebug("WECF_PRIVATE_KEY2_PASSWD");
-			if (status.eap_failures & WECF_DH_FILE2)            qDebug("WECF_DH_FILE2");
-			if (status.eap_failures & WECF_SUBJECT_MATCH2)      qDebug("WECF_SUBJECT_MATCH2");
-			if (status.eap_failures & WECF_ALTSUBJECT_MATCH2)   qDebug("WECF_ALTSUBJECT_MATCH2");
-			if (status.eap_failures & WECF_FRAGMENT_SIZE)       qDebug("WECF_FRAGMENT_SIZE");
-			if (status.eap_failures & WECF_EAPPSK)              qDebug("WECF_EAPPSK");
-			if (status.eap_failures & WECF_NAI)                 qDebug("WECF_NAI");
-			if (status.eap_failures & WECF_PAC_FILE)            qDebug("WECF_PAC_FILE");
+			if (status.eap_failures & ENCF_ALL)                 qDebug("ENCF_ALL");
+			if (status.eap_failures & ENCF_EAP)                 qDebug("ENCF_EAP");
+			if (status.eap_failures & ENCF_IDENTITY)            qDebug("ENCF_IDENTITY");
+			if (status.eap_failures & ENCF_ANON_IDENTITY)       qDebug("ENCF_ANON_IDENTITY");
+			if (status.eap_failures & ENCF_PASSWD)              qDebug("ENCF_PASSWD");
+			if (status.eap_failures & ENCF_CA_CERT)             qDebug("ENCF_CA_CERT");
+			if (status.eap_failures & ENCF_CA_PATH)             qDebug("ENCF_CA_PATH");
+			if (status.eap_failures & ENCF_CLIENT_CERT)         qDebug("ENCF_CLIENT_CERT");
+			if (status.eap_failures & ENCF_PRIVATE_KEY)         qDebug("ENCF_PRIVATE_KEY");
+			if (status.eap_failures & ENCF_PRIVATE_KEY_PASSWD)  qDebug("ENCF_PRIVATE_KEY_PASSWD");
+			if (status.eap_failures & ENCF_DH_FILE)             qDebug("ENCF_DH_FILE");
+			if (status.eap_failures & ENCF_SUBJECT_MATCH)       qDebug("ENCF_SUBJECT_MATCH");
+			if (status.eap_failures & ENCF_ALTSUBJECT_MATCH)    qDebug("ENCF_ALTSUBJECT_MATCH");
+			if (status.eap_failures & ENCF_PHASE1)              qDebug("ENCF_PHASE1");
+			if (status.eap_failures & ENCF_PHASE2)              qDebug("ENCF_PHASE2");
+			if (status.eap_failures & ENCF_CA_CERT2)            qDebug("ENCF_CA_CERT2");
+			if (status.eap_failures & ENCF_CA_PATH2)            qDebug("ENCF_CA_PATH2");
+			if (status.eap_failures & ENCF_CLIENT_CERT2)        qDebug("ENCF_CLIENT_CERT2");
+			if (status.eap_failures & ENCF_PRIVATE_KEY2)        qDebug("ENCF_PRIVATE_KEY2");
+			if (status.eap_failures & ENCF_PRIVATE_KEY2_PASSWD) qDebug("ENCF_PRIVATE_KEY2_PASSWD");
+			if (status.eap_failures & ENCF_DH_FILE2)            qDebug("ENCF_DH_FILE2");
+			if (status.eap_failures & ENCF_SUBJECT_MATCH2)      qDebug("ENCF_SUBJECT_MATCH2");
+			if (status.eap_failures & ENCF_ALTSUBJECT_MATCH2)   qDebug("ENCF_ALTSUBJECT_MATCH2");
+			if (status.eap_failures & ENCF_FRAGMENT_SIZE)       qDebug("ENCF_FRAGMENT_SIZE");
+			if (status.eap_failures & ENCF_EAPPSK)              qDebug("ENCF_EAPPSK");
+			if (status.eap_failures & ENCF_NAI)                 qDebug("ENCF_NAI");
+			if (status.eap_failures & ENCF_PAC_FILE)            qDebug("ENCF_PAC_FILE");
 		}
 		
 		accept();
 	}
 	
-	bool CAccessPointConfig::execute(wps_scan scanResult) {
-		if (scanResult.keyManagement & WKM_WPA_EAP)
+	bool CAccessPointConfig::execute(ScanResult scanResult) {
+		if (scanResult.keyManagement & KM_WPA_EAP)
 			ui.keyManagementCombo->setCurrentIndex(3);
-		else if (scanResult.keyManagement & WKM_WPA_PSK)
+		else if (scanResult.keyManagement & KM_WPA_PSK)
 			ui.keyManagementCombo->setCurrentIndex(2);
-		else if (scanResult.keyManagement & WKM_IEEE8021X)
+		else if (scanResult.keyManagement & KM_IEEE8021X)
 			ui.keyManagementCombo->setCurrentIndex(1);
 		else
 			ui.keyManagementCombo->setCurrentIndex(0);
 		
-		ui.rsnCheck->setChecked(scanResult.protocols & WP_RSN);
+		ui.rsnCheck->setChecked(scanResult.protocols & PROTO_RSN);
 		
 		if (
 			(scanResult.ciphers & CI_WEP40) ||
@@ -271,23 +271,23 @@ namespace qnut {
 	}
 	
 	bool CAccessPointConfig::execute(int id) {
-		wps_network_config config = supplicant->getNetworkConfig(id);
+		NetworkConfig config = supplicant->getNetworkConfig(id);
 		
 		if (config.ssid[0] == '\"')
 			ui.ssidEdit->setText(config.ssid.mid(1, config.ssid.length()-2));
 		else
 			ui.ssidEdit->setText(config.ssid);
 		
-		if (config.keyManagement & WKM_WPA_EAP) {
+		if (config.keyManagement & KM_WPA_EAP) {
 			ui.keyManagementCombo->setCurrentIndex(3);
 			readEAPConfig(config.eap_config);
 		}
-		else if (config.keyManagement & WKM_WPA_PSK) {
+		else if (config.keyManagement & KM_WPA_PSK) {
 			ui.keyManagementCombo->setCurrentIndex(2);
 			ui.pskEdit->setText("");
 			ui.warningLabel->setVisible(true);
 		}
-		else if (config.keyManagement & WKM_IEEE8021X) {
+		else if (config.keyManagement & KM_IEEE8021X) {
 			ui.keyManagementCombo->setCurrentIndex(1);
 			readEAPConfig(config.eap_config);
 		}
@@ -309,7 +309,7 @@ namespace qnut {
 		else
 			ui.encCombo->setCurrentIndex(0);
 		
-		ui.rsnCheck->setChecked(config.protocols & WP_RSN);
+		ui.rsnCheck->setChecked(config.protocols & PROTO_RSN);
 		ui.autoEnableCheck->setChecked(config.disabled);
 		
 		currentID = id;
@@ -317,7 +317,7 @@ namespace qnut {
 		return exec();
 	}
 	
-	inline void CAccessPointConfig::writeEAPConfig(wps_eap_network_config &eap_config) {
+	inline void CAccessPointConfig::writeEAPConfig(EapNetworkConfig &eap_config) {
 		switch (ui.encCombo->currentIndex()) {
 		case 0: eap_config.eap = EAPM_MD5; break;
 		case 1: eap_config.eap = EAPM_TLS; break;
@@ -343,7 +343,7 @@ namespace qnut {
 			return text;
 	}
 	
-	inline void CAccessPointConfig::readEAPConfig(wps_eap_network_config &eap_config) {
+	inline void CAccessPointConfig::readEAPConfig(EapNetworkConfig &eap_config) {
 		if (eap_config.eap & EAPM_LEAP)
 			ui.encCombo->setCurrentIndex(7);
 		else if (eap_config.eap & EAPM_OTP)

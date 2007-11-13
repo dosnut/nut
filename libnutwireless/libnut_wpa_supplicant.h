@@ -45,8 +45,8 @@ namespace libnutws {
 			int timerCount;
 			bool inConnectionPhase;
 			QString ifname;
-			QList<wps_scan> wpsScanResults;
-			wps_wext_signal_readable signalQuality; //bssid is zero
+			QList<ScanResult> wpsScanResults;
+			WextSignal signalQuality; //bssid is zero
 			int ScanTimeoutCount;
 			int wextPollTimeoutCount;
 
@@ -95,61 +95,61 @@ namespace libnutws {
 			QStringList sliceMessage(QString str);
 			
 			//Parse MIB Variables
-			wps_MIB parseMIB(QStringList list);
-			wps_variable::wps_variable_type parseMIBType(QString str);
+			MIBVariables parseMIB(QStringList list);
+			MIBVariable::MIBVariable_type parseMIBType(QString str);
 			
 			//parse list network
-			QList<wps_network> parseListNetwork(QStringList list);
+			QList<ShortNetworkInfo> parseListNetwork(QStringList list);
 			NetworkFlags parseNetworkFlags(QString str);
 
 
 			//parse scan results
-			wps_ciphers parseScanCiphers(QString str);
-			wps_authentication parseScanAuth(QString str);
-			QList<wps_scan> parseScanResult(QStringList list);
+			ScanCiphers parseScanCiphers(QString str);
+			ScanAuthentication parseScanAuth(QString str);
+			QList<ScanResult> parseScanResult(QStringList list);
 
 			//parse config
-			wps_protocols parseProtocols(QString str);
-			wps_key_management parseKeyMgmt(QString str);
-			wps_auth_algs parseAuthAlg(QString str);
-			wps_pairwise_ciphers parsePairwiseCiphers(QString str);
-			wps_group_ciphers parseGroupCiphers(QString str);
-			wps_eapol_flags parseEapolFlags(QString str);
-			wps_eap_method parseEapMethod(QString str);
+			Protocols parseProtocols(QString str);
+			KeyManagement parseKeyMgmt(QString str);
+			AuthenticationAlgs parseAuthAlg(QString str);
+			PairwiseCiphers parsePairwiseCiphers(QString str);
+			GroupCiphers parseGroupCiphers(QString str);
+			EapolFlags parseEapolFlags(QString str);
+			EapMethod parseEapMethod(QString str);
 			
 			
 
 			//parse Status with helper functionss
-			wps_status parseStatus(QStringList list);
-			wps_status::WPA_STATE parseWpaState(QString str);
-			wps_status::PAE_STATE parsePaeState(QString str);
-			wps_status::PORT_STATUS parsePortStatus(QString str);
-			wps_status::PORT_CONTROL parsePortControl(QString str);
-			wps_status::BACKEND_STATE parseBackendState(QString str);
-			wps_status::EAP_STATE parseEapState(QString str);
-			wps_status::METHOD_STATE parseMethodState(QString str);
-			wps_status::DECISION parseDecision(QString str);
+			Status parseStatus(QStringList list);
+			Status::WPA_STATE parseWpaState(QString str);
+			Status::PAE_STATE parsePaeState(QString str);
+			Status::PORT_STATUS parsePortStatus(QString str);
+			Status::PORT_CONTROL parsePortControl(QString str);
+			Status::BACKEND_STATE parseBackendState(QString str);
+			Status::EAP_STATE parseEapState(QString str);
+			Status::METHOD_STATE parseMethodState(QString str);
+			Status::DECISION parseDecision(QString str);
 
 			
 			//parse Event
-			wps_event_type parseEvent(QString str);
-			wps_req parseReq(QString str);
-			wps_req_type parseReqType(QString str);
-			wps_interact_type parseInteract(QString str);
+			EventType parseEvent(QString str);
+			Request parseReq(QString str);
+			RequestType parseReqType(QString str);
+			InteractiveType parseInteract(QString str);
 
 			//Event helper functions:
-			void Event_dispatcher(wps_req req);
-			void Event_dispatcher(wps_event_type event);
+			void Event_dispatcher(Request req);
+			void Event_dispatcher(EventType event);
 			void Event_dispatcher(QString event);
 
 
 			//Edit/get network helper functions
-			wps_eap_network_config wps_getEapNetworkConfig(int id);
-			wps_eap_netconfig_failures wps_editEapNetwork(int netid, wps_eap_network_config config);
+			EapNetworkConfig wps_getEapNetworkConfig(int id);
+			EapNetconfigFailures wps_editEapNetwork(int netid, EapNetworkConfig config);
 
 			//Functions to get actual signal strength and/or signal strength for scan results:
 			//And set scanresults
-			void wps_setScanResults(QList<wps_wext_raw_scan> &wextScanResults);
+			void wps_setScanResults(QList<WextRawScan> &wextScanResults);
 			void wps_tryScanResults();
 
 
@@ -178,7 +178,7 @@ namespace libnutws {
 		public slots:
 			void setLog(bool enabled);
 			//Functions to react to request made from wpa_supplicant:
-			void response(wps_req request, QString msg);
+			void response(Request request, QString msg);
 			//
 			void selectNetwork(int id);
 			void enableNetwork(int id);
@@ -195,9 +195,9 @@ namespace libnutws {
 			void terminate();
 			void preauth(nut::MacAddress bssid);
 			int addNetwork(); //return -1 if failed, otherwise return network id
-			wps_netconfig_status addNetwork(wps_network_config config); //return -1 if failed, otherwise return network id
-			wps_netconfig_status editNetwork(int netid, wps_network_config config);
-			wps_network_config getNetworkConfig(int id);
+			NetconfigStatus addNetwork(NetworkConfig config); //return -1 if failed, otherwise return network id
+			NetconfigStatus editNetwork(int netid, NetworkConfig config);
+			NetworkConfig getNetworkConfig(int id);
 			
 			void removeNetwork(int id);
 			void setBssid(int id, nut::MacAddress bssid);
@@ -208,35 +208,35 @@ namespace libnutws {
 
 			void setSignalQualityPollRate(int msec);
 			int getSignalQualityPollRate();
-			wps_wext_signal_readable getSignalQuality();
+			WextSignal getSignalQuality();
 
-			QList<wps_network> listNetworks();
-			QList<wps_scan> scanResults();
-			wps_status status();
+			QList<ShortNetworkInfo> listNetworks();
+			QList<ScanResult> scanResults();
+			Status status();
 			
 			//Seldomly used functions
-			wps_MIB getMIBVariables();
-			wps_capabilities getCapabilities();
+			MIBVariables getMIBVariables();
+			Capabilities getCapabilities();
 			//Future functions: (these may never be implemented as noone realy needs them
 			/*
 			QString wps_cmd_PMKSA();
-			//Maybe variable/value as new wps_variable / wps_net_variable class
+			//Maybe variable/value as new MIBVariable / NetworkVariableiable class
 			void setVariable(wps_var var);
-			void setNetworkVariable(int id, wps_net_var var);
-			wps_net_var getNetworkVariable(int id, wps_net_var::Type);
+			void setNetworkVariable(int id, NetworkVariable var);
+			NetworkVariable getNetworkVariable(int id, NetworkVariable::Type);
 */
 
 
 			
 		signals:
 			void stateChanged(bool state);
-			void request(libnutws::wps_req req);
+			void request(libnutws::Request req);
 			void closed();
 			void opened();
 			void scanCompleted();
 			void message(QString msg);
-			void eventMessage(libnutws::wps_event_type type);
-			void signalQualityUpdated(libnutws::wps_wext_signal_readable signal);
+			void eventMessage(libnutws::EventType type);
+			void signalQualityUpdated(libnutws::WextSignal signal);
 	};
 
 }
