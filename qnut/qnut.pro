@@ -23,7 +23,7 @@ TRANSLATIONS = qnut_de.ts
 HEADERS += connectionmanager.h trayicon.h \
  constants.h \
  overviewmodel.h \
- deviceoptions.h \
+ devicedetails.h \
  ipconfiguration.h \
  common.h \
  scriptsettings.h \
@@ -38,7 +38,7 @@ HEADERS += connectionmanager.h trayicon.h \
  ipeditdelegate.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  overviewmodel.cpp \
- deviceoptions.cpp \
+ devicedetails.cpp \
  ipconfiguration.cpp \
  common.cpp \
  scriptsettings.cpp \

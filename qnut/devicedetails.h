@@ -9,8 +9,8 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#ifndef QNUT_DEVICEOPTIONS_H
-#define QNUT_DEVICEOPTIONS_H
+#ifndef QNUT_DEVICEDETAILS_H
+#define QNUT_DEVICEDETAILS_H
 
 #include <QSystemTrayIcon>
 #include <QSettings>
@@ -19,10 +19,10 @@
 
 namespace qnut {
 	class CWirelessSettings;
-	class CDeviceOptions;
-	typedef QHash<libnut::CDevice *, CDeviceOptions *> CDeviceOptionsHash;
+	class CDeviceDetails;
+	typedef QHash<libnut::CDevice *, CDeviceDetails *> CDeviceDetailsHash;
 		
-	class CDeviceOptions : public QWidget {
+	class CDeviceDetails : public QWidget {
 		Q_OBJECT
 	protected:
 		Ui::devopt ui;
@@ -55,11 +55,11 @@ namespace qnut {
 		
 		QAction * showAction;
 		
-		CDeviceOptions(libnut::CDevice * parentDevice, QWidget * parent = 0);
-		~CDeviceOptions();
+		CDeviceDetails(libnut::CDevice * parentDevice, QWidget * parent = 0);
+		~CDeviceDetails();
 	private slots:
 		void handleTrayActivated(QSystemTrayIcon::ActivationReason);
-		void showTheeseOptions();
+		void showTheeseDetails();
 		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 		void handleDeviceStateChange(libnut::DeviceState state);
 		void openIPConfiguration();

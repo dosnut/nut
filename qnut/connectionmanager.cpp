@@ -111,7 +111,7 @@ namespace qnut {
 				ui.menuDevice->addAction(refreshDevicesAction);
 				ui.menuDevice->addSeparator();
 				
-				CDeviceOptions * current = (CDeviceOptions *)(tabWidget.currentWidget());
+				CDeviceDetails * current = (CDeviceDetails *)(tabWidget.currentWidget());
 				
 				//current device actions
 				ui.menuDevice->addAction(current->enableDeviceAction);
@@ -154,7 +154,7 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::addUiDevice(CDevice * device) {
-		CDeviceOptions * newDeviceOptions = new CDeviceOptions(device);
+		CDeviceDetails * newDeviceOptions = new CDeviceDetails(device);
 		
 		tabWidget.insertTab(deviceManager.devices.indexOf(device)+1, newDeviceOptions, device->name);
 		
@@ -170,7 +170,7 @@ namespace qnut {
 	
 	void CConnectionManager::removeUiDevice(CDevice * device) {
 		overView.clearSelection();
-		CDeviceOptions * target = deviceOptions[device];
+		CDeviceDetails * target = deviceOptions[device];
 		
 		tabWidget.removeTab(tabWidget.indexOf(target));
 		

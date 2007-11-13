@@ -396,7 +396,7 @@
     </message>
 </context>
 <context>
-    <name>qnut::CDeviceOptions</name>
+    <name>qnut::CDeviceDetails</name>
     <message>
         <location filename="deviceoptions.cpp" line="26"/>
         <source>Enable device</source>
@@ -429,7 +429,7 @@
     </message>
 </context>
 <context>
-    <name>qnut::CDeviceOptionsModel</name>
+    <name>qnut::CDeviceDetailsModel</name>
     <message>
         <location filename="deviceoptionsmodel.cpp" line="74"/>
         <source>default</source>

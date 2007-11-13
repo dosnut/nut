@@ -16,14 +16,14 @@
 #include "ui/ui_scrset.h"
 
 namespace qnut {
-	class CDeviceOptions;
+	class CDeviceDetails;
 	
 	class CScriptSettings : public QDialog {
 		Q_OBJECT
 	private:
 		Ui::scrset ui;
 	public:
-		bool execute(CDeviceOptions * deviceoptions);
+		bool execute(CDeviceDetails * deviceoptions);
 		
 		CScriptSettings(QWidget *parent = 0);
 		~CScriptSettings();

@@ -16,7 +16,7 @@ namespace qnut {
 		libnut::CDeviceManager deviceManager;
 		libnut::CLog logFile;
 		
-		CDeviceOptionsHash deviceOptions;
+		CDeviceDetailsHash deviceOptions;
 		QSettings settings;
 		
 		CTrayIcon trayicon;

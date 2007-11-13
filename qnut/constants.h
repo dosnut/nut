@@ -24,7 +24,7 @@
 #define UI_FILE_LOG                     (UI_PATH_WORK + "qnut.log")
 #define UI_FILE_CONFIG                  (UI_PATH_WORK + "qnut.conf")
 
-#define UI_ICON_SYSTRAY                 UI_DIR_ICONS "network.png"
+#define UI_ICON_SYSTRAY                 UI_DIR_ICONS "qnut.png"
 
 #define UI_ICON_ETH_UP                  UI_DIR_ICONS "eth_up.png"
 #define UI_ICON_ETH_UNCONFIGURED        UI_DIR_ICONS "eth_unconfigured.png"

@@ -17,7 +17,7 @@
 namespace qnut {
 	using namespace libnut;
 	
-	bool CScriptSettings::execute(CDeviceOptions * deviceoptions) {
+	bool CScriptSettings::execute(CDeviceDetails * deviceoptions) {
 		quint8 flags = deviceoptions->scriptFlags;
 		ui.upCheck->setChecked(flags & UI_FLAG_SCRIPT_UP);
 		ui.unconfiguredCheck->setChecked(flags & UI_FLAG_SCRIPT_UNCONFIGURED);

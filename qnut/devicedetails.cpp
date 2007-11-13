@@ -14,7 +14,7 @@
 #include <QProcess>
 #include <QDir>
 #include <QMenu>
-#include "deviceoptions.h"
+#include "devicedetails.h"
 #include "common.h"
 #include "environmenttreemodel.h"
 #include "interfacedetailsmodel.h"
@@ -26,7 +26,7 @@
 namespace qnut {
 	using namespace libnut;
 	
-	CDeviceOptions::CDeviceOptions(CDevice * parentDevice, QWidget * parent) :
+	CDeviceDetails::CDeviceDetails(CDevice * parentDevice, QWidget * parent) :
 		QWidget(parent),
 		settings(UI_PATH_DEV(parentDevice->name) + "dev.conf", QSettings::IniFormat, this)
 	{
@@ -42,7 +42,7 @@ namespace qnut {
 		
 		trayIcon->setToolTip(shortSummary(device));
 		trayIcon->setContextMenu(deviceMenu);
-		connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(showTheeseOptions()));
+		connect(trayIcon, SIGNAL(messageClicked()), this, SLOT(showTheeseDetails()));
 		connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 			this, SLOT(handleTrayActivated(QSystemTrayIcon::ActivationReason)));
 		
@@ -54,7 +54,7 @@ namespace qnut {
 			ui.environmentTree->expand(ui.environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
 	}
 	
-	CDeviceOptions::~CDeviceOptions() {
+	CDeviceDetails::~CDeviceDetails() {
 		disconnect(device, SIGNAL(stateChanged(libnut::DeviceState)), this, SLOT(handleDeviceStateChange(libnut::DeviceState)));
 		writeSettings();
 		if (wirelessSettings) {
@@ -64,7 +64,7 @@ namespace qnut {
 		delete deviceMenu;
 	}
 	
-	inline void CDeviceOptions::readSettings() {
+	inline void CDeviceDetails::readSettings() {
 		settings.beginGroup("Main");
 		scriptFlags = settings.value("scriptFlags", 0).toInt();
 		trayIcon->setVisible(settings.value("showTrayIcon", false).toBool());
@@ -80,7 +80,7 @@ namespace qnut {
 		}
 	}
 	
-	inline void CDeviceOptions::writeSettings() {
+	inline void CDeviceDetails::writeSettings() {
 		settings.beginGroup("Main");
 		settings.setValue("scriptFlags", scriptFlags);
 		settings.setValue("showTrayIcon", trayIcon->isVisible());
@@ -95,7 +95,7 @@ namespace qnut {
 		}
 	}
 	
-	inline void CDeviceOptions::createActions() {
+	inline void CDeviceDetails::createActions() {
 		deviceMenu = new QMenu(device->name, NULL);
 		
 		enableDeviceAction     = deviceMenu->addAction(QIcon(UI_ICON_DEVICE_ENABLE), tr("Enable device"),
@@ -104,7 +104,7 @@ namespace qnut {
 			device, SLOT(disable()));
 		deviceMenu->addSeparator();
 		showAction             = deviceMenu->addAction(QIcon(UI_ICON_ENVIRONMENT), tr("Environments..."),
-			this, SLOT(showTheeseOptions()));
+			this, SLOT(showTheeseDetails()));
 		deviceSettingsAction   = deviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("Scripting settings..."),
 			this, SLOT(openDeviceSettings()));
 		deviceMenu->addSeparator();
@@ -127,7 +127,7 @@ namespace qnut {
 		connect(ipConfigurationAction, SIGNAL(triggered()), this, SLOT(openIPConfiguration()));
 	}
 	
-	inline void CDeviceOptions::createView() {
+	inline void CDeviceDetails::createView() {
 		trayIcon = new QSystemTrayIcon(QIcon(iconFile(device)), this);
 		
 		ui.setupUi(this);
@@ -142,22 +142,22 @@ namespace qnut {
 		setHeadInfo();
 	}
 	
-	inline void CDeviceOptions::setHeadInfo() {
+	inline void CDeviceDetails::setHeadInfo() {
 		ui.iconLabel->setPixmap(QPixmap(iconFile(device)));
 		ui.statusLabel->setText(toString(device->state));
 	}
 	
-	void CDeviceOptions::handleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
+	void CDeviceDetails::handleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
 		if (reason == QSystemTrayIcon::Trigger) {
 			showAction->trigger();
 		}
 	}
 	
-	void CDeviceOptions::showTheeseOptions() {
+	void CDeviceDetails::showTheeseDetails() {
 		emit showOptionsRequested(this);
 	}
 	
-	void CDeviceOptions::handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
+	void CDeviceDetails::handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
 		QModelIndexList deselectedIndexes = deselected.indexes();
 		QModelIndexList selectedIndexes = selected.indexes();
 		
@@ -215,7 +215,7 @@ namespace qnut {
 		}
 	}
 	
-	void CDeviceOptions::openIPConfiguration() {
+	void CDeviceDetails::openIPConfiguration() {
 		CIPConfiguration dialog(this);
 		QModelIndex selectedIndex = (ui.environmentTree->selectionModel()->selection().indexes())[0];
 		
@@ -225,17 +225,17 @@ namespace qnut {
 			interface->setUserConfig(config);
 	}
 	
-	void CDeviceOptions::openDeviceSettings() {
+	void CDeviceDetails::openDeviceSettings() {
 		CScriptSettings dialog(this);
 		dialog.execute(this);
 	}
 	
-	void CDeviceOptions::openWirelessSettings() {
+	void CDeviceDetails::openWirelessSettings() {
 		wirelessSettings->show();
 		wirelessSettings->activateWindow();
 	}
 	
-	void CDeviceOptions::handleDeviceStateChange(DeviceState state) {
+	void CDeviceDetails::handleDeviceStateChange(DeviceState state) {
 		setHeadInfo();
 		ui.environmentTree->collapseAll();
 		if (state >= DS_UNCONFIGURED)
