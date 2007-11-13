@@ -27,7 +27,7 @@ extern "C" {
 //TODO:Check if we can start multiple wpa_supplicants for multiple devices and test behavior
 
 
-namespace libnut {
+namespace libnutws {
 
 	class CWpa_Supplicant: public QObject {
 			Q_OBJECT
@@ -100,7 +100,7 @@ namespace libnut {
 			
 			//parse list network
 			QList<wps_network> parseListNetwork(QStringList list);
-			wps_network_flags parseNetworkFlags(QString str);
+			NetworkFlags parseNetworkFlags(QString str);
 
 
 			//parse scan results
@@ -230,13 +230,13 @@ namespace libnut {
 			
 		signals:
 			void stateChanged(bool state);
-			void request(libnut::wps_req req);
+			void request(libnutws::wps_req req);
 			void closed();
 			void opened();
 			void scanCompleted();
 			void message(QString msg);
-			void eventMessage(libnut::wps_event_type type);
-			void signalQualityUpdated(libnut::wps_wext_signal_readable signal);
+			void eventMessage(libnutws::wps_event_type type);
+			void signalQualityUpdated(libnutws::wps_wext_signal_readable signal);
 	};
 
 }
