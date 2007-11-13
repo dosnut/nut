@@ -15,7 +15,7 @@
 #include <QSystemTrayIcon>
 #include <QSettings>
 #include <libnutclient/libnut_client.h>
-#include "ui/ui_devopt.h"
+#include "ui/ui_devdet.h"
 
 namespace qnut {
 	class CWirelessSettings;
@@ -24,8 +24,8 @@ namespace qnut {
 		
 	class CDeviceDetails : public QWidget {
 		Q_OBJECT
-	protected:
-		Ui::devopt ui;
+	private:
+		Ui::devdet ui;
 		
 		CWirelessSettings * wirelessSettings;
 		

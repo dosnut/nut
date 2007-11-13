@@ -15,9 +15,9 @@ TARGET = qnut
 FORMS = connman.ui \
  ipconf.ui \
  scrset.ui \
- devopt.ui \
  airset.ui \
- apconf.ui
+ apconf.ui \
+ devdet.ui
 TRANSLATIONS = qnut_de.ts
 
 HEADERS += connectionmanager.h trayicon.h \
@@ -73,4 +73,6 @@ LIBS += ../libnutcommon/libnutcommon.a \
 TARGETDEPS += ../libnutcommon/libnutcommon.a \
 ../libnutclient/libnutclient.a \
 ../libnutwireless/libnutwireless.a
+
+FORMS -= devopt.ui
 

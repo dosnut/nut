@@ -1,4 +1,5 @@
 <ui version="4.0" >
+ <author>Oliver Groß</author>
  <class>ipconf</class>
  <widget class="QDialog" name="ipconf" >
   <property name="geometry" >
@@ -182,6 +183,7 @@
   <tabstop>removeButton</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
+ <includes/>
  <resources/>
  <connections>
   <connection>

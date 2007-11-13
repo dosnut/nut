@@ -1,6 +1,7 @@
 <ui version="4.0" >
- <class>devopt</class>
- <widget class="QWidget" name="devopt" >
+ <author>Oliver Groß</author>
+ <class>devdet</class>
+ <widget class="QWidget" name="devdet" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -10,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Device Options</string>
+   <string>Device Details</string>
   </property>
   <layout class="QVBoxLayout" >
    <item>
@@ -24,7 +25,10 @@
         </sizepolicy>
        </property>
        <property name="text" >
-        <string>icon</string>
+        <string/>
+       </property>
+       <property name="pixmap" >
+        <pixmap>../../../../../../usr/share/qnut/icons/clear.png</pixmap>
        </property>
       </widget>
      </item>
@@ -37,7 +41,7 @@
         </sizepolicy>
        </property>
        <property name="text" >
-        <string>status</string>
+        <string>unknown status</string>
        </property>
       </widget>
      </item>

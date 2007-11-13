@@ -49,14 +49,16 @@ namespace qnut {
 		
 		readSettings();
 		
-		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
+		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)),
+			this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
 		
 		if (device->state == DS_UP)
 			ui.environmentTree->expand(ui.environmentTree->model()->index(device->environments.indexOf(device->activeEnvironment), 0));
 	}
 	
 	CDeviceDetails::~CDeviceDetails() {
-		disconnect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
+		disconnect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)),
+			this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
 		writeSettings();
 		if (wirelessSettings) {
 			wirelessSettings->close();
