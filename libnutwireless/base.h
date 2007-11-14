@@ -68,9 +68,9 @@ namespace libnutwireless {
 			inline void wps_cmd_DISCONNECT() { wps_ctrl_command("DISCONNECT"); }
 			inline QString wps_cmd_SCAN() { return wps_ctrl_command("SCAN"); }
 			inline QString wps_cmd_SCAN_RESULTS() { return wps_ctrl_command("SCAN_RESULTS"); }
-			inline void wps_cmd_SELECT_NETWORK(int id) { wps_ctrl_command(QString("SELECT_NETWORK %1").arg(QString::number(id))); }
-			inline void wps_cmd_ENABLE_NETWORK(int id) { wps_ctrl_command(QString("ENABLE_NETWORK %1").arg(QString::number(id))); }
-			inline void wps_cmd_DISABLE_NETWORK(int id) { wps_ctrl_command(QString("DISABLE_NETWORK %1").arg(QString::number(id))); }
+			inline QString wps_cmd_SELECT_NETWORK(int id) { return wps_ctrl_command(QString("SELECT_NETWORK %1").arg(QString::number(id))); }
+			inline QString wps_cmd_ENABLE_NETWORK(int id) { return wps_ctrl_command(QString("ENABLE_NETWORK %1").arg(QString::number(id))); }
+			inline QString wps_cmd_DISABLE_NETWORK(int id) { return wps_ctrl_command(QString("DISABLE_NETWORK %1").arg(QString::number(id))); }
 			//creates new empty network, return id on success and FAIL on failure
 			inline QString wps_cmd_ADD_NETWORK() { return wps_ctrl_command("ADD_NETWORK"); }
 			inline void wps_cmd_REMOVE_NETWORK(int id) { wps_ctrl_command(QString("REMOVE_NETWORK %1").arg(QString::number(id))); }

@@ -23,9 +23,9 @@ namespace libnutwireless {
 			//Functions to react to request made from wpa_supplicant:
 			void response(Request request, QString msg);
 			//
-			void selectNetwork(int id);
-			void enableNetwork(int id);
-			void disableNetwork(int id);
+			bool selectNetwork(int id);
+			bool enableNetwork(int id);
+			bool disableNetwork(int id);
 			void ap_scan(int type=1);
 			bool save_config();
 			void disconnect_device();

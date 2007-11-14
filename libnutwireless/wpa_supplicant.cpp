@@ -13,14 +13,14 @@ void CWpa_Supplicant::response(Request request, QString msg) {
 	}
 }
 
-void CWpa_Supplicant::selectNetwork(int id) {
-	wps_cmd_SELECT_NETWORK(id);
+bool CWpa_Supplicant::selectNetwork(int id) {
+	return ("OK\n" == wps_cmd_SELECT_NETWORK(id));
 }
-void CWpa_Supplicant::enableNetwork(int id) {
-	wps_cmd_ENABLE_NETWORK(id);
+bool CWpa_Supplicant::enableNetwork(int id) {
+	return ("OK\n" == wps_cmd_ENABLE_NETWORK(id));
 }
-void CWpa_Supplicant::disableNetwork(int id) {
-	wps_cmd_DISABLE_NETWORK(id);
+bool CWpa_Supplicant::disableNetwork(int id) {
+	return ("OK\n" == wps_cmd_DISABLE_NETWORK(id));
 }
 
 void CWpa_Supplicant::ap_scan(int type) {
