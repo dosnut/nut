@@ -13,7 +13,7 @@
 //-more debugging output
 namespace libnutclient {
 using namespace libnutcommon;
-QString toString(DeviceState state) {
+QString toStringTr(DeviceState state) {
 	switch (state) {
 		case DS_UP:             return QObject::tr("up");
 		case DS_UNCONFIGURED:   return QObject::tr("unconfigured");
@@ -23,7 +23,7 @@ QString toString(DeviceState state) {
 		default:                return QString();
 	}
 }
-QString toString(DeviceType type) {
+QString toStringTr(DeviceType type) {
 	switch (type) {
 		case DT_ETH: return QObject::tr("Ethernet");
 		case DT_AIR: return QObject::tr("Wireless");
@@ -31,7 +31,7 @@ QString toString(DeviceType type) {
 		default:     return QString();
 	}
 }
-QString toString(InterfaceState state) {
+QString toStringTr(InterfaceState state) {
 	switch (state) {
 		case IFS_OFF: return QObject::tr("OFF");
 		case IFS_STATIC: return QObject::tr("STATIC");
@@ -335,8 +335,8 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		activeEnvironment = 0;
 		qDebug() << (tr("Device properties fetched"));
 		qDebug() << (tr("Name") + ": " + QString(name));
-		qDebug() << (tr("Type") + ": " + libnutclient::toString(type));
-		qDebug() << (tr("State") + ": " + libnutclient::toString(state));
+		qDebug() << (tr("Type") + ": " + libnutclient::toStringTr(type));
+		qDebug() << (tr("State") + ": " + libnutclient::toStringTr(state));
 	}
 	else {
 		throw CLI_DevConnectionException(tr("(%1) Error while retrieving dbus' device information").arg(toString(replyProp.error())));
@@ -836,7 +836,7 @@ void CInterface::dbusstateChanged(libnutcommon::InterfaceProperties properties) 
 	gateway = properties.gateway;
 	dnsserver = properties.dns;
 	getUserConfig(true); //Function will updated userConfig
-	qDebug() << tr("Interface state of %1 has changed to %2").arg(dbusPath.path(),libnutclient::toString(state));
+	qDebug() << tr("Interface state of %1 has changed to %2").arg(dbusPath.path(),libnutclient::toStringTr(state));
 	emit(stateChanged(state));
 }
 //CInterface SLOTS

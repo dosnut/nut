@@ -81,7 +81,7 @@ namespace qnut {
 		ui.availableGroup->setEnabled(state != DS_DEACTIVATED);
 		
 		ui.iconLabel->setPixmap(QPixmap(iconFile(device)));
-		ui.stateLabel->setText(libnutclient::toString(device->state));
+		ui.stateLabel->setText(toStringTr(device->state));
 		
 		if (state <= DS_ACTIVATED)
 			ui.signalLabel->setText("not assigned to accesspoint");

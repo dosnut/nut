@@ -147,7 +147,7 @@ namespace qnut {
 	
 	inline void CDeviceDetails::setHeadInfo() {
 		ui.iconLabel->setPixmap(QPixmap(iconFile(device)));
-		ui.statusLabel->setText(libnutclient::toString(device->state));
+		ui.statusLabel->setText(toStringTr(device->state));
 	}
 	
 	void CDeviceDetails::handleTrayActivated(QSystemTrayIcon::ActivationReason reason) {

@@ -111,9 +111,9 @@ namespace qnut {
 			case OV_MOD_NAME:
 				return data->name;
 			case OV_MOD_STATUS:
-				return libnutclient::toString(data->state);
+				return toStringTr(data->state);
 			case OV_MOD_TYPE:
-				return libnutclient::toString(data->type);
+				return toStringTr(data->type);
 			case OV_MOD_IP: {
 					if (data->state != DS_UP)
 						return QString('-');

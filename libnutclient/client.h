@@ -29,9 +29,9 @@ namespace libnutclient {
 
 namespace libnutclient {
 
-	QString toString(libnutcommon::DeviceState state);
-	QString toString(libnutcommon::DeviceType type);
-	QString toString(QDBusError error);
+	QString toStringTr(libnutcommon::DeviceState state);
+	QString toStringTr(libnutcommon::DeviceType type);
+	QString toStringTr(QDBusError error);
 
 	class CLog : public QObject {
 		Q_OBJECT

@@ -38,7 +38,7 @@ namespace qnut {
 	}
 
 	QString shortSummary(CDevice * device) {
-		return device->name + ": " + libnutclient::toString(device->state) + ", " + activeIP(device);
+		return device->name + ": " + toStringTr(device->state) + ", " + activeIP(device);
 	}
 
 	QString activeIP(CDevice * device) {
