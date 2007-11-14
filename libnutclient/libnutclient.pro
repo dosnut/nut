@@ -10,8 +10,8 @@ QT += network
 
 CODECFORSRC = UTF-8
 
-HEADERS += libnut_client.h libnut_server_proxy.h libnut_client_exceptions.h
-SOURCES += libnut_client.cpp libnut_server_proxy.cpp
+HEADERS += client.h server_proxy.h client_exceptions.h
+SOURCES += client.cpp server_proxy.cpp
 
 OBJECTS_DIR = build/
 UI_DIR = build/

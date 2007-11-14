@@ -1,19 +1,15 @@
-#ifndef LIBNUTWIRELESS_LIBNUTWIRELESS_BASE
-#define LIBNUTWIRELESS_LIBNUTWIRELESS_BASE
+#ifndef LIBNUTWIRELESS_BASE
+#define LIBNUTWIRELESS_BASE
 #include <QHostAddress>
-#include <libnutcommon/types.h>
-#include <libnutcommon/config.h>
-//#include "libnut_server_proxy.h"
-//#include "libnut_exceptions.h"
-#include "libnutwireless_parsers.h"
-#include "wpa_ctrl.h"
 #include <QFile>
 #include <QSocketNotifier>
 #include <QTimerEvent>
-#include <libnutcommon/macaddress.h>
 #include <QCoreApplication>
-#define CWPA_SCAN_TIMER_TIME 1000
-#define CWPA_SCAN_RETRY_TIMER_TIME 1000
+#include <libnutcommon/types.h>
+#include <libnutcommon/config.h>
+#include <libnutcommon/macaddress.h>
+#include "wpa_ctrl/wpa_ctrl.h"
+#include "parsers.h"
 
 #include <iwlib.h>
 extern "C" {
@@ -22,6 +18,9 @@ extern "C" {
 #include <string.h>
 #include <stdlib.h>
 }
+
+#define CWPA_SCAN_TIMER_TIME 1000
+#define CWPA_SCAN_RETRY_TIMER_TIME 1000
 
 namespace libnutwireless {
 

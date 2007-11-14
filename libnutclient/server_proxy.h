@@ -1,5 +1,5 @@
-#ifndef LIBNUT_SERVER_PROXY_H
-#define LIBNUT_SERVER_PROXY_H
+#ifndef LIBNUTCLIENT_SERVER_PROXY_H
+#define LIBNUTCLIENT_SERVER_PROXY_H
 
 #include <QObject>
 #include <QtCore/QByteArray>
@@ -9,10 +9,10 @@
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
 #include <QtDBus/QtDBus>
+#include <QMetaType>
 #include <libnutcommon/dbus.h>
 #include <libnutcommon/types.h>
 #include <libnutcommon/config.h>
-#include <QMetaType>
 namespace libnutclient {
 /*
  * Proxy class for interface DBus.Device

@@ -1,5 +1,5 @@
-#ifndef LIBNUT_EXCEPTIONS_H
-#define LIBNUT_EXCEPTIONS_H
+#ifndef LIBNUTCLIENT_EXCEPTIONS_H
+#define LIBNUTCLIENT_EXCEPTIONS_H
 
 #include <exception>
 #include <QString>

@@ -13,7 +13,7 @@
 #define QNUT_AVAILABLEAPMODEL_H
 
 #include <QAbstractItemModel>
-#include <libnutclient/libnut_client.h>
+#include <libnutclient/client.h>
 
 namespace qnut {
 	class CAvailableAPModel : public QAbstractItemModel {

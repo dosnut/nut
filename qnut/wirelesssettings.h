@@ -13,7 +13,7 @@
 #define QNUT_WIRELESSSETTINGS_H
 
 #include <QDialog>
-#include <libnutclient/libnut_client.h>
+#include <libnutclient/client.h>
 #include "ui/ui_airset.h"
 
 namespace qnut {

@@ -13,7 +13,7 @@
 #define QNUT_INTERFACEDETAILSMODEL_H
 
 #include <QAbstractItemModel>
-#include <libnutclient/libnut_client.h>
+#include <libnutclient/client.h>
 
 namespace qnut {
 	class CInterfaceDetailsModel : public QAbstractItemModel {

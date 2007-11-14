@@ -1,8 +1,8 @@
-#ifndef LIBNUTWIRELESS_LIBNUTWIRELESS_PARSERS
-#define LIBNUTWIRELESS_LIBNUTWIRELESS_PARSERS
+#ifndef LIBNUTWIRELESS_PARSERS
+#define LIBNUTWIRELESS_PARSERS
 
-#include "libnut_wpa_supplicant_types.h"
 #include <QStringList>
+#include "types.h"
 
 
 namespace libnutwireless {

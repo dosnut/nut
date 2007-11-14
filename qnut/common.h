@@ -7,7 +7,7 @@
 #include <QAction>
 #include <QString>
 #include <QHostAddress>
-#include <libnutclient/libnut_client.h>
+#include <libnutclient/client.h>
 #include "constants.h"
 
 namespace qnut {

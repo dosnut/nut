@@ -1,4 +1,4 @@
-#include "libnut_wpa_supplicant.h"
+#include "wpa_supplicant.h"
 #include <QDebug>
 
 namespace libnutwireless {

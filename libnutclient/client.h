@@ -1,5 +1,5 @@
-#ifndef LIBNUT_LIBNUT_CLI_H
-#define LIBNUT_LIBNUT_CLI_H
+#ifndef LIBNUTCLIENT_CLIENT_H
+#define LIBNUTCLIENT_CLIENT_H
 #include <QObject>
 #include <QList>
 #include <QHostAddress>
@@ -10,9 +10,9 @@
 #include <QTextStream>
 #include <libnutcommon/types.h>
 #include <libnutcommon/config.h>
-#include "libnut_server_proxy.h"
-#include "libnut_client_exceptions.h"
-#include <libnutwireless/libnut_wpa_supplicant.h>
+#include <libnutwireless/wpa_supplicant.h>
+#include "server_proxy.h"
+#include "client_exceptions.h"
 
 namespace libnutclient {
 	class CDeviceManager;

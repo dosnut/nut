@@ -1,4 +1,4 @@
-#include "libnutwireless_base.h"
+#include "base.h"
 #include <QDebug>
 
 namespace libnutwireless {

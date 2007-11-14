@@ -9,8 +9,8 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 //
-#ifndef QNUTIPEDITDELEGATE_H
-#define QNUTIPEDITDELEGATE_H
+#ifndef QNUT_IPEDITDELEGATE_H
+#define QNUT_IPEDITDELEGATE_H
 
 #include <QItemDelegate>
 

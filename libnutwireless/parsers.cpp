@@ -1,4 +1,4 @@
-#include "libnutwireless_parsers.h"
+#include "parsers.h"
 
 namespace libnutwireless {
 	

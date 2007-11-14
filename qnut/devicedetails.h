@@ -14,7 +14,7 @@
 
 #include <QSystemTrayIcon>
 #include <QSettings>
-#include <libnutclient/libnut_client.h>
+#include <libnutclient/client.h>
 #include "ui/ui_devdet.h"
 
 namespace qnut {

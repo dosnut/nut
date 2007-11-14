@@ -1,6 +1,6 @@
-#ifndef LIBNUT_LIBNUT_WPA_SUPPLICANT_H
-#define LIBNUT_LIBNUT_WPA_SUPPLICANT_H
-#include "libnutwireless_base.h"
+#ifndef LIBNUTWIRELESS_WPA_SUPPLICANT_H
+#define LIBNUTWIRELESS_WPA_SUPPLICANT_H
+#include "base.h"
 
 
 //TODO:Check if we can start multiple wpa_supplicants for multiple devices and test behavior

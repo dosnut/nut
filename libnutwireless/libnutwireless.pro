@@ -9,21 +9,21 @@ QT += network
 
 CODECFORSRC = UTF-8
 
-HEADERS += libnut_wpa_supplicant.h \
- wpa_ctrl.h \
- includes.h \
- build_config.h \
- common.h \
- os.h \
- libnut_wpa_supplicant_types.h \
- libnutwireless_parsers.h \
- libnutwireless_base.h
-SOURCES += libnut_wpa_supplicant.cpp \
- wpa_ctrl.c \
- common.c \
- libnut_wpa_supplicant_types.cpp \
- libnutwireless_parsers.cpp \
- libnutwireless_base.cpp
+HEADERS += wpa_supplicant.h \
+ parsers.h \
+ base.h \
+ types.h \
+ wpa_ctrl/wpa_ctrl.h \
+ wpa_ctrl/includes.h \
+ wpa_ctrl/build_config.h \
+ wpa_ctrl/common.h \
+ wpa_ctrl/os.h
+SOURCES += wpa_supplicant.cpp \
+ parsers.cpp \
+ base.cpp \
+ types.cpp \
+ wpa_ctrl/wpa_ctrl.c \
+ wpa_ctrl/common.c
 
 OBJECTS_DIR = build/
 UI_DIR = build/

@@ -1,7 +1,7 @@
 /*
 	TRANSLATOR libnutclient::QObject
 */
-#include "libnut_client.h"
+#include "client.h"
 #include <libnutcommon/dbus.h>
 #include <QDebug>
 
