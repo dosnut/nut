@@ -244,6 +244,8 @@ namespace libnutwireless {
 	QString signalQualityToString(WextRawScan scan);
 	QStringList signalQualityToStringList(WextRawScan scan);
 	
+	int FrequencyToChannel(int freq);
+	int ChannelToFrequency(int channel);
 
 	QString toNumberString(BOOL b);
 	bool toBool(BOOL b);
