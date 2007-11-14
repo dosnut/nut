@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS><TS version="1.1" language="de">
-<defaultcodec></defaultcodec>
 <context>
     <name></name>
     <message>
@@ -75,7 +74,7 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="409"/>
+        <location filename="apconf.ui" line="416"/>
         <source>hexadecimal chars</source>
         <translation>hexadezimale Eingabe</translation>
     </message>
@@ -130,143 +129,134 @@
         <translation>0 Zeichen</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="134"/>
-        <source>Clear</source>
-        <translation>Leeren</translation>
-    </message>
-    <message>
-        <location filename="apconf.ui" line="143"/>
+        <location filename="apconf.ui" line="146"/>
         <source>Show key as plain text</source>
         <translation>Zeige Schlüssel</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="156"/>
-        <source>Warning:
-The key is not readable from wpa supplicant thus the field above is empty. You can set a new key by entering something into the edit field.
-If you want to leave the key unchanged clear the field above.</source>
-        <translation>Warnung:
-Der Schlüssel kann nicht vom WPA Supplicant ermittelt werden und deshalb ist das obere Feld leer. Sie können einen neuen Schlüssel setzen indem sie oben etwas eintragen,
-Falls sie den Schlüssel jedoch nich ändern möchten lassen sie das Feld bitte leer.</translation>
-    </message>
-    <message>
-        <location filename="apconf.ui" line="169"/>
+        <location filename="apconf.ui" line="154"/>
         <source>EAP Settings</source>
         <translation>EAP Einstellungen</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="177"/>
+        <location filename="apconf.ui" line="162"/>
         <source>EAP method</source>
         <translation>EAP Methode</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="191"/>
+        <location filename="apconf.ui" line="176"/>
         <source>MD5</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="196"/>
+        <location filename="apconf.ui" line="181"/>
         <source>TLS</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="201"/>
+        <location filename="apconf.ui" line="186"/>
         <source>MSCHAPV2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="206"/>
+        <location filename="apconf.ui" line="191"/>
         <source>PEAP</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="211"/>
+        <location filename="apconf.ui" line="196"/>
         <source>TTLS</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="216"/>
+        <location filename="apconf.ui" line="201"/>
         <source>GTC</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="221"/>
+        <location filename="apconf.ui" line="206"/>
         <source>OTP</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="226"/>
+        <location filename="apconf.ui" line="211"/>
         <source>LEAP</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="234"/>
+        <location filename="apconf.ui" line="219"/>
         <source>Identification</source>
         <translation>Identifikation</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="246"/>
+        <location filename="apconf.ui" line="237"/>
         <source>Certificates</source>
         <translation>Zertifikate</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="252"/>
+        <location filename="apconf.ui" line="243"/>
         <source>CA File</source>
         <translation>CA Datei</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="316"/>
+        <location filename="apconf.ui" line="311"/>
         <source>...</source>
         <translation>...</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="272"/>
+        <location filename="apconf.ui" line="263"/>
         <source>Client File</source>
         <translation>Client Datei</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="295"/>
+        <location filename="apconf.ui" line="292"/>
         <source>Private Key</source>
         <translation>Privater Schlüssel</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="301"/>
+        <location filename="apconf.ui" line="298"/>
         <source>Key File</source>
         <translation>Schlüsseldatei</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="325"/>
+        <location filename="apconf.ui" line="318"/>
         <source>Password</source>
         <translation>Passwort</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="339"/>
+        <location filename="apconf.ui" line="346"/>
         <source>WEP Keys</source>
         <translation>WEP Schlüssel</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="345"/>
+        <location filename="apconf.ui" line="352"/>
         <source>WEP Key 0</source>
         <translation>WEP Schlüssel 0</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="365"/>
+        <location filename="apconf.ui" line="372"/>
         <source>WEP Key 1</source>
         <translation>WEP Schlüssel 1</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="382"/>
+        <location filename="apconf.ui" line="389"/>
         <source>WEP Key 2</source>
         <translation>WEP Schlüssel 2</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="399"/>
+        <location filename="apconf.ui" line="406"/>
         <source>WEP Key 3</source>
         <translation>WEP Schlüssel 3</translation>
     </message>
     <message>
-        <location filename="apconf.ui" line="420"/>
+        <location filename="apconf.ui" line="427"/>
         <source>Enable automatic selection</source>
         <translation>Automatische Auswahl dieses Zugangsknotens ermöglichen</translation>
+    </message>
+    <message>
+        <location filename="apconf.ui" line="330"/>
+        <source>leave unchanged</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -343,26 +333,26 @@ Falls sie den Schlüssel jedoch nich ändern möchten lassen sie das Feld bitte 
     </message>
 </context>
 <context>
-    <name>devopt</name>
+    <name>devdet</name>
     <message>
-        <location filename="devopt.ui" line="14"/>
-        <source>Device Options</source>
+        <location filename="devdet.ui" line="14"/>
+        <source>Device Details</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="devopt.ui" line="44"/>
+        <location filename="devdet.ui" line="44"/>
         <source>unknown status</source>
-        <translation>unbekannter Status</translation>
+        <translation type="unfinished">unbekannter Status</translation>
     </message>
     <message>
-        <location filename="devopt.ui" line="64"/>
+        <location filename="devdet.ui" line="64"/>
         <source>Show Details</source>
-        <translation>Zeige Details</translation>
+        <translation type="unfinished">Zeige Details</translation>
     </message>
     <message>
-        <location filename="devopt.ui" line="117"/>
+        <location filename="devdet.ui" line="117"/>
         <source>Show tray icon for this device</source>
-        <translation>Zeige Symbol im Systembereich für dieses Gerät</translation>
+        <translation type="unfinished">Zeige Symbol im Systembereich für dieses Gerät</translation>
     </message>
 </context>
 <context>
@@ -411,32 +401,32 @@ Falls sie den Schlüssel jedoch nich ändern möchten lassen sie das Feld bitte 
 <context>
     <name>qnut::CAccessPointConfig</name>
     <message>
-        <location filename="accesspointconfig.cpp" line="383"/>
+        <location filename="accesspointconfig.cpp" line="407"/>
         <source>%1 chars</source>
         <translation>%1 Zeichen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="415"/>
+        <location filename="accesspointconfig.cpp" line="439"/>
         <source>Select CA certificate file</source>
         <translation>CA Zertifikat auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="420"/>
+        <location filename="accesspointconfig.cpp" line="444"/>
         <source>Certificate files (%1)</source>
         <translation>Zertifikate (%1)</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="420"/>
+        <location filename="accesspointconfig.cpp" line="444"/>
         <source>Select client certificate file</source>
         <translation>Client Zertifikat auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="425"/>
+        <location filename="accesspointconfig.cpp" line="449"/>
         <source>Select key file</source>
         <translation>Schlüsseldatei auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="425"/>
+        <location filename="accesspointconfig.cpp" line="449"/>
         <source>Key files (%1)</source>
         <translation>Schlüsseldateien (%1)</translation>
     </message>
@@ -451,7 +441,7 @@ Falls sie den Schlüssel jedoch nich ändern möchten lassen sie das Feld bitte 
     <message>
         <location filename="availableapmodel.cpp" line="89"/>
         <source>plain or WEP</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">unverschlüsselt oder WEP</translation>
     </message>
     <message>
         <location filename="availableapmodel.cpp" line="118"/>
@@ -471,7 +461,7 @@ Falls sie den Schlüssel jedoch nich ändern möchten lassen sie das Feld bitte 
     <message>
         <location filename="availableapmodel.cpp" line="156"/>
         <source>Key management</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Schlüsselverwaltung</translation>
     </message>
     <message>
         <location filename="availableapmodel.cpp" line="158"/>
@@ -486,7 +476,7 @@ Falls sie den Schlüssel jedoch nich ändern möchten lassen sie das Feld bitte 
     <message>
         <location filename="availableapmodel.cpp" line="162"/>
         <source>Encryption</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Verschlüsselung</translation>
     </message>
 </context>
 <context>
