@@ -333,10 +333,10 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		type = replyProp.value().type;
 		state = (DeviceState) replyProp.value().state;
 		activeEnvironment = 0;
-		qDebug() << (tr("Device properties fetched"));
-		qDebug() << (tr("Name") + ": " + QString(name));
-		qDebug() << (tr("Type") + ": " + libnutclient::toStringTr(type));
-		qDebug() << (tr("State") + ": " + libnutclient::toStringTr(state));
+		*log << (tr("Device properties fetched"));
+		*log << (tr("Name") + ": " + QString(name));
+		*log << (tr("Type") + ": " + libnutclient::toStringTr(type));
+		*log << (tr("State") + ": " + libnutclient::toStringTr(state));
 	}
 	else {
 		throw CLI_DevConnectionException(tr("(%1) Error while retrieving dbus' device information").arg(toString(replyProp.error())));
@@ -358,7 +358,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	if (replyconf.isValid()) {
 		dbusConfig = replyconf.value();
 		need_wpa_supplicant = !(dbusConfig.wpaConfigFile().isEmpty());
-		qDebug() << tr("(%2) wpa_supplicant config file at: %1").arg(dbusConfig.wpaConfigFile(),name);
+		*log << tr("(%2) wpa_supplicant config file at: %1").arg(dbusConfig.wpaConfigFile(),name);
 	}
 	else {
 		throw CLI_DevConnectionException(tr("(%2) Error(%1) while retrieving device config").arg(replyconf.error().name(),name));
@@ -388,7 +388,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	if (!replyProp.value().activeEnvironment.isEmpty()) {
 		dbusActiveEnvironment = QDBusObjectPath(replyProp.value().activeEnvironment);
 		activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment, 0);
-		qDebug() << (tr("Active Environement") + ": " + dbusActiveEnvironment.path());
+		*log << (tr("Active Environement") + ": " + dbusActiveEnvironment.path());
 	}
 	//connect signals to slots
 	connect(dbusDevice, SIGNAL(environmentChangedActive(const QString &)),
@@ -607,7 +607,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 			if (name.length() == 0)
 				name = tr("untitled (%1)").arg(parent->environments.size());
 		}
-		qDebug() << "Environmentname" + name;
+		*log << "Environmentname" + name;
 		active = replyprop.value().active;
 	}
 	else {
@@ -836,7 +836,7 @@ void CInterface::dbusstateChanged(libnutcommon::InterfaceProperties properties) 
 	gateway = properties.gateway;
 	dnsserver = properties.dns;
 	getUserConfig(true); //Function will updated userConfig
-	qDebug() << tr("Interface state of %1 has changed to %2").arg(dbusPath.path(),libnutclient::toStringTr(state));
+	*log << tr("Interface state of %1 has changed to %2").arg(dbusPath.path(),libnutclient::toStringTr(state));
 	emit(stateChanged(state));
 }
 //CInterface SLOTS
