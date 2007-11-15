@@ -49,7 +49,7 @@ src_install() {
 	newexe "${S}"/debian/nuts.init nuts
 	dodir /etc/nuts
 	insinto /etc/nuts/
-	newins "${S}"/gentoo/nuts.config.example nuts.config.example
+	newins "${S}"/doc/config.example nuts.config.example
 
 	insinto /etc/dbus-1/system.d/
 	newins "${S}"/debian/nuts-dbus.conf nuts-dbus.conf
