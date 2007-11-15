@@ -47,6 +47,11 @@ namespace libnutwireless {
 			int ScanTimeoutCount;
 			int wextPollTimeoutCount;
 			QList<quint32> supportedFrequencies;
+			
+			//Workaround as Constructor of subclass is not beeing called
+			int apScanDefault;
+			bool lastWasAdHoc;
+			//
 
 			QString wps_ctrl_command(QString cmd);
 		//Abstracted Commands:
@@ -84,7 +89,7 @@ namespace libnutwireless {
 			//Change ap_scan value: 0 = no scanning,
 			//1 = wpa_supplicant requests scans and uses scan results to select the AP
 			//2 = wpa_supplicant does not use scanning and just requests driver to associate and take care of AP selection
-			inline void wps_cmd_AP_SCAN(int val) { wps_ctrl_command(QString("AP_SCAN %1").arg(QString::number(val))); }
+			inline QString wps_cmd_AP_SCAN(int val) { return wps_ctrl_command(QString("AP_SCAN %1").arg(QString::number(val))); }
 			inline QString wps_cmd_INTERFACES() { return wps_ctrl_command("INTERFACES"); }
 			
 			//Parser Functions
@@ -98,8 +103,8 @@ namespace libnutwireless {
 			void wps_setScanResults(QList<WextRawScan> &wextScanResults);
 			void wps_tryScanResults();
 
-
-			inline void printMessage(QString msg);
+			//Need to do it that way, as inline fails otherwise
+			inline void printMessage(QString msg) { if (log_enabled) emit(message(msg));}
 
 			void wps_open(bool time_call);
 			bool wps_close(QString call_func, bool internal=true);

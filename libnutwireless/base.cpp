@@ -66,11 +66,11 @@ namespace libnutwireless {
 	
 	
 	
-	void CWpa_SupplicantBase::printMessage(QString msg) {
-		if (log_enabled) {
-			emit(message(msg));
-		}
-	}
+// 	void CWpa_SupplicantBase::printMessage(QString msg) {
+// 		if (log_enabled) {
+// 			emit(message(msg));
+// 		}
+// 	}
 	
 	
 	//Private slots:
@@ -152,6 +152,14 @@ namespace libnutwireless {
 		wps_connected = false;
 		timerCount = 0;
 		log_enabled = true;
+
+		//Workaround as constructor of subclass is not beeing called
+		apScanDefault = -1;
+		qDebug() << (QString("Constructor set ap_scan=%1").arg(QString::number(apScanDefault)));
+		lastWasAdHoc = false;
+		qDebug() << (QString("Constructor set lastWasAdHoc=%1").arg((lastWasAdHoc) ? "true" : "false"));
+		//
+
 		connect(QCoreApplication::instance(),SIGNAL(aboutToQuit ()),this,SLOT(wps_detach()));
 	}
 	CWpa_SupplicantBase::~CWpa_SupplicantBase() {

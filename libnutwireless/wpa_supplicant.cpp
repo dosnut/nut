@@ -14,7 +14,32 @@ void CWpa_Supplicant::response(Request request, QString msg) {
 }
 
 bool CWpa_Supplicant::selectNetwork(int id) {
-	return ("OK\n" == wps_cmd_SELECT_NETWORK(id));
+	//TODO: Check if we need to set ap_scan first
+	if ("OK\n" == wps_cmd_SELECT_NETWORK(id)) {
+		//We have an adhoc network
+		if (BOOL_TRUE == toWpsBool(getNetworkVariable(id,"mode"))) {
+			ap_scan(2);
+			printMessage(tr("auto-setting ap_scan=2."));
+		}
+		else {
+			//Check if we have defaults, and if the last network was an ap-network
+			if (lastWasAdHoc) {
+				lastWasAdHoc = false;
+				if (-1 != apScanDefault) {
+					ap_scan(apScanDefault);
+					printMessage(tr("Using your last ap_scan settings for auto-setting: %1").arg(QString::number(apScanDefault)));
+				}
+				else {
+					printMessage(tr("You must set ap_scan to your needs!"));
+
+				}
+			}
+		}
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 bool CWpa_Supplicant::enableNetwork(int id) {
 	return ("OK\n" == wps_cmd_ENABLE_NETWORK(id));
@@ -23,13 +48,25 @@ bool CWpa_Supplicant::disableNetwork(int id) {
 	return ("OK\n" == wps_cmd_DISABLE_NETWORK(id));
 }
 
-void CWpa_Supplicant::ap_scan(int type) {
-	if ( !(0 <= type and 2 >= type) ) {
-		wps_cmd_AP_SCAN(1);
+bool CWpa_Supplicant::ap_scan(int type) {
+	if ( (0 <= type and 2 >= type) ) {
+		if ("FAIL\n" == wps_cmd_AP_SCAN(type)) {
+			return false;
+		}
+		else {
+			printMessage(QString("Setting ap_scan=1").arg(type));
+			//ap_scan variables accordingly
+			if (2 == type) {
+				lastWasAdHoc = true;
+			}
+			else {
+				lastWasAdHoc = false;
+				apScanDefault = type;
+			}
+			return true;
+		}
 	}
-	else {
-		wps_cmd_AP_SCAN(1);
-	}
+	return false;
 }
 bool CWpa_Supplicant::save_config() {
 	return !("FAIL\n" == wps_cmd_SAVE_CONFIG());

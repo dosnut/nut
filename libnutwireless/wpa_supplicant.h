@@ -17,7 +17,13 @@ namespace libnutwireless {
 			EapNetconfigFailures wps_editEapNetwork(int netid, EapNetworkConfig config);
 			NetconfigStatus checkAdHocNetwork(NetworkConfig config);
 		public:
-			CWpa_Supplicant(QObject * parent, QString ifname) : CWpa_SupplicantBase(parent, ifname) {}
+			//TODO: Check why constructor is not beeing called
+			CWpa_Supplicant(QObject * parent, QString ifname) : CWpa_SupplicantBase(parent, ifname) {
+				apScanDefault = -1;
+				qDebug() << (QString("Constructor set ap_scan=%1").arg(QString::number(apScanDefault)));
+				lastWasAdHoc = false;
+				qDebug() << (QString("Constructor set lastWasAdHoc=%1").arg((lastWasAdHoc) ? "true" : "false"));
+			}
 			~CWpa_Supplicant() {}
 			
 		public slots:
@@ -27,7 +33,7 @@ namespace libnutwireless {
 			bool selectNetwork(int id);
 			bool enableNetwork(int id);
 			bool disableNetwork(int id);
-			void ap_scan(int type=1);
+			bool ap_scan(int type=1);
 			bool save_config();
 			void disconnect_device();
 			void logon();
