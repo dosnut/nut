@@ -17,7 +17,7 @@ namespace libnutwireless {
 	typedef enum {NF_NONE, NF_CURRENT, NF_DISABLED} NetworkFlags;
 
 	typedef enum {CI_UNDEFINED=0, CI_NONE=1, CI_CCMP=2, CI_TKIP=4, CI_WEP104=8, CI_WEP40=16, CI_WEP=24} ScanCiphers;
-	typedef enum {AUTH_UNDEFINED=0, AUTH_PLAIN=1,AUTH_WPA_PSK=2,AUTH_WPA2_PSK=4, AUTH_WPA_EAP=8, AUTH_WPA2_EAP=16, AUTH_IEEE8021X=32, AUTH_DEFAULT=62} ScanAuthentication;
+	typedef enum {AUTH_UNDEFINED=0, AUTH_PLAIN=1,AUTH_WPA_PSK=2,AUTH_WPA2_PSK=4, AUTH_WPA_EAP=8, AUTH_WPA2_EAP=16, AUTH_IEEE8021X=32, AUTH_WPA_NONE=64, AUTH_WPA2_NONE=128, AUTH_DEFAULT=62} ScanAuthentication;
 	//AUTH_WPA_PSK = AUTHALG_OPEN && WKI_WPA && KEYMGMT_WPA_PSK && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
 	//AUTH_WPA2_PSK = AUTHALG_OPEN && WKI_RSN && KEYMGMT_WPA_PSK && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
 	//AUTH_WPA_EAP = (AUTHALG_OPEN || AUTHALG_LEAP) && KEYMGMT_WPA_EAP && WKI_WPA && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
@@ -28,7 +28,7 @@ namespace libnutwireless {
 	typedef enum {PROTO_UNDEFINED=0, PROTO_WPA=1, PROTO_RSN=2, PROTO_DEFAULT=3} Protocols; //RSN=WPA2
 	typedef enum {GCI_UNDEFINED=0, GCI_CCMP=2, GCI_TKIP=4, GCI_WEP104=8, GCI_WEP40=16, GCI_DEF=30} GroupCiphers;
 	typedef enum {PCI_UNDEFINED=0, PCI_NONE=1, PCI_CCMP=2, PCI_TKIP=4, PCI_DEF=6} PairwiseCiphers;
-	typedef enum {KM_UNDEFINED=0, KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8, KM_DEF=6} KeyManagement;
+	typedef enum {KM_UNDEFINED=0, KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8, KM_WPA_NONE=16, KM_DEF=6} KeyManagement;
 	typedef enum {AUTHALG_UNDEFINED=0, AUTHALG_OPEN=1, AUTHALG_SHARED=2, AUTHALG_LEAP=4} AuthenticationAlgs; //Default: automatic selection
 
 	typedef enum {INTERACT_MSG, INTERACT_REQ,INTERACT_EVENT} InteractiveType;
@@ -98,6 +98,7 @@ namespace libnutwireless {
 		WextRawSignal avgquality;
 		int hasRange;
 		int we_version_compiled;
+		int freq;
 	};
 
 // 	typedef enum {
@@ -113,6 +114,7 @@ namespace libnutwireless {
 	} WextSignal_type; 
 
 	struct WextSignal {
+		int frequency;
 		WextSignal_type type;
 		struct {
 			quint8 value;
@@ -244,8 +246,8 @@ namespace libnutwireless {
 	QString signalQualityToString(WextRawScan scan);
 	QStringList signalQualityToStringList(WextRawScan scan);
 	
-	int FrequencyToChannel(int freq);
-	int ChannelToFrequency(int channel);
+	int frequencyToChannel(int freq);
+	int channelToFrequency(int channel);
 
 	QString toNumberString(BOOL b);
 	bool toBool(BOOL b);

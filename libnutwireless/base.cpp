@@ -639,6 +639,16 @@ namespace libnutwireless {
 			return;
 		}
 		qDebug() << "Fetched basic config.";
+
+		//We encode frequency in mhz;
+		//kernel encodes as double; (hopefully always in hz)
+		//But better test this:
+		res.freq = -1;
+		if (b.has_freq) {
+			if ( ( (b.freq/1e9) < 10.0 ) && ( (b.freq/1e9) > 0.0 ) ) {
+				res.freq = (int) (b.freq/1e6);
+			}
+		}
 		
 		struct iwreq wrq;
 		/* Get AP address */
@@ -683,6 +693,31 @@ namespace libnutwireless {
 		}
 		
 		qDebug() << "Got range stuff";
+		
+
+		//Set supported Frequencies if the list is not empty;
+		if (supportedFrequencies.isEmpty() && hasRange) {
+			qDebug() << range.num_frequency;
+			qDebug() << "Printing Frequency information";
+			quint32 m;
+			quint16 e;
+			quint32 freqinmhz;
+	// 		QList<struct iw_freq> freqlist;
+			for (int i=0; i < range.num_channels; i++) {
+				m = (quint32) range.freq[i].m;
+				e = (quint16) range.freq[i].e;
+				freqinmhz = m;
+				for (int j=0; j < 9-e-3; j++) {
+					freqinmhz = freqinmhz/10;
+				}
+				supportedFrequencies.append(freqinmhz);
+				qDebug() << m << e << freqinmhz << frequencyToChannel(freqinmhz);
+			}
+			qDebug() << "Done printing";
+		}
+		else {
+			qDebug() << "supportedFrequencies not set";
+		}
 		
 		if (hasRange) {
 			res.maxquality.level = (quint8) range.max_qual.level;

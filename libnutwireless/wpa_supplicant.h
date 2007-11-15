@@ -15,6 +15,7 @@ namespace libnutwireless {
 			//Edit/get network helper functions
 			EapNetworkConfig wps_getEapNetworkConfig(int id);
 			EapNetconfigFailures wps_editEapNetwork(int netid, EapNetworkConfig config);
+			NetconfigStatus checkAdHocNetwork(NetworkConfig config);
 		public:
 			CWpa_Supplicant(QObject * parent, QString ifname) : CWpa_SupplicantBase(parent, ifname) {}
 			~CWpa_Supplicant() {}

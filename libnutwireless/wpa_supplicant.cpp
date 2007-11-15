@@ -67,7 +67,44 @@ int CWpa_Supplicant::addNetwork() {
 		return reply.toInt();
 	}
 }
-
+NetconfigStatus CWpa_Supplicant::checkAdHocNetwork(NetworkConfig config) {
+	// Note: IBSS can only be used with key_mgmt NONE (plaintext and static WEP)
+	// and key_mgmt=WPA-NONE (fixed group key TKIP/CCMP). In addition, ap_scan has
+	// to be set to 2 for IBSS. WPA-None requires following network block options:
+	// proto=WPA, key_mgmt=WPA-NONE, pairwise=NONE, group=TKIP (or CCMP, but not
+	// both), and psk must also be set.
+	// Furthermore the follwing fields need to be set:
+	// SSID,freq,ap_scan=2
+	// All other options schould be unchecked;
+	// User setable:
+	// SSID,freq,psk,group
+	NetconfigStatus failures;
+	failures.failures = NCF_NONE;
+	failures.eap_failures = ENCF_NONE;
+	if (PROTO_WPA != config.protocols) {
+		failures.failures = (NetconfigFailures)(failures.failures | NCF_PROTO);
+	}
+	if (KM_WPA_NONE != config.keyManagement) {
+		failures.failures = (NetconfigFailures)(failures.failures | NCF_KEYMGMT);
+	}
+	if (PCI_NONE != config.pairwise) {
+		failures.failures = (NetconfigFailures)(failures.failures | NCF_PAIRWISE);
+	}
+	if ( !( (GCI_TKIP == config.group) != (GCI_CCMP == config.group) ) ) {
+		failures.failures = (NetconfigFailures)(failures.failures | NCF_GROUP);
+	}
+	if (config.psk.isEmpty()) {
+		failures.failures = (NetconfigFailures)(failures.failures | NCF_PSK);
+	}
+	//Options that need to be set:
+	if (config.frequency == -1) {
+		failures.failures = (NetconfigFailures) (failures.failures | NCF_FREQ);
+	}
+	if (config.ssid.isEmpty()) {
+		failures.failures = (NetconfigFailures) (failures.failures | NCF_SSID);
+	}
+	return failures;
+}
 
 NetconfigStatus CWpa_Supplicant::addNetwork(NetworkConfig config) {
 	NetconfigStatus status;
@@ -93,9 +130,24 @@ NetconfigStatus CWpa_Supplicant::addNetwork(NetworkConfig config) {
 
 NetconfigStatus CWpa_Supplicant::editNetwork(int netid, NetworkConfig config) {
 	NetconfigStatus wps_fail_status;
+	//Check if we're adding an ad-hoc network:
+	if (BOOL_TRUE == config.mode) {
+		wps_fail_status = checkAdHocNetwork(config);
+		if (NCF_NONE != wps_fail_status.failures) {
+			wps_fail_status.id = netid;
+			return wps_fail_status;
+		}
+		else {
+		
+		}
+	}
+
 	wps_fail_status.failures = NCF_NONE;
 	wps_fail_status.eap_failures = ENCF_NONE;
 	wps_fail_status.id = netid;
+
+
+	//Set the network
 	if (!setNetworkVariable(netid,"ssid",config.ssid) ) {
 		wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_SSID);
 	}

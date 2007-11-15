@@ -115,23 +115,29 @@ namespace libnutwireless {
 		return cip;
 	}
 	ScanAuthentication CWpa_SupplicantParsers::parseScanAuth(QString str) {
-		ScanAuthentication key = AUTH_UNDEFINED;
+		int key = AUTH_UNDEFINED;
 		if (str.contains("WPA-PSK")) {
-			key = (ScanAuthentication) (key | AUTH_WPA_PSK);
+			key = (key | AUTH_WPA_PSK);
 		}
 		if (str.contains("WPA2-EAP")) {
-			key = (ScanAuthentication) (key | AUTH_WPA2_EAP);
+			key = (key | AUTH_WPA2_EAP);
 		}
 		if (str.contains("WPA2-PSK")) {
-			key = (ScanAuthentication) (key | AUTH_WPA2_PSK);
+			key = (key | AUTH_WPA2_PSK);
 		}
 		if (str.contains("WPA-EAP")) {
-			key = (ScanAuthentication) (key | AUTH_WPA_EAP);
+			key = (key | AUTH_WPA_EAP);
 		}
 		if (str.contains("IEEE8021X")) {
-			key = (ScanAuthentication) (key | AUTH_IEEE8021X);
+			key = (key | AUTH_IEEE8021X);
 		}
-		return key;
+		if (str.contains("WPA-NONE")) {
+			key = (key | AUTH_WPA_NONE);
+		}
+		if (str.contains("WPA2-NONE")) {
+			key = (key | AUTH_WPA2_NONE);
+		}
+		return (ScanAuthentication) key;
 	}
 	
 	QList<ScanResult> CWpa_SupplicantParsers::parseScanResult(QStringList list) {

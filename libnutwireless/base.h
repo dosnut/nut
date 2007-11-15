@@ -46,6 +46,7 @@ namespace libnutwireless {
 			WextSignal signalQuality; //bssid is zero
 			int ScanTimeoutCount;
 			int wextPollTimeoutCount;
+			QList<quint32> supportedFrequencies;
 
 			QString wps_ctrl_command(QString cmd);
 		//Abstracted Commands:

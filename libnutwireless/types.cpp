@@ -45,6 +45,12 @@ KeyManagement toKeyManagment(ScanAuthentication auth) {
 	if (AUTH_IEEE8021X & auth) {
 		key = (key | KM_IEEE8021X);
 	}
+	if (AUTH_WPA_NONE & auth) {
+		key = (key | KM_WPA_NONE);
+	}
+	if (AUTH_WPA2_NONE & auth) {
+		key = (key | KM_WPA_NONE);
+	}
 	return ((KeyManagement) key);
 }
 AuthenticationAlgs toAuthAlgs(ScanAuthentication auth) {
@@ -161,6 +167,9 @@ QString toString(KeyManagement keym) {
 	if (keym & KM_IEEE8021X) {
 		ret.append("IEEE8021X");
 	}
+	if (keym & KM_WPA_NONE) {
+		ret.append("WPA-NONE");
+	}
 	return ret;
 }
 
@@ -253,6 +262,7 @@ BOOL toWpsBool(bool b) {
 //We don't care whether information was updated or not. Just convert it
 WextSignal convertValues(WextRawScan scan) {
 	WextSignal res;
+	res.frequency = scan.freq;
 // 	res.encoding = WSIG_QUALITY_ALLABS;
 	qDebug() << "hasRange:" << scan.hasRange;
 	if ( scan.hasRange && ((scan.quality.level != 0) || (scan.quality.updated & (IW_QUAL_DBM | IW_QUAL_RCPI))) ) {
@@ -368,7 +378,7 @@ QStringList signalQualityToStringList(WextRawScan scan) {
 	return ret;
 }
 
-int FrequencyToChannel(int freq) {
+int frequencyToChannel(int freq) {
 	switch (freq) {
 		//2,4GHz part 
 		case 2412: return 1;
@@ -412,7 +422,7 @@ int FrequencyToChannel(int freq) {
 		default: return -1;
 	}
 }
-int ChannelToFrequency(int channel) {
+int channelToFrequency(int channel) {
 	switch(channel) {
 		case (1): return 2412;
 		case (2): return 2417;
@@ -466,7 +476,7 @@ NetworkConfig::NetworkConfig() {
 			scan_ssid = BOOL_UNDEFINED; // (do not) scan with SSID-specific Probe Request frames
 			priority = -1;
 			mode = BOOL_UNDEFINED; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
-			frequency = 0; //no default, but 0 is not a working value
+			frequency = -1; //no default, but -1 is not a working value
 			protocols = PROTO_UNDEFINED; //list of accepted protocols TODO: implement
 			keyManagement = KM_UNDEFINED; // list of accepted authenticated key management protocols
 			auth_alg = AUTHALG_UNDEFINED; //list of allowed IEEE 802.11 authentication algorithms TODO:implement
