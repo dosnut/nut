@@ -33,10 +33,11 @@ QString toStringTr(DeviceType type) {
 }
 QString toStringTr(InterfaceState state) {
 	switch (state) {
-		case IFS_OFF: return QObject::tr("OFF");
-		case IFS_STATIC: return QObject::tr("STATIC");
-		case IFS_DHCP: return QObject::tr("ZEROCONF");
-		case IFS_WAITFORCONFIG: return QObject::tr("WAITFORCONFIG");
+		case IFS_OFF: return QObject::tr("off");
+		case IFS_STATIC: return QObject::tr("static");
+		case IFS_DHCP: return QObject::tr("dynamic");
+		case IFS_ZEROCONF: return QObject::tr("zeroconf");
+		case IFS_WAITFORCONFIG: return QObject::tr("wait for config");
 		default: return QString();
 	}
 }
