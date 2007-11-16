@@ -18,10 +18,11 @@
 #define OV_MOD_TYPE    2
 #define OV_MOD_ENV     3
 #define OV_MOD_IP      4
-#define OV_MOD_SIG     5
+#define OV_MOD_NETWORK 5
 
 namespace qnut {
 	using namespace libnutclient;
+	using namespace libnutwireless;
 	using namespace libnutcommon;
 	
 	COverViewModel::COverViewModel(CDeviceManager * deviceManager, QObject * parent) : QAbstractItemModel(parent) {
@@ -125,9 +126,16 @@ namespace qnut {
 					return data->activeEnvironment->name;
 				else
 					return tr("none");
-			case OV_MOD_SIG:
-				if (data->type == DT_AIR) {
-					return signalSummary(data->wpa_supplicant->getSignalQuality());
+			case OV_MOD_NETWORK:
+				if (data->state > DS_ACTIVATED) {
+					if (data->type == DT_AIR) {
+						WextSignal signal = data->wpa_supplicant->getSignalQuality();
+						return data->essid + " (" +
+							QString::number(signal.quality.value) + '/'+
+							QString::number(signal.quality.maximum) + ')';
+					}
+					else
+						return tr("lokal");
 				}
 				else
 					return QString('-');
@@ -159,11 +167,11 @@ namespace qnut {
 			case OV_MOD_TYPE:
 				return tr("Type");
 			case OV_MOD_IP:
-				return tr("assigned IP-Address");
+				return tr("IP-Address");
 			case OV_MOD_ENV:
 				return tr("Environment");
-			case OV_MOD_SIG:
-				return tr("Signal (Quality, Level, Noise)");
+			case OV_MOD_NETWORK:
+				return tr("Network");
 			default:
 				break;
 			}
