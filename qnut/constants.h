@@ -5,10 +5,10 @@
 #define UI_NAME                         tr("QNUT - Qt client for Network UTility Server (NUTS)")
 
 //#ifdef QNUT_RELEASE
-#define UI_DIR_ICONS                    "/usr/share/qnut/icons/"
+//#define UI_DIR_ICONS                    "/usr/share/qnut/icons/"
 #define UI_DIR_TRANSLATIONS             "/usr/share/qnut/lang/"
 //#else
-//#define UI_DIR_ICONS                    "res/"
+#define UI_DIR_ICONS                    "res/"
 //#define UI_DIR_TRANSLATIONS             ""
 //#endif
 #define UI_DIR_WORK                     ".qnut/"
@@ -24,7 +24,35 @@
 #define UI_FILE_LOG                     (UI_PATH_WORK + "qnut.log")
 #define UI_FILE_CONFIG                  (UI_PATH_WORK + "qnut.conf")
 
-#define UI_ICON_SYSTRAY                 UI_DIR_ICONS "qnut.png"
+#define UI_ICON_QNUT                    UI_DIR_ICONS "qnut.png"
+
+#define UI_ICON_ENABLE                  UI_DIR_ICONS "enable.png"
+#define UI_ICON_ENABLE_ALL              UI_DIR_ICONS "enable_all.png"
+#define UI_ICON_DISABLE                 UI_DIR_ICONS "disable.png"
+
+#define UI_ICON_SELECTED                UI_DIR_ICONS "selected.png"
+#define UI_ICON_UNSELECTED              UI_DIR_ICONS "unselected.png"
+
+#define UI_ICON_SCRIPT_SETTINGS         UI_DIR_ICONS "script_settings.png"
+#define UI_ICON_CONFIGURE               UI_DIR_ICONS "configure.png"
+#define UI_ICON_EDIT                    UI_DIR_ICONS "edit.png"
+#define UI_ICON_RELOAD                  UI_DIR_ICONS "reload.png"
+#define UI_ICON_CLEAR                   UI_DIR_ICONS "clear.png"
+#define UI_ICON_SAVE                    UI_DIR_ICONS "save.png"
+
+#define UI_ICON_ADD                     UI_DIR_ICONS "add.png"
+#define UI_ICON_REMOVE                  UI_DIR_ICONS "remove.png"
+
+#define UI_ICON_ADD_ADHOC               UI_DIR_ICONS "add_adhoc.png"
+
+#define UI_ICON_FORCE                   UI_DIR_ICONS "force.png"
+#define UI_ICON_WARNING                 UI_DIR_ICONS "warning.png"
+#define UI_ICON_SEARCH                  UI_DIR_ICONS "search.png"
+
+#define UI_ICON_AIR                     UI_DIR_ICONS "air.png"
+#define UI_ICON_ADHOC                   UI_DIR_ICONS "adhoc.png"
+
+#define UI_ICON_DETAILED                UI_DIR_ICONS "view_detailed"
 
 #define UI_ICON_ETH_UP                  UI_DIR_ICONS "eth_up.png"
 #define UI_ICON_ETH_UNCONFIGURED        UI_DIR_ICONS "eth_unconfigured.png"
@@ -38,24 +66,10 @@
 #define UI_ICON_AIR_ACTIVATED           UI_DIR_ICONS "air_activated.png"
 #define UI_ICON_AIR_DEACTIVATED         UI_DIR_ICONS "air_deactivated.png"
 
-#define UI_ICON_AIR_SETTINGS            UI_DIR_ICONS "air_settings.png"
-
-#define UI_ICON_DEVICE_ENABLE           UI_DIR_ICONS "device_enable.png"
-#define UI_ICON_DEVICE_DISABLE          UI_DIR_ICONS "device_disable.png"
-
 #define UI_ICON_ENVIRONMENT             UI_DIR_ICONS "environment.png"
-#define UI_ICON_ENVIRONMENT_ENTER       UI_DIR_ICONS "environment_enter.png"
 
-#define UI_ICON_INTERFACE               UI_DIR_ICONS "interface_inactive.png"
+#define UI_ICON_INTERFACE               UI_DIR_ICONS "interface.png"
 #define UI_ICON_INTERFACE_ACTIVE        UI_DIR_ICONS "interface_active.png"
-
-#define UI_ICON_SCRIPT_SETTINGS         UI_DIR_ICONS "script_settings.png"
-#define UI_ICON_EDIT                    UI_DIR_ICONS "edit.png"
-#define UI_ICON_REFRESH                 UI_DIR_ICONS "refresh.png"
-#define UI_ICON_CLEAR                   UI_DIR_ICONS "clear.png"
-#define UI_ICON_WARNING                 UI_DIR_ICONS "warning.png"
-#define UI_ICON_SELECTED                UI_DIR_ICONS "selected.png"
-#define UI_ICON_UNSELECTED              UI_DIR_ICONS "unselected.png"
 
 #define UI_FLAG_SCRIPT_NONE             0x00
 #define UI_FLAG_SCRIPT_UP               0x01
