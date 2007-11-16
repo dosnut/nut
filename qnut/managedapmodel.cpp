@@ -13,10 +13,10 @@
 #include "managedapmodel.h"
 #include "constants.h"
 
-#define MANAP_MOD_ID    0
-#define MANAP_MOD_SSID  1
-#define MANAP_MOD_FLAG  2
-#define MANAP_MOD_BSSID 3
+#define MANAP_MOD_SSID   0
+#define MANAP_MOD_STATUS 1
+#define MANAP_MOD_ID     2
+#define MANAP_MOD_BSSID  3
 
 namespace qnut {
 	using namespace libnutcommon;
@@ -61,6 +61,9 @@ namespace qnut {
 		if ((networks.isEmpty()) || (!index.isValid()))
 			return QVariant();
 		
+		if ((role == Qt::DecorationRole) && (index.column() == 0))
+			return QIcon(UI_ICON_AIR);
+		
 		if (role != Qt::DisplayRole)
 			return QVariant();
 		
@@ -74,7 +77,7 @@ namespace qnut {
 				return tr("any");
 			else
 				return networks[index.row()].bssid.toString();
-		case MANAP_MOD_FLAG:
+		case MANAP_MOD_STATUS:
 			return (networks[index.row()].flags == NF_CURRENT) ? QString('*') : QVariant();
 		default:
 			break;
@@ -105,7 +108,7 @@ namespace qnut {
 				return tr("SSID");
 			case MANAP_MOD_BSSID:
 				return tr("BSSID");
-			case MANAP_MOD_FLAG:
+			case MANAP_MOD_STATUS:
 				return tr("current");
 			default:
 				break;
