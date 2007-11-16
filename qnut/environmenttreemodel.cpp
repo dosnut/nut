@@ -87,7 +87,7 @@ namespace qnut {
 			if (currentData->parent() == device)
 				return static_cast<CEnvironment *>(currentData)->name;
 			else
-				return tr("#%1").arg(static_cast<CInterface *>(currentData)->index);
+				return '#' + QString::number(static_cast<CInterface *>(currentData)->index);
 		case ENVTREE_MOD_STATUS:
 			if (currentData->parent() == device) {
 				return (static_cast<CEnvironment *>(currentData)->active) ? tr("active") : QString('-');

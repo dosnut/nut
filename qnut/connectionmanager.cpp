@@ -44,11 +44,11 @@ namespace qnut {
 		connect(&deviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
 		
 		if (logFile.error() != QFile::NoError)
-			logEdit.append(tr("ERROR:") + " " + tr("Cannot create/open log file."));
+			logEdit.append(tr("ERROR: %1").arg(tr("Cannot create/open log file.")));
 		
 		connect(&logFile, SIGNAL(printed(const QString &)), &logEdit, SLOT(append(const QString &)));
 		
-		logFile << UI_NAME + " (v" + QString(UI_VERSION) + ") " + tr("started");
+		logFile << tr("%1 (v%2) started").arg(UI_NAME, UI_VERSION);
 		logFile << QDateTime::currentDateTime().toString();
 		
 		createActions();
@@ -73,11 +73,11 @@ namespace qnut {
 	
 	inline void CConnectionManager::createActions() {
 		//overViewMenu Actions
-		refreshDevicesAction   = new QAction(QIcon(UI_ICON_REFRESH), tr("Refresh devices"), this);
-		enableDeviceAction     = new QAction(QIcon(UI_ICON_DEVICE_ENABLE), tr("Enable"), this);
-		disableDeviceAction    = new QAction(QIcon(UI_ICON_DEVICE_DISABLE), tr("Disable"), this);
+		refreshDevicesAction   = new QAction(QIcon(UI_ICON_RELOAD), tr("Refresh devices"), this);
+		enableDeviceAction     = new QAction(QIcon(UI_ICON_ENABLE), tr("Enable"), this);
+		disableDeviceAction    = new QAction(QIcon(UI_ICON_DISABLE), tr("Disable"), this);
 		deviceSettingsAction   = new QAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("Scripting settings..."), this);
-		wirelessSettingsAction = new QAction(QIcon(UI_ICON_AIR_SETTINGS), tr("Wireless settings..."), this);
+		wirelessSettingsAction = new QAction(QIcon(UI_ICON_AIR), tr("Wireless settings..."), this);
 		clearLogAction         = new QAction(QIcon(UI_ICON_CLEAR), tr("Clear log"), this);
 		
 		enableDeviceAction->setEnabled(false);
