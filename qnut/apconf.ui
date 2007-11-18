@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>586</width>
-    <height>574</height>
+    <width>494</width>
+    <height>566</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -29,10 +29,43 @@
      <item row="0" column="1" >
       <widget class="QLineEdit" name="ssidEdit" />
      </item>
-     <item row="1" column="1" >
+     <item row="0" column="2" >
       <widget class="QCheckBox" name="ssidHexCheck" >
        <property name="text" >
-        <string>hexadecimal chars</string>
+        <string>hex. chars</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" >
+      <widget class="QLabel" name="bssidLabel" >
+       <property name="text" >
+        <string>BSSID</string>
+       </property>
+       <property name="buddy" >
+        <cstring>bssidEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1" >
+      <widget class="QLineEdit" name="bssidEdit" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="inputMask" >
+        <string>HH:HH:HH:HH:HH:HH;0</string>
+       </property>
+       <property name="text" >
+        <string>:::::</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2" >
+      <widget class="QCheckBox" name="anyBSSIDCheck" >
+       <property name="text" >
+        <string>any</string>
+       </property>
+       <property name="checked" >
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -70,14 +103,14 @@
        </item>
       </widget>
      </item>
-     <item row="3" column="1" >
+     <item row="2" column="2" >
       <widget class="QCheckBox" name="rsnCheck" >
        <property name="text" >
-        <string>use WPA2 (RSN)</string>
+        <string>WPA2 (RSN)</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="0" >
+     <item row="3" column="0" >
       <widget class="QLabel" name="encLabel" >
        <property name="text" >
         <string>Encryption</string>
@@ -87,7 +120,7 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="1" >
+     <item row="3" column="1" >
       <widget class="QComboBox" name="encCombo" />
      </item>
     </layout>
@@ -95,7 +128,7 @@
    <item>
     <widget class="QTabWidget" name="confTabs" >
      <property name="currentIndex" >
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="pskTab" >
       <attribute name="title" >
@@ -111,6 +144,9 @@
            </property>
            <property name="margin" >
             <number>-1</number>
+           </property>
+           <property name="buddy" >
+            <cstring>pskEdit</cstring>
            </property>
           </widget>
          </item>
@@ -218,6 +254,9 @@
            <property name="text" >
             <string>Identification</string>
            </property>
+           <property name="buddy" >
+            <cstring>identificationEdit</cstring>
+           </property>
           </widget>
          </item>
          <item row="1" column="1" >
@@ -317,6 +356,9 @@
             <property name="text" >
              <string>Password</string>
             </property>
+            <property name="buddy" >
+             <cstring>passwordEdit</cstring>
+            </property>
            </widget>
           </item>
           <item row="1" column="1" colspan="2" >
@@ -362,7 +404,7 @@
        <item row="0" column="2" >
         <widget class="QCheckBox" name="wepKey0HexCheck" >
          <property name="text" >
-          <string>hexadecimal chars</string>
+          <string>hex. chars</string>
          </property>
         </widget>
        </item>
@@ -379,7 +421,7 @@
        <item row="1" column="2" >
         <widget class="QCheckBox" name="wepKey1HexCheck" >
          <property name="text" >
-          <string>hexadecimal chars</string>
+          <string>hex. chars</string>
          </property>
         </widget>
        </item>
@@ -396,7 +438,7 @@
        <item row="2" column="2" >
         <widget class="QCheckBox" name="wepKey2HexCheck" >
          <property name="text" >
-          <string>hexadecimal chars</string>
+          <string>hex. chars</string>
          </property>
         </widget>
        </item>
@@ -413,12 +455,19 @@
        <item row="3" column="2" >
         <widget class="QCheckBox" name="wepKey3HexCheck" >
          <property name="text" >
-          <string>hexadecimal chars</string>
+          <string>hex. chars</string>
          </property>
         </widget>
        </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="scanCheck" >
+     <property name="text" >
+      <string>Enable SSID scanning (slower but needed if SSID is hidden)</string>
+     </property>
     </widget>
    </item>
    <item>
@@ -446,6 +495,8 @@
  <tabstops>
   <tabstop>ssidEdit</tabstop>
   <tabstop>ssidHexCheck</tabstop>
+  <tabstop>bssidEdit</tabstop>
+  <tabstop>anyBSSIDCheck</tabstop>
   <tabstop>keyManagementCombo</tabstop>
   <tabstop>rsnCheck</tabstop>
   <tabstop>encCombo</tabstop>
@@ -456,8 +507,8 @@
   <tabstop>eapCombo</tabstop>
   <tabstop>identificationEdit</tabstop>
   <tabstop>caEdit</tabstop>
-  <tabstop>caBrowse</tabstop>
   <tabstop>clientEdit</tabstop>
+  <tabstop>caBrowse</tabstop>
   <tabstop>clientBrowse</tabstop>
   <tabstop>keyFileEdit</tabstop>
   <tabstop>keyBrowse</tabstop>
@@ -475,6 +526,7 @@
   <tabstop>wepKey3Radio</tabstop>
   <tabstop>wepKey3Edit</tabstop>
   <tabstop>wepKey3HexCheck</tabstop>
+  <tabstop>scanCheck</tabstop>
   <tabstop>autoEnableCheck</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
@@ -487,8 +539,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>302</x>
-     <y>564</y>
+     <x>311</x>
+     <y>556</y>
     </hint>
     <hint type="destinationlabel" >
      <x>286</x>
@@ -503,12 +555,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>437</x>
-     <y>457</y>
+     <x>110</x>
+     <y>195</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>417</x>
-     <y>455</y>
+     <x>110</x>
+     <y>195</y>
     </hint>
    </hints>
   </connection>
@@ -519,12 +571,28 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>461</x>
-     <y>292</y>
+     <x>472</x>
+     <y>274</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>372</x>
-     <y>288</y>
+     <x>295</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>anyBSSIDCheck</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>bssidEdit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>412</x>
+     <y>59</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>363</x>
+     <y>59</y>
     </hint>
    </hints>
   </connection>

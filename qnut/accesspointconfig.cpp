@@ -14,7 +14,9 @@
 #include <QToolTip>
 
 namespace qnut {
+	using namespace libnutcommon;
 	using namespace libnutwireless;
+	
 	CAccessPointConfig::CAccessPointConfig(CWpa_Supplicant * wpa_supplicant, QWidget *parent) : QDialog(parent) {
 		supplicant = wpa_supplicant;
 		
@@ -104,6 +106,10 @@ namespace qnut {
 		config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
 		
 		config.disabled = (BOOL)ui.autoEnableCheck->isChecked();
+		config.scan_ssid = (BOOL)ui.scanCheck->isChecked();
+		
+		if (!ui.anyBSSIDCheck->isChecked())
+			config.bssid = MacAddress(ui.ssidEdit->text());
 		
 		if (ui.encCombo->currentText() == "WEP") {
 			config.group = (GroupCiphers)(GCI_WEP104 | GCI_WEP40);
@@ -239,6 +245,12 @@ namespace qnut {
 		}
 		
 		accept();
+	}
+	
+	bool CAccessPointConfig::execute() {
+		setAuthConfig(0);
+		currentID = -1;
+		return exec();
 	}
 	
 	bool CAccessPointConfig::execute(ScanResult scanResult) {
@@ -435,6 +447,8 @@ namespace qnut {
 	}
 	
 	void CAccessPointConfig::selectCAFile() {
+/*		QFileDialog dialog(this);
+		dialog.setFileMode(QFileDialog::ExistingFile);*/
 		ui.caEdit->setText(QFileDialog::getOpenFileName(this,
 			tr("Select CA certificate file"), "/", tr("Certificate files (%1)").arg("*.pem")));
 	}

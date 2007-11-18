@@ -35,6 +35,7 @@ namespace qnut {
 	public:
 		bool execute(libnutwireless::ScanResult scanResult);
 		bool execute(int id);
+		bool execute();
 		
 		CAccessPointConfig(libnutwireless::CWpa_Supplicant * wpa_supplicant, QWidget * parent = 0);
 		~CAccessPointConfig();
