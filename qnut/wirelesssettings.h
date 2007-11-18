@@ -22,7 +22,26 @@ namespace qnut {
 	private:
 		Ui::airset ui;
 		libnutclient::CDevice * device;
+		
+		QAction * enableNetworkAction;
+		QAction * enableNetworksAction;
+		QAction * disableNetworkAction;
+		QAction * switchNetworkAction;
+		QAction * configureNetworkAction;
+		QAction * removeNetworkAction;
+		
+		QAction * saveNetworksAction;
+		
+		QAction * addNetworkAction;
+		QAction * addAdhocAction;
+		
+		QAction * rescanNetworksAction;
+		QAction * reloadNetworksAction;
+		QAction * toggleDetailsAction;
+		inline void createActions();
 	public:
+		inline bool detailsVisible() const { return toggleDetailsAction->isChecked(); }
+		inline void setDetailsVisible(bool value) { toggleDetailsAction->setChecked(value); }
 		CWirelessSettings(libnutclient::CDevice * wireless, QWidget * parent = 0);
 		~CWirelessSettings();
 	public slots:
@@ -32,9 +51,13 @@ namespace qnut {
 	private slots:
 		void updateSignalInfo(libnutwireless::WextSignal signal);
 		void switchToSelectedNetwork();
-		void addSelectedScanResult();
+		void addNetwork();
 		void removeSelectedNetwork();
 		void configureSelectedNetwork();
+		void enableSelectedNetwork();
+		void enableNetworks();
+		void disableSelectedNetwork();
+		void toggleDetails(bool value);
 	};
 };
 

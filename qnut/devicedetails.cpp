@@ -79,6 +79,7 @@ namespace qnut {
 			settings.beginGroup("WirelessSettings");
 			wirelessSettings->resize(settings.value("size", QSize(646, 322)).toSize());
 			wirelessSettings->move(settings.value("pos", QPoint(200, 200)).toPoint());
+			wirelessSettings->setDetailsVisible(settings.value("showDetails", false).toBool());
 			settings.endGroup();
 		}
 	}
@@ -94,6 +95,7 @@ namespace qnut {
 			settings.beginGroup("WirelessSettings");
 			settings.setValue("size", wirelessSettings->size());
 			settings.setValue("pos", wirelessSettings->pos());
+			settings.setValue("showDetails", wirelessSettings->detailsVisible());
 			settings.endGroup();
 		}
 	}

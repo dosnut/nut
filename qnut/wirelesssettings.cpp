@@ -26,16 +26,26 @@ namespace qnut {
 		ui.setupUi(this);
 		
 		setWindowTitle(tr("Wireless Settings for \"%1\"").arg(device->name));
-		setWindowIcon(QIcon(UI_ICON_AIR_SETTINGS));
+		setWindowIcon(QIcon(UI_ICON_AIR));
 		
 		ui.nameLabel->setText(device->name);
 		
 		ui.managedView->setModel(new CManagedAPModel());
 		ui.availableView->setModel(new CAvailableAPModel());
+		
+		createActions();
+		
 		ui.managedView->header()->setResizeMode(QHeaderView::ResizeToContents);
-		//ui.availableView->header()->setResizeMode(QHeaderView::ResizeToContents);
+		ui.availableView->header()->setResizeMode(QHeaderView::ResizeToContents);
 		
 		updateUi(device->state);
+		
+		ui.managedView->setIconSize(QSize(32, 32));
+		
+		ui.managedView->header()->setMinimumSectionSize(-1);
+		ui.availableView->header()->setMinimumSectionSize(-1);
+/*		ui.managedView->header()->resizeSections(QHeaderView::ResizeToContents);
+		ui.availableView->header()->resizeSections(QHeaderView::ResizeToContents);*/
 		
 		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(updateUi(libnutcommon::DeviceState)));
 		
@@ -46,16 +56,73 @@ namespace qnut {
 		
 		connect(ui.availableView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(addSelectedScanResult()));
 		connect(ui.managedView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(configureSelectedNetwork()));
-		
-		connect(ui.switchButton, SIGNAL(clicked()), this, SLOT(switchToSelectedNetwork()));
-		connect(ui.rescanButton, SIGNAL(clicked()), device->wpa_supplicant, SLOT(scan()));
-		connect(ui.addButton, SIGNAL(clicked()), this, SLOT(addSelectedScanResult()));
-		
-		connect(ui.removeButton, SIGNAL(clicked()), this, SLOT(removeSelectedNetwork()));
-		connect(ui.configureButton, SIGNAL(clicked()), this, SLOT(configureSelectedNetwork()));
 	}
 	
 	CWirelessSettings::~CWirelessSettings() {
+	}
+	
+	inline void CWirelessSettings::createActions() {
+		enableNetworkAction    = new QAction(QIcon(UI_ICON_ENABLE), tr("Enable"), this);
+		enableNetworksAction   = new QAction(QIcon(UI_ICON_ENABLE_ALL), tr("Enable all"), this);
+		disableNetworkAction   = new QAction(QIcon(UI_ICON_DISABLE), tr("Disable"), this);
+		switchNetworkAction    = new QAction(QIcon(UI_ICON_FORCE), tr("Switch"), this);
+		configureNetworkAction = new QAction(QIcon(UI_ICON_CONFIGURE), tr("Configure..."), this);
+		removeNetworkAction    = new QAction(QIcon(UI_ICON_REMOVE), tr("Remove"), this);
+		
+		addNetworkAction       = new QAction(QIcon(UI_ICON_ADD), tr("Add network"), this);
+		addAdhocAction         = new QAction(QIcon(UI_ICON_ADD_ADHOC), tr("Add ad-hoc"), this);
+		addAdhocAction->setEnabled(false);
+		rescanNetworksAction   = new QAction(QIcon(UI_ICON_SEARCH), tr("Rescan"), this);
+		
+		saveNetworksAction     = new QAction(QIcon(UI_ICON_SAVE), tr("Save configuration"), this);
+		reloadNetworksAction   = new QAction(QIcon(UI_ICON_RELOAD), tr("Reload configuration"), this);
+		
+		toggleDetailsAction    = new QAction(QIcon(UI_ICON_DETAILED), tr("Detailed view"), this);
+		
+		toggleDetailsAction->setCheckable(true);
+		toggleDetailsAction->setChecked(true);
+		
+		enableNetworkAction->setEnabled(false);
+		disableNetworkAction->setEnabled(false);
+		switchNetworkAction->setEnabled(false);
+		configureNetworkAction->setEnabled(false);
+		removeNetworkAction->setEnabled(false);
+		
+		connect(enableNetworkAction, SIGNAL(triggered()), this, SLOT(enableSelectedNetwork()));
+		connect(enableNetworksAction, SIGNAL(triggered()), this, SLOT(enableNetworks()));
+		connect(disableNetworkAction, SIGNAL(triggered()), this, SLOT(disableSelectedNetwork()));
+		connect(switchNetworkAction, SIGNAL(triggered()), this, SLOT(switchToSelectedNetwork()));
+		connect(configureNetworkAction, SIGNAL(triggered()), this, SLOT(configureSelectedNetwork()));
+		connect(removeNetworkAction, SIGNAL(triggered()), this, SLOT(removeSelectedNetwork()));
+		
+		connect(addNetworkAction, SIGNAL(triggered()), this, SLOT(addNetwork()));
+		
+		connect(toggleDetailsAction, SIGNAL(toggled(bool)), this, SLOT(toggleDetails(bool)));
+		connect(reloadNetworksAction, SIGNAL(triggered()), ui.managedView->model(), SLOT(reloadNetworks()));
+		
+/*		ui.managedView->addAction(enableNetworkAction);
+		ui.managedView->addAction(disableNetworkAction);
+		ui.managedView->addAction(switchNetworkAction);
+		ui.managedView->addAction(configureNetworkAction);
+		ui.managedView->addAction(removeNetworkAction);*/
+		
+		ui.enableNetworkButton->setDefaultAction(enableNetworkAction);
+		ui.enableNetworksButton->setDefaultAction(enableNetworksAction);
+		ui.disableNetworkButton->setDefaultAction(disableNetworkAction);
+		ui.switchNetworkButton->setDefaultAction(switchNetworkAction);
+		ui.configureNetworkButton->setDefaultAction(configureNetworkAction);
+		ui.removeNetworkButton->setDefaultAction(removeNetworkAction);
+		ui.saveNetworksButton->setDefaultAction(saveNetworksAction);
+		ui.reloadNetworksButton->setDefaultAction(reloadNetworksAction);
+		ui.toggleDetailsButton->setDefaultAction(toggleDetailsAction);
+		
+/*		ui.availableView->addAction(addNetworkAction);
+		ui.availableView->addAction(getSeparator(this));
+		ui.availableView->addAction(rescanNetworksAction);*/
+		
+		ui.addNetworkButton->setDefaultAction(addNetworkAction);
+		ui.addAdhocButton->setDefaultAction(addAdhocAction);
+		ui.rescanNetworksButton->setDefaultAction(rescanNetworksAction);
 	}
 	
 	void CWirelessSettings::updateSignalInfo(WextSignal signal) {
@@ -65,30 +132,37 @@ namespace qnut {
 	void CWirelessSettings::handleManagedAPSelectionChanged(const QItemSelection & selected) {
 		QModelIndexList selectedIndexes = selected.indexes();
 		
-		ui.switchButton->setDisabled(selectedIndexes.isEmpty());
-		ui.configureButton->setDisabled(selectedIndexes.isEmpty());
-		ui.removeButton->setDisabled(selectedIndexes.isEmpty());
+		ui.enableNetworkButton->setDisabled(selectedIndexes.isEmpty());
+		ui.disableNetworkButton->setDisabled(selectedIndexes.isEmpty());
+		
+		ui.switchNetworkButton->setDisabled(selectedIndexes.isEmpty());
+		ui.configureNetworkButton->setDisabled(selectedIndexes.isEmpty());
+		ui.removeNetworkButton->setDisabled(selectedIndexes.isEmpty());
 	}
 	
 	void CWirelessSettings::handleAvailableAPSelectionChanged(const QItemSelection & selected) {
 		QModelIndexList selectedIndexes = selected.indexes();
 		
-		ui.addButton->setDisabled(selectedIndexes.isEmpty());
+		ui.addNetworkButton->setDisabled(selectedIndexes.isEmpty());
 	}
 	
 	void CWirelessSettings::updateUi(DeviceState state) {
-		ui.managedGroup->setEnabled(state != DS_DEACTIVATED);
-		ui.availableGroup->setEnabled(state != DS_DEACTIVATED);
-		
 		ui.iconLabel->setPixmap(QPixmap(iconFile(device)));
 		ui.stateLabel->setText(toStringTr(device->state));
+		
+		setEnabled(state != DS_DEACTIVATED);
 		
 		if (state <= DS_ACTIVATED)
 			ui.signalLabel->setText("not assigned to accesspoint");
 		
-		if (state != DS_DEACTIVATED)
+		if (state != DS_DEACTIVATED) {
+			device->wpa_supplicant->ap_scan(1);
+			connect(device->wpa_supplicant, SIGNAL(closed()), ui.managedView, SLOT(clearSelection()));
+			connect(saveNetworksAction, SIGNAL(triggered()), device->wpa_supplicant, SLOT(save_config()));
+			connect(rescanNetworksAction, SIGNAL(triggered()), device->wpa_supplicant, SLOT(scan()));
 			connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)),
 				this, SLOT(updateSignalInfo(libnutwireless::WextSignal)));
+		}
 		
 		dynamic_cast<CAvailableAPModel *>(ui.availableView->model())->setWpaSupplicant(device->wpa_supplicant);
 		dynamic_cast<CManagedAPModel *>(ui.managedView->model())->setWpaSupplicant(device->wpa_supplicant);
@@ -102,24 +176,31 @@ namespace qnut {
 		}
 	}
 	
-	void CWirelessSettings::addSelectedScanResult() {
+	void CWirelessSettings::addNetwork() {
 		QModelIndexList selectedIndexes = ui.availableView->selectionModel()->selectedIndexes();
 		CAccessPointConfig dialog(device->wpa_supplicant, this);
-		ScanResult * scan = static_cast<ScanResult *>(selectedIndexes[0].internalPointer());
 		
-		if (dialog.execute(*scan))
+		bool networkAdded;
+		if (selectedIndexes.isEmpty())
+			networkAdded = dialog.execute();
+		else {
+			ScanResult * scan = static_cast<ScanResult *>(selectedIndexes[0].internalPointer());
+			networkAdded = dialog.execute(*scan);
+		}
+		
+		if (networkAdded)
 			static_cast<CManagedAPModel *>(ui.managedView->model())->reloadNetworks();
 	}
 	
 	void CWirelessSettings::removeSelectedNetwork() {
 		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
-		CAccessPointConfig dialog(device->wpa_supplicant, this);
 		ShortNetworkInfo * network = static_cast<ShortNetworkInfo *>(selectedIndexes[0].internalPointer());
 		
 		if (QMessageBox::question(this, tr("Removing a managed network"), tr("Are you sure to remove \"%1\"?").arg(network->ssid),
 			QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes) {
 			device->wpa_supplicant->removeNetwork(network->id);
 			static_cast<CManagedAPModel *>(ui.managedView->model())->reloadNetworks();
+			ui.managedView->clearSelection();
 		}
 	}
 	
@@ -130,5 +211,46 @@ namespace qnut {
 		
 		if (dialog.execute(network->id))
 			static_cast<CManagedAPModel *>(ui.managedView->model())->reloadNetworks();
+	}
+	
+	void CWirelessSettings::enableSelectedNetwork() {
+		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
+		ShortNetworkInfo * network = static_cast<ShortNetworkInfo *>(selectedIndexes[0].internalPointer());
+		device->wpa_supplicant->enableNetwork(network->id);
+		static_cast<CManagedAPModel *>(ui.managedView->model())->reloadNetworks();
+	}
+	
+	void CWirelessSettings::enableNetworks() {
+		QList<ShortNetworkInfo> networks = static_cast<CManagedAPModel *>(ui.managedView->model())->cachedNetworks();
+		foreach (ShortNetworkInfo i, networks) {
+			device->wpa_supplicant->enableNetwork(i.id);
+		}
+		static_cast<CManagedAPModel *>(ui.managedView->model())->reloadNetworks();
+	}
+	
+	void CWirelessSettings::disableSelectedNetwork() {
+		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
+		ShortNetworkInfo * network = static_cast<ShortNetworkInfo *>(selectedIndexes[0].internalPointer());
+		device->wpa_supplicant->disableNetwork(network->id);
+		static_cast<CManagedAPModel *>(ui.managedView->model())->reloadNetworks();
+	}
+	
+	void CWirelessSettings::toggleDetails(bool value) {
+		if (value) {
+			ui.managedView->showColumn(UI_MANAP_ID);
+			ui.managedView->showColumn(UI_MANAP_BSSID);
+			ui.availableView->showColumn(UI_AVLAP_BSSID);
+			ui.availableView->showColumn(UI_AVLAP_CHANNEL);
+			ui.availableView->showColumn(UI_AVLAP_LEVEL);
+		}
+		else {
+			ui.managedView->hideColumn(UI_MANAP_ID);
+			ui.managedView->hideColumn(UI_MANAP_BSSID);
+			ui.availableView->hideColumn(UI_AVLAP_BSSID);
+			ui.availableView->hideColumn(UI_AVLAP_CHANNEL);
+			ui.availableView->hideColumn(UI_AVLAP_LEVEL);
+		}
+/*		ui.managedView->header()->resizeSections(QHeaderView::ResizeToContents);
+		ui.availableView->header()->resizeSections(QHeaderView::ResizeToContents);*/
 	}
 };

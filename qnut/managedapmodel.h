@@ -15,10 +15,17 @@
 #include <QAbstractItemModel>
 #include <libnutclient/client.h>
 
+#define UI_MANAP_SSID   0
+#define UI_MANAP_STATUS 1
+#define UI_MANAP_ID     2
+#define UI_MANAP_BSSID  3
+
 namespace qnut {
 	class CManagedAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
+		QList<libnutwireless::ShortNetworkInfo> cachedNetworks() const { return networks; };
+		
 		CManagedAPModel(libnutwireless::CWpa_Supplicant * wpaSupplicant = NULL, QObject * parent = 0);
 		~CManagedAPModel();
 		
@@ -34,8 +41,8 @@ namespace qnut {
 	public slots:
 		void reloadNetworks();
 	private:
-		libnutwireless::CWpa_Supplicant * supplicant;
 		QList<libnutwireless::ShortNetworkInfo> networks;
+		libnutwireless::CWpa_Supplicant * supplicant;
 	};
 }
 

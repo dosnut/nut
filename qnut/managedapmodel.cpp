@@ -13,11 +13,6 @@
 #include "managedapmodel.h"
 #include "constants.h"
 
-#define MANAP_MOD_SSID   0
-#define MANAP_MOD_STATUS 1
-#define MANAP_MOD_ID     2
-#define MANAP_MOD_BSSID  3
-
 namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutwireless;
@@ -62,23 +57,31 @@ namespace qnut {
 			return QVariant();
 		
 		if ((role == Qt::DecorationRole) && (index.column() == 0))
-			return QIcon(UI_ICON_AIR);
+			return QIcon(UI_ICON_AIR_ACTIVATED);
 		
 		if (role != Qt::DisplayRole)
 			return QVariant();
 		
 		switch (index.column()) {
-		case MANAP_MOD_ID:
+		case UI_MANAP_ID:
 			return QString::number(index.row());
-		case MANAP_MOD_SSID:
+		case UI_MANAP_SSID:
 			return networks[index.row()].ssid;
-		case MANAP_MOD_BSSID:
+		case UI_MANAP_BSSID:
 			if (networks[index.row()].bssid.zero())
 				return tr("any");
 			else
 				return networks[index.row()].bssid.toString();
-		case MANAP_MOD_STATUS:
-			return (networks[index.row()].flags == NF_CURRENT) ? QString('*') : QVariant();
+		case UI_MANAP_STATUS:
+			//strange "flags"
+			switch (networks[index.row()].flags) {
+			case NF_CURRENT:
+				return tr("selected");
+			case NF_DISABLED:
+				return tr("disabled");
+			default:
+				return tr("enabled");
+			}
 		default:
 			break;
 		}
@@ -90,26 +93,23 @@ namespace qnut {
 		if ((networks.isEmpty()) || (!index.isValid()))
 			return 0;
 		
-		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+		return (networks[index.row()].flags == NF_CURRENT) ? Qt::ItemIsEnabled | Qt::ItemIsSelectable : Qt::ItemIsSelectable;
 	}
 	
 	QVariant CManagedAPModel::headerData(int section, Qt::Orientation orientation, int role) const {
-		if (networks.isEmpty())
-			return QVariant();
-		
 		if (role != Qt::DisplayRole)
 			return QVariant();
 		
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
-			case MANAP_MOD_ID:
+			case UI_MANAP_ID:
 				return tr("ID");
-			case MANAP_MOD_SSID:
+			case UI_MANAP_SSID:
 				return tr("SSID");
-			case MANAP_MOD_BSSID:
+			case UI_MANAP_BSSID:
 				return tr("BSSID");
-			case MANAP_MOD_STATUS:
-				return tr("current");
+			case UI_MANAP_STATUS:
+				return tr("status");
 			default:
 				break;
 			}

@@ -15,6 +15,14 @@
 #include <QAbstractItemModel>
 #include <libnutclient/client.h>
 
+#define UI_AVLAP_SSID    0
+#define UI_AVLAP_KEYMGMT 1
+#define UI_AVLAP_CIPHERS 2
+#define UI_AVLAP_BSSID   3
+#define UI_AVLAP_CHANNEL 4
+#define UI_AVLAP_QUALITY 5
+#define UI_AVLAP_LEVEL   6
+
 namespace qnut {
 	class CAvailableAPModel : public QAbstractItemModel {
 		Q_OBJECT

@@ -13,14 +13,6 @@
 #include "availableapmodel.h"
 #include "common.h"
 
-#define AVLAP_MOD_SSID    0
-#define AVLAP_MOD_KEYMGMT 1
-#define AVLAP_MOD_CIPHERS 2
-#define AVLAP_MOD_BSSID   3
-#define AVLAP_MOD_FREQ    4
-#define AVLAP_MOD_QUALITY 5
-#define AVLAP_MOD_LEVEL   6
-
 namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutwireless;
@@ -67,15 +59,18 @@ namespace qnut {
 		if (!index.isValid())
 			return QVariant();
 		
+		if ((role == Qt::DecorationRole) && (index.column() == 0))
+			return QIcon(UI_ICON_AIR);
+		
 		if (role != Qt::DisplayRole)
 			return QVariant();
 		
 		switch (index.column()) {
-		case AVLAP_MOD_SSID:
+		case UI_AVLAP_SSID:
 			return scans[index.row()].ssid;
-		case AVLAP_MOD_CHANNEL:
+		case UI_AVLAP_CHANNEL:
 			return QString::number(frequencyToChannel(scans[index.row()].freq));
-		case AVLAP_MOD_KEYMGMT: {
+		case UI_AVLAP_KEYMGMT: {
 				int keyFlags = scans[index.row()].keyManagement;
 				
 				if (keyFlags == KM_UNDEFINED)
@@ -107,14 +102,14 @@ namespace qnut {
 				
 				return results.join(", ");
 			}
-		case AVLAP_MOD_BSSID:
+		case UI_AVLAP_BSSID:
 			return scans[index.row()].bssid.toString();
-		case AVLAP_MOD_QUALITY: {
+		case UI_AVLAP_QUALITY: {
 				WextSignal signal = scans[index.row()].signal;
 				return QString::number(signal.quality.value) + '/'+
 					QString::number(signal.quality.maximum);
 			}
-		case AVLAP_MOD_LEVEL: {
+		case UI_AVLAP_LEVEL: {
 				WextSignal signal = scans[index.row()].signal;
 				switch (signal.type) {
 				case WSR_RCPI:
@@ -128,7 +123,7 @@ namespace qnut {
 					return QString('-');
 				}
 			}
-		case AVLAP_MOD_CIPHERS: {
+		case UI_AVLAP_CIPHERS: {
 				int flags = scans[index.row()].ciphers;
 				if (flags == CI_UNDEFINED)
 					return tr("undefined");
@@ -166,19 +161,19 @@ namespace qnut {
 		
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
-			case AVLAP_MOD_SSID:
+			case UI_AVLAP_SSID:
 				return tr("SSID");
-			case AVLAP_MOD_CHANNEL:
+			case UI_AVLAP_CHANNEL:
 				return tr("Channel");
-			case AVLAP_MOD_KEYMGMT:
+			case UI_AVLAP_KEYMGMT:
 				return tr("Key management");
-			case AVLAP_MOD_BSSID:
+			case UI_AVLAP_BSSID:
 				return tr("BSSID");
-			case AVLAP_MOD_QUALITY:
+			case UI_AVLAP_QUALITY:
 				return tr("Quality");
-			case AVLAP_MOD_LEVEL:
+			case UI_AVLAP_LEVEL:
 				return tr("Level");
-			case AVLAP_MOD_CIPHERS:
+			case UI_AVLAP_CIPHERS:
 				return tr("Encryption");
 			default:
 				break;
