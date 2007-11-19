@@ -10,9 +10,7 @@
 #include <QtCore/QVariant>
 #include <QtDBus/QtDBus>
 #include <QMetaType>
-#include <libnutcommon/dbus.h>
-#include <libnutcommon/types.h>
-#include <libnutcommon/config.h>
+#include "libnutcommon/common.h"
 namespace libnutclient {
 /*
  * Proxy class for interface DBus.Device

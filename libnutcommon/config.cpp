@@ -1,16 +1,4 @@
-//
-// C++ Implementation: config
-//
-// Description: 
-//
-//
-// Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
-
-#include "config.h"
+#include "common.h"
 
 namespace libnutcommon {
 	QDBusArgument &operator<< (QDBusArgument &argument, const Config &data) {
@@ -215,5 +203,28 @@ namespace libnutcommon {
 	
 	IPv4Config::IPv4Config(int flags, int overwriteFlags)
 	: m_flags(flags), m_overwriteFlags(overwriteFlags) {
+	}
+
+	// called by common.cpp: init()
+	void config_init() {
+		qRegisterMetaType< Config >("libnutcommon::Config");
+		qRegisterMetaType< DeviceConfig >("libnutcommon::DeviceConfig");
+		qRegisterMetaType< SelectResult >("libnutcommon::SelectResult");
+		qRegisterMetaType< QVector< SelectResult > >("QVector<libnutcommon::SelectRule>");
+		qRegisterMetaType< SelectRule >("libnutcommon::SelectRule");
+		qRegisterMetaType< SelectConfig >("libnutcommon::SelectConfig");
+		qRegisterMetaType< EnvironmentConfig >("libnutcommon::EnvironmentConfig");
+		qRegisterMetaType< IPv4Config >("libnutcommon::IPv4Config");
+		qRegisterMetaType< IPv4UserConfig >("libnutcommon::IPv4UserConfig");
+	
+		qDBusRegisterMetaType< Config >();
+		qDBusRegisterMetaType< DeviceConfig >();
+		qDBusRegisterMetaType< SelectResult >();
+		qDBusRegisterMetaType< QVector< SelectResult > >();
+		qDBusRegisterMetaType< SelectRule >();
+		qDBusRegisterMetaType< SelectConfig >();
+		qDBusRegisterMetaType< EnvironmentConfig >();
+		qDBusRegisterMetaType< IPv4Config >();
+		qDBusRegisterMetaType< IPv4UserConfig >();
 	}
 }
