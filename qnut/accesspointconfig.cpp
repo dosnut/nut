@@ -34,7 +34,6 @@ namespace qnut {
 		connect(ui.pskEdit, SIGNAL(textChanged(QString)), this, SLOT(countPskChars(QString)));
 		connect(ui.showPlainPSKCheck, SIGNAL(toggled(bool)), this, SLOT(togglePlainPSK(bool)));
 		connect(ui.keyManagementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setAuthConfig(int)));
-		connect(ui.encCombo, SIGNAL(currentIndexChanged(QString)), this, SLOT(setEncConfig(QString)));
 		connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(verifyConfiguration()));
 		connect(ui.caBrowse, SIGNAL(clicked()), this, SLOT(selectCAFile()));
 		connect(ui.clientBrowse, SIGNAL(clicked()), this, SLOT(selectClientFile()));
@@ -46,58 +45,14 @@ namespace qnut {
 	}
 	
 	void CAccessPointConfig::setAuthConfig(int type) {
-		ui.encCombo->clear();
-		
-		switch (type) {
-		case 0:
-			ui.confTabs->setEnabled(false);
-			ui.confTabs->setTabEnabled(2, true);
-			ui.confTabs->setCurrentIndex(2);
-			ui.confTabs->setTabEnabled(1, false);
-			ui.confTabs->setTabEnabled(0, false);
-			break;
-		case 2:
-			ui.confTabs->setEnabled(true);
-			ui.confTabs->setTabEnabled(0, true);
-			ui.confTabs->setCurrentIndex(0);
-			ui.confTabs->setTabEnabled(1, false);
-			break;
-		case 1:
-		case 3:
-			ui.confTabs->setEnabled(true);
-			ui.confTabs->setTabEnabled(1, true);
-			ui.confTabs->setCurrentIndex(1);
-			ui.confTabs->setTabEnabled(0, false);
-			break;
-		default:
-			ui.confTabs->setEnabled(false);
-			break;
-		}
+		ui.confTabs->setTabEnabled(2, type == 1 || type == 3);
+		ui.confTabs->setTabEnabled(1, type == 2);
 		
 		ui.rsnCheck->setEnabled((type == 2) || (type == 3));
-		
-		switch (type) {
-		case 0:
-		case 1:
-			ui.encCombo->addItem("NONE");
-			ui.encCombo->addItem("WEP");
-			break;
-		case 2:
-		case 3:
-			ui.encCombo->addItem("TKIP");
-			ui.encCombo->addItem("CCMP");
-			break;
-		default:
-			ui.encCombo->addItem("UNDEFINED");
-			break;
-		}
 	}
 	
-	void CAccessPointConfig::setEncConfig(QString text) {
-		if (ui.keyManagementCombo->currentIndex() == 0)
-			ui.confTabs->setEnabled(text == "WEP");
-		else
-			ui.confTabs->setTabEnabled(2, text == "WEP");
+	void CAccessPointConfig::setEncConfig() {
+		ui.confTabs->setTabEnabled(3, ui.grpWEP104Check->isChecked() || ui.grpWEP40Check->isChecked());
 	}
 		
 	void CAccessPointConfig::verifyConfiguration() {
@@ -109,13 +64,13 @@ namespace qnut {
 		config.disabled = (BOOL)ui.autoEnableCheck->isChecked();
 		config.scan_ssid = (BOOL)ui.scanCheck->isChecked();
 		
+// 		config.group = (GroupCiphers)(GCI_WEP104 | GCI_WEP40);
+// 		config.pairwise = PCI_NONE;
+		
 		if (!ui.anyBSSIDCheck->isChecked())
 			config.bssid = MacAddress(ui.ssidEdit->text());
 		
-		if (ui.encCombo->currentText() == "WEP") {
-			config.group = (GroupCiphers)(GCI_WEP104 | GCI_WEP40);
-			config.pairwise = PCI_NONE;
-			
+		if (ui.grpWEP104Check->isChecked() || ui.grpWEP40Check->isChecked()) {
 			config.wep_key0 = ui.wepKey0HexCheck->isChecked() ? ui.wepKey0Edit->text() : '\"' + ui.wepKey0Edit->text() + '\"';
 			config.wep_key1 = ui.wepKey1HexCheck->isChecked() ? ui.wepKey1Edit->text() : '\"' + ui.wepKey1Edit->text() + '\"';
 			config.wep_key2 = ui.wepKey2HexCheck->isChecked() ? ui.wepKey2Edit->text() : '\"' + ui.wepKey2Edit->text() + '\"';
@@ -130,18 +85,22 @@ namespace qnut {
 			else if (ui.wepKey3Radio->isChecked())
 				config.wep_tx_keyidx = 3;
 		}
-		else if (ui.encCombo->currentText() == "CCMP") {
-			config.group = GCI_CCMP;
-			config.pairwise = PCI_CCMP;
-		}
-		else if (ui.encCombo->currentText() == "TKIP") {
-			config.group = GCI_TKIP;
-			config.pairwise = PCI_TKIP;
-		}
-		else {
-			config.wep_tx_keyidx = -1;
-			config.pairwise = PCI_NONE;
-		}
+		
+		if (ui.grpCCMPCheck->isChecked())
+			config.group = (GroupCiphers)(config.group | GCI_CCMP);
+		if (ui.grpTKIPCheck->isChecked())
+			config.group = (GroupCiphers)(config.group | GCI_TKIP);
+		if (ui.grpWEP104Check->isChecked())
+			config.group = (GroupCiphers)(config.group | GCI_WEP104);
+		if (ui.grpWEP40Check->isChecked())
+			config.group = (GroupCiphers)(config.group | GCI_WEP40);
+			
+		if (ui.prwNoneCheck->isChecked())
+			config.pairwise = (PairwiseCiphers)(config.pairwise | PCI_NONE);
+		if (ui.prwTKIPCheck->isChecked())
+			config.pairwise = (PairwiseCiphers)(config.pairwise | PCI_TKIP);
+		if (ui.prwCCMPCheck->isChecked())
+			config.pairwise = (PairwiseCiphers)(config.pairwise | PCI_CCMP);
 		
 		switch (ui.keyManagementCombo->currentIndex()) {
 		case 0:
@@ -278,14 +237,7 @@ namespace qnut {
 		ui.pskLeaveButton->setChecked(false);
 		ui.rsnCheck->setChecked(scanResult.protocols & PROTO_RSN);
 		
-		if (
-			(scanResult.ciphers & CI_WEP40) ||
-			(scanResult.ciphers & CI_WEP104) ||
-			(scanResult.ciphers & CI_CCMP)
-		)
-			ui.encCombo->setCurrentIndex(1);
-		else
-			ui.encCombo->setCurrentIndex(0);
+		//ciphers setzen
 		
 		ui.ssidEdit->setText(scanResult.ssid);
 		
@@ -316,7 +268,6 @@ namespace qnut {
 		}
 		else if (config.keyManagement & KM_WPA_PSK) {
 			ui.keyManagementCombo->setCurrentIndex(2);
-//			ui.pskEdit->setText("");
 			ui.pskLeaveButton->setVisible(true);
 			ui.pskLeaveButton->setChecked(true);
 			ui.passwordLeaveButton->setVisible(false);
@@ -338,20 +289,21 @@ namespace qnut {
 			ui.passwordLeaveButton->setChecked(false);
 		}
 		
-		if (
-			(config.group & CI_CCMP) ||
-			((config.wep_tx_keyidx >= 0) && ((config.group & CI_WEP40) || (config.group & CI_WEP104)))
-		) {
-			ui.encCombo->setCurrentIndex(1);
-			switch (config.wep_tx_keyidx) {
-			default: ui.wepKey0Radio->setChecked(true); break;
-			case 1:  ui.wepKey1Radio->setChecked(true); break;
-			case 2:  ui.wepKey2Radio->setChecked(true); break;
-			case 3:  ui.wepKey3Radio->setChecked(true); break;
-			}
+		ui.grpTKIPCheck->setChecked(config.group & GCI_TKIP);
+		ui.grpCCMPCheck->setChecked(config.group & GCI_CCMP);
+		ui.grpWEP104Check->setChecked(config.group & GCI_WEP104);
+		ui.grpWEP40Check->setChecked(config.group & GCI_WEP40);
+		ui.prwNoneCheck->setChecked(config.pairwise & PCI_NONE);
+		ui.prwTKIPCheck->setChecked(config.pairwise & PCI_TKIP);
+		ui.prwCCMPCheck->setChecked(config.pairwise & PCI_CCMP);
+
+			
+		switch (config.wep_tx_keyidx) {
+		default: ui.wepKey0Radio->setChecked(true); break;
+		case 1:  ui.wepKey1Radio->setChecked(true); break;
+		case 2:  ui.wepKey2Radio->setChecked(true); break;
+		case 3:  ui.wepKey3Radio->setChecked(true); break;
 		}
-		else
-			ui.encCombo->setCurrentIndex(0);
 		
 		ui.rsnCheck->setChecked(config.protocols & PROTO_RSN);
 		ui.autoEnableCheck->setChecked(config.disabled);
@@ -362,7 +314,7 @@ namespace qnut {
 	}
 	
 	inline void CAccessPointConfig::writeEAPConfig(EapNetworkConfig &eap_config) {
-		switch (ui.encCombo->currentIndex()) {
+		switch (ui.eapCombo->currentIndex()) {
 		case 0: eap_config.eap = EAPM_MD5; break;
 		case 1: eap_config.eap = EAPM_TLS; break;
 		case 2: eap_config.eap = EAPM_MSCHAPV2; break;
@@ -391,21 +343,21 @@ namespace qnut {
 	
 	inline void CAccessPointConfig::readEAPConfig(EapNetworkConfig &eap_config) {
 		if (eap_config.eap & EAPM_LEAP)
-			ui.encCombo->setCurrentIndex(7);
+			ui.eapCombo->setCurrentIndex(7);
 		else if (eap_config.eap & EAPM_OTP)
-			ui.encCombo->setCurrentIndex(6);
+			ui.eapCombo->setCurrentIndex(6);
 		else if (eap_config.eap & EAPM_GTC)
-			ui.encCombo->setCurrentIndex(5);
+			ui.eapCombo->setCurrentIndex(5);
 		else if (eap_config.eap & EAPM_TTLS)
-			ui.encCombo->setCurrentIndex(4);
+			ui.eapCombo->setCurrentIndex(4);
 		else if (eap_config.eap & EAPM_PEAP)
-			ui.encCombo->setCurrentIndex(3);
+			ui.eapCombo->setCurrentIndex(3);
 		else if (eap_config.eap & EAPM_MSCHAPV2)
-			ui.encCombo->setCurrentIndex(2);
+			ui.eapCombo->setCurrentIndex(2);
 		else if (eap_config.eap & EAPM_TLS)
-			ui.encCombo->setCurrentIndex(1);
+			ui.eapCombo->setCurrentIndex(1);
 		else
-			ui.encCombo->setCurrentIndex(0);
+			ui.eapCombo->setCurrentIndex(0);
 		
 		ui.identificationEdit->setText(convertQuoted(eap_config.identity));
 		ui.caEdit->setText(convertQuoted(eap_config.ca_cert));
