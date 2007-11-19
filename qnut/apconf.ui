@@ -7,79 +7,79 @@
     <x>0</x>
     <y>0</y>
     <width>494</width>
-    <height>566</height>
+    <height>572</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>Configure Access Point</string>
   </property>
-  <layout class="QVBoxLayout" >
-   <item>
-    <layout class="QGridLayout" >
-     <item row="0" column="0" >
-      <widget class="QLabel" name="ssidLabel" >
-       <property name="text" >
-        <string>SSID</string>
-       </property>
-       <property name="buddy" >
-        <cstring>ssidEdit</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1" >
-      <widget class="QLineEdit" name="ssidEdit" />
-     </item>
-     <item row="0" column="2" >
-      <widget class="QCheckBox" name="ssidHexCheck" >
-       <property name="text" >
-        <string>hex. chars</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0" >
-      <widget class="QLabel" name="bssidLabel" >
-       <property name="text" >
-        <string>BSSID</string>
-       </property>
-       <property name="buddy" >
-        <cstring>bssidEdit</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1" >
-      <widget class="QLineEdit" name="bssidEdit" >
-       <property name="enabled" >
-        <bool>false</bool>
-       </property>
-       <property name="inputMask" >
-        <string>HH:HH:HH:HH:HH:HH;0</string>
-       </property>
-       <property name="text" >
-        <string>:::::</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2" >
-      <widget class="QCheckBox" name="anyBSSIDCheck" >
-       <property name="text" >
-        <string>any</string>
-       </property>
-       <property name="checked" >
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0" >
-      <widget class="QLabel" name="keyManagementLabel" >
-       <property name="text" >
-        <string>Key management</string>
-       </property>
-       <property name="buddy" >
-        <cstring>keyManagementCombo</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1" >
+  <layout class="QGridLayout" >
+   <item row="0" column="0" >
+    <widget class="QLabel" name="ssidLabel" >
+     <property name="text" >
+      <string>SSID</string>
+     </property>
+     <property name="buddy" >
+      <cstring>ssidEdit</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" >
+    <widget class="QLineEdit" name="ssidEdit" />
+   </item>
+   <item row="0" column="2" >
+    <widget class="QCheckBox" name="ssidHexCheck" >
+     <property name="text" >
+      <string>hex. chars</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" >
+    <widget class="QLabel" name="bssidLabel" >
+     <property name="text" >
+      <string>BSSID</string>
+     </property>
+     <property name="buddy" >
+      <cstring>bssidEdit</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1" >
+    <widget class="QLineEdit" name="bssidEdit" >
+     <property name="enabled" >
+      <bool>false</bool>
+     </property>
+     <property name="inputMask" >
+      <string>HH:HH:HH:HH:HH:HH;0</string>
+     </property>
+     <property name="text" >
+      <string>:::::</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2" >
+    <widget class="QCheckBox" name="anyBSSIDCheck" >
+     <property name="text" >
+      <string>any</string>
+     </property>
+     <property name="checked" >
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" >
+    <widget class="QLabel" name="keyManagementLabel" >
+     <property name="text" >
+      <string>Key management</string>
+     </property>
+     <property name="buddy" >
+      <cstring>keyManagementCombo</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" colspan="2" >
+    <layout class="QHBoxLayout" >
+     <item>
       <widget class="QComboBox" name="keyManagementCombo" >
        <item>
         <property name="text" >
@@ -103,29 +103,59 @@
        </item>
       </widget>
      </item>
-     <item row="2" column="2" >
+     <item>
       <widget class="QCheckBox" name="rsnCheck" >
        <property name="text" >
         <string>WPA2 (RSN)</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="0" >
-      <widget class="QLabel" name="encLabel" >
-       <property name="text" >
-        <string>Encryption</string>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
        </property>
-       <property name="buddy" >
-        <cstring>encCombo</cstring>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
        </property>
-      </widget>
-     </item>
-     <item row="3" column="1" >
-      <widget class="QComboBox" name="encCombo" />
+      </spacer>
      </item>
     </layout>
    </item>
-   <item>
+   <item row="3" column="0" >
+    <widget class="QLabel" name="encLabel" >
+     <property name="text" >
+      <string>Encryption</string>
+     </property>
+     <property name="buddy" >
+      <cstring>encCombo</cstring>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1" colspan="2" >
+    <layout class="QHBoxLayout" >
+     <item>
+      <widget class="QComboBox" name="encCombo" />
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item row="4" column="0" colspan="3" >
     <widget class="QTabWidget" name="confTabs" >
      <property name="currentIndex" >
       <number>0</number>
@@ -182,6 +212,19 @@
           <string>Show key as plain text</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -459,18 +502,31 @@
          </property>
         </widget>
        </item>
+       <item row="4" column="1" >
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </widget>
     </widget>
    </item>
-   <item>
+   <item row="5" column="0" colspan="3" >
     <widget class="QCheckBox" name="scanCheck" >
      <property name="text" >
       <string>Enable SSID scanning (slower but needed if SSID is hidden)</string>
      </property>
     </widget>
    </item>
-   <item>
+   <item row="6" column="0" colspan="3" >
     <widget class="QCheckBox" name="autoEnableCheck" >
      <property name="text" >
       <string>Enable automatic selection</string>
@@ -480,7 +536,7 @@
      </property>
     </widget>
    </item>
-   <item>
+   <item row="7" column="0" colspan="3" >
     <widget class="QDialogButtonBox" name="buttonBox" >
      <property name="orientation" >
       <enum>Qt::Horizontal</enum>
@@ -556,11 +612,11 @@
    <hints>
     <hint type="sourcelabel" >
      <x>110</x>
-     <y>195</y>
+     <y>187</y>
     </hint>
     <hint type="destinationlabel" >
      <x>110</x>
-     <y>195</y>
+     <y>187</y>
     </hint>
    </hints>
   </connection>
@@ -572,11 +628,11 @@
    <hints>
     <hint type="sourcelabel" >
      <x>472</x>
-     <y>274</y>
+     <y>204</y>
     </hint>
     <hint type="destinationlabel" >
      <x>295</x>
-     <y>274</y>
+     <y>204</y>
     </hint>
    </hints>
   </connection>
