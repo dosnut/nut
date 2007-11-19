@@ -260,7 +260,7 @@ namespace libnutwireless {
 		return ( (b == BOOL_UNDEFINED) ? -1 : ( (b == BOOL_TRUE) ? 1 : 0)); 
 	}
 	inline bool toBool(QString str) {
-		return ( ("0" == str) ? true : false);
+		return ( ("1" == str) ? true : false);
 	}
 	inline BOOL toWpsBool(QString str) {
 		if ("0" == str) {
