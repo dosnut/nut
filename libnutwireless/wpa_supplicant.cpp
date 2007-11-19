@@ -4,6 +4,15 @@
 namespace libnutwireless {
 
 //CWpa_supplicant
+QList<quint8>& CWpa_Supplicant::getSupportedChannels() {
+	//create supportedChannels?
+	if (supportedChannels.isEmpty() && !supportedFrequencies.isEmpty()) {
+		foreach(quint32 freq, supportedFrequencies) {
+			supportedChannels.append(frequencyToChannel(freq));
+		}
+	}
+	return supportedChannels;
+}
 
 //Function to respond to ctrl requests from wpa_supplicant
 void CWpa_Supplicant::response(Request request, QString msg) {

@@ -12,6 +12,7 @@ namespace libnutwireless {
 	class CWpa_Supplicant: public CWpa_SupplicantBase {
 			Q_OBJECT
 		private:
+			QList<quint8> supportedChannels;
 
 			//Edit/get network helper functions
 			EapNetworkConfig wps_getEapNetworkConfig(int id);
@@ -26,6 +27,7 @@ namespace libnutwireless {
 				qDebug() << (QString("Constructor set lastWasAdHoc=%1").arg((lastWasAdHoc) ? "true" : "false"));
 			}
 			~CWpa_Supplicant() {}
+			QList<quint8>& getSupportedChannels();
 			
 		public slots:
 			//Functions to react to request made from wpa_supplicant:
