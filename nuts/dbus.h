@@ -111,7 +111,7 @@ namespace nuts {
 			inline Environment * getEnvironment() const { return s_environment; }
 	
 			QString getPath();
-			void emitChange(bool change) { emit stateChanged(change); }
+			void emitChange(bool change);
 	
 		public slots:
 			libnutcommon::EnvironmentProperties getProperties();
@@ -122,6 +122,7 @@ namespace nuts {
 		signals:
 			void interfaceAdded(const QDBusObjectPath &objectpath);
 			void interfaceRemoved(const QDBusObjectPath &objectpath);
+			void selectsResultChanged(libnutcommon::SelectResult result, QVector<libnutcommon::SelectResult> results);
 			void stateChanged(bool state);
 	};
 

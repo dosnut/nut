@@ -579,7 +579,7 @@ void CDevice::setEnvironment(CEnvironment * environment) {
 	}
 	dbusDevice->setEnvironment(dbusEnvironments.key(environment));
 }
-libnutcommon::DeviceConfig CDevice::getConfig() {
+libnutcommon::DeviceConfig& CDevice::getConfig() {
 	return dbusConfig;
 }
 
@@ -740,16 +740,22 @@ void CEnvironment::dbusstateChanged(bool state) {
 	emit(activeChanged(state));
 }
 
+void CEnvironment::dbusselectResultChanged(libnutcommon::SelectResult result, QVector<libnutcommon::SelectResult> results) {
+	selectResult = result;
+	selectResults = results;
+	emit selectResultsChanged();
+}
+
 
 //CEnvironment SLOTS
 void CEnvironment::enter() {
 	static_cast<CDevice *>(parent())->setEnvironment(this);
 }
-libnutcommon::EnvironmentConfig CEnvironment::getConfig() {
+libnutcommon::EnvironmentConfig& CEnvironment::getConfig() {
 	return config;
 }
 
-libnutcommon::SelectResult CEnvironment::getSelectResult(bool refresh) {
+libnutcommon::SelectResult& CEnvironment::getSelectResult(bool refresh) {
 	if (refresh) {
 		QDBusReply<libnutcommon::SelectResult> reply = dbusEnvironment->getSelectResult();
 		if (reply.isValid()) {
@@ -763,7 +769,7 @@ libnutcommon::SelectResult CEnvironment::getSelectResult(bool refresh) {
 	return selectResult;
 }
 
-QVector<libnutcommon::SelectResult> CEnvironment::getSelectResults(bool refresh) {
+QVector<libnutcommon::SelectResult>& CEnvironment::getSelectResults(bool refresh) {
 	if (refresh) {
 		QDBusReply<QVector<libnutcommon::SelectResult> > reply = dbusEnvironment->getSelectResults();
 		if (reply.isValid()) {

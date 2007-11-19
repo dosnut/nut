@@ -199,6 +199,12 @@ namespace nuts {
 	QString DBusEnvironment::getPath() {
 		return dbus_path;
 	}
+	//Function for device to emit a statechange of an environment
+	void DBusEnvironment::emitChange(bool change) {
+		//Workaround so far: emit selectResultChanges:
+		emit selectsResultChanged(s_environment->getSelectResult(),s_environment->getSelectResults());
+		emit stateChanged(change);
+	}
 	
 	libnutcommon::EnvironmentProperties DBusEnvironment::getProperties() {
 		dbus_properties.name = s_environment->getName();
@@ -224,20 +230,23 @@ namespace nuts {
 		return paths;
 	}
 	libnutcommon::SelectResult DBusEnvironment::getSelectResult() {
-		if (s_environment->selectionDone()) {
-			return s_environment->getSelectResult();
-		}
-		else {
-			return libnutcommon::SelectResult();
-		}
+// 		if (s_environment->selectionDone()) {
+// 			return s_environment->getSelectResult();
+// 		}
+// 		else {
+// 			return libnutcommon::SelectResult();
+// 		}
+		//Workaround so far, as qnut crashes if SelectResults are empty
+		return s_environment->getSelectResult();
 	}
 	QVector<libnutcommon::SelectResult> DBusEnvironment::getSelectResults() {
-		if (s_environment->selectionDone()) {
-			return s_environment->getSelectResults();
-		}
-		else {
-			return QVector<libnutcommon::SelectResult>();
-		}
+// 		if (s_environment->selectionDone()) {
+// 			return s_environment->getSelectResults();
+// 		}
+// 		else {
+// 			return QVector<libnutcommon::SelectResult>();
+// 		}
+		return s_environment->getSelectResults();
 	}
 
 

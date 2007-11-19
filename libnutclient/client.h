@@ -137,7 +137,7 @@ namespace libnutclient {
 		
 		CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);
 		~CDevice();
-		libnutcommon::DeviceConfig getConfig();
+		libnutcommon::DeviceConfig& getConfig();
 
 	public slots:
 		void enable();
@@ -172,6 +172,7 @@ namespace libnutclient {
 		void rebuild(const QList<QDBusObjectPath> &paths);
 	private slots:
 		void dbusstateChanged(bool state);
+		void dbusselectResultChanged(libnutcommon::SelectResult result, QVector<libnutcommon::SelectResult> results);
 	public:
 		QString name;
 		CInterfaceList interfaces;
@@ -182,13 +183,14 @@ namespace libnutclient {
 		~CEnvironment();
 	public slots:
 		void enter();
-		libnutcommon::EnvironmentConfig getConfig();
-		libnutcommon::SelectResult getSelectResult(bool refresh=false);
-		QVector<libnutcommon::SelectResult> getSelectResults(bool refresh=false);
+		libnutcommon::EnvironmentConfig& getConfig();
+		libnutcommon::SelectResult& getSelectResult(bool refresh=false);
+		QVector<libnutcommon::SelectResult>& getSelectResults(bool refresh=false);
 		
 	signals:
 		void activeChanged(bool active);
 		void interfacesUpdated();
+		void selectResultsChanged();
 	};
 	
 	class CInterface : public CLibNut {
@@ -216,8 +218,7 @@ namespace libnutclient {
 		int index;
 		
 		libnutcommon::IPv4UserConfig getUserConfig(bool refresh=false);
-		libnutcommon::IPv4Config getConfig() { return dbusConfig; }
-		libnutcommon::IPv4Config config() { return dbusConfig; } //wants qnut wants it like that
+		libnutcommon::IPv4Config& getConfig() { return dbusConfig; }
 
 		CInterface(CEnvironment * parent, QDBusObjectPath dbusPath);
 		~CInterface();
