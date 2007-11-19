@@ -61,8 +61,8 @@ namespace qnut {
 		
 		config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
 		
-		config.disabled = (BOOL)ui.autoEnableCheck->isChecked();
-		config.scan_ssid = (BOOL)ui.scanCheck->isChecked();
+		config.disabled = toWpsBool(ui.autoEnableCheck->isChecked());
+		config.scan_ssid = toWpsBool(ui.scanCheck->isChecked());
 		
 // 		config.group = (GroupCiphers)(GCI_WEP104 | GCI_WEP40);
 // 		config.pairwise = PCI_NONE;
