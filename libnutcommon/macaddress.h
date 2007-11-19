@@ -1,14 +1,3 @@
-//
-// C++ Interface: macaddress
-//
-// Description: Container for MacAddress
-//
-//
-// Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #ifndef NUT_COMMON_MACADDRESS_H
 #define NUT_COMMON_MACADDRESS_H
 
@@ -68,7 +57,7 @@ namespace libnutcommon {
 	};
 }
 
-inline uint qHash(const libnutcommon::MacAddress &key) {
+static inline uint qHash(const libnutcommon::MacAddress &key) {
 	quint8 data[8] = { key.data[0], key.data[2], key.data[3], key.data[4], key.data[5], key.data[6], 0, 0};
 	return qHash(*((quint64*)data));
 }

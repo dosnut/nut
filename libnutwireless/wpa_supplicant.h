@@ -1,6 +1,7 @@
 #ifndef LIBNUTWIRELESS_WPA_SUPPLICANT_H
 #define LIBNUTWIRELESS_WPA_SUPPLICANT_H
 #include "base.h"
+#include <QDebug>
 
 
 //TODO:Check if we can start multiple wpa_supplicants for multiple devices and test behavior

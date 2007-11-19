@@ -8,8 +8,7 @@
 #include <QDBusObjectPath>
 #include <QFile>
 #include <QTextStream>
-#include <libnutcommon/types.h>
-#include <libnutcommon/config.h>
+#include "libnutcommon/common.h"
 #include <libnutwireless/wpa_supplicant.h>
 #include "server_proxy.h"
 #include "client_exceptions.h"

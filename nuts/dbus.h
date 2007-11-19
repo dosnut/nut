@@ -6,9 +6,7 @@
 #include <QDBusObjectPath>
 #include <QHostAddress>
 
-#include <libnutcommon/types.h>
-#include <libnutcommon/dbus.h>
-#include <libnutcommon/config.h>
+#include "libnutcommon/common.h"
 
 namespace nuts {
 	class DBusDeviceManager;

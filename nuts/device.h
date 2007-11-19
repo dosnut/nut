@@ -12,8 +12,7 @@
 #include <QTimer>
 #include <QProcess>
 
-#include <libnutcommon/macaddress.h>
-#include <libnutcommon/types.h>
+#include "libnutcommon/common.h"
 
 namespace nuts {
 	class DBusDeviceManager;

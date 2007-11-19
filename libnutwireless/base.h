@@ -5,9 +5,7 @@
 #include <QSocketNotifier>
 #include <QTimerEvent>
 #include <QCoreApplication>
-#include <libnutcommon/types.h>
-#include <libnutcommon/config.h>
-#include <libnutcommon/macaddress.h>
+#include "libnutcommon/common.h"
 #include "wpa_ctrl/wpa_ctrl.h"
 #include "parsers.h"
 
