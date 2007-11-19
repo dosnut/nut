@@ -55,7 +55,7 @@ namespace qnut {
 		connect(ui.availableView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(handleAvailableAPSelectionChanged(const QItemSelection &)));
 		
-		connect(ui.availableView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(addSelectedScanResult()));
+		connect(ui.availableView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(addNetwork()));
 		connect(ui.managedView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(configureSelectedNetwork()));
 	}
 	
