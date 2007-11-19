@@ -258,6 +258,7 @@ BOOL toWpsBool(bool b) {
 	return ( b ? BOOL_TRUE : BOOL_FALSE);
 }
 
+
 //Modified iw_print_stats function from iwlib.c
 //We don't care whether information was updated or not. Just convert it
 WextSignal convertValues(WextRawScan scan) {

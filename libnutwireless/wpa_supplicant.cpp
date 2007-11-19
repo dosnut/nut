@@ -735,7 +735,7 @@ QList<ShortNetworkInfo> CWpa_Supplicant::listNetworks() {
 	if (!reply.isEmpty()) {
 		QList<ShortNetworkInfo> info = parseListNetwork(sliceMessage(reply));
 		foreach(ShortNetworkInfo i, info) {
-			i.adhoc = (BOOL_TRUE == toWpsBool(getNetworkVariable(i.id,"mode"))) ? true : false;
+			i.adhoc = (BOOL_TRUE == toWpsBool(getNetworkVariable(i.id,"mode")));
 		}
 		return info;
 	}
