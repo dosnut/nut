@@ -473,6 +473,7 @@ namespace nuts {
 	
 	Environment::Environment(Device *device, libnutcommon::EnvironmentConfig *config, int id)
 	: QObject(device), device(device), config(config), envIsUp(false), envStart(false), m_id(id), selArpWaiting(0), m_needUserSetup(false) {
+		m_selectResults.resize(config->getSelect().filters.size());
 		foreach (libnutcommon::IPv4Config *ic, config->getIPv4Interfaces())
 			ifs.push_back(new Interface_IPv4(this, ifs.size(), ic));
 		ifUpStatus.fill(false, ifs.size());
@@ -537,7 +538,6 @@ namespace nuts {
 		
 		const QVector<libnutcommon::SelectRule> &filters = config->getSelect().filters;
 		int c = filters.size();
-		m_selectResults.resize(c);
 		for (int i = 0; i < c; i++) {
 			switch (filters[i].selType) {
 				case libnutcommon::SelectRule::SEL_USER:
