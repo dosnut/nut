@@ -47,6 +47,9 @@ namespace qnut {
 			config.group = GCI_TKIP;
 		}
 		
+		config.mode = 1;
+		config.protocols = PROTO_WPA;
+		
 		config.frequency = channelToFrequency(ui.channelCombo->currentText().toInt());
 		config.pairwise = PCI_NONE;
 		config.keyManagement = KM_WPA_NONE;
