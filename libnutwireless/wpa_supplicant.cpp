@@ -737,9 +737,8 @@ QList<ShortNetworkInfo> CWpa_Supplicant::listNetworks() {
 	QString reply = wps_cmd_LIST_NETWORKS();
 	if (!reply.isEmpty()) {
 		QList<ShortNetworkInfo> info = parseListNetwork(sliceMessage(reply));
-		foreach(ShortNetworkInfo i, info) {
-			i.adhoc = (BOOL_TRUE == toWpsBool(getNetworkVariable(i.id,"mode")));
-		}
+		for (int i = 0; i < info.size(); i++)
+			info[i].adhoc = toBool(getNetworkVariable(info[i].id,"mode"));
 		return info;
 	}
 	else {
