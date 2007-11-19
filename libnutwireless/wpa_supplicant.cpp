@@ -63,7 +63,7 @@ bool CWpa_Supplicant::ap_scan(int type) {
 			return false;
 		}
 		else {
-			printMessage(QString("Setting ap_scan=1").arg(type));
+			printMessage(QString("Setting ap_scan=%1").arg(type));
 			//ap_scan variables accordingly
 			if (2 == type) {
 				lastWasAdHoc = true;
@@ -227,7 +227,7 @@ NetconfigStatus CWpa_Supplicant::editNetwork(int netid, NetworkConfig config) {
 			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_MODE);
 		}
 	}
-	if (0 != config.frequency) {
+	if (-1 != config.frequency) {
 		if (!setNetworkVariable(netid,"frequency",QString::number(config.frequency)) ) {
 			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_FREQ);
 		}
@@ -258,7 +258,10 @@ NetconfigStatus CWpa_Supplicant::editNetwork(int netid, NetworkConfig config) {
 		}
 	}
 	if (!config.psk.isEmpty()) {
-		if ( !setNetworkVariable(netid,"psk",config.psk)) {
+		if ( (config.psk.size() < 8 || config.psk.size() > 63) && '"' == config.psk[0]) {
+			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_PSK);
+		}
+		else if ( !setNetworkVariable(netid,"psk",config.psk)) {
 			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_PSK);
 		}
 	}
@@ -735,7 +738,7 @@ QList<ShortNetworkInfo> CWpa_Supplicant::listNetworks() {
 	if (!reply.isEmpty()) {
 		QList<ShortNetworkInfo> info = parseListNetwork(sliceMessage(reply));
 		foreach(ShortNetworkInfo i, info) {
-			i.adhoc = (BOOL_TRUE == toWpsBool(getNetworkVariable(i.id,"mode"))) ? true : false;
+			i.adhoc = (BOOL_TRUE == toWpsBool(getNetworkVariable(i.id,"mode")));
 		}
 		return info;
 	}
