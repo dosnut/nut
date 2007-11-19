@@ -16,6 +16,7 @@
 #include "common.h"
 #include "availableapmodel.h"
 #include "accesspointconfig.h"
+#include "adhocconfig.h"
 
 namespace qnut {
 	using namespace libnutcommon;
@@ -40,7 +41,7 @@ namespace qnut {
 		
 		updateUi(device->state);
 		
-		ui.managedView->setIconSize(QSize(32, 32));
+		ui.managedView->setIconSize(QSize(24, 24));
 		
 		ui.managedView->header()->setMinimumSectionSize(-1);
 		ui.availableView->header()->setMinimumSectionSize(-1);
@@ -54,7 +55,7 @@ namespace qnut {
 		connect(ui.availableView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(handleAvailableAPSelectionChanged(const QItemSelection &)));
 		
-		connect(ui.availableView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(addSelectedScanResult()));
+		connect(ui.availableView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(addNetwork()));
 		connect(ui.managedView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(configureSelectedNetwork()));
 	}
 	
@@ -71,7 +72,7 @@ namespace qnut {
 		
 		addNetworkAction       = new QAction(QIcon(UI_ICON_ADD), tr("Add network"), this);
 		addAdhocAction         = new QAction(QIcon(UI_ICON_ADD_ADHOC), tr("Add ad-hoc"), this);
-		addAdhocAction->setEnabled(false);
+		
 		rescanNetworksAction   = new QAction(QIcon(UI_ICON_SEARCH), tr("Rescan"), this);
 		
 		saveNetworksAction     = new QAction(QIcon(UI_ICON_SAVE), tr("Save configuration"), this);
@@ -96,6 +97,7 @@ namespace qnut {
 		connect(removeNetworkAction, SIGNAL(triggered()), this, SLOT(removeSelectedNetwork()));
 		
 		connect(addNetworkAction, SIGNAL(triggered()), this, SLOT(addNetwork()));
+		connect(addAdhocAction, SIGNAL(triggered()), this, SLOT(addAdhoc()));
 		
 		connect(toggleDetailsAction, SIGNAL(toggled(bool)), this, SLOT(toggleDetails(bool)));
 		connect(reloadNetworksAction, SIGNAL(triggered()), ui.managedView->model(), SLOT(reloadNetworks()));
@@ -192,6 +194,12 @@ namespace qnut {
 			static_cast<CManagedAPModel *>(ui.managedView->model())->reloadNetworks();
 	}
 	
+	void CWirelessSettings::addAdhoc() {
+		CAdhocConfig dialog(device->wpa_supplicant, this);
+		if (dialog.execute())
+			static_cast<CManagedAPModel *>(ui.managedView->model())->reloadNetworks();
+	}
+	
 	void CWirelessSettings::removeSelectedNetwork() {
 		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
 		ShortNetworkInfo * network = static_cast<ShortNetworkInfo *>(selectedIndexes[0].internalPointer());
@@ -206,10 +214,19 @@ namespace qnut {
 	
 	void CWirelessSettings::configureSelectedNetwork() {
 		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
-		CAccessPointConfig dialog(device->wpa_supplicant, this);
 		ShortNetworkInfo * network = static_cast<ShortNetworkInfo *>(selectedIndexes[0].internalPointer());
 		
-		if (dialog.execute(network->id))
+		bool accepted = false;
+		if (network->adhoc) {
+			CAccessPointConfig dialog(device->wpa_supplicant, this);
+			accepted = dialog.execute(network->id);
+		}
+		else {
+			CAdhocConfig dialog(device->wpa_supplicant, this);
+			accepted = dialog.execute(network->id);
+		}
+		
+		if (accepted)
 			static_cast<CManagedAPModel *>(ui.managedView->model())->reloadNetworks();
 	}
 	
