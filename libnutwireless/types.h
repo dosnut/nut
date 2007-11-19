@@ -277,6 +277,7 @@ namespace libnutwireless {
 		QString ssid;
 		libnutcommon::MacAddress bssid;
 		NetworkFlags flags;
+		bool adhoc;
 	};
 
 	class EapNetworkConfig {

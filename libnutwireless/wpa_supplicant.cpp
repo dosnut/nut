@@ -104,7 +104,7 @@ int CWpa_Supplicant::addNetwork() {
 		return reply.toInt();
 	}
 }
-NetconfigStatus CWpa_Supplicant::checkAdHocNetwork(NetworkConfig config) {
+NetconfigStatus CWpa_Supplicant::checkAdHocNetwork(NetworkConfig &config) {
 	// Note: IBSS can only be used with key_mgmt NONE (plaintext and static WEP)
 	// and key_mgmt=WPA-NONE (fixed group key TKIP/CCMP). In addition, ap_scan has
 	// to be set to 2 for IBSS. WPA-None requires following network block options:
@@ -724,7 +724,11 @@ QString CWpa_Supplicant::getNetworkVariable(int id, QString val) {
 QList<ShortNetworkInfo> CWpa_Supplicant::listNetworks() {
 	QString reply = wps_cmd_LIST_NETWORKS();
 	if (!reply.isEmpty()) {
-		return parseListNetwork(sliceMessage(reply));
+		QList<ShortNetworkInfo> info = parseListNetwork(sliceMessage(reply));
+		foreach(ShortNetworkInfo i, info) {
+			i.adhoc = (BOOL_FALSE == toWpsBool(getNetworkVariable(i.id,"mode"))) ? false : true;
+		}
+		return info;
 	}
 	else {
 		return QList<ShortNetworkInfo>();
