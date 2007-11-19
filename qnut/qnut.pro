@@ -17,7 +17,8 @@ FORMS = connman.ui \
  scrset.ui \
  airset.ui \
  apconf.ui \
- devdet.ui
+ devdet.ui \
+ adhoc.ui
 TRANSLATIONS = qnut_de.ts
 
 HEADERS += connectionmanager.h trayicon.h \
@@ -35,7 +36,8 @@ HEADERS += connectionmanager.h trayicon.h \
  accesspointconfig.h \
  environmentdetailsmodel.h \
  dnslistmodel.h \
- ipeditdelegate.h
+ ipeditdelegate.h \
+ adhocconfig.h
 SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  overviewmodel.cpp \
  devicedetails.cpp \
@@ -50,7 +52,8 @@ SOURCES += main.cpp connectionmanager.cpp trayicon.cpp \
  accesspointconfig.cpp \
  environmentdetailsmodel.cpp \
  dnslistmodel.cpp \
- ipeditdelegate.cpp
+ ipeditdelegate.cpp \
+ adhocconfig.cpp
 DESTDIR = .
 
 target.path = /usr/bin

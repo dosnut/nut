@@ -52,6 +52,7 @@ namespace qnut {
 		void updateSignalInfo(libnutwireless::WextSignal signal);
 		void switchToSelectedNetwork();
 		void addNetwork();
+		void addAdhoc();
 		void removeSelectedNetwork();
 		void configureSelectedNetwork();
 		void enableSelectedNetwork();
