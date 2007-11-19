@@ -42,6 +42,7 @@ namespace qnut {
 	}
 	
 	CAccessPointConfig::~CAccessPointConfig() {
+		delete hexValidator;
 	}
 	
 	void CAccessPointConfig::setAuthConfig(int type) {
@@ -158,9 +159,7 @@ namespace qnut {
 			else
 				config.protocols = PROTO_RSN;
 			
-			if (ui.pskEdit->text().length() == 0)
-				config.psk = QString("");
-			else if (!ui.pskLeaveButton->isChecked())
+			if ((!ui.pskLeaveButton->isChecked()) && (!ui.pskEdit->text().length() == 0))
 				config.psk = '\"' + ui.pskEdit->text() + '\"';
 			
 			break;
@@ -211,6 +210,7 @@ namespace qnut {
 			if (status.failures & NCF_WEP_KEY3)         qDebug("NCF_WEP_KEY3");
 			if (status.failures & NCF_WEP_KEY_IDX)      qDebug("NCF_WEP_KEY_IDX");
 			if (status.failures & NCF_PEERKEY)          qDebug("NCF_PEERKEY");
+			return;
 		}
 		
 		if (status.eap_failures != ENCF_NONE) {
@@ -242,12 +242,18 @@ namespace qnut {
 			if (status.eap_failures & ENCF_EAPPSK)              qDebug("ENCF_EAPPSK");
 			if (status.eap_failures & ENCF_NAI)                 qDebug("ENCF_NAI");
 			if (status.eap_failures & ENCF_PAC_FILE)            qDebug("ENCF_PAC_FILE");
+			return;
 		}
 		
 		accept();
 	}
 	
 	bool CAccessPointConfig::execute() {
+		ui.pskLeaveButton->setVisible(false);
+		ui.pskLeaveButton->setChecked(false);
+		ui.passwordLeaveButton->setVisible(false);
+		ui.passwordLeaveButton->setChecked(false);
+		
 		setAuthConfig(0);
 		currentID = -1;
 		return exec();
@@ -291,10 +297,14 @@ namespace qnut {
 	bool CAccessPointConfig::execute(int id) {
 		NetworkConfig config = supplicant->getNetworkConfig(id);
 		
-		if (config.ssid[0] == '\"')
+		if (config.ssid[0] == '\"') {
+			ui.ssidHexCheck->setChecked(false);
 			ui.ssidEdit->setText(config.ssid.mid(1, config.ssid.length()-2));
-		else
+		}
+		else {
+			ui.ssidHexCheck->setChecked(true);
 			ui.ssidEdit->setText(config.ssid);
+		}
 		
 		if (config.keyManagement & KM_WPA_EAP) {
 			ui.keyManagementCombo->setCurrentIndex(3);
@@ -306,7 +316,7 @@ namespace qnut {
 		}
 		else if (config.keyManagement & KM_WPA_PSK) {
 			ui.keyManagementCombo->setCurrentIndex(2);
-			ui.pskEdit->setText("");
+//			ui.pskEdit->setText("");
 			ui.pskLeaveButton->setVisible(true);
 			ui.pskLeaveButton->setChecked(true);
 			ui.passwordLeaveButton->setVisible(false);
@@ -411,7 +421,7 @@ namespace qnut {
 		}
 		else {
 			lineEdit->setText(QByteArray::fromHex(lineEdit->text().toAscii()));
-			ui.ssidEdit->setValidator(0);
+			lineEdit->setValidator(0);
 		}
 	}
 	
