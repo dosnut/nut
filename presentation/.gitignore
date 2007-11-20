@@ -1,0 +1,8 @@
+*.backup
+*.nav
+*.out
+*.snm
+*.vrb
+*.aux
+*.log
+*.toc
