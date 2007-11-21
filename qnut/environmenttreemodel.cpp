@@ -25,7 +25,7 @@ namespace qnut {
 		device = data;
 		if (data) {
 			foreach(CEnvironment * environment, device->environments) {
-				connect(environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
+				//connect(environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
 				foreach(CInterface * interface, environment->interfaces) {
 					connect(interface, SIGNAL(stateChanged(libnutcommon::InterfaceState)), this, SIGNAL(layoutChanged()));
 				}
@@ -116,14 +116,12 @@ namespace qnut {
 			else {
 				CInterface * interface = static_cast<CInterface *>(currentData);
 				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
-					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
-						return tr("none");
-					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
+					if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return toStringDefault(interface->getConfig().getStaticIP());
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
 						return toStringDefault(interface->getUserConfig().ip());
 					else
-						return tr("unknown");
+						return tr("none");
 				}
 				else
 					return toStringDefault(interface->ip);
