@@ -311,7 +311,7 @@ namespace libnutwireless {
 		}
 	}
 	
-	void CWpa_SupplicantBase::wps_setScanResults(QList<WextRawScan> &wextScanResults) {
+	void CWpa_SupplicantBase::wps_setScanResults(QList<WextRawScan> wextScanResults) {
 		QString response = wps_cmd_SCAN_RESULTS();
 		if (response.isEmpty()) {
 			wpsScanResults = QList<ScanResult>();
@@ -410,6 +410,8 @@ namespace libnutwireless {
 				ScanTimerId = -1;
 				printMessage("We're already scanning!");
 			}
+			//Return scanresults from wpa_supplicant immediately
+			wps_setScanResults(Q
 			ScanTimeoutCount = 0;
 			ScanTimerId = startTimer(CWPA_SCAN_TIMER_TIME);
 		}
@@ -483,11 +485,12 @@ namespace libnutwireless {
 			qDebug() << QString("Error \"hasRange == 0\" (%1)").arg(strerror(errno));
 		}
 		singleres.hasRange = has_range;
+
+		//If we get a timeout for more than 5 times, stop polling.
 		if (errno == EAGAIN) {
 			qDebug() << "Scan results not available yet";
 			ScanTimeoutCount++;
 			if (ScanTimeoutCount == 5) {
-				wps_setScanResults(res);
 				return;
 			}
 			ScanTimerId = startTimer(CWPA_SCAN_RETRY_TIMER_TIME);
@@ -588,6 +591,16 @@ namespace libnutwireless {
 							//Workaround for macaddress
 							iw_saether_ntop(&(iwe.u.ap_addr), buffer2);
 							tmpMac = libnutcommon::MacAddress(QString::fromAscii(buffer2,128));
+
+							if (singleres.bssid.zero()) { //First bssid
+								singleres.bssid = tmpMac;
+							}
+							// if our last bssid is different from the actual one, then we have to append it to our scanlist
+							if ( (singleres.bssid != tmpMac) )  {
+								res.append(singleres);
+								singleres.bssid = tmpMac;
+							}
+
 							break;
 						case IWEVQUAL: //Quality event:
 							singleres.quality.qual = (quint8) iwe.u.qual.qual;
@@ -595,17 +608,108 @@ namespace libnutwireless {
 							singleres.quality.noise = (quint8) iwe.u.qual.noise;
 							singleres.quality.updated = (quint8) iwe.u.qual.updated;
 							qDebug() << "STATS (scanresults): " << singleres.quality.level << singleres.quality.qual << singleres.quality.noise << singleres.quality.updated;
-	
-							// if our last bssid is different from the actual one, then we have to append it to our scanlist
-							if ( (singleres.bssid != tmpMac) )  {
-								singleres.bssid = tmpMac;
-								res.append(singleres);
+							
+						case SIOCGIWFREQ:
+							double freq;
+							freq = iw_freq2float(&(iwe.u.freq)); //Hopefully in hz
+							if ( ( (freq/1e9) < 10.0 ) && ( (freq/1e9) > 0.0 ) ) {
+								singleres.freq = (int) (b.freq/1e6);
 							}
+							else {
+								singleres.freq = -1;
+							}
+							break;
+						
+						case SIOCGIWMODE:
+							if(iwe.u.mode >= IW_NUM_OPER_MODE) {
+								iwe.u.mode = IW_NUM_OPER_MODE;
+							}
+							singleres.opmode = (OPMODE) iwe.u.mode;
+							break;
+						case SIOCGIWESSID:
+							if (iwe.u.essid.flags) {
+								/* Does it have an ESSID index ? */
+								if ( iew.u.essid.pointer && iwe.u.essid.length ) {
+									if ( (event->u.essid.flags & IW_ENCODE_INDEX) > 1) {
+										singleres.ssid = QString("%1 [%2]").arg(QString::fromAscii(iwe.u.essid.pointer,iwe.u.essid.length), QString::number(iwe.u.essid.flags & IW_ENCODE_INDEX));
+									}
+									else {
+										singleres.ssid = QString("%1").arg(QString::fromAscii(iwe.u.essid.pointer,iwe.u.essid.length));
+									}
+								}
+								else {
+									singleres.ssid = QString("N/A");
+								}
+							}
+							else {
+								singleres.ssid = QString("<hidden>");
+							}
+							break;
+
+						case SIOCGIWENCODE: //Get encrytion stuff: (just the key)
+							if (! iwe.u.data.pointer) {
+								iwe.u.data.flags |= IW_ENCODE_NOKEY;
+							}
+							if(iwe.u.data.flags & IW_ENCODE_DISABLED) { //Encryption is disabled
+								singleres.keyManagement = KM_OFF;
+							}
+							else {
+								//Extract key information: (See iwlib.c line 1500)
+								
+								//keyflags: iwe.u.data.flags
+								//keysize = iwe.u.data.length
+								//
+								//Do we have a key
+								if (key_flags & IW_ENCODE_NOKEY) { //no key
+									if (iwe.u.data.length <= 0) {
+										//Encryption is on, but group is unknown
+										singleres.keyManagement = KM_NONE;
+									}
+								} //else: we have a, key but check type later
+							}
+							break;
+						
+						case IWEVGENIE: //group/pairwsie ciphers etc.
+							//buffer = iwe.u.data.pointer
+							//bufflen = iwe.u.data.length
+							{
+								int offset = 0;
+								
+								/* Loop on each IE, each IE is minimum 2 bytes */
+								while(offset <= (buflen - 2)) {
+									printf("                    IE: ");
+								
+									/* Check IE type */
+									switch(buffer[offset]) {
+										case 0xdd:	/* WPA1 (and other) */
+										case 0x30:	/* WPA2 */
+											parseWextIeWpa(buffer + offset, buflen, &singleres);
+// 											iw_print_ie_wpa(buffer + offset, buflen);
+											break;
+										default:
+											
+											iw_print_ie_unknown(buffer + offset, buflen);
+									}
+									/* Skip over this IE to the next one in the list. */
+									offset += buffer[offset+1] + 2;
+								}
+							}
+							
+							
+							break;
 						default: //Ignore all other event types. Maybe we need them later?
 							break;
 					}
 				}
+				else { //Append last scan:
+					if (!singleres.bssid.zero()) {
+						res.append(singleres);
+					}
+				}
+		
 			} while(ret > 0);
+
+			//Delete buffer
 			if (buffer) {
 				free(buffer);
 				buffer = NULL;

@@ -98,7 +98,7 @@ namespace libnutwireless {
 
 			//Functions to get actual signal strength and/or signal strength for scan results:
 			//And set scanresults
-			void wps_setScanResults(QList<WextRawScan> &wextScanResults);
+			void wps_setScanResults(QList<WextRawScan> wextScanResults);
 			void wps_tryScanResults();
 
 			//Need to do it that way, as inline fails otherwise
