@@ -47,7 +47,7 @@ namespace qnut {
 			config.group = GCI_TKIP;
 		}
 		
-		config.mode = 1;
+		config.mode = BOOL_TRUE;
 		config.protocols = PROTO_WPA;
 		
 		config.frequency = channelToFrequency(ui.channelCombo->currentText().toInt());

@@ -134,7 +134,7 @@ QString toString(GroupCiphers cip) {
 		ret.append("WEP104 ");
 	}
 	if (cip & GCI_WEP40) {
-		ret.append("WEP40");
+		ret.append("WEP40 ");
 	}
 	return ret;
 }
@@ -145,16 +145,20 @@ QString toString(PairwiseCiphers cip) {
 		ret.append("NONE ");
 	}
 	if (cip & PCI_CCMP) {
-		ret.append("CCMP");
+		ret.append("CCMP ");
 	}
 	if(cip & PCI_TKIP) {
-		ret.append("TKIP");
+		ret.append("TKIP ");
 	}
 	return ret;
 }
 QString toString(KeyManagement keym) {
 	//{KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8} wps_key_managment;
 	QString ret;
+
+	if (keym & KM_OFF) { //For wpa_supplicant none/off is the same (none=wep, Off=plain)
+		ret.append("NONE ");
+	}
 	if (keym & KM_NONE) {
 		ret.append("NONE ");
 	}
@@ -162,13 +166,13 @@ QString toString(KeyManagement keym) {
 		ret.append("WPA-PSK ");
 	}
 	if (keym & KM_WPA_EAP) {
-		ret.append("WPA-EAP");
+		ret.append("WPA-EAP ");
 	}
 	if (keym & KM_IEEE8021X) {
-		ret.append("IEEE8021X");
+		ret.append("IEEE8021X ");
 	}
 	if (keym & KM_WPA_NONE) {
-		ret.append("WPA-NONE");
+		ret.append("WPA-NONE ");
 	}
 	return ret;
 }
