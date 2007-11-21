@@ -41,7 +41,8 @@ namespace qnut {
 		~CAccessPointConfig();
 	private slots:
 		void setAuthConfig(int type);
-		void setEncConfig();
+		void setEncConfig(QString value);
+		void setWEPDisabled(bool value);
 		void verifyConfiguration();
 		void countPskChars(QString psk);
 		void togglePlainPSK(bool show);

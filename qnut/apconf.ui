@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>472</width>
+    <width>501</width>
     <height>552</height>
    </rect>
   </property>
@@ -90,17 +90,12 @@
          </item>
          <item>
           <property name="text" >
-           <string>IEEE 802.1X</string>
-          </property>
-         </item>
-         <item>
-          <property name="text" >
            <string>WPA-Personal (PSK)</string>
           </property>
          </item>
          <item>
           <property name="text" >
-           <string>WPA-Enterprise (EAP)</string>
+           <string>WPA-Enterprise (IEEE802.1X/EAP)</string>
           </property>
          </item>
         </widget>
@@ -140,55 +135,38 @@
       </attribute>
       <layout class="QVBoxLayout" >
        <item>
-        <widget class="QGroupBox" name="grpCipGroup" >
-         <property name="title" >
-          <string>Group ciphers</string>
-         </property>
-         <layout class="QGridLayout" >
-          <item row="0" column="0" >
-           <widget class="QCheckBox" name="grpTKIPCheck" >
-            <property name="text" >
-             <string>TKIP</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1" >
-           <widget class="QCheckBox" name="grpWEP104Check" >
-            <property name="text" >
-             <string>WEP104</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" >
-           <widget class="QCheckBox" name="grpCCMPCheck" >
-            <property name="text" >
-             <string>CCMP</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1" >
-           <widget class="QCheckBox" name="grpWEP40Check" >
-            <property name="text" >
-             <string>WEP40</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QLabel" name="label" >
+           <property name="text" >
+            <string>General algorithm (group cipher)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="grpCipCombo" />
+         </item>
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
        <item>
-        <widget class="QGroupBox" name="pairCipGroup" >
+        <widget class="QGroupBox" name="prwCipGroup" >
          <property name="title" >
-          <string>Pairwise ciphers</string>
+          <string>Pairwise algorithms (pairwise ciphers)</string>
          </property>
-         <layout class="QVBoxLayout" >
-          <item>
-           <widget class="QCheckBox" name="prwNoneCheck" >
-            <property name="text" >
-             <string>none (plain)</string>
-            </property>
-           </widget>
-          </item>
+         <layout class="QHBoxLayout" >
           <item>
            <widget class="QCheckBox" name="prwTKIPCheck" >
             <property name="text" >
@@ -307,51 +285,68 @@
           </widget>
          </item>
          <item row="0" column="1" >
-          <widget class="QComboBox" name="eapCombo" >
-           <property name="enabled" >
-            <bool>true</bool>
-           </property>
+          <layout class="QHBoxLayout" >
            <item>
-            <property name="text" >
-             <string>MD5</string>
-            </property>
+            <widget class="QComboBox" name="eapCombo" >
+             <property name="enabled" >
+              <bool>true</bool>
+             </property>
+             <item>
+              <property name="text" >
+               <string>MD5</string>
+              </property>
+             </item>
+             <item>
+              <property name="text" >
+               <string>TLS</string>
+              </property>
+             </item>
+             <item>
+              <property name="text" >
+               <string>MSCHAPV2</string>
+              </property>
+             </item>
+             <item>
+              <property name="text" >
+               <string>PEAP</string>
+              </property>
+             </item>
+             <item>
+              <property name="text" >
+               <string>TTLS</string>
+              </property>
+             </item>
+             <item>
+              <property name="text" >
+               <string>GTC</string>
+              </property>
+             </item>
+             <item>
+              <property name="text" >
+               <string>OTP</string>
+              </property>
+             </item>
+             <item>
+              <property name="text" >
+               <string>LEAP</string>
+              </property>
+             </item>
+            </widget>
            </item>
            <item>
-            <property name="text" >
-             <string>TLS</string>
-            </property>
+            <spacer>
+             <property name="orientation" >
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" >
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
-           <item>
-            <property name="text" >
-             <string>MSCHAPV2</string>
-            </property>
-           </item>
-           <item>
-            <property name="text" >
-             <string>PEAP</string>
-            </property>
-           </item>
-           <item>
-            <property name="text" >
-             <string>TTLS</string>
-            </property>
-           </item>
-           <item>
-            <property name="text" >
-             <string>GTC</string>
-            </property>
-           </item>
-           <item>
-            <property name="text" >
-             <string>OTP</string>
-            </property>
-           </item>
-           <item>
-            <property name="text" >
-             <string>LEAP</string>
-            </property>
-           </item>
-          </widget>
+          </layout>
          </item>
          <item row="1" column="0" >
           <widget class="QLabel" name="identificationLabel" >
@@ -491,79 +486,144 @@
       <attribute name="title" >
        <string>WEP Keys</string>
       </attribute>
-      <layout class="QGridLayout" >
-       <item row="0" column="0" >
-        <widget class="QRadioButton" name="wepKey0Radio" >
-         <property name="text" >
-          <string>WEP Key 0</string>
-         </property>
-         <property name="checked" >
-          <bool>true</bool>
-         </property>
-        </widget>
+      <layout class="QVBoxLayout" >
+       <item>
+        <layout class="QGridLayout" >
+         <item row="0" column="0" >
+          <widget class="QRadioButton" name="wep0Radio" >
+           <property name="text" >
+            <string>WEP Key 0</string>
+           </property>
+           <property name="checked" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1" >
+          <widget class="QLineEdit" name="wep0Edit" />
+         </item>
+         <item row="0" column="2" >
+          <widget class="QCheckBox" name="wep0HexCheck" >
+           <property name="text" >
+            <string>hex. chars</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3" >
+          <widget class="QPushButton" name="wep0LeaveButton" >
+           <property name="text" >
+            <string>leave unchanged</string>
+           </property>
+           <property name="checkable" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" >
+          <widget class="QRadioButton" name="wep1Radio" >
+           <property name="text" >
+            <string>WEP Key 1</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1" >
+          <widget class="QLineEdit" name="wep1Edit" />
+         </item>
+         <item row="2" column="2" >
+          <widget class="QCheckBox" name="wep1HexCheck" >
+           <property name="text" >
+            <string>hex. chars</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3" >
+          <widget class="QPushButton" name="wep1LeaveButton" >
+           <property name="text" >
+            <string>leave unchanged</string>
+           </property>
+           <property name="checkable" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0" >
+          <widget class="QRadioButton" name="wep2Radio" >
+           <property name="text" >
+            <string>WEP Key 2</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1" >
+          <widget class="QLineEdit" name="wep2Edit" />
+         </item>
+         <item row="4" column="2" >
+          <widget class="QCheckBox" name="wep2HexCheck" >
+           <property name="text" >
+            <string>hex. chars</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="3" >
+          <widget class="QPushButton" name="wep2LeaveButton" >
+           <property name="text" >
+            <string>leave unchanged</string>
+           </property>
+           <property name="checkable" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0" >
+          <widget class="QRadioButton" name="wep3Radio" >
+           <property name="text" >
+            <string>WEP Key 3</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1" >
+          <widget class="QLineEdit" name="wep3Edit" />
+         </item>
+         <item row="6" column="2" >
+          <widget class="QCheckBox" name="wep3HexCheck" >
+           <property name="text" >
+            <string>hex. chars</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="3" >
+          <widget class="QPushButton" name="wep3LeaveButton" >
+           <property name="text" >
+            <string>leave unchanged</string>
+           </property>
+           <property name="checkable" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="4" >
+          <widget class="Line" name="line" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0" colspan="4" >
+          <widget class="Line" name="line_2" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0" colspan="4" >
+          <widget class="Line" name="line_3" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
-       <item row="0" column="1" >
-        <widget class="QLineEdit" name="wepKey0Edit" />
-       </item>
-       <item row="0" column="2" >
-        <widget class="QCheckBox" name="wepKey0HexCheck" >
-         <property name="text" >
-          <string>hex. chars</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" >
-        <widget class="QRadioButton" name="wepKey1Radio" >
-         <property name="text" >
-          <string>WEP Key 1</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1" >
-        <widget class="QLineEdit" name="wepKey1Edit" />
-       </item>
-       <item row="1" column="2" >
-        <widget class="QCheckBox" name="wepKey1HexCheck" >
-         <property name="text" >
-          <string>hex. chars</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" >
-        <widget class="QRadioButton" name="wepKey2Radio" >
-         <property name="text" >
-          <string>WEP Key 2</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1" >
-        <widget class="QLineEdit" name="wepKey2Edit" />
-       </item>
-       <item row="2" column="2" >
-        <widget class="QCheckBox" name="wepKey2HexCheck" >
-         <property name="text" >
-          <string>hex. chars</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0" >
-        <widget class="QRadioButton" name="wepKey3Radio" >
-         <property name="text" >
-          <string>WEP Key 3</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1" >
-        <widget class="QLineEdit" name="wepKey3Edit" />
-       </item>
-       <item row="3" column="2" >
-        <widget class="QCheckBox" name="wepKey3HexCheck" >
-         <property name="text" >
-          <string>hex. chars</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1" >
+       <item>
         <spacer>
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
@@ -571,7 +631,7 @@
          <property name="sizeHint" >
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>137</height>
           </size>
          </property>
         </spacer>
@@ -630,31 +690,37 @@
   <tabstop>keyManagementCombo</tabstop>
   <tabstop>rsnCheck</tabstop>
   <tabstop>confTabs</tabstop>
+  <tabstop>prwTKIPCheck</tabstop>
+  <tabstop>prwCCMPCheck</tabstop>
   <tabstop>pskEdit</tabstop>
   <tabstop>pskLeaveButton</tabstop>
   <tabstop>showPlainPSKCheck</tabstop>
   <tabstop>eapCombo</tabstop>
   <tabstop>identificationEdit</tabstop>
   <tabstop>caEdit</tabstop>
-  <tabstop>clientEdit</tabstop>
   <tabstop>caBrowse</tabstop>
+  <tabstop>clientEdit</tabstop>
   <tabstop>clientBrowse</tabstop>
   <tabstop>keyFileEdit</tabstop>
   <tabstop>keyBrowse</tabstop>
   <tabstop>passwordEdit</tabstop>
   <tabstop>passwordLeaveButton</tabstop>
-  <tabstop>wepKey0Radio</tabstop>
-  <tabstop>wepKey0Edit</tabstop>
-  <tabstop>wepKey0HexCheck</tabstop>
-  <tabstop>wepKey1Radio</tabstop>
-  <tabstop>wepKey1Edit</tabstop>
-  <tabstop>wepKey1HexCheck</tabstop>
-  <tabstop>wepKey2Radio</tabstop>
-  <tabstop>wepKey2Edit</tabstop>
-  <tabstop>wepKey2HexCheck</tabstop>
-  <tabstop>wepKey3Radio</tabstop>
-  <tabstop>wepKey3Edit</tabstop>
-  <tabstop>wepKey3HexCheck</tabstop>
+  <tabstop>wep0Radio</tabstop>
+  <tabstop>wep0Edit</tabstop>
+  <tabstop>wep0HexCheck</tabstop>
+  <tabstop>wep0LeaveButton</tabstop>
+  <tabstop>wep1Radio</tabstop>
+  <tabstop>wep1Edit</tabstop>
+  <tabstop>wep1HexCheck</tabstop>
+  <tabstop>wep1LeaveButton</tabstop>
+  <tabstop>wep2Radio</tabstop>
+  <tabstop>wep2Edit</tabstop>
+  <tabstop>wep2HexCheck</tabstop>
+  <tabstop>wep2LeaveButton</tabstop>
+  <tabstop>wep3Radio</tabstop>
+  <tabstop>wep3Edit</tabstop>
+  <tabstop>wep3HexCheck</tabstop>
+  <tabstop>wep3LeaveButton</tabstop>
   <tabstop>scanCheck</tabstop>
   <tabstop>autoEnableCheck</tabstop>
   <tabstop>buttonBox</tabstop>
@@ -700,11 +766,11 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>472</x>
+     <x>390</x>
      <y>172</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>295</x>
+     <x>213</x>
      <y>172</y>
     </hint>
    </hints>
@@ -722,6 +788,134 @@
     <hint type="destinationlabel" >
      <x>363</x>
      <y>59</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep0LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep0HexCheck</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>382</x>
+     <y>159</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>293</x>
+     <y>163</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep0HexCheck</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep0Edit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>345</x>
+     <y>150</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>237</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep1LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep1HexCheck</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>378</x>
+     <y>201</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>342</x>
+     <y>201</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep1LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep1Edit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>461</x>
+     <y>204</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>229</x>
+     <y>209</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep2LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep2HexCheck</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>402</x>
+     <y>245</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>331</x>
+     <y>245</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep3LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep3HexCheck</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>362</x>
+     <y>298</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>330</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep2LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep2Edit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>418</x>
+     <y>232</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>238</x>
+     <y>242</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep3LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep3Edit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>374</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>244</x>
+     <y>309</y>
     </hint>
    </hints>
   </connection>

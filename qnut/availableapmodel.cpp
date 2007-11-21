@@ -82,7 +82,7 @@ namespace qnut {
 				QStringList wpaPrefixes;
 				
 				if (keyFlags & KM_NONE)
-					results << tr("plain or WEP");
+					results << tr("none");
 					
 				if (protocolFlags & PROTO_WPA)
 					wpaPrefixes << "WPA";
@@ -90,15 +90,11 @@ namespace qnut {
 				if (protocolFlags & PROTO_RSN)
 					wpaPrefixes << "WPA2";
 				
-				if (keyFlags & KM_WPA_PSK) {
+				if (keyFlags & KM_WPA_PSK)
 					results << wpaPrefixes.join("/") + " PSK";
-				}
-				if (keyFlags & KM_WPA_EAP) {
+				
+				if ((keyFlags & KM_WPA_EAP) || (keyFlags & KM_IEEE8021X))
 					results << wpaPrefixes.join("/") + " EAP";
-				}
-				if (keyFlags & KM_IEEE8021X) {
-					results << "IEEE 802.1X";
-				}
 				
 				return results.join(", ");
 			}
@@ -123,23 +119,34 @@ namespace qnut {
 					return QString('-');
 				}
 			}
-		case UI_AVLAP_CIPHERS: {
-				int flags = scans[index.row()].ciphers;
-				if (flags == CI_UNDEFINED)
-					return tr("undefined");
-				else if (flags == CI_NONE)
-					return tr("none");
-				
+		case UI_AVLAP_ENC: {
+				int flags = scans[index.row()].pairwise;
 				QStringList results;
 				
-				if (flags & CI_CCMP)
-					results << "CCMP";
-				if (flags & CI_TKIP)
-					results << "TKIP";
-				if ((flags & CI_WEP104) || (flags & CI_WEP40))
-					results << "WEP";
+				if (flags == PCI_UNDEFINED)
+					results << tr("undefined");
+				else if (flags == PCI_NONE)
+					results << tr("none");
+				else {
+					if (flags & PCI_CCMP)
+						results << "CCMP";
+					if (flags & PCI_TKIP)
+						results << "TKIP";
+				}
 				
-				return results.join(", ");
+				switch (scans[index.row()].group) {
+				case GCI_NONE:
+					return tr("none") + "; " + results.join(", ");
+				case GCI_WEP104:
+				case GCI_WEP40:
+					return "WEP; " + results.join(", ");
+				case GCI_TKIP:
+					return "TKIP; " + results.join(", ");
+				case GCI_CCMP:
+					return "CCMP; " + results.join(", ");
+				default:
+					return tr("undefined") + "; " + results.join(", ");
+				}
 			}
 		default:
 			break;
@@ -173,8 +180,8 @@ namespace qnut {
 				return tr("Quality");
 			case UI_AVLAP_LEVEL:
 				return tr("Level");
-			case UI_AVLAP_CIPHERS:
-				return tr("Encryption");
+			case UI_AVLAP_ENC:
+				return tr("Encryption (general; pairwise)");
 			default:
 				break;
 			}

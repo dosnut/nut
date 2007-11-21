@@ -14,8 +14,20 @@
    <string/>
   </property>
   <layout class="QGridLayout" >
+   <property name="leftMargin" >
+    <number>4</number>
+   </property>
+   <property name="topMargin" >
+    <number>4</number>
+   </property>
+   <property name="rightMargin" >
+    <number>4</number>
+   </property>
+   <property name="bottomMargin" >
+    <number>4</number>
+   </property>
    <property name="horizontalSpacing" >
-    <number>9</number>
+    <number>6</number>
    </property>
    <item row="0" column="0" colspan="3" >
     <widget class="QFrame" name="frame" >
@@ -354,13 +366,22 @@
        </item>
        <item row="1" column="0" colspan="3" >
         <widget class="QTreeView" name="managedView" >
+         <property name="iconSize" >
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
          <property name="rootIsDecorated" >
           <bool>false</bool>
          </property>
-         <property name="itemsExpandable" >
-          <bool>false</bool>
+         <property name="uniformRowHeights" >
+          <bool>true</bool>
          </property>
          <property name="allColumnsShowFocus" >
+          <bool>true</bool>
+         </property>
+         <property name="wordWrap" >
           <bool>true</bool>
          </property>
         </widget>
@@ -423,9 +444,6 @@
        <item row="1" column="0" colspan="3" >
         <widget class="QTreeView" name="availableView" >
          <property name="rootIsDecorated" >
-          <bool>false</bool>
-         </property>
-         <property name="itemsExpandable" >
           <bool>false</bool>
          </property>
          <property name="allColumnsShowFocus" >
