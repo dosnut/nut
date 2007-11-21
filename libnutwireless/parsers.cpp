@@ -235,14 +235,29 @@ namespace libnutwireless {
 		}
 		else {
 			//Set GroupCiphers
+			qDebug() << "GroupCiphers for " << scan->ssid << scan->bssid.toString() << iebuf[offset+3];
 			switch (iebuf[offset+3]) {
-				case 0: scan->group = GCI_NONE; break;
-				case 1: scan->group = GCI_WEP40; break;
-				case 2: scan->group = GCI_TKIP; break;
-				case 3: scan->group = GCI_WRAP; break;
-				case 4: scan->group = GCI_CCMP; break;
-				case 5: scan->group = GCI_WEP104; break;
-				default: scan->group = GCI_UNDEFINED; break;
+				case 0:
+					scan->group = GCI_NONE;
+					break;
+				case 1:
+					scan->group = GCI_WEP40;
+					break;
+				case 2:
+					scan->group = GCI_TKIP;
+					break;
+				case 3:
+					scan->group = GCI_WRAP;
+					break;
+				case 4:
+					scan->group = GCI_CCMP;
+					break;
+				case 5:
+					scan->group = GCI_WEP104;
+					break;
+				default:
+					scan->group = GCI_UNDEFINED;
+					break;
 			}
 		}
 		offset += 4;
@@ -266,6 +281,7 @@ namespace libnutwireless {
 // 				printf(" Proprietary");
 			}
 			else { //Set PairwiseCiphers
+				qDebug() << "PairwiseCiphers for " << scan->ssid << scan->bssid.toString() << iebuf[offset+3];
 				switch (iebuf[offset+3]) {
 					case 0: scan->pairwise = PCI_NONE; break;
 					case 2: scan->pairwise = (PairwiseCiphers) (scan->pairwise | PCI_TKIP); break;
@@ -295,20 +311,25 @@ namespace libnutwireless {
 // 				printf(" Proprietary");
 			}
 			else { //Set the authsuites
+				qDebug() << "Setting AUTHSUITES of" << scan->ssid << scan->bssid.toString();
 				switch (iebuf[offset+3]) {
 					case 0:
 						if ( OPM_ADHOC == scan->opmode) {
 							scan->keyManagement = (KeyManagement) (scan->keyManagement | KM_WPA_NONE);
+							qDebug() << "AUTHSUITE: WPA_NONE";
 						}
 						else {
 							scan->keyManagement = (KeyManagement) (scan->keyManagement | KM_NONE);
+							qDebug() << "AUTHSUITE: NONE";
 						}
 						break;
 					case 1:
 						scan->keyManagement = (KeyManagement) (scan->keyManagement | KM_WPA_EAP | KM_IEEE8021X);
+						qDebug() << "AUTHSUITE: WPA_EAP";
 						break;
 					case 2:
 						scan->keyManagement = (KeyManagement) (scan->keyManagement | KM_WPA_PSK);
+						qDebug() << "AUTHSUITE: WPA_PSK";
 						break;
 					default:
 						break;
