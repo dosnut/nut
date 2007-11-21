@@ -76,14 +76,17 @@ namespace qnut {
 				if (keyFlags == KM_UNDEFINED)
 					return tr("undefined");
 				
+				if (keyFlags == KM_OFF)
+					return tr("none");
+				
+				if (keyFlags == KM_NONE)
+					return tr("WEP");
+				
 				int protocolFlags = scans[index.row()].protocols;
 				
 				QStringList results;
 				QStringList wpaPrefixes;
 				
-				if (keyFlags & KM_NONE)
-					results << tr("none");
-					
 				if (protocolFlags & PROTO_WPA)
 					wpaPrefixes << "WPA";
 				
