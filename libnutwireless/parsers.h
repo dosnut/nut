@@ -24,7 +24,9 @@ namespace libnutwireless {
 		ScanCiphers parseScanCiphers(QString str);
 		ScanAuthentication parseScanAuth(QString str);
 		QList<ScanResult> parseScanResult(QStringList list);
-	
+		void parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * scan);
+
+
 		//parse config
 		Protocols parseProtocols(QString str);
 		KeyManagement parseKeyMgmt(QString str);

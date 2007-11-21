@@ -212,7 +212,7 @@ namespace nuts {
 		m_curenvconfig->m_select.filters.append(rule);
 		if (!m_curenvconfig->m_select.blocks.isEmpty()) {
 			quint32 filterid = m_curenvconfig->m_select.filters.count() - 1;
-			m_curenvconfig->m_select.blocks.last().append(filterid);
+			m_curenvconfig->m_select.blocks[m_selBlocks.top()].append(filterid);
 		}
 	}
 	
@@ -221,6 +221,7 @@ namespace nuts {
 		quint32 blockid = m_curenvconfig->m_select.blocks.size();
 		selectAdd(libnutcommon::SelectRule(blockid, libnutcommon::SelectRule::SEL_AND_BLOCK));
 		m_curenvconfig->m_select.blocks.append(QVector<quint32>());
+		m_selBlocks.push(blockid);
 		return true;
 	}
 	
@@ -229,6 +230,13 @@ namespace nuts {
 		quint32 blockid = m_curenvconfig->m_select.blocks.size();
 		selectAdd(libnutcommon::SelectRule(blockid, libnutcommon::SelectRule::SEL_OR_BLOCK));
 		m_curenvconfig->m_select.blocks.append(QVector<quint32>());
+		m_selBlocks.push(blockid);
+		return true;
+	}
+	
+	bool ConfigParser::selectBlockEnd() {
+		if (!m_curenvconfig) return false;
+		m_selBlocks.pop();
 		return true;
 	}
 	
