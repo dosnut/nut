@@ -88,7 +88,7 @@ environmentoptions:
 environmentoption: dhcpconfig
 	| zeroconf
 	| static
-	| { CHECK(envSelect()); } select { CHECK(finishSelect()); }
+	| SELECT { CHECK(envSelect()); } select { CHECK(finishSelect()); }
 	| NODHCP { CHECK(envNoDHCP()); }
 ;
 
@@ -129,24 +129,22 @@ staticoption_gateway: GATEWAY IPv4_VAL ';' { CHECK(staticGateway(*$2)); delete $
 staticoption_dns: DNSSERVER IPv4_VAL ';' { CHECK(staticDNS(*$2)); delete $2; }
 ;
 
-select: selectstart selectblock
-;
-
-selectstart: SELECT AND { CHECK(selectAndBlock()); }
-	| SELECT OR { CHECK(selectOrBlock()); }
-	| SELECT { CHECK(selectAndBlock()); }
+select: selectfilter
 ;
 
 selectblock: '{' selectfilters '}'
 	| '{' selectfilters '}' ';'
-	| selectfilter
 ;
 
 selectfilters:
 	| selectfilters selectfilter
 ;
 
-selectfilter: sf_user
+selectfilter: selectfilter2
+	| SELECT selectfilter2
+;
+
+selectfilter2: sf_user
 	| sf_arp
 	| sf_essid
 	| sf_block
@@ -163,7 +161,9 @@ sf_arp: ARP IPv4_VAL ';' { CHECK(selectARP(*$2)); delete $2; }
 sf_essid: ESSID STRING ';' { CHECK(selectESSID(*$2)); delete $2; }
 ;
 
-sf_block: select
+sf_block: AND { CHECK(selectAndBlock()); } selectblock { CHECK(selectBlockEnd()); }
+	| OR { CHECK(selectOrBlock()); } selectblock { CHECK(selectBlockEnd()); }
+	| { CHECK(selectAndBlock()); } selectblock { CHECK(selectBlockEnd()); }
 ;
 
 %%

@@ -26,7 +26,7 @@ namespace nuts {
 			libnutcommon::DeviceConfig *m_curdevconfig;
 			libnutcommon::EnvironmentConfig *m_curenvconfig;
 			libnutcommon::IPv4Config *m_curipv4config;
-			QStack<size_t> m_selBlocks;
+			QStack<quint32> m_selBlocks;
 			
 			local_env_config *m_cur_env, *m_def_env;
 			
@@ -76,6 +76,7 @@ namespace nuts {
 
 			bool selectAndBlock();
 			bool selectOrBlock();
+			bool selectBlockEnd();
 			
 			bool selectUser();
 			bool selectARP(const QHostAddress &addr);
