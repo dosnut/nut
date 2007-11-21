@@ -151,9 +151,9 @@ namespace qnut {
 			config.keyManagement = KM_WPA_PSK;
 			
 			if (ui.rsnCheck->isChecked())
-				config.protocols = PROTO_WPA;
-			else
 				config.protocols = PROTO_RSN;
+			else
+				config.protocols = PROTO_WPA;
 			
 			if ((!ui.pskLeaveButton->isChecked()) && (!ui.pskEdit->text().isEmpty()))
 				config.psk = '\"' + ui.pskEdit->text() + '\"';
@@ -166,9 +166,9 @@ namespace qnut {
 				config.keyManagement = KM_WPA_EAP;
 			
 			if (ui.rsnCheck->isChecked())
-				config.protocols = PROTO_WPA;
-			else
 				config.protocols = PROTO_RSN;
+			else
+				config.protocols = PROTO_WPA;
 			
 			writeEAPConfig(config.eap_config);
 			break;
