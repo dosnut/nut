@@ -321,19 +321,57 @@ namespace libnutwireless {
 			//Set scan results from wpa_supplicant:
 			wpsScanResults = parseScanResult(sliceMessage(response));
 			//This may not be possible as qHash references an namespace that is unknown to qt TODO:CHECK!
-			QHash<QString,WextSignal> wextScanHash; //Namespace problem
+			QHash<QString,WextScan> wextScanHash; //Namespace problem
+			WextScan wextScan;
 			foreach(WextRawScan i, wextScanResults) {
-				wextScanHash.insert(i.bssid.toString(), convertValues(i));
+				wextScan.ssid = i.ssid;
+				wextScan.bssid = i.bssid;
+				wextScan.signal = convertValues(i);
+				wextScan.hasRange = i.hasRange;
+				wextScan.we_version_compiled = i.we_version_compiled;
+				wextScan.freq = i.freq;
+				wextScan.group = i.group;
+				wextScan.pairwise = i.pairwise;
+				wextScan.keyManagement = i.keyManagement;
+				wextScan.protocols = i.protocols;
+				wextScan.opmode = i.opmode;
+				wextScanHash.insert(i.bssid.toString(), wextScan);
 			}
-			WextSignal dummy;
+			WextScan dummy;
 			int count = 0;
+			QHash<QString,WextScan>::iterator wextScanHashIter;
 			//Set the signal quality
 			for (QList<ScanResult>::Iterator i = wpsScanResults.begin(); i != wpsScanResults.end(); ++i ) {
-				i->signal = wextScanHash.value(i->bssid.toString(), dummy); //convert to readable format
 				if (wextScanHash.contains(i->bssid.toString())) {
+					wextScanHashIter = wextScanHash.find(i->bssid.toString());
+					i->bssid = wextScanHashIter.value().bssid;
+					i->ssid = wextScanHashIter.value().ssid;
+					i->freq = wextScanHashIter.value().freq;
+					i->signal = wextScanHashIter.value().signal;
+					i->group = wextScanHashIter.value().group;
+					i->pairwise = wextScanHashIter.value().pairwise;
+					i->keyManagement = wextScanHashIter.value().keyManagement;
+					i->protocols = wextScanHashIter.value().protocols;
+					i->opmode = wextScanHashIter.value().opmode;
+					wextScanHash.erase(wextScanHashIter);
 					count++;
 				}
 			}
+			ScanResult scanresult;
+			//Now add all remaining networks:
+			for(QHash<QString,WextScan>::iterator i = wextScanHash.begin(); i != wextScanHash.end(); ++i) {
+				scanresult.bssid = i.value().bssid;
+				scanresult.ssid = i.value().ssid;
+				scanresult.freq = i.value().freq;
+				scanresult.signal = i.value().signal;
+				scanresult.group = i.value().group;
+				scanresult.pairwise = i.value().pairwise;
+				scanresult.keyManagement = i.value().keyManagement;
+				scanresult.protocols = i.value().protocols;
+				scanresult.opmode = i.value().opmode;
+				wpsScanResults.append(scanresult);
+			}
+
 			qDebug() << "Found " << count << "BSSIDs; " << wextScanHash.size() << " in Hash; " << wpsScanResults.size() << " in wpa_supplicant list";
 			//The complete list is done;
 			emit(scanCompleted());
@@ -411,7 +449,7 @@ namespace libnutwireless {
 				printMessage("We're already scanning!");
 			}
 			//Return scanresults from wpa_supplicant immediately
-			wps_setScanResults(Q
+			wps_setScanResults(QList<WextRawScan>());
 			ScanTimeoutCount = 0;
 			ScanTimerId = startTimer(CWPA_SCAN_TIMER_TIME);
 		}
@@ -629,12 +667,12 @@ namespace libnutwireless {
 						case SIOCGIWESSID:
 							if (iwe.u.essid.flags) {
 								/* Does it have an ESSID index ? */
-								if ( iew.u.essid.pointer && iwe.u.essid.length ) {
-									if ( (event->u.essid.flags & IW_ENCODE_INDEX) > 1) {
-										singleres.ssid = QString("%1 [%2]").arg(QString::fromAscii(iwe.u.essid.pointer,iwe.u.essid.length), QString::number(iwe.u.essid.flags & IW_ENCODE_INDEX));
+								if ( iwe.u.essid.pointer && iwe.u.essid.length ) {
+									if ( (iwe.u.essid.flags & IW_ENCODE_INDEX) > 1) {
+										singleres.ssid = QString("%1 [%2]").arg(QString::fromAscii((char*) iwe.u.essid.pointer,iwe.u.essid.length), QString::number(iwe.u.essid.flags & IW_ENCODE_INDEX));
 									}
 									else {
-										singleres.ssid = QString("%1").arg(QString::fromAscii(iwe.u.essid.pointer,iwe.u.essid.length));
+										singleres.ssid = QString("%1").arg(QString::fromAscii((char*) iwe.u.essid.pointer,iwe.u.essid.length));
 									}
 								}
 								else {
@@ -660,7 +698,7 @@ namespace libnutwireless {
 								//keysize = iwe.u.data.length
 								//
 								//Do we have a key
-								if (key_flags & IW_ENCODE_NOKEY) { //no key
+								if (iwe.u.data.flags & IW_ENCODE_NOKEY) { //no key
 									if (iwe.u.data.length <= 0) {
 										//Encryption is on, but group is unknown
 										singleres.keyManagement = KM_NONE;
@@ -674,29 +712,18 @@ namespace libnutwireless {
 							//bufflen = iwe.u.data.length
 							{
 								int offset = 0;
-								
 								/* Loop on each IE, each IE is minimum 2 bytes */
-								while(offset <= (buflen - 2)) {
-									printf("                    IE: ");
-								
+								while(offset <= (iwe.u.data.length - 2)) {
 									/* Check IE type */
-									switch(buffer[offset]) {
-										case 0xdd:	/* WPA1 (and other) */
-										case 0x30:	/* WPA2 */
-											parseWextIeWpa(buffer + offset, buflen, &singleres);
-// 											iw_print_ie_wpa(buffer + offset, buflen);
-											break;
-										default:
-											
-											iw_print_ie_unknown(buffer + offset, buflen);
+									if (0xdd == ((uchar *) iwe.u.data.pointer)[offset] || (0x30 == ((uchar *) iwe.u.data.pointer)[offset]) ) { // WPA1/2
+										parseWextIeWpa(((uchar *) iwe.u.data.pointer) + offset, iwe.u.data.length, &singleres);
 									}
 									/* Skip over this IE to the next one in the list. */
 									offset += buffer[offset+1] + 2;
 								}
 							}
-							
-							
 							break;
+
 						default: //Ignore all other event types. Maybe we need them later?
 							break;
 					}

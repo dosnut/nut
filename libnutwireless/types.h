@@ -26,7 +26,7 @@ namespace libnutwireless {
 
 
 	typedef enum {PROTO_UNDEFINED=0, PROTO_WPA=1, PROTO_RSN=2, PROTO_DEFAULT=3} Protocols; //RSN=WPA2
-	typedef enum {GCI_UNDEFINED=0, GCI_CCMP=2, GCI_TKIP=4, GCI_WEP104=8, GCI_WEP40=16, GCI_DEF=30} GroupCiphers;
+	typedef enum {GCI_UNDEFINED=0, GCI_CCMP=2, GCI_TKIP=4, GCI_WEP104=8, GCI_WEP40=16, GCI_NONE=32, GCI_WRAP=64, GCI_DEF=30} GroupCiphers;
 	typedef enum {PCI_UNDEFINED=0, PCI_NONE=1, PCI_CCMP=2, PCI_TKIP=4, PCI_DEF=6} PairwiseCiphers;
 	typedef enum {KM_UNDEFINED=0, KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8, KM_WPA_NONE=16, KM_OFF=32, KM_DEF=6} KeyManagement; //TODO:change parsers due to KM_OFF
 	typedef enum {AUTHALG_UNDEFINED=0, AUTHALG_OPEN=1, AUTHALG_SHARED=2, AUTHALG_LEAP=4} AuthenticationAlgs; //Default: automatic selection
@@ -107,6 +107,8 @@ namespace libnutwireless {
 		GroupCiphers group;
 		PairwiseCiphers pairwise;
 		KeyManagement keyManagement;
+		Protocols protocols;
+		OPMODE opmode;
 		//Further information pending...
 	};
 
@@ -146,8 +148,17 @@ namespace libnutwireless {
 	};
 
 	struct WextScan {
+		QString ssid;
 		libnutcommon::MacAddress bssid;
 		WextSignal signal;
+		int hasRange;
+		int we_version_compiled;
+		int freq;
+		GroupCiphers group;
+		PairwiseCiphers pairwise;
+		KeyManagement keyManagement;
+		Protocols protocols;
+		OPMODE opmode;
 	};
 	
 	struct ScanResult {
@@ -155,9 +166,11 @@ namespace libnutwireless {
 		QString ssid;
 		int freq;
 		WextSignal signal;
-		ScanCiphers ciphers;
+		GroupCiphers group;
+		PairwiseCiphers pairwise;
 		KeyManagement keyManagement;
 		Protocols protocols;
+		OPMODE opmode;
 	};
 	struct MIBVariable;
 	typedef QList<MIBVariable> MIBVariables;

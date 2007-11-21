@@ -263,6 +263,7 @@ BOOL toWpsBool(bool b) {
 //We don't care whether information was updated or not. Just convert it
 WextSignal convertValues(WextRawScan scan) {
 	WextSignal res;
+	//Set all non-signalquality info
 	res.frequency = scan.freq;
 // 	res.encoding = WSIG_QUALITY_ALLABS;
 	qDebug() << "hasRange:" << scan.hasRange;
