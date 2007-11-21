@@ -148,10 +148,6 @@ namespace qnut {
 			config.keyManagement = KM_NONE;
 			break;
 		case 1:
-			config.keyManagement = KM_IEEE8021X;
-			writeEAPConfig(config.eap_config);
-			break;
-		case 2:
 			config.keyManagement = KM_WPA_PSK;
 			
 			if (ui.rsnCheck->isChecked())
@@ -163,8 +159,11 @@ namespace qnut {
 				config.psk = '\"' + ui.pskEdit->text() + '\"';
 			
 			break;
-		case 3:
-			config.keyManagement = KM_WPA_EAP;
+		case 2:
+			if (ui.grpCipCombo->currentText() == "WEP")
+				config.keyManagement = KM_IEEE8021X;
+			else
+				config.keyManagement = KM_WPA_EAP;
 			
 			if (ui.rsnCheck->isChecked())
 				config.protocols = PROTO_WPA;
