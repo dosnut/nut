@@ -41,12 +41,8 @@ namespace qnut {
 		
 		updateUi(device->state);
 		
-		ui.managedView->setIconSize(QSize(24, 24));
-		
 		ui.managedView->header()->setMinimumSectionSize(-1);
 		ui.availableView->header()->setMinimumSectionSize(-1);
-/*		ui.managedView->header()->resizeSections(QHeaderView::ResizeToContents);
-		ui.availableView->header()->resizeSections(QHeaderView::ResizeToContents);*/
 		
 		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(updateUi(libnutcommon::DeviceState)));
 		
@@ -218,11 +214,11 @@ namespace qnut {
 		
 		bool accepted = false;
 		if (network->adhoc) {
-			CAccessPointConfig dialog(device->wpa_supplicant, this);
+			CAdhocConfig dialog(device->wpa_supplicant, this);
 			accepted = dialog.execute(network->id);
 		}
 		else {
-			CAdhocConfig dialog(device->wpa_supplicant, this);
+			CAccessPointConfig dialog(device->wpa_supplicant, this);
 			accepted = dialog.execute(network->id);
 		}
 		
