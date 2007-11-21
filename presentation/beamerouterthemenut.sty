@@ -1,0 +1,75 @@
+%
+
+\ProvidesPackageRCS $Header: beamerouterthemenut.sty,v 0.1 2007/11/20 12:03:00 $
+
+\mode<presentation>
+
+\setbeamercolor{homepage in head/foot}{parent=palette primary}
+\setbeamerfont{homepage in head/foot}{size=\tiny,parent=author in head/foot}
+
+\newcommand{\inserthomepage}{}
+\newcommand{\homepage}[1]{\renewcommand{\inserthomepage}{\url{#1}}}
+
+\defbeamertemplate*{homepage}{nut}
+{
+	\leavevmode
+	\begin{beamercolorbox}[wd=0.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=0.3cm,rightskip=0.3cm plus1fill]{homepage in head/foot}
+		\usebeamerfont{homepage in head/foot}\inserthomepage
+	\end{beamercolorbox}
+}
+
+\defbeamertemplate*{sidebar left}{nut}
+{
+  \vfill%
+  \usebeamertemplate***{homepage}
+  \vskip0pt%
+}
+
+% \defbeamertemplate*{sidebar right}{default}
+% {
+%   \vfill%
+%   \llap{\insertlogo\hskip0.1cm}%
+%   \vskip2pt%
+%   \llap{\usebeamertemplate***{navigation symbols}\hskip0.1cm}%
+%   \vskip2pt%
+% }
+\defbeamertemplate*{sidebar right}{nut}
+{
+  \vfill%
+  \llap{\usebeamertemplate***{navigation symbols}\hskip0.1cm}%
+  \vskip2pt%
+}
+
+\defbeamertemplate*{headline}{nut}
+{%
+  \leavevmode%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex]{section in head/foot}%
+    \insertsectionnavigationhorizontal{.5\paperwidth}{\hskip0pt plus1filll}{}%
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex]{subsection in head/foot}%
+    \insertsubsectionnavigationhorizontal{.5\paperwidth}{}{\hskip0pt plus1filll}%
+  \end{beamercolorbox}%
+
+  \vskip-4.8ex\hskip0pt
+  \begin{beamercolorbox}[wd=\paperwidth,ht=4.75ex]{}%
+    \pgfuseimage{ul-logo}
+    \hfill
+    \pgfuseimage{ur-logo}
+  \end{beamercolorbox}%
+  %\vskip-1.1255ex
+}
+
+\defbeamertemplate*{footline}{nut}
+{%
+  \leavevmode%
+  \hbox{\begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm plus1fill,rightskip=.3cm]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\mode
+<all>

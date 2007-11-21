@@ -1,0 +1,76 @@
+
+\section{Server}
+\subsection{Aufbau}
+\begin{frame}[<+-|alert@+>]{Überblick der Strukturen}
+	\includegraphics<+->{nuts_structure.pdf}
+	\begin{itemize}
+		\item Devices: Entsprechen den Hardwaregeräten
+		\begin{itemize}
+			\item Erkennt Zustandsänderungen wie Kabel ein-/ausstecken oder WLAN Verbindung.
+			\item Kann für WLAN Karten den wpa\_supplicant automatisch starten und beenden.
+		\end{itemize}
+		\item Environments: Entsprechen Umgebungen; z.Bsp. Arbeitsplatz, Zuhause, ...
+		\item Interfaces: Entsprechen je einer IP
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[<+-|alert@+>]{Environment}
+	\begin{itemize}
+		\item Environments werden je nach Konfiguration vom Server automatisch ausgewählt, Kriterien für die Auswahl sind:
+		\begin{itemize}
+			\item Der WLAN Name, in dem sich das Device befindet (ESSID)
+			\item Das Vorhandenseins eines Rechners mit einer bestimmten IP (und evtl. passender MAC Adresse)
+			\item Wunsch des Benutzers.
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[<+-|alert@+>]{IP Zuweisung}
+	\begin{itemize}
+		\item 3 verschiedene Methoden:
+		\begin{itemize}
+			\item Statisch konfigurierte (oder vom Benutzer eingegebene) IP
+			\item Per DHCP (benötigt einen DHCP-Server)
+			\item Zeroconf (aka \href{http://tools.ietf.org/html/rfc3927}{``IPv4 Link-Local Adresses'', RFC 3927});
+				es wird eine lokal freie IP aus dem Bereich 169.254/16 gesucht. Die IP ist nur im lokalen Netzwerk gültig.
+		\end{itemize}
+		\item Zur IP gehören weitere Werte, die auch pro Interface konfiguriert werden: Netmask, Gateway, DNS-Server.
+	\end{itemize}
+\end{frame}
+
+\subsection{Weitere Features}
+\begin{frame}[<+-|alert@+>]{Weitere Features}
+	\begin{itemize}
+		\item Eventgesteurte Scriptausführung: das ermöglich z.Bsp. den Aufbau eines VPN nach dem Aufbau der darunterliegenden Verbindung (die Skripte haben Rootrechte)
+		\item Unterstützt Plug'n'Play von Netzwerkgeräten, z.Bsp. PCMCIA Karten oder Laden und Entladen von Treibern wegen Inkompatibilität mit Suspend.
+	\end{itemize}
+\end{frame}
+
+\subsection{Beispiel}
+\begin{frame}[fragile]{Konfigurationsbeispiel}
+\textbf{/etc/nuts/nuts.config}
+\tiny
+\begin{verbatim}
+device "eth0" {
+    dhcp;
+    environment "home" {
+        static {
+            ip 192.168.0.86;
+            netmask 255.255.255.0;
+            gateway 192.168.0.1;
+            dns-server 192.168.0.1
+        };
+        select arp 192.168.0.1 00:1A:4F:AA:AA:AA;
+    };
+    environment "gwlaptop" select arp 129.69.212.17 00:00:1A:19:40:C7;
+};
+
+device "eth1" {
+    no-auto-start;   // Nicht automatisch aktivieren
+    wpa-supplicant config "/etc/wpa_supplicant/wpa_supplicant.conf";
+    environment "infeap" select essid "infeap";
+    environment "zeroconf" zeroconf;
+    environment "user" static user;
+};
+\end{verbatim}
+\end{frame}
