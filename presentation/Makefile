@@ -15,6 +15,7 @@ presentation.pdf: ${SRC}
 	@echo Removing temporary files
 	@rm -f ${TMP}
 	@pdflatex presentation.tex
+	@pdflatex presentation.tex
 	@echo Removing temporary files
 	@rm -f ${TMP}
 
