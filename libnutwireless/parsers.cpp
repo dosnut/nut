@@ -312,6 +312,10 @@ namespace libnutwireless {
 			}
 			else { //Set the authsuites
 				qDebug() << "Setting AUTHSUITES of" << scan->ssid << scan->bssid.toString();
+				if (KM_NONE == scan->keyManagement) {
+					qDebug() << "Resetting keymanagement";
+					scan->keyManagement = KM_UNDEFINED;
+				}
 				switch (iebuf[offset+3]) {
 					case 0:
 						if ( OPM_ADHOC == scan->opmode) {

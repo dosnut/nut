@@ -340,7 +340,7 @@ namespace libnutwireless {
 			WextScan dummy;
 			int count = 0;
 			QHash<QString,WextScan>::iterator wextScanHashIter;
-			//Set the signal quality
+			//Set the signal quality and so on
 			for (QList<ScanResult>::Iterator i = wpsScanResults.begin(); i != wpsScanResults.end(); ++i ) {
 				if (wextScanHash.contains(i->bssid.toString())) {
 					wextScanHashIter = wextScanHash.find(i->bssid.toString());
@@ -478,6 +478,11 @@ namespace libnutwireless {
 		QList<WextRawScan> res;
 		WextRawScan singleres;
 		singleres.bssid = libnutcommon::MacAddress();
+		singleres.group = GCI_UNDEFINED;
+		singleres.pairwise = PCI_UNDEFINED;
+		singleres.protocols = PROTO_UNDEFINED;
+		singleres.keyManagement = KM_UNDEFINED;
+		
 		/* workaround */
 		struct wireless_config b;
 		/* Get basic information */ 
@@ -690,6 +695,7 @@ namespace libnutwireless {
 							}
 							if(iwe.u.data.flags & IW_ENCODE_DISABLED) { //Encryption is disabled
 								singleres.keyManagement = KM_OFF;
+								qDebug() << "PARING ENCODE-Information: NO KEY";
 							}
 							else {
 								//Extract key information: (See iwlib.c line 1500)
@@ -702,6 +708,7 @@ namespace libnutwireless {
 									if (iwe.u.data.length <= 0) {
 										//Encryption is on, but group is unknown
 										singleres.keyManagement = KM_NONE;
+										qDebug() << "PARSING ENCODE-INFORMATION: WEP KEY";
 									}
 								} //else: we have a, key but check type later
 							}
@@ -717,6 +724,9 @@ namespace libnutwireless {
 									/* Check IE type */
 									if (0xdd == ((uchar *) iwe.u.data.pointer)[offset] || (0x30 == ((uchar *) iwe.u.data.pointer)[offset]) ) { // WPA1/2
 										parseWextIeWpa(((uchar *) iwe.u.data.pointer) + offset, iwe.u.data.length, &singleres);
+
+									qDebug() << "Parsed IE-Information of " << singleres.ssid << singleres.bssid.toString();
+									qDebug() << toString(singleres.group) << toString(singleres.pairwise) << toString(singleres.keyManagement);
 									}
 									/* Skip over this IE to the next one in the list. */
 									offset += buffer[offset+1] + 2;
