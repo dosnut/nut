@@ -123,9 +123,9 @@ namespace qnut {
 				config.wep_tx_keyidx = 3;
 		}
 		
-		if (ui.grpCipCombo->currentText() == "none")
+/*		if (ui.grpCipCombo->currentText() == "none")
 			config.group = GCI_NONE;
-		else if (ui.grpCipCombo->currentText() == "TKIP")
+		else */if (ui.grpCipCombo->currentText() == "TKIP")
 			config.group = GCI_TKIP;
 		else if (ui.grpCipCombo->currentText() == "CCMP")
 			config.group = GCI_CCMP;
