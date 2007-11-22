@@ -653,13 +653,16 @@ namespace libnutwireless {
 							qDebug() << "STATS (scanresults): " << singleres.quality.level << singleres.quality.qual << singleres.quality.noise << singleres.quality.updated;
 							
 						case SIOCGIWFREQ:
-							double freq;
-							freq = iw_freq2float(&(iwe.u.freq)); //Hopefully in hz
-							if ( ( (freq/1e9) < 10.0 ) && ( (freq/1e9) > 0.0 ) ) {
-								singleres.freq = (int) (b.freq/1e6);
-							}
-							else {
-								singleres.freq = -1;
+							{
+								double freq;
+								freq = iw_freq2float(&(iwe.u.freq)); //Hopefully in hz
+								if ( ( (freq/1e9) < 10.0 ) && ( (freq/1e9) > 0.0 ) ) {
+									singleres.freq = (int) (freq/1e6);
+									qDebug() << "Channel for" << singleres.ssid << "is " << freq << singleres.freq;
+								}
+								else {
+									singleres.freq = -1;
+								}
 							}
 							break;
 						

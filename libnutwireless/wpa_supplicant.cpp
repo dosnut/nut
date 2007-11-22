@@ -252,7 +252,7 @@ NetconfigStatus CWpa_Supplicant::editNetwork(int netid, NetworkConfig config) {
 			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_PAIRWISE);
 		}
 	}
-	if (! (GCI_UNDEFINED == config.group) ) {
+	if ( !(GCI_UNDEFINED == config.group) && !(GCI_NONE == config.group) ) {
 		if ( !setNetworkVariable(netid,"group",toString(config.group) )) {
 			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_GROUP);
 		}
