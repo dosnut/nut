@@ -1,5 +1,7 @@
 #include "parsers.h"
 
+#include <QDebug>
+
 namespace libnutwireless {
 	
 	
