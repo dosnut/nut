@@ -10,7 +10,6 @@
 #include <QTextStream>
 #include "libnutcommon/common.h"
 #include <libnutwireless/wpa_supplicant.h>
-#include "server_proxy.h"
 #include "client_exceptions.h"
 
 namespace libnutclient {
@@ -20,6 +19,11 @@ namespace libnutclient {
 	class CDevice;
 	class CEnvironment;
 	class CInterface;
+
+	class DBusDeviceManagerInterface;
+	class DBusDeviceInterface;
+	class DBusEnvironmentInterface;
+	class DBusInterfaceInterface_IPv4;
 
 	typedef QList<CDevice *> CDeviceList;
 	typedef QList<CEnvironment *> CEnvironmentList;
@@ -119,6 +123,11 @@ namespace libnutclient {
 		void refreshAll();
 		void setActiveEnvironment(CEnvironment * env, QDBusObjectPath dbusPath);
 		void rebuild(QList<QDBusObjectPath> paths);
+		
+		//Locking functions;
+		bool pending_removal;
+		int lockCount;
+		
 
 	private slots:
 		void environmentChangedActive(const QString &newenv);
@@ -137,6 +146,8 @@ namespace libnutclient {
 		CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);
 		~CDevice();
 		libnutcommon::DeviceConfig& getConfig();
+		bool incrementLock();
+		void decrementLock();
 
 	public slots:
 		void enable();
@@ -231,5 +242,5 @@ namespace libnutclient {
 		void stateChanged(libnutcommon::InterfaceState state);
 	};
 };
-
+#include "server_proxy.h"
 #endif

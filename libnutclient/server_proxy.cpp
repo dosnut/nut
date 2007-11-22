@@ -1,4 +1,6 @@
 #include "server_proxy.h"
+#include "libnutclient/client.h"
+
 namespace libnutclient {
 /*
  * Implementation of interface class DBusDeviceInterface
@@ -7,11 +9,14 @@ namespace libnutclient {
 DBusDeviceInterface::DBusDeviceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
     : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
 {
+	device = static_cast<CDevice*>(parent);
 }
 
 DBusDeviceInterface::~DBusDeviceInterface()
 {
 }
+
+
 
 /*
  * Implementation of interface class DBusDeviceManagerInterface
@@ -26,6 +31,13 @@ DBusDeviceManagerInterface::~DBusDeviceManagerInterface()
 {
 }
 
+//Methods
+
+
+
+
+
+
 /*
  * Implementation of interface class DBusEnvironmentInterface
  */
@@ -33,11 +45,16 @@ DBusDeviceManagerInterface::~DBusDeviceManagerInterface()
 DBusEnvironmentInterface::DBusEnvironmentInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
     : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
 {
+	device = static_cast<CDevice*>(parent->parent());
 }
 
 DBusEnvironmentInterface::~DBusEnvironmentInterface()
 {
 }
+
+
+
+
 
 /*
  * Implementation of interface class DBusInterfaceInterface_IPv4
@@ -46,9 +63,13 @@ DBusEnvironmentInterface::~DBusEnvironmentInterface()
 DBusInterfaceInterface_IPv4::DBusInterfaceInterface_IPv4(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
     : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
 {
+	device = static_cast<CDevice*>((parent->parent())->parent());
 }
 
 DBusInterfaceInterface_IPv4::~DBusInterfaceInterface_IPv4()
 {
 }
 }
+
+//Methods
+

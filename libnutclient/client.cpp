@@ -247,14 +247,19 @@ void CDeviceManager::dbusDeviceAdded(const QDBusObjectPath &objectpath) {
 }
 void CDeviceManager::dbusDeviceRemoved(const QDBusObjectPath &objectpath) {
 	//remove devices from devicelist
-	CDevice * device = dbusDevices.take(objectpath);
-	devices.removeAll(device);
-	//Rebuild device->index for qnut
-	foreach(CDevice * dev, devices) {
-		dev->index = devices.indexOf(dev);
+	if (dbusDevices.value(objectpath)->lockCount == 0) {
+		CDevice * device = dbusDevices.take(objectpath);
+		devices.removeAll(device);
+		//Rebuild device->index for qnut
+		foreach(CDevice * dev, devices) {
+			dev->index = devices.indexOf(dev);
+		}
+		emit(deviceRemoved(device));
+		delete device;
 	}
-	emit(deviceRemoved(device));
-	delete device;
+	else {
+		dbusDevices.value(objectpath)->pending_removal = true;
+	}
 }
 
 
@@ -316,7 +321,7 @@ void CDeviceManager::rebuild() {
 /////////
 //CDevice
 /////////
-CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ dbusPath(dbusPath) {
+CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ dbusPath(dbusPath), pending_removal(false), lockCount(0) {
 	log = parent->log;
 	//get dbusConnection from parent:
 	dbusConnection = &(parent->dbusConnection);
@@ -517,6 +522,29 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 		env->index = environments.indexOf(env);
 	}
 // 	emit(environmentsUpdated()); //Pending for removal
+}
+
+
+//Locking functions
+bool CDevice::incrementLock() {
+	lockCount++;
+	qDebug() << "Increment Lock to " << lockCount;
+	return !(pending_removal);
+}
+void CDevice::decrementLock() {
+	if (lockCount > 0) {
+		lockCount--;
+		qDebug() << "Decrement Lock to " << lockCount;
+	}
+	else {
+		*log << "ERROR: LOCK-COUNT<0";
+	}
+	if (pending_removal) {
+		qDebug() << "Removing";
+		if (lockCount == 0) {
+			static_cast<CDeviceManager* >(parent())->dbusDeviceRemoved(dbusPath);
+		}
+	}
 }
 
 //CDevice private slots:
