@@ -148,15 +148,36 @@ namespace qnut {
 			ui.ssidEdit->setText(config.ssid);
 		}
 		
-		if (config.group & CI_CCMP)
+		if (config.group & PCI_CCMP)
 			ui.encCombo->setCurrentIndex(1);
 		else
 			ui.encCombo->setCurrentIndex(0);
+		
+		int channel = frequencyToChannel(config.frequency);
+		int channelIndex = supplicant->getSupportedChannels().indexOf(channel);
+		ui.channelCombo->setCurrentIndex(channelIndex);
 		
 		ui.pskLeaveButton->setVisible(true);
 		ui.pskLeaveButton->setChecked(true);
 		
 		currentID = id;
+		
+		return exec();
+	}
+	
+	bool CAdhocConfig::execute(ScanResult scanResult) {
+		ui.ssidEdit->setText(scanResult.ssid);
+		
+		int channel = frequencyToChannel(scanResult.freq);
+		int channelIndex = supplicant->getSupportedChannels().indexOf(channel);
+		ui.channelCombo->setCurrentIndex(channelIndex);
+		
+		if (scanResult.group & PCI_CCMP)
+			ui.encCombo->setCurrentIndex(1);
+		else
+			ui.encCombo->setCurrentIndex(0);
+		
+		currentID = -1;
 		
 		return exec();
 	}
