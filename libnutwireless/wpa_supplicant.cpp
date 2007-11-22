@@ -48,8 +48,6 @@ bool CWpa_Supplicant::selectNetwork(int id) {
 			}
 		}
 	}
-	return true;
-
 	if ("OK\n" == wps_cmd_SELECT_NETWORK(id)) {
 		return true;
 	}
