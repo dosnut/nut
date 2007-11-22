@@ -358,6 +358,7 @@ namespace nuts {
 		struct iwreq iwr;
 		iwreq_init(iwr, ifName);
 		char buf[32];
+		memset(buf, 0, sizeof(buf));
 		iwr.u.essid.pointer = buf;
 		iwr.u.essid.length = sizeof(buf);
 		if (ioctl(ethtool_fd, SIOCGIWESSID, &iwr) < 0) return false;

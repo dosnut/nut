@@ -11,6 +11,8 @@
 //
 #include "events.h"
 
+#include <QList>
+
 namespace nuts {
 	Events::Events(QObject *parent)
 	: QObject(parent) {
@@ -24,7 +26,7 @@ namespace nuts {
 		args << event << device;
 		if (!env.isNull()) args << env;
 		if (iface != -1) args << QString("%1").arg(iface);
-		QProcess *process = new QProcess();
+		QProcess *process = new QProcess(this);
 		environment << QString("NUT_EVENT=%1").arg(event);
 		process->setEnvironment(environment);
 		process->start("/etc/nuts/dispatch", args);
