@@ -24,29 +24,40 @@ void CWpa_Supplicant::response(Request request, QString msg) {
 
 bool CWpa_Supplicant::selectNetwork(int id) {
 	//TODO: Check if we need to set ap_scan first
-	if ("OK\n" == wps_cmd_SELECT_NETWORK(id)) {
-		//We have an adhoc network
-		if (BOOL_TRUE == toWpsBool(getNetworkVariable(id,"mode"))) {
-			ap_scan(2);
-			printMessage(tr("auto-setting ap_scan=2."));
-		}
-		else {
-			//Check if we have defaults, and if the last network was an ap-network
-			if (lastWasAdHoc) {
-				lastWasAdHoc = false;
-				if (-1 != apScanDefault) {
-					ap_scan(apScanDefault);
-					printMessage(tr("Using your last ap_scan settings for auto-setting: %1").arg(QString::number(apScanDefault)));
-				}
-				else {
-					printMessage(tr("You must set ap_scan to your needs!"));
 
-				}
+	BOOL hasMode = toWpsBool(getNetworkVariable(id,"mode"));
+	//Let's hope wpa_supplicant returns fail only when network id is invalid
+	if (BOOL_UNDEFINED == hasMode) {
+		return false;
+	}
+	else if (BOOL_TRUE == hasMode) {
+		ap_scan(2);
+		printMessage(tr("auto-setting ap_scan=2."));
+	}
+	else {
+		//Check if we have defaults, and if the last network was an ap-network
+		if (lastWasAdHoc) {
+			lastWasAdHoc = false;
+			if (-1 != apScanDefault) {
+				ap_scan(apScanDefault);
+				printMessage(tr("Using your last ap_scan settings for auto-setting: %1").arg(QString::number(apScanDefault)));
+			}
+			else {
+				printMessage(tr("You must set ap_scan to your needs!"));
+
 			}
 		}
+	}
+	return true;
+
+	if ("OK\n" == wps_cmd_SELECT_NETWORK(id)) {
 		return true;
 	}
 	else {
+		//Reset ap_scan:
+		if (lastWasAdHoc) {
+			ap_scan(apScanDefault);
+		}
 		return false;
 	}
 }

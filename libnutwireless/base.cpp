@@ -346,7 +346,9 @@ namespace libnutwireless {
 					wextScanHashIter = wextScanHash.find(i->bssid.toString());
 					i->bssid = wextScanHashIter.value().bssid;
 					i->ssid = wextScanHashIter.value().ssid;
-					i->freq = wextScanHashIter.value().freq;
+					if (-1 != frequencyToChannel(wextScanHashIter.value().freq)) {
+						i->freq = wextScanHashIter.value().freq;
+					}
 					i->signal = wextScanHashIter.value().signal;
 					i->group = wextScanHashIter.value().group;
 					i->pairwise = wextScanHashIter.value().pairwise;
@@ -637,22 +639,27 @@ namespace libnutwireless {
 
 							if (singleres.bssid.zero()) { //First bssid
 								singleres.bssid = tmpMac;
+								qDebug() << "Start parsing one network" << singleres.bssid.toString();
 							}
 							// if our last bssid is different from the actual one, then we have to append it to our scanlist
 							if ( (singleres.bssid != tmpMac) )  {
 								res.append(singleres);
+								qDebug() << "End parsing one network" << singleres.bssid.toString();
 								singleres.bssid = tmpMac;
+								qDebug() << "Start parsing one network" << singleres.bssid.toString();
 							}
-
+							qDebug() << "BSSID" << singleres.bssid.toString();
 							break;
 						case IWEVQUAL: //Quality event:
+							qDebug() << "Quality" << singleres.bssid.toString();
 							singleres.quality.qual = (quint8) iwe.u.qual.qual;
 							singleres.quality.level = (quint8) iwe.u.qual.level;
 							singleres.quality.noise = (quint8) iwe.u.qual.noise;
 							singleres.quality.updated = (quint8) iwe.u.qual.updated;
 							qDebug() << "STATS (scanresults): " << singleres.quality.level << singleres.quality.qual << singleres.quality.noise << singleres.quality.updated;
-							
+							break;
 						case SIOCGIWFREQ:
+							qDebug() << "Frequency" << singleres.bssid.toString();
 							{
 								double freq;
 								freq = iw_freq2float(&(iwe.u.freq)); //Hopefully in hz
@@ -667,12 +674,14 @@ namespace libnutwireless {
 							break;
 						
 						case SIOCGIWMODE:
+							qDebug() << "Mode:" << singleres.bssid.toString();
 							if(iwe.u.mode >= IW_NUM_OPER_MODE) {
 								iwe.u.mode = IW_NUM_OPER_MODE;
 							}
 							singleres.opmode = (OPMODE) iwe.u.mode;
 							break;
 						case SIOCGIWESSID:
+							qDebug() << "ESSID:" << singleres.bssid.toString();
 							if (iwe.u.essid.flags) {
 								/* Does it have an ESSID index ? */
 								if ( iwe.u.essid.pointer && iwe.u.essid.length ) {
@@ -693,6 +702,7 @@ namespace libnutwireless {
 							break;
 
 						case SIOCGIWENCODE: //Get encrytion stuff: (just the key)
+							qDebug() << "Encode" << singleres.bssid.toString();
 							if (! iwe.u.data.pointer) {
 								iwe.u.data.flags |= IW_ENCODE_NOKEY;
 							}
@@ -720,6 +730,7 @@ namespace libnutwireless {
 						case IWEVGENIE: //group/pairwsie ciphers etc.
 							//buffer = iwe.u.data.pointer
 							//bufflen = iwe.u.data.length
+							qDebug() << "IE_START" << singleres.bssid.toString();
 							{
 								int offset = 0;
 								/* Loop on each IE, each IE is minimum 2 bytes */
@@ -735,15 +746,18 @@ namespace libnutwireless {
 									offset += buffer[offset+1] + 2;
 								}
 							}
+							qDebug() << "IE_END" << singleres.bssid.toString();
 							break;
 
 						default: //Ignore all other event types. Maybe we need them later?
+							qDebug() << "unuse event type";
 							break;
 					}
 				}
 				else { //Append last scan:
 					if (!singleres.bssid.zero()) {
 						res.append(singleres);
+						qDebug() << "End parsing one network" << singleres.bssid.toString();
 					}
 				}
 		
