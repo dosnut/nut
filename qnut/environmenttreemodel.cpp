@@ -25,7 +25,7 @@ namespace qnut {
 		device = data;
 		if (data) {
 			foreach(CEnvironment * environment, device->environments) {
-				//connect(environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
+				connect(environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
 				foreach(CInterface * interface, environment->interfaces) {
 					connect(interface, SIGNAL(stateChanged(libnutcommon::InterfaceState)), this, SIGNAL(layoutChanged()));
 				}

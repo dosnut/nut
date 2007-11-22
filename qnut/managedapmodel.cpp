@@ -57,7 +57,7 @@ namespace qnut {
 			return QVariant();
 		
 		if ((role == Qt::DecorationRole) && (index.column() == 0))
-			return QIcon(UI_ICON_AIR_ACTIVATED);
+			return QIcon(networks[index.row()].adhoc ? UI_ICON_ADHOC : UI_ICON_AIR_ACTIVATED);
 		
 		if (role != Qt::DisplayRole)
 			return QVariant();

@@ -59,6 +59,7 @@ namespace qnut {
 		void enableNetworks();
 		void disableSelectedNetwork();
 		void toggleDetails(bool value);
+		void enableInterface();
 	};
 };
 

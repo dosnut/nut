@@ -12,7 +12,7 @@
 #include <QIcon>
 #include "environmentdetailsmodel.h"
 #include "constants.h"
-
+#include <QDebug>
 #define ENVDET_MOD_STATEMENT 0
 #define ENVDET_MOD_VALUE     1
 
@@ -79,6 +79,7 @@ namespace qnut {
 		if ((role == Qt::DecorationRole) && (index.column() == ENVDET_MOD_STATEMENT)) {
 			CDevice * device = static_cast<CDevice *>(environment->parent());
 			if (environment == device->activeEnvironment) {
+				qDebug() << "Internal Id:" << index.internalId();
 				if ((qint8)(environment->getSelectResults()[index.internalId()]))
 					return QIcon(UI_ICON_SELECTED);
 			}

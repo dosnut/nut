@@ -172,17 +172,17 @@ namespace qnut {
 	void CConnectionManager::removeUiDevice(CDevice * device) {
 		overView.clearSelection();
 		CDeviceDetails * target = deviceOptions[device];
+		deviceOptions.remove(device);
 		
 		tabWidget.removeTab(tabWidget.indexOf(target));
 		
 		trayicon.devicesMenu.removeAction(target->deviceMenu->menuAction());
-		trayicon.devicesMenu.setDisabled(deviceManager.devices.isEmpty());
+		delete target;
 		
+		trayicon.devicesMenu.setDisabled(deviceManager.devices.isEmpty());
 		enableDeviceAction->setDisabled(deviceManager.devices.isEmpty());
 		disableDeviceAction->setDisabled(deviceManager.devices.isEmpty());
 		
-		deviceOptions.remove(device);
-		delete target;
 	}
 	
 	void CConnectionManager::updateTrayIconInfo() {

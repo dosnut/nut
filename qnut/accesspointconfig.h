@@ -28,6 +28,13 @@ namespace qnut {
 		
 		int currentID;
 		
+		bool wepEnabled;
+		struct {
+			libnutwireless::GroupCiphers group;
+			libnutwireless::PairwiseCiphers pairwise;
+			libnutwireless::Protocols protocols;
+		} oldConfig;
+		
 		inline void convertLineEditText(QLineEdit * lineEdit, bool hex);
 		inline QString convertQuoted(QString text);
 		inline void writeEAPConfig(libnutwireless::EapNetworkConfig &eap_config);

@@ -25,6 +25,7 @@ namespace qnut {
 		int currentID;
 		libnutwireless::CWpa_Supplicant * supplicant;
 	public:
+		bool execute(libnutwireless::ScanResult scanResult);
 		bool execute(int id);
 		bool execute();
 		

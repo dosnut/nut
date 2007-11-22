@@ -11,6 +11,20 @@
 \subsection{libnutwireless}
 \begin{frame}[<+-| alert@+>]{wireless client}
 	\begin{itemize}
-		\item Qt-Library für die wpa\_supplicant Verwaltung.
+		\item Qt-Library für die wpa\_supplicant Verwaltung und Serverkommunikation.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[<+-| alert@+>]{wireless client}
+	\begin{itemize}
+		\item Verwaltungsstruktur ähnelt dem Server:
+		\item Devices:
+		\begin{itemize}
+			\item Abstraktion der Serverkommunikation der Netzwerkgeräte
+			\item Abstraktion der Kommunikation mit dem wpa\_supplicant und der WirelessExtension 
+		\end{itemize}
+
+		\item Environments: Abstrahieren die Environments
+		\item Interfaces: Abstrahieren die Interface-Informationen und -Methoden
 	\end{itemize}
 \end{frame}

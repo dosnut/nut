@@ -162,27 +162,47 @@
         </layout>
        </item>
        <item>
-        <widget class="QGroupBox" name="prwCipGroup" >
-         <property name="title" >
-          <string>Pairwise algorithms (pairwise ciphers)</string>
-         </property>
-         <layout class="QHBoxLayout" >
-          <item>
-           <widget class="QCheckBox" name="prwTKIPCheck" >
+        <layout class="QHBoxLayout" >
+         <item>
+          <widget class="QLabel" name="prwCipLabel" >
+           <property name="text" >
+            <string>Pairwise algorithm (pairwise cipher)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="prwCipCombo" >
+           <item>
+            <property name="text" >
+             <string>none</string>
+            </property>
+           </item>
+           <item>
             <property name="text" >
              <string>TKIP</string>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="prwCCMPCheck" >
+           </item>
+           <item>
             <property name="text" >
              <string>CCMP</string>
             </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <spacer>
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer>
@@ -693,8 +713,6 @@
   <tabstop>keyManagementCombo</tabstop>
   <tabstop>rsnCheck</tabstop>
   <tabstop>confTabs</tabstop>
-  <tabstop>prwTKIPCheck</tabstop>
-  <tabstop>prwCCMPCheck</tabstop>
   <tabstop>pskEdit</tabstop>
   <tabstop>pskLeaveButton</tabstop>
   <tabstop>showPlainPSKCheck</tabstop>
