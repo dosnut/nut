@@ -255,7 +255,7 @@ void CDeviceManager::dbusDeviceRemoved(const QDBusObjectPath &objectpath) {
 			dev->index = devices.indexOf(dev);
 		}
 		emit(deviceRemoved(device));
-		delete device;
+		device->deleteLater();
 	}
 	else {
 		dbusDevices.value(objectpath)->pending_removal = true;
@@ -539,11 +539,9 @@ void CDevice::decrementLock() {
 	else {
 		*log << "ERROR: LOCK-COUNT<0";
 	}
-	if (pending_removal) {
+	if ( (pending_removal) && (lockCount == 0) ){
 		qDebug() << "Removing";
-		if (lockCount == 0) {
-			static_cast<CDeviceManager* >(parent())->dbusDeviceRemoved(dbusPath);
-		}
+		static_cast<CDeviceManager* >(parent())->dbusDeviceRemoved(dbusPath);
 	}
 }
 
