@@ -645,6 +645,18 @@ namespace libnutwireless {
 							if ( (singleres.bssid != tmpMac) )  {
 								res.append(singleres);
 								qDebug() << "End parsing one network" << singleres.bssid.toString();
+								//reset singleres
+								singleres.ssid = QString();
+								singleres.bssid.clear();
+								singleres.quality = WextRawSignal();
+								singleres.maxquality = WextRawSignal();
+								singleres.avgquality = WextRawSignal();
+								singleres.freq = -1;
+								singleres.group = GCI_UNDEFINED;
+								singleres.pairwise = PCI_UNDEFINED;
+								singleres.keyManagement = KM_UNDEFINED;
+								singleres.protocols = PROTO_UNDEFINED;
+								singleres.opmode = OPM_AUTO;
 								singleres.bssid = tmpMac;
 								qDebug() << "Start parsing one network" << singleres.bssid.toString();
 							}
