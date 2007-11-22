@@ -82,6 +82,9 @@ namespace qnut {
 				if (keyFlags == KM_NONE)
 					return tr("WEP");
 				
+				if (keyFlags == KM_WPA_NONE)
+					return tr("WPA PSK (ad-hoc)");
+				
 				int protocolFlags = scans[index.row()].protocols;
 				
 				QStringList results;
