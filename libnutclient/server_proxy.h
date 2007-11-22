@@ -43,21 +43,21 @@ public Q_SLOTS: // METHODS
     inline QDBusReply<QList<QDBusObjectPath> > getEnvironments()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getEnvironments"), argumentList);
+        return callWithArgumentList(QDBus::Block, QLatin1String("getEnvironments"), argumentList);
     }
     inline QDBusReply<libnutcommon::DeviceProperties> getProperties() {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
+        return callWithArgumentList(QDBus::Block, QLatin1String("getProperties"), argumentList);
     }
     inline QDBusReply<QString> getEssid() {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getEssid"), argumentList);
+        return callWithArgumentList(QDBus::Block, QLatin1String("getEssid"), argumentList);
     }
 	
 	inline QDBusReply<libnutcommon::DeviceConfig> getConfig()
 	{
 		QList<QVariant> argumentList;
-		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList);
+		return callWithArgumentList(QDBus::Block, QLatin1String("getConfig"), argumentList);
 	}
     inline QDBusReply<void> setEnvironment(QDBusObjectPath envpath) {
         QList<QVariant> argumentList;
@@ -91,7 +91,7 @@ public Q_SLOTS: // METHODS
     inline QDBusReply<QList<QDBusObjectPath> > getDeviceList()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getDeviceList"), argumentList);
+        return callWithArgumentList(QDBus::Block, QLatin1String("getDeviceList"), argumentList);
     }
 
 Q_SIGNALS: // SIGNALS
@@ -118,28 +118,28 @@ public Q_SLOTS: // METHODS
     inline QDBusReply<QList<QDBusObjectPath> > getInterfaces()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getInterfaces"), argumentList);
+        return callWithArgumentList(QDBus::Block, QLatin1String("getInterfaces"), argumentList);
     }
 
     inline QDBusReply<libnutcommon::EnvironmentProperties> getProperties()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
+        return callWithArgumentList(QDBus::Block, QLatin1String("getProperties"), argumentList);
     }
 	inline QDBusReply<libnutcommon::EnvironmentConfig> getConfig()
 	{
 		QList<QVariant> argumentList;
-		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList);
+		return callWithArgumentList(QDBus::Block, QLatin1String("getConfig"), argumentList);
 	}
 	inline QDBusReply<libnutcommon::SelectResult> getSelectResult()
 	{
 		QList<QVariant> argumentList;
-		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getSelectResult"), argumentList);
+		return callWithArgumentList(QDBus::Block, QLatin1String("getSelectResult"), argumentList);
 	}
 	inline QDBusReply<QVector<libnutcommon::SelectResult> > getSelectResults()
 	{
 		QList<QVariant> argumentList;
-		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getSelectResults"), argumentList);
+		return callWithArgumentList(QDBus::Block, QLatin1String("getSelectResults"), argumentList);
 	}
 
 Q_SIGNALS: // SIGNALS
@@ -178,12 +178,12 @@ public Q_SLOTS: // METHODS
     inline QDBusReply<libnutcommon::InterfaceProperties> getProperties()
     {
         QList<QVariant> argumentList;
-        return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
+        return callWithArgumentList(QDBus::Block, QLatin1String("getProperties"), argumentList);
     }
 	inline QDBusReply<libnutcommon::IPv4Config> getConfig()
 	{
 		QList<QVariant> argumentList;
-		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList); 
+		return callWithArgumentList(QDBus::Block, QLatin1String("getConfig"), argumentList); 
 	}
     inline QDBusReply<void> setDynamic()
     {
@@ -193,16 +193,16 @@ public Q_SLOTS: // METHODS
 
 	inline QDBusReply<bool> needUserSetup() {
 		QList<QVariant> argumentList;
-		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("needUserSetup"), argumentList);
+		return callWithArgumentList(QDBus::Block, QLatin1String("needUserSetup"), argumentList);
 	}
 	inline QDBusReply<bool> setUserConfig(libnutcommon::IPv4UserConfig userConfig) {
 		QList<QVariant> argumentList;
 		argumentList << qVariantFromValue(userConfig);
-		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("setUserConfig"), argumentList);
+		return callWithArgumentList(QDBus::Block, QLatin1String("setUserConfig"), argumentList);
 	}
 	inline QDBusReply<libnutcommon::IPv4UserConfig> getUserConfig() {
 		QList<QVariant> argumentList;
-		return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getUserConfig"), argumentList);
+		return callWithArgumentList(QDBus::Block, QLatin1String("getUserConfig"), argumentList);
 	}
 
 Q_SIGNALS: // SIGNALS
