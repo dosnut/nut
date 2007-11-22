@@ -171,7 +171,23 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="prwCipCombo" />
+          <widget class="QComboBox" name="prwCipCombo" >
+           <item>
+            <property name="text" >
+             <string>none</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>TKIP</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>CCMP</string>
+            </property>
+           </item>
+          </widget>
          </item>
          <item>
           <spacer>
