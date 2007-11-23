@@ -221,6 +221,7 @@ namespace nuts {
 			
 		signals:
 			void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState, Device* device);
+			void environmentChanged(int newEnvironment);
 	};
 	
 	class Environment : public QObject {
@@ -278,6 +279,9 @@ namespace nuts {
 			bool selectionDone() { return (selArpWaiting == -1); }
 			libnutcommon::SelectResult getSelectResult() { return m_selectResult; }
 			QVector<libnutcommon::SelectResult> getSelectResults() { return m_selectResults; }
+			
+		signals:
+			void selectResultReady();
 	};
 	
 	class Interface : public QObject {
