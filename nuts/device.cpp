@@ -215,6 +215,7 @@ namespace nuts {
 		nextEnv = -1;
 		if (activeEnv != -1)
 			envs[activeEnv]->start();
+		emit environmentChanged(activeEnv);
 	}
 	void Device::envNeedUserSetup(Environment* env) {
 		if (envs[activeEnv] != env) return;
@@ -241,6 +242,7 @@ namespace nuts {
 		if (activeEnv != -1) {
 			envs[activeEnv]->stop();
 			activeEnv = -1;
+			emit environmentChanged(activeEnv);
 		}
 		interfaceIndex = -1;
 		setState(libnutcommon::DS_ACTIVATED);
@@ -368,11 +370,13 @@ namespace nuts {
 		log << QString("Set next environment %1").arg(env) << endl;
 		if (env < 0 || env >= envs.size()) {
 			nextEnv = -1;
-			if (activeEnv != -1)
+			if (activeEnv != -1) {
 				envs[activeEnv]->stop();
+			}
 		} else if (activeEnv == -1) {
 			activeEnv = env;
 			envs[activeEnv]->start();
+			emit environmentChanged(activeEnv);
 		} else if (nextEnv == -1) {
 			nextEnv = env;
 			envs[activeEnv]->stop();
@@ -435,6 +439,7 @@ namespace nuts {
 			if (activeEnv != -1) {
 				envs[activeEnv]->stop();
 				activeEnv = -1;
+				emit environmentChanged(activeEnv);
 			}
 			interfaceIndex = -1;
 			stopWPASupplicant();
@@ -577,6 +582,7 @@ namespace nuts {
 //			qDebug() << QString("Nothing to select") << endl;
 			m_selectResult = libnutcommon::SelectResult::User;
 			device->selectDone(this);
+			emit selectResultReady();
 			return;
 		}
 		for (int i = c-1; i >= 0; i--) {
@@ -600,6 +606,7 @@ namespace nuts {
 		}
 		m_selectResult = m_selectResults[0];
 		device->selectDone(this);
+		emit selectResultReady();
 //		qDebug() << QString("Select Result: %1").arg((qint8) m_selectResults[0]) << endl;
 	}
 	
