@@ -93,6 +93,7 @@ namespace nuts {
 		}
 		connect(s_device,SIGNAL(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState, Device*)),this,SLOT(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState)));
 		setAutoRelaySignals(true);
+		connect(s_device,SIGNAL(environmentChanged(int)),this,SLOT(environmentChanged(int)));
 	}
 	
 	DBusDevice::~DBusDevice() {
@@ -123,6 +124,26 @@ namespace nuts {
 			}
 		}
 		emit(stateChanged((int) newState, (int) oldState));
+	}
+	void DBusDevice::environmentChanged(int newEnvironment) {
+		//Check if active environment has changed:
+		if (active_environment != newEnvironment ) {
+			int oldActive = active_environment;
+			active_environment = newEnvironment;
+			if (0 <= oldActive) {
+				emit(dbus_environments[oldActive]->emitChange(false));
+			}
+			if (0 <= active_environment) {
+				emit(dbus_environments[active_environment]->emitChange(true));
+			}
+			//active Environment has changed for device:
+			if (0 > active_environment) {
+				emit( environmentChangedActive(QString()) );
+			}
+			else {
+				emit( environmentChangedActive( dbus_environments[active_environment]->getPath() ) );
+			}
+		}
 	}
 
 	libnutcommon::DeviceProperties DBusDevice::getProperties() {
@@ -200,10 +221,13 @@ namespace nuts {
 	QString DBusEnvironment::getPath() {
 		return dbus_path;
 	}
+
+	void DBusEnvironment::selectResultReady() {
+		emit selectsResultChanged(s_environment->getSelectResult(),s_environment->getSelectResults());
+	}
+	
 	//Function for device to emit a statechange of an environment
 	void DBusEnvironment::emitChange(bool change) {
-		//Workaround so far: emit selectResultChanges:
-		emit selectsResultChanged(s_environment->getSelectResult(),s_environment->getSelectResults());
 		emit stateChanged(change);
 	}
 	

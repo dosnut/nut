@@ -64,6 +64,7 @@ namespace nuts {
 		
 		private slots:
 			void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState);
+			void environmentChanged(int newEnvironment);
 		
 		public:
 			DBusDevice(Device *dev, QDBusConnection *connection, const QString &path);
@@ -102,7 +103,9 @@ namespace nuts {
 			QString dbus_path;
 			libnutcommon::EnvironmentProperties dbus_properties;
 			Device * s_device;
-		
+
+		private slots:
+			void selectResultReady();
 		public:
 			DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path, Device* dev);
 			virtual ~DBusEnvironment();
