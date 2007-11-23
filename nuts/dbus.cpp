@@ -124,6 +124,7 @@ namespace nuts {
 		}
 		emit(stateChanged((int) newState, (int) oldState));
 	}
+
 	libnutcommon::DeviceProperties DBusDevice::getProperties() {
 		dbus_properties.state = s_device->getState();
 		dbus_properties.type = s_device->hasWLAN() ? libnutcommon::DT_AIR : libnutcommon::DT_ETH;
