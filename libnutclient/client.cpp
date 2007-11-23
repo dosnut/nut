@@ -396,6 +396,9 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 		activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment, 0);
 		*log << (tr("Active Environement") + ": " + dbusActiveEnvironment.path());
 	}
+	else {
+		activeEnvironment = 0;
+	}
 	//connect signals to slots
 	connect(dbusDevice, SIGNAL(environmentChangedActive(const QString &)),
 			this, SLOT(environmentChangedActive(const QString &)));
@@ -616,6 +619,7 @@ libnutcommon::DeviceConfig& CDevice::getConfig() {
 CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ dbusPath(dbusPath) {
 	//Set log.
 	log = parent->log;
+	active = false;
 	//First attach to dbus
 	dbusConnection = parent->dbusConnection;
 	dbusConnectionInterface = parent->dbusConnectionInterface;
