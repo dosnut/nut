@@ -60,10 +60,22 @@ bool CWpa_Supplicant::selectNetwork(int id) {
 	}
 }
 bool CWpa_Supplicant::enableNetwork(int id) {
-	return ("OK\n" == wps_cmd_ENABLE_NETWORK(id));
+	if ("OK\n" == wps_cmd_ENABLE_NETWORK(id)) {
+		emit networkDataChanged(id);
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 bool CWpa_Supplicant::disableNetwork(int id) {
-	return ("OK\n" == wps_cmd_DISABLE_NETWORK(id));
+	if ("OK\n" == wps_cmd_DISABLE_NETWORK(id)) {
+		emit networkDataChanged(id);
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 bool CWpa_Supplicant::ap_scan(int type) {
