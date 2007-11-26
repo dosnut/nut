@@ -12,13 +12,17 @@
 #include <QIcon>
 #include "managedapmodel.h"
 #include "constants.h"
-
+#include <QDebug>
 namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutwireless;
 	
 	CManagedAPModel::CManagedAPModel(CWpa_Supplicant * wpaSupplicant, QObject * parent) : QAbstractItemModel(parent) {
 		setWpaSupplicant(wpaSupplicant);
+		if (networks.isEmpty())
+			qDebug("peng!");
+		else
+			qDebug("pong");
 	}
 	
 	CManagedAPModel::~CManagedAPModel() {
@@ -26,16 +30,17 @@ namespace qnut {
 	}
 	
 	void CManagedAPModel::setWpaSupplicant(CWpa_Supplicant * wpaSupplicant) {
+		if (supplicant == wpaSupplicant)
+			return;
+		
 		supplicant = wpaSupplicant;
 		if (supplicant) {
-			reloadNetworks();
-			connect(supplicant, SIGNAL(opened()), this, SLOT(reloadNetworks()));
-			connect(supplicant, SIGNAL(closed()), this, SLOT(reloadNetworks()));
-			connect(supplicant, SIGNAL(stateChanged(bool)), this, SLOT(reloadNetworks()));
+			updateNetworks();
+			connect(supplicant, SIGNAL(networkListUpdated()), this, SLOT(updateNetworks()));
 		}
 	}
 	
-	void CManagedAPModel::reloadNetworks() {
+	void CManagedAPModel::updateNetworks() {
 		emit layoutAboutToBeChanged();
 		networks = supplicant->listNetworks();
 		emit layoutChanged();
@@ -53,7 +58,7 @@ namespace qnut {
 	}
 	
 	QVariant CManagedAPModel::data(const QModelIndex & index, int role) const {
-		if ((networks.isEmpty()) || (!index.isValid()))
+		if (!index.isValid())
 			return QVariant();
 		
 		if ((role == Qt::DecorationRole) && (index.column() == 0))
@@ -118,18 +123,11 @@ namespace qnut {
 	}
 	
 	QModelIndex CManagedAPModel::index(int row, int column, const QModelIndex & parent) const {
-		if (networks.isEmpty())
+		//qDebug() << "index(" << row << column << ')';
+		if (networks.isEmpty() || parent.isValid() || row >= networks.count())
 			return QModelIndex();
-		
-		if (!hasIndex(row, column, parent))
-			return QModelIndex();
-		
-		if (!parent.isValid()) {
-			if (row < networks.count())
-				return createIndex(row, column, (void *)(&(networks[row])));
-		}
-		
-		return QModelIndex();
+		else
+			return createIndex(row, column, networks[row].id);
 	}
 	
 	QModelIndex CManagedAPModel::parent(const QModelIndex &) const {

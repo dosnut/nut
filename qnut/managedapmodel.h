@@ -39,7 +39,7 @@ namespace qnut {
 		
 		void setWpaSupplicant(libnutwireless::CWpa_Supplicant * wpaSupplicant);
 	public slots:
-		void reloadNetworks();
+		void updateNetworks();
 	private:
 		QList<libnutwireless::ShortNetworkInfo> networks;
 		libnutwireless::CWpa_Supplicant * supplicant;
