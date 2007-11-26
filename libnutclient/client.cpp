@@ -258,7 +258,7 @@ void CDeviceManager::dbusDeviceRemoved(const QDBusObjectPath &objectpath) {
 		device->deleteLater();
 	}
 	else {
-		dbusDevices.value(objectpath)->pending_removal = true;
+		dbusDevices.value(objectpath)->pendingRemoval = true;
 	}
 }
 
@@ -321,7 +321,7 @@ void CDeviceManager::rebuild() {
 /////////
 //CDevice
 /////////
-CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ dbusPath(dbusPath), pending_removal(false), lockCount(0) {
+CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ dbusPath(dbusPath), pendingRemoval(false), lockCount(0) {
 	log = parent->log;
 	//get dbusConnection from parent:
 	dbusConnection = &(parent->dbusConnection);
@@ -530,7 +530,7 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 
 //Locking functions
 bool CDevice::incrementLock() {
-	if (pending_removal) {
+	if (pendingRemoval) {
 		if (0 == lockCount) {
 			static_cast<CDeviceManager* >(parent())->dbusDeviceRemoved(dbusPath);
 		}
@@ -548,7 +548,7 @@ void CDevice::decrementLock() {
 	else {
 		*log << "ERROR: LOCK-COUNT<0";
 	}
-	if ( (pending_removal) && (0 == lockCount) ){
+	if ( (pendingRemoval) && (0 == lockCount) ){
 		static_cast<CDeviceManager* >(parent())->dbusDeviceRemoved(dbusPath);
 	}
 }

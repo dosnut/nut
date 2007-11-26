@@ -36,6 +36,12 @@ namespace libnutclient {
 	QString toStringTr(libnutcommon::DeviceType type);
 	QString toStringTr(QDBusError error);
 
+	/** @brief CLog provides a logging facility for the client_exceptions
+		
+		The Log can be used to save the logging information to a file.
+		You can get access to via the printed signal, which is called every time
+		the logging functions are invoked.
+	*/
 	class CLog : public QObject {
 		Q_OBJECT
 	private:
@@ -60,6 +66,11 @@ namespace libnutclient {
 		void printed(const QString & line);
 	};
 
+
+	/** @brief CLibNut is the base class for all libnutclient classes
+		
+		The class provides very basic functions and members that all derived classes have in common
+	*/
 	class CLibNut : public QObject {
 		Q_OBJECT
 		protected:
@@ -71,6 +82,17 @@ namespace libnutclient {
 
 	};
 
+	/** @brief The DeviceManager keeps track of all devices
+		
+		The DeviceManager represents the server's device manager on the client side.
+		It handles the dbus connections, server disconnect/connect events and device adds/removes.
+		
+		Server disconnect/connects are published via the stateChanged signal.
+		Device adds/removes are published via deviceAdded/deviceRemoved
+
+		After creating a new CDeviceManager init() has to be called for associating
+		to DBus.
+	*/
 	class CDeviceManager : public CLibNut {
 		Q_OBJECT
 		friend class CDevice;
@@ -91,7 +113,13 @@ namespace libnutclient {
 		void dbusDeviceRemoved(const QDBusObjectPath &objectpath);
 		void dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner);
 	public:
+		/** @brief List of devices managed by the DeviceManager
+		*/
 		CDeviceList devices;
+
+		/** @brief Init function to initialize
+			It has to be called to start the device manager
+		*/
 		bool init(CLog * inlog);
 
 		CDeviceManager(QObject * parent);
@@ -105,6 +133,13 @@ namespace libnutclient {
 		void stateChanged(bool state); //Information about server state
 	};
 
+	/** @brief The Device represents a hardware device with its Environments
+
+		The Devices provides information about the state of the hardware device.
+		It also manages its environments.
+		
+		Events are emitted on an environment change and a state change of the device
+	*/
 	class CDevice : public CLibNut {
 		Q_OBJECT
 		friend class CDeviceManager;
@@ -125,7 +160,7 @@ namespace libnutclient {
 		void rebuild(QList<QDBusObjectPath> paths);
 		
 		//Locking functions;
-		bool pending_removal;
+		bool pendingRemoval;
 		int lockCount;
 		
 
@@ -156,12 +191,11 @@ namespace libnutclient {
 		
 	signals:
 		void environmentChangedActive(libnutclient::CEnvironment * current, libnutclient::CEnvironment * previous);
-// 		void environmentsUpdated(); //Pending for removal
-// 		void environmentAdded(CEnvironment * environment); //Pending for removal
-// 		void environmentRemoved(CEnvironment * environment); //Pending for removal
 		void stateChanged(libnutcommon::DeviceState newState);
 	};
 	
+	/** @brief The Environment 
+	*/
 	class CEnvironment : public CLibNut {
 		Q_OBJECT
 		friend class CDeviceManager;
