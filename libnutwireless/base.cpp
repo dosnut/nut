@@ -113,12 +113,12 @@ namespace libnutwireless {
 			emit(request(req));
 		}
 	}
-	void CWpa_SupplicantBase::Event_dispatcher(EventType event) {
+	void CWpa_SupplicantBase::Event_dispatcher(EventType event, QString str) {
 		if (event == EVENT_CONNECTED) {
-			emit(stateChanged(true));
+			emit(connectionStateChanged(true,parseEventNetworkId(str)));
 		}
 		else if (event == EVENT_DISCONNECTED) {
-			emit(stateChanged(false));
+			emit(connectionStateChanged(false,parseEventNetworkId(str)));
 		}
 		else if (event == EVENT_TERMINATING) {
 			wps_close("event-dispatcher/wpa-TERMINATING");
@@ -138,7 +138,7 @@ namespace libnutwireless {
 					Event_dispatcher(parseReq(str));
 					break;
 				case (INTERACT_EVENT):
-					Event_dispatcher(parseEvent(str));
+					Event_dispatcher(parseEvent(str),str);
 					break;
 				default:
 					printMessage(str);

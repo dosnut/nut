@@ -668,6 +668,22 @@ namespace libnutwireless {
 			return INTERACT_MSG;
 		}
 	}
+	int CWpa_SupplicantParsers::parseEventNetworkId(QString str) {
+		//CTRL-EVENT-CONNECTED - Connection to 00:00:00:00:00:00 completed (reauth) [id=-1 id_str=]
+		int id;
+		bool worked;
+		int first = str.indexOf(" [id=", Qt::CaseSensitive)+5;
+		int last = str.indexOf(" ", first, Qt::CaseSensitive);
+		qDebug() << "EVENT DISPATCHING " << str;
+		qDebug() << "EVENT DISPATCHING: " << str.mid(first,last-first);
+		id = str.mid(first,last-first).toInt(&worked);
+		if (worked) {
+			return id;
+		}
+		else {
+			return -1;
+		}
+	}
 	/*
 	IDENTITY (EAP identity/user name)
 	PASSWORD (EAP password)

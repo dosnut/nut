@@ -55,6 +55,7 @@ namespace libnutwireless {
 		Request parseReq(QString str);
 		RequestType parseReqType(QString str);
 		InteractiveType parseInteract(QString str);
+		int parseEventNetworkId(QString str);
 	
 	};
 }

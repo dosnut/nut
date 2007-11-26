@@ -93,7 +93,7 @@ namespace libnutwireless {
 			//Parser Functions
 			//Event helper functions:
 			void Event_dispatcher(Request req);
-			void Event_dispatcher(EventType event);
+			void Event_dispatcher(EventType event, QString str);
 			void Event_dispatcher(QString event);
 
 			//Functions to get actual signal strength and/or signal strength for scan results:
@@ -135,7 +135,8 @@ namespace libnutwireless {
 			QList<ScanResult> scanResults();
 			
 		signals:
-			void stateChanged(bool state);
+			
+			void connectionStateChanged(bool state, int id);
 			void request(libnutwireless::Request req);
 			void closed();
 			void opened();
