@@ -25,7 +25,7 @@ PairwiseCiphers toPairwiseCiphers(ScanCiphers cip) {
 }
 KeyManagement toKeyManagment(ScanAuthentication auth) {
 	//{AUTH_PLAIN=1,AUTH_WPA_PSK=2,AUTH_WPA2_PSK=4, AUTH_WPA_EAP=8, AUTH_WPA2_EAP=16, AUTH_IEEE8021X=32}
-	//{KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8} wps_key_managment;
+	//{KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8}
 	int key = 0;
 	if (AUTH_PLAIN & auth) {
 		key = (key  | KM_NONE) ;
@@ -153,7 +153,7 @@ QString toString(PairwiseCiphers cip) {
 	return ret;
 }
 QString toString(KeyManagement keym) {
-	//{KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8} wps_key_managment;
+	//{KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8}
 	QString ret;
 
 	if (keym & KM_OFF) { //For wpa_supplicant none/off is the same (none=wep, Off=plain)
@@ -252,14 +252,14 @@ QString toString(RequestType reqt) {
 	return QString();
 }
 
-QString toNumberString(BOOL b) {
-	return ( (b == BOOL_UNDEFINED) ? "-1" : ( (b == BOOL_TRUE) ? "1" : "0")); 
+QString toNumberString(QOOL b) {
+	return ( (b == QOOL_UNDEFINED) ? "-1" : ( (b == QOOL_TRUE) ? "1" : "0")); 
 }
-bool toBool(BOOL b) {
-	return (b == BOOL_TRUE);
+bool toBool(QOOL b) {
+	return (b == QOOL_TRUE);
 }
-BOOL toWpsBool(bool b) {
-	return ( b ? BOOL_TRUE : BOOL_FALSE);
+QOOL toQOOL(bool b) {
+	return ( b ? QOOL_TRUE : QOOL_FALSE);
 }
 
 
@@ -477,11 +477,11 @@ NetworkConfig::NetworkConfig() {
 			//Set default values
 			ssid = QString();
 			bssid = libnutcommon::MacAddress();
-			disabled = BOOL_UNDEFINED;
+			disabled = QOOL_UNDEFINED;
 			id_str = QString();
-			scan_ssid = BOOL_UNDEFINED; // (do not) scan with SSID-specific Probe Request frames
+			scan_ssid = QOOL_UNDEFINED; // (do not) scan with SSID-specific Probe Request frames
 			priority = -1;
-			mode = BOOL_UNDEFINED; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
+			mode = QOOL_UNDEFINED; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
 			frequency = -1; //no default, but -1 is not a working value
 			protocols = PROTO_UNDEFINED; //list of accepted protocols TODO: implement
 			keyManagement = KM_UNDEFINED; // list of accepted authenticated key management protocols
@@ -490,14 +490,14 @@ NetworkConfig::NetworkConfig() {
 			group = GCI_UNDEFINED; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
 			QString psk = QString(); //WPA preshared key; 256-bit pre-shared key
 			eapol_flags = EAPF_UNDEFINED;
-			mixed_cell = BOOL_UNDEFINED; //This option can be used to configure whether so called mixed
-			proactive_key_caching = BOOL_UNDEFINED; //Enable/disable opportunistic PMKSA caching for WPA2.
+			mixed_cell = QOOL_UNDEFINED; //This option can be used to configure whether so called mixed
+			proactive_key_caching = QOOL_UNDEFINED; //Enable/disable opportunistic PMKSA caching for WPA2.
 			wep_key0 = QString(); //Static WEP key (ASCII in double quotation, hex without)
 			wep_key1 = QString();
 			wep_key2 = QString();
 			wep_key3 = QString();
 			wep_tx_keyidx = -1; //Default WEP key index (TX) (0..3) TODO: implement
-			peerkey = BOOL_UNDEFINED; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
+			peerkey = QOOL_UNDEFINED; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
 }
 NetworkConfig::~NetworkConfig() {
 }

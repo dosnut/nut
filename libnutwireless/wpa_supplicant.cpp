@@ -5,42 +5,42 @@ namespace libnutwireless {
 
 //CWpa_supplicant
 QList<quint8>& CWpa_Supplicant::getSupportedChannels() {
-	//create supportedChannels?
-	if (supportedChannels.isEmpty() && !supportedFrequencies.isEmpty()) {
-		foreach(quint32 freq, supportedFrequencies) {
-			supportedChannels.append(frequencyToChannel(freq));
+	//create m_supportedChannels?
+	if (m_supportedChannels.isEmpty() && !m_supportedFrequencies.isEmpty()) {
+		foreach(quint32 freq, m_supportedFrequencies) {
+			m_supportedChannels.append(frequencyToChannel(freq));
 		}
 	}
-	return supportedChannels;
+	return m_supportedChannels;
 }
 
 //Function to respond to ctrl requests from wpa_supplicant
 void CWpa_Supplicant::response(Request request, QString msg) {
 	QString cmd = toString(request.type);
 	if (!cmd.isEmpty()) {
-		wps_cmd_CTRL_RSP(cmd,request.id,msg);
+		wpaCtrlCmd_CTRL_RSP(cmd,request.id,msg);
 	}
 }
 
 bool CWpa_Supplicant::selectNetwork(int id) {
 	//TODO: Check if we need to set ap_scan first
 
-	BOOL hasMode = toWpsBool(getNetworkVariable(id,"mode"));
+	QOOL hasMode = toQOOL(getNetworkVariable(id,"mode"));
 	//Let's hope wpa_supplicant returns fail only when network id is invalid
-	if (BOOL_UNDEFINED == hasMode) {
+	if (QOOL_UNDEFINED == hasMode) {
 		return false;
 	}
-	else if (BOOL_TRUE == hasMode) {
+	else if (QOOL_TRUE == hasMode) {
 		ap_scan(2);
 		printMessage(tr("auto-setting ap_scan=2."));
 	}
 	else {
 		//Check if we have defaults, and if the last network was an ap-network
-		if (lastWasAdHoc) {
-			lastWasAdHoc = false;
-			if (-1 != apScanDefault) {
-				ap_scan(apScanDefault);
-				printMessage(tr("Using your last ap_scan settings for auto-setting: %1").arg(QString::number(apScanDefault)));
+		if (m_lastWasAdHoc) {
+			m_lastWasAdHoc = false;
+			if (-1 != m_apScanDefault) {
+				ap_scan(m_apScanDefault);
+				printMessage(tr("Using your last ap_scan settings for auto-setting: %1").arg(QString::number(m_apScanDefault)));
 			}
 			else {
 				printMessage(tr("You must set ap_scan to your needs!"));
@@ -48,20 +48,20 @@ bool CWpa_Supplicant::selectNetwork(int id) {
 			}
 		}
 	}
-	if ("OK\n" == wps_cmd_SELECT_NETWORK(id)) {
+	if ("OK\n" == wpaCtrlCmd_SELECT_NETWORK(id)) {
 		emit networkListUpdated();
 		return true;
 	}
 	else {
 		//Reset ap_scan:
-		if (lastWasAdHoc) {
-			ap_scan(apScanDefault);
+		if (m_lastWasAdHoc) {
+			ap_scan(m_apScanDefault);
 		}
 		return false;
 	}
 }
 bool CWpa_Supplicant::enableNetwork(int id) {
-	if ("OK\n" == wps_cmd_ENABLE_NETWORK(id)) {
+	if ("OK\n" == wpaCtrlCmd_ENABLE_NETWORK(id)) {
 		emit networkListUpdated();
 		return true;
 	}
@@ -70,7 +70,7 @@ bool CWpa_Supplicant::enableNetwork(int id) {
 	}
 }
 bool CWpa_Supplicant::disableNetwork(int id) {
-	if ("OK\n" == wps_cmd_DISABLE_NETWORK(id)) {
+	if ("OK\n" == wpaCtrlCmd_DISABLE_NETWORK(id)) {
 		emit networkListUpdated();
 		return true;
 	}
@@ -81,18 +81,18 @@ bool CWpa_Supplicant::disableNetwork(int id) {
 
 bool CWpa_Supplicant::ap_scan(int type) {
 	if ( (0 <= type and 2 >= type) ) {
-		if ("FAIL\n" == wps_cmd_AP_SCAN(type)) {
+		if ("FAIL\n" == wpaCtrlCmd_AP_SCAN(type)) {
 			return false;
 		}
 		else {
 			printMessage(QString("Setting ap_scan=%1").arg(type));
 			//ap_scan variables accordingly
 			if (2 == type) {
-				lastWasAdHoc = true;
+				m_lastWasAdHoc = true;
 			}
 			else {
-				lastWasAdHoc = false;
-				apScanDefault = type;
+				m_lastWasAdHoc = false;
+				m_apScanDefault = type;
 			}
 			return true;
 		}
@@ -100,34 +100,34 @@ bool CWpa_Supplicant::ap_scan(int type) {
 	return false;
 }
 bool CWpa_Supplicant::save_config() {
-	return !("FAIL\n" == wps_cmd_SAVE_CONFIG());
+	return !("FAIL\n" == wpaCtrlCmd_SAVE_CONFIG());
 }
 void CWpa_Supplicant::disconnect_device() {
-	wps_cmd_DISCONNECT();
+	wpaCtrlCmd_DISCONNECT();
 }
 void CWpa_Supplicant::logon() {
-	wps_cmd_LOGON();
+	wpaCtrlCmd_LOGON();
 }
 void CWpa_Supplicant::logoff() {
-	wps_cmd_LOGOFF();
+	wpaCtrlCmd_LOGOFF();
 }
 void CWpa_Supplicant::reassociate() {
-	wps_cmd_REASSOCIATE();
+	wpaCtrlCmd_REASSOCIATE();
 }
 void CWpa_Supplicant::debug_level(int level) {
-	wps_cmd_LEVEL(level);
+	wpaCtrlCmd_LEVEL(level);
 }
 void CWpa_Supplicant::reconfigure() {
-	wps_cmd_RECONFIGURE();
+	wpaCtrlCmd_RECONFIGURE();
 }
 void CWpa_Supplicant::terminate() {
-	wps_cmd_TERMINATE();
+	wpaCtrlCmd_TERMINATE();
 }
 void CWpa_Supplicant::preauth(libnutcommon::MacAddress bssid) {
-	wps_cmd_PREAUTH(bssid.toString());
+	wpaCtrlCmd_PREAUTH(bssid.toString());
 }
 int CWpa_Supplicant::addNetwork() {
-	QString reply = wps_cmd_ADD_NETWORK();
+	QString reply = wpaCtrlCmd_ADD_NETWORK();
 	if ("FAIL\n" == reply) {
 		return -1;
 	}
@@ -198,265 +198,265 @@ NetconfigStatus CWpa_Supplicant::addNetwork(NetworkConfig config) {
 
 
 NetconfigStatus CWpa_Supplicant::editNetwork(int netid, NetworkConfig config) {
-	NetconfigStatus wps_fail_status;
+	NetconfigStatus failStatus;
 	//Check if we're adding an ad-hoc network:
-	if (BOOL_TRUE == config.mode) {
-		wps_fail_status = checkAdHocNetwork(config);
-		if (NCF_NONE != wps_fail_status.failures) {
-			wps_fail_status.id = netid;
-			return wps_fail_status;
+	if (QOOL_TRUE == config.mode) {
+		failStatus = checkAdHocNetwork(config);
+		if (NCF_NONE != failStatus.failures) {
+			failStatus.id = netid;
+			return failStatus;
 		}
 		else {
 		
 		}
 	}
 
-	wps_fail_status.failures = NCF_NONE;
-	wps_fail_status.eap_failures = ENCF_NONE;
-	wps_fail_status.id = netid;
+	failStatus.failures = NCF_NONE;
+	failStatus.eap_failures = ENCF_NONE;
+	failStatus.id = netid;
 
 
 	//Set the network
 	if (!setNetworkVariable(netid,"ssid",config.ssid) ) {
-		wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_SSID);
+		failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_SSID);
 	}
 	if (!config.bssid.zero()) {
 		if (! setNetworkVariable(netid,"bssid",config.bssid.toString()) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_BSSID);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_BSSID);
 		}
 	}
-	if (config.disabled != BOOL_UNDEFINED) {
+	if (config.disabled != QOOL_UNDEFINED) {
 		if (!setNetworkVariable(netid,"disabled",toNumberString(config.disabled)) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_DISABLED);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_DISABLED);
 		}
 	}
 	if (!config.id_str.isEmpty()) {
 		if ( setNetworkVariable(netid,"id_str",config.id_str) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_ID_STR);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_ID_STR);
 		}
 	}
-	if (config.scan_ssid != BOOL_UNDEFINED) {
+	if (config.scan_ssid != QOOL_UNDEFINED) {
 		if (!setNetworkVariable(netid,"scan_ssid",toNumberString(config.scan_ssid)) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_SCAN_SSID);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_SCAN_SSID);
 		}
 	}
 	if (config.priority >= 0) {
 		if (!setNetworkVariable(netid,"priority",QString::number(config.priority)) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_PRIORITY);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_PRIORITY);
 		}
 	}
-	if (config.mode != BOOL_UNDEFINED) {
+	if (config.mode != QOOL_UNDEFINED) {
 		if (!setNetworkVariable(netid,"mode",toNumberString(config.mode)) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_MODE);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_MODE);
 		}
 	}
 	if (-1 != config.frequency) {
 		if (!setNetworkVariable(netid,"frequency",QString::number(config.frequency)) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_FREQ);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_FREQ);
 		}
 	}
 	if (! (PROTO_UNDEFINED == config.protocols) ) {
 		if ( !setNetworkVariable(netid,"proto",toString(config.protocols)) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_PROTO);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_PROTO);
 		}
 	}
 	if (! (KM_UNDEFINED == config.keyManagement) ) {
 		if ( !setNetworkVariable(netid,"key_mgmt",toString(config.keyManagement)) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_KEYMGMT);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_KEYMGMT);
 		}
 	}
 	if (! (AUTHALG_UNDEFINED == config.auth_alg) ) {
 		if ( !setNetworkVariable(netid,"auth_alg",toString(config.auth_alg) )) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_AUTH_ALG);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_AUTH_ALG);
 		}
 	}
 	if (! (PCI_UNDEFINED == config.pairwise) ) {
 		if ( !setNetworkVariable(netid,"pairwise",toString(config.pairwise) )) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_PAIRWISE);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_PAIRWISE);
 		}
 	}
 	if ( !(GCI_UNDEFINED == config.group) && !(GCI_NONE == config.group) ) {
 		if ( !setNetworkVariable(netid,"group",toString(config.group) )) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_GROUP);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_GROUP);
 		}
 	}
 	if (!config.psk.isEmpty()) {
 		if ( (config.psk.size() < 8 || config.psk.size() > 63) && '"' == config.psk[0]) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_PSK);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_PSK);
 		}
 		else if ( !setNetworkVariable(netid,"psk",config.psk)) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_PSK);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_PSK);
 		}
 	}
 	if (! EAPF_UNDEFINED == config.eapol_flags ) {
 		if ( !setNetworkVariable(netid,"eapol_flags",toString(config.eapol_flags))) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_EAPOL_FLAGS);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_EAPOL_FLAGS);
 		}
 	}
-	if (config.mixed_cell != BOOL_UNDEFINED) {
+	if (config.mixed_cell != QOOL_UNDEFINED) {
 		if ( !setNetworkVariable(netid,"mixed_cell",toNumberString(config.mixed_cell)) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_MIXED_CELL);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_MIXED_CELL);
 		}
 	}
-	if (config.proactive_key_caching != BOOL_UNDEFINED) {
+	if (config.proactive_key_caching != QOOL_UNDEFINED) {
 		if ( !setNetworkVariable(netid,"proactive_key_caching",toNumberString(config.proactive_key_caching)) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_PROA_KEY_CACHING);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_PROA_KEY_CACHING);
 		}
 	}
 	if (!config.wep_key0.isEmpty()) {
 		if ( !setNetworkVariable(netid,"wep_key0",config.wep_key0) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_WEP_KEY0);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_WEP_KEY0);
 		}	
 	}
 	if (!config.wep_key1.isEmpty()) {
 		if ( !setNetworkVariable(netid,"wep_key1",config.wep_key1)) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_WEP_KEY1);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_WEP_KEY1);
 		}	
 	}
 	if (!config.wep_key2.isEmpty()) {
 		if ( !setNetworkVariable(netid,"wep_key2",config.wep_key2) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_WEP_KEY2);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_WEP_KEY2);
 		}	
 	}
 	if (!config.wep_key3.isEmpty()) {
 		if ( !setNetworkVariable(netid,"wep_key3",config.wep_key3) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_WEP_KEY3);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_WEP_KEY3);
 		}	
 	}
 	if (config.wep_tx_keyidx <= 3 && config.wep_tx_keyidx >= 0) {
 		if ( !setNetworkVariable(netid,"wep_tx_keyidx",QString::number(config.wep_tx_keyidx)) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_WEP_KEY_IDX);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_WEP_KEY_IDX);
 		}
 	}
 	else if (config.wep_tx_keyidx != -1) {
-		wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_WEP_KEY_IDX);
+		failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_WEP_KEY_IDX);
 	}
-	if (config.peerkey != BOOL_UNDEFINED) {
+	if (config.peerkey != QOOL_UNDEFINED) {
 		if ( !setNetworkVariable(netid,"peerkey",toNumberString(config.peerkey)) ) {
-			wps_fail_status.failures = (NetconfigFailures) (wps_fail_status.failures | NCF_PEERKEY);
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_PEERKEY);
 		}
 	}
 	//Check if we have an EAP network
 	if ((config.keyManagement & (KM_WPA_EAP | KM_IEEE8021X) ) || config.keyManagement == KM_UNDEFINED) {
-		wps_fail_status.eap_failures = wps_editEapNetwork(netid,config.eap_config);
+		failStatus.eap_failures = editEapNetwork(netid,config.eap_config);
 	}
 
-	if (NCF_NONE == wps_fail_status.failures && ENCF_NONE == wps_fail_status.eap_failures) {
+	if (NCF_NONE == failStatus.failures && ENCF_NONE == failStatus.eap_failures) {
 		emit networkListUpdated();
 	}
-	return wps_fail_status;
+	return failStatus;
 }
 
 NetworkConfig CWpa_Supplicant::getNetworkConfig(int id) {
 	NetworkConfig config;
 	QString response;
 
-	response = wps_cmd_GET_NETWORK(id,"ssid");
+	response = wpaCtrlCmd_GET_NETWORK(id,"ssid");
 	if ("FAIL\n" != response) {
-		config.ssid = wps_cmd_GET_NETWORK(id,"ssid");
+		config.ssid = wpaCtrlCmd_GET_NETWORK(id,"ssid");
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"bssid");
+	response = wpaCtrlCmd_GET_NETWORK(id,"bssid");
 	if ("FAIL\n" != response) {
 		config.bssid = libnutcommon::MacAddress(response);
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"disabled");
+	response = wpaCtrlCmd_GET_NETWORK(id,"disabled");
 	if ("FAIL\n" != response) {
-		config.disabled = toWpsBool(response);
+		config.disabled = toQOOL(response);
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"id_str");
+	response = wpaCtrlCmd_GET_NETWORK(id,"id_str");
 	if ("FAIL\n" != response) {
 		config.id_str = response;
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"scan_ssid");
+	response = wpaCtrlCmd_GET_NETWORK(id,"scan_ssid");
 	if ("FAIL\n" != response) {
-		config.scan_ssid = toWpsBool(response);
+		config.scan_ssid = toQOOL(response);
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"priority");
+	response = wpaCtrlCmd_GET_NETWORK(id,"priority");
 	if ("FAIL\n" != response) {
 		config.priority = response.toInt();
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"mode");
+	response = wpaCtrlCmd_GET_NETWORK(id,"mode");
 	if ("FAIL\n" != response) {
-		config.mode = toWpsBool(response);
+		config.mode = toQOOL(response);
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"frequency");
+	response = wpaCtrlCmd_GET_NETWORK(id,"frequency");
 	if ("FAIL\n" != response) {
 		config.frequency = response.toInt();
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"proto");
+	response = wpaCtrlCmd_GET_NETWORK(id,"proto");
 	if ("FAIL\n" != response) {
 		config.protocols = parseProtocols(response); // TODO: implement
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"key_mgmt");
+	response = wpaCtrlCmd_GET_NETWORK(id,"key_mgmt");
 	if ("FAIL\n" != response) {
 		config.keyManagement = parseKeyMgmt(response); // TODO: implement
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"auth_alg");
+	response = wpaCtrlCmd_GET_NETWORK(id,"auth_alg");
 	if ("FAIL\n" != response) {
 		config.auth_alg = parseAuthAlg(response); // TODO: implement
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"pairwise");
+	response = wpaCtrlCmd_GET_NETWORK(id,"pairwise");
 	if ("FAIL\n" != response) {
 		config.pairwise = parsePairwiseCiphers(response); // TODO: implement
 	}
 	
-	response = wps_cmd_GET_NETWORK(id,"group");
+	response = wpaCtrlCmd_GET_NETWORK(id,"group");
 	if ("FAIL\n" != response) {
 		config.group = parseGroupCiphers(response); // TODO: implement
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"psk");
+	response = wpaCtrlCmd_GET_NETWORK(id,"psk");
 	if ("FAIL\n" != response) {
 		config.psk = response;
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"eapol_flags");
+	response = wpaCtrlCmd_GET_NETWORK(id,"eapol_flags");
 	if ("FAIL\n" != response) {
 		config.eapol_flags = parseEapolFlags(response); // TODO: implement
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"mixed_cell");
+	response = wpaCtrlCmd_GET_NETWORK(id,"mixed_cell");
 	if ("FAIL\n" != response) {
-		config.mixed_cell = toWpsBool(response);
+		config.mixed_cell = toQOOL(response);
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"proactive_key_caching");
+	response = wpaCtrlCmd_GET_NETWORK(id,"proactive_key_caching");
 	if ("FAIL\n" != response) {
-		config.proactive_key_caching = toWpsBool(response);
+		config.proactive_key_caching = toQOOL(response);
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"wep_key0");
+	response = wpaCtrlCmd_GET_NETWORK(id,"wep_key0");
 	if ("FAIL\n" != response) {
 		config.wep_key0 = response;
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"wep_key1");
+	response = wpaCtrlCmd_GET_NETWORK(id,"wep_key1");
 	if ("FAIL\n" != response) {
 		config.wep_key1 = response;
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"wep_key2");
+	response = wpaCtrlCmd_GET_NETWORK(id,"wep_key2");
 	if ("FAIL\n" != response) {
 		config.wep_key2 = response;
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"wep_key3");
+	response = wpaCtrlCmd_GET_NETWORK(id,"wep_key3");
 	if ("FAIL\n" != response) {
 		config.wep_key3 = response;
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"wep_tx_keyidx");
+	response = wpaCtrlCmd_GET_NETWORK(id,"wep_tx_keyidx");
 	if ("FAIL\n" != response) {
 		config.wep_tx_keyidx = response.toInt();
 		if ( (0 == config.wep_tx_keyidx) && config.wep_key0.isEmpty() ) {
@@ -464,23 +464,23 @@ NetworkConfig CWpa_Supplicant::getNetworkConfig(int id) {
 		}
 	}
 
-	response = wps_cmd_GET_NETWORK(id,"peerkey");
+	response = wpaCtrlCmd_GET_NETWORK(id,"peerkey");
 	if ("FAIL\n" != response) {
-		config.peerkey = toWpsBool(response);
+		config.peerkey = toQOOL(response);
 	}
 	//Check if we need to fetch wpa_settings
 	if ( config.keyManagement & (KM_IEEE8021X | KM_WPA_EAP)) {
-		config.eap_config = wps_getEapNetworkConfig(id);
+		config.eap_config = getEapNetworkConfig(id);
 	}
 	return config;
 }
 
-EapNetworkConfig CWpa_Supplicant::wps_getEapNetworkConfig(int id) {
+EapNetworkConfig CWpa_Supplicant::getEapNetworkConfig(int id) {
 	EapNetworkConfig config;
 	bool ok;
 	QString response;
 	//Check if the network uses EAP
-	response = wps_cmd_GET_NETWORK(id,"key_mgmt");
+	response = wpaCtrlCmd_GET_NETWORK(id,"key_mgmt");
 	if ("FAIL\n" != response) {
 		if ( !(parseKeyMgmt(response) & (KM_WPA_EAP | KM_IEEE8021X) ) ) {
 			return config;
@@ -490,116 +490,116 @@ EapNetworkConfig CWpa_Supplicant::wps_getEapNetworkConfig(int id) {
 		return config;
 	}
 	//Get eap network config
-	response = wps_cmd_GET_NETWORK(id,"eap");
+	response = wpaCtrlCmd_GET_NETWORK(id,"eap");
 	if ("FAIL\n" != response) {
 		config.eap = parseEapMethod(response); //space-separated list of accepted EAP methods TODO: implement
 	}
-	response = wps_cmd_GET_NETWORK(id,"identity");
+	response = wpaCtrlCmd_GET_NETWORK(id,"identity");
 	if ("FAIL\n" != response) {
 		config.identity = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"anonymous_identity");
+	response = wpaCtrlCmd_GET_NETWORK(id,"anonymous_identity");
 	if ("FAIL\n" != response) {
 		config.anonymous_identity = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"password");
+	response = wpaCtrlCmd_GET_NETWORK(id,"password");
 	if ("FAIL\n" != response) {
 		config.password = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"ca_cert");
+	response = wpaCtrlCmd_GET_NETWORK(id,"ca_cert");
 	if ("FAIL\n" != response) {
 		config.ca_cert = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"ca_path");
+	response = wpaCtrlCmd_GET_NETWORK(id,"ca_path");
 	if ("FAIL\n" != response) {
 		config.ca_path = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"client_cert");
+	response = wpaCtrlCmd_GET_NETWORK(id,"client_cert");
 	if ("FAIL\n" != response) {
 		config.client_cert = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"private_key");
+	response = wpaCtrlCmd_GET_NETWORK(id,"private_key");
 	if ("FAIL\n" != response) {
 		config.private_key = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"private_key_passwd");
+	response = wpaCtrlCmd_GET_NETWORK(id,"private_key_passwd");
 	if ("FAIL\n" != response) {
 		config.private_key_passwd = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"dh_file");
+	response = wpaCtrlCmd_GET_NETWORK(id,"dh_file");
 	if ("FAIL\n" != response) {
 		config.dh_file = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"subject_match");
+	response = wpaCtrlCmd_GET_NETWORK(id,"subject_match");
 	if ("FAIL\n" != response) {
 		config.subject_match = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"altsubject_match");
+	response = wpaCtrlCmd_GET_NETWORK(id,"altsubject_match");
 	if ("FAIL\n" != response) {
 		config.altsubject_match = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"phase1");
+	response = wpaCtrlCmd_GET_NETWORK(id,"phase1");
 	if ("FAIL\n" != response) {
 		config.phase1 = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"phase2");
+	response = wpaCtrlCmd_GET_NETWORK(id,"phase2");
 	if ("FAIL\n" != response) {
 		config.phase2 = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"ca_cert2");
+	response = wpaCtrlCmd_GET_NETWORK(id,"ca_cert2");
 	if ("FAIL\n" != response) {
 		config.ca_cert2 = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"ca_path2");
+	response = wpaCtrlCmd_GET_NETWORK(id,"ca_path2");
 	if ("FAIL\n" != response) {
 		config.ca_path2 = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"client_cert2");
+	response = wpaCtrlCmd_GET_NETWORK(id,"client_cert2");
 	if ("FAIL\n" != response) {
 		config.client_cert2 = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"private_key2");
+	response = wpaCtrlCmd_GET_NETWORK(id,"private_key2");
 	if ("FAIL\n" != response) {
 		config.private_key2 = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"private_key2_passwd");
+	response = wpaCtrlCmd_GET_NETWORK(id,"private_key2_passwd");
 	if ("FAIL\n" != response) {
 		config.private_key2_passwd = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"dh_file2");
+	response = wpaCtrlCmd_GET_NETWORK(id,"dh_file2");
 	if ("FAIL\n" != response) {
 		config.dh_file2 = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"subject_match2");
+	response = wpaCtrlCmd_GET_NETWORK(id,"subject_match2");
 	if ("FAIL\n" != response) {
 		config.subject_match2 = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"altsubject_match2");
+	response = wpaCtrlCmd_GET_NETWORK(id,"altsubject_match2");
 	if ("FAIL\n" != response) {
 		config.altsubject_match2 = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"fragment_size");
+	response = wpaCtrlCmd_GET_NETWORK(id,"fragment_size");
 	if ("FAIL\n" != response) {
 		config.fragment_size = response.toInt(&ok);
 		if (!ok) {
 			config.fragment_size = -1;
 		}
 	}
-	response = wps_cmd_GET_NETWORK(id,"eappsk");
+	response = wpaCtrlCmd_GET_NETWORK(id,"eappsk");
 	if ("FAIL\n" != response) {
 		config.eappsk = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"nai");
+	response = wpaCtrlCmd_GET_NETWORK(id,"nai");
 	if ("FAIL\n" != response) {
 		config.nai = response;
 	}
-	response = wps_cmd_GET_NETWORK(id,"pac_file");
+	response = wpaCtrlCmd_GET_NETWORK(id,"pac_file");
 	if ("FAIL\n" != response) {
 		config.pac_file = response;
 	}
 	return config;
 }
-EapNetconfigFailures CWpa_Supplicant::wps_editEapNetwork(int netid, EapNetworkConfig config) {
+EapNetconfigFailures CWpa_Supplicant::editEapNetwork(int netid, EapNetworkConfig config) {
 	EapNetconfigFailures eap_failures = ENCF_NONE;
 	if (EAPM_UNDEFINED != config.eap) {
 		if (!setNetworkVariable(netid,"eap",toString(config.eap)) ) {
@@ -735,19 +735,19 @@ EapNetconfigFailures CWpa_Supplicant::wps_editEapNetwork(int netid, EapNetworkCo
 }
 
 void CWpa_Supplicant::removeNetwork(int id) {
-	wps_cmd_REMOVE_NETWORK(id);
+	wpaCtrlCmd_REMOVE_NETWORK(id);
 }
 
 //TODO:Check is id is in range
 void CWpa_Supplicant::setBssid(int id, libnutcommon::MacAddress bssid) {
-	wps_cmd_BSSID(id,bssid.toString());
+	wpaCtrlCmd_BSSID(id,bssid.toString());
 }
 //Plain setVaraiable functions
 void CWpa_Supplicant::setVariable(QString var, QString val) {
-	wps_cmd_SET(var,val);
+	wpaCtrlCmd_SET(var,val);
 }
 bool CWpa_Supplicant::setNetworkVariable(int id, QString var, QString val) {
-	QString ret = wps_cmd_SET_NETWORK(id,var,val);
+	QString ret = wpaCtrlCmd_SET_NETWORK(id,var,val);
 	if (ret.contains("OK")) {
 		return true;
 	}
@@ -756,12 +756,12 @@ bool CWpa_Supplicant::setNetworkVariable(int id, QString var, QString val) {
 	}
 }
 QString CWpa_Supplicant::getNetworkVariable(int id, QString val) {
-	return wps_cmd_GET_NETWORK(id,val);
+	return wpaCtrlCmd_GET_NETWORK(id,val);
 }
 
 //Functions with a lot more functionality  (in the parser functions :)
 QList<ShortNetworkInfo> CWpa_Supplicant::listNetworks() {
-	QString reply = wps_cmd_LIST_NETWORKS();
+	QString reply = wpaCtrlCmd_LIST_NETWORKS();
 	if (!reply.isEmpty()) {
 		QList<ShortNetworkInfo> info = parseListNetwork(sliceMessage(reply));
 		for (int i = 0; i < info.size(); i++)
@@ -774,7 +774,7 @@ QList<ShortNetworkInfo> CWpa_Supplicant::listNetworks() {
 }
 
 Status CWpa_Supplicant::status() {
-	QString reply = wps_cmd_STATUS(true);
+	QString reply = wpaCtrlCmd_STATUS(true);
 	if (!reply.isEmpty()) {
 		return parseStatus(sliceMessage(reply));
 	}
@@ -784,7 +784,7 @@ Status CWpa_Supplicant::status() {
 	}
 }
 MIBVariables CWpa_Supplicant::getMIBVariables() {
-	QString reply = wps_cmd_MIB();
+	QString reply = wpaCtrlCmd_MIB();
 	if (!reply.isEmpty()) {
 		return parseMIB(sliceMessage(reply));
 	}
@@ -802,27 +802,27 @@ Capabilities CWpa_Supplicant::getCapabilities() {
 	caps.proto = PROTO_UNDEFINED;
 	caps.auth_alg = AUTHALG_UNDEFINED;
 	QString response;
-	response = wps_cmd_GET_CAPABILITY("eap",false);
+	response = wpaCtrlCmd_GET_CAPABILITY("eap",false);
 	if ("FAIL\n" != response) {
 		caps.eap = parseEapMethod(response);
 	}
-	response = wps_cmd_GET_CAPABILITY("pairwise",false);
+	response = wpaCtrlCmd_GET_CAPABILITY("pairwise",false);
 	if ("FAIL\n" != response) {
 		caps.pairwise = parsePairwiseCiphers(response);
 	}
-	response = wps_cmd_GET_CAPABILITY("group",false);
+	response = wpaCtrlCmd_GET_CAPABILITY("group",false);
 	if ("FAIL\n" != response) {
 		caps.group = parseGroupCiphers(response);
 	}
-	response = wps_cmd_GET_CAPABILITY("key_mgmt",false);
+	response = wpaCtrlCmd_GET_CAPABILITY("key_mgmt",false);
 	if ("FAIL\n" != response) {
 		caps.keyManagement = parseKeyMgmt(response);
 	}
-	response = wps_cmd_GET_CAPABILITY("proto",false);
+	response = wpaCtrlCmd_GET_CAPABILITY("proto",false);
 	if ("FAIL\n" != response) {
 		caps.proto = parseProtocols(response);
 	}
-	response = wps_cmd_GET_CAPABILITY("auth_alg",false);
+	response = wpaCtrlCmd_GET_CAPABILITY("auth_alg",false);
 	if ("FAIL\n" != response) {
 		caps.auth_alg = parseAuthAlg(response);
 	}

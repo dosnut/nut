@@ -31,95 +31,95 @@ namespace libnutwireless {
 			QString m_wpaSupplicantPath;
 			int m_wpaFd, m_wextFd;
 			QSocketNotifier *m_eventSn;
-			bool log_enabled;
-			bool wps_connected;
-			int timerId;
-			int wextTimerId;
-			int ScanTimerId;
-			int wextTimerRate;
-			int timerCount;
-			bool inConnectionPhase;
-			QString ifname;
-			QList<ScanResult> wpsScanResults;
-			WextSignal signalQuality;
-			int ScanTimeoutCount;
-			int wextPollTimeoutCount;
-			QList<quint32> supportedFrequencies;
+			bool m_logEnabled;
+			bool m_wpaConnected;
+			int m_timerId;
+			int m_wextTimerId;
+			int m_scanTimerId;
+			int m_wextTimerRate;
+			int m_timerCount;
+			bool m_inConnectionPhase;
+			QString m_ifname;
+			QList<ScanResult> m_wpaScanResults;
+			WextSignal m_signalQuality;
+			int m_scanTimeoutCount;
+			int m_wextPollTimeoutCount;
+			QList<quint32> m_supportedFrequencies;
 			
 			//Workaround as Constructor of subclass is not beeing called
-			int apScanDefault;
-			bool lastWasAdHoc;
+			int m_apScanDefault;
+			bool m_lastWasAdHoc;
 			//
 
-			QString wps_ctrl_command(QString cmd);
+			QString wpaCtrlCommand(QString cmd);
 		//Abstracted Commands:
-			inline QString wps_cmd_PING() { return wps_ctrl_command("PING"); }
-			inline QString wps_cmd_MIB() { return wps_ctrl_command("MIB"); }
-			inline QString wps_cmd_STATUS(bool verbose=false) { return (verbose) ? wps_ctrl_command("STATUS-VERBOSE") : wps_ctrl_command("STATUS"); }
-			inline QString wps_cmd_PMKSA() { return wps_ctrl_command("PMKSA"); }
-			inline void wps_cmd_SET(QString var, QString val) { wps_ctrl_command(QString("SET %1 %2").arg(var,val)); }
-			inline void wps_cmd_LOGON() { wps_ctrl_command("LOGON"); }
-			inline void wps_cmd_LOGOFF() { wps_ctrl_command("LOGOFF"); }
-			inline void wps_cmd_REASSOCIATE() { wps_ctrl_command("REASSOCIATE"); }
+			inline QString wpaCtrlCmd_PING() { return wpaCtrlCommand("PING"); }
+			inline QString wpaCtrlCmd_MIB() { return wpaCtrlCommand("MIB"); }
+			inline QString wpaCtrlCmd_STATUS(bool verbose=false) { return (verbose) ? wpaCtrlCommand("STATUS-VERBOSE") : wpaCtrlCommand("STATUS"); }
+			inline QString wpaCtrlCmd_PMKSA() { return wpaCtrlCommand("PMKSA"); }
+			inline void wpaCtrlCmd_SET(QString var, QString val) { wpaCtrlCommand(QString("SET %1 %2").arg(var,val)); }
+			inline void wpaCtrlCmd_LOGON() { wpaCtrlCommand("LOGON"); }
+			inline void wpaCtrlCmd_LOGOFF() { wpaCtrlCommand("LOGOFF"); }
+			inline void wpaCtrlCmd_REASSOCIATE() { wpaCtrlCommand("REASSOCIATE"); }
 			//Start pre-authentication with the given BSSID.
-			inline void wps_cmd_PREAUTH(QString bssid) { wps_ctrl_command(QString("PREAUTH %1").arg(bssid)); }
-			inline void wps_cmd_LEVEL(int level) { wps_ctrl_command(QString("LEVEL %1").arg(QString::number(level))); }
-			inline void wps_cmd_RECONFIGURE() { wps_ctrl_command("RECONFIGURE"); };
-			inline void wps_cmd_TERMINATE() { wps_ctrl_command("TERMINATE"); }
+			inline void wpaCtrlCmd_PREAUTH(QString bssid) { wpaCtrlCommand(QString("PREAUTH %1").arg(bssid)); }
+			inline void wpaCtrlCmd_LEVEL(int level) { wpaCtrlCommand(QString("LEVEL %1").arg(QString::number(level))); }
+			inline void wpaCtrlCmd_RECONFIGURE() { wpaCtrlCommand("RECONFIGURE"); };
+			inline void wpaCtrlCmd_TERMINATE() { wpaCtrlCommand("TERMINATE"); }
 			//Set preferred BSSID for a network. Network id can be received from the LIST_NETWORKS command output.
-			inline void wps_cmd_BSSID(int id, QString bssid) { wps_ctrl_command(QString("BSSID %1 %2").arg(QString::number(id),bssid));}
-			inline QString wps_cmd_LIST_NETWORKS() { return wps_ctrl_command("LIST_NETWORKS"); }
-			inline void wps_cmd_DISCONNECT() { wps_ctrl_command("DISCONNECT"); }
-			inline QString wps_cmd_SCAN() { return wps_ctrl_command("SCAN"); }
-			inline QString wps_cmd_SCAN_RESULTS() { return wps_ctrl_command("SCAN_RESULTS"); }
-			inline QString wps_cmd_SELECT_NETWORK(int id) { return wps_ctrl_command(QString("SELECT_NETWORK %1").arg(QString::number(id))); }
-			inline QString wps_cmd_ENABLE_NETWORK(int id) { return wps_ctrl_command(QString("ENABLE_NETWORK %1").arg(QString::number(id))); }
-			inline QString wps_cmd_DISABLE_NETWORK(int id) { return wps_ctrl_command(QString("DISABLE_NETWORK %1").arg(QString::number(id))); }
+			inline void wpaCtrlCmd_BSSID(int id, QString bssid) { wpaCtrlCommand(QString("BSSID %1 %2").arg(QString::number(id),bssid));}
+			inline QString wpaCtrlCmd_LIST_NETWORKS() { return wpaCtrlCommand("LIST_NETWORKS"); }
+			inline void wpaCtrlCmd_DISCONNECT() { wpaCtrlCommand("DISCONNECT"); }
+			inline QString wpaCtrlCmd_SCAN() { return wpaCtrlCommand("SCAN"); }
+			inline QString wpaCtrlCmd_SCAN_RESULTS() { return wpaCtrlCommand("SCAN_RESULTS"); }
+			inline QString wpaCtrlCmd_SELECT_NETWORK(int id) { return wpaCtrlCommand(QString("SELECT_NETWORK %1").arg(QString::number(id))); }
+			inline QString wpaCtrlCmd_ENABLE_NETWORK(int id) { return wpaCtrlCommand(QString("ENABLE_NETWORK %1").arg(QString::number(id))); }
+			inline QString wpaCtrlCmd_DISABLE_NETWORK(int id) { return wpaCtrlCommand(QString("DISABLE_NETWORK %1").arg(QString::number(id))); }
 			//creates new empty network, return id on success and FAIL on failure
-			inline QString wps_cmd_ADD_NETWORK() { return wps_ctrl_command("ADD_NETWORK"); }
-			inline void wps_cmd_REMOVE_NETWORK(int id) { wps_ctrl_command(QString("REMOVE_NETWORK %1").arg(QString::number(id))); }
-			inline QString wps_cmd_SET_NETWORK(int id, QString var, QString val) { return wps_ctrl_command(QString("SET_NETWORK %1 %2 %3").arg(QString::number(id),var,val));}
+			inline QString wpaCtrlCmd_ADD_NETWORK() { return wpaCtrlCommand("ADD_NETWORK"); }
+			inline void wpaCtrlCmd_REMOVE_NETWORK(int id) { wpaCtrlCommand(QString("REMOVE_NETWORK %1").arg(QString::number(id))); }
+			inline QString wpaCtrlCmd_SET_NETWORK(int id, QString var, QString val) { return wpaCtrlCommand(QString("SET_NETWORK %1 %2 %3").arg(QString::number(id),var,val));}
 			//get network variable
-			inline QString wps_cmd_GET_NETWORK(int id, QString var) { return wps_ctrl_command(QString("GET_NETWORK %1 %2").arg(QString::number(id), var)); }
-			inline QString wps_cmd_SAVE_CONFIG() { return wps_ctrl_command("SAVE_CONFIG"); }
-			inline void wps_cmd_CTRL_RSP(QString field_name, int id, QString val) { wps_ctrl_command(QString("CTRL-RSP-%1-%2-%3").arg(field_name,QString::number(id), val)); }
-			inline QString wps_cmd_GET_CAPABILITY(QString option, bool strict) { return (strict) ? wps_ctrl_command(QString("GET_CAPABILITY %1 strict").arg(option)) : wps_ctrl_command(QString("GET_CAPABILITY %1").arg(option));}
+			inline QString wpaCtrlCmd_GET_NETWORK(int id, QString var) { return wpaCtrlCommand(QString("GET_NETWORK %1 %2").arg(QString::number(id), var)); }
+			inline QString wpaCtrlCmd_SAVE_CONFIG() { return wpaCtrlCommand("SAVE_CONFIG"); }
+			inline void wpaCtrlCmd_CTRL_RSP(QString field_name, int id, QString val) { wpaCtrlCommand(QString("CTRL-RSP-%1-%2-%3").arg(field_name,QString::number(id), val)); }
+			inline QString wpaCtrlCmd_GET_CAPABILITY(QString option, bool strict) { return (strict) ? wpaCtrlCommand(QString("GET_CAPABILITY %1 strict").arg(option)) : wpaCtrlCommand(QString("GET_CAPABILITY %1").arg(option));}
 			//Change ap_scan value: 0 = no scanning,
 			//1 = wpa_supplicant requests scans and uses scan results to select the AP
 			//2 = wpa_supplicant does not use scanning and just requests driver to associate and take care of AP selection
-			inline QString wps_cmd_AP_SCAN(int val) { return wps_ctrl_command(QString("AP_SCAN %1").arg(QString::number(val))); }
-			inline QString wps_cmd_INTERFACES() { return wps_ctrl_command("INTERFACES"); }
+			inline QString wpaCtrlCmd_AP_SCAN(int val) { return wpaCtrlCommand(QString("AP_SCAN %1").arg(QString::number(val))); }
+			inline QString wpaCtrlCmd_INTERFACES() { return wpaCtrlCommand("INTERFACES"); }
 			
 			//Parser Functions
 			//Event helper functions:
-			void Event_dispatcher(Request req);
-			void Event_dispatcher(EventType event, QString str);
-			void Event_dispatcher(QString event);
+			void eventDispatcher(Request req);
+			void eventDispatcher(EventType event, QString str);
+			void eventDispatcher(QString event);
 
 			//Functions to get actual signal strength and/or signal strength for scan results:
 			//And set scanresults
-			void wps_setScanResults(QList<WextRawScan> wextScanResults);
-			void wps_tryScanResults();
+			void setScanResults(QList<WextRawScan> wextScanResults);
+			void tryScanResults();
 
 			//Need to do it that way, as inline fails otherwise
-			inline void printMessage(QString msg) { if (log_enabled) emit(message(msg));}
+			inline void printMessage(QString msg) { if (m_logEnabled) emit(message(msg));}
 
-			void wps_open(bool time_call);
-			bool wps_close(QString call_func, bool internal=true);
-			int wps_TimerTime(int timerCount);
+			void openWpa(bool time_call);
+			bool closeWpa(QString call_func, bool internal=true);
+			int dynamicTimerTime(int m_timerCount);
 
 		protected slots:
-			void wps_read(int socket);
-			void wps_detach();
+			void readFromWpa(int socket);
+			void detachWpa();
 		protected:
 			//proposed time polling:
 			void timerEvent(QTimerEvent *event);
 			
 		public:
-			CWpa_SupplicantBase(QObject * parent, QString ifname);
+			CWpa_SupplicantBase(QObject * parent, QString m_ifname);
 			~CWpa_SupplicantBase();
-			inline void open() { wps_open(false); }
-			inline bool close() {return wps_close("libnutclient",false); }
+			inline void open() { openWpa(false); }
+			inline bool close() {return closeWpa("libnutclient",false); }
 			bool connected();
 			void readWirelessInfo();
 			
@@ -144,6 +144,7 @@ namespace libnutwireless {
 			void message(QString msg);
 			void eventMessage(libnutwireless::EventType type);
 			void signalQualityUpdated(libnutwireless::WextSignal signal);
+			void networkListUpdated();
 	};
 
 }

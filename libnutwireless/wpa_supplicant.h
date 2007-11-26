@@ -12,19 +12,19 @@ namespace libnutwireless {
 	class CWpa_Supplicant: public CWpa_SupplicantBase {
 			Q_OBJECT
 		private:
-			QList<quint8> supportedChannels;
+			QList<quint8> m_supportedChannels;
 
 			//Edit/get network helper functions
-			EapNetworkConfig wps_getEapNetworkConfig(int id);
-			EapNetconfigFailures wps_editEapNetwork(int netid, EapNetworkConfig config);
+			EapNetworkConfig getEapNetworkConfig(int id);
+			EapNetconfigFailures editEapNetwork(int netid, EapNetworkConfig config);
 			NetconfigStatus checkAdHocNetwork(NetworkConfig &config);
 		public:
 			//TODO: Check why constructor is not beeing called
-			CWpa_Supplicant(QObject * parent, QString ifname) : CWpa_SupplicantBase(parent, ifname) {
-				apScanDefault = -1;
-				qDebug() << (QString("Constructor set ap_scan=%1").arg(QString::number(apScanDefault)));
-				lastWasAdHoc = false;
-				qDebug() << (QString("Constructor set lastWasAdHoc=%1").arg((lastWasAdHoc) ? "true" : "false"));
+			CWpa_Supplicant(QObject * parent, QString m_ifname) : CWpa_SupplicantBase(parent, m_ifname) {
+				m_apScanDefault = -1;
+				qDebug() << (QString("Constructor set ap_scan=%1").arg(QString::number(m_apScanDefault)));
+				m_lastWasAdHoc = false;
+				qDebug() << (QString("Constructor set m_lastWasAdHoc=%1").arg((m_lastWasAdHoc) ? "true" : "false"));
 			}
 			~CWpa_Supplicant() {}
 			QList<quint8>& getSupportedChannels();
@@ -66,14 +66,12 @@ namespace libnutwireless {
 			Capabilities getCapabilities();
 			//Future functions: (these may never be implemented as noone realy needs them
 			/*
-			QString wps_cmd_PMKSA();
+			QString wpaCtrlCmd_PMKSA();
 			//Maybe variable/value as new MIBVariable / NetworkVariableiable class
-			void setVariable(wps_var var);
+			void setVariable(NetworkVariable var);
 			void setNetworkVariable(int id, NetworkVariable var);
 			NetworkVariable getNetworkVariable(int id, NetworkVariable::Type);
 */
-		signals:
-			void networkListUpdated();
 	};
 
 }
