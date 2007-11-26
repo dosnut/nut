@@ -6,8 +6,8 @@ namespace libnutwireless {
 //CWpa_supplicant
 QList<quint8>& CWpa_Supplicant::getSupportedChannels() {
 	//create supportedChannels?
-	if (supportedChannels.isEmpty() && !supportedFrequencies.isEmpty()) {
-		foreach(quint32 freq, supportedFrequencies) {
+	if (supportedChannels.isEmpty() && !m_supportedFrequencies.isEmpty()) {
+		foreach(quint32 freq, m_supportedFrequencies) {
 			supportedChannels.append(frequencyToChannel(freq));
 		}
 	}
@@ -36,11 +36,11 @@ bool CWpa_Supplicant::selectNetwork(int id) {
 	}
 	else {
 		//Check if we have defaults, and if the last network was an ap-network
-		if (lastWasAdHoc) {
-			lastWasAdHoc = false;
-			if (-1 != apScanDefault) {
-				ap_scan(apScanDefault);
-				printMessage(tr("Using your last ap_scan settings for auto-setting: %1").arg(QString::number(apScanDefault)));
+		if (m_lastWasAdHoc) {
+			m_lastWasAdHoc = false;
+			if (-1 != m_apScanDefault) {
+				ap_scan(m_apScanDefault);
+				printMessage(tr("Using your last ap_scan settings for auto-setting: %1").arg(QString::number(m_apScanDefault)));
 			}
 			else {
 				printMessage(tr("You must set ap_scan to your needs!"));
@@ -54,8 +54,8 @@ bool CWpa_Supplicant::selectNetwork(int id) {
 	}
 	else {
 		//Reset ap_scan:
-		if (lastWasAdHoc) {
-			ap_scan(apScanDefault);
+		if (m_lastWasAdHoc) {
+			ap_scan(m_apScanDefault);
 		}
 		return false;
 	}
@@ -88,11 +88,11 @@ bool CWpa_Supplicant::ap_scan(int type) {
 			printMessage(QString("Setting ap_scan=%1").arg(type));
 			//ap_scan variables accordingly
 			if (2 == type) {
-				lastWasAdHoc = true;
+				m_lastWasAdHoc = true;
 			}
 			else {
-				lastWasAdHoc = false;
-				apScanDefault = type;
+				m_lastWasAdHoc = false;
+				m_apScanDefault = type;
 			}
 			return true;
 		}

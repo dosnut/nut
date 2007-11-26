@@ -20,11 +20,11 @@ namespace libnutwireless {
 			NetconfigStatus checkAdHocNetwork(NetworkConfig &config);
 		public:
 			//TODO: Check why constructor is not beeing called
-			CWpa_Supplicant(QObject * parent, QString ifname) : CWpa_SupplicantBase(parent, ifname) {
-				apScanDefault = -1;
-				qDebug() << (QString("Constructor set ap_scan=%1").arg(QString::number(apScanDefault)));
-				lastWasAdHoc = false;
-				qDebug() << (QString("Constructor set lastWasAdHoc=%1").arg((lastWasAdHoc) ? "true" : "false"));
+			CWpa_Supplicant(QObject * parent, QString m_ifname) : CWpa_SupplicantBase(parent, m_ifname) {
+				m_apScanDefault = -1;
+				qDebug() << (QString("Constructor set ap_scan=%1").arg(QString::number(m_apScanDefault)));
+				m_lastWasAdHoc = false;
+				qDebug() << (QString("Constructor set m_lastWasAdHoc=%1").arg((m_lastWasAdHoc) ? "true" : "false"));
 			}
 			~CWpa_Supplicant() {}
 			QList<quint8>& getSupportedChannels();

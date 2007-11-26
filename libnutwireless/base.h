@@ -31,24 +31,24 @@ namespace libnutwireless {
 			QString m_wpaSupplicantPath;
 			int m_wpaFd, m_wextFd;
 			QSocketNotifier *m_eventSn;
-			bool log_enabled;
-			bool wps_connected;
-			int timerId;
-			int wextTimerId;
-			int ScanTimerId;
-			int wextTimerRate;
-			int timerCount;
-			bool inConnectionPhase;
-			QString ifname;
-			QList<ScanResult> wpsScanResults;
-			WextSignal signalQuality;
-			int ScanTimeoutCount;
-			int wextPollTimeoutCount;
-			QList<quint32> supportedFrequencies;
+			bool m_logEnabled;
+			bool m_wpaConnected;
+			int m_timerId;
+			int m_wextTimerId;
+			int m_scanTimerId;
+			int m_wextTimerRate;
+			int m_timerCount;
+			bool m_inConnectionPhase;
+			QString m_ifname;
+			QList<ScanResult> m_wpaScanResults;
+			WextSignal m_signalQuality;
+			int m_scanTimeoutCount;
+			int m_wextPollTimeoutCount;
+			QList<quint32> m_supportedFrequencies;
 			
 			//Workaround as Constructor of subclass is not beeing called
-			int apScanDefault;
-			bool lastWasAdHoc;
+			int m_apScanDefault;
+			bool m_lastWasAdHoc;
 			//
 
 			QString wps_ctrl_command(QString cmd);
@@ -102,11 +102,11 @@ namespace libnutwireless {
 			void wps_tryScanResults();
 
 			//Need to do it that way, as inline fails otherwise
-			inline void printMessage(QString msg) { if (log_enabled) emit(message(msg));}
+			inline void printMessage(QString msg) { if (m_logEnabled) emit(message(msg));}
 
 			void wps_open(bool time_call);
 			bool wps_close(QString call_func, bool internal=true);
-			int wps_TimerTime(int timerCount);
+			int wps_TimerTime(int m_timerCount);
 
 		protected slots:
 			void wps_read(int socket);
@@ -116,7 +116,7 @@ namespace libnutwireless {
 			void timerEvent(QTimerEvent *event);
 			
 		public:
-			CWpa_SupplicantBase(QObject * parent, QString ifname);
+			CWpa_SupplicantBase(QObject * parent, QString m_ifname);
 			~CWpa_SupplicantBase();
 			inline void open() { wps_open(false); }
 			inline bool close() {return wps_close("libnutclient",false); }
