@@ -77,7 +77,7 @@ namespace libnutwireless {
 	//Reads messages from wpa_supplicant
 	////TODO:Check if we need to check if wpa_supplicant is still available
 	void CWpa_SupplicantBase::wps_read(int socket) {
-		if (socket == wps_fd) {
+		if (socket == m_wpaFd) {
 			if (wps_connected) {
 				//check if wpa_supplicant is still running (i.e. file exists)
 				if (! QFile::exists(m_wpaSupplicantPath)) {
@@ -148,7 +148,7 @@ namespace libnutwireless {
 	}
 	
 	//Public functions:
-	CWpa_SupplicantBase::CWpa_SupplicantBase(QObject * parent, QString ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), m_wpaSupplicantPath("/var/run/wpa_supplicant/"+ifname), wps_fd(-1), wext_fd(-1), event_sn(0), timerId(-1), wextTimerId(-1), ScanTimerId(-1), wextTimerRate(10000), ifname(ifname), ScanTimeoutCount(0),wextPollTimeoutCount(0) {
+	CWpa_SupplicantBase::CWpa_SupplicantBase(QObject * parent, QString ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), m_wpaSupplicantPath("/var/run/wpa_supplicant/"+ifname), m_wpaFd(-1), m_wextFd(-1), m_eventSn(0), timerId(-1), wextTimerId(-1), ScanTimerId(-1), wextTimerRate(10000), ifname(ifname), ScanTimeoutCount(0),wextPollTimeoutCount(0) {
 		wps_connected = false;
 		timerCount = 0;
 		log_enabled = true;
@@ -224,21 +224,21 @@ namespace libnutwireless {
 		inConnectionPhase = false;
 		timerCount = 0;
 		//Set socket notifier
-		wps_fd = wpa_ctrl_get_fd(event_ctrl);
-		event_sn  = new QSocketNotifier(wps_fd, QSocketNotifier::Read,NULL);
-		connect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
-		event_sn->setEnabled(true);
+		m_wpaFd = wpa_ctrl_get_fd(event_ctrl);
+		m_eventSn  = new QSocketNotifier(m_wpaFd, QSocketNotifier::Read,NULL);
+		connect(m_eventSn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
+		m_eventSn->setEnabled(true);
 		wps_connected = true;
 	
 		//NEW FEATURE: Signal level retrieving:
 		
 		//Get file Descriptor to NET kernel
-		if ( (wext_fd = iw_sockets_open()) < 0) {
-			wext_fd = -1;
+		if ( (m_wextFd = iw_sockets_open()) < 0) {
+			m_wextFd = -1;
 			qWarning() << tr("ERROR: Could not open socket to net kernel");
 		}
 		else { //Socket is set up, now set SocketNotifier
-			qDebug() << QString("File Descriptor for Wext is: %1").arg(QString::number(wext_fd));
+			qDebug() << QString("File Descriptor for Wext is: %1").arg(QString::number(m_wextFd));
 			
 	
 			//Start timer for reading wireless info (like in /proc/net/wireless)
@@ -264,14 +264,14 @@ namespace libnutwireless {
 			wextTimerId = -1;
 		}
 		if (wps_connected) {
-			if (event_sn != NULL) {
-				disconnect(event_sn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
-				delete event_sn;
-				event_sn = NULL;
+			if (m_eventSn != NULL) {
+				disconnect(m_eventSn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
+				delete m_eventSn;
+				m_eventSn = NULL;
 			}
-			if (-1 != wext_fd) {
-				iw_sockets_close(wext_fd);
-				wext_fd = -1;
+			if (-1 != m_wextFd) {
+				iw_sockets_close(m_wextFd);
+				m_wextFd = -1;
 			}
 			//Detaching takes place if program is about to quit
 			//Close control connections
@@ -389,7 +389,7 @@ namespace libnutwireless {
 	
 	void CWpa_SupplicantBase::timerEvent(QTimerEvent *event) {
 		if (event->timerId() == wextTimerId) {
-			if ( (wext_fd != -1) && wps_connected) {
+			if ( (m_wextFd != -1) && wps_connected) {
 				readWirelessInfo();
 			}
 		}
@@ -404,7 +404,7 @@ namespace libnutwireless {
 			}
 		}
 		else if (event->timerId() == ScanTimerId) {
-			if ( (wext_fd != -1) && wps_connected) {
+			if ( (m_wextFd != -1) && wps_connected) {
 				wps_tryScanResults();
 			}
 		}
@@ -465,7 +465,7 @@ namespace libnutwireless {
 	
 	//noise levels, returned by this functions, are invalid, don't use them
 	void CWpa_SupplicantBase::wps_tryScanResults() {
-		if (wext_fd == -1 || !wps_connected) {
+		if (m_wextFd == -1 || !wps_connected) {
 			return;
 		}
 		//Kill Timer:
@@ -493,13 +493,13 @@ namespace libnutwireless {
 		/* workaround */
 		struct wireless_config b;
 		/* Get basic information */ 
-		if(iw_get_basic_config(wext_fd, ifname.toAscii().data(), &b) < 0) {
+		if(iw_get_basic_config(m_wextFd, ifname.toAscii().data(), &b) < 0) {
 			/* If no wireless name : no wireless extensions */ 
 			/* But let's check if the interface exists at all */ 
 			struct ifreq ifr; 
 		
 			strncpy(ifr.ifr_name, ifname.toAscii().data(), IFNAMSIZ); 
-			if(ioctl(wext_fd, SIOCGIFFLAGS, &ifr) < 0) 
+			if(ioctl(m_wextFd, SIOCGIFFLAGS, &ifr) < 0) 
 				qWarning() << tr("(Wireless Extension) No device present");
 			else
 				qWarning() << tr("(Wireless Extension) Device not supported");
@@ -508,18 +508,18 @@ namespace libnutwireless {
 		qDebug() << "Fetched basic config.";
 		
 		/* Get AP address */
-		if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWAP, &wrq) >= 0) {
+		if(iw_get_ext(m_wextFd, ifname.toAscii().data(), SIOCGIWAP, &wrq) >= 0) {
 			qDebug() << "Got AP";
 		}
 		
 		/* Get bit rate */
-		if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWRATE, &wrq) >= 0) {
+		if(iw_get_ext(m_wextFd, ifname.toAscii().data(), SIOCGIWRATE, &wrq) >= 0) {
 			qDebug() << "Got bit rate";
 		}
 		
 		/* Get Power Management settings */
 		wrq.u.power.flags = 0;
-		if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWPOWER, &wrq) >= 0) {
+		if(iw_get_ext(m_wextFd, ifname.toAscii().data(), SIOCGIWPOWER, &wrq) >= 0) {
 			qDebug() << "Got power";
 		}
 		/* workaround */
@@ -527,7 +527,7 @@ namespace libnutwireless {
 		/* Get range stuff */
 		/* Get range stuff */
 		qDebug() << QString("Getting range stuff for %1").arg(ifname.toAscii().data());
-		if (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0) {
+		if (iw_get_range_info(m_wextFd, ifname.toAscii().data(), &range) >= 0) {
 			has_range = 1;
 			qDebug() << "Success readWirelessInfo getrange" << strerror(errno);
 		}
@@ -584,7 +584,7 @@ namespace libnutwireless {
 			wrq.u.data.length = buflen;
 			
 			//Get the data:
-			if (iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWSCAN, &wrq) < 0) {
+			if (iw_get_ext(m_wextFd, ifname.toAscii().data(), SIOCGIWSCAN, &wrq) < 0) {
 				//Buffer is too small
 				if((errno == E2BIG) && (range.we_version_compiled > 16)) {
 					
@@ -795,7 +795,7 @@ namespace libnutwireless {
 	}
 	
 	void CWpa_SupplicantBase::readWirelessInfo() {
-		if ( (wext_fd == -1) || !wps_connected) {
+		if ( (m_wextFd == -1) || !wps_connected) {
 			return;
 		}
 		qDebug() << "Executing readWirelessInfo() with TimerRate of" << wextTimerRate;
@@ -806,13 +806,13 @@ namespace libnutwireless {
 		/* workaround */
 		struct wireless_config b;
 		/* Get basic information */ 
-		if(iw_get_basic_config(wext_fd, ifname.toAscii().data(), &b) < 0) {
+		if(iw_get_basic_config(m_wextFd, ifname.toAscii().data(), &b) < 0) {
 			/* If no wireless name : no wireless extensions */ 
 			/* But let's check if the interface exists at all */ 
 			struct ifreq ifr; 
 		
 			strncpy(ifr.ifr_name, ifname.toAscii().data(), IFNAMSIZ); 
-			if(ioctl(wext_fd, SIOCGIFFLAGS, &ifr) < 0) 
+			if(ioctl(m_wextFd, SIOCGIFFLAGS, &ifr) < 0) 
 				qWarning() << tr("(Wireless Extension) No device present");
 			else
 				qWarning() << tr("(Wireless Extension) device not supported");
@@ -832,25 +832,25 @@ namespace libnutwireless {
 		
 		struct iwreq wrq;
 		/* Get AP address */
-		if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWAP, &wrq) >= 0) {
+		if(iw_get_ext(m_wextFd, ifname.toAscii().data(), SIOCGIWAP, &wrq) >= 0) {
 			qDebug() << "Got AP";
 		}
 		
 		/* Get bit rate */
-		if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWRATE, &wrq) >= 0) {
+		if(iw_get_ext(m_wextFd, ifname.toAscii().data(), SIOCGIWRATE, &wrq) >= 0) {
 			qDebug() << "Got bit rate";
 		}
 		
 		/* Get Power Management settings */
 		wrq.u.power.flags = 0;
-		if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWPOWER, &wrq) >= 0) {
+		if(iw_get_ext(m_wextFd, ifname.toAscii().data(), SIOCGIWPOWER, &wrq) >= 0) {
 			qDebug() << "Got power";
 		}
 		/* workaround */
 			
 		/* Get range stuff */
 		qDebug() << QString("Getting range stuff for %1").arg(ifname.toAscii().data());
-		if (iw_get_range_info(wext_fd, ifname.toAscii().data(), &range) >= 0) {
+		if (iw_get_range_info(m_wextFd, ifname.toAscii().data(), &range) >= 0) {
 			hasRange = 1;
 			qDebug() << "Success readWirelessInfo getrange" << strerror(errno);
 		}
@@ -920,7 +920,7 @@ namespace libnutwireless {
 			strncpy(wrq.ifr_name, ifname.toAscii().data(), IFNAMSIZ);
 			
 			qDebug() << "Getting wireless stats";
-			if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
+			if(iw_get_ext(m_wextFd, ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
 				qWarning() << tr("Error occured while fetching wireless info: ") << strerror(errno);
 			}
 			else { //Stats fetched
@@ -945,7 +945,7 @@ namespace libnutwireless {
 		}
 		else {
 			qDebug() << "Error while trying to fetch wireless information" << strerror(errno);
-			qDebug() << "Wireless Extension socket file descriptor was: " << wext_fd;
+			qDebug() << "Wireless Extension socket file descriptor was: " << m_wextFd;
 		}
 	}
 	

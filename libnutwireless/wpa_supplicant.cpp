@@ -49,6 +49,7 @@ bool CWpa_Supplicant::selectNetwork(int id) {
 		}
 	}
 	if ("OK\n" == wps_cmd_SELECT_NETWORK(id)) {
+		emit networkListUpdated();
 		return true;
 	}
 	else {
@@ -338,6 +339,10 @@ NetconfigStatus CWpa_Supplicant::editNetwork(int netid, NetworkConfig config) {
 	//Check if we have an EAP network
 	if ((config.keyManagement & (KM_WPA_EAP | KM_IEEE8021X) ) || config.keyManagement == KM_UNDEFINED) {
 		wps_fail_status.eap_failures = wps_editEapNetwork(netid,config.eap_config);
+	}
+
+	if (NCF_NONE == wps_fail_status.failures && ENCF_NONE == wps_fail_status.eap_failures) {
+		emit networkListUpdated();
 	}
 	return wps_fail_status;
 }
