@@ -143,7 +143,7 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 			device = new CDevice(this, i);
 		}
 		catch (CLI_ConnectionException &e) {
-			qDebug() << e.what();
+			qWarning() << e.what();
 			continue;
 		}
 		dbusDevices.insert(i, device);
@@ -159,7 +159,7 @@ void CDeviceManager::setInformation() {
 	QDBusReply<QList<QDBusObjectPath> > replydevs;
 	replydevs = dbusDevmgr->getDeviceList();
 	if (!replydevs.isValid()) {
-		qDebug() << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
+		qWarning() << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
 	}
 	//Let's populate our own DeviceList
 	
@@ -174,7 +174,7 @@ void CDeviceManager::setInformation() {
 			device = new CDevice(this, i);
 		}
 		catch (CLI_DevConnectionException e) {
-			qDebug() << e.msg();
+			qWarning() << e.msg();
 			continue;
 		}
 		devices.append(device);
@@ -227,13 +227,13 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 //CDeviceManager DBUS-SLOTS:
 void CDeviceManager::dbusDeviceAdded(const QDBusObjectPath &objectpath) {
 	if (!dbusDevices.contains(objectpath)) {
-		qDebug() << (tr("Adding device at: ") + objectpath.path());
+		*log << tr("Adding device at: %1").arg(objectpath.path());
 		CDevice * device;
 		try {
 			device = new CDevice(this, objectpath);
 		}
 		catch (CLI_DevConnectionException e) {
-			qDebug() << e.msg();
+			qWarning() << e.msg();
 			return;
 		}
 		dbusDevices.insert(objectpath,device);
@@ -298,7 +298,7 @@ void CDeviceManager::refreshAll() {
 		}
 	}
 	else {
-		qDebug() << tr("(%1) Could not refresh device list").arg(toString(replydevs.error()));
+		qWarning() << tr("(%1) Could not refresh device list").arg(toString(replydevs.error()));
 	}
 }
 
@@ -312,7 +312,7 @@ void CDeviceManager::rebuild() {
 		rebuild(replydevs.value());
 	}
 	else {
-		qDebug() << tr("(%1) Error while retrieving device list").arg(toString(replydevs.error()));
+		qWarning() << tr("(%1) Error while retrieving device list").arg(toString(replydevs.error()));
 	}
 }
 
@@ -332,17 +332,17 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	dbusDevice = new DBusDeviceInterface(NUT_DBUS_URL, dbusPath.path(),*dbusConnection, this);
 	
 	//get properties
-	qDebug() << (tr("Getting device properties at: ") + dbusPath.path());
+	*log << tr("Getting device properties at: %1").arg(dbusPath.path());
 	QDBusReply<DeviceProperties> replyProp = dbusDevice->getProperties();
 	if (replyProp.isValid()) {
 		name = replyProp.value().name;
 		type = replyProp.value().type;
 		state = (DeviceState) replyProp.value().state;
 		activeEnvironment = 0;
-		*log << (tr("Device properties fetched"));
-		*log << (tr("Name") + ": " + QString(name));
-		*log << (tr("Type") + ": " + libnutclient::toStringTr(type));
-		*log << (tr("State") + ": " + libnutclient::toStringTr(state));
+		*log << tr("Device properties fetched");
+		*log << tr("Name : %1").arg(name);
+		*log << tr("Type: %1").arg(libnutclient::toStringTr(type));
+		*log << tr("State: %1").arg(libnutclient::toStringTr(state));
 	}
 	else {
 		throw CLI_DevConnectionException(tr("(%1) Error while retrieving dbus' device information").arg(toString(replyProp.error())));
@@ -354,7 +354,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 			essid = replyessid.value();
 		}
 		else {
-			qDebug() << tr("(%1) Could not refresh device essid").arg(toString(replyessid.error()));
+			qWarning() << tr("(%1) Could not refresh device essid").arg(toString(replyessid.error()));
 			essid = QString();
 		}
 	}
@@ -378,12 +378,12 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	//poppulate own Environmentlist
 	CEnvironment * env;
 	foreach(QDBusObjectPath i, replyEnv.value()) {
-		qDebug() << (tr("Adding Environment at: ") + i.path());
+		*log << tr("Adding Environment at: %1").arg(i.path());
 		try {
 			env = new CEnvironment(this,i);
 		}
 		catch (CLI_EnvConnectionException e) {
-			qDebug() << e.msg();
+			qWarning() << e.msg();
 			continue;
 		}
 		dbusEnvironments.insert(i,env);
@@ -394,7 +394,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	if (!replyProp.value().activeEnvironment.isEmpty()) {
 		dbusActiveEnvironment = QDBusObjectPath(replyProp.value().activeEnvironment);
 		activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment, 0);
-		*log << (tr("Active Environement") + ": " + dbusActiveEnvironment.path());
+		*log << tr("Active Environement: %1").arg(dbusActiveEnvironment.path());
 	}
 	else {
 		activeEnvironment = 0;
@@ -463,7 +463,7 @@ void CDevice::refreshAll() {
 		}
 	}
 	else {
-		qDebug() << tr("(%1) Could not refresh environments").arg(toString(replyenvs.error()));
+		qWarning() << tr("(%1) Could not refresh environments").arg(toString(replyenvs.error()));
 	}
 	activeEnvironment = 0;
 	//now refresh the rest of our device properties:
@@ -473,13 +473,13 @@ void CDevice::refreshAll() {
 			dbusActiveEnvironment = QDBusObjectPath(replyprop.value().activeEnvironment);
 			activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment);
 		}
-		qDebug() << "Refreshing active environment: " + dbusActiveEnvironment.path();
+		*log << tr("Refreshing active environment: %1").arg(dbusActiveEnvironment.path());
 		state = (DeviceState) replyprop.value().state;
 		type = replyprop.value().type;
 		name = replyprop.value().name;
 	}
 	else {
-		qDebug() << tr("(%1) Could not refresh device properties").arg(toString(replyprop.error()));
+		qWarning() << tr("(%1) Could not refresh device properties").arg(toString(replyprop.error()));
 	}
 	if (DT_AIR == type) {
 		QDBusReply<QString> replyessid = dbusDevice->getEssid();
@@ -487,7 +487,7 @@ void CDevice::refreshAll() {
 			essid = replyessid.value();
 		}
 		else {
-			qDebug() << tr("(%1) Could not refresh device essid").arg(toString(replyessid.error()));
+			qWarning() << tr("(%1) Could not refresh device essid").arg(toString(replyessid.error()));
 			essid = QString();
 		}
 	}
@@ -517,7 +517,7 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 			env = new CEnvironment(this,i);
 		}
 		catch (CLI_ConnectionException &e) {
-			qDebug() << e.what();
+			qWarning() << e.what();
 			continue;
 		}
 		dbusEnvironments.insert(i,env);
@@ -655,7 +655,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 		config = replyconf.value();
 	}
 	else {
-		throw CLI_EnvConnectionException(tr("Error while retrieving environment config") + replyconf.error().name());
+		throw CLI_EnvConnectionException(tr("(%1) Error while retrieving environment config").arg(replyconf.error().name()));
 	}
 	//Get select results
 	getSelectResult(true); //functions saves SelectResult
@@ -670,7 +670,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 				interface = new CInterface(this,i);
 			}
 			catch (CLI_ConnectionException &e) {
-				qDebug() << e.what();
+				qWarning() << e.what();
 				continue;
 			}
 			dbusInterfaces.insert(i,interface);
@@ -709,7 +709,7 @@ void CEnvironment::refreshAll() {
 		}
 	}
 	else {
-		qDebug() << tr("Error while refreshing environment properties");
+		qWarning() << tr("Error while refreshing environment properties");
 	}
 	getSelectResult(true); //functions saves SelectResult
 	getSelectResults(true); //functions saves SelectResults
@@ -740,7 +740,7 @@ void CEnvironment::refreshAll() {
 		}
 	}
 	else {
-		qDebug() << tr("Error while refreshing environment interfaces");
+		qWarning() << tr("Error while refreshing environment interfaces");
 	}
 }
 void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
@@ -758,7 +758,7 @@ void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 			interface = new CInterface(this,i);
 		}
 		catch (CLI_ConnectionException &e) {
-			qDebug() << e.what();
+			qWarning() << e.what();
 			continue;
 		}
 		dbusInterfaces.insert(i,interface);
@@ -797,7 +797,7 @@ libnutcommon::SelectResult& CEnvironment::getSelectResult(bool refresh) {
 			selectResult = reply.value();
 		}
 		else {
-			qDebug() << tr("(%1) Error while trying to get SelectResult").arg(toString(reply.error()));
+			qWarning() << tr("(%1) Error while trying to get SelectResult").arg(toString(reply.error()));
 			selectResult = libnutcommon::SelectResult();
 		}
 	}
@@ -811,7 +811,7 @@ QVector<libnutcommon::SelectResult>& CEnvironment::getSelectResults(bool refresh
 			selectResults = reply.value();
 		}
 		else {
-			qDebug() << tr("(%1) Error while trying to get SelectResults").arg(toString(reply.error()));
+			qWarning() << tr("(%1) Error while trying to get SelectResults").arg(toString(reply.error()));
 			selectResults = QVector<libnutcommon::SelectResult>();
 		}
 	}
@@ -838,7 +838,7 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 		dnsserver = replyprops.value().dns;
 	}
 	else {
-		throw CLI_IfConnectionException(tr("Error while retrieving interface properties") + replyprops.error().name());
+		throw CLI_IfConnectionException(tr("(%1) Error while retrieving interface properties").arg(replyprops.error().name()));
 	}
 	//Get Config
 	QDBusReply<libnutcommon::IPv4Config> replyconf = dbusInterface->getConfig();
@@ -846,7 +846,7 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 		dbusConfig = replyconf.value();
 	}
 	else {
-		throw CLI_IfConnectionException(tr("Error while retrieving interface config") + replyconf.error().name());
+		throw CLI_IfConnectionException(tr("(%1) Error while retrieving interface config").arg(replyconf.error().name()));
 	}
 	getUserConfig(true); //Function will updated userConfig
 
@@ -866,7 +866,7 @@ void CInterface::refreshAll() {
 		getUserConfig(true); //Function will updated userConfig
 	}
 	else {
-		qDebug() << (tr("Error while refreshing interface at: ") + dbusPath.path());
+		qWarning() << (tr("Error while refreshing interface at: %1").arg(dbusPath.path()));
 	}
 }
 //CInterface private slots
@@ -894,7 +894,7 @@ bool CInterface::needUserSetup() {
 		return reply.value();
 	}
 	else {
-		qDebug() << (tr("Error while interface->needUserSetup at: ") + dbusPath.path());
+		qWarning() << tr("Error while interface->needUserSetup at: %1").arg(dbusPath.path());
 	}
 	return false;
 }
@@ -908,7 +908,7 @@ bool CInterface::setUserConfig(const libnutcommon::IPv4UserConfig &cuserConfig) 
 		return false;
 	}
 	else {
-		qDebug() << tr("(%1) Error while interface->setUserConfig at: %2").arg(toString(reply.error()),dbusPath.path());
+		qWarning() << tr("(%1) Error while setting user config at: %2").arg(toString(reply.error()),dbusPath.path());
 	}
 	return false;
 }
@@ -919,7 +919,7 @@ libnutcommon::IPv4UserConfig CInterface::getUserConfig(bool refresh) {
 			userConfig = reply.value();
 		}
 		else {
-			qDebug() << (tr("Error while interface->getUserConfig at: ") + dbusPath.path());
+			qDebug() << tr("Error while getting user config at: %1").(dbusPath.path());
 			userConfig = libnutcommon::IPv4UserConfig();
 		}
 	}
