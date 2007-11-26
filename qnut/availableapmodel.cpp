@@ -26,16 +26,17 @@ namespace qnut {
 	}
 	
 	void CAvailableAPModel::setWpaSupplicant(CWpa_Supplicant * wpaSupplicant) {
+		if (supplicant == wpaSupplicant)
+			return;
+		
 		supplicant = wpaSupplicant;
 		if (supplicant) {
-			reloadScans();
-			connect(supplicant, SIGNAL(opened()), this, SLOT(reloadScans()));
-			connect(supplicant, SIGNAL(closed()), this, SLOT(reloadScans()));
-			connect(supplicant, SIGNAL(scanCompleted()), this, SLOT(reloadScans()));
+			updateScans();
+			connect(supplicant, SIGNAL(scanCompleted()), this, SLOT(updateScans()));
 		}
 	}
 	
-	void CAvailableAPModel::reloadScans() {
+	void CAvailableAPModel::updateScans() {
 		emit layoutAboutToBeChanged();
 		scans = supplicant->scanResults();
 		emit layoutChanged();
@@ -196,18 +197,10 @@ namespace qnut {
 	}
 	
 	QModelIndex CAvailableAPModel::index(int row, int column, const QModelIndex & parent) const {
-		if (scans.isEmpty())
+		if (!scans.isEmpty() || parent.isValid() || row >= scans.count())
+			return createIndex(row, column);
+		else
 			return QModelIndex();
-		
-		if (!hasIndex(row, column, parent))
-			return QModelIndex();
-		
-		if (!parent.isValid()) {
-			if (row < scans.count())
-				return createIndex(row, column, (void *)(&(scans[row])));
-		}
-		
-		return QModelIndex();
 	}
 	
 	QModelIndex CAvailableAPModel::parent(const QModelIndex &) const {

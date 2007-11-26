@@ -27,6 +27,8 @@ namespace qnut {
 	class CAvailableAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
+		QList<libnutwireless::ScanResult> cachedScans() const { return scans; };
+		
 		CAvailableAPModel(libnutwireless::CWpa_Supplicant * data = NULL, QObject * parent = 0);
 		~CAvailableAPModel();
 		
@@ -40,7 +42,7 @@ namespace qnut {
 		
 		void setWpaSupplicant(libnutwireless::CWpa_Supplicant * wpaSupplicant);
 	private slots:
-		void reloadScans();
+		void updateScans();
 	private:
 		libnutwireless::CWpa_Supplicant * supplicant;
 		QList<libnutwireless::ScanResult> scans;
