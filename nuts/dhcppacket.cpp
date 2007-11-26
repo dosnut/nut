@@ -256,12 +256,12 @@ namespace nuts {
 	
 	DHCPClientPacket::DHCPClientPacket(Interface_IPv4 *iface)
 	: DHCPPacket(true), iface(iface) {
-		setClientMac(iface->m_env->device->getMacAddress());
+		setClientMac(iface->m_env->m_device->getMacAddress());
 	}
 	
 	DHCPClientPacket::DHCPClientPacket(Interface_IPv4 *iface, const QHostAddress &unicast_addr)
 	: DHCPPacket(true, unicast_addr), iface(iface) {
-		setClientMac(iface->m_env->device->getMacAddress());
+		setClientMac(iface->m_env->m_device->getMacAddress());
 	}
 	
 	void DHCPClientPacket::setVendor() {

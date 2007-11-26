@@ -314,7 +314,7 @@ namespace nuts {
 	
 	bool ARP::start() {
 		if (m_arp_socket != -1) return true;
-		int if_index = m_device->interfaceIndex;
+		int if_index = m_device->m_interfaceIndex;
 		if (if_index < 0) {
 			err << "Interface index invalid" << endl;
 			return false;
@@ -447,7 +447,7 @@ namespace nuts {
 //		log << "writeARPSocket" << endl;
 		if (!m_arp_write_buf.empty()) {
 			QByteArray msgdata = m_arp_write_buf.takeFirst();
-			writeARPPacket(m_arp_socket, m_device->interfaceIndex, msgdata);
+			writeARPPacket(m_arp_socket, m_device->m_interfaceIndex, msgdata);
 		}
 		m_arp_write_nf->setEnabled(!m_arp_write_buf.empty());
 	}

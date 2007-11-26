@@ -41,11 +41,11 @@ static inline void setSockaddrIPv4(struct sockaddr &s, quint32 host = 0, quint16
 
 namespace nuts {
 	DeviceManager::DeviceManager(const QString &configFile)
-	: configParser(configFile), config(configParser.getConfig()) {
-		connect(&hwman, SIGNAL(gotCarrier(const QString&, int, const QString)), SLOT(gotCarrier(const QString &, int, const QString)));
-		connect(&hwman, SIGNAL(lostCarrier(const QString&)), SLOT(lostCarrier(const QString &)));
-		connect(&hwman, SIGNAL(newDevice(const QString&, int)), SLOT(newDevice(const QString &, int)));
-		connect(&hwman, SIGNAL(delDevice(const QString&)), SLOT(delDevice(const QString&)));
+	: m_configParser(configFile), m_config(m_configParser.getConfig()) {
+		connect(&m_hwman, SIGNAL(gotCarrier(const QString&, int, const QString)), SLOT(gotCarrier(const QString &, int, const QString)));
+		connect(&m_hwman, SIGNAL(lostCarrier(const QString&)), SLOT(lostCarrier(const QString &)));
+		connect(&m_hwman, SIGNAL(newDevice(const QString&, int)), SLOT(newDevice(const QString &, int)));
+		connect(&m_hwman, SIGNAL(delDevice(const QString&)), SLOT(delDevice(const QString&)));
 		
 		connect(this, SIGNAL(deviceAdded(QString, Device*)), &m_events, SLOT(deviceAdded(QString, Device*)));
 		connect(this, SIGNAL(deviceRemoved(QString, Device*)), &m_events, SLOT(deviceRemoved(QString, Device*)));
@@ -57,58 +57,56 @@ namespace nuts {
 		      don't reach the hardware, local packet sniffers get them).
 		    - in the case of lostCarrier, we want ignore short breaks.
 		*/
-		carrier_timer.setInterval(400);
-		connect(&carrier_timer, SIGNAL(timeout()), SLOT(ca_timer()));
-		QHashIterator<QString, libnutcommon::DeviceConfig*> i(config->getDevices());
+		m_carrier_timer.setInterval(400);
+		connect(&m_carrier_timer, SIGNAL(timeout()), SLOT(ca_timer()));
+		QHashIterator<QString, libnutcommon::DeviceConfig*> i(m_config->getDevices());
 		while (i.hasNext()) {
 			i.next();
-			if (hwman.ifExists(i.key()))
+			if (m_hwman.ifExists(i.key()))
 				addDevice(i.key(), i.value());
 		}
 	}
 	
 	void DeviceManager::addDevice(const QString &ifName, libnutcommon::DeviceConfig *dc) {
-		Device *d = new Device(this, ifName, dc, hwman.hasWLAN(ifName));
-		devices.insert(ifName, d);
+		Device *d = new Device(this, ifName, dc, m_hwman.hasWLAN(ifName));
+		m_devices.insert(ifName, d);
 		emit deviceAdded(ifName, d);
 		if (!dc->noAutoStart())
 			d->enable(true);
 	}
 	
 	DeviceManager::~DeviceManager() {
-		dbus_devMan->stopDBus();
+		m_dbus_devMan->stopDBus();
 		// manually deleting devices so HardwareManager is available for their destruction;
 		// in ~QObject  (deleteChildren) it is too late for them.
-		foreach (Device* device, devices)
+		foreach (Device* device, m_devices)
 			delete device;
-		devices.clear();
+		m_devices.clear();
 	}
 	
 	void DeviceManager::ca_timer() {
-		if (!ca_evts.empty()) {
-			struct ca_evt e = ca_evts.takeFirst();
+		if (!m_ca_evts.empty()) {
+			struct ca_evt e = m_ca_evts.takeFirst();
 			if (e.up)
-				devices[e.ifName]->gotCarrier(e.ifIndex);
+				m_devices[e.ifName]->gotCarrier(e.ifIndex);
 			else
-				devices[e.ifName]->lostCarrier();
+				m_devices[e.ifName]->lostCarrier();
 		}
-//		if (!ca_evts.empty())
-//			carrier_timer.start();
-		if (ca_evts.empty())
-			carrier_timer.stop();
+		if (m_ca_evts.empty())
+			m_carrier_timer.stop();
 	}
 	
 	void DeviceManager::gotCarrier(const QString &ifName, int ifIndex, const QString &essid) {
 		if (!essid.isEmpty()) {
-			devices[ifName]->gotCarrier(ifIndex, essid);
+			m_devices[ifName]->gotCarrier(ifIndex, essid);
 			return;
 		}
-		QMutableLinkedListIterator<struct ca_evt> i(ca_evts);
+		QMutableLinkedListIterator<struct ca_evt> i(m_ca_evts);
 		while(i.hasNext()) {
 			if (i.next().ifName == ifName) {
 				i.remove();
-				if (ca_evts.empty())
-					carrier_timer.stop();
+				if (m_ca_evts.empty())
+					m_carrier_timer.stop();
 				return;
 			}
 		}
@@ -116,24 +114,24 @@ namespace nuts {
 		e.ifName = ifName;
 		e.ifIndex = ifIndex;
 		e.up = true;
-		ca_evts.push_back(e);
+		m_ca_evts.push_back(e);
 		// do not restart the timer if a item is already in the queue
-		if (!carrier_timer.isActive())
-			carrier_timer.start();
+		if (!m_carrier_timer.isActive())
+			m_carrier_timer.start();
 	}
 	void DeviceManager::lostCarrier(const QString &ifName) {
-		Device *dev = devices.value(ifName, 0);
+		Device *dev = m_devices.value(ifName, 0);
 		if (!dev) return;
 		if (dev->hasWLAN()) {
 			dev->lostCarrier();
 			return;
 		}
-		QMutableLinkedListIterator<struct ca_evt> i(ca_evts);
+		QMutableLinkedListIterator<struct ca_evt> i(m_ca_evts);
 		while(i.hasNext()) {
 			if (i.next().ifName == ifName) {
 				i.remove();
-				if (ca_evts.empty())
-					carrier_timer.stop();
+				if (m_ca_evts.empty())
+					m_carrier_timer.stop();
 				return;
 			}
 		}
@@ -141,47 +139,47 @@ namespace nuts {
 		e.ifName = ifName;
 		e.ifIndex = 0;
 		e.up = false;
-		ca_evts.push_back(e);
+		m_ca_evts.push_back(e);
 		// do not restart the timer if a item is already in the queue
-		if (!carrier_timer.isActive())
-			carrier_timer.start();
+		if (!m_carrier_timer.isActive())
+			m_carrier_timer.start();
 	}
 	
 	void DeviceManager::newDevice(const QString &ifName, int) {
-		Device *d = devices.value(ifName, 0);
+		Device *d = m_devices.value(ifName, 0);
 		if (d) return;
-		libnutcommon::DeviceConfig *dc = config->getDevices().value(ifName, 0);
+		libnutcommon::DeviceConfig *dc = m_config->getDevices().value(ifName, 0);
 		if (!dc) return;
 		addDevice(ifName, dc);
 //		log << QString("newDevice(%1)").arg(ifName) << endl;
 	}
 	
 	void DeviceManager::delDevice(const QString &ifName) {
-		Device *d = devices.value(ifName, 0);
+		Device *d = m_devices.value(ifName, 0);
 		if (!d) return;
 //		log << QString("delDevice(%1)").arg(ifName) << endl;
 		d->disable();
 		emit deviceRemoved(ifName, d);
 		d->deleteLater();
-		devices.remove(ifName);
+		m_devices.remove(ifName);
 	}
 	
 	Device::Device(DeviceManager* dm, const QString &name, libnutcommon::DeviceConfig *config, bool hasWLAN)
-	: QObject(dm), m_arp(this), dm(dm), name(name), interfaceIndex(-1), config(config), activeEnv(-1), nextEnv(-1), m_userEnv(-1), m_waitForEnvSelects(0), m_state(libnutcommon::DS_DEACTIVATED), dhcp_client_socket(-1), m_hasWLAN(hasWLAN), m_wpa_supplicant(0) {
-		connect(this, SIGNAL(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState, Device*)), &dm->m_events, SLOT(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState, Device*)));
+	: QObject(dm), m_arp(this), m_dm(dm), m_name(name), m_interfaceIndex(-1), m_config(config), m_activeEnv(-1), m_nextEnv(-1), m_userEnv(-1), m_waitForEnvSelects(0), m_state(libnutcommon::DS_DEACTIVATED), m_dhcp_client_socket(-1), m_hasWLAN(hasWLAN), m_wpa_supplicant(0) {
+		connect(this, SIGNAL(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState, Device*)), &m_dm->m_events, SLOT(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState, Device*)));
 		
 		int i = 0;
-		foreach(libnutcommon::EnvironmentConfig *ec, config->getEnvironments())
-			envs.push_back(new Environment(this, ec, i++));
+		foreach(libnutcommon::EnvironmentConfig *ec, m_config->getEnvironments())
+			m_envs.push_back(new Environment(this, ec, i++));
 	}
 	
 	Device::~Device() {
 		disable();
-		if (dhcp_client_socket >= 0)
+		if (m_dhcp_client_socket >= 0)
 			closeDHCPClientSocket();
-		foreach (Environment* env, envs)
+		foreach (Environment* env, m_envs)
 			delete env;
-		envs.clear();
+		m_envs.clear();
 	}
 	
 	void Device::setState(libnutcommon::DeviceState state) {
@@ -203,81 +201,81 @@ namespace nuts {
 	}
 	
 	void Device::envUp(Environment* env) {
-		if (envs[activeEnv] != env) return;
+		if (m_envs[m_activeEnv] != env) return;
 		setState(libnutcommon::DS_UP);
-		log << "Device(" << name << ") is up!" << endl;
+		log << "Device(" << m_name << ") is up!" << endl;
 	}
 	void Device::envDown(Environment* env) {
-		if (activeEnv < 0 || envs[activeEnv] != env) return;
+		if (m_activeEnv < 0 || m_envs[m_activeEnv] != env) return;
 		setState(libnutcommon::DS_CARRIER);
-		log << "Device(" << name << ") is down!" << endl;
-		activeEnv = nextEnv;
-		nextEnv = -1;
-		if (activeEnv != -1)
-			envs[activeEnv]->start();
-		emit environmentChanged(activeEnv);
+		log << "Device(" << m_name << ") is down!" << endl;
+		m_activeEnv = m_nextEnv;
+		m_nextEnv = -1;
+		if (m_activeEnv != -1)
+			m_envs[m_activeEnv]->start();
+		emit environmentChanged(m_activeEnv);
 	}
 	void Device::envNeedUserSetup(Environment* env) {
-		if (envs[activeEnv] != env) return;
+		if (m_envs[m_activeEnv] != env) return;
 		setState(libnutcommon::DS_UNCONFIGURED);
-		log << "Device(" << name << ") needs user configuration!" << endl;
+		log << "Device(" << m_name << ") needs user configuration!" << endl;
 	}
 	
 	void Device::gotCarrier(int ifIndex, const QString &essid) {
-		interfaceIndex = ifIndex;
+		m_interfaceIndex = ifIndex;
 		m_essid = essid;
 		m_hasWLAN = !essid.isEmpty();
-		libnutcommon::MacAddress mAddr = dm->hwman.getMacAddress(name);
-		if (mAddr.valid()) macAddress = mAddr;
-		if (mAddr.zero()) log << "Device(" << name << "): couldn't get MacAddress from hardware:" << mAddr.toString() << endl;
-		if (macAddress.zero()) log << "Device(" << name << "): couldn't get MacAddress" << endl;
-		log << "Device(" << name << ") gotCarrier" << endl;
+		libnutcommon::MacAddress mAddr = m_dm->m_hwman.getMacAddress(m_name);
+		if (mAddr.valid()) m_macAddress = mAddr;
+		if (mAddr.zero()) log << "Device(" << m_name << "): couldn't get MacAddress from hardware:" << mAddr.toString() << endl;
+		if (m_macAddress.zero()) log << "Device(" << m_name << "): couldn't get MacAddress" << endl;
+		log << "Device(" << m_name << ") gotCarrier" << endl;
 		if (m_hasWLAN) log << "ESSID: " << essid << endl;
 		setState(libnutcommon::DS_CARRIER);
 		startEnvSelect();
 	}
 	void Device::lostCarrier() {
-		log << "Device(" << name << ") lostCarrier" << endl;
-		nextEnv = -1;
-		if (activeEnv != -1) {
-			envs[activeEnv]->stop();
-			activeEnv = -1;
-			emit environmentChanged(activeEnv);
+		log << "Device(" << m_name << ") lostCarrier" << endl;
+		m_nextEnv = -1;
+		if (m_activeEnv != -1) {
+			m_envs[m_activeEnv]->stop();
+			m_activeEnv = -1;
+			emit environmentChanged(m_activeEnv);
 		}
-		interfaceIndex = -1;
+		m_interfaceIndex = -1;
 		setState(libnutcommon::DS_ACTIVATED);
 	}
 	bool Device::registerXID(quint32 xid, Interface_IPv4 *iface) {
 		if (!xid) return false;
-		if (dhcp_xid_iface.contains(xid)) return false;
-		dhcp_xid_iface.insert(xid, iface);
-		if (dhcp_client_socket < 0)
+		if (m_dhcp_xid_iface.contains(xid)) return false;
+		m_dhcp_xid_iface.insert(xid, iface);
+		if (m_dhcp_client_socket < 0)
 			setupDHCPClientSocket();
 		return true;
 	}
 	void Device::unregisterXID(quint32 xid) {
 		if (!xid) return;
-		dhcp_xid_iface.remove(xid);
-		if (dhcp_xid_iface.count() == 0 && dhcp_client_socket >= 0)
+		m_dhcp_xid_iface.remove(xid);
+		if (m_dhcp_xid_iface.count() == 0 && m_dhcp_client_socket >= 0)
 			closeDHCPClientSocket();
 	}
 	bool Device::sendDHCPClientPacket(DHCPPacket *packet) {
-		if (dhcp_client_socket < 0) {
+		if (m_dhcp_client_socket < 0) {
 			err << "Cannot send DHCP packet" << endl;
 			return false;
 		}
-		dhcp_write_buf.push_back(packet->msgdata);
-		dhcp_write_nf->setEnabled(true);
+		m_dhcp_write_buf.push_back(packet->msgdata);
+		m_dhcp_write_nf->setEnabled(true);
 		return true;
 	}
 	bool Device::setupDHCPClientSocket() {
-		if (interfaceIndex < 0) {
+		if (m_interfaceIndex < 0) {
 			log << "Interface index invalid" << endl;
 			return false;
 		}
-		if ((dhcp_client_socket = socket(PF_PACKET, SOCK_DGRAM, htons(ETH_P_IP))) < 0) {
+		if ((m_dhcp_client_socket = socket(PF_PACKET, SOCK_DGRAM, htons(ETH_P_IP))) < 0) {
 			log << "Couldn't open rawsocket for dhcp client" << endl;
-			dhcp_client_socket = -1;
+			m_dhcp_client_socket = -1;
 			return false;
 		}
 		const char MAC_BCAST_ADDR[] = "\xff\xff\xff\xff\xff\xff";
@@ -285,28 +283,28 @@ namespace nuts {
 		memset(&sock, 0, sizeof(sock));
 		sock.sll_family = AF_PACKET;
 		sock.sll_protocol = htons(ETH_P_IP);
-		sock.sll_ifindex = interfaceIndex;
+		sock.sll_ifindex = m_interfaceIndex;
 		sock.sll_halen = 6;
 		memcpy(sock.sll_addr, MAC_BCAST_ADDR, 6);
-		if (bind(dhcp_client_socket, (struct sockaddr *) &sock, sizeof(sock)) < 0) {
+		if (bind(m_dhcp_client_socket, (struct sockaddr *) &sock, sizeof(sock)) < 0) {
 			log << "Couldn't bind socket for dhcp client" << endl;
-			close(dhcp_client_socket);
-			dhcp_client_socket = -1;
+			close(m_dhcp_client_socket);
+			m_dhcp_client_socket = -1;
 			return false;
 		}
 		
-		dhcp_read_nf = new QSocketNotifier(dhcp_client_socket, QSocketNotifier::Read);
-		dhcp_write_nf = new QSocketNotifier(dhcp_client_socket, QSocketNotifier::Write);
-		dhcp_write_nf->setEnabled(!dhcp_write_buf.empty());
-		connect(dhcp_read_nf, SIGNAL(activated(int)), SLOT(readDHCPClientSocket()));
-		connect(dhcp_write_nf, SIGNAL(activated(int)), SLOT(writeDHCPClientSocket()));
+		m_dhcp_read_nf = new QSocketNotifier(m_dhcp_client_socket, QSocketNotifier::Read);
+		m_dhcp_write_nf = new QSocketNotifier(m_dhcp_client_socket, QSocketNotifier::Write);
+		m_dhcp_write_nf->setEnabled(!m_dhcp_write_buf.empty());
+		connect(m_dhcp_read_nf, SIGNAL(activated(int)), SLOT(readDHCPClientSocket()));
+		connect(m_dhcp_write_nf, SIGNAL(activated(int)), SLOT(writeDHCPClientSocket()));
 		return true;
 	}
 	void Device::closeDHCPClientSocket() {
-		delete dhcp_read_nf; dhcp_read_nf = 0;
-		delete dhcp_write_nf; dhcp_write_nf = 0;
-		close(dhcp_client_socket);
-		dhcp_client_socket = -1;
+		delete m_dhcp_read_nf; m_dhcp_read_nf = 0;
+		delete m_dhcp_write_nf; m_dhcp_write_nf = 0;
+		close(m_dhcp_client_socket);
+		m_dhcp_client_socket = -1;
 	}
 	void Device::readDHCPClientSocket() {
 		struct sockaddr_ll sock;
@@ -318,7 +316,7 @@ namespace nuts {
 		do {
 			msgsize = (msgsize << 1) - 1;
 			buf.resize(msgsize);
-			nread = recvfrom(dhcp_client_socket, buf.data(), msgsize, MSG_PEEK, (struct sockaddr *)&sock, &slen);
+			nread = recvfrom(m_dhcp_client_socket, buf.data(), msgsize, MSG_PEEK, (struct sockaddr *)&sock, &slen);
 			if (nread < 0) {
 //				perror("Device::readDHCPClientSocket: recvfrom");
 				closeDHCPClientSocket();
@@ -326,14 +324,14 @@ namespace nuts {
 			if (nread == 0) return;
 		} while (nread == msgsize);
 		buf.resize(nread);
-		recvfrom(dhcp_client_socket, buf.data(), nread, 0, (struct sockaddr *)&sock, &slen);
+		recvfrom(m_dhcp_client_socket, buf.data(), nread, 0, (struct sockaddr *)&sock, &slen);
 		DHCPPacket *packet = DHCPPacket::parseRaw(buf);
 		if (!packet) return;
 		// check mac
-		if (packet->getClientMac() != macAddress)
+		if (packet->getClientMac() != m_macAddress)
 			goto cleanup;
 		xid = packet->getXID();
-		iface = dhcp_xid_iface.value(xid);
+		iface = m_dhcp_xid_iface.value(xid);
 		if (!iface)
 			goto cleanup;
 		iface->dhcpReceived(packet);
@@ -343,8 +341,8 @@ namespace nuts {
 	
 	void Device::writeDHCPClientSocket() {
 //		log << "writeDHCPClientSocket" << endl;
-		if (!dhcp_write_buf.empty()) {
-			QByteArray msgdata = dhcp_write_buf.takeFirst();
+		if (!m_dhcp_write_buf.empty()) {
+			QByteArray msgdata = m_dhcp_write_buf.takeFirst();
 			// raw_packet(&packet, INADDR_ANY, CLIENT_PORT, INADDR_BROADCAST,
 			// SERVER_PORT, MAC_BCAST_ADDR, client_config.ifindex);
 			const char MAC_BCAST_ADDR[] = "\xff\xff\xff\xff\xff\xff";
@@ -352,12 +350,12 @@ namespace nuts {
 			memset(&sock, 0, sizeof(sock));
 			sock.sll_family = AF_PACKET;
 			sock.sll_protocol = htons(ETH_P_IP);
-			sock.sll_ifindex = interfaceIndex;
+			sock.sll_ifindex = m_interfaceIndex;
 			sock.sll_halen = 6;
 			memcpy(sock.sll_addr, MAC_BCAST_ADDR, 6);
-			sendto(dhcp_client_socket, msgdata.data(), msgdata.size(), 0, (struct sockaddr *) &sock, sizeof(sock));
+			sendto(m_dhcp_client_socket, msgdata.data(), msgdata.size(), 0, (struct sockaddr *) &sock, sizeof(sock));
 		}
-		dhcp_write_nf->setEnabled(!dhcp_write_buf.empty());
+		m_dhcp_write_nf->setEnabled(!m_dhcp_write_buf.empty());
 	}
 	
 	void Device::selectDone(Environment*) {
@@ -366,29 +364,29 @@ namespace nuts {
 	}
 	
 	void Device::setEnvironment(int env) {
-		if (activeEnv == env || nextEnv == env) return;
+		if (m_activeEnv == env || m_nextEnv == env) return;
 		log << QString("Set next environment %1").arg(env) << endl;
-		if (env < 0 || env >= envs.size()) {
-			nextEnv = -1;
-			if (activeEnv != -1) {
-				envs[activeEnv]->stop();
+		if (env < 0 || env >= m_envs.size()) {
+			m_nextEnv = -1;
+			if (m_activeEnv != -1) {
+				m_envs[m_activeEnv]->stop();
 			}
-		} else if (activeEnv == -1) {
-			activeEnv = env;
-			envs[activeEnv]->start();
-			emit environmentChanged(activeEnv);
-		} else if (nextEnv == -1) {
-			nextEnv = env;
-			envs[activeEnv]->stop();
+		} else if (m_activeEnv == -1) {
+			m_activeEnv = env;
+			m_envs[m_activeEnv]->start();
+			emit environmentChanged(m_activeEnv);
+		} else if (m_nextEnv == -1) {
+			m_nextEnv = env;
+			m_envs[m_activeEnv]->stop();
 		} else {
-			nextEnv = env;
+			m_nextEnv = env;
 		}
 	}
 	
 	void Device::checkEnvironment() {
 		libnutcommon::SelectResult user_res;
-		if (m_userEnv >= 0) user_res = envs[m_userEnv]->getSelectResult();
-		if ((m_userEnv >= 0) && (envs[m_userEnv]->selectionDone())) {
+		if (m_userEnv >= 0) user_res = m_envs[m_userEnv]->getSelectResult();
+		if ((m_userEnv >= 0) && (m_envs[m_userEnv]->selectionDone())) {
 			if (user_res == libnutcommon::SelectResult::True || user_res == libnutcommon::SelectResult::User) {
 				setEnvironment(m_userEnv);
 				return;
@@ -397,9 +395,9 @@ namespace nuts {
 		if (m_waitForEnvSelects != 0) return;
 		// every environment has now selectionDone() == true
 		// => m_userEnv is either -1 or m_userEnv cannot be selected.
-		if ((activeEnv >= 0) && (envs[activeEnv]->getSelectResult() == libnutcommon::SelectResult::True)) return;
+		if ((m_activeEnv >= 0) && (m_envs[m_activeEnv]->getSelectResult() == libnutcommon::SelectResult::True)) return;
 		// => select first with SelectResult::True
-		foreach (Environment* env, envs) {
+		foreach (Environment* env, m_envs) {
 			if (env->getSelectResult() == libnutcommon::SelectResult::True) {
 				setEnvironment(env->m_id);
 				return;
@@ -409,13 +407,13 @@ namespace nuts {
 	}
 	
 	void Device::startEnvSelect() {
-		m_waitForEnvSelects = envs.size();
-		foreach (Environment* env, envs)
+		m_waitForEnvSelects = m_envs.size();
+		foreach (Environment* env, m_envs)
 			env->startSelect();
 	}
 	
 	void Device::setUserPreferredEnvironment(int env) {
-		if (env < 0 || env >= envs.size()) {
+		if (env < 0 || env >= m_envs.size()) {
 			m_userEnv = -1;
 		} else {
 			m_userEnv = env;
@@ -425,7 +423,7 @@ namespace nuts {
 	
 	bool Device::enable(bool force) {
 		if (m_state == libnutcommon::DS_DEACTIVATED) {
-			if (!dm->hwman.controlOn(name, force))
+			if (!m_dm->m_hwman.controlOn(m_name, force))
 				return false;
 			if (!startWPASupplicant())
 				return false;
@@ -435,26 +433,26 @@ namespace nuts {
 	}
 	void Device::disable() {
 		if (m_state != libnutcommon::DS_DEACTIVATED) {
-			nextEnv = -1;
-			if (activeEnv != -1) {
-				envs[activeEnv]->stop();
-				activeEnv = -1;
-				emit environmentChanged(activeEnv);
+			m_nextEnv = -1;
+			if (m_activeEnv != -1) {
+				m_envs[m_activeEnv]->stop();
+				m_activeEnv = -1;
+				emit environmentChanged(m_activeEnv);
 			}
-			interfaceIndex = -1;
+			m_interfaceIndex = -1;
 			stopWPASupplicant();
-			dm->hwman.controlOff(name);
+			m_dm->m_hwman.controlOff(m_name);
 			setState(libnutcommon::DS_DEACTIVATED);
 		}
 	}
 	
 	bool Device::startWPASupplicant() {
-		if (!config->wpaDriver().isEmpty()) {
+		if (!m_config->wpaDriver().isEmpty()) {
 			m_wpa_supplicant = new QProcess(this);
 			QStringList arguments;
-			arguments << "-i" << name;
-			arguments << "-D" << config->wpaDriver();
-			arguments << "-c" << config->wpaConfigFile();
+			arguments << "-i" << m_name;
+			arguments << "-D" << m_config->wpaDriver();
+			arguments << "-c" << m_config->wpaConfigFile();
 			m_wpa_supplicant->start("/sbin/wpa_supplicant", arguments);
 			if (m_wpa_supplicant->waitForStarted(-1)) return true;
 			log << "Couldn't start wpa_supplicant" << endl;
@@ -477,71 +475,71 @@ namespace nuts {
 
 	
 	Environment::Environment(Device *device, libnutcommon::EnvironmentConfig *config, int id)
-	: QObject(device), device(device), config(config), envIsUp(false), envStart(false), m_id(id), selArpWaiting(0), m_needUserSetup(false) {
-		m_selectResults.resize(config->getSelect().filters.size());
-		foreach (libnutcommon::IPv4Config *ic, config->getIPv4Interfaces())
-			ifs.push_back(new Interface_IPv4(this, ifs.size(), ic));
-		ifUpStatus.fill(false, ifs.size());
+	: QObject(device), m_device(device), m_config(config), m_envIsUp(false), m_envStart(false), m_id(id), m_selArpWaiting(0), m_needUserSetup(false) {
+		m_selectResults.resize(m_config->getSelect().filters.size());
+		foreach (libnutcommon::IPv4Config *ic, m_config->getIPv4Interfaces())
+			m_ifs.push_back(new Interface_IPv4(this, m_ifs.size(), ic));
+		m_ifUpStatus.fill(false, m_ifs.size());
 		updateNeedUserSetup();
 	}
 	Environment::~Environment() {
-		foreach (Interface* iface, ifs)
+		foreach (Interface* iface, m_ifs)
 			delete iface;
-		ifs.clear();
+		m_ifs.clear();
 	}
 	
 	void Environment::checkStatus() {
 //		log << QString("checkStatus: %1/%2").arg(ifUpStatus.count(true)).arg(ifUpStatus.size()) << endl;
-		if (envStart) {
-			if (!envIsUp && ifUpStatus.count(true) == ifUpStatus.size()) {
-				envIsUp = true;
-				device->envUp(this);
+		if (m_envStart) {
+			if (!m_envIsUp && m_ifUpStatus.count(true) == m_ifUpStatus.size()) {
+				m_envIsUp = true;
+				m_device->envUp(this);
 			}
 		} else {
-			if (envIsUp && ifUpStatus.count(true) == 0) {
-				envIsUp = false;
-				device->envDown(this);
+			if (m_envIsUp && m_ifUpStatus.count(true) == 0) {
+				m_envIsUp = false;
+				m_device->envDown(this);
 			}
 		}
 	}
 
 	void Environment::start() {
-		if (envStart) return;
-		envStart = true; envIsUp = false;
-		bool needUserSetup = false;
-		foreach (Interface* i, ifs) {
+		if (m_envStart) return;
+		m_envStart = true; m_envIsUp = false;
+		bool m_needUserSetup = false;
+		foreach (Interface* i, m_ifs) {
 			i->start();
-			needUserSetup |= i->needUserSetup();
+			m_needUserSetup |= i->needUserSetup();
 		}
-		if (needUserSetup)
-			device->envNeedUserSetup(this);
+		if (m_needUserSetup)
+			m_device->envNeedUserSetup(this);
 		checkStatus();
 	}
 	void Environment::stop() {
-		if (!envStart) return;
-		envStart = false; envIsUp = true;
-		foreach (Interface* i, ifs)
+		if (!m_envStart) return;
+		m_envStart = false; m_envIsUp = true;
+		foreach (Interface* i, m_ifs)
 			i->stop();
 		checkStatus();
 	}
 	
 	void Environment::ifUp(Interface* i) {
 //		log << QString("Interface %1 up").arg(i->m_index) << endl;
-		ifUpStatus[i->m_index] = true;
+		m_ifUpStatus[i->m_index] = true;
 		checkStatus();
 	}
 	void Environment::ifDown(Interface* i) {
 //		log << QString("Interface %1 down").arg(i->m_index) << endl;
-		ifUpStatus[i->m_index] = false;
+		m_ifUpStatus[i->m_index] = false;
 		checkStatus();
 	}
 	
 	bool Environment::startSelect() {
-		selArpWaiting = 0;
+		m_selArpWaiting = 0;
 		
 		ARPRequest *r;
 		
-		const QVector<libnutcommon::SelectRule> &filters = config->getSelect().filters;
+		const QVector<libnutcommon::SelectRule> &filters = m_config->getSelect().filters;
 		int c = filters.size();
 		for (int i = 0; i < c; i++) {
 			switch (filters[i].selType) {
@@ -549,15 +547,15 @@ namespace nuts {
 					m_selectResults[i] = libnutcommon::SelectResult::User;
 					break;
 				case libnutcommon::SelectRule::SEL_ARP:
-					r = device->m_arp.requestIPv4(QHostAddress((quint32) 0), filters[i].ipAddr);
+					r = m_device->m_arp.requestIPv4(QHostAddress((quint32) 0), filters[i].ipAddr);
 					if (!r) return false;
 					r->disconnect(this);
-					connect(r, SIGNAL(timeout(QHostAddress)), this, SLOT(selectArpRequestTimeout(QHostAddress)));
-					connect(r, SIGNAL(foundMac(libnutcommon::MacAddress, QHostAddress)), this, SLOT(selectArpRequestFoundMac(libnutcommon::MacAddress, QHostAddress)));
-					selArpWaiting++;
+					connect(r, SIGNAL(timeout(QHostAddress)), SLOT(selectArpRequestTimeout(QHostAddress)));
+					connect(r, SIGNAL(foundMac(libnutcommon::MacAddress, QHostAddress)),  SLOT(selectArpRequestFoundMac(libnutcommon::MacAddress, QHostAddress)));
+					m_selArpWaiting++;
 					break;
 				case libnutcommon::SelectRule::SEL_ESSID:
-					m_selectResults[i] = (filters[i].essid == device->essid()) ? libnutcommon::SelectResult::True : libnutcommon::SelectResult::False;
+					m_selectResults[i] = (filters[i].essid == m_device->essid()) ? libnutcommon::SelectResult::True : libnutcommon::SelectResult::False;
 					break;
 				case libnutcommon::SelectRule::SEL_AND_BLOCK:
 				case libnutcommon::SelectRule::SEL_OR_BLOCK:
@@ -569,19 +567,19 @@ namespace nuts {
 	}
 	
 	void Environment::checkSelectState() {
-		if (selArpWaiting > 0) return;
-		if (selArpWaiting == -1) {
+		if (m_selArpWaiting > 0) return;
+		if (m_selArpWaiting == -1) {
 			err << QString("Environment::checkSelectState called after selection was done") << endl;
 			return;
 		}
-		selArpWaiting = -1;
-		const QVector<libnutcommon::SelectRule> &filters = config->getSelect().filters;
-		const QVector< QVector<quint32> > &blocks = config->getSelect().blocks;
+		m_selArpWaiting = -1;
+		const QVector<libnutcommon::SelectRule> &filters = m_config->getSelect().filters;
+		const QVector< QVector<quint32> > &blocks = m_config->getSelect().blocks;
 		int c = filters.size();
 		if (!c) {
 //			qDebug() << QString("Nothing to select") << endl;
 			m_selectResult = libnutcommon::SelectResult::User;
-			device->selectDone(this);
+			m_device->selectDone(this);
 			emit selectResultReady();
 			return;
 		}
@@ -605,19 +603,19 @@ namespace nuts {
 			}
 		}
 		m_selectResult = m_selectResults[0];
-		device->selectDone(this);
+		m_device->selectDone(this);
 		emit selectResultReady();
 //		qDebug() << QString("Select Result: %1").arg((qint8) m_selectResults[0]) << endl;
 	}
 	
 	void Environment::selectArpRequestTimeout(QHostAddress ip) {
 //		qDebug() << QString("arp timeout: %1").arg(ip.toString()) << endl;
-		const QVector<libnutcommon::SelectRule> &filters = config->getSelect().filters;
+		const QVector<libnutcommon::SelectRule> &filters = m_config->getSelect().filters;
 		int c = filters.size();
 		for (int i = 0; i < c; i++) {
 			if (filters[i].selType == libnutcommon::SelectRule::SEL_ARP && filters[i].ipAddr == ip) {
 				m_selectResults[i] = libnutcommon::SelectResult::False;
-				selArpWaiting--;
+				m_selArpWaiting--;
 			}
 		}
 		checkSelectState();
@@ -625,7 +623,7 @@ namespace nuts {
 	
 	void Environment::selectArpRequestFoundMac(libnutcommon::MacAddress mac, QHostAddress ip) {
 //		qDebug() << QString("arp found: %1 -> %2").arg(ip.toString()).arg(mac.toString()) << endl;
-		const QVector<libnutcommon::SelectRule> &filters = config->getSelect().filters;
+		const QVector<libnutcommon::SelectRule> &filters = m_config->getSelect().filters;
 		int c = filters.size();
 		for (int i = 0; i < c; i++) {
 			if (filters[i].selType == libnutcommon::SelectRule::SEL_ARP && filters[i].ipAddr == ip) {
@@ -634,7 +632,7 @@ namespace nuts {
 				} else {
 					m_selectResults[i] = libnutcommon::SelectResult::True;
 				}
-				selArpWaiting--;
+				m_selArpWaiting--;
 			}
 		}
 		checkSelectState();
@@ -642,7 +640,7 @@ namespace nuts {
 	
 	void Environment::updateNeedUserSetup() {
 		m_needUserSetup = false;
-		foreach (Interface *iface, ifs) {
+		foreach (Interface *iface, m_ifs) {
 			if (iface->needUserSetup()) {
 				m_needUserSetup = true;
 				break;
@@ -659,9 +657,9 @@ namespace nuts {
 	}
 	
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, libnutcommon::IPv4Config *config)
-	: Interface(env, index), dhcp_timer_id(-1), dm(env->device->dm), dhcp_xid(0), dhcpstate(DHCPS_OFF), zc_state(ZCS_OFF), zc_arp_probe(0), m_config(config), m_ifstate(libnutcommon::IFS_OFF) {
-		m_needUserSetup = config->getFlags() & libnutcommon::IPv4Config::DO_USERSTATIC;
-		connect(this, SIGNAL(statusChanged(libnutcommon::InterfaceState, Interface_IPv4*)), &m_env->device->dm->m_events, SLOT(interfaceStatusChanged(libnutcommon::InterfaceState, Interface_IPv4*)));
+	: Interface(env, index), m_dhcp_timer_id(-1), m_dm(env->m_device->m_dm), m_dhcp_xid(0), m_dhcpstate(DHCPS_OFF), m_zc_state(ZCS_OFF), m_zc_arp_probe(0), m_config(config), m_ifstate(libnutcommon::IFS_OFF) {
+		m_needUserSetup = m_config->getFlags() & libnutcommon::IPv4Config::DO_USERSTATIC;
+		connect(this, SIGNAL(statusChanged(libnutcommon::InterfaceState, Interface_IPv4*)), &m_env->m_device->m_dm->m_events, SLOT(interfaceStatusChanged(libnutcommon::InterfaceState, Interface_IPv4*)));
 	}
 	
 	Interface_IPv4::~Interface_IPv4() {
@@ -685,7 +683,7 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::dhcp_send_renew() {
-		DHCPClientPacket cp(this, dhcp_server_ip);
+		DHCPClientPacket cp(this, m_dhcp_server_ip);
 		cp.doDHCPRenew(ip);
 		cp.check();
 		cp.send();
@@ -699,24 +697,24 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::dhcp_send_release() {
-		DHCPClientPacket cp(this, dhcp_server_ip);
-		cp.doDHCPRelease(ip, dhcp_server_identifier);
+		DHCPClientPacket cp(this, m_dhcp_server_ip);
+		cp.doDHCPRelease(ip, m_dhcp_server_identifier);
 		cp.check();
 		cp.send();
 	}
 	
 	void Interface_IPv4::dhcp_setup_interface(DHCPPacket *ack, bool renewing) {
 		if (renewing) {
-			dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
+			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
 		} else {
 			ip = ack->getYourIP();
 			netmask = ack->getOptionAddress(DHCP_SUBNET);
 			gateway = ack->getOptionAddress(DHCP_ROUTER);
 			dnsserver = ack->getOptionAddresses(DHCP_DNS_SERVER);
 			localdomain = ack->getOptionString(DHCP_DOMAIN_NAME);
-			dhcp_server_identifier = ack->getOption(DHCP_SERVER_ID);
-			dhcp_server_ip = QHostAddress(ntohl(ack->headers.ip.saddr));
-			dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
+			m_dhcp_server_identifier = ack->getOption(DHCP_SERVER_ID);
+			m_dhcp_server_ip = QHostAddress(ntohl(ack->headers.ip.saddr));
+			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
 				// T1: 0.5 * dhcp_lease_time
 				// T2: 0.875 * dhcp_lease_time ( 7/8 )
 			m_ifstate = libnutcommon::IFS_DHCP;
@@ -725,16 +723,16 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::dhcp_set_timeout(int msec) {
-		if (dhcp_timer_id != -1) killTimer(dhcp_timer_id);
+		if (m_dhcp_timer_id != -1) killTimer(m_dhcp_timer_id);
 		if (msec != -1)
-			dhcp_timer_id = startTimer(msec);
+			m_dhcp_timer_id = startTimer(msec);
 		else
-			dhcp_timer_id = -1;
+			m_dhcp_timer_id = -1;
 	}
 	
 	void Interface_IPv4::zeroconf_setup_interface() {
 		if (m_ifstate != libnutcommon::IFS_OFF) return;
-		ip = zc_probe_ip;
+		ip = m_zc_probe_ip;
 		netmask = QHostAddress((quint32) 0xFFFF0000);
 		gateway = QHostAddress((quint32) 0);
 		dnsserver.clear();
@@ -748,47 +746,47 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::zeroconfProbe() {   // select new ip and start probe it
-		quint32 lastip = zc_probe_ip.toIPv4Address();
+		quint32 lastip = m_zc_probe_ip.toIPv4Address();
 		const quint32 baseip = 0xA9FE0000; // 169.254.0.0
 		const quint32 mask = 0xFFFF;
-		quint32 rnd = hashMac(m_env->device->getMacAddress()), ip;
+		quint32 rnd = hashMac(m_env->m_device->getMacAddress()), ip;
 		do {
 			while ((rnd >> 8) == 0 || (rnd >> 8) == 0xFF)
 				rnd = getRandomUInt32() & mask;
 			ip = baseip | rnd;
 		} while (ip == lastip);
-		zc_probe_ip = QHostAddress(ip);
-		zc_arp_probe = m_env->device->m_arp.probeIPv4(zc_probe_ip);
-		if (!zc_arp_probe || zc_arp_probe->getState() != ARPProbe::PROBING) {
+		m_zc_probe_ip = QHostAddress(ip);
+		m_zc_arp_probe = m_env->m_device->m_arp.probeIPv4(m_zc_probe_ip);
+		if (!m_zc_arp_probe || m_zc_arp_probe->getState() != ARPProbe::PROBING) {
 			err << "ARPProbe failed" << endl;
-			zc_state =ZCS_OFF;
+			m_zc_state =ZCS_OFF;
 			return;
 		}
-		zc_arp_probe->setReserve(m_config->getFlags() & libnutcommon::IPv4Config::DO_DHCP);
-		connect(zc_arp_probe, SIGNAL(conflict(QHostAddress, libnutcommon::MacAddress)), SLOT(zc_probe_conflict()));
-		connect(zc_arp_probe, SIGNAL(ready(QHostAddress)), SLOT(zc_probe_ready()));
+		m_zc_arp_probe->setReserve(m_config->getFlags() & libnutcommon::IPv4Config::DO_DHCP);
+		connect(m_zc_arp_probe, SIGNAL(conflict(QHostAddress, libnutcommon::MacAddress)), SLOT(zc_probe_conflict()));
+		connect(m_zc_arp_probe, SIGNAL(ready(QHostAddress)), SLOT(zc_probe_ready()));
 	}
 	void Interface_IPv4::zeroconfWatch() {
-		zc_arp_watch = m_env->device->m_arp.watchIPv4(zc_probe_ip);
-		connect(zc_arp_watch, SIGNAL(conflict(QHostAddress, libnutcommon::MacAddress)), SLOT(zc_watch_conflict()));
+		m_zc_arp_watch = m_env->m_device->m_arp.watchIPv4(m_zc_probe_ip);
+		connect(m_zc_arp_watch, SIGNAL(conflict(QHostAddress, libnutcommon::MacAddress)), SLOT(zc_watch_conflict()));
 	}
 	void Interface_IPv4::zeroconfAnnounce() {
-		zc_arp_announce = m_env->device->m_arp.announceIPv4(zc_probe_ip);
-		connect(zc_arp_announce, SIGNAL(ready(QHostAddress)), SLOT(zc_announce_ready()));
+		m_zc_arp_announce = m_env->m_device->m_arp.announceIPv4(m_zc_probe_ip);
+		connect(m_zc_arp_announce, SIGNAL(ready(QHostAddress)), SLOT(zc_announce_ready()));
 	}
 	
 	void Interface_IPv4::zeroconfFree() {    // free ARPProbe and ARPWatch
-		if (zc_arp_probe) {
-			delete zc_arp_probe;
-			zc_arp_probe = 0;
+		if (m_zc_arp_probe) {
+			delete m_zc_arp_probe;
+			m_zc_arp_probe = 0;
 		}
-		if (zc_arp_announce) {
-			delete zc_arp_announce;
-			zc_arp_announce = 0;
+		if (m_zc_arp_announce) {
+			delete m_zc_arp_announce;
+			m_zc_arp_announce = 0;
 		}
-		if (zc_arp_watch) {
-			delete zc_arp_watch;
-			zc_arp_watch = 0;
+		if (m_zc_arp_watch) {
+			delete m_zc_arp_watch;
+			m_zc_arp_watch = 0;
 		}
 	}
 	
@@ -797,99 +795,99 @@ namespace nuts {
 			return;
 		bool hasDHCP = (m_config->getFlags() & libnutcommon::IPv4Config::DO_DHCP);
 		if (m_ifstate == libnutcommon::IFS_DHCP)
-			zc_state = ZCS_OFF;
+			m_zc_state = ZCS_OFF;
 		for (;;) {
-			switch (zc_state) {
+			switch (m_zc_state) {
 				case ZCS_OFF:
 					zeroconfFree();
 					return;
 				case ZCS_START:
-					zc_probe_ip = QHostAddress((quint32) 0);
-					zc_state = ZCS_PROBE;
+					m_zc_probe_ip = QHostAddress((quint32) 0);
+					m_zc_state = ZCS_PROBE;
 				case ZCS_PROBE:
 					zeroconfProbe();
-					zc_state = ZCS_PROBING;
+					m_zc_state = ZCS_PROBING;
 				case ZCS_PROBING:
 					return;
 				case ZCS_RESERVING:
-					if (!hasDHCP || dhcp_retry > 3) {
-						if (zc_arp_probe != 0){
-							delete zc_arp_probe;
-							zc_arp_probe = 0;
+					if (!hasDHCP || m_dhcp_retry > 3) {
+						if (m_zc_arp_probe != 0){
+							delete m_zc_arp_probe;
+							m_zc_arp_probe = 0;
 						}
-						zc_state = ZCS_ANNOUNCE;
+						m_zc_state = ZCS_ANNOUNCE;
 					} else {
 						return;
 					}
 				case ZCS_ANNOUNCE:
 					zeroconfWatch();
 					zeroconfAnnounce();
-					zc_state = ZCS_ANNOUNCING;
+					m_zc_state = ZCS_ANNOUNCING;
 				case ZCS_ANNOUNCING:
 					return;
 				case ZCS_BIND:
 					zeroconf_setup_interface();
-					zc_state = ZCS_BOUND;
+					m_zc_state = ZCS_BOUND;
 				case ZCS_BOUND:
 					return;
 				case ZCS_CONFLICT:
 					zeroconfFree();
-					zc_state = ZCS_PROBE;
+					m_zc_state = ZCS_PROBE;
 					break;
 			}
 		}
 	}
 	
 	void Interface_IPv4::zc_probe_conflict() {
-		zc_arp_probe = 0; // Deletes itself
-		zc_state = ZCS_CONFLICT;
+		m_zc_arp_probe = 0; // Deletes itself
+		m_zc_state = ZCS_CONFLICT;
 		zeroconfAction();
 	}
 	void Interface_IPv4::zc_probe_ready() {
-		if (!zc_arp_probe->getReserve())
-			zc_arp_probe = 0; // Deletes itself
-		zc_state = ZCS_RESERVING;
+		if (!m_zc_arp_probe->getReserve())
+			m_zc_arp_probe = 0; // Deletes itself
+		m_zc_state = ZCS_RESERVING;
 		zeroconfAction();
 	}
 	void Interface_IPv4::zc_announce_ready() {
-		zc_arp_announce = 0; // Deletes itself
-		zc_state = ZCS_BIND;
+		m_zc_arp_announce = 0; // Deletes itself
+		m_zc_state = ZCS_BIND;
 		zeroconfAction();
 	}
 	void Interface_IPv4::zc_watch_conflict() {
-		zc_arp_watch = 0; // Deletes itself
+		m_zc_arp_watch = 0; // Deletes itself
 		if (m_ifstate == libnutcommon::IFS_ZEROCONF) systemDown();
-		zc_state = ZCS_CONFLICT;
+		m_zc_state = ZCS_CONFLICT;
 		zeroconfAction();
 	}
 	
 	void Interface_IPv4::dhcpAction(DHCPPacket *source) {
 		for (;;) {
-			switch (dhcpstate) {
+			switch (m_dhcpstate) {
 				case DHCPS_OFF:
 					releaseXID();
 					return;
 				case DHCPS_INIT_START:
-					dhcp_retry = 0;
+					m_dhcp_retry = 0;
 					// fall through:
 					// dhcpstate = DHCPS_INIT;
 				case DHCPS_INIT:
 					dhcp_send_discover();
-					dhcpstate = DHCPS_SELECTING;
+					m_dhcpstate = DHCPS_SELECTING;
 					break;
 				case DHCPS_SELECTING:
 					if (source) {
 						if (source->getMessageType() == DHCP_OFFER)  {
-							killTimer(dhcp_timer_id);
+							killTimer(m_dhcp_timer_id);
 							dhcp_send_request(source);
-							dhcpstate = DHCPS_REQUESTING;
+							m_dhcpstate = DHCPS_REQUESTING;
 						}
 					} else {
-						if (dhcp_retry < 5) {
-							dhcp_retry++;
+						if (m_dhcp_retry < 5) {
+							m_dhcp_retry++;
 							// send 6 packets with short interval
 							// 0, 500, 2500, 4500, 6500, 8500 [ms]
-							dhcp_set_timeout(500 + (dhcp_retry-1) * 2000);
+							dhcp_set_timeout(500 + (m_dhcp_retry-1) * 2000);
 						} else {
 							// 1 min
 							dhcp_set_timeout(1 * 60 * 1000);
@@ -900,13 +898,13 @@ namespace nuts {
 					if (source) {
 						switch (source->getMessageType()) {
 							case DHCP_ACK:
-								killTimer(dhcp_timer_id);
+								killTimer(m_dhcp_timer_id);
 								dhcp_setup_interface(source);
-								dhcpstate = DHCPS_BOUND;
+								m_dhcpstate = DHCPS_BOUND;
 								break;
 							case DHCP_NAK:
-								killTimer(dhcp_timer_id);
-								dhcpstate = DHCPS_INIT;
+								killTimer(m_dhcp_timer_id);
+								m_dhcpstate = DHCPS_INIT;
 								break;
 							default:
 								break;
@@ -919,19 +917,19 @@ namespace nuts {
 				case DHCPS_BOUND:
 					releaseXID();
 					// 0.5 * 1000 (msecs)
-					dhcp_set_timeout(500 * dhcp_lease_time);
+					dhcp_set_timeout(500 * m_dhcp_lease_time);
 					return;
 				case DHCPS_RENEWING:
 					if (source) {
 						switch (source->getMessageType()) {
 							case DHCP_ACK:
-								killTimer(dhcp_timer_id);
+								killTimer(m_dhcp_timer_id);
 								dhcp_setup_interface(source, true);
-								dhcpstate = DHCPS_BOUND;
+								m_dhcpstate = DHCPS_BOUND;
 								break;
 							case DHCP_NAK:
-								killTimer(dhcp_timer_id);
-								dhcpstate = DHCPS_INIT_START;
+								killTimer(m_dhcp_timer_id);
+								m_dhcpstate = DHCPS_INIT_START;
 								break;
 							default:
 								break;
@@ -940,20 +938,20 @@ namespace nuts {
 					} else {
 						dhcp_send_renew();
 						// T2 - T1 * 1000 (msecs) = (7 / 8 - 1 / 2) * 1000 = 3 / 8 * 1000 = 375
-						dhcp_set_timeout(375 * dhcp_lease_time);
+						dhcp_set_timeout(375 * m_dhcp_lease_time);
 						return;
 					}
 				case DHCPS_REBINDING:
 					if (source) {
 						switch (source->getMessageType()) {
 							case DHCP_ACK:
-								killTimer(dhcp_timer_id);
+								killTimer(m_dhcp_timer_id);
 								dhcp_setup_interface(source, true);
-								dhcpstate = DHCPS_BOUND;
+								m_dhcpstate = DHCPS_BOUND;
 								break;
 							case DHCP_NAK:
-								killTimer(dhcp_timer_id);
-								dhcpstate = DHCPS_INIT_START;
+								killTimer(m_dhcp_timer_id);
+								m_dhcpstate = DHCPS_INIT_START;
 								break;
 							default:
 								break;
@@ -962,7 +960,7 @@ namespace nuts {
 					} else {
 						dhcp_send_rebind();
 						// T - (T2) = 1/8 -> 125
-						dhcp_set_timeout(125 * dhcp_lease_time);
+						dhcp_set_timeout(125 * m_dhcp_lease_time);
 						return;
 					}
 				default:
@@ -974,26 +972,26 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::timerEvent(QTimerEvent *tevt) {
-		if (tevt->timerId() != dhcp_timer_id) {
+		if (tevt->timerId() != m_dhcp_timer_id) {
 			err << "Unrequested timer Event: " << tevt->timerId() << endl;
 //			return;
 		}
 		dhcp_set_timeout(-1);
-		switch (dhcpstate) {
+		switch (m_dhcpstate) {
 			case DHCPS_SELECTING:
-				dhcpstate = DHCPS_INIT;
+				m_dhcpstate = DHCPS_INIT;
 				break;
 			case DHCPS_REQUESTING:
-				dhcpstate = DHCPS_INIT;
+				m_dhcpstate = DHCPS_INIT;
 				break;
 			case DHCPS_BOUND:
-				dhcpstate = DHCPS_RENEWING;
+				m_dhcpstate = DHCPS_RENEWING;
 				break;
 			case DHCPS_RENEWING:
-				dhcpstate = DHCPS_REBINDING;
+				m_dhcpstate = DHCPS_REBINDING;
 				break;
 			case DHCPS_REBINDING:
-				dhcpstate = DHCPS_INIT_START;
+				m_dhcpstate = DHCPS_INIT_START;
 				break;
 			default:
 				break;
@@ -1002,11 +1000,11 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::startDHCP() {
-		dhcpstate = DHCPS_INIT_START;
+		m_dhcpstate = DHCPS_INIT_START;
 		dhcpAction();
 	}
 	void Interface_IPv4::stopDHCP() {
-		switch (dhcpstate) {
+		switch (m_dhcpstate) {
 			case DHCPS_INITREBOOT:  // nothing to do ??
 			case DHCPS_REBOOTING:  // nothing to do ??
 			
@@ -1026,7 +1024,7 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::startZeroconf() {
-		zc_state = ZCS_START;
+		m_zc_state = ZCS_START;
 		zeroconfAction();
 	}
 	void Interface_IPv4::startStatic() {
@@ -1066,10 +1064,10 @@ namespace nuts {
 	
 	void Interface_IPv4::stop() {
 		log << "Interface_IPv4::stop" << endl;
-		if (dhcpstate != DHCPS_OFF)
+		if (m_dhcpstate != DHCPS_OFF)
 			stopDHCP();
-		if (zc_state != ZCS_OFF) {
-			zc_state = ZCS_OFF;
+		if (m_zc_state != ZCS_OFF) {
+			m_zc_state = ZCS_OFF;
 			zeroconfAction();
 		}
 		systemDown();
@@ -1112,7 +1110,7 @@ namespace nuts {
 //		char buf[32];
 //		log << nl_addr2str (local, buf, 32) << endl;
 		struct rtnl_addr *addr = rtnl_addr_alloc();
-		rtnl_addr_set_ifindex(addr, m_env->device->interfaceIndex);
+		rtnl_addr_set_ifindex(addr, m_env->m_device->m_interfaceIndex);
 		rtnl_addr_set_family(addr, AF_INET);
 		rtnl_addr_set_local(addr, local);
 		rtnl_addr_set_broadcast(addr, bcast);
@@ -1123,7 +1121,7 @@ namespace nuts {
 #if 0
 		log << "systemUp: addr_add = " << rtnl_addr_add(dm->hwman.getNLHandle(), addr, 0) << endl;
 #else
-		rtnl_addr_add(dm->hwman.getNLHandle(), addr, 0);
+		rtnl_addr_add(m_dm->m_hwman.getNLHandle(), addr, 0);
 #endif
 		rtnl_addr_put(addr);
 		nl_addr_put(local);
@@ -1137,7 +1135,7 @@ namespace nuts {
 			setSockaddrIPv4(rt.rt_dst);
 			setSockaddrIPv4(rt.rt_gateway, gateway.toIPv4Address());
 			setSockaddrIPv4(rt.rt_genmask);
-			QByteArray buf = m_env->device->name.toUtf8();
+			QByteArray buf = m_env->m_device->m_name.toUtf8();
 			rt.rt_dev = buf.data();
 			int skfd = socket(AF_INET, SOCK_DGRAM, 0);
 			write(3, &rt, sizeof(rt));
@@ -1148,7 +1146,7 @@ namespace nuts {
 		if (!dnsserver.empty()) {
 			QProcess *proc = new QProcess();
 			QStringList arguments;
-			arguments << "-a" << QString("%1_%2").arg(m_env->device->name).arg(m_index);
+			arguments << "-a" << QString("%1_%2").arg(m_env->m_device->m_name).arg(m_index);
 			proc->start("/sbin/resolvconf", arguments);
 			QTextStream ts(proc);
 			if (!localdomain.isEmpty())
@@ -1167,7 +1165,7 @@ namespace nuts {
 		// Resolvconf
 		QProcess *proc = new QProcess();
 		QStringList arguments;
-		arguments << "-d" << QString("%1_%2").arg(m_env->device->name).arg(m_index);
+		arguments << "-d" << QString("%1_%2").arg(m_env->m_device->m_name).arg(m_index);
 		proc->start("/sbin/resolvconf", arguments);
 		proc->closeWriteChannel();
 		proc->waitForFinished(-1);
@@ -1180,7 +1178,7 @@ namespace nuts {
 			setSockaddrIPv4(rt.rt_dst);
 			setSockaddrIPv4(rt.rt_gateway, gateway.toIPv4Address());
 			setSockaddrIPv4(rt.rt_genmask);
-			QByteArray buf = m_env->device->name.toUtf8();
+			QByteArray buf = m_env->m_device->m_name.toUtf8();
 			rt.rt_dev = buf.data();
 			int skfd = socket(AF_INET, SOCK_DGRAM, 0);
 			ioctl(skfd, SIOCDELRT, &rt);
@@ -1190,13 +1188,13 @@ namespace nuts {
 //		char buf[32];
 //		log << nl_addr2str (local, buf, 32) << endl;
 		struct rtnl_addr *addr = rtnl_addr_alloc();
-		rtnl_addr_set_ifindex(addr, m_env->device->interfaceIndex);
+		rtnl_addr_set_ifindex(addr, m_env->m_device->m_interfaceIndex);
 		rtnl_addr_set_family(addr, AF_INET);
 		rtnl_addr_set_local(addr, local);
 #if 0
 		log << "systemUp: addr_delete = " << rtnl_addr_delete(dm->hwman.getNLHandle(), addr, 0) << endl;
 #else
-		rtnl_addr_delete(dm->hwman.getNLHandle(), addr, 0);
+		rtnl_addr_delete(m_dm->m_hwman.getNLHandle(), addr, 0);
 #endif
 		rtnl_addr_put(addr);
 		nl_addr_put(local);
@@ -1207,9 +1205,9 @@ namespace nuts {
 	
 	bool Interface_IPv4::registerXID(quint32 xid) {
 		releaseXID();
-		if (m_env->device->registerXID(xid, this)) {
-			dhcp_xid_unicast = false;
-			dhcp_xid = xid;
+		if (m_env->m_device->registerXID(xid, this)) {
+			m_dhcp_xid_unicast = false;
+			m_dhcp_xid = xid;
 			return true;
 		}
 		return false;
@@ -1219,21 +1217,21 @@ namespace nuts {
 		releaseXID();
 		if (!xid) return false;
 		if (setupUnicastDHCP()) {
-			dhcp_xid_unicast = true;
-			dhcp_xid = xid;
+			m_dhcp_xid_unicast = true;
+			m_dhcp_xid = xid;
 			return true;
 		}
 		return false;
 	}
 	
 	void Interface_IPv4::releaseXID() {
-		if (dhcp_xid) {
-			if (dhcp_xid_unicast) {
+		if (m_dhcp_xid) {
+			if (m_dhcp_xid_unicast) {
 				closeUnicastDHCP();
 			} else{
-				m_env->device->unregisterXID(dhcp_xid);
+				m_env->m_device->unregisterXID(m_dhcp_xid);
 			}
-			dhcp_xid = 0;
+			m_dhcp_xid = 0;
 		}
 	}
 	
@@ -1242,8 +1240,8 @@ namespace nuts {
 	}
 
 	bool Interface_IPv4::setupUnicastDHCP(bool temporary) {
-		dhcp_unicast_socket = socket(PF_INET, SOCK_DGRAM, 0);
-		if (dhcp_unicast_socket == -1) {
+		m_dhcp_unicast_socket = socket(PF_INET, SOCK_DGRAM, 0);
+		if (m_dhcp_unicast_socket == -1) {
 			err << "Couldn't create UDP socket" << endl;
 			return false;
 		}
@@ -1251,37 +1249,37 @@ namespace nuts {
 		sin.sin_family = AF_INET;
 		sin.sin_port = htons(68);
 		sin.sin_addr.s_addr = htonl(ip.toIPv4Address());
-		if (-1 == bind(dhcp_unicast_socket, (struct sockaddr*) &sin, sizeof(sin))) {
+		if (-1 == bind(m_dhcp_unicast_socket, (struct sockaddr*) &sin, sizeof(sin))) {
 			err << "Couldn't bind on local dhcp client socket" << endl;
-			close(dhcp_unicast_socket);
-			dhcp_unicast_socket = -1;
+			close(m_dhcp_unicast_socket);
+			m_dhcp_unicast_socket = -1;
 			return false;
 		}
-		dhcp_unicast_read_nf = 0;
+		m_dhcp_unicast_read_nf = 0;
 		if (!temporary) {
-			dhcp_unicast_read_nf = new QSocketNotifier(dhcp_unicast_socket, QSocketNotifier::Read);
-			connect(dhcp_unicast_read_nf, SIGNAL(activated(int)), SLOT(readDHCPUnicastClientSocket()));
+			m_dhcp_unicast_read_nf = new QSocketNotifier(m_dhcp_unicast_socket, QSocketNotifier::Read);
+			connect(m_dhcp_unicast_read_nf, SIGNAL(activated(int)), SLOT(readDHCPUnicastClientSocket()));
 		}
 		return true;
 	}
 	
 	void Interface_IPv4::closeUnicastDHCP() {
-		if (dhcp_unicast_read_nf) {
-			delete dhcp_unicast_read_nf;
-			dhcp_unicast_read_nf = 0;
+		if (m_dhcp_unicast_read_nf) {
+			delete m_dhcp_unicast_read_nf;
+			m_dhcp_unicast_read_nf = 0;
 		}
-		close(dhcp_unicast_socket);
-		dhcp_unicast_socket = -1;
+		close(m_dhcp_unicast_socket);
+		m_dhcp_unicast_socket = -1;
 	}
 	
 	bool Interface_IPv4::sendUnicastDHCP(DHCPPacket *packet) {
-		bool tmpSocket = !dhcp_xid || !dhcp_xid_unicast;
+		bool tmpSocket = !m_dhcp_xid || !m_dhcp_xid_unicast;
 		if (tmpSocket && !setupUnicastDHCP(true)) return false;
 		struct sockaddr_in sin;
 		sin.sin_family = AF_INET;
 		sin.sin_port = htons(67);
 		sin.sin_addr.s_addr = htonl(packet->unicast_addr.toIPv4Address());
-		sendto(dhcp_unicast_socket, packet->msgdata.data() + sizeof(packet->headers), packet->msgdata.length() - sizeof(packet->headers), 0, (struct sockaddr*) &sin, sizeof(sin));
+		sendto(m_dhcp_unicast_socket, packet->msgdata.data() + sizeof(packet->headers), packet->msgdata.length() - sizeof(packet->headers), 0, (struct sockaddr*) &sin, sizeof(sin));
 		if (tmpSocket) closeUnicastDHCP();
 		return true;
 	}
@@ -1294,7 +1292,7 @@ namespace nuts {
 		do {
 			msgsize = (msgsize << 1) - 1;
 			buf.resize(msgsize);
-			nread = recvfrom(dhcp_unicast_socket, buf.data(), msgsize, MSG_PEEK, (struct sockaddr *)&sin, &slen);
+			nread = recvfrom(m_dhcp_unicast_socket, buf.data(), msgsize, MSG_PEEK, (struct sockaddr *)&sin, &slen);
 			if (nread < 0) {
 //				perror("Device::readDHCPClientSocket: recvfrom");
 				closeUnicastDHCP();
@@ -1302,7 +1300,7 @@ namespace nuts {
 			if (nread == 0) return;
 		} while (nread == msgsize);
 		buf.resize(nread);
-		recvfrom(dhcp_unicast_socket, buf.data(), nread, 0, (struct sockaddr *)&sin, &slen);
+		recvfrom(m_dhcp_unicast_socket, buf.data(), nread, 0, (struct sockaddr *)&sin, &slen);
 		DHCPPacket *packet = DHCPPacket::parseData(buf, sin);
 		if (!packet) return;
 		dhcpAction(packet);

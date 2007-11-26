@@ -46,26 +46,26 @@ namespace nuts {
 	class DeviceManager : public QObject {
 		Q_OBJECT
 		private:
-			ConfigParser configParser;
+			ConfigParser m_configParser;
 			Events m_events;
-			libnutcommon::Config *config;
-			QTimer carrier_timer;
+			libnutcommon::Config *m_config;
+			QTimer m_carrier_timer;
 			/// Internal structure for delaying carrier events.
 			struct ca_evt {
 				QString ifName;
 				int ifIndex;
 				bool up;
 			};
-			QLinkedList<struct ca_evt> ca_evts;
+			QLinkedList<struct ca_evt> m_ca_evts;
 			
-			QHash<QString, Device*> devices;
+			QHash<QString, Device*> m_devices;
 			
 			void addDevice(const QString &ifname, libnutcommon::DeviceConfig *dc);
 			
 			friend class Device;
 			friend class Interface_IPv4;
 			
-			HardwareManager hwman;
+			HardwareManager m_hwman;
 			
 		private slots:
 			void ca_timer();
@@ -75,7 +75,7 @@ namespace nuts {
 			void delDevice(const QString &ifname);
 		
 		public:
-			DBusDeviceManager *dbus_devMan;
+			DBusDeviceManager *m_dbus_devMan;
 			/**
 			 * @brief Constructs the DeviceManager
 			 * @param configFile Path to the configfile.
@@ -87,12 +87,12 @@ namespace nuts {
 			 * @brief Gets all managed devices.
 			 * @return Hash of devices; the keys in the hash represent the device name in the kernel.
 			 */
-			const QHash<QString, Device*>& getDevices() { return devices; }
+			const QHash<QString, Device*>& getDevices() { return m_devices; }
 			/**
 			 * @brief Get the config.
 			 * @return Config
 			 */
-			const libnutcommon::Config& getConfig() { return *config; }
+			const libnutcommon::Config& getConfig() { return *m_config; }
 		
 		signals:
 			/**
@@ -139,25 +139,25 @@ namespace nuts {
 			friend class ARP;
 			
 			ARP m_arp;
-			DeviceManager *dm;
-			QString name;
-			int interfaceIndex;
-			libnutcommon::DeviceConfig *config;
+			DeviceManager *m_dm;
+			QString m_name;
+			int m_interfaceIndex;
+			libnutcommon::DeviceConfig *m_config;
 			
-			int activeEnv, nextEnv, m_userEnv;
+			int m_activeEnv, m_nextEnv, m_userEnv;
 			int m_waitForEnvSelects;
 			
 			libnutcommon::DeviceState m_state;
-			QList<Environment*> envs;
+			QList<Environment*> m_envs;
 			
 			// DHCP
-			QHash< quint32, Interface_IPv4* > dhcp_xid_iface;
-			int dhcp_client_socket;
-			QSocketNotifier *dhcp_read_nf, *dhcp_write_nf;
-			QLinkedList< QByteArray > dhcp_write_buf;
+			QHash< quint32, Interface_IPv4* > m_dhcp_xid_iface;
+			int m_dhcp_client_socket;
+			QSocketNotifier *m_dhcp_read_nf, *m_dhcp_write_nf;
+			QLinkedList< QByteArray > m_dhcp_write_buf;
 			
 			// Device properties
-			libnutcommon::MacAddress macAddress;
+			libnutcommon::MacAddress m_macAddress;
 			bool m_hasWLAN;
 			QString m_essid;
 			
@@ -194,10 +194,10 @@ namespace nuts {
 			
 		public slots:
 			// Properties
-			QString getName() { return name; } //!< Name of the device in the kernel, e.g. "eth0"
-			const libnutcommon::DeviceConfig& getConfig() { return *config; }
+			QString getName() { return m_name; } //!< Name of the device in the kernel, e.g. "eth0"
+			const libnutcommon::DeviceConfig& getConfig() { return *m_config; }
 			
-			int getEnvironment() { return activeEnv; } //!< Active environment, or -1
+			int getEnvironment() { return m_activeEnv; } //!< Active environment, or -1
 			
 			int getUserPreferredEnvironment() { return m_userEnv; }
 			void setUserPreferredEnvironment(int env);
@@ -213,11 +213,11 @@ namespace nuts {
 			bool enable(bool force = false);
 			void disable(); //!< Disable device
 			
-			const QList<Environment*>& getEnvironments() { return envs; }
+			const QList<Environment*>& getEnvironments() { return m_envs; }
 			
 			bool hasWLAN() { return m_hasWLAN; }
 			QString essid() { return m_essid; }
-			libnutcommon::MacAddress getMacAddress() { return macAddress; }
+			libnutcommon::MacAddress getMacAddress() { return m_macAddress; }
 			
 		signals:
 			void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState, Device* device);
@@ -235,14 +235,14 @@ namespace nuts {
 			friend class DHCPPacket;
 			friend class DHCPClientPacket;
 			
-			Device *device;
-			QList<Interface*> ifs;
+			Device *m_device;
+			QList<Interface*> m_ifs;
 			QVector<libnutcommon::SelectResult> m_selectResults;
 			libnutcommon::SelectResult m_selectResult;
 			
-			libnutcommon::EnvironmentConfig *config;
-			QBitArray ifUpStatus;
-			bool envIsUp, envStart;
+			libnutcommon::EnvironmentConfig *m_config;
+			QBitArray m_ifUpStatus;
+			bool m_envIsUp, m_envStart;
 			
 			int m_id;
 			
@@ -254,7 +254,7 @@ namespace nuts {
 			void ifUp(Interface*);
 			void ifDown(Interface*);
 			
-			int selArpWaiting;
+			int m_selArpWaiting;
 			bool startSelect();
 			void checkSelectState();
 			
@@ -269,14 +269,14 @@ namespace nuts {
 			Environment(Device *device, libnutcommon::EnvironmentConfig *config, int id);
 			virtual ~Environment();
 			
-			Device* getDevice() { return device; }
+			Device* getDevice() { return m_device; }
 			
-			const QList<Interface*>& getInterfaces() { return ifs; }
+			const QList<Interface*>& getInterfaces() { return m_ifs; }
 			int getID() { return m_id; }
-			QString getName() { return config->getName(); }
-			const libnutcommon::EnvironmentConfig& getConfig() { return *config; }
+			QString getName() { return m_config->getName(); }
+			const libnutcommon::EnvironmentConfig& getConfig() { return *m_config; }
 			
-			bool selectionDone() { return (selArpWaiting == -1); }
+			bool selectionDone() { return (m_selArpWaiting == -1); }
 			libnutcommon::SelectResult getSelectResult() { return m_selectResult; }
 			QVector<libnutcommon::SelectResult> getSelectResults() { return m_selectResults; }
 			
@@ -311,8 +311,8 @@ namespace nuts {
 	class Interface_IPv4 : public Interface {
 		Q_OBJECT
 		private:
-			int dhcp_timer_id;     // timer id
-			int dhcp_retry;        // count retries
+			int m_dhcp_timer_id;     // timer id
+			int m_dhcp_retry;        // count retries
 			virtual void timerEvent(QTimerEvent *event);
 			void dhcp_set_timeout(int msec);
 		
@@ -343,22 +343,22 @@ namespace nuts {
 				ZCS_CONFLICT,      // Conflict detected, select new address and restart Probing.
 			};
 			
-			DeviceManager *dm;
+			DeviceManager *m_dm;
 			
-			quint32 dhcp_xid;
-			bool dhcp_xid_unicast;
-			int dhcp_unicast_socket;
-			QSocketNotifier *dhcp_unicast_read_nf;
-			dhcp_state dhcpstate;
-			QHostAddress dhcp_server_ip;
-			QVector<quint8> dhcp_server_identifier;
-			quint32 dhcp_lease_time;
+			quint32 m_dhcp_xid;
+			bool m_dhcp_xid_unicast;
+			int m_dhcp_unicast_socket;
+			QSocketNotifier *m_dhcp_unicast_read_nf;
+			dhcp_state m_dhcpstate;
+			QHostAddress m_dhcp_server_ip;
+			QVector<quint8> m_dhcp_server_identifier;
+			quint32 m_dhcp_lease_time;
 			
-			zeroconf_state zc_state;
-			QHostAddress zc_probe_ip;
-			ARPProbe *zc_arp_probe;
-			ARPWatch *zc_arp_watch;
-			ARPAnnounce *zc_arp_announce;
+			zeroconf_state m_zc_state;
+			QHostAddress m_zc_probe_ip;
+			ARPProbe *m_zc_arp_probe;
+			ARPWatch *m_zc_arp_watch;
+			ARPAnnounce *m_zc_arp_announce;
 			
 			libnutcommon::IPv4Config *m_config;
 			
@@ -417,6 +417,7 @@ namespace nuts {
 			virtual void start();
 			virtual void stop();
 			
+			// TODO: Make private
 			QHostAddress ip, netmask, gateway;
 			QString localdomain;
 			QList<QHostAddress> dnsserver;

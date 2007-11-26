@@ -201,7 +201,7 @@ namespace nuts {
 				if (sendUnicast) {
 					iface->sendUnicastDHCP(this);
 				} else {
-					iface->m_env->device->sendDHCPClientPacket(this);
+					iface->m_env->m_device->sendDHCPClientPacket(this);
 				}
 			}
 	};
