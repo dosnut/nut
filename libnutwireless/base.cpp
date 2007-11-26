@@ -91,7 +91,7 @@ namespace libnutwireless {
 					char reply[512];
 					size_t reply_len = sizeof(reply);
 					wpa_ctrl_recv(event_ctrl, reply, &reply_len);
-					Event_dispatcher(QString::fromUtf8(reply, reply_len));
+					eventDispatcher(QString::fromUtf8(reply, reply_len));
 				}
 				else if (-1 == status) {
 					qWarning() << tr("Error while trying to receive messages from wpa_supplicant");
@@ -108,14 +108,15 @@ namespace libnutwireless {
 	CTRL-EVENT-DISCONNECTED
 	CTRL-EVENT-CONNECTED
 	*/
-	void CWpa_SupplicantBase::Event_dispatcher(Request req) {
+	void CWpa_SupplicantBase::eventDispatcher(Request req) {
 		if (req.type != REQ_FAIL) {
 			emit(request(req));
 		}
 	}
-	void CWpa_SupplicantBase::Event_dispatcher(EventType event, QString str) {
+	void CWpa_SupplicantBase::eventDispatcher(EventType event, QString str) {
 		if (event == EVENT_CONNECTED) {
 			emit(connectionStateChanged(true,parseEventNetworkId(str)));
+			emit(networkListUpdated());
 		}
 		else if (event == EVENT_DISCONNECTED) {
 			emit(connectionStateChanged(false,parseEventNetworkId(str)));
@@ -128,17 +129,17 @@ namespace libnutwireless {
 		}
 	}
 	
-	void CWpa_SupplicantBase::Event_dispatcher(QString event) {
+	void CWpa_SupplicantBase::eventDispatcher(QString event) {
 		QStringList str_list = event.split('\n',QString::KeepEmptyParts);
 		InteractiveType type;
 		foreach(QString str, str_list) {
 			type = parseInteract(str);
 			switch (type) {
 				case (INTERACT_REQ):
-					Event_dispatcher(parseReq(str));
+					eventDispatcher(parseReq(str));
 					break;
 				case (INTERACT_EVENT):
-					Event_dispatcher(parseEvent(str),str);
+					eventDispatcher(parseEvent(str),str);
 					break;
 				default:
 					printMessage(str);
