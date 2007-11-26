@@ -204,7 +204,7 @@ namespace qnut {
 				CAdhocConfig dialog(device->wpa_supplicant, this);
 				networkAdded = dialog.execute(*scan);
 			}
-			else if (scan->opmode == OPM_MANAGED) {
+			else {
 				CAccessPointConfig dialog(device->wpa_supplicant, this);
 				networkAdded = dialog.execute(*scan);
 			}
