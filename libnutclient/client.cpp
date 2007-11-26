@@ -530,20 +530,25 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 
 //Locking functions
 bool CDevice::incrementLock() {
-	lockCount++;
-	qDebug() << "Increment Lock to " << lockCount;
-	return !(pending_removal);
+	if (pending_removal) {
+		if (0 == lockCount) {
+			static_cast<CDeviceManager* >(parent())->dbusDeviceRemoved(dbusPath);
+		}
+		return false;
+	}
+	else {
+		lockCount++;
+		return true;
+	}
 }
 void CDevice::decrementLock() {
 	if (lockCount > 0) {
 		lockCount--;
-		qDebug() << "Decrement Lock to " << lockCount;
 	}
 	else {
 		*log << "ERROR: LOCK-COUNT<0";
 	}
-	if ( (pending_removal) && (lockCount == 0) ){
-		qDebug() << "Removing";
+	if ( (pending_removal) && (0 == lockCount) ){
 		static_cast<CDeviceManager* >(parent())->dbusDeviceRemoved(dbusPath);
 	}
 }
