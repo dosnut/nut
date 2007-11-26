@@ -45,19 +45,19 @@ namespace libnutclient {
 	class CLog : public QObject {
 		Q_OBJECT
 	private:
-		QFile file;
-		QTextStream outStream;
-		bool fileLoggingEnabled;
+		QFile m_file;
+		QTextStream m_outStream;
+		bool m_fileLoggingEnabled;
 	public:
 		CLog(QObject * parent, QString fileName);
 		inline QFile::FileError error() const {
-			return file.error();
+			return m_file.error();
 		}
 		inline bool getFileLoggingEnabled() const {
-			return fileLoggingEnabled;
+			return m_fileLoggingEnabled;
 		}
 		inline void setFileLoggingEnabled(bool isEnabled) {
-			fileLoggingEnabled = isEnabled && (file.error() == QFile::NoError);
+			m_fileLoggingEnabled = isEnabled && (m_file.error() == QFile::NoError);
 		}
 		void operator<<(QString text);
 	public slots:
@@ -74,8 +74,8 @@ namespace libnutclient {
 	class CLibNut : public QObject {
 		Q_OBJECT
 		protected:
-			QDBusConnectionInterface * dbusConnectionInterface;
-			QDBusConnection * dbusConnection;
+			QDBusConnectionInterface * m_dbusConnectionInterface;
+			QDBusConnection * m_dbusConnection;
 			void serviceCheck(QDBusConnectionInterface * interface);
 		public:
 			CLibNut(QObject * parent) : QObject(parent) {}
@@ -100,11 +100,11 @@ namespace libnutclient {
 		friend class CInterface;
 		friend class DBusDeviceManagerInterface;
 	private:
-		DBusDeviceManagerInterface * dbusDevmgr;
-		QHash<QDBusObjectPath, CDevice* > dbusDevices;
-		QDBusConnection dbusConnection;
+		DBusDeviceManagerInterface * m_dbusDevmgr;
+		QHash<QDBusObjectPath, CDevice* > m_dbusDevices;
+		QDBusConnection m_dbusConnection;
 		CLog * log;
-		bool nutsstate;
+		bool m_nutsstate;
 		void rebuild(QList<QDBusObjectPath> paths);
 		void setInformation();
 		void clearInformation();
@@ -148,20 +148,20 @@ namespace libnutclient {
 		friend class DBusDeviceInterface;
 	private:
 		//CDeviceManager * parent;
-		QDBusObjectPath dbusPath;
-		QDBusObjectPath dbusActiveEnvironment;
-		QHash<QDBusObjectPath, CEnvironment*> dbusEnvironments;
+		QDBusObjectPath m_dbusPath;
+		QDBusObjectPath m_dbusActiveEnvironment;
+		QHash<QDBusObjectPath, CEnvironment*> m_dbusEnvironments;
 		CLog * log;
-		DBusDeviceInterface * dbusDevice;
-		libnutcommon::DeviceConfig dbusConfig;
-		bool need_wpa_supplicant;
+		DBusDeviceInterface * m_dbusDevice;
+		libnutcommon::DeviceConfig m_config;
+		bool m_needWpaSupplicant;
 		void refreshAll();
-		void setActiveEnvironment(CEnvironment * env, QDBusObjectPath dbusPath);
+		void setActiveEnvironment(CEnvironment * env, QDBusObjectPath m_dbusPath);
 		void rebuild(QList<QDBusObjectPath> paths);
 		
 		//Locking functions;
-		bool pendingRemoval;
-		int lockCount;
+		bool m_pendingRemoval;
+		int m_lockCount;
 		
 
 	private slots:
@@ -204,13 +204,13 @@ namespace libnutclient {
 		friend class DBusEnvironmentInterface;
 	private:
 		//CDevice * parent;
-		QDBusObjectPath dbusPath;
+		QDBusObjectPath m_dbusPath;
 		CLog * log;
-		QHash<QDBusObjectPath, CInterface *> dbusInterfaces;
-		DBusEnvironmentInterface * dbusEnvironment;
-		libnutcommon::EnvironmentConfig config;
-		libnutcommon::SelectResult selectResult;
-		QVector<libnutcommon::SelectResult> selectResults;
+		QHash<QDBusObjectPath, CInterface *> m_dbusInterfaces;
+		DBusEnvironmentInterface * m_dbusEnvironment;
+		libnutcommon::EnvironmentConfig m_config;
+		libnutcommon::SelectResult m_selectResult;
+		QVector<libnutcommon::SelectResult> m_selectResults;
 		
 		void refreshAll();
 		void rebuild(const QList<QDBusObjectPath> &paths);
@@ -245,11 +245,11 @@ namespace libnutclient {
 		friend class DBusInterfaceInterface_IPv4;
 	private:
 		//CEnvironment * parent;
-		QDBusObjectPath dbusPath;
+		QDBusObjectPath m_dbusPath;
 		CLog * log;
-		DBusInterfaceInterface_IPv4 * dbusInterface;
-		libnutcommon::IPv4Config dbusConfig;
-		libnutcommon::IPv4UserConfig userConfig;
+		DBusInterfaceInterface_IPv4 * m_dbusInterface;
+		libnutcommon::IPv4Config m_config;
+		libnutcommon::IPv4UserConfig m_userConfig;
 		void refreshAll();
 	private slots:
 		void dbusstateChanged(libnutcommon::InterfaceProperties properties);
@@ -262,7 +262,7 @@ namespace libnutclient {
 		int index;
 		
 		libnutcommon::IPv4UserConfig getUserConfig(bool refresh=false);
-		libnutcommon::IPv4Config& getConfig() { return dbusConfig; }
+		libnutcommon::IPv4Config& getConfig() { return m_config; }
 
 		CInterface(CEnvironment * parent, QDBusObjectPath dbusPath);
 		~CInterface();

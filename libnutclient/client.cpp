@@ -48,19 +48,19 @@ QString toString(QDBusError error) {
 ////////////////
 //CLog
 ///////////////
-CLog::CLog(QObject * parent, QString fileName) : QObject(parent), file(fileName) {
-	fileLoggingEnabled = file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
+CLog::CLog(QObject * parent, QString fileName) : QObject(parent), m_file(fileName) {
+	m_fileLoggingEnabled = m_file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
 	
-	if (fileLoggingEnabled) {
-		outStream.setDevice(&file);
+	if (m_fileLoggingEnabled) {
+		m_outStream.setDevice(&m_file);
 	}
 }
 
 void CLog::operator<<(QString text) {
 	emit printed(text);
 	
-	if (fileLoggingEnabled) {
-		outStream << text << endl;
+	if (m_fileLoggingEnabled) {
+		m_outStream << text << endl;
 	}
 }
 
@@ -83,9 +83,9 @@ void CLibNut::serviceCheck(QDBusConnectionInterface * interface) {
 ////////////////
 //CDeviceManager
 ///////////////
-CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), dbusConnection(QDBusConnection::systemBus()) {
+CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), m_dbusConnection(QDBusConnection::systemBus()) {
 	//Init Hashtable
-	dbusDevices.reserve(10);
+	m_dbusDevices.reserve(10);
 }
 CDeviceManager::~CDeviceManager() {
 //Cleanup action: delete entire devicelist
@@ -97,40 +97,40 @@ CDeviceManager::~CDeviceManager() {
 }
 
 bool CDeviceManager::init(CLog * inlog) {
-	nutsstate = true;
+	m_nutsstate = true;
 	log = inlog;
 	//setup dbus connections
-	dbusConnectionInterface = dbusConnection.interface();
+	m_dbusConnectionInterface = m_dbusConnection.interface();
 	//Check if service is running
 	try {
-		serviceCheck(dbusConnectionInterface);
+		serviceCheck(m_dbusConnectionInterface);
 	}
 	catch (CLI_ConnectionInitException& e) {
 		*log << tr("Please start nuts. Starting idle mode");
-		nutsstate = false;
+		m_nutsstate = false;
 	}
 	//Attach to DbusDevicemanager
-	dbusDevmgr = new DBusDeviceManagerInterface(NUT_DBUS_URL, "/manager",dbusConnection, this);
-	if (nutsstate) {
+	m_dbusDevmgr = new DBusDeviceManagerInterface(NUT_DBUS_URL, "/manager",m_dbusConnection, this);
+	if (m_nutsstate) {
 		setInformation();
 		emit(stateChanged(true));
 	}
-	connect(dbusConnectionInterface, SIGNAL(serviceOwnerChanged(const QString &, const QString &, const QString &)), this, SLOT(dbusServiceOwnerChanged(const QString &, const QString &, const QString &)));
+	connect(m_dbusConnectionInterface, SIGNAL(serviceOwnerChanged(const QString &, const QString &, const QString &)), this, SLOT(dbusServiceOwnerChanged(const QString &, const QString &, const QString &)));
 	//Connect dbus-signals to own slots:
-	connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
-	connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
-	return nutsstate;
+	connect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
+	connect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+	return m_nutsstate;
 }
 
 //CDeviceManager private functions:
 //rebuilds the device list
 void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 	//Only rebuild when nuts is available
-	if (!nutsstate) {
+	if (!m_nutsstate) {
 		return;
 	}
 	//Delete all devices
-	dbusDevices.clear();
+	m_dbusDevices.clear();
 	CDevice * device;
 	while (!devices.isEmpty()) {
 		device = devices.takeFirst();
@@ -146,7 +146,7 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 			qWarning() << e.what();
 			continue;
 		}
-		dbusDevices.insert(i, device);
+		m_dbusDevices.insert(i, device);
 		devices.append(device);
 		device->index = devices.indexOf(device); // Set device index;
 		emit(deviceAdded(device));
@@ -157,7 +157,7 @@ void CDeviceManager::setInformation() {
 	//get devicelist etc.
 	qDebug() << "setInformation()";
 	QDBusReply<QList<QDBusObjectPath> > replydevs;
-	replydevs = dbusDevmgr->getDeviceList();
+	replydevs = m_dbusDevmgr->getDeviceList();
 	if (!replydevs.isValid()) {
 		qWarning() << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
 	}
@@ -166,7 +166,7 @@ void CDeviceManager::setInformation() {
 	CDevice * device;
 	foreach (QDBusObjectPath i, replydevs.value()) {
 		//Only add device if it's not already in our list;
-		if (dbusDevices.contains(i)) {
+		if (m_dbusDevices.contains(i)) {
 			continue;
 		}
 		//Add device
@@ -179,13 +179,13 @@ void CDeviceManager::setInformation() {
 		}
 		devices.append(device);
 		device->index = devices.indexOf(device); // Set device index;
-		dbusDevices.insert(i, device);
+		m_dbusDevices.insert(i, device);
 		emit(deviceAdded(device));
 	}
 }
 void CDeviceManager::clearInformation() {
 	//Clean Device list:
-	dbusDevices.clear();
+	m_dbusDevices.clear();
 	CDevice * dev;
 	while (!devices.isEmpty()) {
 		dev = devices.takeFirst();
@@ -199,34 +199,34 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 	if (NUT_DBUS_URL == name) { //nuts starts
 		if (oldOwner.isEmpty()) {
 			*log << tr("NUTS has been started");
-			if (nutsstate) {
+			if (m_nutsstate) {
 				clearInformation();
 				setInformation();
 			}
 			else {
-				nutsstate = true;
+				m_nutsstate = true;
 				setInformation();
 				emit(stateChanged(true));
 			}
-			connect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
-			connect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+			connect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
+			connect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
 		}
 		else if (newOwner.isEmpty()) { //nuts stops
 			*log<< tr("NUTS has been stopped");
-			if (nutsstate) {
-				nutsstate = false;
+			if (m_nutsstate) {
+				m_nutsstate = false;
 				clearInformation();
 				emit(stateChanged(false));
 			}
-			disconnect(dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
-			disconnect(dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+			disconnect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
+			disconnect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
  		}
 	}
 }
 
 //CDeviceManager DBUS-SLOTS:
 void CDeviceManager::dbusDeviceAdded(const QDBusObjectPath &objectpath) {
-	if (!dbusDevices.contains(objectpath)) {
+	if (!m_dbusDevices.contains(objectpath)) {
 		*log << tr("Adding device at: %1").arg(objectpath.path());
 		CDevice * device;
 		try {
@@ -236,19 +236,19 @@ void CDeviceManager::dbusDeviceAdded(const QDBusObjectPath &objectpath) {
 			qWarning() << e.msg();
 			return;
 		}
-		dbusDevices.insert(objectpath,device);
+		m_dbusDevices.insert(objectpath,device);
 		devices.append(device);
 		device->index = devices.indexOf(device); // Set device index;
 		emit(deviceAdded(device));
 		}
 	else {
-		dbusDevices.value(objectpath)->refreshAll();
+		m_dbusDevices.value(objectpath)->refreshAll();
 	}
 }
 void CDeviceManager::dbusDeviceRemoved(const QDBusObjectPath &objectpath) {
 	//remove devices from devicelist
-	if (dbusDevices.value(objectpath)->lockCount == 0) {
-		CDevice * device = dbusDevices.take(objectpath);
+	if (m_dbusDevices.value(objectpath)->m_lockCount == 0) {
+		CDevice * device = m_dbusDevices.take(objectpath);
 		devices.removeAll(device);
 		//Rebuild device->index for qnut
 		foreach(CDevice * dev, devices) {
@@ -258,7 +258,7 @@ void CDeviceManager::dbusDeviceRemoved(const QDBusObjectPath &objectpath) {
 		device->deleteLater();
 	}
 	else {
-		dbusDevices.value(objectpath)->pendingRemoval = true;
+		m_dbusDevices.value(objectpath)->m_pendingRemoval = true;
 	}
 }
 
@@ -266,18 +266,18 @@ void CDeviceManager::dbusDeviceRemoved(const QDBusObjectPath &objectpath) {
 //CDeviceManager SLOTS
 void CDeviceManager::refreshAll() {
 	//Only refresh when nuts is available
-	if (!nutsstate) {
+	if (!m_nutsstate) {
 		return;
 	}
 	//Get our current DeviceList
-	QDBusReply<QList<QDBusObjectPath> > replydevs = dbusDevmgr->getDeviceList();
+	QDBusReply<QList<QDBusObjectPath> > replydevs = m_dbusDevmgr->getDeviceList();
 	if (replydevs.isValid()) {
 		//If a device is missing or there are too many devices in our Hash
 		//Then rebuild complete tree, otherwise just call refresh on child
 		bool equal = true;
-		if ( (dbusDevices.size() == replydevs.value().size()) ) {
+		if ( (m_dbusDevices.size() == replydevs.value().size()) ) {
 			foreach(QDBusObjectPath i, replydevs.value()) {
-				if ( !dbusDevices.contains(i) ) {
+				if ( !m_dbusDevices.contains(i) ) {
 					equal = false;
 					break;
 				}
@@ -304,10 +304,10 @@ void CDeviceManager::refreshAll() {
 
 void CDeviceManager::rebuild() {
 	//Do not rebuild if nuts is not running
-	if (!nutsstate) {
+	if (!m_nutsstate) {
 		return;
 	}
-	QDBusReply<QList<QDBusObjectPath> > replydevs = dbusDevmgr->getDeviceList();
+	QDBusReply<QList<QDBusObjectPath> > replydevs = m_dbusDevmgr->getDeviceList();
 	if (replydevs.isValid()) {
 		rebuild(replydevs.value());
 	}
@@ -321,19 +321,19 @@ void CDeviceManager::rebuild() {
 /////////
 //CDevice
 /////////
-CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ dbusPath(dbusPath), pendingRemoval(false), lockCount(0) {
+CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) : CLibNut(parent), /*parent(parent),*/ m_dbusPath(m_dbusPath), m_pendingRemoval(false), m_lockCount(0) {
 	log = parent->log;
-	//get dbusConnection from parent:
-	dbusConnection = &(parent->dbusConnection);
-	dbusConnectionInterface = parent->dbusConnectionInterface;
+	//get m_dbusConnection from parent:
+	m_dbusConnection = &(parent->m_dbusConnection);
+	m_dbusConnectionInterface = parent->m_dbusConnectionInterface;
 	//Service check
-	serviceCheck(dbusConnectionInterface);
+	serviceCheck(m_dbusConnectionInterface);
 	//connect to dbus-object
-	dbusDevice = new DBusDeviceInterface(NUT_DBUS_URL, dbusPath.path(),*dbusConnection, this);
+	m_dbusDevice = new DBusDeviceInterface(NUT_DBUS_URL, m_dbusPath.path(),*m_dbusConnection, this);
 	
 	//get properties
-	*log << tr("Getting device properties at: %1").arg(dbusPath.path());
-	QDBusReply<DeviceProperties> replyProp = dbusDevice->getProperties();
+	*log << tr("Getting device properties at: %1").arg(m_dbusPath.path());
+	QDBusReply<DeviceProperties> replyProp = m_dbusDevice->getProperties();
 	if (replyProp.isValid()) {
 		name = replyProp.value().name;
 		type = replyProp.value().type;
@@ -349,7 +349,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	}
 
 	if (DT_AIR == type) {
-		QDBusReply<QString> replyessid = dbusDevice->getEssid();
+		QDBusReply<QString> replyessid = m_dbusDevice->getEssid();
 		if (replyessid.isValid()) {
 			essid = replyessid.value();
 		}
@@ -360,18 +360,18 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 	}
 
 	//get config and set wpa_supplicant variable
-	QDBusReply<libnutcommon::DeviceConfig> replyconf = dbusDevice->getConfig();
+	QDBusReply<libnutcommon::DeviceConfig> replyconf = m_dbusDevice->getConfig();
 	if (replyconf.isValid()) {
-		dbusConfig = replyconf.value();
-		need_wpa_supplicant = !(dbusConfig.wpaConfigFile().isEmpty());
-		*log << tr("(%2) wpa_supplicant config file at: %1").arg(dbusConfig.wpaConfigFile(),name);
+		m_config = replyconf.value();
+		m_needWpaSupplicant = !(m_config.wpaConfigFile().isEmpty());
+		*log << tr("(%2) wpa_supplicant config file at: %1").arg(m_config.wpaConfigFile(),name);
 	}
 	else {
 		throw CLI_DevConnectionException(tr("(%2) Error(%1) while retrieving device config").arg(replyconf.error().name(),name));
 	}
 
 	//get Environment list
-	QDBusReply<QList<QDBusObjectPath> > replyEnv = dbusDevice->getEnvironments();
+	QDBusReply<QList<QDBusObjectPath> > replyEnv = m_dbusDevice->getEnvironments();
 	if (!replyEnv.isValid()) {
 		throw CLI_DevConnectionException(tr("(%1) Error while trying to get environment list").arg(toString(replyEnv.error())));
 	}
@@ -386,28 +386,28 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath dbusPath) : CLibNut(pa
 			qWarning() << e.msg();
 			continue;
 		}
-		dbusEnvironments.insert(i,env);
+		m_dbusEnvironments.insert(i,env);
 		environments.append(env);
 		env->index = environments.indexOf(env);
 	}
 	
 	if (!replyProp.value().activeEnvironment.isEmpty()) {
-		dbusActiveEnvironment = QDBusObjectPath(replyProp.value().activeEnvironment);
-		activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment, 0);
-		*log << tr("Active Environement: %1").arg(dbusActiveEnvironment.path());
+		m_dbusActiveEnvironment = QDBusObjectPath(replyProp.value().activeEnvironment);
+		activeEnvironment = m_dbusEnvironments.value(m_dbusActiveEnvironment, 0);
+		*log << tr("Active Environement: %1").arg(m_dbusActiveEnvironment.path());
 	}
 	else {
 		activeEnvironment = 0;
 	}
 	//connect signals to slots
-	connect(dbusDevice, SIGNAL(environmentChangedActive(const QString &)),
+	connect(m_dbusDevice, SIGNAL(environmentChangedActive(const QString &)),
 			this, SLOT(environmentChangedActive(const QString &)));
 
-	connect(dbusDevice, SIGNAL(stateChanged(int , int)),
+	connect(m_dbusDevice, SIGNAL(stateChanged(int , int)),
 			this, SLOT(dbusstateChanged(int, int)));
 
 	//Only use wpa_supplicant if we need one
-	if (need_wpa_supplicant) {
+	if (m_needWpaSupplicant) {
 		wpa_supplicant = new libnutwireless::CWpa_Supplicant(this,name);
 		connect(wpa_supplicant,SIGNAL(message(QString)),log,SLOT(log(QString)));
 		//Connect to wpa_supplicant only if device is not deactivated
@@ -440,14 +440,14 @@ CDevice::~CDevice() {
  */
 void CDevice::refreshAll() {
 	//Refresh environment list
-	QDBusReply<QList<QDBusObjectPath> > replyenvs = dbusDevice->getEnvironments();
+	QDBusReply<QList<QDBusObjectPath> > replyenvs = m_dbusDevice->getEnvironments();
 	if (replyenvs.isValid()) {
 		//Compare local with remote list:
 		//if they are equal just refresh otherwise rebuild
-		bool envequal = (dbusEnvironments.size() == replyenvs.value().size());
+		bool envequal = (m_dbusEnvironments.size() == replyenvs.value().size());
 		if (envequal) {
 			foreach(QDBusObjectPath i, replyenvs.value()) {
-				if ( !dbusEnvironments.contains(i) ) {
+				if ( !m_dbusEnvironments.contains(i) ) {
 					envequal = false;
 					break;
 				}
@@ -467,13 +467,13 @@ void CDevice::refreshAll() {
 	}
 	activeEnvironment = 0;
 	//now refresh the rest of our device properties:
-	QDBusReply<DeviceProperties> replyprop = dbusDevice->getProperties();
+	QDBusReply<DeviceProperties> replyprop = m_dbusDevice->getProperties();
 	if (replyprop.isValid()) {
 		if (!replyprop.value().activeEnvironment.isEmpty()) {
-			dbusActiveEnvironment = QDBusObjectPath(replyprop.value().activeEnvironment);
-			activeEnvironment = dbusEnvironments.value(dbusActiveEnvironment);
+			m_dbusActiveEnvironment = QDBusObjectPath(replyprop.value().activeEnvironment);
+			activeEnvironment = m_dbusEnvironments.value(m_dbusActiveEnvironment);
 		}
-		*log << tr("Refreshing active environment: %1").arg(dbusActiveEnvironment.path());
+		*log << tr("Refreshing active environment: %1").arg(m_dbusActiveEnvironment.path());
 		state = (DeviceState) replyprop.value().state;
 		type = replyprop.value().type;
 		name = replyprop.value().name;
@@ -482,7 +482,7 @@ void CDevice::refreshAll() {
 		qWarning() << tr("(%1) Could not refresh device properties").arg(toString(replyprop.error()));
 	}
 	if (DT_AIR == type) {
-		QDBusReply<QString> replyessid = dbusDevice->getEssid();
+		QDBusReply<QString> replyessid = m_dbusDevice->getEssid();
 		if (replyessid.isValid()) {
 			essid = replyessid.value();
 		}
@@ -493,7 +493,7 @@ void CDevice::refreshAll() {
 	}
 
 	if ( !(DS_DEACTIVATED == state) ) {
-		if (need_wpa_supplicant) {
+		if (m_needWpaSupplicant) {
 			wpa_supplicant->open();
 		}
 	}
@@ -504,7 +504,7 @@ void CDevice::refreshAll() {
 //Rebuilds the environment list
 void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 	//Remove current list:
-	dbusEnvironments.clear();
+	m_dbusEnvironments.clear();
 	CEnvironment * env;
 	while ( !environments.isEmpty() ) {
 		env = environments.takeFirst();
@@ -520,7 +520,7 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 			qWarning() << e.what();
 			continue;
 		}
-		dbusEnvironments.insert(i,env);
+		m_dbusEnvironments.insert(i,env);
 		environments.append(env);
 		env->index = environments.indexOf(env);
 	}
@@ -530,26 +530,26 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 
 //Locking functions
 bool CDevice::incrementLock() {
-	if (pendingRemoval) {
-		if (0 == lockCount) {
-			static_cast<CDeviceManager* >(parent())->dbusDeviceRemoved(dbusPath);
+	if (m_pendingRemoval) {
+		if (0 == m_lockCount) {
+			static_cast<CDeviceManager* >(parent())->dbusDeviceRemoved(m_dbusPath);
 		}
 		return false;
 	}
 	else {
-		lockCount++;
+		m_lockCount++;
 		return true;
 	}
 }
 void CDevice::decrementLock() {
-	if (lockCount > 0) {
-		lockCount--;
+	if (m_lockCount > 0) {
+		m_lockCount--;
 	}
 	else {
 		*log << "ERROR: LOCK-COUNT<0";
 	}
-	if ( (pendingRemoval) && (0 == lockCount) ){
-		static_cast<CDeviceManager* >(parent())->dbusDeviceRemoved(dbusPath);
+	if ( (m_pendingRemoval) && (0 == m_lockCount) ){
+		static_cast<CDeviceManager* >(parent())->dbusDeviceRemoved(m_dbusPath);
 	}
 }
 
@@ -560,7 +560,7 @@ void CDevice::environmentChangedActive(const QString &newenv) {
 		activeEnvironment = NULL;
 	}
 	else {
-		activeEnvironment = dbusEnvironments.value(QDBusObjectPath(newenv), 0);
+		activeEnvironment = m_dbusEnvironments.value(QDBusObjectPath(newenv), 0);
 	}
 	emit(environmentChangedActive(activeEnvironment, oldenv));
 }
@@ -570,19 +570,19 @@ void CDevice::dbusstateChanged(int newState, int oldState) {
 	//TODO:fix wpa_supplicant connecting; workaround for now:
 	//connect when device has carrier, although this should happen, when device is beeing activated
 	if (DS_DEACTIVATED == oldState && !(DS_DEACTIVATED == newState) ) {
-		if (need_wpa_supplicant) {
+		if (m_needWpaSupplicant) {
 			wpa_supplicant->open();
 		}
 	}
 	else if (DS_DEACTIVATED == newState) {
-		if (need_wpa_supplicant) {
+		if (m_needWpaSupplicant) {
 			wpa_supplicant->close();
 		}
 	}
 	state = (DeviceState) newState;
 	//Workaround so far, as nuts does not send any environment changed information
 	if (DT_AIR == type && !(newState == DS_DEACTIVATED) ) {
-		QDBusReply<QString> replyessid = dbusDevice->getEssid();
+		QDBusReply<QString> replyessid = m_dbusDevice->getEssid();
 		if (replyessid.isValid()) {
 			essid = replyessid.value();
 		}
@@ -602,37 +602,37 @@ void CDevice::dbusstateChanged(int newState, int oldState) {
 
 //CDevice SLOTS
 void CDevice::enable() {
-	dbusDevice->enable();
+	m_dbusDevice->enable();
 }
 void CDevice::disable() {
-	dbusDevice->disable();
+	m_dbusDevice->disable();
 }
 void CDevice::setEnvironment(CEnvironment * environment) {
 	if (DS_DEACTIVATED == state) {
 		enable();
 	}
-	dbusDevice->setEnvironment(dbusEnvironments.key(environment));
+	m_dbusDevice->setEnvironment(m_dbusEnvironments.key(environment));
 }
 libnutcommon::DeviceConfig& CDevice::getConfig() {
-	return dbusConfig;
+	return m_config;
 }
 
 //////////////
 //CEnvironment
 //////////////
 
-CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ dbusPath(dbusPath) {
+CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ m_dbusPath(dbusPath) {
 	//Set log.
 	log = parent->log;
 	active = false;
 	//First attach to dbus
-	dbusConnection = parent->dbusConnection;
-	dbusConnectionInterface = parent->dbusConnectionInterface;
-	serviceCheck(dbusConnectionInterface);
-	dbusEnvironment = new DBusEnvironmentInterface(NUT_DBUS_URL, dbusPath.path(),*dbusConnection,this);
+	m_dbusConnection = parent->m_dbusConnection;
+	m_dbusConnectionInterface = parent->m_dbusConnectionInterface;
+	serviceCheck(m_dbusConnectionInterface);
+	m_dbusEnvironment = new DBusEnvironmentInterface(NUT_DBUS_URL, m_dbusPath.path(),*m_dbusConnection,this);
 
 	//get Environment properties
-	QDBusReply<EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
+	QDBusReply<EnvironmentProperties> replyprop = m_dbusEnvironment->getProperties();
 	if (replyprop.isValid()) {
 		if (parent->environments.size() == 0)
 			//standard environment
@@ -650,9 +650,9 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment properties").arg(toString(replyprop.error())));
 	}
 	//Get environment config
-	QDBusReply<libnutcommon::EnvironmentConfig> replyconf = dbusEnvironment->getConfig();
+	QDBusReply<libnutcommon::EnvironmentConfig> replyconf = m_dbusEnvironment->getConfig();
 	if (replyconf.isValid()) {
-		config = replyconf.value();
+		m_config = replyconf.value();
 	}
 	else {
 		throw CLI_EnvConnectionException(tr("(%1) Error while retrieving environment config").arg(replyconf.error().name()));
@@ -662,7 +662,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	getSelectResults(true); //functions saves SelectResults
 
 	//Get Interfaces
- 	QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnvironment->getInterfaces();
+ 	QDBusReply<QList<QDBusObjectPath> > replyifs = m_dbusEnvironment->getInterfaces();
 	if (replyifs.isValid()) {
 		CInterface * interface;
 		foreach(QDBusObjectPath i, replyifs.value()) {
@@ -673,7 +673,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 				qWarning() << e.what();
 				continue;
 			}
-			dbusInterfaces.insert(i,interface);
+			m_dbusInterfaces.insert(i,interface);
 			interfaces.append(interface);
 			interface->index = interfaces.indexOf(interface);
 		}
@@ -681,7 +681,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	else {
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment's interfaces"));
 	}
-	connect(dbusEnvironment, SIGNAL(stateChanged(bool )), this, SLOT(dbusstateChanged(bool )));
+	connect(m_dbusEnvironment, SIGNAL(stateChanged(bool )), this, SLOT(dbusstateChanged(bool )));
 }
 CEnvironment::~CEnvironment() {
 	CInterface * interface;
@@ -696,7 +696,7 @@ CEnvironment::~CEnvironment() {
 
 void CEnvironment::refreshAll() {
 	//Retrieve properties and select config, then interfaces:
-	QDBusReply<EnvironmentProperties> replyprop = dbusEnvironment->getProperties();
+	QDBusReply<EnvironmentProperties> replyprop = m_dbusEnvironment->getProperties();
 	if (replyprop.isValid()) {
 		if (static_cast<CDevice *>(parent())->environments[0] == this)
 			//standard environment
@@ -713,13 +713,13 @@ void CEnvironment::refreshAll() {
 	}
 	getSelectResult(true); //functions saves SelectResult
 	getSelectResults(true); //functions saves SelectResults
-	QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnvironment->getInterfaces();
+	QDBusReply<QList<QDBusObjectPath> > replyifs = m_dbusEnvironment->getInterfaces();
 	if (replyifs.isValid()) {
 		//Check if we need to rebuild the interface list or just refresh them:
-		bool ifequal = (replyifs.value().size() == dbusInterfaces.size());
+		bool ifequal = (replyifs.value().size() == m_dbusInterfaces.size());
 		if (ifequal) {
 			foreach(QDBusObjectPath i, replyifs.value()) {
-				if (!dbusInterfaces.contains(i)) {
+				if (!m_dbusInterfaces.contains(i)) {
 					ifequal = false;
 					break;
 				}
@@ -745,7 +745,7 @@ void CEnvironment::refreshAll() {
 }
 void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 	//Remove all interfaces
-	dbusInterfaces.clear();
+	m_dbusInterfaces.clear();
 	CInterface * interface;
 	while (!interfaces.isEmpty()) {
 		interface = interfaces.takeFirst();
@@ -761,7 +761,7 @@ void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 			qWarning() << e.what();
 			continue;
 		}
-		dbusInterfaces.insert(i,interface);
+		m_dbusInterfaces.insert(i,interface);
 		interfaces.append(interface);
 		interface->index = interfaces.indexOf(interface);
 	}
@@ -776,8 +776,8 @@ void CEnvironment::dbusstateChanged(bool state) {
 }
 
 void CEnvironment::dbusselectResultChanged(libnutcommon::SelectResult result, QVector<libnutcommon::SelectResult> results) {
-	selectResult = result;
-	selectResults = results;
+	m_selectResult = result;
+	m_selectResults = results;
 	emit selectResultsChanged();
 }
 
@@ -787,49 +787,49 @@ void CEnvironment::enter() {
 	static_cast<CDevice *>(parent())->setEnvironment(this);
 }
 libnutcommon::EnvironmentConfig& CEnvironment::getConfig() {
-	return config;
+	return m_config;
 }
 
 libnutcommon::SelectResult& CEnvironment::getSelectResult(bool refresh) {
 	if (refresh) {
-		QDBusReply<libnutcommon::SelectResult> reply = dbusEnvironment->getSelectResult();
+		QDBusReply<libnutcommon::SelectResult> reply = m_dbusEnvironment->getSelectResult();
 		if (reply.isValid()) {
-			selectResult = reply.value();
+			m_selectResult = reply.value();
 		}
 		else {
 			qWarning() << tr("(%1) Error while trying to get SelectResult").arg(toString(reply.error()));
-			selectResult = libnutcommon::SelectResult();
+			m_selectResult = libnutcommon::SelectResult();
 		}
 	}
-	return selectResult;
+	return m_selectResult;
 }
 
 QVector<libnutcommon::SelectResult>& CEnvironment::getSelectResults(bool refresh) {
 	if (refresh) {
-		QDBusReply<QVector<libnutcommon::SelectResult> > reply = dbusEnvironment->getSelectResults();
+		QDBusReply<QVector<libnutcommon::SelectResult> > reply = m_dbusEnvironment->getSelectResults();
 		if (reply.isValid()) {
-			selectResults = reply.value();
+			m_selectResults = reply.value();
 		}
 		else {
 			qWarning() << tr("(%1) Error while trying to get SelectResults").arg(toString(reply.error()));
-			selectResults = QVector<libnutcommon::SelectResult>();
+			m_selectResults = QVector<libnutcommon::SelectResult>();
 		}
 	}
-	return selectResults;
+	return m_selectResults;
 }
 
 ////////////
 //CInterface
 ////////////
-CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ dbusPath(dbusPath) {
+CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ m_dbusPath(dbusPath) {
 	log = parent->log;
 	//Attach to dbus
-	dbusConnection = parent->dbusConnection;
-	dbusConnectionInterface = parent->dbusConnectionInterface;
-	dbusInterface = new DBusInterfaceInterface_IPv4(NUT_DBUS_URL, dbusPath.path(), *dbusConnection, this);
-	serviceCheck(dbusConnectionInterface);
+	m_dbusConnection = parent->m_dbusConnection;
+	m_dbusConnectionInterface = parent->m_dbusConnectionInterface;
+	m_dbusInterface = new DBusInterfaceInterface_IPv4(NUT_DBUS_URL, m_dbusPath.path(), *m_dbusConnection, this);
+	serviceCheck(m_dbusConnectionInterface);
 	//Get properties:
-	QDBusReply<InterfaceProperties> replyprops = dbusInterface->getProperties();
+	QDBusReply<InterfaceProperties> replyprops = m_dbusInterface->getProperties();
 	if (replyprops.isValid()) {
 		state = replyprops.value().ifState;
 		ip = replyprops.value().ip;
@@ -841,22 +841,22 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 		throw CLI_IfConnectionException(tr("(%1) Error while retrieving interface properties").arg(replyprops.error().name()));
 	}
 	//Get Config
-	QDBusReply<libnutcommon::IPv4Config> replyconf = dbusInterface->getConfig();
+	QDBusReply<libnutcommon::IPv4Config> replyconf = m_dbusInterface->getConfig();
 	if (replyconf.isValid()) {
-		dbusConfig = replyconf.value();
+		m_config = replyconf.value();
 	}
 	else {
 		throw CLI_IfConnectionException(tr("(%1) Error while retrieving interface config").arg(replyconf.error().name()));
 	}
 	getUserConfig(true); //Function will updated userConfig
 
-	connect(dbusInterface, SIGNAL(stateChanged(libnutcommon::InterfaceProperties)), this, SLOT(dbusstateChanged(libnutcommon::InterfaceProperties)));
+	connect(m_dbusInterface, SIGNAL(stateChanged(libnutcommon::InterfaceProperties)), this, SLOT(dbusstateChanged(libnutcommon::InterfaceProperties)));
 }
 CInterface::~CInterface() {
 }
 //CInterface private functions:
 void CInterface::refreshAll() {
-	QDBusReply<InterfaceProperties> replyprops = dbusInterface->getProperties();
+	QDBusReply<InterfaceProperties> replyprops = m_dbusInterface->getProperties();
 	if (replyprops.isValid()) {
 		state = replyprops.value().ifState;
 		ip = replyprops.value().ip;
@@ -866,7 +866,7 @@ void CInterface::refreshAll() {
 		getUserConfig(true); //Function will updated userConfig
 	}
 	else {
-		qWarning() << (tr("Error while refreshing interface at: %1").arg(dbusPath.path()));
+		qWarning() << (tr("Error while refreshing interface at: %1").arg(m_dbusPath.path()));
 	}
 }
 //CInterface private slots
@@ -878,52 +878,52 @@ void CInterface::dbusstateChanged(libnutcommon::InterfaceProperties properties) 
 	gateway = properties.gateway;
 	dnsserver = properties.dns;
 	getUserConfig(true); //Function will updated userConfig
-	*log << tr("Interface state of %1 has changed to %2").arg(dbusPath.path(),libnutclient::toStringTr(state));
+	*log << tr("Interface state of %1 has changed to %2").arg(m_dbusPath.path(),libnutclient::toStringTr(state));
 	emit(stateChanged(state));
 }
 //CInterface SLOTS
 void CInterface::activate() {
-	dbusInterface->activate();
+	m_dbusInterface->activate();
 }
 void CInterface::deactivate() {
-	dbusInterface->deactivate();
+	m_dbusInterface->deactivate();
 }
 bool CInterface::needUserSetup() {
-	QDBusReply<bool> reply = dbusInterface->needUserSetup();
+	QDBusReply<bool> reply = m_dbusInterface->needUserSetup();
 	if (reply.isValid()) {
 		return reply.value();
 	}
 	else {
-		qWarning() << tr("Error while interface->needUserSetup at: %1").arg(dbusPath.path());
+		qWarning() << tr("Error while interface->needUserSetup at: %1").arg(m_dbusPath.path());
 	}
 	return false;
 }
 bool CInterface::setUserConfig(const libnutcommon::IPv4UserConfig &cuserConfig) {
-	QDBusReply<bool> reply = dbusInterface->setUserConfig(cuserConfig);
+	QDBusReply<bool> reply = m_dbusInterface->setUserConfig(cuserConfig);
 	if (reply.isValid()) {
 		if (reply.value()) {
-			userConfig = cuserConfig;
+			m_userConfig = cuserConfig;
 			return true;
 		}
 		return false;
 	}
 	else {
-		qWarning() << tr("(%1) Error while setting user config at: %2").arg(toString(reply.error()),dbusPath.path());
+		qWarning() << tr("(%1) Error while setting user config at: %2").arg(toString(reply.error()),m_dbusPath.path());
 	}
 	return false;
 }
 libnutcommon::IPv4UserConfig CInterface::getUserConfig(bool refresh) {
 	if (refresh) {
-		QDBusReply<libnutcommon::IPv4UserConfig> reply = dbusInterface->getUserConfig();
+		QDBusReply<libnutcommon::IPv4UserConfig> reply = m_dbusInterface->getUserConfig();
 		if (reply.isValid()) {
-			userConfig = reply.value();
+			m_userConfig = reply.value();
 		}
 		else {
-			qDebug() << tr("Error while getting user config at: %1").arg(dbusPath.path());
-			userConfig = libnutcommon::IPv4UserConfig();
+			qDebug() << tr("Error while getting user config at: %1").arg(m_dbusPath.path());
+			m_userConfig = libnutcommon::IPv4UserConfig();
 		}
 	}
-	return userConfig;
+	return m_userConfig;
 }
 
 };
