@@ -94,7 +94,7 @@ namespace libnutwireless {
 					Event_dispatcher(QString::fromUtf8(reply, reply_len));
 				}
 				else if (-1 == status) {
-					qDebug() << "Error while trying to receive messages from wpa_supplicant";
+					qWarning() << tr("Error while trying to receive messages from wpa_supplicant");
 				}
 			}
 		}
@@ -178,7 +178,7 @@ namespace libnutwireless {
 		int status;
 		//Open wpa_supplicant control interface
 		if (!QFile::exists(wpa_supplicant_path)) {
-			qDebug() << tr("Could not open wpa_supplicant socket: %1").arg(QString::number(timerCount));
+			qWarning() << tr("Could not open wpa_supplicant socket: %1").arg(QString::number(timerCount));
 			inConnectionPhase = true;
 			timerId = startTimer(wps_TimerTime(timerCount));
 			return;
@@ -186,7 +186,7 @@ namespace libnutwireless {
 		cmd_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
 		event_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
 		if (cmd_ctrl == NULL and event_ctrl == NULL) {
-			qDebug() << tr("Could not open wpa_supplicant control interface");
+			qWarning() << tr("Could not open wpa_supplicant control interface");
 			inConnectionPhase = true;
 			timerId = startTimer(wps_TimerTime(timerCount));
 			return;
@@ -194,7 +194,7 @@ namespace libnutwireless {
 		if (cmd_ctrl == NULL) {
 			wpa_ctrl_close(event_ctrl);
 			event_ctrl = NULL;
-			qDebug() << tr("Could not open wpa_supplicant control interface");
+			qWarning() << tr("Could not open wpa_supplicant control interface");
 			inConnectionPhase = true;
 			timerId = startTimer(wps_TimerTime(timerCount));
 			return;
@@ -202,7 +202,7 @@ namespace libnutwireless {
 		if (event_ctrl == NULL) {
 			wpa_ctrl_close(cmd_ctrl);
 			cmd_ctrl = NULL;
-			qDebug() << tr("Could not open wpa_supplicant control interface");
+			qWarning() << tr("Could not open wpa_supplicant control interface");
 			inConnectionPhase = true;
 			timerId = startTimer(wps_TimerTime(timerCount));
 			return;
@@ -216,7 +216,7 @@ namespace libnutwireless {
 			wpa_ctrl_close(cmd_ctrl);
 			event_ctrl = NULL;
 			cmd_ctrl = NULL;
-			qDebug() << tr("Could not attach to wpa_supplicant");
+			qWarning() << tr("Could not attach to wpa_supplicant");
 			inConnectionPhase = true;
 			timerId = startTimer(wps_TimerTime(timerCount));
 			return;
@@ -235,7 +235,7 @@ namespace libnutwireless {
 		//Get file Descriptor to NET kernel
 		if ( (wext_fd = iw_sockets_open()) < 0) {
 			wext_fd = -1;
-			qDebug() << "ERROR: Could not open socket to net kernel";
+			qWarning() << tr("ERROR: Could not open socket to net kernel");
 		}
 		else { //Socket is set up, now set SocketNotifier
 			qDebug() << QString("File Descriptor for Wext is: %1").arg(QString::number(wext_fd));
@@ -474,7 +474,7 @@ namespace libnutwireless {
 			ScanTimerId = -1;
 		}
 		else { //This is not a timer call; this should not happen
-			qDebug() << "Warning, no timer present while trying to get scan results";
+			qWarning() << tr("Warning, no timer present while trying to get scan results");
 			return;
 		}
 		struct iwreq wrq;
@@ -500,9 +500,9 @@ namespace libnutwireless {
 		
 			strncpy(ifr.ifr_name, ifname.toAscii().data(), IFNAMSIZ); 
 			if(ioctl(wext_fd, SIOCGIFFLAGS, &ifr) < 0) 
-				qDebug() << "no device";
+				qWarning() << tr("(Wireless Extension) No device present");
 			else
-				qDebug() << "not supported";
+				qWarning() << tr("(Wireless Extension) Device not supported");
 			return;
 		}
 		qDebug() << "Fetched basic config.";
@@ -561,7 +561,7 @@ namespace libnutwireless {
 			singleres.maxquality.qual = 0;
 			singleres.maxquality.noise = 0;
 			singleres.maxquality.updated = 0;
-			qDebug() << "Range information are not available";
+			qWarning() << tr("Range information are not available");
 		}
 	
 		unsigned char * newbuf;
@@ -611,7 +611,7 @@ namespace libnutwireless {
 					free(buffer);
 					buffer = NULL;
 				}
-				qDebug() << QString("(%1) Failed to read scan data : %2").arg(ifname, QString(strerror(errno)));
+				qWarning() << tr("(%1) Failed to read scan data : %2").arg(ifname, QString(strerror(errno)));
 			}
 			else { //Results are there
 				break;
@@ -786,7 +786,7 @@ namespace libnutwireless {
 			wps_setScanResults(res);
 		}
 		else {
-			qDebug() << "No Scanresults available";
+			qWarning() << tr("No Scanresults available");
 		}
 		if (buffer) {
 			free(buffer);
@@ -813,9 +813,9 @@ namespace libnutwireless {
 		
 			strncpy(ifr.ifr_name, ifname.toAscii().data(), IFNAMSIZ); 
 			if(ioctl(wext_fd, SIOCGIFFLAGS, &ifr) < 0) 
-				qDebug() << "no device";
+				qWarning() << tr("(Wireless Extension) No device present");
 			else
-				qDebug() << "not supported";
+				qWarning() << tr("(Wireless Extension) device not supported");
 			return;
 		}
 		qDebug() << "Fetched basic config.";
@@ -882,7 +882,6 @@ namespace libnutwireless {
 			quint32 m;
 			quint16 e;
 			quint32 freqinmhz;
-	// 		QList<struct iw_freq> freqlist;
 			for (int i=0; i < range.num_channels; i++) {
 				m = (quint32) range.freq[i].m;
 				e = (quint16) range.freq[i].e;
@@ -922,7 +921,7 @@ namespace libnutwireless {
 			
 			qDebug() << "Getting wireless stats";
 			if(iw_get_ext(wext_fd, ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
-				qDebug() << "Error occured while fetching wireless info" << strerror(errno);
+				qWarning() << tr("Error occured while fetching wireless info: ") << strerror(errno);
 			}
 			else { //Stats fetched
 				qDebug() << "Stats fetched";
@@ -935,7 +934,7 @@ namespace libnutwireless {
 				qDebug() << "Emittig signalQualityUpdated()";
 				if (wextTimerRate < 1000) {
 					setSignalQualityPollRate(10000);
-					qDebug() << "Auto-resetting timer to 10 seconds";
+					printMessage(tr("Auto-resetting timer to 10 seconds"));
 				}
 				emit signalQualityUpdated(signalQuality);
 			}

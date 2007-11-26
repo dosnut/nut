@@ -134,6 +134,7 @@ NetconfigStatus CWpa_Supplicant::checkAdHocNetwork(NetworkConfig &config) {
 	// User setable:
 	// SSID,freq,psk,group
 	NetconfigStatus failures;
+	failures.id = -1;
 	failures.failures = NCF_NONE;
 	failures.eap_failures = ENCF_NONE;
 	if (PROTO_WPA != config.protocols) {

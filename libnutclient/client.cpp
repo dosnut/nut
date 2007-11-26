@@ -919,7 +919,7 @@ libnutcommon::IPv4UserConfig CInterface::getUserConfig(bool refresh) {
 			userConfig = reply.value();
 		}
 		else {
-			qDebug() << tr("Error while getting user config at: %1").(dbusPath.path());
+			qDebug() << tr("Error while getting user config at: %1").arg(dbusPath.path());
 			userConfig = libnutcommon::IPv4UserConfig();
 		}
 	}
