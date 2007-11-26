@@ -73,7 +73,7 @@ namespace libnutwireless {
 			NetworkVariable getNetworkVariable(int id, NetworkVariable::Type);
 */
 		signals:
-			void networkDataChanged(int netid);
+			void networkListUpdated();
 	};
 
 }

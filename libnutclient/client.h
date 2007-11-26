@@ -194,7 +194,7 @@ namespace libnutclient {
 		void stateChanged(libnutcommon::DeviceState newState);
 	};
 	
-	/** @brief The Environment 
+	/** @brief The Environment manages the interfaces
 	*/
 	class CEnvironment : public CLibNut {
 		Q_OBJECT

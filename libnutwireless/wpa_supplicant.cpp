@@ -61,7 +61,7 @@ bool CWpa_Supplicant::selectNetwork(int id) {
 }
 bool CWpa_Supplicant::enableNetwork(int id) {
 	if ("OK\n" == wps_cmd_ENABLE_NETWORK(id)) {
-		emit networkDataChanged(id);
+		emit networkListUpdated();
 		return true;
 	}
 	else {
@@ -70,7 +70,7 @@ bool CWpa_Supplicant::enableNetwork(int id) {
 }
 bool CWpa_Supplicant::disableNetwork(int id) {
 	if ("OK\n" == wps_cmd_DISABLE_NETWORK(id)) {
-		emit networkDataChanged(id);
+		emit networkListUpdated();
 		return true;
 	}
 	else {
@@ -187,6 +187,9 @@ NetconfigStatus CWpa_Supplicant::addNetwork(NetworkConfig config) {
 		if ( (status.eap_failures != ENCF_NONE) || (NCF_NONE != status.failures) ) {
 			removeNetwork(netid);
 			status.id = -1;
+		}
+		else {
+			emit networkListUpdated();
 		}
 		return status;
 	}

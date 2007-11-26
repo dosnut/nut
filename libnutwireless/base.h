@@ -28,7 +28,7 @@ namespace libnutwireless {
 			Q_OBJECT
 		protected:
 			struct wpa_ctrl *cmd_ctrl, *event_ctrl;
-			QString wpa_supplicant_path;
+			QString m_wpaSupplicantPath;
 			int wps_fd, wext_fd;
 			QSocketNotifier *event_sn;
 			bool log_enabled;

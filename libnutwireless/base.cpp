@@ -80,7 +80,7 @@ namespace libnutwireless {
 		if (socket == wps_fd) {
 			if (wps_connected) {
 				//check if wpa_supplicant is still running (i.e. file exists)
-				if (! QFile::exists(wpa_supplicant_path)) {
+				if (! QFile::exists(m_wpaSupplicantPath)) {
 					wps_close("wps_read/no wps interface on event");
 					return;
 				}
@@ -148,7 +148,7 @@ namespace libnutwireless {
 	}
 	
 	//Public functions:
-	CWpa_SupplicantBase::CWpa_SupplicantBase(QObject * parent, QString ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), wpa_supplicant_path("/var/run/wpa_supplicant/"+ifname), wps_fd(-1), wext_fd(-1), event_sn(0), timerId(-1), wextTimerId(-1), ScanTimerId(-1), wextTimerRate(10000), ifname(ifname), ScanTimeoutCount(0),wextPollTimeoutCount(0) {
+	CWpa_SupplicantBase::CWpa_SupplicantBase(QObject * parent, QString ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), m_wpaSupplicantPath("/var/run/wpa_supplicant/"+ifname), wps_fd(-1), wext_fd(-1), event_sn(0), timerId(-1), wextTimerId(-1), ScanTimerId(-1), wextTimerRate(10000), ifname(ifname), ScanTimeoutCount(0),wextPollTimeoutCount(0) {
 		wps_connected = false;
 		timerCount = 0;
 		log_enabled = true;
@@ -177,14 +177,14 @@ namespace libnutwireless {
 		if (wps_connected) return;
 		int status;
 		//Open wpa_supplicant control interface
-		if (!QFile::exists(wpa_supplicant_path)) {
+		if (!QFile::exists(m_wpaSupplicantPath)) {
 			qWarning() << tr("Could not open wpa_supplicant socket: %1").arg(QString::number(timerCount));
 			inConnectionPhase = true;
 			timerId = startTimer(wps_TimerTime(timerCount));
 			return;
 		}
-		cmd_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
-		event_ctrl = wpa_ctrl_open(wpa_supplicant_path.toAscii().constData());
+		cmd_ctrl = wpa_ctrl_open(m_wpaSupplicantPath.toAscii().constData());
+		event_ctrl = wpa_ctrl_open(m_wpaSupplicantPath.toAscii().constData());
 		if (cmd_ctrl == NULL and event_ctrl == NULL) {
 			qWarning() << tr("Could not open wpa_supplicant control interface");
 			inConnectionPhase = true;
