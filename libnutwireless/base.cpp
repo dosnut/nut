@@ -8,7 +8,7 @@ namespace libnutwireless {
 	
 	//Wpa_supplicant control commands:
 	//WARNING!!!! THIS MAY HAVE SOME MEMORY LEAKS!!! Check if char * is deleted in wpa_ctrl_request
-	QString CWpa_SupplicantBase::wps_ctrl_command(QString cmd = "PING") {
+	QString CWpa_SupplicantBase::wpaCtrlCommand(QString cmd = "PING") {
 		//int wpa_ctrl_request(struct wpa_ctrl *ctrl, const char *cmd, size_t cmd_len,
 		//	     char *reply, size_t *reply_len,
 		//	     void (*msg_cb)(char *msg, size_t len));
@@ -32,7 +32,7 @@ namespace libnutwireless {
 		if ( (status != 0) or (QString::fromUtf8(reply, reply_len) != "PONG\n") ) {
 			qDebug() << QString("(status=%2)PING COMMAND RESPONSE: %1").arg(QString::fromUtf8(reply, reply_len),QString::number(status));
 			//TODO: Maybe we need to detach and close wpa_supplicant:
-			wps_close("wps_ctrl_command/nopong");
+			closeWpa("wpaCtrlCommand/nopong");
 			return QString();
 		}
 		if (cmd != "PING") {
@@ -76,12 +76,12 @@ namespace libnutwireless {
 	//Private slots:
 	//Reads messages from wpa_supplicant
 	////TODO:Check if we need to check if wpa_supplicant is still available
-	void CWpa_SupplicantBase::wps_read(int socket) {
+	void CWpa_SupplicantBase::readFromWpa(int socket) {
 		if (socket == m_wpaFd) {
 			if (m_wpaConnected) {
 				//check if wpa_supplicant is still running (i.e. file exists)
 				if (! QFile::exists(m_wpaSupplicantPath)) {
-					wps_close("wps_read/no wps interface on event");
+					closeWpa("readFromWpa/no wpa interface on event");
 					return;
 				}
 				//status: 1 = msg available; 0 = no messages, -1 = error
@@ -121,7 +121,7 @@ namespace libnutwireless {
 			emit(connectionStateChanged(false,parseEventNetworkId(str)));
 		}
 		else if (event == EVENT_TERMINATING) {
-			wps_close("event-dispatcher/wpa-TERMINATING");
+			closeWpa("event-dispatcher/wpa-TERMINATING");
 		}
 		else {
 			emit(eventMessage(event));
@@ -160,12 +160,12 @@ namespace libnutwireless {
 		qDebug() << (QString("Constructor set m_lastWasAdHoc=%1").arg((m_lastWasAdHoc) ? "true" : "false"));
 		//
 
-		connect(QCoreApplication::instance(),SIGNAL(aboutToQuit ()),this,SLOT(wps_detach()));
+		connect(QCoreApplication::instance(),SIGNAL(aboutToQuit ()),this,SLOT(detachWpa()));
 	}
 	CWpa_SupplicantBase::~CWpa_SupplicantBase() {
-		wps_close("destructor");
+		closeWpa("destructor");
 	}
-	void CWpa_SupplicantBase::wps_open(bool) {
+	void CWpa_SupplicantBase::openWpa(bool) {
 		if (m_timerId != -1) {
 			killTimer(m_timerId);
 			m_timerId = -1;
@@ -180,7 +180,7 @@ namespace libnutwireless {
 		if (!QFile::exists(m_wpaSupplicantPath)) {
 			qWarning() << tr("Could not open wpa_supplicant socket: %1").arg(QString::number(m_timerCount));
 			m_inConnectionPhase = true;
-			m_timerId = startTimer(wps_TimerTime(m_timerCount));
+			m_timerId = startTimer(dynamicTimerTime(m_timerCount));
 			return;
 		}
 		cmd_ctrl = wpa_ctrl_open(m_wpaSupplicantPath.toAscii().constData());
@@ -188,7 +188,7 @@ namespace libnutwireless {
 		if (cmd_ctrl == NULL and event_ctrl == NULL) {
 			qWarning() << tr("Could not open wpa_supplicant control interface");
 			m_inConnectionPhase = true;
-			m_timerId = startTimer(wps_TimerTime(m_timerCount));
+			m_timerId = startTimer(dynamicTimerTime(m_timerCount));
 			return;
 		}
 		if (cmd_ctrl == NULL) {
@@ -196,7 +196,7 @@ namespace libnutwireless {
 			event_ctrl = NULL;
 			qWarning() << tr("Could not open wpa_supplicant control interface");
 			m_inConnectionPhase = true;
-			m_timerId = startTimer(wps_TimerTime(m_timerCount));
+			m_timerId = startTimer(dynamicTimerTime(m_timerCount));
 			return;
 		}
 		if (event_ctrl == NULL) {
@@ -204,7 +204,7 @@ namespace libnutwireless {
 			cmd_ctrl = NULL;
 			qWarning() << tr("Could not open wpa_supplicant control interface");
 			m_inConnectionPhase = true;
-			m_timerId = startTimer(wps_TimerTime(m_timerCount));
+			m_timerId = startTimer(dynamicTimerTime(m_timerCount));
 			return;
 		}
 			
@@ -218,7 +218,7 @@ namespace libnutwireless {
 			cmd_ctrl = NULL;
 			qWarning() << tr("Could not attach to wpa_supplicant");
 			m_inConnectionPhase = true;
-			m_timerId = startTimer(wps_TimerTime(m_timerCount));
+			m_timerId = startTimer(dynamicTimerTime(m_timerCount));
 			return;
 		}
 		m_inConnectionPhase = false;
@@ -226,7 +226,7 @@ namespace libnutwireless {
 		//Set socket notifier
 		m_wpaFd = wpa_ctrl_get_fd(event_ctrl);
 		m_eventSn  = new QSocketNotifier(m_wpaFd, QSocketNotifier::Read,NULL);
-		connect(m_eventSn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
+		connect(m_eventSn,SIGNAL(activated(int)),this,SLOT(readFromWpa(int)));
 		m_eventSn->setEnabled(true);
 		m_wpaConnected = true;
 	
@@ -252,7 +252,7 @@ namespace libnutwireless {
 		return;
 	}
 	
-	bool CWpa_SupplicantBase::wps_close(QString call_func, bool internal) {
+	bool CWpa_SupplicantBase::closeWpa(QString call_func, bool internal) {
 		if (m_timerId != -1) {
 			killTimer(m_timerId);
 			m_timerId = -1;
@@ -265,7 +265,7 @@ namespace libnutwireless {
 		}
 		if (m_wpaConnected) {
 			if (m_eventSn != NULL) {
-				disconnect(m_eventSn,SIGNAL(activated(int)),this,SLOT(wps_read(int)));
+				disconnect(m_eventSn,SIGNAL(activated(int)),this,SLOT(readFromWpa(int)));
 				delete m_eventSn;
 				m_eventSn = NULL;
 			}
@@ -285,7 +285,7 @@ namespace libnutwireless {
 		printMessage(tr("(%1)[%2] wpa_supplicant disconnected").arg(((internal) ? "internal" : "external"),call_func));
 		return true;
 	}
-	int CWpa_SupplicantBase::wps_TimerTime(int m_timerCount) {
+	int CWpa_SupplicantBase::dynamicTimerTime(int m_timerCount) {
 		if (m_timerCount > 0) { 
 			if (m_timerCount <= 5) {
 				return 1000;
@@ -305,14 +305,14 @@ namespace libnutwireless {
 	
 	
 	//Slot is executed when aplication is about to quit;
-	void CWpa_SupplicantBase::wps_detach() {
+	void CWpa_SupplicantBase::detachWpa() {
 		if (event_ctrl != NULL) {
 			wpa_ctrl_detach(event_ctrl);
 		}
 	}
 	
-	void CWpa_SupplicantBase::wps_setScanResults(QList<WextRawScan> wextScanResults) {
-		QString response = wps_cmd_SCAN_RESULTS();
+	void CWpa_SupplicantBase::setScanResults(QList<WextRawScan> wextScanResults) {
+		QString response = wpaCtrlCmd_SCAN_RESULTS();
 		if (response.isEmpty()) {
 			m_wpaScanResults = QList<ScanResult>();
 			return;
@@ -396,7 +396,7 @@ namespace libnutwireless {
 		else if (event->timerId() == m_timerId) {
 			if (!m_wpaConnected) {
 				m_timerCount++;
-				wps_open(true);
+				openWpa(true);
 			} else {
 				killTimer(m_timerId);
 				m_timerId = -1;
@@ -405,13 +405,13 @@ namespace libnutwireless {
 		}
 		else if (event->timerId() == m_scanTimerId) {
 			if ( (m_wextFd != -1) && m_wpaConnected) {
-				wps_tryScanResults();
+				tryScanResults();
 			}
 		}
 	}
 	
 	bool CWpa_SupplicantBase::connected() {
-		if (wps_cmd_PING() == "PONG\n") {
+		if (wpaCtrlCmd_PING() == "PONG\n") {
 			return true;
 		}
 		else {
@@ -448,7 +448,7 @@ namespace libnutwireless {
 
 	
 	void CWpa_SupplicantBase::scan() {
-		if (0 == wps_cmd_SCAN().indexOf("OK")) {
+		if (0 == wpaCtrlCmd_SCAN().indexOf("OK")) {
 			//Check if we're already scanning:
 			if (m_scanTimerId != -1) {
 				killTimer(m_scanTimerId);
@@ -456,7 +456,7 @@ namespace libnutwireless {
 				printMessage("We're already scanning!");
 			}
 			//Return scanresults from wpa_supplicant immediately
-			wps_setScanResults(QList<WextRawScan>());
+			setScanResults(QList<WextRawScan>());
 			m_scanTimeoutCount = 0;
 			m_scanTimerId = startTimer(CWPA_SCAN_TIMER_TIME);
 		}
@@ -464,7 +464,7 @@ namespace libnutwireless {
 	
 	
 	//noise levels, returned by this functions, are invalid, don't use them
-	void CWpa_SupplicantBase::wps_tryScanResults() {
+	void CWpa_SupplicantBase::tryScanResults() {
 		if (m_wextFd == -1 || !m_wpaConnected) {
 			return;
 		}
@@ -783,7 +783,7 @@ namespace libnutwireless {
 				buffer = NULL;
 			}
 			//We have the data, now construct complete ScanResult
-			wps_setScanResults(res);
+			setScanResults(res);
 		}
 		else {
 			qWarning() << tr("No Scanresults available");

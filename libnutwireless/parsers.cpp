@@ -18,7 +18,7 @@ namespace libnutwireless {
 		//First strip dot11 or dot1x
 		//create new MIBVariable
 		//append to MIBVariables
-		QList<MIBVariable> wpsMIB;
+		QList<MIBVariable> mibVariable;
 		QStringList tmp_strlist;
 		MIBVariable var;
 		foreach(QString str, list) {
@@ -39,9 +39,9 @@ namespace libnutwireless {
 			if (MIBVariable::LOGIC == var.type) {
 				var.value.logic = new bool((tmp_strlist[1] == "TRUE"));
 			}
-			wpsMIB.append(var);
+			mibVariable.append(var);
 		}
-		return ((MIBVariables) wpsMIB);
+		return ((MIBVariables) mibVariable);
 	}
 	MIBVariable::MIBVariable_type CWpa_SupplicantParsers::parseMIBType(QString str) {
 		bool ok;

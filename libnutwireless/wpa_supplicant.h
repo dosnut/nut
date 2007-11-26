@@ -12,11 +12,11 @@ namespace libnutwireless {
 	class CWpa_Supplicant: public CWpa_SupplicantBase {
 			Q_OBJECT
 		private:
-			QList<quint8> supportedChannels;
+			QList<quint8> m_supportedChannels;
 
 			//Edit/get network helper functions
-			EapNetworkConfig wps_getEapNetworkConfig(int id);
-			EapNetconfigFailures wps_editEapNetwork(int netid, EapNetworkConfig config);
+			EapNetworkConfig getEapNetworkConfig(int id);
+			EapNetconfigFailures editEapNetwork(int netid, EapNetworkConfig config);
 			NetconfigStatus checkAdHocNetwork(NetworkConfig &config);
 		public:
 			//TODO: Check why constructor is not beeing called
@@ -66,9 +66,9 @@ namespace libnutwireless {
 			Capabilities getCapabilities();
 			//Future functions: (these may never be implemented as noone realy needs them
 			/*
-			QString wps_cmd_PMKSA();
+			QString wpaCtrlCmd_PMKSA();
 			//Maybe variable/value as new MIBVariable / NetworkVariableiable class
-			void setVariable(wps_var var);
+			void setVariable(NetworkVariable var);
 			void setNetworkVariable(int id, NetworkVariable var);
 			NetworkVariable getNetworkVariable(int id, NetworkVariable::Type);
 */

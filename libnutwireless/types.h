@@ -67,8 +67,8 @@ namespace libnutwireless {
 	} EapNetconfigFailures;
 
 	typedef enum {
-		BOOL_UNDEFINED=-1, BOOL_FALSE=0,BOOL_TRUE=1
-	} BOOL;
+		QOOL_UNDEFINED=-1, QOOL_FALSE=0,QOOL_TRUE=1
+	} QOOL; // Like a qubit :)
 
 	typedef enum {
 		OPM_AUTO=0, OPM_ADHOC=1, OPM_MANAGED=2,OPM_MASTER=3,OPM_REPEATER=4,OPM_SECONDARY=5,OPM_MONITOR=6,OPM_UNKNOWN_BUG=7
@@ -112,14 +112,6 @@ namespace libnutwireless {
 		//Further information pending...
 	};
 
-// 	typedef enum {
-// 		WSIG_QUALITY_ALLABS=0, WSIG_LEVEL_REL=1, WSIG_NOISE_REL=2, WSIG_UNKNOWN=4
-// 	} wps_signal_quality_encoding; 
-
-// 	struct WextScan : public wps_wext_scan {
-// 		wps_signal_quality_encoding encoding;
-// 	};
-	
 	typedef enum {
 		WSR_UNKNOWN=0, WSR_RCPI=1, WSR_ABSOLUTE=2, WSR_RELATIVE=3
 	} WextSignal_type; 
@@ -271,27 +263,27 @@ namespace libnutwireless {
 	int frequencyToChannel(int freq);
 	int channelToFrequency(int channel);
 
-	QString toNumberString(BOOL b);
-	bool toBool(BOOL b);
-	BOOL toWpsBool(bool b);
+	QString toNumberString(QOOL b);
+	bool toBool(QOOL b);
+	QOOL toQOOL(bool b);
 
 	inline int toNumber(bool b) {
 		return ((b)? 1 : 0);
 	}
-	inline int toNumber(BOOL b) {
-		return ( (b == BOOL_UNDEFINED) ? -1 : ( (b == BOOL_TRUE) ? 1 : 0)); 
+	inline int toNumber(QOOL b) {
+		return ( (b == QOOL_UNDEFINED) ? -1 : ( (b == QOOL_TRUE) ? 1 : 0)); 
 	}
 	inline bool toBool(QString str) {
 		return ( ("1" == str) ? true : false);
 	}
-	inline BOOL toWpsBool(QString str) {
+	inline QOOL toQOOL(QString str) {
 		if ("0" == str) {
-			return BOOL_FALSE;
+			return QOOL_FALSE;
 		}
 		else if ("1" == str) {
-			return BOOL_TRUE;
+			return QOOL_TRUE;
 		}
-		return BOOL_UNDEFINED;
+		return QOOL_UNDEFINED;
 	}
 	
 	struct ShortNetworkInfo {
@@ -341,11 +333,11 @@ namespace libnutwireless {
 			~NetworkConfig();
 			QString ssid;
 			libnutcommon::MacAddress bssid;
-			BOOL disabled;
+			QOOL disabled;
 			QString id_str; // Network identifier string for external scripts
-			BOOL scan_ssid; // (do not) scan with SSID-specific Probe Request frames
+			QOOL scan_ssid; // (do not) scan with SSID-specific Probe Request frames
 			int priority;
-			BOOL mode; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
+			QOOL mode; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
 			int frequency;
 			Protocols protocols; //list of accepted protocols TODO: implement
 			KeyManagement keyManagement; // list of accepted authenticated key management protocols
@@ -354,14 +346,14 @@ namespace libnutwireless {
 			GroupCiphers group; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
 			QString psk; //WPA preshared key; 256-bit pre-shared key
 			EapolFlags eapol_flags; // IEEE 802.1X/EAPOL options (bit field) TODO:implement
-			BOOL mixed_cell; //This option can be used to configure whether so called mixed
-			BOOL proactive_key_caching; //Enable/disable opportunistic PMKSA caching for WPA2.
+			QOOL mixed_cell; //This option can be used to configure whether so called mixed
+			QOOL proactive_key_caching; //Enable/disable opportunistic PMKSA caching for WPA2.
 			QString wep_key0; //Static WEP key (ASCII in double quotation, hex without)
 			QString wep_key1;
 			QString wep_key2;
 			QString wep_key3;
 			char wep_tx_keyidx; //Default WEP key index (TX) (0..3) TODO: implement
-			BOOL peerkey; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
+			QOOL peerkey; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
 			EapNetworkConfig eap_config;
 	};
 }
