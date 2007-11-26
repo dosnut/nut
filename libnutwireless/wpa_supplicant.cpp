@@ -148,9 +148,6 @@ NetconfigStatus CWpa_Supplicant::checkAdHocNetwork(NetworkConfig &config) {
 	if ( !( (GCI_TKIP == config.group) != (GCI_CCMP == config.group) ) ) {
 		failures.failures = (NetconfigFailures)(failures.failures | NCF_GROUP);
 	}
-	if (config.psk.isEmpty()) {
-		failures.failures = (NetconfigFailures)(failures.failures | NCF_PSK);
-	}
 	//Options that need to be set:
 	if (config.frequency == -1) {
 		failures.failures = (NetconfigFailures) (failures.failures | NCF_FREQ);

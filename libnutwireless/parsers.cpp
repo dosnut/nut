@@ -147,12 +147,23 @@ namespace libnutwireless {
 		QList<ScanResult> scanresults;
 		QStringList line;
 		ScanResult scanresult;
+		scanresult.signal.type = WSR_UNKNOWN;
+		scanresult.signal.quality.maximum = 0;
+		scanresult.signal.quality.value = 0;
+		scanresult.signal.noise.rcpi = 0.0;
+		scanresult.signal.level.rcpi = 0.0;
 		bool worked = true;
 		ScanAuthentication scanAuth;
 		foreach(QString str, list) {
 			line = str.split('\t',QString::KeepEmptyParts);
 			scanresult.bssid = libnutcommon::MacAddress(line[0]);
 			scanresult.freq = line[1].toInt(&worked);
+			scanresult.signal.frequency = scanresult.freq;
+			if (!worked) {
+				worked = true;
+				continue;
+			}
+			scanresult.signal.level.nonrcpi.value = line[2].toInt(&worked);
 			if (!worked) {
 				worked = true;
 				continue;

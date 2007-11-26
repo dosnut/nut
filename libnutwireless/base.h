@@ -41,7 +41,7 @@ namespace libnutwireless {
 			bool inConnectionPhase;
 			QString ifname;
 			QList<ScanResult> wpsScanResults;
-			WextSignal signalQuality; //bssid is zero
+			WextSignal signalQuality;
 			int ScanTimeoutCount;
 			int wextPollTimeoutCount;
 			QList<quint32> supportedFrequencies;

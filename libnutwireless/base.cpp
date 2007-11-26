@@ -342,7 +342,7 @@ namespace libnutwireless {
 			QHash<QString,WextScan>::iterator wextScanHashIter;
 			//Set the signal quality and so on
 			for (QList<ScanResult>::Iterator i = wpsScanResults.begin(); i != wpsScanResults.end(); ++i ) {
-				if (wextScanHash.contains(i->bssid.toString())) {
+				if (wextScanHash.contains(i->bssid.toString())) { //We do have this network in our wext list
 					wextScanHashIter = wextScanHash.find(i->bssid.toString());
 					i->bssid = wextScanHashIter.value().bssid;
 					i->ssid = wextScanHashIter.value().ssid;
@@ -357,6 +357,11 @@ namespace libnutwireless {
 					i->opmode = wextScanHashIter.value().opmode;
 					wextScanHash.erase(wextScanHashIter);
 					count++;
+				}
+				else { //Network is unknown to wext, add level type information
+					if (signalQuality.type != WSR_UNKNOWN) {
+						i->signal.type = signalQuality.type;
+					}
 				}
 			}
 			ScanResult scanresult;
@@ -649,8 +654,6 @@ namespace libnutwireless {
 								singleres.ssid = QString();
 								singleres.bssid.clear();
 								singleres.quality = WextRawSignal();
-								singleres.maxquality = WextRawSignal();
-								singleres.avgquality = WextRawSignal();
 								singleres.freq = -1;
 								singleres.group = GCI_UNDEFINED;
 								singleres.pairwise = PCI_UNDEFINED;
@@ -762,7 +765,6 @@ namespace libnutwireless {
 							break;
 
 						default: //Ignore all other event types. Maybe we need them later?
-							qDebug() << "unuse event type";
 							break;
 					}
 				}
