@@ -27,6 +27,10 @@ pkg_setup() {
 		eerror ">=qt4.3.2 requires dbus"
 		die "rebuild >=x11-libs/qt-4.3.2 with the dbus USE flag"
 	fi
+	if ! qmake --version | grep -i qt4 ; then
+		eerror "qmake does not point to qmake-qt4"
+		die "Install qmake-qt4 and set symlinks correctly"
+	fi
 	enewgroup netdev
 }
 
@@ -39,11 +43,13 @@ src_compile() {
 	cd "${S}"
 	if ! use debug; then 
 		#Disable debugging output
-		for path in $( find ./ -type f -iname '*.pro' ); do
-			echo "DEFINDES += QT_NO_DEBUG_OUTPUT" >> "${path}";
-		done
+# 		for path in $( find ./ -type f -iname '*.pro' ); do
+# 			echo "DEFINDES += QT_NO_DEBUG_OUTPUT" >> "${path}";
+# 		done
+		qmake
+	else
+		qmake -recursive -Wall 'CONFIG+=release' 'DEFINES+=QT_NO_DEBUG_OUTPUT'
 	fi
-	qmake -recursive -Wall
 	make
 }
 
@@ -56,6 +62,12 @@ src_install() {
 	dodir /etc/nuts
 	insinto /etc/nuts/
 	newins "${S}"/doc/config.example nuts.config.example
+	
+	exeinto /etc/nuts/
+	newexe "${S}"/nuts/dispatch dispatch
+	dodir /etc/nuts/events
+	dodir /etc/nuts/events/all
+	dodir /etc/nuts/events/default
 
 	insinto /etc/dbus-1/system.d/
 	newins "${S}"/debian/nuts-dbus.conf nuts-dbus.conf
