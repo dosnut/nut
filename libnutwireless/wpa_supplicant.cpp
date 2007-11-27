@@ -739,7 +739,7 @@ void CWpa_Supplicant::removeNetwork(int id) {
 }
 
 bool CWpa_Supplicant::setBssid(int id, libnutcommon::MacAddress bssid) {
-	if ("OK" == wpaCtrlCmd_BSSID(id,bssid.toString()).indexOf(0)) {
+	if (0 == wpaCtrlCmd_BSSID(id,bssid.toString()).indexOf("OK")) {
 		return true;
 	}
 	else {

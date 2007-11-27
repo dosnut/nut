@@ -97,25 +97,60 @@ namespace libnutwireless {
 	02:55:24:33:77:a3	2462	187	[WPA-PSK-TKIP]	testing
 	00:09:5b:95:e0:4f	2412	209		jkm guest
 	*/
-	ScanCiphers CWpa_SupplicantParsers::parseScanCiphers(QString str) {
-		ScanCiphers cip = CI_NONE;
+	PairwiseCiphers CWpa_SupplicantParsers::parseScanPairwiseCiphers(QString str) {
+		int cip = PCI_UNDEFINED;
 		if (str.contains("CCMP")) {
-			cip = (ScanCiphers) (cip | CI_CCMP);
+			cip = (cip | PCI_CCMP);
 		}
 		if (str.contains("TKIP")) {
-			cip = (ScanCiphers) (cip | CI_TKIP);
+			cip = (cip | PCI_TKIP);
 		}
-		if (str.contains("WEP104")) {
-			cip = (ScanCiphers) (cip | CI_WEP104);
+		return (PairwiseCiphers) cip;
+	}
+
+	KeyManagement parseScanKeyMgmt(QString str) {
+		int keymgmt = KM_UNDEFINED;
+		if (str.contains("WPA-PSK")) {
+			keymgmt= (keymgmt| KM_WPA_PSK);
 		}
-		if (str.contains("WEP40")) {
-			cip = (ScanCiphers) (cip | CI_WEP40);
+		if (str.contains("WPA2-EAP")) {
+			keymgmt= (keymgmt| KM_WPA_EAP);
+		}
+		if (str.contains("WPA2-PSK")) {
+			keymgmt= (keymgmt| KM_WPA_PSK);
+		}
+		if (str.contains("WPA-EAP")) {
+			keymgmt= (keymgmt| KM_WPA_EAP);
+		}
+		if (str.contains("IEEE8021X")) {
+			keymgmt= (keymgmt| KM_IEEE8021X);
+		}
+		if (str.contains("WPA-NONE")) {
+			keymgmt= (keymgmt| KM_WPA_NONE);
+		}
+		if (str.contains("WPA2-NONE")) {
+			keymgmt= (keymgmt| KM_WPA_NONE);
 		}
 		if (str.contains("WEP")) {
-			cip = (ScanCiphers) (cip | CI_WEP);
+			keymgmt = (keymgmt | KM_NONE);
 		}
-		return cip;
+		if (str.isEmpty()) {
+			keymgmt = KM_OFF;
+		}
+		return (KeyManagement) keymgmt;
 	}
+
+	Protocols parseScanProtocols(QString str) {
+		int proto = PROTO_UNDEFINED;
+		if (str.contains("WPA")) {
+			proto = (proto | PROTO_WPA);
+		}
+		if (str.contains("WPA2")) {
+			proto = (proto | PROTO_RSN);
+		}
+		return (Protocols) proto;
+	}
+
 	ScanAuthentication CWpa_SupplicantParsers::parseScanAuth(QString str) {
 		int key = AUTH_UNDEFINED;
 		if (str.contains("WPA-PSK")) {
@@ -139,6 +174,9 @@ namespace libnutwireless {
 		if (str.contains("WPA2-NONE")) {
 			key = (key | AUTH_WPA2_NONE);
 		}
+		if (str.contains("WEP")) {
+			
+		}
 		return (ScanAuthentication) key;
 	}
 	
@@ -153,7 +191,6 @@ namespace libnutwireless {
 		scanresult.signal.noise.rcpi = 0.0;
 		scanresult.signal.level.rcpi = 0.0;
 		bool worked = true;
-		ScanAuthentication scanAuth;
 		foreach(QString str, list) {
 			line = str.split('\t',QString::KeepEmptyParts);
 			scanresult.bssid = libnutcommon::MacAddress(line[0]);
@@ -163,17 +200,17 @@ namespace libnutwireless {
 				worked = true;
 				continue;
 			}
+			//Quality will come directly from wext
 			scanresult.signal.level.nonrcpi.value = line[2].toInt(&worked);
 			if (!worked) {
 				worked = true;
 				continue;
 			}
-			//Quality will come directly from wext
-			scanAuth = parseScanAuth(line[3]);
-			scanresult.group = toGroupCiphers(parseScanCiphers(line[3]));
-			scanresult.pairwise = toPairwiseCiphers(parseScanCiphers(line[3]));
-			scanresult.protocols = toProtocols(scanAuth);
-			scanresult.keyManagement = toKeyManagment(scanAuth);
+
+			scanresult.group = GCI_UNDEFINED; //Wpa_supplicant doesn't send any info about that
+			scanresult.pairwise = parseScanPairwiseCiphers(line[3]);
+			scanresult.protocols = parseScanProtocols(line[3]);
+			scanresult.keyManagement = parseScanKeyMgmt(line[3]);
 			scanresult.ssid = line[4];
 			scanresults.append(scanresult);
 		}
