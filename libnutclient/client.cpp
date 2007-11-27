@@ -404,12 +404,13 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) : CLibNut(
 			this, SLOT(environmentChangedActive(const QString &)));
 
 	connect(m_dbusDevice, SIGNAL(stateChanged(int , int)),
-			this, SLOT(dbusstateChanged(int, int)));
+			this, SLOT(dbusStateChanged(int, int)));
 
 	//Only use wpa_supplicant if we need one
 	if (m_needWpaSupplicant) {
 		wpa_supplicant = new libnutwireless::CWpa_Supplicant(this,name);
 		connect(wpa_supplicant,SIGNAL(message(QString)),log,SLOT(log(QString)));
+		connect(m_dbusDevice,SIGNAL(newWirelssNetworkFound(void)),this,SIGNAL(newWirelessNetworkFound(void)));
 		//Connect to wpa_supplicant only if device is not deactivated
 		if (! (DS_DEACTIVATED == state) ) {
 			wpa_supplicant->open();
@@ -565,10 +566,8 @@ void CDevice::environmentChangedActive(const QString &newenv) {
 	emit(environmentChangedActive(activeEnvironment, oldenv));
 }
 //Every time our device changed from anything to active, our active environment may have changed
-void CDevice::dbusstateChanged(int newState, int oldState) {
+void CDevice::dbusStateChanged(int newState, int oldState) {
 	//If switching from DS_DEACTIVATED to any other state then connect wpa_supplicant
-	//TODO:fix wpa_supplicant connecting; workaround for now:
-	//connect when device has carrier, although this should happen, when device is beeing activated
 	if (DS_DEACTIVATED == oldState && !(DS_DEACTIVATED == newState) ) {
 		if (m_needWpaSupplicant) {
 			wpa_supplicant->open();
@@ -681,7 +680,7 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 	else {
 		throw CLI_EnvConnectionException(tr("Error while retrieving environment's interfaces"));
 	}
-	connect(m_dbusEnvironment, SIGNAL(stateChanged(bool )), this, SLOT(dbusstateChanged(bool )));
+	connect(m_dbusEnvironment, SIGNAL(stateChanged(bool )), this, SLOT(dbusStateChanged(bool )));
 }
 CEnvironment::~CEnvironment() {
 	CInterface * interface;
@@ -770,12 +769,12 @@ void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 }
 
 //CEnvironment private slots:
-void CEnvironment::dbusstateChanged(bool state) {
+void CEnvironment::dbusStateChanged(bool state) {
 	active = state;
 	emit(activeChanged(state));
 }
 
-void CEnvironment::dbusselectResultChanged(libnutcommon::SelectResult result, QVector<libnutcommon::SelectResult> results) {
+void CEnvironment::dbusSelectResultChanged(libnutcommon::SelectResult result, QVector<libnutcommon::SelectResult> results) {
 	m_selectResult = result;
 	m_selectResults = results;
 	emit selectResultsChanged();
@@ -850,7 +849,7 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNu
 	}
 	getUserConfig(true); //Function will updated userConfig
 
-	connect(m_dbusInterface, SIGNAL(stateChanged(libnutcommon::InterfaceProperties)), this, SLOT(dbusstateChanged(libnutcommon::InterfaceProperties)));
+	connect(m_dbusInterface, SIGNAL(stateChanged(libnutcommon::InterfaceProperties)), this, SLOT(dbusStateChanged(libnutcommon::InterfaceProperties)));
 }
 CInterface::~CInterface() {
 }
@@ -870,7 +869,7 @@ void CInterface::refreshAll() {
 	}
 }
 //CInterface private slots
-void CInterface::dbusstateChanged(libnutcommon::InterfaceProperties properties) {
+void CInterface::dbusStateChanged(libnutcommon::InterfaceProperties properties) {
 	//Check changes:
 	state = properties.ifState;
 	ip = properties.ip;

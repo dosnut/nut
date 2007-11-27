@@ -166,7 +166,7 @@ namespace libnutclient {
 
 	private slots:
 		void environmentChangedActive(const QString &newenv);
-		void dbusstateChanged(int newState, int oldState);
+		void dbusStateChanged(int newState, int oldState);
 	public:
 		CEnvironmentList environments;
 		
@@ -192,9 +192,14 @@ namespace libnutclient {
 	signals:
 		void environmentChangedActive(libnutclient::CEnvironment * current, libnutclient::CEnvironment * previous);
 		void stateChanged(libnutcommon::DeviceState newState);
+		void newWirelessNetworkFound();
 	};
 	
 	/** @brief The Environment manages the interfaces
+		
+		The Environment manages its associated interfaces. It also provides information about the Environment (name, select results, state).
+		It reports state changes via 3 signals
+
 	*/
 	class CEnvironment : public CLibNut {
 		Q_OBJECT
@@ -215,8 +220,8 @@ namespace libnutclient {
 		void refreshAll();
 		void rebuild(const QList<QDBusObjectPath> &paths);
 	private slots:
-		void dbusstateChanged(bool state);
-		void dbusselectResultChanged(libnutcommon::SelectResult result, QVector<libnutcommon::SelectResult> results);
+		void dbusStateChanged(bool state);
+		void dbusSelectResultChanged(libnutcommon::SelectResult result, QVector<libnutcommon::SelectResult> results);
 	public:
 		QString name;
 		CInterfaceList interfaces;
@@ -231,12 +236,26 @@ namespace libnutclient {
 		libnutcommon::SelectResult& getSelectResult(bool refresh=false);
 		QVector<libnutcommon::SelectResult>& getSelectResults(bool refresh=false);
 		
+		/** @brief Environment signals
+		
+			activeChanged(bool active) is emitted when environment get's activated or deactivated
+			interfacesUpdated() is emitted when interfaces are added or removed
+			selectResultsChanged() is emitted when select results changed (this normaly hapens, when they're completly done)
+			
+		*/
 	signals:
 		void activeChanged(bool active);
 		void interfacesUpdated();
 		void selectResultsChanged();
 	};
-	
+
+	/** @brief The Interface represents one network interface
+		
+		It provides information about its configuration (ip,netmask,gateway,dnsservers,state).
+		There's also a function to set an own interface configuration
+		It also emits a signal on data changes.
+		
+	*/
 	class CInterface : public CLibNut {
 		Q_OBJECT
 		friend class CDeviceManager;
@@ -252,7 +271,7 @@ namespace libnutclient {
 		libnutcommon::IPv4UserConfig m_userConfig;
 		void refreshAll();
 	private slots:
-		void dbusstateChanged(libnutcommon::InterfaceProperties properties);
+		void dbusStateChanged(libnutcommon::InterfaceProperties properties);
 	public:
 		libnutcommon::InterfaceState state;
 		QHostAddress ip;

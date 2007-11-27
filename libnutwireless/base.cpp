@@ -31,7 +31,6 @@ namespace libnutwireless {
 		int status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);
 		if ( (status != 0) or (QString::fromUtf8(reply, reply_len) != "PONG\n") ) {
 			qDebug() << QString("(status=%2)PING COMMAND RESPONSE: %1").arg(QString::fromUtf8(reply, reply_len),QString::number(status));
-			//TODO: Maybe we need to detach and close wpa_supplicant:
 			closeWpa("wpaCtrlCommand/nopong");
 			return QString();
 		}
@@ -44,7 +43,6 @@ namespace libnutwireless {
 			if (0 == status) {
 				qDebug() << cmd << ":" << QString::fromUtf8(reply, reply_len) << "\nEOC";
 				if (reply_len > 0) {
-					//TODO:Check if reply is \0 terminated
 					return QString::fromUtf8(reply, reply_len);
 				}
 				else {
@@ -75,7 +73,6 @@ namespace libnutwireless {
 	
 	//Private slots:
 	//Reads messages from wpa_supplicant
-	////TODO:Check if we need to check if wpa_supplicant is still available
 	void CWpa_SupplicantBase::readFromWpa(int socket) {
 		if (socket == m_wpaFd) {
 			if (m_wpaConnected) {

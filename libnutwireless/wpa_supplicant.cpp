@@ -393,27 +393,27 @@ NetworkConfig CWpa_Supplicant::getNetworkConfig(int id) {
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"proto");
 	if ("FAIL\n" != response) {
-		config.protocols = parseProtocols(response); // TODO: implement
+		config.protocols = parseProtocols(response); 
 	}
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"key_mgmt");
 	if ("FAIL\n" != response) {
-		config.keyManagement = parseKeyMgmt(response); // TODO: implement
+		config.keyManagement = parseKeyMgmt(response);
 	}
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"auth_alg");
 	if ("FAIL\n" != response) {
-		config.auth_alg = parseAuthAlg(response); // TODO: implement
+		config.auth_alg = parseAuthAlg(response);
 	}
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"pairwise");
 	if ("FAIL\n" != response) {
-		config.pairwise = parsePairwiseCiphers(response); // TODO: implement
+		config.pairwise = parsePairwiseCiphers(response);
 	}
 	
 	response = wpaCtrlCmd_GET_NETWORK(id,"group");
 	if ("FAIL\n" != response) {
-		config.group = parseGroupCiphers(response); // TODO: implement
+		config.group = parseGroupCiphers(response);
 	}
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"psk");
@@ -423,7 +423,7 @@ NetworkConfig CWpa_Supplicant::getNetworkConfig(int id) {
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"eapol_flags");
 	if ("FAIL\n" != response) {
-		config.eapol_flags = parseEapolFlags(response); // TODO: implement
+		config.eapol_flags = parseEapolFlags(response);
 	}
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"mixed_cell");
@@ -492,7 +492,7 @@ EapNetworkConfig CWpa_Supplicant::getEapNetworkConfig(int id) {
 	//Get eap network config
 	response = wpaCtrlCmd_GET_NETWORK(id,"eap");
 	if ("FAIL\n" != response) {
-		config.eap = parseEapMethod(response); //space-separated list of accepted EAP methods TODO: implement
+		config.eap = parseEapMethod(response);
 	}
 	response = wpaCtrlCmd_GET_NETWORK(id,"identity");
 	if ("FAIL\n" != response) {
@@ -738,9 +738,13 @@ void CWpa_Supplicant::removeNetwork(int id) {
 	wpaCtrlCmd_REMOVE_NETWORK(id);
 }
 
-//TODO:Check is id is in range
-void CWpa_Supplicant::setBssid(int id, libnutcommon::MacAddress bssid) {
-	wpaCtrlCmd_BSSID(id,bssid.toString());
+bool CWpa_Supplicant::setBssid(int id, libnutcommon::MacAddress bssid) {
+	if ("OK" == wpaCtrlCmd_BSSID(id,bssid.toString()).indexOf(0)) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 //Plain setVaraiable functions
 void CWpa_Supplicant::setVariable(QString var, QString val) {

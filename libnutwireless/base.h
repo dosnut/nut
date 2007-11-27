@@ -67,7 +67,7 @@ namespace libnutwireless {
 			inline void wpaCtrlCmd_RECONFIGURE() { wpaCtrlCommand("RECONFIGURE"); };
 			inline void wpaCtrlCmd_TERMINATE() { wpaCtrlCommand("TERMINATE"); }
 			//Set preferred BSSID for a network. Network id can be received from the LIST_NETWORKS command output.
-			inline void wpaCtrlCmd_BSSID(int id, QString bssid) { wpaCtrlCommand(QString("BSSID %1 %2").arg(QString::number(id),bssid));}
+			inline bool wpaCtrlCmd_BSSID(int id, QString bssid) { return wpaCtrlCommand(QString("BSSID %1 %2").arg(QString::number(id),bssid));}
 			inline QString wpaCtrlCmd_LIST_NETWORKS() { return wpaCtrlCommand("LIST_NETWORKS"); }
 			inline void wpaCtrlCmd_DISCONNECT() { wpaCtrlCommand("DISCONNECT"); }
 			inline QString wpaCtrlCmd_SCAN() { return wpaCtrlCommand("SCAN"); }

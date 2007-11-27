@@ -299,7 +299,7 @@ namespace libnutwireless {
 			EapNetworkConfig();
 			~EapNetworkConfig();
 			//Following fields are only used with internal EAP implementation.
-			EapMethod eap; //space-separated list of accepted EAP methods TODO: implement
+			EapMethod eap; //space-separated list of accepted EAP methods
 			QString identity; //Identity string for EAP
 			QString anonymous_identity; //Anonymous identity string for EAP;
 			QString password; //Password string for EAP.
@@ -339,20 +339,20 @@ namespace libnutwireless {
 			int priority;
 			QOOL mode; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
 			int frequency;
-			Protocols protocols; //list of accepted protocols TODO: implement
+			Protocols protocols; //list of accepted protocols 
 			KeyManagement keyManagement; // list of accepted authenticated key management protocols
-			AuthenticationAlgs auth_alg; //list of allowed IEEE 802.11 authentication algorithms TODO:implement
+			AuthenticationAlgs auth_alg; //list of allowed IEEE 802.11 authentication algorithms
 			PairwiseCiphers pairwise; //list of accepted pairwise (unicast) ciphers for WPA (CCMP,TKIP,NONE)
 			GroupCiphers group; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
 			QString psk; //WPA preshared key; 256-bit pre-shared key
-			EapolFlags eapol_flags; // IEEE 802.1X/EAPOL options (bit field) TODO:implement
+			EapolFlags eapol_flags; // IEEE 802.1X/EAPOL options (bit field)
 			QOOL mixed_cell; //This option can be used to configure whether so called mixed
 			QOOL proactive_key_caching; //Enable/disable opportunistic PMKSA caching for WPA2.
 			QString wep_key0; //Static WEP key (ASCII in double quotation, hex without)
 			QString wep_key1;
 			QString wep_key2;
 			QString wep_key3;
-			char wep_tx_keyidx; //Default WEP key index (TX) (0..3) TODO: implement
+			char wep_tx_keyidx; //Default WEP key index (TX) (0..3)
 			QOOL peerkey; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
 			EapNetworkConfig eap_config;
 	};

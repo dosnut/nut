@@ -4,8 +4,6 @@
 #include <QDebug>
 
 
-//TODO:Check if we can start multiple wpa_supplicants for multiple devices and test behavior
-
 
 namespace libnutwireless {
 
@@ -52,7 +50,7 @@ namespace libnutwireless {
 			NetworkConfig getNetworkConfig(int id);
 			
 			void removeNetwork(int id);
-			void setBssid(int id, libnutcommon::MacAddress bssid);
+			bool setBssid(int id, libnutcommon::MacAddress bssid);
 
 			void setVariable(QString var, QString val);
 			bool setNetworkVariable(int id, QString var, QString val);
