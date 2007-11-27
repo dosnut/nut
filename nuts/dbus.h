@@ -88,6 +88,7 @@ namespace nuts {
 		signals:
 			void stateChanged(int newState, int oldState);
 			void environmentChangedActive(const QString &objectpath);
+			void newWirelessNetworkFound();
 	};
 	
 	class DBusEnvironment: public QDBusAbstractAdaptor {

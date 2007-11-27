@@ -41,9 +41,9 @@ public Q_SLOTS: // METHODS
 
 Q_SIGNALS: // SIGNALS
 	void environmentChangedActive(const QString &newenv);
-	void environmentAdded(const QDBusObjectPath &path);
-	void environmentRemoved(const QDBusObjectPath &path);
 	void stateChanged(int newState, int oldState);
+	void newWirelssNetworkFound();
+	
 };
 
 /*
