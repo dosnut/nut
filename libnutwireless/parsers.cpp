@@ -108,7 +108,7 @@ namespace libnutwireless {
 		return (PairwiseCiphers) cip;
 	}
 
-	KeyManagement parseScanKeyMgmt(QString str) {
+	KeyManagement CWpa_SupplicantParsers::parseScanKeyMgmt(QString str) {
 		int keymgmt = KM_UNDEFINED;
 		if (str.contains("WPA-PSK")) {
 			keymgmt= (keymgmt| KM_WPA_PSK);
@@ -140,7 +140,7 @@ namespace libnutwireless {
 		return (KeyManagement) keymgmt;
 	}
 
-	Protocols parseScanProtocols(QString str) {
+	Protocols CWpa_SupplicantParsers::parseScanProtocols(QString str) {
 		int proto = PROTO_UNDEFINED;
 		if (str.contains("WPA")) {
 			proto = (proto | PROTO_WPA);
@@ -151,35 +151,7 @@ namespace libnutwireless {
 		return (Protocols) proto;
 	}
 
-	ScanAuthentication CWpa_SupplicantParsers::parseScanAuth(QString str) {
-		int key = AUTH_UNDEFINED;
-		if (str.contains("WPA-PSK")) {
-			key = (key | AUTH_WPA_PSK);
-		}
-		if (str.contains("WPA2-EAP")) {
-			key = (key | AUTH_WPA2_EAP);
-		}
-		if (str.contains("WPA2-PSK")) {
-			key = (key | AUTH_WPA2_PSK);
-		}
-		if (str.contains("WPA-EAP")) {
-			key = (key | AUTH_WPA_EAP);
-		}
-		if (str.contains("IEEE8021X")) {
-			key = (key | AUTH_IEEE8021X);
-		}
-		if (str.contains("WPA-NONE")) {
-			key = (key | AUTH_WPA_NONE);
-		}
-		if (str.contains("WPA2-NONE")) {
-			key = (key | AUTH_WPA2_NONE);
-		}
-		if (str.contains("WEP")) {
-			
-		}
-		return (ScanAuthentication) key;
-	}
-	
+
 	QList<ScanResult> CWpa_SupplicantParsers::parseScanResult(QStringList list) {
 		list.removeFirst();
 		QList<ScanResult> scanresults;
