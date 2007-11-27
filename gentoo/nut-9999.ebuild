@@ -41,7 +41,7 @@ src_unpack() {
 
 src_compile() {
 	cd "${S}"
-	if ! use debug; then 
+	if use debug; then 
 		#Disable debugging output
 # 		for path in $( find ./ -type f -iname '*.pro' ); do
 # 			echo "DEFINDES += QT_NO_DEBUG_OUTPUT" >> "${path}";
@@ -61,7 +61,7 @@ src_install() {
 	newexe "${S}"/debian/nuts.init nuts
 	dodir /etc/nuts
 	insinto /etc/nuts/
-	newins "${S}"/doc/config.example nuts.config.example
+	newins "${S}"/docs/config.example nuts.config.example
 	
 	exeinto /etc/nuts/
 	newexe "${S}"/nuts/dispatch dispatch
