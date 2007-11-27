@@ -1,3 +1,11 @@
+nut (0.4.0) unstable; urgency=low
+
+  * Many cleanups, renames and bug fixes.
+  * Zeroconf completed. 
+  * Supports Ad-Hoc.
+
+ -- Stefan Bühler <stbuehler@web.de>  Tue, 27 Nov 2007 12:39:35 +0100
+
 nut (0.3.0-rc2) unstable; urgency=low
 
   * Many bug fixes
