@@ -10,7 +10,7 @@ SRC_URI=""
 LICENSE="GPL-2.0"
 SLOT="0"
 KEYWORDS="~x86"
-IUSE="X"
+IUSE="debug"
 
 RDEPEND=">=x11-libs/qt-4.3.2
 		sys-apps/dbus"
@@ -37,6 +37,12 @@ src_unpack() {
 
 src_compile() {
 	cd "${S}"
+	if ! use debug; then 
+		#Disable debugging output
+		for path in $( find ./ -type f -iname '*.pro' ); do
+			echo "DEFINDES += QT_NO_DEBUG_OUTPUT" >> "${path}";
+		done
+	fi
 	qmake -recursive -Wall
 	make
 }
