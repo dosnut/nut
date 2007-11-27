@@ -12,6 +12,7 @@
 #include "events.h"
 
 #include <QList>
+#include <QFile>
 
 namespace nuts {
 	Events::Events(QObject *parent)
@@ -31,6 +32,7 @@ namespace nuts {
 		process->setEnvironment(environment);
 		process->start("/etc/nuts/dispatch", args);
 		connect(process, SIGNAL(finished( int )), process, SLOT(deleteLater()));
+		connect(process, SIGNAL(error( QProcess::ProcessError )), process, SLOT(deleteLater()));
 	}
 	
 	void setupEnvironment(QStringList &environment) {
