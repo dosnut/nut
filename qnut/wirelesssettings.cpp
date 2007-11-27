@@ -101,7 +101,7 @@ namespace qnut {
 		connect(addAdhocAction, SIGNAL(triggered()), this, SLOT(addAdhoc()));
 		
 		connect(toggleDetailsAction, SIGNAL(toggled(bool)), this, SLOT(toggleDetails(bool)));
-		connect(reloadNetworksAction, SIGNAL(triggered()), ui.managedView->model(), SLOT(reloadNetworks()));
+		connect(reloadNetworksAction, SIGNAL(triggered()), ui.managedView->model(), SLOT(updateNetworks()));
 		
 		ui.managedView->addAction(enableNetworkAction);
 		ui.managedView->addAction(enableNetworksAction);
@@ -219,6 +219,7 @@ namespace qnut {
 	
 	void CWirelessSettings::addAdhoc() {
 		CAdhocConfig dialog(device->wpa_supplicant, this);
+		dialog.execute();
 	}
 	
 	void CWirelessSettings::removeSelectedNetwork() {
