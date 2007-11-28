@@ -42,10 +42,6 @@ src_unpack() {
 src_compile() {
 	cd "${S}"
 	if use debug; then 
-		#Disable debugging output
-# 		for path in $( find ./ -type f -iname '*.pro' ); do
-# 			echo "DEFINDES += QT_NO_DEBUG_OUTPUT" >> "${path}";
-# 		done
 		qmake
 	else
 		qmake -recursive -Wall 'CONFIG+=release' 'DEFINES+=QT_NO_DEBUG_OUTPUT'
