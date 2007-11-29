@@ -5,80 +5,16 @@
 \begin{frame}[<+-| alert@+>]{nut client und wireless client}
 	\begin{itemize}
 		\item libnutclient : Qt-Library für den Client-Teil der DBus Verbindung zum Server.
-		\item Verwaltungsstruktur ähnelt dem Server
-		\begin{itemize}
-			\item DeviceManager verwaltet die Netzwerkgeräte (Devices)
-			\item Device verwaltet die Umgebungen (Environments)
-			\item Environment verwaltet die Interfaces
-			\item Interface
-		\end{itemize}
+		\item Verwaltungsstruktur wie im Server
 
 		\item libnutwireless : Qt-Library für die wpa\_supplicant Verwaltung und Serverkommunikation.
 	\end{itemize}
 \end{frame}
 
-\subsection{libnutclient}
-\begin{frame}[<+-| alert@+>]{DeviceManager}
-	\begin{itemize}
-		\item Abstraktion der Serverkommunikation zum DeviceManager
-		\item Verwaltung der Devices
-		\item Signale zur Kommunikation mit der Applikation
-		\begin{itemize}
-			\item Server Zustand (an/aus)
-			\item Hinzufügen/Entfernen eines Netzwerkgerätes
-		\end{itemize}
-	\end{itemize}
-\end{frame}
-
-\begin{frame}[<+-| alert@+>]{Device}
-	\begin{itemize}
-		\item Abstraktion der Serverkommunikation der Netzwerkgeräte
-		\item Abstraktion der Kommunikation mit dem wpa\_supplicant und der WirelessExtension
-		\item Verwaltung ihrer Environments
-		\item Bereitstellung von Netzwerkgeräte-Eigenschaften
-		\item Methoden zur Kommunikation mit dem Netzwerkgerät:
-		\begin{itemize}
-			\item Device an/ausschalten
-			\item Setzen eines Environments
-		\end{itemize}
-		\item Signale zur Kommunikation mit der Applikation
-		\begin{itemize}
-			\item Statusänderungen des Netzwerkgerätes
-			\item Änderung des aktuellen Environments
-		\end{itemize}
-	\end{itemize}
-\end{frame}
-
-\begin{frame}[<+-| alert@+>]{Environment}
-	\begin{itemize}
-		\item Abstraktion der Serverkommunikation mit den Environments
-		\item Verwaltung ihrer Interfaces
-		\item Bereitstellung von Environment-Eigenschaften
-		\item Methoden zur Kommunikation mit dem Environment
-		\begin{itemize}
-			\item Aktivieren des Environments
-		\end{itemize}
-		\item Signale zur Kommunikation mit der Applikation
-		\begin{itemize}
-			\item Zustandsänderungen des Environments
-		\end{itemize}
-	\end{itemize}
-\end{frame}
-
-\begin{frame}[<+-| alert@+>]{Interface}
-	\begin{itemize}
-		\item Abstraktion der Serverkommunikation mit den Interfaces
-		\item Bereitstellung von Informationen über die Netzwerkschnittstelle
-		\item Methoden zur Kommunikation mit dem Interface
-		\begin{itemize}
-			\item ein/ausschalten der Schnittstelle
-			\item Setzen einer eigenen Konfigurationen
-		\end{itemize}
-		\item Signale zur Kommunikation mit der Applikation
-		\begin{itemize}
-			\item Zustandsänderungen oder Eigenschaftsänderungen der Schnittstelle
-		\end{itemize}
-	\end{itemize}
+\begin{frame}[<+-| alert@+>]{nut client und wireless client}
+	\begin{center}
+		\includegraphics<+->{libnutstructure.pdf}
+	\end{center}
 \end{frame}
 
 \subsection{libnutwireless}
@@ -90,7 +26,6 @@
 			\item Bereitstellung von Informationen zur Signalqualität
 			\item Es kann nach Netzwerken gescannt werden
 			\item Hinzufügen/Entfernen von Netzwerken (auch aus dem Scan)
-			\item Hinzufügen eines Ad-Hoc-Netzwerkes mit 4 Klicks und 2 Texteingaben
 			\item Konfiguration eines bereits vorhandenen Netzwerks
 			\item Speichern der Konfiguration (sofern erlaubt)
 		\end{itemize}

@@ -7,6 +7,7 @@ SRC+=${wildcard *.sty}
 SRC+=${wildcard *.png}
 SRC+=${wildcard *.jpg}
 SRC+=nutsstructure.pdf
+SRC+=libnutstructure.pdf
 
 TMP=presentation.nav presentation.out presentation.snm presentation.vrb
 TMP+=presentation.aux  presentation.log presentation.toc
@@ -26,6 +27,14 @@ nutsstructure.pdf: nutsstructure.mp
 	@epstopdf nutsstructure.mps
 	@echo Removing temporary files
 	@rm -f nutsstructure.mps nutsstructure.log nutsstructure.mpx
+
+libnutstructure.pdf: libnutstructure.mp
+	@echo [MPOST] libnutstructure.mp
+	@mpost libnutstructure.mp
+	@echo "[EPS->PDF]" libnutstructure.mps
+	@epstopdf libnutstructure.mps
+	@echo Removing temporary files
+	@rm -f libnutstructure.mps libnutstructure.log libnutstructure.mpx
 
 .PHONY: clean
 clean:
