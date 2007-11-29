@@ -61,7 +61,7 @@ namespace nuts {
 	
 	bool ConfigParser::finishEnvironment(libnutcommon::EnvironmentConfig *envc, local_env_config *l_envc) {
 		if ((envc->m_ipv4Interfaces.size() == 0) && (!l_envc->no_def_dhcp)) {
-			envc->m_ipv4Interfaces.push_back(new libnutcommon::IPv4Config());
+			envc->m_ipv4Interfaces.push_back(new libnutcommon::IPv4Config(libnutcommon::IPv4Config::DO_DHCP));
 		}
 		// Append "select user;" if no select config was given.
 		if (envc->m_select.filters.size() == 0) {
@@ -130,7 +130,7 @@ namespace nuts {
 		m_curipv4config = 0;
 		if (!m_curenvconfig) return false;
 		if (m_cur_env->m_hasdhcp) return false;
-		m_curipv4config = new libnutcommon::IPv4Config();
+		m_curipv4config = new libnutcommon::IPv4Config(libnutcommon::IPv4Config::DO_DHCP);
 		return true;
 	}
 	
