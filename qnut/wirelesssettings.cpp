@@ -64,22 +64,22 @@ namespace qnut {
 	}
 	
 	inline void CWirelessSettings::createActions() {
-		enableNetworkAction    = new QAction(QIcon(UI_ICON_ENABLE), tr("Enable"), this);
-		enableNetworksAction   = new QAction(QIcon(UI_ICON_ENABLE_ALL), tr("Enable all"), this);
-		disableNetworkAction   = new QAction(QIcon(UI_ICON_DISABLE), tr("Disable"), this);
-		switchNetworkAction    = new QAction(QIcon(UI_ICON_FORCE), tr("Switch"), this);
-		configureNetworkAction = new QAction(QIcon(UI_ICON_CONFIGURE), tr("Configure..."), this);
-		removeNetworkAction    = new QAction(QIcon(UI_ICON_REMOVE), tr("Remove"), this);
+		enableNetworkAction    = new QAction(QIcon(UI_ICON_ENABLE), tr("&Enable"), this);
+		enableNetworksAction   = new QAction(QIcon(UI_ICON_ENABLE_ALL), tr("Enable &all"), this);
+		disableNetworkAction   = new QAction(QIcon(UI_ICON_DISABLE), tr("&Disable"), this);
+		switchNetworkAction    = new QAction(QIcon(UI_ICON_FORCE), tr("S&witch"), this);
+		configureNetworkAction = new QAction(QIcon(UI_ICON_CONFIGURE), tr("&Configure..."), this);
+		removeNetworkAction    = new QAction(QIcon(UI_ICON_REMOVE), tr("&Remove"), this);
 		
-		addNetworkAction       = new QAction(QIcon(UI_ICON_ADD), tr("Add network"), this);
-		addAdhocAction         = new QAction(QIcon(UI_ICON_ADD_ADHOC), tr("Add ad-hoc"), this);
+		addNetworkAction       = new QAction(QIcon(UI_ICON_ADD), tr("Add &network"), this);
+		addAdhocAction         = new QAction(QIcon(UI_ICON_ADD_ADHOC), tr("Add ad-&hoc"), this);
 		
-		rescanNetworksAction   = new QAction(QIcon(UI_ICON_SEARCH), tr("Rescan"), this);
+		rescanNetworksAction   = new QAction(QIcon(UI_ICON_SEARCH), tr("Scan ne&tworks"), this);
 		
-		saveNetworksAction     = new QAction(QIcon(UI_ICON_SAVE), tr("Save configuration"), this);
-		reloadNetworksAction   = new QAction(QIcon(UI_ICON_RELOAD), tr("Reload configuration"), this);
+		saveNetworksAction     = new QAction(QIcon(UI_ICON_SAVE), tr("&Save configuration"), this);
+		reloadNetworksAction   = new QAction(QIcon(UI_ICON_RELOAD), tr("Re&load configuration"), this);
 		
-		toggleDetailsAction    = new QAction(QIcon(UI_ICON_DETAILED), tr("Detailed view"), this);
+		toggleDetailsAction    = new QAction(QIcon(UI_ICON_DETAILED), tr("Detailed &view"), this);
 		
 		toggleDetailsAction->setCheckable(true);
 		toggleDetailsAction->setChecked(true);
