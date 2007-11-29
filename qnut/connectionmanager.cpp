@@ -73,12 +73,12 @@ namespace qnut {
 	
 	inline void CConnectionManager::createActions() {
 		//overViewMenu Actions
-		mRefreshDevicesAction   = new QAction(QIcon(UI_ICON_RELOAD), tr("Refresh devices"), this);
-		mEnableDeviceAction     = new QAction(QIcon(UI_ICON_ENABLE), tr("Enable"), this);
-		mDisableDeviceAction    = new QAction(QIcon(UI_ICON_DISABLE), tr("Disable"), this);
-		mDeviceSettingsAction   = new QAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("Scripting settings..."), this);
-		mWirelessSettingsAction = new QAction(QIcon(UI_ICON_AIR), tr("Wireless settings..."), this);
-		mClearLogAction         = new QAction(QIcon(UI_ICON_CLEAR), tr("Clear log"), this);
+		mRefreshDevicesAction   = new QAction(QIcon(UI_ICON_RELOAD), tr("&Refresh devices"), this);
+		mEnableDeviceAction     = new QAction(QIcon(UI_ICON_ENABLE), tr("&Enable"), this);
+		mDisableDeviceAction    = new QAction(QIcon(UI_ICON_DISABLE), tr("&Disable"), this);
+		mDeviceSettingsAction   = new QAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("&Scripting settings..."), this);
+		mWirelessSettingsAction = new QAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."), this);
+		mClearLogAction         = new QAction(QIcon(UI_ICON_CLEAR), tr("&Clear log"), this);
 		
 		mEnableDeviceAction->setEnabled(false);
 		mDisableDeviceAction->setEnabled(false);

@@ -103,21 +103,21 @@ namespace qnut {
 	inline void CDeviceDetails::createActions() {
 		deviceMenu = new QMenu(device->name, NULL);
 		
-		mEnableDeviceAction     = deviceMenu->addAction(QIcon(UI_ICON_ENABLE), tr("Enable device"),
+		mEnableDeviceAction     = deviceMenu->addAction(QIcon(UI_ICON_ENABLE), tr("&Enable device"),
 			device, SLOT(enable()));
-		mDisableDeviceAction    = deviceMenu->addAction(QIcon(UI_ICON_DISABLE), tr("Disable device"),
+		mDisableDeviceAction    = deviceMenu->addAction(QIcon(UI_ICON_DISABLE), tr("&Disable device"),
 			device, SLOT(disable()));
 		deviceMenu->addSeparator();
-		showAction             = deviceMenu->addAction(QIcon(UI_ICON_FORCE), tr("Environments..."),
+		showAction             = deviceMenu->addAction(QIcon(UI_ICON_FORCE), tr("En&vironments..."),
 			this, SLOT(showTheeseDetails()));
-		mDeviceSettingsAction   = deviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("Scripting settings..."),
+		mDeviceSettingsAction   = deviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("&Scripting settings..."),
 			this, SLOT(openDeviceSettings()));
 		deviceMenu->addSeparator();
-		mWirelessSettingsAction = deviceMenu->addAction(QIcon(UI_ICON_AIR), tr("Wireless settings..."),
+		mWirelessSettingsAction = deviceMenu->addAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."),
 			this, SLOT(openWirelessSettings()));
 		
-		enterEnvironmentAction = new QAction(QIcon(UI_ICON_FORCE), tr("Enter environment"), this);
-		ipConfigurationAction  = new QAction(QIcon(UI_ICON_EDIT), tr("Set IP configuration..."), this);
+		enterEnvironmentAction = new QAction(QIcon(UI_ICON_FORCE), tr("E&nter environment"), this);
+		ipConfigurationAction  = new QAction(QIcon(UI_ICON_EDIT), tr("Set &IP configuration..."), this);
 		ui.environmentTree->addAction(enterEnvironmentAction);
 		ui.environmentTree->addAction(ipConfigurationAction);
 		

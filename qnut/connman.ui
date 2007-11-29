@@ -86,7 +86,7 @@
    </widget>
    <widget class="QMenu" name="menuView" >
     <property name="title" >
-     <string>View</string>
+     <string>&amp;View</string>
     </property>
     <addaction name="actionShowBalloonTips" />
     <addaction name="actionShowLog" />
@@ -96,29 +96,19 @@
    <addaction name="menuView" />
    <addaction name="menuHelp" />
   </widget>
-  <action name="actionRefresh" >
-   <property name="text" >
-    <string>&amp;Refresh</string>
-   </property>
-  </action>
   <action name="actionClose" >
    <property name="text" >
     <string>&amp;Close</string>
    </property>
   </action>
-  <action name="actionDefault" >
-   <property name="text" >
-    <string>&amp;default</string>
-   </property>
-  </action>
   <action name="actionAboutQt" >
    <property name="text" >
-    <string>About Qt</string>
+    <string>About &amp;Qt</string>
    </property>
   </action>
   <action name="actionAboutQNUT" >
    <property name="text" >
-    <string>About QNUT</string>
+    <string>&amp;About QNUT</string>
    </property>
   </action>
   <action name="actionShowBalloonTips" >
@@ -126,12 +116,7 @@
     <bool>true</bool>
    </property>
    <property name="text" >
-    <string>Show balloon tips</string>
-   </property>
-  </action>
-  <action name="actionShowTrayIcon" >
-   <property name="text" >
-    <string>Show main tray icon</string>
+    <string>Show &amp;balloon tips</string>
    </property>
   </action>
   <action name="actionShowLog" >
@@ -139,12 +124,11 @@
     <bool>true</bool>
    </property>
    <property name="text" >
-    <string>Show log</string>
+    <string>Show &amp;log</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="4" margin="4" />
- <includes/>
  <resources/>
  <connections>
   <connection>
