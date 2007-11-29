@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS><TS version="1.1" language="de">
-<defaultcodec></defaultcodec>
 <context>
     <name></name>
     <message>
@@ -666,9 +665,6 @@
         <source>(%1)Error while setting-up dbusconnection</source>
         <translation>(%1) Fehler beim Erstellen der DBus-Verbindung</translation>
     </message>
-</context>
-<context>
-    <name>libnutclient::QObject</name>
     <message>
         <location filename="../libnutclient/client.cpp" line="18"/>
         <source>up</source>
@@ -727,7 +723,7 @@
     <message>
         <location filename="../libnutclient/client.cpp" line="39"/>
         <source>zeroconf</source>
-        <translation>zeroconf</translation>
+        <translation>zerconf</translation>
     </message>
     <message>
         <location filename="../libnutclient/client.cpp" line="40"/>
@@ -740,65 +736,55 @@
     <message>
         <location filename="../libnutwireless/wpa_supplicant.cpp" line="35"/>
         <source>auto-setting ap_scan=2.</source>
-        <translation>Setzte automatisch &quot;ap_scan=2&quot;.</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../libnutwireless/wpa_supplicant.cpp" line="43"/>
         <source>Using your last ap_scan settings for auto-setting: %1</source>
-        <translation>Letzter Wert von &quot;ap_scan&quot; wird als standard benutzt: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../libnutwireless/wpa_supplicant.cpp" line="46"/>
         <source>You must set ap_scan to your needs!</source>
-        <translation>Kein Standardwert für &quot;ap_scan&quot; gesetzt!</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>libnutwireless::CWpa_SupplicantBase</name>
     <message>
+        <location filename="../libnutwireless/base.cpp" line="94"/>
+        <source>Error while trying to receive messages from wpa_supplicant</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../libnutwireless/base.cpp" line="179"/>
         <source>Could not open wpa_supplicant socket: %1</source>
-        <translation>Konnte die Verbindung zum wpa_supplicant nicht herstellen: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../libnutwireless/base.cpp" line="203"/>
         <source>Could not open wpa_supplicant control interface</source>
-        <translation>Konnte das Kontrollinterface für den wpa_supplicant nicht öffnen</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../libnutwireless/base.cpp" line="217"/>
         <source>Could not attach to wpa_supplicant</source>
-        <translation>Fehler beim Anmelden am wpa_supplicant</translation>
-    </message>
-    <message>
-        <location filename="../libnutwireless/base.cpp" line="249"/>
-        <source>wpa_supplicant connection established</source>
-        <translation>Verbindung zum wpa_supplicant hergestellt</translation>
-    </message>
-    <message>
-        <location filename="../libnutwireless/base.cpp" line="283"/>
-        <source>(%1)[%2] wpa_supplicant disconnected</source>
-        <translation>(%1)[%2] Verbindung zum wpa_supplicant getrennt</translation>
-    </message>
-    <message>
-        <location filename="../libnutwireless/base.cpp" line="941"/>
-        <source>Cannot fetch wireless information as your wireless extension is too old</source>
-        <translation>Kann die drahtlose Netzwerkeinformationen nicht holen, da Ihre wireless extension zu alt ist</translation>
-    </message>
-    <message>
-        <location filename="../libnutwireless/base.cpp" line="942"/>
-        <source>Think about updating your kernel (it&apos;s way too old)</source>
-        <translation>Bitte aktualisieren sie ihren Kernel, da dieser zu alt ist</translation>
-    </message>
-    <message>
-        <location filename="../libnutwireless/base.cpp" line="94"/>
-        <source>Error while trying to receive messages from wpa_supplicant</source>
-        <translation>Fehler beim Versuch Nachrichten vom wap_supplicant zu empfangen</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../libnutwireless/base.cpp" line="236"/>
         <source>ERROR: Could not open socket to net kernel</source>
-        <translation>Fehler: Konnte Socket zum NetLink Interface nicht öffnen</translation>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../libnutwireless/base.cpp" line="249"/>
+        <source>wpa_supplicant connection established</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../libnutwireless/base.cpp" line="283"/>
+        <source>(%1)[%2] wpa_supplicant disconnected</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../libnutwireless/base.cpp" line="475"/>
@@ -843,6 +829,16 @@
     <message>
         <location filename="../libnutwireless/base.cpp" line="935"/>
         <source>Auto-resetting timer to 10 seconds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../libnutwireless/base.cpp" line="941"/>
+        <source>Cannot fetch wireless information as your wireless extension is too old</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../libnutwireless/base.cpp" line="942"/>
+        <source>Think about updating your kernel (it&apos;s way too old)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1170,47 +1166,22 @@ Klick here to open the device details.</source>
         <translation>aktiv</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="98"/>
-        <source>off</source>
-        <translation>aus</translation>
-    </message>
-    <message>
-        <location filename="environmenttreemodel.cpp" line="100"/>
-        <source>static</source>
-        <translation>statisch</translation>
-    </message>
-    <message>
-        <location filename="environmenttreemodel.cpp" line="102"/>
-        <source>dynamic</source>
-        <translation>dynamisch</translation>
-    </message>
-    <message>
-        <location filename="environmenttreemodel.cpp" line="104"/>
-        <source>zeroconf</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="environmenttreemodel.cpp" line="106"/>
-        <source>unconfigured</source>
-        <translation>konfigurationslos</translation>
-    </message>
-    <message>
-        <location filename="environmenttreemodel.cpp" line="124"/>
+        <location filename="environmenttreemodel.cpp" line="125"/>
         <source>none</source>
         <translation>keine</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="156"/>
+        <location filename="environmenttreemodel.cpp" line="157"/>
         <source>Item</source>
         <translation>Objekt</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="158"/>
+        <location filename="environmenttreemodel.cpp" line="159"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="160"/>
+        <location filename="environmenttreemodel.cpp" line="161"/>
         <source>IP-Address</source>
         <translation>IP-Adresse</translation>
     </message>

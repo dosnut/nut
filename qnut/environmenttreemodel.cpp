@@ -93,20 +93,7 @@ namespace qnut {
 				return (static_cast<CEnvironment *>(currentData)->active) ? tr("active") : QString('-');
 			}
 			else {
-				switch (static_cast<CInterface *>(currentData)->state) {
-				case IFS_OFF:
-					return tr("off");
-				case IFS_STATIC:
-					return tr("static");
-				case IFS_DHCP:
-					return tr("dynamic");
-				case IFS_ZEROCONF:
-					return tr("zeroconf");
-				case IFS_WAITFORCONFIG:
-					return tr("unconfigured");
-				default:
-					break;
-				}
+				return toStringTr(static_cast<CInterface *>(currentData)->state);
 			}
 			break;
 		case ENVTREE_MOD_IP:
