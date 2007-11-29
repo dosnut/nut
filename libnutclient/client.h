@@ -35,6 +35,7 @@ namespace libnutclient {
 	QString toStringTr(libnutcommon::DeviceState state);
 	QString toStringTr(libnutcommon::DeviceType type);
 	QString toStringTr(QDBusError error);
+	QString toStringTr(libnutcommon::InterfaceState state);
 
 	/** @brief CLog provides a logging facility for the client_exceptions
 		
