@@ -7,6 +7,12 @@
 
 namespace libnutwireless {
 
+	/** @brief CWpa_Supplicant is the main class for communicatin with wpa_supplicant
+
+		It provides all necessary functions to communicate with wpa_supplicant.
+		
+		To open the wpa_supplicant interface, open() has to be called.
+	*/
 	class CWpa_Supplicant: public CWpa_SupplicantBase {
 			Q_OBJECT
 		private:
@@ -18,6 +24,12 @@ namespace libnutwireless {
 			NetconfigStatus checkAdHocNetwork(NetworkConfig &config);
 		public:
 			//TODO: Check why constructor is not beeing called
+			
+			/** 
+			 * 
+			 * @param m_ifname interface name
+			 * The interface's socket has to be at /var/run/wpa_supplicant/ifname_name
+			 */
 			CWpa_Supplicant(QObject * parent, QString m_ifname) : CWpa_SupplicantBase(parent, m_ifname) {
 				m_apScanDefault = -1;
 				qDebug() << (QString("Constructor set ap_scan=%1").arg(QString::number(m_apScanDefault)));
@@ -28,7 +40,11 @@ namespace libnutwireless {
 			QList<quint8>& getSupportedChannels();
 			
 		public slots:
-			//Functions to react to request made from wpa_supplicant:
+			/**
+				Function to react to request made from wpa_supplicant:
+				@param request Type of request
+				@param msg the value that will be passed to wpa_supplicant
+			*/
 			void response(Request request, QString msg);
 			//
 			bool selectNetwork(int id);
@@ -45,7 +61,18 @@ namespace libnutwireless {
 			void terminate();
 			void preauth(libnutcommon::MacAddress bssid);
 			int addNetwork(); //return -1 if failed, otherwise return network id
-			NetconfigStatus addNetwork(NetworkConfig config); //return -1 if failed, otherwise return network id
+			
+			/**
+				Function to add a Network. Errors will be written in NetconfigStatus
+				EAP-Networks are automatically detected.
+				Undefined values in Networkconfig will not be set.
+			*/
+			NetconfigStatus addNetwork(NetworkConfig config);
+			/**
+				Function to edit a Network. Errors will be written in NetconfigStatus
+				EAP-Networks are automatically detected.
+				Undefined values in Networkconfig will not be set.
+			*/
 			NetconfigStatus editNetwork(int netid, NetworkConfig config);
 			NetworkConfig getNetworkConfig(int id);
 			
