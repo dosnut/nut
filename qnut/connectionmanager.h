@@ -13,25 +13,25 @@ namespace qnut {
 	private:
 		Ui::connMan ui;
 		
-		libnutclient::CDeviceManager deviceManager;
-		libnutclient::CLog logFile;
+		libnutclient::CDeviceManager mDeviceManager;
+		libnutclient::CLog mLogFile;
 		
-		CDeviceDetailsHash deviceOptions;
-		QSettings settings;
+		CDeviceDetailsHash mDeviceDetails;
+		QSettings mStettings;
 		
-		CTrayIcon trayicon;
-		QTabWidget tabWidget;
-		QTreeView overView;
-		QTextEdit logEdit;
+		CTrayIcon mTrayIcon;
+		QTabWidget mTabWidget;
+		QTreeView mOverView;
+		QTextEdit mLogEdit;
 		
-		QAction * refreshDevicesAction;
-		QAction * clearLogAction;
+		QAction * mRefreshDevicesAction;
+		QAction * mClearLogAction;
 		
-		QAction * enableDeviceAction;
-		QAction * disableDeviceAction;
+		QAction * mEnableDeviceAction;
+		QAction * mDisableDeviceAction;
 		
-		QAction * deviceSettingsAction;
-		QAction * wirelessSettingsAction;
+		QAction * mDeviceSettingsAction;
+		QAction * mWirelessSettingsAction;
 		
 		inline void createActions();
 		inline void distributeActions(int mode = 0);

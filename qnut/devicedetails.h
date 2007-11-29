@@ -29,7 +29,7 @@ namespace qnut {
 		
 		CWirelessSettings * wirelessSettings;
 		
-		QSettings settings;
+		QSettings mStettings;
 		
 		inline void readSettings();
 		inline void writeSettings();
@@ -44,14 +44,14 @@ namespace qnut {
 		QSystemTrayIcon * trayIcon;
 		
 		QMenu * deviceMenu;
-		QAction * enableDeviceAction;
-		QAction * disableDeviceAction;
+		QAction * mEnableDeviceAction;
+		QAction * mDisableDeviceAction;
 		
 		QAction * enterEnvironmentAction;
 		
-		QAction * deviceSettingsAction;
+		QAction * mDeviceSettingsAction;
 		QAction * ipConfigurationAction;
-		QAction * wirelessSettingsAction;
+		QAction * mWirelessSettingsAction;
 		
 		QAction * showAction;
 		
