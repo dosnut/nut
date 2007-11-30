@@ -22,8 +22,11 @@ extern "C" {
 
 namespace libnutwireless {
 
-	//This class provides all functions that need very "low-level" (like timers) functions to
-	//communicate with the wpa_supplicant
+	/** @brief The base class contains all timer/lowlevel io dependant functions
+	
+		This class provides all functions that need timers, socket notifiers etc.
+		It is not used directly.
+	*/
 	class CWpa_SupplicantBase: public QObject, public CWpa_SupplicantParsers {
 			Q_OBJECT
 		protected:

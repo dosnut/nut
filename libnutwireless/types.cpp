@@ -265,7 +265,7 @@ QOOL toQOOL(bool b) {
 
 //Modified iw_print_stats function from iwlib.c
 //We don't care whether information was updated or not. Just convert it
-WextSignal convertValues(WextRawScan scan) {
+WextSignal convertValues(WextRawScan &scan) {
 	WextSignal res;
 	//Set all non-signalquality info
 	res.frequency = scan.freq;

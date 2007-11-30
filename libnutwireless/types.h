@@ -14,8 +14,12 @@ extern "C" {
 }
 namespace libnutwireless {
 
+	/**
+		NetworkFlags
+	*/
 	typedef enum {NF_NONE, NF_CURRENT, NF_DISABLED} NetworkFlags;
-
+	
+	
 	typedef enum {CI_UNDEFINED=0, CI_NONE=1, CI_CCMP=2, CI_TKIP=4, CI_WEP104=8, CI_WEP40=16, CI_WEP=24} ScanCiphers;
 	typedef enum {AUTH_UNDEFINED=0, AUTH_PLAIN=1,AUTH_WPA_PSK=2,AUTH_WPA2_PSK=4, AUTH_WPA_EAP=8, AUTH_WPA2_EAP=16, AUTH_IEEE8021X=32, AUTH_WPA_NONE=64, AUTH_WPA2_NONE=128, AUTH_DEFAULT=62} ScanAuthentication;
 	//AUTH_WPA_PSK = AUTHALG_OPEN && WKI_WPA && KEYMGMT_WPA_PSK && (GCI_CCMP || GCI_TKIP) && (PCI_CCMP || PCI_TKIP)
@@ -25,25 +29,34 @@ namespace libnutwireless {
 	//AUTH_IEEE8021X = (AUTHALG_OPEN || LEAP) && KEYMGMT_IEEE8021X && (WKI_RSN || WKI_WPA) // This is not very clear yet
 
 
+	/** Protocols */
 	typedef enum {PROTO_UNDEFINED=0, PROTO_WPA=1, PROTO_RSN=2, PROTO_DEFAULT=3} Protocols; //RSN=WPA2
+	/** GroupCiphers */
 	typedef enum {GCI_UNDEFINED=0, GCI_CCMP=2, GCI_TKIP=4, GCI_WEP104=8, GCI_WEP40=16, GCI_NONE=32, GCI_WRAP=64, GCI_DEF=30} GroupCiphers;
+	/** Pairwise Ciphers */
 	typedef enum {PCI_UNDEFINED=0, PCI_NONE=1, PCI_CCMP=2, PCI_TKIP=4, PCI_DEF=6} PairwiseCiphers;
+	/** Keymanagement */
 	typedef enum {KM_UNDEFINED=0, KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8, KM_WPA_NONE=16, KM_OFF=32, KM_DEF=6} KeyManagement; //TODO:change parsers due to KM_OFF
+	/** AuthenticationAlgs */
 	typedef enum {AUTHALG_UNDEFINED=0, AUTHALG_OPEN=1, AUTHALG_SHARED=2, AUTHALG_LEAP=4} AuthenticationAlgs; //Default: automatic selection
 
+	
 	typedef enum {INTERACT_MSG, INTERACT_REQ,INTERACT_EVENT} InteractiveType;
+	/** Request type contains all possible request from wpa_supplicant. */
 	typedef enum {REQ_FAIL, REQ_PASSWORD, REQ_IDENTITY, REQ_NEW_PASSWORD, REQ_PIN, REQ_OTP, REQ_PASSPHRASE} RequestType;
+	/** Possible events from wpa_supplicant, not complete */
 	typedef enum {EVENT_OTHER, EVENT_DISCONNECTED, EVENT_CONNECTED, EVENT_TERMINATING, EVENT_PASSWORD_CHANGED, EVENT_EAP_NOTIFICATION, EVENT_EAP_STARTED, EVENT_EAP_METHOD, EVENT_EAP_SUCCESS, EVENT_EAP_FAILURE } EventType;
-
+	/** Eapol flags */
 	typedef enum {EAPF_UNDEFINED=-1, EAPF_WIRED=0,EAPF_DYN_UNICAST_WEP=1, EAPF_BCAST_WEP=2,EAPF_DEFAULT=3} EapolFlags;
 
-	//Default: all build in
+	/** List of Eap methods for wpa_supplicant */
 	typedef enum {EAPM_UNDEFINED=0, EAPM_MD5=1,EAPM_MSCHAPV2=2,EAPM_OTP=4,EAPM_GTC=8,EAPM_TLS=16,EAPM_PEAP=32,EAPM_TTLS=64,EAPM_ALL=127, EAPM_AKA=128, EAPM_FAST=256, EAPM_LEAP=512,EAPM_PSK=1024,EAPM_PAX=2048,EAPM_SAKE=4096,EAPM_GPSK=8192} EapMethod;
 	//0001 = 1
 	//0010 = 2
 	//0100 = 4
 	//0100 = 8
 
+	/** Enum of possible config failures.  */
 	typedef enum {
 	NCF_NONE=0x0000000000, NCF_SSID=0x0000000001,NCF_BSSID=0x0000000002,NCF_DISABLED=0x0000000004,
 	NCF_ID_STR=0x0000000008, NCF_SCAN_SSID=0x0000000010, NCF_PRIORITY=0x0000000020,
@@ -55,6 +68,7 @@ namespace libnutwireless {
 	NCF_PEERKEY=0x0000400000, NCF_ALL=0x00007FFFFF
 	}NetconfigFailures;
 
+	/** Enum of possible eap config failures */
 	typedef enum {
 	ENCF_NONE=0x0000000000, ENCF_EAP=0x0000000001,ENCF_IDENTITY=0x0000000002,ENCF_ANON_IDENTITY=0x0000000004, ENCF_PASSWD=0x0000000008,
 	ENCF_CA_CERT=0x0000000010, ENCF_CA_PATH=0x0000000020, ENCF_CLIENT_CERT=0x0000000040, ENCF_PRIVATE_KEY=0x0000000080,
@@ -66,19 +80,28 @@ namespace libnutwireless {
 	ENCF_NAI=0x00001000000, ENCF_PAC_FILE=0x00002000000, ENCF_ALL=0x00003FFFFFF
 	} EapNetconfigFailures;
 
+	/** QOOL is a tri-state. Its name is derived from Bool and qubit. */
 	typedef enum {
 		QOOL_UNDEFINED=-1, QOOL_FALSE=0,QOOL_TRUE=1
 	} QOOL; // Like a qubit :)
 
+	/** Enum of operation modes of wireless networks (see WirelessExtension) */
 	typedef enum {
 		OPM_AUTO=0, OPM_ADHOC=1, OPM_MANAGED=2,OPM_MASTER=3,OPM_REPEATER=4,OPM_SECONDARY=5,OPM_MONITOR=6,OPM_UNKNOWN_BUG=7
 	} OPMODE;
 
+	/**
+		NetconfigStatus contains error information when configuring a network
+		@param failures Standard network failures
+		@param eap_failures Eap network failures
+		@param id on failures, id is -1, else it's the network id which was configured
+	*/
 	struct NetconfigStatus {
 		NetconfigFailures failures;
 		EapNetconfigFailures eap_failures;
 		int id;
 	};
+	/** wpa_supplicant's capabilities */
 	struct Capabilities {
 		EapMethod eap;
 		PairwiseCiphers pairwise;
@@ -88,6 +111,8 @@ namespace libnutwireless {
 		AuthenticationAlgs auth_alg;
 	};
 
+	/** Raw signal is contains the data from the kernel. 
+		For human readable format, it has to be converted to WextSignal */
 	struct	WextRawSignal {
 		quint8 qual;	/* link quality (%retries, SNR, %missed beacons or better...) */
 		quint8 level;		/* signal level (dBm) */
@@ -95,6 +120,10 @@ namespace libnutwireless {
 		quint8 updated;	/* Flags to know if updated */
 	};
 
+	/**
+		WextRawScan contains the data from the kernel.
+		It's converted to WextScan.
+	*/
 	struct WextRawScan {
 		QString ssid;
 		libnutcommon::MacAddress bssid;
@@ -112,13 +141,15 @@ namespace libnutwireless {
 		//Further information pending...
 	};
 
+	/** enum of possible signal encodig */
 	typedef enum {
 		WSR_UNKNOWN=0, WSR_RCPI=1, WSR_ABSOLUTE=2, WSR_RELATIVE=3
-	} WextSignal_type; 
-
+	} WextSignalType; 
+	
+	/** signal quality in human readable format */
 	struct WextSignal {
 		int frequency;
-		WextSignal_type type;
+		WextSignalType type;
 		struct {
 			quint8 value;
 			quint8 maximum;
@@ -139,6 +170,7 @@ namespace libnutwireless {
 		} level;
 	};
 
+	/** Scan in human readable format (internal use) */
 	struct WextScan {
 		QString ssid;
 		libnutcommon::MacAddress bssid;
@@ -153,6 +185,7 @@ namespace libnutwireless {
 		OPMODE opmode;
 	};
 	
+	/** One scan result (network) in human readable format */
 	struct ScanResult {
 		libnutcommon::MacAddress bssid;
 		QString ssid;
@@ -167,6 +200,8 @@ namespace libnutwireless {
 	struct MIBVariable;
 	typedef QList<MIBVariable> MIBVariables;
 	//enums are NOT complete, but maybe we schould change this to QString
+
+	/** Status of wpa_supplicant */
 	struct Status {
 // 		typedef enum {COMPLETED} WPA_STATE;
 // 		typedef enum {AUTHENTICATED} PAE_STATE;
@@ -208,6 +243,7 @@ namespace libnutwireless {
 		int ClientTimeout;
 	};
 
+	/** one wpa_Supplicant MIB variable */
 	struct MIBVariable {
 		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} MIBVariable_type;
 		MIBVariable_type type;
@@ -218,6 +254,8 @@ namespace libnutwireless {
 			bool * logic;
 		} value;
 	};
+	
+	/** One wpa_suplicant network variable */
 	struct NetworkVariable {
 		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} Type;
 		QString name;
@@ -227,6 +265,8 @@ namespace libnutwireless {
 			bool * logic;
 		} value;
 	};
+
+	/** request made by wpa_supplicant */
 	struct Request {
 		RequestType type;
 		int id;
@@ -256,7 +296,7 @@ namespace libnutwireless {
 	QString toString(EapMethod method);
 
 	//Function converts the encoded scan values to real values
-	WextSignal convertValues(WextRawScan scan);
+	WextSignal convertValues(WextRawScan &scan);
 	QString signalQualityToString(WextRawScan scan);
 	QStringList signalQualityToStringList(WextRawScan scan);
 	
@@ -285,7 +325,8 @@ namespace libnutwireless {
 		}
 		return QOOL_UNDEFINED;
 	}
-	
+
+	/** Information about a configured network (see listNetworks) */
 	struct ShortNetworkInfo {
 		int id;
 		QString ssid;
@@ -294,6 +335,10 @@ namespace libnutwireless {
 		bool adhoc;
 	};
 
+	/**
+		The eap network config class contains all information for configuring
+		the eap part of a network. On instantiation all values will be set to undefined.
+	*/
 	class EapNetworkConfig {
 		public:
 			EapNetworkConfig();
@@ -327,6 +372,10 @@ namespace libnutwireless {
 			QString pac_file; //File path for the PAC entries.
 	};
 
+	/**
+		The network config class contains all information for configuring a network.
+		On instantiation all values will be set to undefined.
+	*/
 	class NetworkConfig { //All without linebreak
 		public:
 			NetworkConfig();
