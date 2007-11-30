@@ -54,7 +54,7 @@ src_install() {
 	make INSTALL_ROOT="${D}" install || die
 
 	exeinto /etc/init.d/
-	newexe "${S}"/debian/nuts.init nuts
+	newexe "${S}"/gentoo/nuts.init nuts
 	dodir /etc/nuts
 	insinto /etc/nuts/
 	newins "${S}"/docs/config.example nuts.config.example
