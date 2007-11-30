@@ -18,14 +18,14 @@ namespace qnut {
 	using namespace libnutclient;
 	
 	bool CScriptSettings::execute(CDeviceDetails * deviceoptions) {
-		quint8 flags = deviceoptions->scriptFlags;
+		quint8 flags = deviceoptions->scriptFlags();
 		ui.upCheck->setChecked(flags & UI_FLAG_SCRIPT_UP);
 		ui.unconfiguredCheck->setChecked(flags & UI_FLAG_SCRIPT_UNCONFIGURED);
 		ui.carrierCheck->setChecked(flags & UI_FLAG_SCRIPT_CARRIER);
 		ui.activatedCheck->setChecked(flags & UI_FLAG_SCRIPT_ACTIVATED);
 		ui.deactivatedCheck->setChecked(flags & UI_FLAG_SCRIPT_DEACTIVATED);
 		if (exec() == QDialog::Accepted) {
-			QDir workdir(UI_PATH_DEV(deviceoptions->device->name));
+			QDir workdir(UI_PATH_DEV(deviceoptions->device()->name));
 			flags = UI_FLAG_SCRIPT_NONE;
 			
 			if (ui.upCheck->isChecked()) {
@@ -54,7 +54,7 @@ namespace qnut {
 					workdir.mkdir(UI_DIR_SCRIPT_DEACTIVATED);
 			}
 			
-			deviceoptions->scriptFlags = flags;
+			deviceoptions->setScriptFlags(flags);
 			
 			return true;
 		}

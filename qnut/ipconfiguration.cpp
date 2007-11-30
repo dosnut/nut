@@ -31,9 +31,9 @@ namespace qnut {
 		ui.netmaskEdit->setText(config.netmask().toString());
 		ui.gatewayEdit->setText(config.gateway().toString());
 		
-		dnsList = config.dnsservers();
+		m_DNSList = config.dnsservers();
 		
-		ui.dnsList->setModel(new CDNSListModel(&dnsList));
+		ui.dnsList->setModel(new CDNSListModel(&m_DNSList));
 		ui.dnsList->setItemDelegate(new CIPEditDelegate());
 		
 		connect(ui.dnsList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
@@ -43,7 +43,7 @@ namespace qnut {
 			config.setIP(QHostAddress(ui.ipEdit->text()));
 			config.setNetmask(QHostAddress(ui.netmaskEdit->text()));
 			config.setGateway(QHostAddress(ui.gatewayEdit->text()));
-			config.setDnsservers(dnsList);
+			config.setDnsservers(m_DNSList);
 			return true;
 		}
 		else

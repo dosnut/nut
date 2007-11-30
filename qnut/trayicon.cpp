@@ -6,39 +6,42 @@
 using namespace std;
 
 namespace qnut {
-	CTrayIcon::CTrayIcon (QObject * parent) : QSystemTrayIcon(QIcon(UI_ICON_QNUT), parent) {
-		devicesMenu.setTitle (tr("Network &Devices"));
+	CTrayIcon::CTrayIcon(QObject * parent) : QSystemTrayIcon(QIcon(UI_ICON_QNUT), parent) {
+		m_DevicesMenu.setTitle(tr("Network &Devices"));
 
-		trayMenu.setTitle("QNUT");
-		trayMenu.addAction(tr("Open Connection &Manager"), parent, SLOT(show()));
+		m_TrayMenu.setTitle("QNUT");
+		m_TrayMenu.addAction(tr("Open Connection &Manager"), parent, SLOT(show()));
 
-		trayMenu.addMenu(&devicesMenu);
-		devicesMenu.setEnabled (false);
-		trayMenu.addSeparator();
-		trayMenu.addAction(tr("&Quit"), qApp, SLOT(quit()));
+		m_TrayMenu.addMenu(&m_DevicesMenu);
+		m_DevicesMenu.setEnabled(false);
+		m_TrayMenu.addSeparator();
+		m_TrayMenu.addAction(tr("&Quit"), qApp, SLOT(quit()));
 
-		setContextMenu(&trayMenu);
+		setContextMenu(&m_TrayMenu);
 
 		connect(this, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-		        this, SLOT(handleClicks(QSystemTrayIcon::ActivationReason)));
+			this, SLOT(handleClicks(QSystemTrayIcon::ActivationReason)));
 	}
-
-	void CTrayIcon::handleClicks (QSystemTrayIcon::ActivationReason reason) {
-		QWidget * mainwin = (QWidget *)(parent());
+	
+	void CTrayIcon::addDeviceMenu(QMenu * deviceMenu) {
+		m_DevicesMenu.addMenu(deviceMenu);
+		m_DevicesMenu.setEnabled(true);
+	}
+	
+	void CTrayIcon::removeDeviceMenu(QMenu * deviceMenu) {
+		m_DevicesMenu.removeAction(deviceMenu->menuAction());
+		m_DevicesMenu.setDisabled(m_DevicesMenu.isEmpty());
+	}
+	
+	void CTrayIcon::handleClicks(QSystemTrayIcon::ActivationReason reason) {
+		QWidget * mainwin = dynamic_cast<QWidget *>(parent());
 		switch (reason) {
 			case Trigger:
 				if (mainwin->isVisible()) {
 					mainwin->close();
-// 					if (mainwin->isActiveWindow())
-// 						mainwin->close();
-// 					else {
-// 						mainwin->activateWindow();
-// 						mainwin->raise();
-// 					}
 				}
 				else {
 					mainwin->show();
-					//mainwin->activateWindow();
 				}
 				break;
 			default:

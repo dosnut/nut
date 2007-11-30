@@ -21,35 +21,35 @@ namespace qnut {
 	using namespace libnutclient;
 
 	CInterfaceDetailsModel::CInterfaceDetailsModel(CInterface * data, QObject * parent) : QAbstractItemModel(parent) {
-		interface = data;
-		if (interface) {
-			connect(interface, SIGNAL(stateChanged(libnutcommon::InterfaceState)), this, SIGNAL(layoutChanged()));
-			//connect(interface, SIGNAL(userConfigApplied()), this, SIGNAL(layoutChanged()));
+		m_Interface = data;
+		if (m_Interface) {
+			connect(m_Interface, SIGNAL(stateChanged(libnutcommon::InterfaceState)), this, SIGNAL(layoutChanged()));
+			//connect(m_Interface, SIGNAL(userConfigApplied()), this, SIGNAL(layoutChanged()));
 		}
 	}
 	
 	CInterfaceDetailsModel::~CInterfaceDetailsModel() {
-		interface = NULL;
+		m_Interface = NULL;
 	}
 	
 	int CInterfaceDetailsModel::columnCount(const QModelIndex &) const {
-		if (interface == NULL)
+		if (m_Interface == NULL)
 			return 0;
 		else
 			return 2;
 	}
 	
 	int CInterfaceDetailsModel::rowCount(const QModelIndex & parent) const {
-		if (interface == NULL)
+		if (m_Interface == NULL)
 			return 0;
 		
 		if (!parent.isValid())
-			if (interface->state == IFS_WAITFORCONFIG)
-				return 4 + interface->getUserConfig().dnsservers().size();
-			else if (interface->state != IFS_OFF)
-				return 4 + interface->dnsserver.size();
-			else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
-				return 4 + interface->getConfig().getStaticDNS().size();
+			if (m_Interface->state == IFS_WAITFORCONFIG)
+				return 4 + m_Interface->getUserConfig().dnsservers().size();
+			else if (m_Interface->state != IFS_OFF)
+				return 4 + m_Interface->dnsserver.size();
+			else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
+				return 4 + m_Interface->getConfig().getStaticDNS().size();
 			else
 				return 4;
 		else {
@@ -58,7 +58,7 @@ namespace qnut {
 	}
 	
 	QVariant CInterfaceDetailsModel::data(const QModelIndex & index, int role) const {
-		if (interface == NULL)
+		if (m_Interface == NULL)
 			return QVariant();
 		
 		if (!index.isValid())
@@ -85,32 +85,32 @@ namespace qnut {
 		case IFDET_MOD_VALUE:
 			switch (index.row()) {
 			case 0:
-				switch (interface->state) {
+				switch (m_Interface->state) {
 				case IFS_OFF:
-					if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
+					if (m_Interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
 						return tr("user defined static");
-					else if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP) {
+					else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_DHCP) {
 						QString fallback;
-						if (interface->getConfig().getFlags() & IPv4Config::DO_ZEROCONF)
+						if (m_Interface->getConfig().getFlags() & IPv4Config::DO_ZEROCONF)
 							fallback = ' ' + tr("fallback: zeroconf");
-						else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
+						else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 							fallback = ' ' + tr("fallback: static");
 						return tr("dynamic (DHCP)") + fallback;
 					}
-					else if (interface->getConfig().getFlags() & IPv4Config::DO_ZEROCONF)
+					else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_ZEROCONF)
 						return tr("zeroconf");
-					else if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
+					else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return tr("static");
 					break;
 				case IFS_STATIC:
-					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
+					if (m_Interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("static (fallback)");
 					else
 						return tr("static");
 				case IFS_DHCP:
 					return tr("dynamic");
 				case IFS_ZEROCONF:
-					if (interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
+					if (m_Interface->getConfig().getFlags() & IPv4Config::DO_DHCP)
 						return tr("zeroconf (fallback)");
 					else
 						return tr("zeroconf");
@@ -119,49 +119,49 @@ namespace qnut {
 				}
 				return tr("unknown");
 			case 1:
-				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
-					if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
-						return toStringDefault(interface->getConfig().getStaticIP());
-					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
-						return toStringDefault(interface->getUserConfig().ip());
+				if ((m_Interface->state == IFS_OFF) || (m_Interface->state == IFS_WAITFORCONFIG)) {
+					if (m_Interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
+						return toStringDefault(m_Interface->getConfig().getStaticIP());
+					else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
+						return toStringDefault(m_Interface->getUserConfig().ip());
 					else
 						return tr("none");
 				}
 				else
-					return toStringDefault(interface->ip);
+					return toStringDefault(m_Interface->ip);
 			case 2:
-				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
-					if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
-						return toStringDefault(interface->getConfig().getStaticNetmask());
-					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
-						return toStringDefault(interface->getUserConfig().netmask());
+				if ((m_Interface->state == IFS_OFF) || (m_Interface->state == IFS_WAITFORCONFIG)) {
+					if (m_Interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
+						return toStringDefault(m_Interface->getConfig().getStaticNetmask());
+					else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
+						return toStringDefault(m_Interface->getUserConfig().netmask());
 					else
 						return tr("none");
 				}
 				else
-					return toStringDefault(interface->netmask);
+					return toStringDefault(m_Interface->netmask);
 			case 3:
-				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
-					if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
-						return toStringDefault(interface->getConfig().getStaticGateway());
-					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
-						return toStringDefault(interface->getUserConfig().gateway());
+				if ((m_Interface->state == IFS_OFF) || (m_Interface->state == IFS_WAITFORCONFIG)) {
+					if (m_Interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
+						return toStringDefault(m_Interface->getConfig().getStaticGateway());
+					else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
+						return toStringDefault(m_Interface->getUserConfig().gateway());
 					else
 						return tr("none");
 				}
 				else
-					return toStringDefault(interface->gateway);
+					return toStringDefault(m_Interface->gateway);
 			default:
-				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
-					if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
-						return interface->getConfig().getStaticDNS()[index.row()-4].toString();
-					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
-						return interface->getUserConfig().dnsservers()[index.row()-4].toString();
+				if ((m_Interface->state == IFS_OFF) || (m_Interface->state == IFS_WAITFORCONFIG)) {
+					if (m_Interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
+						return m_Interface->getConfig().getStaticDNS()[index.row()-4].toString();
+					else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
+						return m_Interface->getUserConfig().dnsservers()[index.row()-4].toString();
 					else
 						break;
 				}
 				else
-					return interface->dnsserver[index.row()-4].toString();
+					return m_Interface->dnsserver[index.row()-4].toString();
 			}
 			break;
 		default:
@@ -172,7 +172,7 @@ namespace qnut {
 	}
 	
 	Qt::ItemFlags CInterfaceDetailsModel::flags(const QModelIndex & index) const {
-		if (interface == NULL)
+		if (m_Interface == NULL)
 			return 0;
 		
 		if (!index.isValid())
@@ -182,7 +182,7 @@ namespace qnut {
 	}
 	
 	QVariant CInterfaceDetailsModel::headerData(int section, Qt::Orientation orientation, int role) const {
-		if (interface == NULL)
+		if (m_Interface == NULL)
 			return QVariant();
 		
 		if (role != Qt::DisplayRole)
@@ -202,14 +202,14 @@ namespace qnut {
 	}
 	
 	QModelIndex CInterfaceDetailsModel::index(int row, int column, const QModelIndex & parent) const {
-		if (interface == NULL)
+		if (m_Interface == NULL)
 			return QModelIndex();
 		
 		if (!hasIndex(row, column, parent))
 			return QModelIndex();
 		
 		if (!parent.isValid()) {
-			//if (row < 4 + interface->dnsserver.size())
+			//if (row < 4 + m_Interface->dnsserver.size())
 			return createIndex(row, column, (void *)NULL);
 		}
 		

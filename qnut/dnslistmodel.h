@@ -29,7 +29,7 @@ namespace qnut {
 		bool appendRow(QHostAddress address);
 		bool removeRows(int position, int rows, const QModelIndex & parent = QModelIndex());
 	private:
-		QList<QHostAddress> * dnsList;
+		QList<QHostAddress> * m_DNSList;
 	};
 };
 

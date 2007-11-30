@@ -22,23 +22,23 @@ namespace qnut {
 	}
 	
 	CAvailableAPModel::~CAvailableAPModel() {
-		supplicant = NULL;
+		m_Supplicant = NULL;
 	}
 	
 	void CAvailableAPModel::setWpaSupplicant(CWpa_Supplicant * wpaSupplicant) {
-		if (supplicant == wpaSupplicant)
+		if (m_Supplicant == wpaSupplicant)
 			return;
 		
-		supplicant = wpaSupplicant;
-		if (supplicant) {
+		m_Supplicant = wpaSupplicant;
+		if (m_Supplicant) {
 			updateScans();
-			connect(supplicant, SIGNAL(scanCompleted()), this, SLOT(updateScans()));
+			connect(m_Supplicant, SIGNAL(scanCompleted()), this, SLOT(updateScans()));
 		}
 	}
 	
 	void CAvailableAPModel::updateScans() {
 		emit layoutAboutToBeChanged();
-		scans = supplicant->scanResults();
+		m_Scans = m_Supplicant->scanResults();
 		emit layoutChanged();
 	}
 	
@@ -48,13 +48,13 @@ namespace qnut {
 	
 	int CAvailableAPModel::rowCount(const QModelIndex & parent) const {
 		if (!parent.isValid())
-			return scans.count();
+			return m_Scans.count();
 		else
 			return 0;
 	}
 	
 	QVariant CAvailableAPModel::data(const QModelIndex & index, int role) const {
-		if (scans.isEmpty())
+		if (m_Scans.isEmpty())
 			return QVariant();
 		
 		if (!index.isValid())
@@ -68,11 +68,11 @@ namespace qnut {
 		
 		switch (index.column()) {
 		case UI_AVLAP_SSID:
-			return scans[index.row()].ssid;
+			return m_Scans[index.row()].ssid;
 		case UI_AVLAP_CHANNEL:
-			return QString::number(frequencyToChannel(scans[index.row()].freq));
+			return QString::number(frequencyToChannel(m_Scans[index.row()].freq));
 		case UI_AVLAP_KEYMGMT: {
-				int keyFlags = scans[index.row()].keyManagement;
+				int keyFlags = m_Scans[index.row()].keyManagement;
 				
 				if (keyFlags == KM_UNDEFINED)
 					return tr("undefined");
@@ -86,7 +86,7 @@ namespace qnut {
 				if (keyFlags == KM_WPA_NONE)
 					return tr("WPA PSK (ad-hoc)");
 				
-				int protocolFlags = scans[index.row()].protocols;
+				int protocolFlags = m_Scans[index.row()].protocols;
 				
 				QStringList results;
 				QStringList wpaPrefixes;
@@ -106,14 +106,14 @@ namespace qnut {
 				return results.join(", ");
 			}
 		case UI_AVLAP_BSSID:
-			return scans[index.row()].bssid.toString();
+			return m_Scans[index.row()].bssid.toString();
 		case UI_AVLAP_QUALITY: {
-				WextSignal signal = scans[index.row()].signal;
+				WextSignal signal = m_Scans[index.row()].signal;
 				return QString::number(signal.quality.value) + '/'+
 					QString::number(signal.quality.maximum);
 			}
 		case UI_AVLAP_LEVEL: {
-				WextSignal signal = scans[index.row()].signal;
+				WextSignal signal = m_Scans[index.row()].signal;
 				switch (signal.type) {
 				case WSR_RCPI:
 					return QString::number(signal.level.rcpi) + "dBm";
@@ -127,7 +127,7 @@ namespace qnut {
 				}
 			}
 		case UI_AVLAP_ENC: {
-				int flags = scans[index.row()].pairwise;
+				int flags = m_Scans[index.row()].pairwise;
 				QStringList results;
 				
 				if (flags == PCI_UNDEFINED)
@@ -141,7 +141,7 @@ namespace qnut {
 						results << "TKIP";
 				}
 				
-				switch (scans[index.row()].group) {
+				switch (m_Scans[index.row()].group) {
 				case GCI_NONE:
 					return tr("none") + "; " + results.join(", ");
 				case GCI_WEP104:
@@ -163,7 +163,7 @@ namespace qnut {
 	}
 	
 	Qt::ItemFlags CAvailableAPModel::flags(const QModelIndex & index) const {
-		if ((scans.isEmpty()) || (!index.isValid()))
+		if ((m_Scans.isEmpty()) || (!index.isValid()))
 			return 0;
 		
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
@@ -197,7 +197,7 @@ namespace qnut {
 	}
 	
 	QModelIndex CAvailableAPModel::index(int row, int column, const QModelIndex & parent) const {
-		if (!scans.isEmpty() || parent.isValid() || row >= scans.count())
+		if (!m_Scans.isEmpty() || parent.isValid() || row >= m_Scans.count())
 			return createIndex(row, column);
 		else
 			return QModelIndex();

@@ -20,7 +20,7 @@ namespace qnut {
 	
 	class CScriptSettings : public QDialog {
 		Q_OBJECT
-	private:
+	protected:
 		Ui::scrset ui;
 	public:
 		bool execute(CDeviceDetails * deviceoptions);

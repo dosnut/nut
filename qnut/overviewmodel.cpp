@@ -27,17 +27,17 @@ namespace qnut {
 	
 	COverViewModel::COverViewModel(CDeviceManager * deviceManager, QObject * parent) : QAbstractItemModel(parent) {
 		if (deviceManager) {
-			devices = &(deviceManager->devices);
+			m_Devices = &(deviceManager->devices);
 			
 			connect(deviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(deviceAdded(libnutclient::CDevice *)));
 			connect(deviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(deviceRemoved(libnutclient::CDevice *)));
 		}
 		else
-			devices = NULL;
+			m_Devices = NULL;
 	}
 	
 	COverViewModel::~COverViewModel() {
-		devices = NULL;
+		m_Devices = NULL;
 	}
 	
 	void COverViewModel::deviceAdded(CDevice * device) {
@@ -55,7 +55,7 @@ namespace qnut {
 	}
 	
 	Qt::ItemFlags COverViewModel::flags(const QModelIndex & index) const {
-		if (devices == NULL)
+		if (m_Devices == NULL)
 			return 0;
 		
 		if (!index.isValid())
@@ -69,7 +69,7 @@ namespace qnut {
 	}
 	
 	int COverViewModel::columnCount(const QModelIndex & parent) const {
-		if (devices == NULL)
+		if (m_Devices == NULL)
 			return 0;
 			
 		if (parent.isValid())
@@ -79,30 +79,30 @@ namespace qnut {
 	}
 	
 	QModelIndex COverViewModel::index(int row, int column, const QModelIndex & parent) const {
-		if ((devices == NULL) || (parent.isValid()) || (row >= devices->size()))
+		if ((m_Devices == NULL) || (parent.isValid()) || (row >= m_Devices->size()))
 			return QModelIndex();
 		else
-			return createIndex(row, column, (void *)(devices->at(row)));
+			return createIndex(row, column, (void *)(m_Devices->at(row)));
 	}
 	
 	int COverViewModel::rowCount(const QModelIndex & parent) const {
-		if (devices == NULL)
+		if (m_Devices == NULL)
 			return 0;
 		
 		if (!parent.isValid())
-			return devices->count();
+			return m_Devices->count();
 		
 		return 0;
 	}
 	
 	QVariant COverViewModel::data(const QModelIndex & index, int role) const {
-		if (devices == NULL)
+		if (m_Devices == NULL)
 			return QVariant();
 		
 		if (!index.isValid())
 			return QVariant();
 		
-/*		if (index.row() >= devices->size())
+/*		if (index.row() >= m_Devices->size())
 			return QVariant();*/
 		
 		CDevice * data = (CDevice *)(index.internalPointer());
@@ -152,7 +152,7 @@ namespace qnut {
 	}
 	
 	QVariant COverViewModel::headerData(int section, Qt::Orientation orientation, int role) const {
-		if (devices == NULL)
+		if (m_Devices == NULL)
 			return QVariant();
 		
 		if (role != Qt::DisplayRole)

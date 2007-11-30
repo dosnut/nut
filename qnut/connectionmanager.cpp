@@ -9,47 +9,47 @@ namespace qnut {
 	
 	CConnectionManager::CConnectionManager(QWidget * parent) :
 		QMainWindow(parent),
-		mDeviceManager(this),
-		mLogFile(this, UI_FILE_LOG),
-		mStettings(UI_FILE_CONFIG, QSettings::IniFormat, this),
-		mTrayIcon(this)
+		m_DeviceManager(this),
+		m_LogFile(this, UI_FILE_LOG),
+		m_Stettings(UI_FILE_CONFIG, QSettings::IniFormat, this),
+		m_TrayIcon(this)
 	{
-		setWindowIcon(mTrayIcon.icon());
-		mDeviceDetails.reserve(10);
+		setWindowIcon(m_TrayIcon.icon());
+		m_DeviceDetails.reserve(10);
 		
 		ui.setupUi(this);
 		readSettings();
 		
-		mLogEdit.setReadOnly(true);
-		mLogEdit.setAcceptRichText(false);
+		m_LogEdit.setReadOnly(true);
+		m_LogEdit.setAcceptRichText(false);
 		
-		//mOverView.setSortingEnabled(true);
-		mOverView.setModel(new COverViewModel(&(mDeviceManager)));
-		mOverView.setContextMenuPolicy(Qt::ActionsContextMenu);
-		mOverView.setRootIsDecorated(false);
-		mOverView.setItemsExpandable(false);
-		mOverView.setAllColumnsShowFocus(true);
-		mOverView.setIconSize(QSize(32, 32));
+		//m_OverView.setSortingEnabled(true);
+		m_OverView.setModel(new COverViewModel(&(m_DeviceManager)));
+		m_OverView.setContextMenuPolicy(Qt::ActionsContextMenu);
+		m_OverView.setRootIsDecorated(false);
+		m_OverView.setItemsExpandable(false);
+		m_OverView.setAllColumnsShowFocus(true);
+		m_OverView.setIconSize(QSize(32, 32));
 		
-		mTabWidget.addTab(&mOverView, tr("Overview"));
+		m_TabWidget.addTab(&m_OverView, tr("Overview"));
 		
 		if (ui.actionShowLog->isChecked())
 			showLog(true);
 		
-		ui.centralwidget->layout()->addWidget(&mTabWidget);
+		ui.centralwidget->layout()->addWidget(&m_TabWidget);
 		
-		connect(&mDeviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(addUiDevice(libnutclient::CDevice *)));
-		connect(&mDeviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
-		connect(&mDeviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(removeUiDevice(libnutclient::CDevice *)));
-		connect(&mDeviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
+		connect(&m_DeviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(addUiDevice(libnutclient::CDevice *)));
+		connect(&m_DeviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
+		connect(&m_DeviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(removeUiDevice(libnutclient::CDevice *)));
+		connect(&m_DeviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
 		
-		if (mLogFile.error() != QFile::NoError)
-			mLogEdit.append(tr("ERROR: %1").arg(tr("Cannot create/open log file.")));
+		if (m_LogFile.error() != QFile::NoError)
+			m_LogEdit.append(tr("ERROR: %1").arg(tr("Cannot create/open log file.")));
 		
-		connect(&mLogFile, SIGNAL(printed(const QString &)), &mLogEdit, SLOT(append(const QString &)));
+		connect(&m_LogFile, SIGNAL(printed(const QString &)), &m_LogEdit, SLOT(append(const QString &)));
 		
-		mLogFile << tr("%1 (v%2) started").arg(UI_NAME, UI_VERSION);
-		mLogFile << QDateTime::currentDateTime().toString();
+		m_LogFile << tr("%1 (v%2) started").arg(UI_NAME, UI_VERSION);
+		m_LogFile << QDateTime::currentDateTime().toString();
 		
 		createActions();
 		distributeActions();
@@ -58,13 +58,13 @@ namespace qnut {
 		connect(ui.actionShowLog, SIGNAL(toggled(bool)), this, SLOT(showLog(bool)));
 		connect(ui.actionAboutQt, SIGNAL(triggered()), qApp , SLOT(aboutQt()));
 		connect(ui.actionAboutQNUT, SIGNAL(triggered()), this , SLOT(showAbout()));
-		connect(&mTabWidget, SIGNAL(currentChanged(int)), this, SLOT(handleTabChanged(int)));
-		connect(&mTrayIcon, SIGNAL(messageClicked()), this, SLOT(show()));
-		connect(mOverView.selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+		connect(&m_TabWidget, SIGNAL(currentChanged(int)), this, SLOT(handleTabChanged(int)));
+		connect(&m_TrayIcon, SIGNAL(messageClicked()), this, SLOT(show()));
+		connect(m_OverView.selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(handleSelectionChanged(const QItemSelection &, const QItemSelection &)));
 		
-		mTrayIcon.show();
-		mDeviceManager.init(&mLogFile);
+		m_TrayIcon.show();
+		m_DeviceManager.init(&m_LogFile);
 	}
 	
 	CConnectionManager::~CConnectionManager() {
@@ -73,56 +73,51 @@ namespace qnut {
 	
 	inline void CConnectionManager::createActions() {
 		//overViewMenu Actions
-		mRefreshDevicesAction   = new QAction(QIcon(UI_ICON_RELOAD), tr("&Refresh devices"), this);
-		mEnableDeviceAction     = new QAction(QIcon(UI_ICON_ENABLE), tr("&Enable"), this);
-		mDisableDeviceAction    = new QAction(QIcon(UI_ICON_DISABLE), tr("&Disable"), this);
-		mDeviceSettingsAction   = new QAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("&Scripting settings..."), this);
-		mWirelessSettingsAction = new QAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."), this);
-		mClearLogAction         = new QAction(QIcon(UI_ICON_CLEAR), tr("&Clear log"), this);
+		m_RefreshDevicesAction   = new QAction(QIcon(UI_ICON_RELOAD), tr("&Refresh devices"), this);
+		m_EnableDeviceAction     = new QAction(QIcon(UI_ICON_ENABLE), tr("&Enable"), this);
+		m_DisableDeviceAction    = new QAction(QIcon(UI_ICON_DISABLE), tr("&Disable"), this);
+		m_DeviceSettingsAction   = new QAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("&Scripting settings..."), this);
+		m_WirelessSettingsAction = new QAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."), this);
+		m_ClearLogAction         = new QAction(QIcon(UI_ICON_CLEAR), tr("&Clear log"), this);
 		
-		mEnableDeviceAction->setEnabled(false);
-		mDisableDeviceAction->setEnabled(false);
-		mDeviceSettingsAction->setEnabled(false);
-		mWirelessSettingsAction->setEnabled(false);
+		m_EnableDeviceAction->setEnabled(false);
+		m_DisableDeviceAction->setEnabled(false);
+		m_DeviceSettingsAction->setEnabled(false);
+		m_WirelessSettingsAction->setEnabled(false);
 		
-		mOverView.addAction(mRefreshDevicesAction);
-		mOverView.addAction(getSeparator(this));
-		mOverView.addAction(mEnableDeviceAction);
-		mOverView.addAction(mDisableDeviceAction);
-		mOverView.addAction(getSeparator(this));
-		mOverView.addAction(mDeviceSettingsAction);
-		mOverView.addAction(mWirelessSettingsAction);
+		m_OverView.addAction(m_RefreshDevicesAction);
+		m_OverView.addAction(getSeparator(this));
+		m_OverView.addAction(m_EnableDeviceAction);
+		m_OverView.addAction(m_DisableDeviceAction);
+		m_OverView.addAction(getSeparator(this));
+		m_OverView.addAction(m_DeviceSettingsAction);
+		m_OverView.addAction(m_WirelessSettingsAction);
 		
-		connect(mRefreshDevicesAction, SIGNAL(triggered()), &mDeviceManager, SLOT(rebuild()));
-		connect(mClearLogAction, SIGNAL(triggered()), &mLogEdit, SLOT(clear()));
+		connect(m_RefreshDevicesAction, SIGNAL(triggered()), &m_DeviceManager, SLOT(rebuild()));
+		connect(m_ClearLogAction, SIGNAL(triggered()), &m_LogEdit, SLOT(clear()));
 	}
 	
 	inline void CConnectionManager::distributeActions(int mode) {
 		switch (mode) {
 		case UI_ACTIONS_OVERVIEW:
 			//general device actions
-			ui.menuDevice->addActions(mOverView.actions());
+			ui.menuDevice->addActions(m_OverView.actions());
 			break;
 		case UI_ACTIONS_LOG:
-			ui.menuDevice->addAction(mRefreshDevicesAction);
+			ui.menuDevice->addAction(m_RefreshDevicesAction);
 			ui.menuDevice->addSeparator();
-			ui.menuDevice->addAction(mClearLogAction);
+			ui.menuDevice->addAction(m_ClearLogAction);
 			break;
 		case UI_ACTIONS_DEVICE: {
-				ui.menuDevice->addAction(mRefreshDevicesAction);
+				ui.menuDevice->addAction(m_RefreshDevicesAction);
 				ui.menuDevice->addSeparator();
 				
-				CDeviceDetails * current = (CDeviceDetails *)(mTabWidget.currentWidget());
+				CDeviceDetails * current = (CDeviceDetails *)(m_TabWidget.currentWidget());
 				
 				//current device actions
-				ui.menuDevice->addAction(current->mEnableDeviceAction);
-				ui.menuDevice->addAction(current->mDisableDeviceAction);
+				ui.menuDevice->addActions(current->deviceActions());
 				ui.menuDevice->addSeparator();
-				ui.menuDevice->addAction(current->mDeviceSettingsAction);
-				ui.menuDevice->addAction(current->mWirelessSettingsAction);
-				ui.menuDevice->addSeparator();
-				ui.menuDevice->addAction(current->enterEnvironmentAction);
-				ui.menuDevice->addAction(current->ipConfigurationAction);
+				ui.menuDevice->addActions(current->environmentTreeActions());
 			}
 			break;
 		default:
@@ -131,37 +126,36 @@ namespace qnut {
 	}
 	
 	inline void CConnectionManager::readSettings() {
-		mStettings.beginGroup("Main");
-		ui.actionShowBalloonTips->setChecked(mStettings.value("showBalloonTips", true).toBool());
-		ui.actionShowLog->setChecked(mStettings.value("showLog", true).toBool());
-		mStettings.endGroup();
+		m_Stettings.beginGroup("Main");
+		ui.actionShowBalloonTips->setChecked(m_Stettings.value("showBalloonTips", true).toBool());
+		ui.actionShowLog->setChecked(m_Stettings.value("showLog", true).toBool());
+		m_Stettings.endGroup();
 		
-		mStettings.beginGroup("ConnectionManager");
-		resize(mStettings.value("size", QSize(646, 322)).toSize());
-		move(mStettings.value("pos", QPoint(200, 200)).toPoint());
-		mStettings.endGroup();
+		m_Stettings.beginGroup("ConnectionManager");
+		resize(m_Stettings.value("size", QSize(646, 322)).toSize());
+		move(m_Stettings.value("pos", QPoint(200, 200)).toPoint());
+		m_Stettings.endGroup();
 	}
 	
 	inline void CConnectionManager::writeSettings() {
-		mStettings.beginGroup("Main");
-		mStettings.setValue("showBalloonTips", ui.actionShowBalloonTips->isChecked());
-		mStettings.setValue("showLog", ui.actionShowLog->isChecked());
-		mStettings.endGroup();
+		m_Stettings.beginGroup("Main");
+		m_Stettings.setValue("showBalloonTips", ui.actionShowBalloonTips->isChecked());
+		m_Stettings.setValue("showLog", ui.actionShowLog->isChecked());
+		m_Stettings.endGroup();
 		
-		mStettings.beginGroup("ConnectionManager");
-		mStettings.setValue("size", size());
-		mStettings.setValue("pos", pos());
-		mStettings.endGroup();
+		m_Stettings.beginGroup("ConnectionManager");
+		m_Stettings.setValue("size", size());
+		m_Stettings.setValue("pos", pos());
+		m_Stettings.endGroup();
 	}
 	
 	void CConnectionManager::addUiDevice(CDevice * device) {
 		CDeviceDetails * newDeviceOptions = new CDeviceDetails(device);
 		
-		mTabWidget.insertTab(mDeviceManager.devices.indexOf(device)+1, newDeviceOptions, device->name);
+		m_TabWidget.insertTab(m_DeviceManager.devices.indexOf(device)+1, newDeviceOptions, device->name);
 		
-		mDeviceDetails.insert(device, newDeviceOptions);
-		mTrayIcon.devicesMenu.addMenu(newDeviceOptions->deviceMenu);
-		mTrayIcon.devicesMenu.setEnabled(true);
+		m_DeviceDetails.insert(device, newDeviceOptions);
+		m_TrayIcon.addDeviceMenu(newDeviceOptions->trayMenu());
 		
 		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(updateTrayIconInfo()));
 		connect(newDeviceOptions, SIGNAL(showOptionsRequested(QWidget *)), this, SLOT(showDeviceOptions(QWidget *)));
@@ -170,32 +164,30 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::removeUiDevice(CDevice * device) {
-		mOverView.clearSelection();
-		CDeviceDetails * target = mDeviceDetails[device];
-		mDeviceDetails.remove(device);
+		m_OverView.clearSelection();
+		CDeviceDetails * target = m_DeviceDetails[device];
+		m_DeviceDetails.remove(device);
 		
-		mTabWidget.removeTab(mTabWidget.indexOf(target));
-		
-		mTrayIcon.devicesMenu.removeAction(target->deviceMenu->menuAction());
+		m_TabWidget.removeTab(m_TabWidget.indexOf(target));
+		m_TrayIcon.removeDeviceMenu(target->trayMenu());
 		delete target;
 		
-		mTrayIcon.devicesMenu.setDisabled(mDeviceManager.devices.isEmpty());
-		mEnableDeviceAction->setDisabled(mDeviceManager.devices.isEmpty());
-		mDisableDeviceAction->setDisabled(mDeviceManager.devices.isEmpty());
+		m_EnableDeviceAction->setDisabled(m_DeviceManager.devices.isEmpty());
+		m_DisableDeviceAction->setDisabled(m_DeviceManager.devices.isEmpty());
 		
 	}
 	
 	void CConnectionManager::updateTrayIconInfo() {
 		QStringList result;
 		
-		if (mDeviceManager.devices.isEmpty())
+		if (m_DeviceManager.devices.isEmpty())
 			result << tr("no devices present");
 		else
-			foreach (CDevice * i, mDeviceManager.devices) {
+			foreach (CDevice * i, m_DeviceManager.devices) {
 				result << shortSummary(i);
 			}
 		
-		mTrayIcon.setToolTip(result.join("\n"));
+		m_TrayIcon.setToolTip(result.join("\n"));
 	}
 	
 	void CConnectionManager::handleTabChanged(int index) {
@@ -203,7 +195,7 @@ namespace qnut {
 		
 		if (index == 0)
 			distributeActions(UI_ACTIONS_OVERVIEW);
-		else if ((ui.actionShowLog->isChecked()) && (index == mTabWidget.count()-1))
+		else if ((ui.actionShowLog->isChecked()) && (index == m_TabWidget.count()-1))
 			distributeActions(UI_ACTIONS_LOG);
 		else
 			distributeActions(UI_ACTIONS_DEVICE);
@@ -221,30 +213,30 @@ namespace qnut {
 		if (!deselectedIndexes.isEmpty()) {
 			CDevice * deselectedDevice = static_cast<CDevice *>(deselectedIndexes[0].internalPointer());
 			disconnect(deselectedDevice, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
-			disconnect(mEnableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(enable()));
-			disconnect(mDisableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(disable()));
-			disconnect(mDeviceSettingsAction, SIGNAL(triggered()), mDeviceDetails[deselectedDevice], SLOT(openDeviceSettings()));
-			disconnect(mWirelessSettingsAction, SIGNAL(triggered()), mDeviceDetails[deselectedDevice], SLOT(openWirelessSettings()));
+			disconnect(m_EnableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(enable()));
+			disconnect(m_DisableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(disable()));
+			disconnect(m_DeviceSettingsAction, SIGNAL(triggered()), m_DeviceDetails[deselectedDevice], SLOT(openDeviceSettings()));
+			disconnect(m_WirelessSettingsAction, SIGNAL(triggered()), m_DeviceDetails[deselectedDevice], SLOT(openWirelessSettings()));
 		}
 		
 		if (!selectedIndexes.isEmpty()) {
 			CDevice * selectedDevice = static_cast<CDevice *>(selectedIndexes[0].internalPointer());
 			connect(selectedDevice, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
-			connect(mEnableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(enable()));
-			connect(mDisableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(disable()));
-			connect(mDeviceSettingsAction, SIGNAL(triggered()), mDeviceDetails[selectedDevice], SLOT(openDeviceSettings()));
-			connect(mWirelessSettingsAction, SIGNAL(triggered()), mDeviceDetails[selectedDevice], SLOT(openWirelessSettings()));
+			connect(m_EnableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(enable()));
+			connect(m_DisableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(disable()));
+			connect(m_DeviceSettingsAction, SIGNAL(triggered()), m_DeviceDetails[selectedDevice], SLOT(openDeviceSettings()));
+			connect(m_WirelessSettingsAction, SIGNAL(triggered()), m_DeviceDetails[selectedDevice], SLOT(openWirelessSettings()));
 			
-			mEnableDeviceAction->setEnabled(selectedDevice->state == DS_DEACTIVATED);
-			mDisableDeviceAction->setDisabled(selectedDevice->state == DS_DEACTIVATED);
-			mDeviceSettingsAction->setEnabled(true);
-			mWirelessSettingsAction->setEnabled(selectedDevice->type == DT_AIR);
+			m_EnableDeviceAction->setEnabled(selectedDevice->state == DS_DEACTIVATED);
+			m_DisableDeviceAction->setDisabled(selectedDevice->state == DS_DEACTIVATED);
+			m_DeviceSettingsAction->setEnabled(true);
+			m_WirelessSettingsAction->setEnabled(selectedDevice->type == DT_AIR);
 		}
 		else {
-			mEnableDeviceAction->setEnabled(false);
-			mDisableDeviceAction->setEnabled(false);
-			mDeviceSettingsAction->setEnabled(false);
-			mWirelessSettingsAction->setEnabled(false);
+			m_EnableDeviceAction->setEnabled(false);
+			m_DisableDeviceAction->setEnabled(false);
+			m_DeviceSettingsAction->setEnabled(false);
+			m_WirelessSettingsAction->setEnabled(false);
 		}
 	}
 	
@@ -253,7 +245,7 @@ namespace qnut {
 			if (trayIcon)
 				trayIcon->showMessage(title, message, QSystemTrayIcon::Information, 4000);
 			else
-				mTrayIcon.showMessage(title, message, QSystemTrayIcon::Information, 4000);
+				m_TrayIcon.showMessage(title, message, QSystemTrayIcon::Information, 4000);
 		}
 	}
 	
@@ -262,20 +254,20 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::handleDeviceStateChange(DeviceState state) {
-		mEnableDeviceAction->setEnabled(state == DS_DEACTIVATED);
-		mDisableDeviceAction->setDisabled(state == DS_DEACTIVATED);
+		m_EnableDeviceAction->setEnabled(state == DS_DEACTIVATED);
+		m_DisableDeviceAction->setDisabled(state == DS_DEACTIVATED);
 	}
 	
 	void CConnectionManager::showLog(bool doShow) {
 		if (doShow)
-			mTabWidget.addTab(&mLogEdit, tr("Log"));
+			m_TabWidget.addTab(&m_LogEdit, tr("Log"));
 		else
-			mTabWidget.removeTab(mTabWidget.count()-1);
+			m_TabWidget.removeTab(m_TabWidget.count()-1);
 	}
 	
 	void CConnectionManager::showDeviceOptions(QWidget * widget) {
 		show();
 		activateWindow();
-		mTabWidget.setCurrentWidget(widget);
+		m_TabWidget.setCurrentWidget(widget);
 	}
 };

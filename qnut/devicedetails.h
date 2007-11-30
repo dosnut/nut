@@ -21,15 +21,30 @@ namespace qnut {
 	class CWirelessSettings;
 	class CDeviceDetails;
 	typedef QHash<libnutclient::CDevice *, CDeviceDetails *> CDeviceDetailsHash;
-		
+	
+	/** @brief CDeviceDetails interacts directly with CDevice
+		The device details class provides functions to open the windows for
+		scritping settings and wireless settings (if the device has wireless
+		extensions).
+	*/
 	class CDeviceDetails : public QWidget {
 		Q_OBJECT
-	private:
+	protected:
 		Ui::devdet ui;
+		QSettings m_Stettings;
+		quint8 m_ScriptFlags;
 		
-		CWirelessSettings * wirelessSettings;
+		libnutclient::CDevice * m_Device;
 		
-		QSettings mStettings;
+		CWirelessSettings * m_WirelessSettings;
+		
+		QMenu * m_DeviceMenu;
+		QList<QAction *> m_DeviceActions;
+		
+		QAction * m_EnterEnvironmentAction;
+		QAction * m_IPConfigurationAction;
+		
+		QSystemTrayIcon * m_trayIcon;
 		
 		inline void readSettings();
 		inline void writeSettings();
@@ -37,31 +52,21 @@ namespace qnut {
 		inline void createView();
 		inline void setHeadInfo();
 	public:
-		quint8 scriptFlags;
+		inline quint8 scriptFlags() const { return m_ScriptFlags; }
+		inline void setScriptFlags(quint8 value) { m_ScriptFlags = value; }
+		inline libnutclient::CDevice * device() const { return m_Device; }
+		inline QMenu * trayMenu() const { return m_DeviceMenu; }
 		
-		libnutclient::CDevice * device;
-		
-		QSystemTrayIcon * trayIcon;
-		
-		QMenu * deviceMenu;
-		QAction * mEnableDeviceAction;
-		QAction * mDisableDeviceAction;
-		
-		QAction * enterEnvironmentAction;
-		
-		QAction * mDeviceSettingsAction;
-		QAction * ipConfigurationAction;
-		QAction * mWirelessSettingsAction;
-		
-		QAction * showAction;
+		inline QList<QAction *> deviceActions() const { return m_DeviceActions; }
+		inline QList<QAction *> environmentTreeActions() const { return ui.environmentTree->actions(); }
 		
 		CDeviceDetails(libnutclient::CDevice * parentDevice, QWidget * parent = 0);
 		~CDeviceDetails();
-	private slots:
+	protected slots:
 		void handleTrayActivated(QSystemTrayIcon::ActivationReason);
-		void showTheeseDetails();
 		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 		void handleDeviceStateChange(libnutcommon::DeviceState state);
+		void showTheeseDetails();
 		void openIPConfiguration();
 	public slots:
 		void openDeviceSettings();

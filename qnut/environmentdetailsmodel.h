@@ -32,9 +32,9 @@ namespace qnut {
 	private:
 		void fillParentRules(quint32 start = 0);
 		
-		libnutclient::CEnvironment * environment;
-		libnutcommon::SelectConfig selectConfig;
-		QVector<quint32> parentRules;
+		libnutclient::CEnvironment * m_Environment;
+		libnutcommon::SelectConfig m_SelectConfig;
+		QVector<quint32> m_ParentRules;
 	};
 }
 

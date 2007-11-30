@@ -22,9 +22,9 @@ namespace qnut {
 	using namespace libnutclient;
 	
 	CEnvironmentTreeModel::CEnvironmentTreeModel(CDevice * data, QObject * parent) : QAbstractItemModel(parent) {
-		device = data;
+		m_Device = data;
 		if (data) {
-			foreach(CEnvironment * environment, device->environments) {
+			foreach(CEnvironment * environment, m_Device->environments) {
 				connect(environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
 				foreach(CInterface * interface, environment->interfaces) {
 					connect(interface, SIGNAL(stateChanged(libnutcommon::InterfaceState)), this, SIGNAL(layoutChanged()));
@@ -34,25 +34,25 @@ namespace qnut {
 	}
 	
 	CEnvironmentTreeModel::~CEnvironmentTreeModel() {
-		device = NULL;
+		m_Device = NULL;
 	}
 	
 	int CEnvironmentTreeModel::columnCount(const QModelIndex &) const {
-		if (device == NULL)
+		if (m_Device == NULL)
 			return 0;
 		else
 			return 3;
 	}
 	
 	int CEnvironmentTreeModel::rowCount(const QModelIndex & parent) const {
-		if (device == NULL)
+		if (m_Device == NULL)
 			return 0;
 		
 		if (!parent.isValid())
-			return device->environments.count();
+			return m_Device->environments.count();
 		else {
 			QObject * parentData = static_cast<QObject *>(parent.internalPointer());
-			if (parentData->parent() == device)
+			if (parentData->parent() == m_Device)
 				return static_cast<CEnvironment *>(parentData)->interfaces.count();
 			else
 				return 0;
@@ -60,13 +60,13 @@ namespace qnut {
 	}
 	
 	QVariant CEnvironmentTreeModel::data(const QModelIndex & index, int role) const {
-		if ((device == NULL) || (!index.isValid()))
+		if ((m_Device == NULL) || (!index.isValid()))
 			return QVariant();
 		
 		QObject * currentData = static_cast<QObject *>(index.internalPointer());
 		
 		if ((role == Qt::DecorationRole) && (index.column() == ENVTREE_MOD_ITEM)) {
-			if (currentData->parent() == device)
+			if (currentData->parent() == m_Device)
 				return QIcon(UI_ICON_ENVIRONMENT);
 			else
 				switch (static_cast<CInterface *>(currentData)->state) {
@@ -84,12 +84,12 @@ namespace qnut {
 		
 		switch (index.column()) {
 		case ENVTREE_MOD_ITEM:
-			if (currentData->parent() == device)
+			if (currentData->parent() == m_Device)
 				return static_cast<CEnvironment *>(currentData)->name;
 			else
 				return '#' + QString::number(static_cast<CInterface *>(currentData)->index);
 		case ENVTREE_MOD_STATUS:
-			if (currentData->parent() == device) {
+			if (currentData->parent() == m_Device) {
 				return (static_cast<CEnvironment *>(currentData)->active) ? tr("active") : QString('-');
 			}
 			else {
@@ -97,7 +97,7 @@ namespace qnut {
 			}
 			break;
 		case ENVTREE_MOD_IP:
-			if (currentData->parent() == device) {
+			if (currentData->parent() == m_Device) {
 				return QString('-');
 			}
 			else {
@@ -121,7 +121,7 @@ namespace qnut {
 	}
 	
 	Qt::ItemFlags CEnvironmentTreeModel::flags(const QModelIndex & index) const {
-		if (device == NULL)
+		if (m_Device == NULL)
 			return 0;
 		
 		if (!index.isValid())
@@ -131,7 +131,7 @@ namespace qnut {
 	}
 	
 	QVariant CEnvironmentTreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
-		if (device == NULL)
+		if (m_Device == NULL)
 			return QVariant();
 		
 		if (role != Qt::DisplayRole)
@@ -153,14 +153,14 @@ namespace qnut {
 	}
 	
 	QModelIndex CEnvironmentTreeModel::index(int row, int column, const QModelIndex & parent) const {
-		if (device == NULL)
+		if (m_Device == NULL)
 			return QModelIndex();
 		
 		if (!hasIndex(row, column, parent))
 			return QModelIndex();
 		
 		if (!parent.isValid()) {
-			return createIndex(row, column, device->environments[row]);
+			return createIndex(row, column, m_Device->environments[row]);
 		}
 		else {
 			CEnvironment * parentData = static_cast<CEnvironment *>(parent.internalPointer());
@@ -171,7 +171,7 @@ namespace qnut {
 	}
 	
 	QModelIndex CEnvironmentTreeModel::parent(const QModelIndex & index) const {
-		if (device == NULL)
+		if (m_Device == NULL)
 			return QModelIndex();
 		
 		if (!index.isValid())
@@ -182,7 +182,7 @@ namespace qnut {
 		
 		QObject * parentData = static_cast<QObject *>(index.internalPointer())->parent();
 		
-		if (parentData->parent() == device)
+		if (parentData->parent() == m_Device)
 			return createIndex(static_cast<CEnvironment *>(parentData)->index, 0, (void *)(parentData));
 		else
 			return QModelIndex();
