@@ -27,10 +27,10 @@ namespace nuts {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".DeviceManager")
 		private:
-			QDBusConnection dbus_connection;
-			DeviceManager *s_devmgr;
-			QHash<QString, DBusDevice *> dbus_devices;
-			static const QString dbus_path, dbus_devices_path;
+			QDBusConnection m_dbusConnection;
+			DeviceManager * m_devmgr;
+			QHash<QString, DBusDevice *> m_dbusDevices;
+			static const QString m_dbusPath, m_dbusDevicesPath;
 			
 		private slots:
 			void devAdded(QString devName, Device *dev);
@@ -55,12 +55,12 @@ namespace nuts {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Device")
 		private:
-			Device *s_device;
-			QDBusConnection *dbus_connection;
-			QList<DBusEnvironment* > dbus_environments;
-			QString dbus_path;
-			libnutcommon::DeviceProperties dbus_properties;
-			int active_environment;
+			Device *m_device;
+			QDBusConnection *m_dbusConnection;
+			QList<DBusEnvironment* > m_dbusEnvironments;
+			QString m_dbusPath;
+			libnutcommon::DeviceProperties m_dbusProperties;
+			int m_activeEnvironment;
 		
 		private slots:
 			void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState);
@@ -80,10 +80,10 @@ namespace nuts {
 			Q_NOREPLY void disable();
 			Q_NOREPLY void setEnvironment(const QDBusObjectPath &path);
 			Q_NOREPLY void setEnvironment(int env) {
-				s_device->setUserPreferredEnvironment(env);
+				m_device->setUserPreferredEnvironment(env);
 			}
 			
-			QString getEssid() { return s_device->essid(); }
+			QString getEssid() { return m_device->essid(); }
 		
 		signals:
 			void stateChanged(int newState, int oldState);
@@ -95,22 +95,22 @@ namespace nuts {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Environment")
 		private:
-			Environment *s_environment;
-			QDBusConnection *dbus_connection;
-			QList<DBusInterface_IPv4*> dbus_interfaces_IPv4;
+			Environment *m_environment;
+			QDBusConnection *m_dbusConnection;
+			QList<DBusInterface_IPv4*> m_dbusInterfacesIPv4;
 			#ifdef IPv6
-			QList<DBusInterface_IPv6*> dbus_interfaces_IPv6;
+			QList<DBusInterface_IPv6*> m_dbusInterfacesIPv6;
 			#endif
-			QString dbus_path;
-			libnutcommon::EnvironmentProperties dbus_properties;
-			Device * s_device;
+			QString m_dbusPath;
+			libnutcommon::EnvironmentProperties m_dbusProperties;
+			Device * m_device;
 
 		private slots:
 			void selectResultReady();
 		public:
 			DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path, Device* dev);
 			virtual ~DBusEnvironment();
-			inline Environment * getEnvironment() const { return s_environment; }
+			inline Environment * getEnvironment() const { return m_environment; }
 	
 			QString getPath();
 			void emitChange(bool change);
@@ -132,10 +132,10 @@ namespace nuts {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Interface_IPv4")
 		private:
-			Interface_IPv4 *s_interface;
-			QDBusConnection *dbus_connection;
-			QString dbus_path;
-			libnutcommon::InterfaceProperties dbus_properties;
+			Interface_IPv4 *m_interface;
+			QDBusConnection *m_dbusConnection;
+			QString m_dbusPath;
+			libnutcommon::InterfaceProperties m_dbusProperties;
 		private slots:
 			void interfaceStatusChanged(libnutcommon::InterfaceState state);
 		public:
@@ -148,9 +148,9 @@ namespace nuts {
 			libnutcommon::InterfaceProperties getProperties();
 			libnutcommon::IPv4Config getConfig();
 	
-			bool needUserSetup() { return s_interface->needUserSetup(); }
-			bool setUserConfig(libnutcommon::IPv4UserConfig userConfig) { return s_interface->setUserConfig(userConfig); }
-			libnutcommon::IPv4UserConfig getUserConfig() { return s_interface->getUserConfig(); }
+			bool needUserSetup() { return m_interface->needUserSetup(); }
+			bool setUserConfig(libnutcommon::IPv4UserConfig userConfig) { return m_interface->setUserConfig(userConfig); }
+			libnutcommon::IPv4UserConfig getUserConfig() { return m_interface->getUserConfig(); }
 		
 		signals:
 			void stateChanged(const libnutcommon::InterfaceProperties &properties);
