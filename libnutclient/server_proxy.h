@@ -23,7 +23,7 @@ class DBusDeviceInterface: public QDBusAbstractInterface {
 public:
 	static inline const char *staticInterfaceName()
 	{ return NUT_DBUS_URL ".Device"; }
-	CDevice * device;
+	CDevice * m_device;
 
 public:
 	DBusDeviceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
@@ -74,7 +74,7 @@ Q_SIGNALS: // SIGNALS
 class DBusEnvironmentInterface: public QDBusAbstractInterface {
 	Q_OBJECT
 private:
-	CDevice * device;
+	CDevice * m_device;
 public:
 	static inline const char *staticInterfaceName()
 	{ return NUT_DBUS_URL ".Environment"; }
@@ -102,7 +102,7 @@ Q_SIGNALS: // SIGNALS
 class DBusInterfaceInterface_IPv4: public QDBusAbstractInterface {
 	Q_OBJECT
 private:
-	CDevice * device;
+	CDevice * m_device;
 public:
 	static inline const char *staticInterfaceName()
 	{ return NUT_DBUS_URL ".Interface_IPv4"; }
@@ -150,9 +150,9 @@ inline QDBusReply<void> DBusDeviceInterface::enable() {
 inline QDBusReply<QList<QDBusObjectPath> > DBusDeviceInterface::getEnvironments() {
 	QList<QVariant> argumentList;
 	QDBusMessage msg;
-	if (device->incrementLock()) {
+	if (m_device->incrementLock()) {
 		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getEnvironments"), argumentList);
-		device->decrementLock();
+		m_device->decrementLock();
 	}
 	else {
 		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
@@ -166,9 +166,9 @@ inline QDBusReply<libnutcommon::DeviceProperties> DBusDeviceInterface::getProper
 inline QDBusReply<QString> DBusDeviceInterface::getEssid() {
 	QList<QVariant> argumentList;
 	QDBusMessage msg;
-	if (device->incrementLock()) {
+	if (m_device->incrementLock()) {
 		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getEssid"), argumentList);
-		device->decrementLock();
+		m_device->decrementLock();
 	}
 	else {
 		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
@@ -179,9 +179,9 @@ inline QDBusReply<QString> DBusDeviceInterface::getEssid() {
 inline QDBusReply<libnutcommon::DeviceConfig> DBusDeviceInterface::getConfig() {
 	QList<QVariant> argumentList;
 	QDBusMessage msg;
-	if (device->incrementLock()) {
+	if (m_device->incrementLock()) {
 		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList);
-		device->decrementLock();
+		m_device->decrementLock();
 	}
 	else {
 		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
@@ -207,9 +207,9 @@ inline QDBusReply<QList<QDBusObjectPath> > DBusDeviceManagerInterface::getDevice
 inline QDBusReply<QList<QDBusObjectPath> > DBusEnvironmentInterface::getInterfaces() {
 	QList<QVariant> argumentList;
 	QDBusMessage msg;
-	if ( device->incrementLock() ) {
+	if ( m_device->incrementLock() ) {
 		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getInterfaces"), argumentList);
-		device->decrementLock();
+		m_device->decrementLock();
 	}
 	else {
 		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
@@ -220,9 +220,9 @@ inline QDBusReply<QList<QDBusObjectPath> > DBusEnvironmentInterface::getInterfac
 inline QDBusReply<libnutcommon::EnvironmentProperties> DBusEnvironmentInterface::getProperties() {
 	QList<QVariant> argumentList;
 	QDBusMessage msg;
-	if ( device->incrementLock() ) {
+	if ( m_device->incrementLock() ) {
 		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
-		device->decrementLock();
+		m_device->decrementLock();
 	}
 	else {
 		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
@@ -232,9 +232,9 @@ inline QDBusReply<libnutcommon::EnvironmentProperties> DBusEnvironmentInterface:
 inline QDBusReply<libnutcommon::EnvironmentConfig> DBusEnvironmentInterface::getConfig() {
 	QList<QVariant> argumentList;
 	QDBusMessage msg;
-	if ( device->incrementLock() ) {
+	if ( m_device->incrementLock() ) {
 		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList);
-		device->decrementLock();
+		m_device->decrementLock();
 	}
 	else {
 		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
@@ -244,9 +244,9 @@ inline QDBusReply<libnutcommon::EnvironmentConfig> DBusEnvironmentInterface::get
 inline QDBusReply<libnutcommon::SelectResult> DBusEnvironmentInterface::getSelectResult() {
 	QList<QVariant> argumentList;
 	QDBusMessage msg;
-	if ( device->incrementLock() ) {
+	if ( m_device->incrementLock() ) {
 		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getSelectResult"), argumentList);
-		device->decrementLock();
+		m_device->decrementLock();
 	}
 	else {
 		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
@@ -256,9 +256,9 @@ inline QDBusReply<libnutcommon::SelectResult> DBusEnvironmentInterface::getSelec
 inline QDBusReply<QVector<libnutcommon::SelectResult> > DBusEnvironmentInterface::getSelectResults() {
 	QList<QVariant> argumentList;
 	QDBusMessage msg;
-	if ( device->incrementLock() ) {
+	if ( m_device->incrementLock() ) {
 		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getSelectResults"), argumentList);
-		device->decrementLock();
+		m_device->decrementLock();
 	}
 	else {
 		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
@@ -280,9 +280,9 @@ inline QDBusReply<void> DBusInterfaceInterface_IPv4::deactivate() {
 inline QDBusReply<libnutcommon::InterfaceProperties> DBusInterfaceInterface_IPv4::getProperties() {
 	QList<QVariant> argumentList;
 	QDBusMessage msg;
-	if ( device->incrementLock() ) {
+	if ( m_device->incrementLock() ) {
 		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
-		device->decrementLock();
+		m_device->decrementLock();
 	}
 	else {
 		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
@@ -292,9 +292,9 @@ inline QDBusReply<libnutcommon::InterfaceProperties> DBusInterfaceInterface_IPv4
 inline QDBusReply<libnutcommon::IPv4Config> DBusInterfaceInterface_IPv4::getConfig() {
 	QList<QVariant> argumentList;
 	QDBusMessage msg;
-	if ( device->incrementLock() ) {
+	if ( m_device->incrementLock() ) {
 		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList); 
-		device->decrementLock();
+		m_device->decrementLock();
 	}
 	else {
 		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
@@ -309,9 +309,9 @@ inline QDBusReply<void> DBusInterfaceInterface_IPv4::setDynamic() {
 inline QDBusReply<bool> DBusInterfaceInterface_IPv4::needUserSetup() {
 	QList<QVariant> argumentList;
 	QDBusMessage msg;
-	if ( device->incrementLock() ) {
+	if ( m_device->incrementLock() ) {
 		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("needUserSetup"), argumentList);
-		device->decrementLock();
+		m_device->decrementLock();
 	}
 	else {
 		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
@@ -322,9 +322,9 @@ inline QDBusReply<bool> DBusInterfaceInterface_IPv4::setUserConfig(libnutcommon:
 	QList<QVariant> argumentList;
 	QDBusMessage msg;
 	argumentList << qVariantFromValue(userConfig);
-	if ( device->incrementLock() ) {
+	if ( m_device->incrementLock() ) {
 		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("setUserConfig"), argumentList);
-		device->decrementLock();
+		m_device->decrementLock();
 	}
 	else {
 		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
@@ -334,9 +334,9 @@ inline QDBusReply<bool> DBusInterfaceInterface_IPv4::setUserConfig(libnutcommon:
 inline QDBusReply<libnutcommon::IPv4UserConfig> DBusInterfaceInterface_IPv4::getUserConfig() {
 	QList<QVariant> argumentList;
 	QDBusMessage msg;
-	if ( device->incrementLock() ) {
+	if ( m_device->incrementLock() ) {
 		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getUserConfig"), argumentList);
-		device->decrementLock();
+		m_device->decrementLock();
 	}
 	else {
 		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");

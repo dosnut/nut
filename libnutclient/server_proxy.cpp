@@ -9,7 +9,7 @@ namespace libnutclient {
 DBusDeviceInterface::DBusDeviceInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
     : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
 {
-	device = static_cast<CDevice*>(parent);
+	m_device = static_cast<CDevice*>(parent);
 }
 
 DBusDeviceInterface::~DBusDeviceInterface()
@@ -45,7 +45,7 @@ DBusDeviceManagerInterface::~DBusDeviceManagerInterface()
 DBusEnvironmentInterface::DBusEnvironmentInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
     : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
 {
-	device = static_cast<CDevice*>(parent->parent());
+	m_device = static_cast<CDevice*>(parent->parent());
 }
 
 DBusEnvironmentInterface::~DBusEnvironmentInterface()
@@ -63,7 +63,7 @@ DBusEnvironmentInterface::~DBusEnvironmentInterface()
 DBusInterfaceInterface_IPv4::DBusInterfaceInterface_IPv4(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
     : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
 {
-	device = static_cast<CDevice*>((parent->parent())->parent());
+	m_device = static_cast<CDevice*>((parent->parent())->parent());
 }
 
 DBusInterfaceInterface_IPv4::~DBusInterfaceInterface_IPv4()
