@@ -1,0 +1,22 @@
+#! /sbin/runscript
+
+DAEMON=/usr/sbin/nuts
+NAME=nuts
+DESC="Network UTility Server (nuts)"
+
+depend() {
+	need localmount dbus
+	use logger
+}
+
+start() {
+	ebegin "Starting $DESC: "
+	start-stop-daemon --start --oknodo -b -m --quiet --pidfile /var/run/$NAME.pid \
+		--exec $DAEMON -- $NUTS_OPTS
+	eend $?
+}
+stop() {
+	ebegin "Stopping $DESC: "
+	start-stop-daemon --stop --oknodo --pidfile /var/run/$NAME.pid --exec $DAEMON
+	eend $?
+}
