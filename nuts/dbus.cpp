@@ -1,14 +1,3 @@
-//
-// C++ Implementation: dbus
-//
-// Description: 
-//
-//
-// Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #include "dbus.h"
 #include "log.h"
 #include <QHashIterator>
@@ -255,22 +244,9 @@ namespace nuts {
 		return paths;
 	}
 	libnutcommon::SelectResult DBusEnvironment::getSelectResult() {
-// 		if (m_environment->selectionDone()) {
-// 			return m_environment->getSelectResult();
-// 		}
-// 		else {
-// 			return libnutcommon::SelectResult();
-// 		}
-		//Workaround so far, as qnut crashes if SelectResults are empty
 		return m_environment->getSelectResult();
 	}
 	QVector<libnutcommon::SelectResult> DBusEnvironment::getSelectResults() {
-// 		if (m_environment->selectionDone()) {
-// 			return m_environment->getSelectResults();
-// 		}
-// 		else {
-// 			return QVector<libnutcommon::SelectResult>();
-// 		}
 		return m_environment->getSelectResults();
 	}
 
