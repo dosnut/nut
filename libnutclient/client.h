@@ -117,7 +117,7 @@ namespace libnutclient {
 	public:
 		/** @brief List of devices managed by the DeviceManager
 		*/
-		inline const CDeviceList& getDevices() { return m_devices; }
+		inline CDeviceList& getDevices() { return m_devices; } //TODO:change to const
 
 
 		/** @brief Init function to initialize
@@ -183,8 +183,8 @@ namespace libnutclient {
 		inline const CEnvironmentList& getEnvironments() { return m_environments; }
 		inline const QString& getName() { return m_name; }
 		inline const QString& getEssid() { return m_essid; }
-		inline libnutcommon::DeviceState getDeviceState() { return m_state; }
-		inline libnutcommon::DeviceType getDeviceType() { return m_type; }
+		inline libnutcommon::DeviceState getState() { return m_state; }
+		inline libnutcommon::DeviceType getType() { return m_type; }
 		inline CEnvironment * getActiveEnvironment() { return m_activeEnvironment; }
 		inline libnutwireless::CWpa_Supplicant * getWpaSupplicant() { return m_wpaSupplicant; }
 		inline int getIndex() { return m_index; }

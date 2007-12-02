@@ -25,7 +25,7 @@ namespace qnut {
 		ui.activatedCheck->setChecked(flags & UI_FLAG_SCRIPT_ACTIVATED);
 		ui.deactivatedCheck->setChecked(flags & UI_FLAG_SCRIPT_DEACTIVATED);
 		if (exec() == QDialog::Accepted) {
-			QDir workdir(UI_PATH_DEV(deviceoptions->device()->name));
+			QDir workdir(UI_PATH_DEV(deviceoptions->device()->getName()));
 			flags = UI_FLAG_SCRIPT_NONE;
 			
 			if (ui.upCheck->isChecked()) {

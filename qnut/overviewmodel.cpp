@@ -27,7 +27,7 @@ namespace qnut {
 	
 	COverViewModel::COverViewModel(CDeviceManager * deviceManager, QObject * parent) : QAbstractItemModel(parent) {
 		if (deviceManager) {
-			m_Devices = &(deviceManager->devices);
+			m_Devices = &(deviceManager->getDevices());
 			
 			connect(deviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(deviceAdded(libnutclient::CDevice *)));
 			connect(deviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(deviceRemoved(libnutclient::CDevice *)));
@@ -42,15 +42,15 @@ namespace qnut {
 	
 	void COverViewModel::deviceAdded(CDevice * device) {
 		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SIGNAL(layoutChanged()));
-		if (device->type == DT_AIR)
-			connect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)), this, SIGNAL(layoutChanged()));
+		if (device->getType() == DT_AIR)
+			connect(device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)), this, SIGNAL(layoutChanged()));
 		emit layoutChanged();
 	}
 	
 	void COverViewModel::deviceRemoved(CDevice * device) {
 		disconnect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SIGNAL(layoutChanged()));
-		if (device->type == DT_AIR)
-			disconnect(device->wpa_supplicant, SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)), this, SIGNAL(layoutChanged()));
+		if (device->getType() == DT_AIR)
+			disconnect(device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)), this, SIGNAL(layoutChanged()));
 		emit layoutChanged();
 	}
 	
@@ -110,27 +110,27 @@ namespace qnut {
 		if (role == Qt::DisplayRole) {
 			switch (index.column()) {
 			case OV_MOD_NAME:
-				return data->name;
+				return data->getName();
 			case OV_MOD_STATUS:
-				return toStringTr(data->state);
+				return toStringTr(data->getState());
 			case OV_MOD_TYPE:
-				return toStringTr(data->type);
+				return toStringTr(data->getType());
 			case OV_MOD_IP: {
-					if (data->state != DS_UP)
+					if (data->getState() != DS_UP)
 						return QString('-');
 					else
 						return activeIP(data);
 				}
 			case OV_MOD_ENV:
-				if (data->state >= DS_UNCONFIGURED)
-					return data->activeEnvironment->name;
+				if (data->getState() >= DS_UNCONFIGURED)
+					return data->getActiveEnvironment()->getName();
 				else
 					return tr("none");
 			case OV_MOD_NETWORK:
-				if (data->state > DS_ACTIVATED) {
-					if (data->type == DT_AIR) {
-						WextSignal signal = data->wpa_supplicant->getSignalQuality();
-						return data->essid + " (" +
+				if (data->getState() > DS_ACTIVATED) {
+					if (data->getType() == DT_AIR) {
+						WextSignal signal = data->getWpaSupplicant()->getSignalQuality();
+						return data->getEssid() + " (" +
 							QString::number(signal.quality.value) + '/'+
 							QString::number(signal.quality.maximum) + ')';
 					}

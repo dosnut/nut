@@ -152,7 +152,7 @@ namespace qnut {
 	void CConnectionManager::addUiDevice(CDevice * device) {
 		CDeviceDetails * newDeviceOptions = new CDeviceDetails(device);
 		
-		m_TabWidget.insertTab(m_DeviceManager.devices.indexOf(device)+1, newDeviceOptions, device->name);
+		m_TabWidget.insertTab(m_DeviceManager.getDevices().indexOf(device)+1, newDeviceOptions, device->getName());
 		
 		m_DeviceDetails.insert(device, newDeviceOptions);
 		m_TrayIcon.addDeviceMenu(newDeviceOptions->trayMenu());
@@ -172,18 +172,18 @@ namespace qnut {
 		m_TrayIcon.removeDeviceMenu(target->trayMenu());
 		delete target;
 		
-		m_EnableDeviceAction->setDisabled(m_DeviceManager.devices.isEmpty());
-		m_DisableDeviceAction->setDisabled(m_DeviceManager.devices.isEmpty());
+		m_EnableDeviceAction->setDisabled(m_DeviceManager.getDevices().isEmpty());
+		m_DisableDeviceAction->setDisabled(m_DeviceManager.getDevices().isEmpty());
 		
 	}
 	
 	void CConnectionManager::updateTrayIconInfo() {
 		QStringList result;
 		
-		if (m_DeviceManager.devices.isEmpty())
+		if (m_DeviceManager.getDevices().isEmpty())
 			result << tr("no devices present");
 		else
-			foreach (CDevice * i, m_DeviceManager.devices) {
+			foreach (CDevice * i, m_DeviceManager.getDevices()) {
 				result << shortSummary(i);
 			}
 		
@@ -227,10 +227,10 @@ namespace qnut {
 			connect(m_DeviceSettingsAction, SIGNAL(triggered()), m_DeviceDetails[selectedDevice], SLOT(openDeviceSettings()));
 			connect(m_WirelessSettingsAction, SIGNAL(triggered()), m_DeviceDetails[selectedDevice], SLOT(openWirelessSettings()));
 			
-			m_EnableDeviceAction->setEnabled(selectedDevice->state == DS_DEACTIVATED);
-			m_DisableDeviceAction->setDisabled(selectedDevice->state == DS_DEACTIVATED);
+			m_EnableDeviceAction->setEnabled(selectedDevice->getState() == DS_DEACTIVATED);
+			m_DisableDeviceAction->setDisabled(selectedDevice->getState() == DS_DEACTIVATED);
 			m_DeviceSettingsAction->setEnabled(true);
-			m_WirelessSettingsAction->setEnabled(selectedDevice->type == DT_AIR);
+			m_WirelessSettingsAction->setEnabled(selectedDevice->getType() == DT_AIR);
 		}
 		else {
 			m_EnableDeviceAction->setEnabled(false);

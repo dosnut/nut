@@ -44,10 +44,10 @@ namespace qnut {
 			return 0;
 		
 		if (!parent.isValid())
-			if (m_Interface->state == IFS_WAITFORCONFIG)
+			if (m_Interface->getState() == IFS_WAITFORCONFIG)
 				return 4 + m_Interface->getUserConfig().dnsservers().size();
-			else if (m_Interface->state != IFS_OFF)
-				return 4 + m_Interface->dnsserver.size();
+			else if (m_Interface->getState() != IFS_OFF)
+				return 4 + m_Interface->getDnsServers().size();
 			else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 				return 4 + m_Interface->getConfig().getStaticDNS().size();
 			else
@@ -85,7 +85,7 @@ namespace qnut {
 		case IFDET_MOD_VALUE:
 			switch (index.row()) {
 			case 0:
-				switch (m_Interface->state) {
+				switch (m_Interface->getState()) {
 				case IFS_OFF:
 					if (m_Interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
 						return tr("user defined static");
@@ -119,7 +119,7 @@ namespace qnut {
 				}
 				return tr("unknown");
 			case 1:
-				if ((m_Interface->state == IFS_OFF) || (m_Interface->state == IFS_WAITFORCONFIG)) {
+				if ((m_Interface->getState() == IFS_OFF) || (m_Interface->getState() == IFS_WAITFORCONFIG)) {
 					if (m_Interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return toStringDefault(m_Interface->getConfig().getStaticIP());
 					else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
@@ -128,9 +128,9 @@ namespace qnut {
 						return tr("none");
 				}
 				else
-					return toStringDefault(m_Interface->ip);
+					return toStringDefault(m_Interface->getIp());
 			case 2:
-				if ((m_Interface->state == IFS_OFF) || (m_Interface->state == IFS_WAITFORCONFIG)) {
+				if ((m_Interface->getState() == IFS_OFF) || (m_Interface->getState() == IFS_WAITFORCONFIG)) {
 					if (m_Interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return toStringDefault(m_Interface->getConfig().getStaticNetmask());
 					else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
@@ -139,9 +139,9 @@ namespace qnut {
 						return tr("none");
 				}
 				else
-					return toStringDefault(m_Interface->netmask);
+					return toStringDefault(m_Interface->getNetmask());
 			case 3:
-				if ((m_Interface->state == IFS_OFF) || (m_Interface->state == IFS_WAITFORCONFIG)) {
+				if ((m_Interface->getState() == IFS_OFF) || (m_Interface->getState() == IFS_WAITFORCONFIG)) {
 					if (m_Interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return toStringDefault(m_Interface->getConfig().getStaticGateway());
 					else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
@@ -150,9 +150,9 @@ namespace qnut {
 						return tr("none");
 				}
 				else
-					return toStringDefault(m_Interface->gateway);
+					return toStringDefault(m_Interface->getGateway());
 			default:
-				if ((m_Interface->state == IFS_OFF) || (m_Interface->state == IFS_WAITFORCONFIG)) {
+				if ((m_Interface->getState() == IFS_OFF) || (m_Interface->getState() == IFS_WAITFORCONFIG)) {
 					if (m_Interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return m_Interface->getConfig().getStaticDNS()[index.row()-4].toString();
 					else if (m_Interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
@@ -161,7 +161,7 @@ namespace qnut {
 						break;
 				}
 				else
-					return m_Interface->dnsserver[index.row()-4].toString();
+					return m_Interface->getDnsServers()[index.row()-4].toString();
 			}
 			break;
 		default:

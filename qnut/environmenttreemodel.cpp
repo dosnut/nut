@@ -24,9 +24,9 @@ namespace qnut {
 	CEnvironmentTreeModel::CEnvironmentTreeModel(CDevice * data, QObject * parent) : QAbstractItemModel(parent) {
 		m_Device = data;
 		if (data) {
-			foreach(CEnvironment * environment, m_Device->environments) {
+			foreach(CEnvironment * environment, m_Device->getEnvironments()) {
 				connect(environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
-				foreach(CInterface * interface, environment->interfaces) {
+				foreach(CInterface * interface, environment->getInterfaces()) {
 					connect(interface, SIGNAL(stateChanged(libnutcommon::InterfaceState)), this, SIGNAL(layoutChanged()));
 				}
 			}
@@ -49,11 +49,11 @@ namespace qnut {
 			return 0;
 		
 		if (!parent.isValid())
-			return m_Device->environments.count();
+			return m_Device->getEnvironments().count();
 		else {
 			QObject * parentData = static_cast<QObject *>(parent.internalPointer());
 			if (parentData->parent() == m_Device)
-				return static_cast<CEnvironment *>(parentData)->interfaces.count();
+				return static_cast<CEnvironment *>(parentData)->getInterfaces().count();
 			else
 				return 0;
 		}
@@ -69,7 +69,7 @@ namespace qnut {
 			if (currentData->parent() == m_Device)
 				return QIcon(UI_ICON_ENVIRONMENT);
 			else
-				switch (static_cast<CInterface *>(currentData)->state) {
+				switch (static_cast<CInterface *>(currentData)->getState()) {
 				case IFS_OFF:
 					return QIcon(UI_ICON_INTERFACE);
 				case IFS_WAITFORCONFIG:
@@ -85,15 +85,15 @@ namespace qnut {
 		switch (index.column()) {
 		case ENVTREE_MOD_ITEM:
 			if (currentData->parent() == m_Device)
-				return static_cast<CEnvironment *>(currentData)->name;
+				return static_cast<CEnvironment *>(currentData)->getName();
 			else
-				return '#' + QString::number(static_cast<CInterface *>(currentData)->index);
+				return '#' + QString::number(static_cast<CInterface *>(currentData)->getIndex());
 		case ENVTREE_MOD_STATUS:
 			if (currentData->parent() == m_Device) {
-				return (static_cast<CEnvironment *>(currentData)->active) ? tr("active") : QString('-');
+				return (static_cast<CEnvironment *>(currentData)->getState()) ? tr("active") : QString('-');
 			}
 			else {
-				return toStringTr(static_cast<CInterface *>(currentData)->state);
+				return toStringTr(static_cast<CInterface *>(currentData)->getState());
 			}
 			break;
 		case ENVTREE_MOD_IP:
@@ -102,7 +102,7 @@ namespace qnut {
 			}
 			else {
 				CInterface * interface = static_cast<CInterface *>(currentData);
-				if ((interface->state == IFS_OFF) || (interface->state == IFS_WAITFORCONFIG)) {
+				if ((interface->getState() == IFS_OFF) || (interface->getState() == IFS_WAITFORCONFIG)) {
 					if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
 						return toStringDefault(interface->getConfig().getStaticIP());
 					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
@@ -111,7 +111,7 @@ namespace qnut {
 						return tr("none");
 				}
 				else
-					return toStringDefault(interface->ip);
+					return toStringDefault(interface->getIp());
 			}
 		default:
 			break;
@@ -160,11 +160,11 @@ namespace qnut {
 			return QModelIndex();
 		
 		if (!parent.isValid()) {
-			return createIndex(row, column, m_Device->environments[row]);
+			return createIndex(row, column, m_Device->getEnvironments()[row]);
 		}
 		else {
 			CEnvironment * parentData = static_cast<CEnvironment *>(parent.internalPointer());
-			return createIndex(row, column, parentData->interfaces[row]);
+			return createIndex(row, column, parentData->getInterfaces()[row]);
 		}
 		
 		return QModelIndex();
@@ -183,7 +183,7 @@ namespace qnut {
 		QObject * parentData = static_cast<QObject *>(index.internalPointer())->parent();
 		
 		if (parentData->parent() == m_Device)
-			return createIndex(static_cast<CEnvironment *>(parentData)->index, 0, (void *)(parentData));
+			return createIndex(static_cast<CEnvironment *>(parentData)->getIndex(), 0, (void *)(parentData));
 		else
 			return QModelIndex();
 	}
