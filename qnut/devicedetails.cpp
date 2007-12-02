@@ -252,10 +252,9 @@ namespace qnut {
 		m_DeviceActions[0]->setEnabled(state == DS_DEACTIVATED);
 		m_DeviceActions[1]->setDisabled(state == DS_DEACTIVATED);
 		
+		m_trayIcon->setToolTip(shortSummary(m_Device));
+		m_trayIcon->setIcon(QIcon(iconFile(m_Device)));
 		if (m_trayIcon->isVisible()) {
-			m_trayIcon->setToolTip(shortSummary(m_Device));
-			m_trayIcon->setIcon(QIcon(iconFile(m_Device)));
-			
 			switch (state) {
 			case DS_UP:
 				emit showMessageRequested(tr("QNUT - %1 ...").arg(m_Device->name),

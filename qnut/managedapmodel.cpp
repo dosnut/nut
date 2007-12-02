@@ -19,10 +19,6 @@ namespace qnut {
 	
 	CManagedAPModel::CManagedAPModel(CWpa_Supplicant * wpaSupplicant, QObject * parent) : QAbstractItemModel(parent) {
 		setWpaSupplicant(wpaSupplicant);
-		if (m_Networks.isEmpty())
-			qDebug("peng!");
-		else
-			qDebug("pong");
 	}
 	
 	CManagedAPModel::~CManagedAPModel() {
