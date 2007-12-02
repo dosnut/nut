@@ -24,7 +24,7 @@ namespace qnut {
 	class CManagedAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		QList<libnutwireless::ShortNetworkInfo> cachedNetworks() const { return networks; };
+		QList<libnutwireless::ShortNetworkInfo> cachedNetworks() const { return m_Networks; };
 		
 		CManagedAPModel(libnutwireless::CWpa_Supplicant * wpaSupplicant = NULL, QObject * parent = 0);
 		~CManagedAPModel();
@@ -41,8 +41,8 @@ namespace qnut {
 	public slots:
 		void updateNetworks();
 	private:
-		QList<libnutwireless::ShortNetworkInfo> networks;
-		libnutwireless::CWpa_Supplicant * supplicant;
+		QList<libnutwireless::ShortNetworkInfo> m_Networks;
+		libnutwireless::CWpa_Supplicant * m_Supplicant;
 	};
 }
 

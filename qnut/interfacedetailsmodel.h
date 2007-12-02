@@ -30,7 +30,7 @@ namespace qnut {
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
 	private:
-		libnutclient::CInterface * interface;
+		libnutclient::CInterface * m_Interface;
 	};
 }
 

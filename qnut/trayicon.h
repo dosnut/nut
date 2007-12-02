@@ -7,12 +7,13 @@
 namespace qnut {
 	class CTrayIcon : public QSystemTrayIcon {
 		Q_OBJECT
+	protected:
+		QMenu m_TrayMenu;
+		QMenu m_DevicesMenu;
 	public:
-		QMenu trayMenu;
-		QMenu devicesMenu;
-
+		void addDeviceMenu(QMenu * deviceMenu);
+		void removeDeviceMenu(QMenu * deviceMenu);
 		CTrayIcon(QObject * parent = 0);
-
 	public slots:
 		void handleClicks(QSystemTrayIcon::ActivationReason reason);
 	};

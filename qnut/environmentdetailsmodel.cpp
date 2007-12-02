@@ -21,42 +21,42 @@ namespace qnut {
 	using namespace libnutclient;
 	
 	void CEnvironmentDetailsModel::fillParentRules(quint32 start) {
-		if ((selectConfig.filters[start].selType == SelectRule::SEL_AND_BLOCK) ||
-		    (selectConfig.filters[start].selType == SelectRule::SEL_OR_BLOCK)) {
-			quint32 block = selectConfig.filters[start].block;
-			foreach (quint32 i, selectConfig.blocks[block]) {
-				parentRules[i] = start;
+		if ((m_SelectConfig.filters[start].selType == SelectRule::SEL_AND_BLOCK) ||
+		    (m_SelectConfig.filters[start].selType == SelectRule::SEL_OR_BLOCK)) {
+			quint32 block = m_SelectConfig.filters[start].block;
+			foreach (quint32 i, m_SelectConfig.blocks[block]) {
+				m_ParentRules[i] = start;
 				fillParentRules(i);
 			}
 		}
 	}
 	
 	CEnvironmentDetailsModel::CEnvironmentDetailsModel(CEnvironment * data, QObject * parent) : QAbstractItemModel(parent) {
-		environment = data;
-		if (environment) {
-			selectConfig = data->getConfig().getSelect();
+		m_Environment = data;
+		if (m_Environment) {
+			m_SelectConfig = data->getConfig().getSelect();
 			
-			parentRules.resize(selectConfig.filters.size());
-			parentRules[0] = 0;
+			m_ParentRules.resize(m_SelectConfig.filters.size());
+			m_ParentRules[0] = 0;
 			fillParentRules();
 			
-			connect(environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
+			connect(m_Environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
 		}
 	}
 	
 	CEnvironmentDetailsModel::~CEnvironmentDetailsModel() {
-		environment = NULL;
+		m_Environment = NULL;
 	}
 	
 	int CEnvironmentDetailsModel::columnCount(const QModelIndex &) const {
-		if (environment == NULL)
+		if (m_Environment == NULL)
 			return 0;
 		else
 			return 2;
 	}
 	
 	int CEnvironmentDetailsModel::rowCount(const QModelIndex & parent) const {
-		if (environment == NULL)
+		if (m_Environment == NULL)
 			return 0;
 		
 		if (parent.column() > 0)
@@ -65,22 +65,22 @@ namespace qnut {
 		if (!parent.isValid())
 			return 1;
 		
-		if ((selectConfig.filters[parent.internalId()].selType == SelectRule::SEL_AND_BLOCK) ||
-			(selectConfig.filters[parent.internalId()].selType == SelectRule::SEL_OR_BLOCK))
-			return selectConfig.blocks[selectConfig.filters[parent.internalId()].block].size();
+		if ((m_SelectConfig.filters[parent.internalId()].selType == SelectRule::SEL_AND_BLOCK) ||
+			(m_SelectConfig.filters[parent.internalId()].selType == SelectRule::SEL_OR_BLOCK))
+			return m_SelectConfig.blocks[m_SelectConfig.filters[parent.internalId()].block].size();
 		
 		return 0;
 	}
 	
 	QVariant CEnvironmentDetailsModel::data(const QModelIndex & index, int role) const {
-		if ((environment == NULL) || (!index.isValid()))
+		if ((m_Environment == NULL) || (!index.isValid()))
 			return QVariant();
 		
 		if ((role == Qt::DecorationRole) && (index.column() == ENVDET_MOD_STATEMENT)) {
-			CDevice * device = static_cast<CDevice *>(environment->parent());
-			if (environment == device->activeEnvironment) {
+			CDevice * device = dynamic_cast<CDevice *>(m_Environment->parent());
+			if (m_Environment == device->activeEnvironment) {
 				qDebug() << "Internal Id:" << index.internalId();
-				if ((qint8)(environment->getSelectResults()[index.internalId()]))
+				if ((qint8)(m_Environment->getSelectResults()[index.internalId()]))
 					return QIcon(UI_ICON_SELECTED);
 			}
 			return QIcon(UI_ICON_UNSELECTED);
@@ -91,8 +91,8 @@ namespace qnut {
 		
 		switch (index.column()) {
 			case ENVDET_MOD_STATEMENT:
-				if (selectConfig.filters[index.internalId()].invert)
-					switch (selectConfig.filters[index.internalId()].selType) {
+				if (m_SelectConfig.filters[index.internalId()].invert)
+					switch (m_SelectConfig.filters[index.internalId()].selType) {
 					case SelectRule::SEL_USER:
 						return tr("not by user");
 					case SelectRule::SEL_ARP:
@@ -107,7 +107,7 @@ namespace qnut {
 						break;
 					}
 				else
-					switch (selectConfig.filters[index.internalId()].selType) {
+					switch (m_SelectConfig.filters[index.internalId()].selType) {
 					case SelectRule::SEL_USER:
 						return tr("by user");
 					case SelectRule::SEL_ARP:
@@ -122,15 +122,15 @@ namespace qnut {
 						break;
 					}
 			case ENVDET_MOD_VALUE:
-				switch (selectConfig.filters[index.internalId()].selType) {
+				switch (m_SelectConfig.filters[index.internalId()].selType) {
 				case SelectRule::SEL_ARP:
-					if (selectConfig.filters[index.internalId()].macAddr.valid())
-						return selectConfig.filters[index.internalId()].ipAddr.toString() + ", "+
-							selectConfig.filters[index.internalId()].macAddr.toString();
+					if (m_SelectConfig.filters[index.internalId()].macAddr.valid())
+						return m_SelectConfig.filters[index.internalId()].ipAddr.toString() + ", "+
+							m_SelectConfig.filters[index.internalId()].macAddr.toString();
 					else
-						return selectConfig.filters[index.internalId()].ipAddr.toString();
+						return m_SelectConfig.filters[index.internalId()].ipAddr.toString();
 				case SelectRule::SEL_ESSID:
-					return selectConfig.filters[index.internalId()].essid;
+					return m_SelectConfig.filters[index.internalId()].essid;
 				default:
 					break;
 				}
@@ -142,7 +142,7 @@ namespace qnut {
 	}
 	
 	Qt::ItemFlags CEnvironmentDetailsModel::flags(const QModelIndex & index) const {
-		if (environment == NULL)
+		if (m_Environment == NULL)
 			return 0;
 		
 		if (!index.isValid())
@@ -152,7 +152,7 @@ namespace qnut {
 	}
 	
 	QVariant CEnvironmentDetailsModel::headerData(int section, Qt::Orientation orientation, int role) const {
-		if (environment == NULL)
+		if (m_Environment == NULL)
 			return QVariant();
 		
 		if (role != Qt::DisplayRole)
@@ -172,7 +172,7 @@ namespace qnut {
 	}
 	
 	QModelIndex CEnvironmentDetailsModel::index(int row, int column, const QModelIndex & parent) const {
-		if (environment == NULL)
+		if (m_Environment == NULL)
 			return QModelIndex();
 		
 		if (!hasIndex(row, column, parent))
@@ -182,13 +182,13 @@ namespace qnut {
 			return createIndex(row, column, 0);
 		}
 		else {
-			quint32 parentBlock = selectConfig.filters[parent.internalId()].block;
-			return createIndex(row, column, selectConfig.blocks[parentBlock][row]);
+			quint32 parentBlock = m_SelectConfig.filters[parent.internalId()].block;
+			return createIndex(row, column, m_SelectConfig.blocks[parentBlock][row]);
 		}
 	}
 	
 	QModelIndex CEnvironmentDetailsModel::parent(const QModelIndex & index) const {
-		if (environment == NULL)
+		if (m_Environment == NULL)
 			return QModelIndex();
 		
 		if (!index.isValid())
@@ -197,12 +197,12 @@ namespace qnut {
 		if (index.internalId() == 0)
 			return QModelIndex();
 		
-		quint32 parentRule = parentRules[index.internalId()];
+		quint32 parentRule = m_ParentRules[index.internalId()];
 		quint32 parentRuleIndex = 0;
 		
 		if (parentRule != 0) {
-			quint32 parentBlock = selectConfig.filters[parentRules[parentRule]].block;
-			parentRuleIndex = selectConfig.blocks[parentBlock].indexOf(parentRule);
+			quint32 parentBlock = m_SelectConfig.filters[m_ParentRules[parentRule]].block;
+			parentRuleIndex = m_SelectConfig.blocks[parentBlock].indexOf(parentRule);
 		}
 		
 		return createIndex(parentRuleIndex, 0, parentRule);

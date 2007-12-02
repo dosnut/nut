@@ -19,9 +19,9 @@
 namespace qnut {
 	class CIPConfiguration : public QDialog {
 		Q_OBJECT
-	private:
+	protected:
 		Ui::ipconf ui;
-		QList<QHostAddress> dnsList;
+		QList<QHostAddress> m_DNSList;
 	public:
 		bool execute(libnutcommon::IPv4UserConfig & config);
 		CIPConfiguration(QWidget * parent = 0);

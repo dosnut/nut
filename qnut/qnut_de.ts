@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS><TS version="1.1" language="de">
+<defaultcodec></defaultcodec>
 <context>
     <name></name>
     <message>
-        <location filename="constants.h" line="8"/>
+        <location filename="constants.h" line="7"/>
         <source>QNUT - Qt client for Network UTility Server (NUTS)</source>
         <translation>QNUT - Qt Client für den Network UTility Server (NUTS)</translation>
     </message>
@@ -981,17 +982,17 @@
         <translation>Protokoll &amp;leeren</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="192"/>
+        <location filename="connectionmanager.cpp" line="184"/>
         <source>no devices present</source>
         <translation>keine Geräte vorhanden</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="261"/>
+        <location filename="connectionmanager.cpp" line="253"/>
         <source>About QNUT</source>
         <translation>Über QNUT</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="271"/>
+        <location filename="connectionmanager.cpp" line="263"/>
         <source>Log</source>
         <translation>Protokoll</translation>
     </message>
@@ -1014,85 +1015,89 @@
         <translation>Gerät &amp;deaktivieren</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="111"/>
+        <location filename="devicedetails.cpp" line="119"/>
         <source>En&amp;vironments...</source>
         <translation>&amp;Umgebungen...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="113"/>
+        <location filename="devicedetails.cpp" line="111"/>
         <source>&amp;Scripting settings...</source>
         <translation>&amp;Skripteinstellungen...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="116"/>
+        <location filename="devicedetails.cpp" line="113"/>
         <source>&amp;Wireless settings...</source>
-        <translation>Drahtlose &amp;Kommunikations-Einstellungen...</translation>
+        <translation>Einstellungen der drahtlosen &amp;Kommunikation...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="119"/>
+        <location filename="devicedetails.cpp" line="122"/>
         <source>E&amp;nter environment</source>
         <translation>&amp;Betrete Umgebung</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="120"/>
+        <location filename="devicedetails.cpp" line="123"/>
         <source>Set &amp;IP configuration...</source>
         <translation>Setzte &amp;IP-Konfiguration...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="270"/>
+        <location filename="devicedetails.cpp" line="273"/>
         <source>QNUT - %1 ...</source>
         <translation>QNUT - %1 ...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="259"/>
+        <location filename="devicedetails.cpp" line="262"/>
         <source>... is now up and running.</source>
         <translation>... ist jetzt verbunden.</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="263"/>
-        <source>... got carrier but needs configuration.
-
-Klick here to open the device details.</source>
-        <translation>... physikalisch verbunden, benötige Konfiguration.
-
-Klicken Sie hier um die Gerätedetails anzuzeigen.</translation>
-    </message>
-    <message>
-        <location filename="devicedetails.cpp" line="267"/>
+        <location filename="devicedetails.cpp" line="270"/>
         <source>... is now activated an waits for carrier.</source>
-        <translation>... ist jetzt aktiviert und wartet auf eine physikalische Verbindung.</translation>
+        <translation>... ist jetzt aktiviert und wartet
+auf eine physikalische Verbindung.</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="271"/>
+        <location filename="devicedetails.cpp" line="274"/>
         <source>... is now deactivated</source>
         <translation>... ist jetzt deaktiviert</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="292"/>
+        <location filename="devicedetails.cpp" line="295"/>
         <source>QNUT</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="281"/>
+        <location filename="devicedetails.cpp" line="284"/>
         <source>%1 is now up and running.</source>
         <translation>%1 ist jetzt verbunden.</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="285"/>
+        <location filename="devicedetails.cpp" line="292"/>
+        <source>%1 is now activated an waits for carrier.</source>
+        <translation>%1 ist jetzt aktiviert und wartet
+auf eine physikalische Verbindung.</translation>
+    </message>
+    <message>
+        <location filename="devicedetails.cpp" line="296"/>
+        <source>%1 is now deactivated</source>
+        <translation>%1 ist jetzt deaktiviert</translation>
+    </message>
+    <message>
+        <location filename="devicedetails.cpp" line="266"/>
+        <source>... got carrier but needs configuration.
+
+Klick here to open the device details.</source>
+        <translation>... ist zwar physikalisch verbunden
+hat aber unkonfigurierte Schnittellen.
+
+Klicken sie hier, um die Details
+dieses Gerätes anzuzeigen.</translation>
+    </message>
+    <message>
+        <location filename="devicedetails.cpp" line="288"/>
         <source>%1 got carrier but needs configuration.
 
 Klick here to open the device details.</source>
-        <translation>%1 ... physikalisch verbunden; benötige Konfiguration.Klicken Sie hier um die Gerätedetails anzuzeigen.</translation>
-    </message>
-    <message>
-        <location filename="devicedetails.cpp" line="289"/>
-        <source>%1 is now activated an waits for carrier.</source>
-        <translation>%1 ist jetzt aktiviert und wartet auf eine physikalische Verbindung.</translation>
-    </message>
-    <message>
-        <location filename="devicedetails.cpp" line="293"/>
-        <source>%1 is now deactivated</source>
-        <translation>%1 ist jetzt deaktiviert</translation>
+        <translation>%1 ist zwar physikalisch verbundenhat aber unkonfigurierte Schnittellen.Klicken sie hier, um die Detailsdieses Gerätes anzuzeigen.</translation>
     </message>
 </context>
 <context>
@@ -1166,22 +1171,22 @@ Klick here to open the device details.</source>
         <translation>aktiv</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="125"/>
+        <location filename="environmenttreemodel.cpp" line="111"/>
         <source>none</source>
         <translation>keine</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="157"/>
+        <location filename="environmenttreemodel.cpp" line="143"/>
         <source>Item</source>
         <translation>Objekt</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="159"/>
+        <location filename="environmenttreemodel.cpp" line="145"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="161"/>
+        <location filename="environmenttreemodel.cpp" line="147"/>
         <source>IP-Address</source>
         <translation>IP-Adresse</translation>
     </message>
@@ -1401,87 +1406,87 @@ Klick here to open the device details.</source>
     <message>
         <location filename="wirelesssettings.cpp" line="29"/>
         <source>Wireless Settings for &quot;%1&quot;</source>
-        <translation>Drahtlose Netzwerke-Einstellungen für &quot;%1&quot;</translation>
+        <translation>Einstellungen der drahtlosen Verbindung für &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="138"/>
+        <location filename="wirelesssettings.cpp" line="141"/>
         <source>Signal (Quality, Level, Noise): %1</source>
         <translation>Signal (Qualität, Pegel, Rauschen): %1</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="229"/>
+        <location filename="wirelesssettings.cpp" line="220"/>
         <source>Removing a managed network</source>
         <translation>Entferne ein verwaltetes Netzwerk</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="229"/>
+        <location filename="wirelesssettings.cpp" line="220"/>
         <source>Are you sure to remove &quot;%1&quot;?</source>
         <translation>Sind Sie sich sicher, dass sie &quot;%1&quot; entfernen möchten?</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="67"/>
+        <location filename="wirelesssettings.cpp" line="70"/>
         <source>&amp;Enable</source>
         <translation>&amp;Aktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="68"/>
+        <location filename="wirelesssettings.cpp" line="71"/>
         <source>Enable &amp;all</source>
         <translation>A&amp;lle Aktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="69"/>
+        <location filename="wirelesssettings.cpp" line="72"/>
         <source>&amp;Disable</source>
         <translation>&amp;Deaktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="70"/>
+        <location filename="wirelesssettings.cpp" line="73"/>
         <source>S&amp;witch</source>
         <translation>&amp;Wechseln</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="71"/>
+        <location filename="wirelesssettings.cpp" line="74"/>
         <source>&amp;Configure...</source>
         <translation>&amp;Konfigurieren...</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="72"/>
+        <location filename="wirelesssettings.cpp" line="75"/>
         <source>&amp;Remove</source>
         <translation>&amp;Entfernen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="74"/>
+        <location filename="wirelesssettings.cpp" line="77"/>
         <source>Add &amp;network</source>
         <translation>&amp;Netzwerk hinzufügen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="75"/>
+        <location filename="wirelesssettings.cpp" line="78"/>
         <source>Add ad-&amp;hoc</source>
         <translation>Ad-&amp;hoc Netz hinzufügen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="79"/>
+        <location filename="wirelesssettings.cpp" line="82"/>
         <source>&amp;Save configuration</source>
         <translation>Konfiguration &amp;speichern</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="80"/>
+        <location filename="wirelesssettings.cpp" line="83"/>
         <source>Re&amp;load configuration</source>
         <translation>Konfiguration akt&amp;ualisieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="82"/>
+        <location filename="wirelesssettings.cpp" line="85"/>
         <source>Detailed &amp;view</source>
         <translation>De&amp;tailierte Ansicht</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="176"/>
+        <location filename="wirelesssettings.cpp" line="167"/>
         <source>waiting for device properties...</source>
         <translation>warte auf Geräteeigenschaften...</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="77"/>
+        <location filename="wirelesssettings.cpp" line="80"/>
         <source>Scan ne&amp;tworks</source>
-        <translation>Ne&amp;tze suchen</translation>
+        <translation>Ne&amp;tzwerke suchen</translation>
     </message>
 </context>
 <context>

@@ -27,7 +27,7 @@ namespace qnut {
 	class CAvailableAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		QList<libnutwireless::ScanResult> cachedScans() const { return scans; };
+		QList<libnutwireless::ScanResult> cachedScans() const { return m_Scans; };
 		
 		CAvailableAPModel(libnutwireless::CWpa_Supplicant * data = NULL, QObject * parent = 0);
 		~CAvailableAPModel();
@@ -44,8 +44,8 @@ namespace qnut {
 	private slots:
 		void updateScans();
 	private:
-		libnutwireless::CWpa_Supplicant * supplicant;
-		QList<libnutwireless::ScanResult> scans;
+		libnutwireless::CWpa_Supplicant * m_Supplicant;
+		QList<libnutwireless::ScanResult> m_Scans;
 	};
 }
 

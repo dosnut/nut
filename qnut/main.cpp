@@ -12,7 +12,7 @@ int main(int argc, char * argv[])
 	
 	QString locale = QLocale::system().name();
 	QTranslator translator;
-	translator.load(QString(UI_DIR_TRANSLATIONS "qnut_") + locale);
+	translator.load(QString(UI_PATH_TRANSLATIONS "qnut_") + locale);
 	app.installTranslator(&translator);
 	app.setQuitOnLastWindowClosed(false);
 	

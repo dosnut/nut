@@ -22,39 +22,32 @@ namespace qnut {
 	
 	class CWirelessSettings : public QWidget {
 		Q_OBJECT
-	private:
+	protected:
 		Ui::airset ui;
-		libnutclient::CDevice * device;
+		libnutclient::CDevice * m_Device;
 		
-		CManagedAPModel * managedAPModel;
-		CAvailableAPModel * availableAPModel;
+		CManagedAPModel * m_ManagedAPModel;
+		CAvailableAPModel * m_AvailableAPModel;
 		
-		QAction * enableNetworkAction;
-		QAction * enableNetworksAction;
-		QAction * disableNetworkAction;
-		QAction * switchNetworkAction;
-		QAction * configureNetworkAction;
-		QAction * removeNetworkAction;
+		QAction * m_EnableNetworkAction;
+		QAction * m_DisableNetworkAction;
+		QAction * m_SwitchNetworkAction;
+		QAction * m_ConfigureNetworkAction;
+		QAction * m_RemoveNetworkAction;
 		
-		QAction * saveNetworksAction;
+		QAction * m_ToggleDetailsAction;
+		QAction * m_SaveNetworksAction;
+		QAction * m_RescanNetworksAction;
 		
-		QAction * addNetworkAction;
-		QAction * addAdhocAction;
-		
-		QAction * rescanNetworksAction;
-		QAction * reloadNetworksAction;
-		QAction * toggleDetailsAction;
 		inline void createActions();
 	public:
-		inline bool detailsVisible() const { return toggleDetailsAction->isChecked(); }
-		inline void setDetailsVisible(bool value) { toggleDetailsAction->setChecked(value); }
+		inline bool detailsVisible() const { return m_ToggleDetailsAction->isChecked(); }
+		inline void setDetailsVisible(bool value) { m_ToggleDetailsAction->setChecked(value); }
 		CWirelessSettings(libnutclient::CDevice * wireless, QWidget * parent = 0);
 		~CWirelessSettings();
-	public slots:
+	protected slots:
 		void handleManagedAPSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
-		void handleAvailableAPSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 		void updateUi(libnutcommon::DeviceState state);
-	private slots:
 		void updateSignalInfo(libnutwireless::WextSignal signal);
 		void switchToSelectedNetwork();
 		void addNetwork();

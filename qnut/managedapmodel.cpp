@@ -19,30 +19,26 @@ namespace qnut {
 	
 	CManagedAPModel::CManagedAPModel(CWpa_Supplicant * wpaSupplicant, QObject * parent) : QAbstractItemModel(parent) {
 		setWpaSupplicant(wpaSupplicant);
-		if (networks.isEmpty())
-			qDebug("peng!");
-		else
-			qDebug("pong");
 	}
 	
 	CManagedAPModel::~CManagedAPModel() {
-		supplicant = NULL;
+		m_Supplicant = NULL;
 	}
 	
 	void CManagedAPModel::setWpaSupplicant(CWpa_Supplicant * wpaSupplicant) {
-		if (supplicant == wpaSupplicant)
+		if (m_Supplicant == wpaSupplicant)
 			return;
 		
-		supplicant = wpaSupplicant;
-		if (supplicant) {
+		m_Supplicant = wpaSupplicant;
+		if (m_Supplicant) {
 			updateNetworks();
-			connect(supplicant, SIGNAL(networkListUpdated()), this, SLOT(updateNetworks()));
+			connect(m_Supplicant, SIGNAL(networkListUpdated()), this, SLOT(updateNetworks()));
 		}
 	}
 	
 	void CManagedAPModel::updateNetworks() {
 		emit layoutAboutToBeChanged();
-		networks = supplicant->listNetworks();
+		m_Networks = m_Supplicant->listNetworks();
 		emit layoutChanged();
 	}
 	
@@ -52,7 +48,7 @@ namespace qnut {
 	
 	int CManagedAPModel::rowCount(const QModelIndex & parent) const {
 		if (!parent.isValid())
-			return networks.count();
+			return m_Networks.count();
 		else
 			return 0;
 	}
@@ -62,7 +58,7 @@ namespace qnut {
 			return QVariant();
 		
 		if ((role == Qt::DecorationRole) && (index.column() == 0))
-			return QIcon(networks[index.row()].adhoc ? UI_ICON_ADHOC : UI_ICON_AIR_ACTIVATED);
+			return QIcon(m_Networks[index.row()].adhoc ? UI_ICON_ADHOC : UI_ICON_AIR_ACTIVATED);
 		
 		if (role != Qt::DisplayRole)
 			return QVariant();
@@ -71,15 +67,15 @@ namespace qnut {
 		case UI_MANAP_ID:
 			return QString::number(index.row());
 		case UI_MANAP_SSID:
-			return networks[index.row()].ssid;
+			return m_Networks[index.row()].ssid;
 		case UI_MANAP_BSSID:
-			if (networks[index.row()].bssid.zero())
+			if (m_Networks[index.row()].bssid.zero())
 				return tr("any");
 			else
-				return networks[index.row()].bssid.toString();
+				return m_Networks[index.row()].bssid.toString();
 		case UI_MANAP_STATUS:
 			//strange "flags"
-			switch (networks[index.row()].flags) {
+			switch (m_Networks[index.row()].flags) {
 			case NF_CURRENT:
 				return tr("selected");
 			case NF_DISABLED:
@@ -95,10 +91,10 @@ namespace qnut {
 	}
 	
 	Qt::ItemFlags CManagedAPModel::flags(const QModelIndex & index) const {
-		if ((networks.isEmpty()) || (!index.isValid()))
+		if ((m_Networks.isEmpty()) || (!index.isValid()))
 			return 0;
 		
-		return (networks[index.row()].flags == NF_CURRENT) ? Qt::ItemIsEnabled | Qt::ItemIsSelectable : Qt::ItemIsSelectable;
+		return (m_Networks[index.row()].flags == NF_CURRENT) ? Qt::ItemIsEnabled | Qt::ItemIsSelectable : Qt::ItemIsSelectable;
 	}
 	
 	QVariant CManagedAPModel::headerData(int section, Qt::Orientation orientation, int role) const {
@@ -124,10 +120,10 @@ namespace qnut {
 	
 	QModelIndex CManagedAPModel::index(int row, int column, const QModelIndex & parent) const {
 		//qDebug() << "index(" << row << column << ')';
-		if (networks.isEmpty() || parent.isValid() || row >= networks.count())
+		if (m_Networks.isEmpty() || parent.isValid() || row >= m_Networks.count())
 			return QModelIndex();
 		else
-			return createIndex(row, column, networks[row].id);
+			return createIndex(row, column, m_Networks[row].id);
 	}
 	
 	QModelIndex CManagedAPModel::parent(const QModelIndex &) const {
