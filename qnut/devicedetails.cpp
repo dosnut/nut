@@ -29,11 +29,11 @@ namespace qnut {
 	
 	CDeviceDetails::CDeviceDetails(CDevice * parentDevice, QWidget * parent) :
 		QWidget(parent),
-		m_Stettings(UI_PATH_DEV(parentDevice->name) + "dev.conf", QSettings::IniFormat, this)
+		m_Stettings(UI_PATH_DEV(parentDevice->getName()) + "dev.conf", QSettings::IniFormat, this)
 	{
 		m_Device = parentDevice;
 		
-		if (m_Device->type == DT_AIR)
+		if (m_Device->getType() == DT_AIR)
 			m_WirelessSettings = new CWirelessSettings(m_Device);
 		else
 			m_WirelessSettings = NULL;
@@ -52,8 +52,8 @@ namespace qnut {
 		connect(m_Device, SIGNAL(stateChanged(libnutcommon::DeviceState)),
 			this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
 		
-		if (m_Device->state == DS_UP)
-			ui.environmentTree->expand(ui.environmentTree->model()->index(m_Device->environments.indexOf(m_Device->activeEnvironment), 0));
+		if (m_Device->getState() == DS_UP)
+			ui.environmentTree->expand(ui.environmentTree->model()->index(m_Device->getEnvironments().indexOf(m_Device->getActiveEnvironment()), 0));
 	}
 	
 	CDeviceDetails::~CDeviceDetails() {
@@ -101,7 +101,7 @@ namespace qnut {
 	}
 	
 	inline void CDeviceDetails::createActions() {
-		m_DeviceMenu = new QMenu(m_Device->name, NULL);
+		m_DeviceMenu = new QMenu(m_Device->getName(), NULL);
 		
 		m_DeviceMenu->addAction(QIcon(UI_ICON_ENABLE), tr("&Enable device"),
 			m_Device, SLOT(enable()));
@@ -126,9 +126,9 @@ namespace qnut {
 		
 		ui.environmentTree->setContextMenuPolicy(Qt::ActionsContextMenu);
 
-		m_DeviceActions[0]->setEnabled(m_Device->state == DS_DEACTIVATED);
-		m_DeviceActions[1]->setDisabled(m_Device->state == DS_DEACTIVATED);
-		m_DeviceActions[4]->setEnabled(m_Device->type == DT_AIR);
+		m_DeviceActions[0]->setEnabled(m_Device->getState() == DS_DEACTIVATED);
+		m_DeviceActions[1]->setDisabled(m_Device->getState() == DS_DEACTIVATED);
+		m_DeviceActions[4]->setEnabled(m_Device->getType() == DT_AIR);
 		m_IPConfigurationAction->setEnabled(false);
 		m_EnterEnvironmentAction->setEnabled(false);
 		
@@ -152,7 +152,7 @@ namespace qnut {
 	
 	inline void CDeviceDetails::setHeadInfo() {
 		ui.iconLabel->setPixmap(QPixmap(iconFile(m_Device)));
-		ui.statusLabel->setText(toStringTr(m_Device->state));
+		ui.statusLabel->setText(toStringTr(m_Device->getState()));
 	}
 	
 	void CDeviceDetails::handleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
@@ -211,7 +211,7 @@ namespace qnut {
 				ui.detailsView->expandAll();
 			}
 			
-			m_EnterEnvironmentAction->setDisabled(environment->active);
+			m_EnterEnvironmentAction->setDisabled(environment->getState());
 			
 			connect(environment, SIGNAL(activeChanged(bool)), m_EnterEnvironmentAction, SLOT(setDisabled(bool)));
 			connect(m_EnterEnvironmentAction, SIGNAL(triggered()), environment, SLOT(enter()));
@@ -247,7 +247,7 @@ namespace qnut {
 		setHeadInfo();
 		ui.environmentTree->collapseAll();
 		if (state >= DS_UNCONFIGURED)
-			ui.environmentTree->expand(ui.environmentTree->model()->index(m_Device->activeEnvironment->index, 0));
+			ui.environmentTree->expand(ui.environmentTree->model()->index(m_Device->getActiveEnvironment()->getIndex(), 0));
 		
 		m_DeviceActions[0]->setEnabled(state == DS_DEACTIVATED);
 		m_DeviceActions[1]->setDisabled(state == DS_DEACTIVATED);
@@ -257,19 +257,19 @@ namespace qnut {
 		if (m_trayIcon->isVisible()) {
 			switch (state) {
 			case DS_UP:
-				emit showMessageRequested(tr("QNUT - %1 ...").arg(m_Device->name),
+				emit showMessageRequested(tr("QNUT - %1 ...").arg(m_Device->getName()),
 					tr("... is now up and running."), m_trayIcon);
 				break;
 			case DS_UNCONFIGURED:
-				emit showMessageRequested(tr("QNUT - %1 ...").arg(m_Device->name),
+				emit showMessageRequested(tr("QNUT - %1 ...").arg(m_Device->getName()),
 					tr("... got carrier but needs configuration.\n\nKlick here to open the device details."), m_trayIcon);
 				break;
 			case DS_ACTIVATED:
-				emit showMessageRequested(tr("QNUT - %1 ...").arg(m_Device->name),
+				emit showMessageRequested(tr("QNUT - %1 ...").arg(m_Device->getName()),
 					tr("... is now activated an waits for carrier."), m_trayIcon);
 				break;
 			case DS_DEACTIVATED: 
-				emit showMessageRequested(tr("QNUT - %1 ...").arg(m_Device->name),
+				emit showMessageRequested(tr("QNUT - %1 ...").arg(m_Device->getName()),
 					tr("... is now deactivated"), m_trayIcon);
 				break;
 			default:
@@ -280,26 +280,26 @@ namespace qnut {
 			switch (state) {
 			case DS_UP:
 				emit showMessageRequested(tr("QNUT"),
-					tr("%1 is now up and running.").arg(m_Device->name));
+					tr("%1 is now up and running.").arg(m_Device->getName()));
 				break;
 			case DS_UNCONFIGURED:
 				emit showMessageRequested(tr("QNUT"),
-					tr("%1 got carrier but needs configuration.\n\nKlick here to open the device details.").arg(m_Device->name));
+					tr("%1 got carrier but needs configuration.\n\nKlick here to open the device details.").arg(m_Device->getName()));
 				break;
 			case DS_ACTIVATED:
 				emit showMessageRequested(tr("QNUT"),
-					tr("%1 is now activated an waits for carrier.").arg(m_Device->name));
+					tr("%1 is now activated an waits for carrier.").arg(m_Device->getName()));
 				break;
 			case DS_DEACTIVATED:
 				emit showMessageRequested(tr("QNUT"),
-					tr("%1 is now deactivated").arg(m_Device->name));
+					tr("%1 is now deactivated").arg(m_Device->getName()));
 				break;
 			default:
 				break;
 			}
 		}
 		if (m_ScriptFlags) {
-			QDir workdir(UI_PATH_DEV(m_Device->name));
+			QDir workdir(UI_PATH_DEV(m_Device->getName()));
 			bool doExecuteScripts = false;
 			QString targetDir;
 			switch (state) {
@@ -330,17 +330,17 @@ namespace qnut {
 			if (doExecuteScripts && workdir.exists(targetDir)) {
 				QStringList env;
 				QProcess process;
-				env << "QNUT_DEV_NAME="  + m_Device->name;
+				env << "QNUT_DEV_NAME="  + m_Device->getName();
 				env << "QNUT_DEV_STATE=" + libnutcommon::toString(state);
 				
 				if (state >= DS_UNCONFIGURED)
-					env << "QNUT_ENV_NAME=" + m_Device->activeEnvironment->name;
+					env << "QNUT_ENV_NAME=" + m_Device->getActiveEnvironment()->getName();
 				
 				if (state == DS_UP) {
-					env << "QNUT_IF_COUNT=" + QString::number(m_Device->activeEnvironment->interfaces.count());
+					env << "QNUT_IF_COUNT=" + QString::number(m_Device->getActiveEnvironment()->getInterfaces().count());
 					int j = 0;
-					foreach (CInterface * i, m_Device->activeEnvironment->interfaces) {
-						env << QString("QNUT_IF_%1=%2").arg(QString::number(j),i->ip.toString());
+					foreach (CInterface * i, m_Device->getActiveEnvironment()->getInterfaces()) {
+						env << QString("QNUT_IF_%1=%2").arg(QString::number(j),i->getIp().toString());
 						j++;
 					}
 				}

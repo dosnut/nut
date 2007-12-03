@@ -21,14 +21,11 @@ namespace libnutwireless {
 			return QString();
 		}
 		//First Check if wpa_supplicant is running:
-		size_t command_len;
-		const char * command;
+		QByteArray command("PING");
 		char reply[4096];
 		size_t reply_len = sizeof(reply);
 		
-		command = "PING";
-		command_len = strlen(command);
-		int status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);
+		int status = wpa_ctrl_request(cmd_ctrl, command.constData(), command.size(), reply, &reply_len,NULL);
 		if ( (status != 0) or (QString::fromUtf8(reply, reply_len) != "PONG\n") ) {
 			qDebug() << QString("(status=%2)PING COMMAND RESPONSE: %1").arg(QString::fromUtf8(reply, reply_len),QString::number(status));
 			closeWpa("wpaCtrlCommand/nopong");
@@ -36,10 +33,10 @@ namespace libnutwireless {
 		}
 		if (cmd != "PING") {
 			size_t reply_len = sizeof(reply);
-			command = cmd.toAscii().data();
-			command_len = cmd.toAscii().size();
+
+			command = cmd.toAscii();
 			
-			status = wpa_ctrl_request(cmd_ctrl, command, command_len, reply, &reply_len,NULL);
+			status = wpa_ctrl_request(cmd_ctrl, command.constData(), command.size(), reply, &reply_len,NULL);
 			if (0 == status) {
 				qDebug() << cmd << ":" << QString::fromUtf8(reply, reply_len) << "\nEOC";
 				if (reply_len > 0) {
@@ -476,11 +473,13 @@ namespace libnutwireless {
 			return;
 		}
 		struct iwreq wrq;
+		memset(&wrq,0,sizeof(struct iwreq));
 		unsigned char * buffer = NULL;		/* Results */
 		int buflen = IW_SCAN_MAX_DATA; /* Min for compat WE<17 */
 		struct iw_range range;
+		memset(&range,0,sizeof(struct iw_range));
 		int has_range;
-		QList<WextRawScan> res;
+		QList<WextRawScan> res = QList<WextRawScan>();
 		WextRawScan singleres;
 		singleres.bssid = libnutcommon::MacAddress();
 		singleres.group = GCI_UNDEFINED;
@@ -489,12 +488,15 @@ namespace libnutwireless {
 		singleres.keyManagement = KM_UNDEFINED;
 		
 		/* workaround */
-		struct wireless_config b;
+		struct wireless_config wifiConfig;
+		memset(&wifiConfig,0,sizeof(struct wireless_config));
+	
 		/* Get basic information */ 
-		if(iw_get_basic_config(m_wextFd, m_ifname.toAscii().data(), &b) < 0) {
+		if(iw_get_basic_config(m_wextFd, m_ifname.toAscii().constData(), &wifiConfig) < 0) {
 			/* If no wireless name : no wireless extensions */ 
 			/* But let's check if the interface exists at all */ 
-			struct ifreq ifr; 
+			struct ifreq ifr;
+			memset(&ifr,0,sizeof(struct ifreq)); 
 		
 			strncpy(ifr.ifr_name, m_ifname.toAscii().data(), IFNAMSIZ); 
 			if(ioctl(m_wextFd, SIOCGIFFLAGS, &ifr) < 0) 
@@ -620,7 +622,9 @@ namespace libnutwireless {
 		if (wrq.u.data.length) {
 	
 			struct iw_event iwe;
+			memset(&iwe,0,sizeof(struct iw_event));
 			struct stream_descr stream;
+			memset(&stream,0,sizeof(struct stream_descr));
 			int ret;
 			
 			//Init event stream
@@ -630,6 +634,7 @@ namespace libnutwireless {
 			iw_init_event_stream(&stream, (char *) buffer, wrq.u.data.length);
 			do {
 				/* Extract an event and parse it*/
+				memset(&iwe,0,sizeof(struct iw_event)); //valgrind complains about it?
 				ret = iw_extract_event_stream(&stream, &iwe, range.we_version_compiled);
 				if(ret > 0) {
 					//Now parse our scan event:
@@ -798,16 +803,20 @@ namespace libnutwireless {
 		}
 		qDebug() << "Executing readWirelessInfo() with TimerRate of" << m_wextTimerRate;
 		struct iw_range range;
+		memset(&range,0,sizeof(struct iw_range));
 		int hasRange = 0;
 		iwstats stats;
+		memset(&stats,0,sizeof(iwstats));
 		WextRawScan res;
 		/* workaround */
-		struct wireless_config b;
+		struct wireless_config wifiConfig;
+		memset(&wifiConfig,0,sizeof(struct wireless_config));
 		/* Get basic information */ 
-		if(iw_get_basic_config(m_wextFd, m_ifname.toAscii().data(), &b) < 0) {
+		if(iw_get_basic_config(m_wextFd, m_ifname.toAscii().constData(), &wifiConfig) < 0) {
 			/* If no wireless name : no wireless extensions */ 
 			/* But let's check if the interface exists at all */ 
-			struct ifreq ifr; 
+			struct ifreq ifr;
+			memset(&ifr,0,sizeof(struct ifreq)); 
 		
 			strncpy(ifr.ifr_name, m_ifname.toAscii().data(), IFNAMSIZ); 
 			if(ioctl(m_wextFd, SIOCGIFFLAGS, &ifr) < 0) 
@@ -822,13 +831,14 @@ namespace libnutwireless {
 		//kernel encodes as double; (hopefully always in hz)
 		//But better test this:
 		res.freq = -1;
-		if (b.has_freq) {
-			if ( ( (b.freq/1e9) < 10.0 ) && ( (b.freq/1e9) > 0.0 ) ) {
-				res.freq = (int) (b.freq/1e6);
+		if (wifiConfig.has_freq) {
+			if ( ( (wifiConfig.freq/1e9) < 10.0 ) && ( (wifiConfig.freq/1e9) > 0.0 ) ) {
+				res.freq = (int) (wifiConfig.freq/1e6);
 			}
 		}
 		
 		struct iwreq wrq;
+		memset(&wrq,0,sizeof(struct iwreq));
 		/* Get AP address */
 		if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWAP, &wrq) >= 0) {
 			qDebug() << "Got AP";
@@ -912,6 +922,7 @@ namespace libnutwireless {
 		}
 		if ( (hasRange) && (range.we_version_compiled > 11) ) {
 			struct iwreq wrq;
+			memset(&wrq,0,sizeof(struct iwreq));
 			wrq.u.data.pointer = (caddr_t) &stats;
 			wrq.u.data.length = sizeof(struct iw_statistics);
 			wrq.u.data.flags = 1; // Clear updated flag
