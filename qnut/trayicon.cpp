@@ -7,7 +7,7 @@ using namespace std;
 
 namespace qnut {
 	CTrayIcon::CTrayIcon(QObject * parent) : QSystemTrayIcon(QIcon(UI_ICON_QNUT), parent) {
-		m_DevicesMenu.setTitle(tr("Network &Devices"));
+		m_DevicesMenu.setTitle(tr("Network &devices"));
 
 		m_TrayMenu.setTitle("QNUT");
 		m_TrayMenu.addAction(tr("Open Connection &Manager"), parent, SLOT(show()));
