@@ -27,7 +27,7 @@ namespace qnut {
 	 */
 	class CWirelessSettings : public QWidget {
 		Q_OBJECT
-	protected:
+	private:
 		Ui::airset ui;
 		libnutclient::CDevice * m_Device;
 		
@@ -46,18 +46,22 @@ namespace qnut {
 		
 		inline void createActions();
 	public:
-		/**
-		 * @brief returnes the visibility state of the details
-		 */
+		/// @brief returnes the visibility state of the details
 		inline bool detailsVisible() const { return m_ToggleDetailsAction->isChecked(); }
+		
 		/**
 		 * @brief sets the visibility state of the details
 		 * @param value visibilty state
 		 */
 		inline void setDetailsVisible(bool value) { m_ToggleDetailsAction->setChecked(value); }
+		
+		/**
+		 * @brief basic constructor
+		 * @param wireless CDevice with wireless support
+		 * @param parent parent widget
+		 */
 		CWirelessSettings(libnutclient::CDevice * wireless, QWidget * parent = 0);
-		~CWirelessSettings();
-	protected slots:
+	private slots:
 		void handleManagedAPSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 		void updateUi(libnutcommon::DeviceState state);
 		void updateSignalInfo(libnutwireless::WextSignal signal);
@@ -70,7 +74,7 @@ namespace qnut {
 		void enableNetworks();
 		void disableSelectedNetwork();
 		void toggleDetails(bool value);
-		void enableInterface();
+/*		void enableInterface();*/
 	};
 };
 
