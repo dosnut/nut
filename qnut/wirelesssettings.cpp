@@ -57,7 +57,6 @@ namespace qnut {
 		
 		if (m_Device->getWpaSupplicant()) {
 			connect(m_Device->getWpaSupplicant(), SIGNAL(stateChanged(bool)), this, SLOT(setEnabled(bool)));
-			connect(m_Device->getWpaSupplicant(), SIGNAL(closed()), ui.managedView, SLOT(clearSelection()));
 			connect(m_SaveNetworksAction, SIGNAL(triggered()), m_Device->getWpaSupplicant(), SLOT(save_config()));
 			connect(m_RescanNetworksAction, SIGNAL(triggered()), m_Device->getWpaSupplicant(), SLOT(scan()));
 			connect(m_Device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)),
@@ -143,12 +142,6 @@ namespace qnut {
 		ui.signalLabel->setText(tr("Signal (Quality, Level, Noise): %1").arg(signalSummary(signal)));
 	}
 	
-// 	void CWirelessSettings::enableInterface() {
-// 		setEnabled(true);
-// 		disconnect(m_Device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)),
-// 			this, SLOT(enableInterface()));
-// 	}
-	
 	void CWirelessSettings::handleManagedAPSelectionChanged(const QItemSelection & selected, const QItemSelection &) {
 		m_EnableNetworkAction->setDisabled(selected.isEmpty());
 		m_DisableNetworkAction->setDisabled(selected.isEmpty());
@@ -161,15 +154,10 @@ namespace qnut {
 		ui.iconLabel->setPixmap(QPixmap(iconFile(m_Device)));
 		ui.stateLabel->setText(toStringTr(m_Device->getState()));
 		
-		if (state <= DS_ACTIVATED) {
+		if (state <= DS_ACTIVATED)
 			ui.signalLabel->setText("not assigned to accesspoint");
-		}
-		else if (state == DS_CARRIER) {
-			m_Device->getWpaSupplicant()->ap_scan(1);
+		else if (state == DS_CARRIER)
 			ui.signalLabel->setText(tr("waiting for device properties..."));
-/*			connect(m_Device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)),
-				this, SLOT(enableInterface()));*/
-		}
 	}
 	
 	void CWirelessSettings::switchToSelectedNetwork() {

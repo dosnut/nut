@@ -56,7 +56,7 @@ namespace qnut {
 		inline void setDetailsVisible(bool value) { m_ToggleDetailsAction->setChecked(value); }
 		
 		/**
-		 * @brief basic constructor
+		 * @brief Creates the object and initializes the basic user interface.
 		 * @param wireless CDevice with wireless support
 		 * @param parent parent widget
 		 */
@@ -74,7 +74,6 @@ namespace qnut {
 		void enableNetworks();
 		void disableSelectedNetwork();
 		void toggleDetails(bool value);
-/*		void enableInterface();*/
 	};
 };
 
