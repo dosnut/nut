@@ -120,6 +120,9 @@ namespace libnutwireless {
 			//proposed time polling:
 			void timerEvent(QTimerEvent *event);
 			
+			//Set ap_scan
+			virtual void setApScanDefault()=0;
+			
 		public:
 			CWpa_SupplicantBase(QObject * parent, QString m_ifname);
 			~CWpa_SupplicantBase();

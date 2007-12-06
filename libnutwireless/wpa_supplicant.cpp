@@ -3,6 +3,24 @@
 
 namespace libnutwireless {
 
+void CWpa_Supplicant::setApScanDefault() {
+	QList<ShortNetworkInfo> netlist = listNetworks();
+	//Assume ap_scan=1 as default:
+	if (-1 == m_apScanDefault) {
+		m_apScanDefault = 1;
+		m_lastWasAdHoc = false;
+	}
+	//Check if active network is ad-hoc network:
+	foreach(ShortNetworkInfo i, netlist) {
+		if (NF_CURRENT == i.flags) {
+			if (i.adhoc) {
+				m_lastWasAdHoc = true;
+			}
+			break;
+		}
+	}
+}
+
 //CWpa_supplicant
 QList<quint8>& CWpa_Supplicant::getSupportedChannels() {
 	//create m_supportedChannels?

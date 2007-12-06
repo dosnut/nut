@@ -1,3 +1,9 @@
+//Features not implemented yet:
+//Retrieving of bit-rate
+//Signal from server when a new network was found
+//Fallback config in server
+
+
 #ifndef LIBNUTWIRELESS_WPA_SUPPLICANT_H
 #define LIBNUTWIRELESS_WPA_SUPPLICANT_H
 #include "base.h"
@@ -25,6 +31,10 @@ namespace libnutwireless {
 			EapNetworkConfig getEapNetworkConfig(int id);
 			EapNetconfigFailures editEapNetwork(int netid, EapNetworkConfig config);
 			NetconfigStatus checkAdHocNetwork(NetworkConfig &config);
+			
+			//Set ap_scan defaults
+			void setApScanDefault();
+			
 		public:
 			//TODO: Check why constructor is not beeing called
 			
@@ -38,6 +48,7 @@ namespace libnutwireless {
 				qDebug() << (QString("Constructor set ap_scan=%1").arg(QString::number(m_apScanDefault)));
 				m_lastWasAdHoc = false;
 				qDebug() << (QString("Constructor set m_lastWasAdHoc=%1").arg((m_lastWasAdHoc) ? "true" : "false"));
+				
 			}
 			~CWpa_Supplicant() {}
 			QList<quint8>& getSupportedChannels();
