@@ -30,7 +30,7 @@ namespace qnut {
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
 	private:
-		libnutclient::CDeviceList * m_Devices;
+		const libnutclient::CDeviceList * m_Devices;
 	private slots:
 		void deviceAdded(libnutclient::CDevice * device);
 		void deviceRemoved(libnutclient::CDevice * device);
