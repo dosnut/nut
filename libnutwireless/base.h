@@ -55,7 +55,7 @@ namespace libnutwireless {
 			//
 
 			QString wpaCtrlCommand(QString cmd);
-		//Abstracted Commands:
+			//Abstracted Commands:
 			inline QString wpaCtrlCmd_PING() { return wpaCtrlCommand("PING"); }
 			inline QString wpaCtrlCmd_MIB() { return wpaCtrlCommand("MIB"); }
 			inline QString wpaCtrlCmd_STATUS(bool verbose=false) { return (verbose) ? wpaCtrlCommand("STATUS-VERBOSE") : wpaCtrlCommand("STATUS"); }
@@ -93,10 +93,12 @@ namespace libnutwireless {
 			inline QString wpaCtrlCmd_AP_SCAN(int val) { return wpaCtrlCommand(QString("AP_SCAN %1").arg(QString::number(val))); }
 			inline QString wpaCtrlCmd_INTERFACES() { return wpaCtrlCommand("INTERFACES"); }
 			
-			//Parser Functions
 			//Event helper functions:
 			void eventDispatcher(Request req);
 			void eventDispatcher(EventType event, QString str);
+			/** This function is called by readFromWpa
+				when new information is available from wpa_supplicant
+			*/
 			void eventDispatcher(QString event);
 
 			//Functions to get actual signal strength and/or signal strength for scan results:
@@ -121,14 +123,20 @@ namespace libnutwireless {
 		public:
 			CWpa_SupplicantBase(QObject * parent, QString m_ifname);
 			~CWpa_SupplicantBase();
+			/** open connection to wpa_supplicant */
 			inline void open() { openWpa(false); }
+			/** close connection to wpa_supplicant */
 			inline bool close() {return closeWpa("libnutclient",false); }
 			bool connected();
+			/** This function reads the signal quality from wireless extension.
+				On success signalQualityUpdated(libnutwireless::WextSignal signal) will be emitted.
+			*/
 			void readWirelessInfo();
 			
 		public slots:
 			void setLog(bool enabled);
-			//Functions to react to request made from wpa_supplicant:
+			
+			/** Initiate a scan; See scanCompleted() */
 			void scan();
 			
 			void setSignalQualityPollRate(int msec);
@@ -138,15 +146,31 @@ namespace libnutwireless {
 			QList<ScanResult> scanResults();
 			
 		signals:
-			
+			/** Signal which is emitted if wpa_supplicant connects or disconnects
+				from a network
+				@param state connection state of network
+				@param id network id
+			*/
 			void connectionStateChanged(bool state, int id);
+			/** Signal which is emitted if wpa_supplicant requests a action.
+				Respond with CWpa_Supplicant::response();
+			*/
 			void request(libnutwireless::Request req);
-			void closed();
-			void opened();
+			/** This signal is emitted if the connection to wpa_supplicant is
+				established: state=true or
+				closed: state=false
+			*/
+			void stateChanged(bool state);
+			/** This signal is emitted whenever a scan is ready.
+				So far this happens twice:
+				First the scanresults from wpa_supplicant are set imediately.
+				Then we're trying to retrieve further information via wirelessExtension.
+			*/
 			void scanCompleted();
 			void message(QString msg);
 			void eventMessage(libnutwireless::EventType type);
 			void signalQualityUpdated(libnutwireless::WextSignal signal);
+			/** This signal is emitted whenever the network list from listNetworks() has changed. */
 			void networkListUpdated();
 	};
 

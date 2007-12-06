@@ -14,9 +14,7 @@ extern "C" {
 }
 namespace libnutwireless {
 
-	/**
-		NetworkFlags
-	*/
+	/** NetworkFlags */
 	typedef enum {NF_NONE, NF_CURRENT, NF_DISABLED} NetworkFlags;
 	
 	
@@ -29,9 +27,9 @@ namespace libnutwireless {
 	//AUTH_IEEE8021X = (AUTHALG_OPEN || LEAP) && KEYMGMT_IEEE8021X && (WKI_RSN || WKI_WPA) // This is not very clear yet
 
 
-	/** Protocols */
+	/*! Protocols. */
 	typedef enum {PROTO_UNDEFINED=0, PROTO_WPA=1, PROTO_RSN=2, PROTO_DEFAULT=3} Protocols; //RSN=WPA2
-	/** GroupCiphers */
+	/*! GroupCiphers. */
 	typedef enum {GCI_UNDEFINED=0, GCI_CCMP=2, GCI_TKIP=4, GCI_WEP104=8, GCI_WEP40=16, GCI_NONE=32, GCI_WRAP=64, GCI_DEF=30} GroupCiphers;
 	/** Pairwise Ciphers */
 	typedef enum {PCI_UNDEFINED=0, PCI_NONE=1, PCI_CCMP=2, PCI_TKIP=4, PCI_DEF=6} PairwiseCiphers;
