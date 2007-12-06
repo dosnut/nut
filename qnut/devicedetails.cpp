@@ -109,7 +109,7 @@ namespace qnut {
 			m_Device, SLOT(disable()));
 		m_DeviceMenu->addSeparator();
 		m_DeviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("&Scripting settings..."),
-			this, SLOT(openDeviceSettings()));
+			this, SLOT(openScriptingSettings()));
 		m_DeviceMenu->addAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."),
 			this, SLOT(openWirelessSettings()));
 		
@@ -233,7 +233,7 @@ namespace qnut {
 			interface->setUserConfig(config);
 	}
 	
-	void CDeviceDetails::openDeviceSettings() {
+	void CDeviceDetails::openScriptingSettings() {
 		CScriptSettings dialog(this);
 		dialog.execute(this);
 	}
