@@ -1,3 +1,10 @@
+//
+// C++ Interface: connectionmanager
+//
+// Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
+//
+// Copyright: See COPYING file that comes with this distribution
+//
 #ifndef QNUT_CONNECTIONMANAGER_H
 #define QNUT_CONNECTIONMANAGER_H
 
@@ -8,13 +15,20 @@
 #include "devicedetails.h"
 
 namespace qnut {
-	/** @brief CConnectionManager acts as the main class (and window) of the application
-		The connection manager itself provides only the constructor and destructor.
-		It's the main user interface of QNUT, that interacts with the libnutclient::CDeviceManager.
-	*/
+	/**
+	 * @brief CConnectionManager acts as the main class (and window) of the application
+	 * @author Oliver Groß <z.o.gross@gmx.de>
+	 * 
+	 * The connection manager itself provides only constructor and destructor.
+	 * 
+	 * It's the main user interface of QNUT with the following tasks:
+	 *  - interact with the libnutclient::CDeviceManager
+	 *  - provide an overview of all managed devices and an application log (written to file: "~/.qnut/qnut.log")
+	 *  - delegate detailed views and settings of each device, environment and interface
+	 */
 	class CConnectionManager : public QMainWindow {
 		Q_OBJECT
-	protected:
+	private:
 		Ui::connMan ui;
 		
 		libnutclient::CDeviceManager m_DeviceManager;
@@ -43,9 +57,15 @@ namespace qnut {
 		inline void readSettings();
 		inline void writeSettings();
 	public:
+		/**
+		 * @brief Creates the class and initializes the basic user interface and reads settings from "~/.qnut/qnut.conf".
+		 * @param parent parent widget
+		 */
 		CConnectionManager(QWidget * parent = 0);
+		
+		/// @brief Destroyes the class and writes the settings to "~/.qnut/qnut.conf".
 		~CConnectionManager();
-	protected slots:
+	private slots:
 		void handleTabChanged(int index);
 		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 		void showLog(bool doShow);

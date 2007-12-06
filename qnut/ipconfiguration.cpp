@@ -1,9 +1,6 @@
 //
 // C++ Implementation: ipconfiguration
 //
-// Description: 
-//
-//
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
@@ -21,9 +18,6 @@ namespace qnut {
 		ui.setupUi(this);
 		connect(ui.addButton, SIGNAL(clicked()), this, SLOT(addDNS()));
 		connect(ui.removeButton, SIGNAL(clicked()), this, SLOT(removeDNS()));
-	}
-	
-	CIPConfiguration::~CIPConfiguration() {
 	}
 	
 	bool CIPConfiguration::execute(libnutcommon::IPv4UserConfig & config) {

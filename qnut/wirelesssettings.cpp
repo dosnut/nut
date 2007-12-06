@@ -1,13 +1,9 @@
 //
 // C++ Implementation: wirelesssettings
 //
-// Description: 
-//
-//
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
-//
 //
 #include <QHeaderView>
 #include <QMessageBox>
@@ -31,18 +27,22 @@ namespace qnut {
 		
 		ui.nameLabel->setText(m_Device->getName());
 		
-		m_ManagedAPModel = new CManagedAPModel();
-		m_AvailableAPModel = new CAvailableAPModel();
+		
+		m_ManagedAPModel = new CManagedAPModel(m_Device->getWpaSupplicant());
+		m_AvailableAPModel = new CAvailableAPModel(m_Device->getWpaSupplicant());
+		
+		createActions();
 		
 		ui.managedView->setModel(m_ManagedAPModel);
 		ui.availableView->setModel(m_AvailableAPModel);
-		
-		createActions();
 		
 		ui.managedView->header()->setResizeMode(QHeaderView::ResizeToContents);
 		ui.availableView->header()->setResizeMode(QHeaderView::ResizeToContents);
 		
 		updateUi(m_Device->getState());
+		
+/*		m_ManagedAPModel->setWpaSupplicant(m_Device->getWpaSupplicant());
+		m_AvailableAPModel->setWpaSupplicant(m_Device->getWpaSupplicant());*/
 		
 		ui.managedView->header()->setMinimumSectionSize(-1);
 		ui.availableView->header()->setMinimumSectionSize(-1);
@@ -54,9 +54,15 @@ namespace qnut {
 		
 		connect(ui.availableView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(addNetwork()));
 		connect(ui.managedView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(switchToSelectedNetwork()));
-	}
-	
-	CWirelessSettings::~CWirelessSettings() {
+		
+		if (m_Device->getWpaSupplicant()) {
+			connect(m_Device->getWpaSupplicant(), SIGNAL(stateChanged(bool)), this, SLOT(setEnabled(bool)));
+			connect(m_Device->getWpaSupplicant(), SIGNAL(closed()), ui.managedView, SLOT(clearSelection()));
+			connect(m_SaveNetworksAction, SIGNAL(triggered()), m_Device->getWpaSupplicant(), SLOT(save_config()));
+			connect(m_RescanNetworksAction, SIGNAL(triggered()), m_Device->getWpaSupplicant(), SLOT(scan()));
+			connect(m_Device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)),
+				this, SLOT(updateSignalInfo(libnutwireless::WextSignal)));
+		}
 	}
 	
 	inline void CWirelessSettings::createActions() {
@@ -68,21 +74,17 @@ namespace qnut {
 		QAction * reloadNetworksAction;
 		
 		m_EnableNetworkAction    = new QAction(QIcon(UI_ICON_ENABLE), tr("&Enable"), this);
-		enableNetworksAction   = new QAction(QIcon(UI_ICON_ENABLE_ALL), tr("Enable &all"), this);
+		enableNetworksAction     = new QAction(QIcon(UI_ICON_ENABLE_ALL), tr("Enable &all"), this);
 		m_DisableNetworkAction   = new QAction(QIcon(UI_ICON_DISABLE), tr("&Disable"), this);
 		m_SwitchNetworkAction    = new QAction(QIcon(UI_ICON_FORCE), tr("S&witch"), this);
 		m_ConfigureNetworkAction = new QAction(QIcon(UI_ICON_CONFIGURE), tr("&Configure..."), this);
-		m_RemoveNetworkAction    = new QAction(QIcon(UI_ICON_REMOVE), tr("&Remove"), this);
-		
-		addNetworkAction       = new QAction(QIcon(UI_ICON_ADD), tr("Add &network"), this);
-		addAdhocAction         = new QAction(QIcon(UI_ICON_ADD_ADHOC), tr("Add ad-&hoc"), this);
-		
-		m_RescanNetworksAction   = new QAction(QIcon(UI_ICON_SEARCH), tr("Scan ne&tworks"), this);
-		
+		addNetworkAction         = new QAction(QIcon(UI_ICON_ADD), tr("Add &network"), this);
+		addAdhocAction           = new QAction(QIcon(UI_ICON_ADD_ADHOC), tr("Add ad-&hoc"), this);
+		reloadNetworksAction     = new QAction(QIcon(UI_ICON_RELOAD), tr("Re&load configuration"), this);
 		m_SaveNetworksAction     = new QAction(QIcon(UI_ICON_SAVE), tr("&Save configuration"), this);
-		reloadNetworksAction   = new QAction(QIcon(UI_ICON_RELOAD), tr("Re&load configuration"), this);
-		
+		m_RemoveNetworkAction    = new QAction(QIcon(UI_ICON_REMOVE), tr("&Remove"), this);
 		m_ToggleDetailsAction    = new QAction(QIcon(UI_ICON_DETAILED), tr("Detailed &view"), this);
+		m_RescanNetworksAction   = new QAction(QIcon(UI_ICON_SEARCH), tr("Scan ne&tworks"), this);
 		
 		m_ToggleDetailsAction->setCheckable(true);
 		m_ToggleDetailsAction->setChecked(true);
@@ -104,7 +106,7 @@ namespace qnut {
 		connect(addAdhocAction, SIGNAL(triggered()), this, SLOT(addAdhoc()));
 		
 		connect(m_ToggleDetailsAction, SIGNAL(toggled(bool)), this, SLOT(toggleDetails(bool)));
-		connect(reloadNetworksAction, SIGNAL(triggered()), ui.managedView->model(), SLOT(updateNetworks()));
+		connect(reloadNetworksAction, SIGNAL(triggered()), m_ManagedAPModel, SLOT(updateNetworks()));
 		
 		ui.managedView->addAction(m_EnableNetworkAction);
 		ui.managedView->addAction(enableNetworksAction);
@@ -141,11 +143,11 @@ namespace qnut {
 		ui.signalLabel->setText(tr("Signal (Quality, Level, Noise): %1").arg(signalSummary(signal)));
 	}
 	
-	void CWirelessSettings::enableInterface() {
-		setEnabled(true);
-		disconnect(m_Device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)),
-			this, SLOT(enableInterface()));
-	}
+// 	void CWirelessSettings::enableInterface() {
+// 		setEnabled(true);
+// 		disconnect(m_Device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)),
+// 			this, SLOT(enableInterface()));
+// 	}
 	
 	void CWirelessSettings::handleManagedAPSelectionChanged(const QItemSelection & selected, const QItemSelection &) {
 		m_EnableNetworkAction->setDisabled(selected.isEmpty());
@@ -159,26 +161,15 @@ namespace qnut {
 		ui.iconLabel->setPixmap(QPixmap(iconFile(m_Device)));
 		ui.stateLabel->setText(toStringTr(m_Device->getState()));
 		
-		if (state <= DS_ACTIVATED)
+		if (state <= DS_ACTIVATED) {
 			ui.signalLabel->setText("not assigned to accesspoint");
-		
-		if (state != DS_DEACTIVATED) {
+		}
+		else if (state == DS_CARRIER) {
 			m_Device->getWpaSupplicant()->ap_scan(1);
 			ui.signalLabel->setText(tr("waiting for device properties..."));
-			connect(m_Device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)),
-				this, SLOT(enableInterface()));
-			connect(m_Device->getWpaSupplicant(), SIGNAL(closed()), ui.managedView, SLOT(clearSelection()));
-			connect(m_SaveNetworksAction, SIGNAL(triggered()), m_Device->getWpaSupplicant(), SLOT(save_config()));
-			connect(m_RescanNetworksAction, SIGNAL(triggered()), m_Device->getWpaSupplicant(), SLOT(scan()));
-			connect(m_Device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)),
-				this, SLOT(updateSignalInfo(libnutwireless::WextSignal)));
+/*			connect(m_Device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)),
+				this, SLOT(enableInterface()));*/
 		}
-		else {
-			setEnabled(false);
-		}
-		
-		m_ManagedAPModel->setWpaSupplicant(m_Device->getWpaSupplicant());
-		m_AvailableAPModel->setWpaSupplicant(m_Device->getWpaSupplicant());
 	}
 	
 	void CWirelessSettings::switchToSelectedNetwork() {
