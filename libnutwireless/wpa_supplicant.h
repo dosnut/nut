@@ -12,6 +12,9 @@ namespace libnutwireless {
 		It provides all necessary functions to communicate with wpa_supplicant.
 		
 		To open the wpa_supplicant interface, open() has to be called.
+		To close it, close() has to be called.
+		Wpa_supplicant connection changes are emitted by stateChanged(bool state).
+		Network connection changes are emitted by connectionStateChanged
 	*/
 	class CWpa_Supplicant: public CWpa_SupplicantBase {
 			Q_OBJECT

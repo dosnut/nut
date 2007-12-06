@@ -7,7 +7,6 @@ namespace libnutwireless {
 	
 	
 	//Wpa_supplicant control commands:
-	//WARNING!!!! THIS MAY HAVE SOME MEMORY LEAKS!!! Check if char * is deleted in wpa_ctrl_request
 	QString CWpa_SupplicantBase::wpaCtrlCommand(QString cmd = "PING") {
 		//int wpa_ctrl_request(struct wpa_ctrl *ctrl, const char *cmd, size_t cmd_len,
 		//	     char *reply, size_t *reply_len,
@@ -242,7 +241,7 @@ namespace libnutwireless {
 		
 	
 		//Continue of ol features:
-		emit(opened());
+		emit(stateChanged(true));
 		printMessage(tr("wpa_supplicant connection established"));
 		return;
 	}
@@ -275,7 +274,7 @@ namespace libnutwireless {
 			event_ctrl = NULL;
 			cmd_ctrl = NULL;
 			m_wpaConnected = false;
-			emit(closed());
+			emit(stateChanged(false));
 		}
 		printMessage(tr("(%1)[%2] wpa_supplicant disconnected").arg(((internal) ? "internal" : "external"),call_func));
 		return true;

@@ -117,7 +117,7 @@ namespace libnutclient {
 	public:
 		/** @brief List of devices managed by the DeviceManager
 		*/
-		inline CDeviceList& getDevices() { return m_devices; } //TODO:change to const
+		inline const CDeviceList& getDevices() { return m_devices; } //TODO:change to const
 
 
 		/** @brief Init function to initialize
@@ -186,6 +186,9 @@ namespace libnutclient {
 		inline libnutcommon::DeviceState getState() { return m_state; }
 		inline libnutcommon::DeviceType getType() { return m_type; }
 		inline CEnvironment * getActiveEnvironment() { return m_activeEnvironment; }
+		/** If the device has a wpa_supplicant config, this function returns the pointer
+			to the wpa_supplicant object; See CWpa_Supplicant
+		*/
 		inline libnutwireless::CWpa_Supplicant * getWpaSupplicant() { return m_wpaSupplicant; }
 		inline int getIndex() { return m_index; }
 		
@@ -242,8 +245,8 @@ namespace libnutclient {
 
 		inline const QString& getName() { return m_name; }
 		inline const CInterfaceList& getInterfaces() { return m_interfaces;}
-		inline bool getState() { return m_state; }
-		inline int getIndex() { return m_index;}
+		inline bool getState() const { return m_state; }
+		inline int getIndex() const { return m_index;}
 		
 		CEnvironment(CDevice * parent, QDBusObjectPath dbusPath);
 		~CEnvironment();
@@ -296,15 +299,15 @@ namespace libnutclient {
 	private slots:
 		void dbusStateChanged(libnutcommon::InterfaceProperties properties);
 	public:
-		inline libnutcommon::InterfaceState getState() { return m_state; }
+		inline libnutcommon::InterfaceState getState() const { return m_state; }
 		inline const QHostAddress& getIp() { return m_ip;}
 		inline const QHostAddress& getNetmask() { return m_netmask; }
 		inline const QHostAddress& getGateway() { return m_gateway; }
 		inline const QList<QHostAddress>& getDnsServers() { return m_dnsservers; }
-		inline int getIndex() { return m_index;}
+		inline int getIndex() const { return m_index;}
 		
 		libnutcommon::IPv4UserConfig getUserConfig(bool refresh=false);
-		libnutcommon::IPv4Config& getConfig() { return m_config; }
+		const libnutcommon::IPv4Config& getConfig() const { return m_config; }
 
 		CInterface(CEnvironment * parent, QDBusObjectPath dbusPath);
 		~CInterface();
