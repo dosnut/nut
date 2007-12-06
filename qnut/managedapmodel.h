@@ -1,13 +1,9 @@
 //
 // C++ Interface: managedapmodel
 //
-// Description: 
-//
-//
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
-//
 //
 #ifndef QNUT_MANAGEDAPMODEL_H
 #define QNUT_MANAGEDAPMODEL_H
@@ -21,12 +17,31 @@
 #define UI_MANAP_BSSID  3
 
 namespace qnut {
+	/**
+	 * @brief CManagedAPModel provides an item model for an overview of the managed networks from a wpa_supplicant.
+	 * @author Oliver Groß <z.o.gross@gmx.de>
+	 * 
+	 * The class provides all functions for a read-only model specified in the Qt 4 documentation.
+	 * Additionally: A function to retrieve the cached data and a slot to force an update of the cached data are provided.
+	 * 
+	 * The model supports the display the following information in columns for each network:
+	 *  - SSID
+	 *  - current status (selected, enabled, disabled)
+	 *  - ID (the unique id)
+	 *  - BSSID (MAC address)
+	 */
 	class CManagedAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
+		/// @brief Returns the cached list of managed networks.
 		QList<libnutwireless::ShortNetworkInfo> cachedNetworks() const { return m_Networks; };
 		
+		/**
+		 * @brief Creates the object and initializes the model according to the given wpa_supplicant object.
+		 * @param wpaSupplicant pointer to a wpa_supplicant (if NULL nothing is displayed)
+		 */
 		CManagedAPModel(libnutwireless::CWpa_Supplicant * wpaSupplicant = NULL, QObject * parent = 0);
+		/// @brief Destroyes the object.
 		~CManagedAPModel();
 		
 		QVariant data(const QModelIndex & index, int role) const;
@@ -36,11 +51,11 @@ namespace qnut {
 		QModelIndex parent(const QModelIndex & index) const;
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
-		
-		void setWpaSupplicant(libnutwireless::CWpa_Supplicant * wpaSupplicant);
 	public slots:
+		/// @brief Updates the cached data.
 		void updateNetworks();
 	private:
+		void setWpaSupplicant(libnutwireless::CWpa_Supplicant * wpaSupplicant);
 		QList<libnutwireless::ShortNetworkInfo> m_Networks;
 		libnutwireless::CWpa_Supplicant * m_Supplicant;
 	};
