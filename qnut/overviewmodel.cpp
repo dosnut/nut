@@ -1,9 +1,6 @@
 //
 // C++ Implementation: overviewlistmodel
 //
-// Description: 
-// Dies stellt die Implementierung für das Model des ListView Steuerelemnts dar.
-//
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
