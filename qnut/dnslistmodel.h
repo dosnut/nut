@@ -16,10 +16,23 @@
 #include <QHostAddress>
 
 namespace qnut {
+	/**
+	 * @brief CDNSListModel provides an item model for an overview of a given the dns server list.
+	 * @author Oliver Groß <z.o.gross@gmx.de>
+	 * 
+	 * The class provides all functions for an editalbe model specified in the Qt 4 documentation.
+	 * 
+	 * The model supports the display and edit of the host addresses is the list.
+	 */
 	class CDNSListModel : public QAbstractListModel {
 		Q_OBJECT
 	public:
+		/**
+		 * @brief Creates the object and initializes the model according to the given list of host addresses.
+		 * @param dnsList pointer to a list of host addresses (if NULL nothing is displayed)
+		 */
 		CDNSListModel(QList<QHostAddress> * dnsList, QObject * parent = 0);
+		/// @brief Destroyes the object.
 		~CDNSListModel();
 		
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
