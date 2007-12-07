@@ -20,7 +20,7 @@ namespace qnut {
 	 * @brief CWirelessSettings provides an UI to configure the wireless Connection for a given CDevice.
 	 * @author Oliver Groß <z.o.gross@gmx.de>
 	 * 
-	 * On creation, the CWirelessSettings sets up the basic UI and waits for the CWpa_Supplicant
+	 * On creation, the CWirelessSettings sets up the basic UI and waits for the CWpaSupplicant
 	 * to retrieve the device properties. While waiting it disables the UI for user input.
 	 * 
 	 * The class provides public functions to set and get the state of a detailed view.

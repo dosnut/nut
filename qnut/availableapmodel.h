@@ -47,7 +47,7 @@ namespace qnut {
 		 * @param wpaSupplicant pointer to a wpa_supplicant (if NULL nothing is displayed)
 		 * @param parent parent object
 		 */
-		CAvailableAPModel(libnutwireless::CWpa_Supplicant * data = NULL, QObject * parent = 0);
+		CAvailableAPModel(libnutwireless::CWpaSupplicant * data = NULL, QObject * parent = 0);
 		/// @brief Destroyes the object.
 		~CAvailableAPModel();
 		
@@ -61,8 +61,8 @@ namespace qnut {
 	private slots:
 		void updateScans();
 	private:
-		void setWpaSupplicant(libnutwireless::CWpa_Supplicant * wpaSupplicant);
-		libnutwireless::CWpa_Supplicant * m_Supplicant;
+		void setWpaSupplicant(libnutwireless::CWpaSupplicant * wpaSupplicant);
+		libnutwireless::CWpaSupplicant * m_Supplicant;
 		QList<libnutwireless::ScanResult> m_Scans;
 	};
 }

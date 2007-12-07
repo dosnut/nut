@@ -23,13 +23,13 @@ namespace qnut {
 		Ui::adhoc ui;
 		QRegExpValidator * hexValidator;
 		int currentID;
-		libnutwireless::CWpa_Supplicant * supplicant;
+		libnutwireless::CWpaSupplicant * supplicant;
 	public:
 		bool execute(libnutwireless::ScanResult scanResult);
 		bool execute(int id);
 		bool execute();
 		
-		CAdhocConfig(libnutwireless::CWpa_Supplicant * wpa_supplicant, QWidget * parent = 0);
+		CAdhocConfig(libnutwireless::CWpaSupplicant * wpa_supplicant, QWidget * parent = 0);
 		~CAdhocConfig();
 	private slots:
 		void verifyConfiguration();

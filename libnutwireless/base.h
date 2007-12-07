@@ -27,7 +27,7 @@ namespace libnutwireless {
 		This class provides all functions that need timers, socket notifiers etc.
 		It is not used directly.
 	*/
-	class CWpa_SupplicantBase: public QObject, public CWpa_SupplicantParsers {
+	class CWpaSupplicantBase: public QObject, public CWpaSupplicantParsers {
 			Q_OBJECT
 		protected:
 			struct wpa_ctrl *cmd_ctrl, *event_ctrl;
@@ -124,8 +124,8 @@ namespace libnutwireless {
 			virtual void setApScanDefault()=0;
 			
 		public:
-			CWpa_SupplicantBase(QObject * parent, QString m_ifname);
-			~CWpa_SupplicantBase();
+			CWpaSupplicantBase(QObject * parent, QString m_ifname);
+			~CWpaSupplicantBase();
 			/** open connection to wpa_supplicant */
 			inline void open() { openWpa(false); }
 			/** close connection to wpa_supplicant */
@@ -156,7 +156,7 @@ namespace libnutwireless {
 			*/
 			void connectionStateChanged(bool state, int id);
 			/** Signal which is emitted if wpa_supplicant requests a action.
-				Respond with CWpa_Supplicant::response();
+				Respond with CWpaSupplicant::response();
 			*/
 			void request(libnutwireless::Request req);
 			/** This signal is emitted if the connection to wpa_supplicant is

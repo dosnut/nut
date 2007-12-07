@@ -13,7 +13,7 @@
 
 namespace libnutwireless {
 
-	/** @brief CWpa_Supplicant is the main class for communicatin with wpa_supplicant
+	/** @brief CWpaSupplicant is the main class for communicatin with wpa_supplicant
 
 		It provides all necessary functions to communicate with wpa_supplicant.
 		
@@ -27,7 +27,7 @@ namespace libnutwireless {
 		If the current network is an adhoc network, we assume the actual ap_scan value to be 2.
 		Otherwise we assume ap_scan=1.
 	*/
-	class CWpa_Supplicant: public CWpa_SupplicantBase {
+	class CWpaSupplicant: public CWpaSupplicantBase {
 			Q_OBJECT
 		private:
 			QList<quint8> m_supportedChannels;
@@ -48,14 +48,14 @@ namespace libnutwireless {
 			 * @param m_ifname interface name
 			 * The interface's socket has to be at /var/run/wpa_supplicant/ifname_name
 			 */
-			CWpa_Supplicant(QObject * parent, QString m_ifname) : CWpa_SupplicantBase(parent, m_ifname) {
+			CWpaSupplicant(QObject * parent, QString m_ifname) : CWpaSupplicantBase(parent, m_ifname) {
 				m_apScanDefault = -1;
 				qDebug() << (QString("Constructor set ap_scan=%1").arg(QString::number(m_apScanDefault)));
 				m_lastWasAdHoc = false;
 				qDebug() << (QString("Constructor set m_lastWasAdHoc=%1").arg((m_lastWasAdHoc) ? "true" : "false"));
 				
 			}
-			~CWpa_Supplicant() {}
+			~CWpaSupplicant() {}
 			QList<quint8>& getSupportedChannels();
 			
 		public slots:
@@ -77,7 +77,7 @@ namespace libnutwireless {
 			/** Set the ap_scan value.
 				If it's 0 or 1 the value will be used as default ap_scan value.
 				Normally you do not have to call the ap_scan function.
-				See selectNetwork(int id) and CWpa_Supplicant.
+				See selectNetwork(int id) and CWpaSupplicant.
 			*/
 			bool ap_scan(int type=1);
 			bool save_config();

@@ -733,7 +733,7 @@
     </message>
 </context>
 <context>
-    <name>libnutwireless::CWpa_Supplicant</name>
+    <name>libnutwireless::CWpaSupplicant</name>
     <message>
         <location filename="../libnutwireless/wpa_supplicant.cpp" line="35"/>
         <source>auto-setting ap_scan=2.</source>
@@ -751,7 +751,7 @@
     </message>
 </context>
 <context>
-    <name>libnutwireless::CWpa_SupplicantBase</name>
+    <name>libnutwireless::CWpaSupplicantBase</name>
     <message>
         <location filename="../libnutwireless/base.cpp" line="94"/>
         <source>Error while trying to receive messages from wpa_supplicant</source>
