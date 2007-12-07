@@ -238,6 +238,8 @@ namespace libnutwireless {
 			//Start timer for reading wireless info (like in /proc/net/wireless)
 			m_wextTimerId = startTimer(m_wextTimerRate);
 		}
+		//Set ap_scan default
+		setApScanDefault();
 		
 		//Continue of old features:
 		emit(stateChanged(true));
