@@ -17,9 +17,6 @@ namespace qnut {
 	CIPEditDelegate::CIPEditDelegate(QObject * parent) : QItemDelegate(parent) {
 	}
 	
-	CIPEditDelegate::~CIPEditDelegate() {
-	}
-	
 	QWidget * CIPEditDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem &, const QModelIndex &) const {
 		QLineEdit * editor = new QLineEdit(parent);
 		editor->setInputMask("000.000.000.000;_");
