@@ -37,11 +37,11 @@ namespace libnutclient {
 	QString toStringTr(QDBusError error);
 	QString toStringTr(libnutcommon::InterfaceState state);
 
-	/** @brief CLog provides a logging facility for the client_exceptions
+	/** @brief CLog provides a logging facility for the client
 		
 		The Log can be used to save the logging information to a file.
-		You can get access to via the printed signal, which is called every time
-		the logging functions are invoked.
+		You can get access to the text via the printed signal,
+		which is called every time the logging functions are invoked.
 	*/
 	class CLog : public QObject {
 		Q_OBJECT
@@ -77,6 +77,7 @@ namespace libnutclient {
 		protected:
 			QDBusConnectionInterface * m_dbusConnectionInterface;
 			QDBusConnection * m_dbusConnection;
+			/** Function to check if nuts is running */
 			void serviceCheck(QDBusConnectionInterface * interface);
 		public:
 			CLibNut(QObject * parent) : QObject(parent) {}

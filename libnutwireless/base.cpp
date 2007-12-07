@@ -239,8 +239,7 @@ namespace libnutwireless {
 			m_wextTimerId = startTimer(m_wextTimerRate);
 		}
 		
-	
-		//Continue of ol features:
+		//Continue of old features:
 		emit(stateChanged(true));
 		printMessage(tr("wpa_supplicant connection established"));
 		return;
