@@ -65,10 +65,8 @@ namespace qnut {
 	
 	QString signalSummary(libnutwireless::WextSignal signal) {
 		QString quality = QString::number(signal.quality.value) + '/' + QString::number(signal.quality.maximum);
-		QString level/* = QString::number(signal.quality.level) +
-			((signal.encoding & WSIG_LEVEL_REL)   ? '/' + QString::number(signal.maxquality.level) : QString())*/;
-		QString noise/* = QString::number(signal.quality.noise) +
-			((signal.encoding & WSIG_NOISE_REL)   ? '/' + QString::number(signal.maxquality.noise) : QString())*/;
+		QString level;
+		QString noise;
 		
 		switch (signal.type) {
 		case WSR_RCPI:
