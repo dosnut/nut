@@ -9,10 +9,10 @@ namespace libnutwireless {
 	/** @brief The parser class contains all wpa_supplicant specific parser functions
 		
 		The class is used to integrate all parser functions that we need later in
-		CWpa_SupplicantBase and CWpa_Supplicant.
+		CWpaSupplicantBase and CWpaSupplicant.
 
 	*/
-	class CWpa_SupplicantParsers {
+	class CWpaSupplicantParsers {
 		protected:
 
 		QStringList sliceMessage(QString str);

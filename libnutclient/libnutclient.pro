@@ -30,4 +30,3 @@ LIBS += ../libnutcommon/libnutcommon.a \
  ../libnutwireless/libnutwireless.a
 TARGETDEPS += ../libnutcommon/libnutcommon.a \
  ../libnutwireless/libnutwireless.a
-

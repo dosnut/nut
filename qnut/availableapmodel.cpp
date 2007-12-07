@@ -17,7 +17,7 @@ namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutwireless;
 	
-	CAvailableAPModel::CAvailableAPModel(CWpa_Supplicant * wpaSupplicant, QObject * parent) : QAbstractItemModel(parent) {
+	CAvailableAPModel::CAvailableAPModel(CWpaSupplicant * wpaSupplicant, QObject * parent) : QAbstractItemModel(parent) {
 		setWpaSupplicant(wpaSupplicant);
 	}
 	
@@ -25,7 +25,7 @@ namespace qnut {
 		m_Supplicant = NULL;
 	}
 	
-	void CAvailableAPModel::setWpaSupplicant(CWpa_Supplicant * wpaSupplicant) {
+	void CAvailableAPModel::setWpaSupplicant(CWpaSupplicant * wpaSupplicant) {
 		if (m_Supplicant == wpaSupplicant)
 			return;
 		

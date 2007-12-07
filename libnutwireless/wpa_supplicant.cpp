@@ -3,18 +3,21 @@
 
 namespace libnutwireless {
 
-void CWpa_Supplicant::setApScanDefault() {
+void CWpaSupplicant::setApScanDefault() {
+	if (-1 != m_apScanDefault) {
+		return;
+	}
 	QList<ShortNetworkInfo> netlist = listNetworks();
 	//Assume ap_scan=1 as default:
-	if (-1 == m_apScanDefault) {
-		m_apScanDefault = 1;
-		m_lastWasAdHoc = false;
-	}
+	m_apScanDefault = 1;
+	printMessage("Auto-setting ap_scan=1");
+	m_lastWasAdHoc = false;
 	//Check if active network is ad-hoc network:
 	foreach(ShortNetworkInfo i, netlist) {
 		if (NF_CURRENT == i.flags) {
 			if (i.adhoc) {
 				m_lastWasAdHoc = true;
+				printMessage("auto-setting last was adhoc to true");
 			}
 			break;
 		}
@@ -22,7 +25,7 @@ void CWpa_Supplicant::setApScanDefault() {
 }
 
 //CWpa_supplicant
-QList<quint8>& CWpa_Supplicant::getSupportedChannels() {
+QList<quint8>& CWpaSupplicant::getSupportedChannels() {
 	//create m_supportedChannels?
 	if (m_supportedChannels.isEmpty() && !m_supportedFrequencies.isEmpty()) {
 		foreach(quint32 freq, m_supportedFrequencies) {
@@ -33,14 +36,14 @@ QList<quint8>& CWpa_Supplicant::getSupportedChannels() {
 }
 
 //Function to respond to ctrl requests from wpa_supplicant
-void CWpa_Supplicant::response(Request request, QString msg) {
+void CWpaSupplicant::response(Request request, QString msg) {
 	QString cmd = toString(request.type);
 	if (!cmd.isEmpty()) {
 		wpaCtrlCmd_CTRL_RSP(cmd,request.id,msg);
 	}
 }
 
-bool CWpa_Supplicant::selectNetwork(int id) {
+bool CWpaSupplicant::selectNetwork(int id) {
 	//TODO: Check if we need to set ap_scan first
 
 	QOOL hasMode = toQOOL(getNetworkVariable(id,"mode"));
@@ -78,7 +81,7 @@ bool CWpa_Supplicant::selectNetwork(int id) {
 		return false;
 	}
 }
-bool CWpa_Supplicant::enableNetwork(int id) {
+bool CWpaSupplicant::enableNetwork(int id) {
 	if ("OK\n" == wpaCtrlCmd_ENABLE_NETWORK(id)) {
 		emit networkListUpdated();
 		return true;
@@ -87,7 +90,7 @@ bool CWpa_Supplicant::enableNetwork(int id) {
 		return false;
 	}
 }
-bool CWpa_Supplicant::disableNetwork(int id) {
+bool CWpaSupplicant::disableNetwork(int id) {
 	if ("OK\n" == wpaCtrlCmd_DISABLE_NETWORK(id)) {
 		emit networkListUpdated();
 		return true;
@@ -97,7 +100,7 @@ bool CWpa_Supplicant::disableNetwork(int id) {
 	}
 }
 
-bool CWpa_Supplicant::ap_scan(int type) {
+bool CWpaSupplicant::ap_scan(int type) {
 	if ( (0 <= type and 2 >= type) ) {
 		if ("FAIL\n" == wpaCtrlCmd_AP_SCAN(type)) {
 			return false;
@@ -117,34 +120,34 @@ bool CWpa_Supplicant::ap_scan(int type) {
 	}
 	return false;
 }
-bool CWpa_Supplicant::save_config() {
+bool CWpaSupplicant::save_config() {
 	return !("FAIL\n" == wpaCtrlCmd_SAVE_CONFIG());
 }
-void CWpa_Supplicant::disconnect_device() {
+void CWpaSupplicant::disconnect_device() {
 	wpaCtrlCmd_DISCONNECT();
 }
-void CWpa_Supplicant::logon() {
+void CWpaSupplicant::logon() {
 	wpaCtrlCmd_LOGON();
 }
-void CWpa_Supplicant::logoff() {
+void CWpaSupplicant::logoff() {
 	wpaCtrlCmd_LOGOFF();
 }
-void CWpa_Supplicant::reassociate() {
+void CWpaSupplicant::reassociate() {
 	wpaCtrlCmd_REASSOCIATE();
 }
-void CWpa_Supplicant::debug_level(int level) {
+void CWpaSupplicant::debug_level(int level) {
 	wpaCtrlCmd_LEVEL(level);
 }
-void CWpa_Supplicant::reconfigure() {
+void CWpaSupplicant::reconfigure() {
 	wpaCtrlCmd_RECONFIGURE();
 }
-void CWpa_Supplicant::terminate() {
+void CWpaSupplicant::terminate() {
 	wpaCtrlCmd_TERMINATE();
 }
-void CWpa_Supplicant::preauth(libnutcommon::MacAddress bssid) {
+void CWpaSupplicant::preauth(libnutcommon::MacAddress bssid) {
 	wpaCtrlCmd_PREAUTH(bssid.toString());
 }
-int CWpa_Supplicant::addNetwork() {
+int CWpaSupplicant::addNetwork() {
 	QString reply = wpaCtrlCmd_ADD_NETWORK();
 	if ("FAIL\n" == reply) {
 		return -1;
@@ -153,7 +156,7 @@ int CWpa_Supplicant::addNetwork() {
 		return reply.toInt();
 	}
 }
-NetconfigStatus CWpa_Supplicant::checkAdHocNetwork(NetworkConfig &config) {
+NetconfigStatus CWpaSupplicant::checkAdHocNetwork(NetworkConfig &config) {
 	// Note: IBSS can only be used with key_mgmt NONE (plaintext and static WEP)
 	// and key_mgmt=WPA-NONE (fixed group key TKIP/CCMP). In addition, ap_scan has
 	// to be set to 2 for IBSS. WPA-None requires following network block options:
@@ -190,7 +193,7 @@ NetconfigStatus CWpa_Supplicant::checkAdHocNetwork(NetworkConfig &config) {
 	return failures;
 }
 
-NetconfigStatus CWpa_Supplicant::addNetwork(NetworkConfig config) {
+NetconfigStatus CWpaSupplicant::addNetwork(NetworkConfig config) {
 	NetconfigStatus status;
 	status.failures = NCF_NONE;
 	status.eap_failures = ENCF_NONE;
@@ -215,7 +218,7 @@ NetconfigStatus CWpa_Supplicant::addNetwork(NetworkConfig config) {
 }
 
 
-NetconfigStatus CWpa_Supplicant::editNetwork(int netid, NetworkConfig config) {
+NetconfigStatus CWpaSupplicant::editNetwork(int netid, NetworkConfig config) {
 	NetconfigStatus failStatus;
 	//Check if we're adding an ad-hoc network:
 	if (QOOL_TRUE == config.mode) {
@@ -365,7 +368,7 @@ NetconfigStatus CWpa_Supplicant::editNetwork(int netid, NetworkConfig config) {
 	return failStatus;
 }
 
-NetworkConfig CWpa_Supplicant::getNetworkConfig(int id) {
+NetworkConfig CWpaSupplicant::getNetworkConfig(int id) {
 	NetworkConfig config;
 	QString response;
 
@@ -493,7 +496,7 @@ NetworkConfig CWpa_Supplicant::getNetworkConfig(int id) {
 	return config;
 }
 
-EapNetworkConfig CWpa_Supplicant::getEapNetworkConfig(int id) {
+EapNetworkConfig CWpaSupplicant::getEapNetworkConfig(int id) {
 	EapNetworkConfig config;
 	bool ok;
 	QString response;
@@ -617,7 +620,7 @@ EapNetworkConfig CWpa_Supplicant::getEapNetworkConfig(int id) {
 	}
 	return config;
 }
-EapNetconfigFailures CWpa_Supplicant::editEapNetwork(int netid, EapNetworkConfig config) {
+EapNetconfigFailures CWpaSupplicant::editEapNetwork(int netid, EapNetworkConfig config) {
 	EapNetconfigFailures eap_failures = ENCF_NONE;
 	if (EAPM_UNDEFINED != config.eap) {
 		if (!setNetworkVariable(netid,"eap",toString(config.eap)) ) {
@@ -752,11 +755,11 @@ EapNetconfigFailures CWpa_Supplicant::editEapNetwork(int netid, EapNetworkConfig
 	return eap_failures;
 }
 
-void CWpa_Supplicant::removeNetwork(int id) {
+void CWpaSupplicant::removeNetwork(int id) {
 	wpaCtrlCmd_REMOVE_NETWORK(id);
 }
 
-bool CWpa_Supplicant::setBssid(int id, libnutcommon::MacAddress bssid) {
+bool CWpaSupplicant::setBssid(int id, libnutcommon::MacAddress bssid) {
 	if (0 == wpaCtrlCmd_BSSID(id,bssid.toString()).indexOf("OK")) {
 		return true;
 	}
@@ -765,10 +768,10 @@ bool CWpa_Supplicant::setBssid(int id, libnutcommon::MacAddress bssid) {
 	}
 }
 //Plain setVaraiable functions
-void CWpa_Supplicant::setVariable(QString var, QString val) {
+void CWpaSupplicant::setVariable(QString var, QString val) {
 	wpaCtrlCmd_SET(var,val);
 }
-bool CWpa_Supplicant::setNetworkVariable(int id, QString var, QString val) {
+bool CWpaSupplicant::setNetworkVariable(int id, QString var, QString val) {
 	QString ret = wpaCtrlCmd_SET_NETWORK(id,var,val);
 	if (ret.contains("OK")) {
 		return true;
@@ -777,12 +780,12 @@ bool CWpa_Supplicant::setNetworkVariable(int id, QString var, QString val) {
 		return false;
 	}
 }
-QString CWpa_Supplicant::getNetworkVariable(int id, QString val) {
+QString CWpaSupplicant::getNetworkVariable(int id, QString val) {
 	return wpaCtrlCmd_GET_NETWORK(id,val);
 }
 
 //Functions with a lot more functionality  (in the parser functions :)
-QList<ShortNetworkInfo> CWpa_Supplicant::listNetworks() {
+QList<ShortNetworkInfo> CWpaSupplicant::listNetworks() {
 	QString reply = wpaCtrlCmd_LIST_NETWORKS();
 	if (!reply.isEmpty()) {
 		QList<ShortNetworkInfo> info = parseListNetwork(sliceMessage(reply));
@@ -795,7 +798,7 @@ QList<ShortNetworkInfo> CWpa_Supplicant::listNetworks() {
 	}
 }
 
-Status CWpa_Supplicant::status() {
+Status CWpaSupplicant::status() {
 	QString reply = wpaCtrlCmd_STATUS(true);
 	if (!reply.isEmpty()) {
 		return parseStatus(sliceMessage(reply));
@@ -805,7 +808,7 @@ Status CWpa_Supplicant::status() {
 		return dummy;
 	}
 }
-MIBVariables CWpa_Supplicant::getMIBVariables() {
+MIBVariables CWpaSupplicant::getMIBVariables() {
 	QString reply = wpaCtrlCmd_MIB();
 	if (!reply.isEmpty()) {
 		return parseMIB(sliceMessage(reply));
@@ -815,7 +818,7 @@ MIBVariables CWpa_Supplicant::getMIBVariables() {
 	}
 }
 
-Capabilities CWpa_Supplicant::getCapabilities() {
+Capabilities CWpaSupplicant::getCapabilities() {
 	Capabilities caps;
 	caps.eap = EAPM_UNDEFINED;
 	caps.pairwise = PCI_UNDEFINED;

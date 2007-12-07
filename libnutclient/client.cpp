@@ -408,7 +408,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) : CLibNut(
 
 	//Only use wpa_supplicant if we need one
 	if (m_needWpaSupplicant) {
-		m_wpaSupplicant = new libnutwireless::CWpa_Supplicant(this,m_name);
+		m_wpaSupplicant = new libnutwireless::CWpaSupplicant(this,m_name);
 		connect(m_wpaSupplicant,SIGNAL(message(QString)),log,SLOT(log(QString)));
 		connect(m_dbusDevice,SIGNAL(newWirelssNetworkFound(void)),this,SIGNAL(newWirelessNetworkFound(void)));
 		//Connect to wpa_supplicant only if device is not deactivated

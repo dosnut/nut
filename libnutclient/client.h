@@ -174,7 +174,7 @@ namespace libnutclient {
 		libnutcommon::DeviceState m_state;
 		libnutcommon::DeviceType m_type;
 		CEnvironment * m_activeEnvironment;
-		libnutwireless::CWpa_Supplicant * m_wpaSupplicant;
+		libnutwireless::CWpaSupplicant * m_wpaSupplicant;
 		int m_index;
 
 	private slots:
@@ -188,9 +188,9 @@ namespace libnutclient {
 		inline libnutcommon::DeviceType getType() { return m_type; }
 		inline CEnvironment * getActiveEnvironment() { return m_activeEnvironment; }
 		/** If the device has a wpa_supplicant config, this function returns the pointer
-			to the wpa_supplicant object; See CWpa_Supplicant
+			to the wpa_supplicant object; See CWpaSupplicant
 		*/
-		inline libnutwireless::CWpa_Supplicant * getWpaSupplicant() { return m_wpaSupplicant; }
+		inline libnutwireless::CWpaSupplicant * getWpaSupplicant() { return m_wpaSupplicant; }
 		inline int getIndex() { return m_index; }
 		
 		CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);

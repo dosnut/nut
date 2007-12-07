@@ -17,7 +17,7 @@ namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutwireless;
 	
-	CAccessPointConfig::CAccessPointConfig(CWpa_Supplicant * wpa_supplicant, QWidget *parent) : QDialog(parent) {
+	CAccessPointConfig::CAccessPointConfig(CWpaSupplicant * wpa_supplicant, QWidget *parent) : QDialog(parent) {
 		supplicant = wpa_supplicant;
 		
 		ui.setupUi(this);

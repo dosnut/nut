@@ -14,7 +14,7 @@
 namespace qnut {
 	using namespace libnutwireless;
 
-	CAdhocConfig::CAdhocConfig(CWpa_Supplicant * wpa_supplicant, QWidget * parent) : QDialog(parent) {
+	CAdhocConfig::CAdhocConfig(CWpaSupplicant * wpa_supplicant, QWidget * parent) : QDialog(parent) {
 		supplicant = wpa_supplicant;
 		
 		ui.setupUi(this);

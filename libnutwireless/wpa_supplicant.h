@@ -13,7 +13,7 @@
 
 namespace libnutwireless {
 
-	/** @brief CWpa_Supplicant is the main class for communicatin with wpa_supplicant
+	/** @brief CWpaSupplicant is the main class for communicatin with wpa_supplicant
 
 		It provides all necessary functions to communicate with wpa_supplicant.
 		
@@ -21,8 +21,13 @@ namespace libnutwireless {
 		To close it, close() has to be called.
 		Wpa_supplicant connection changes are emitted by stateChanged(bool state).
 		Network connection changes are emitted by connectionStateChanged
+
+		We try to do all tasks automatically as far as possible.
+		On instantiation we set apScanDefault to 1. If you want to change this, call ap_scan with your desired value.
+		If the current network is an adhoc network, we assume the actual ap_scan value to be 2.
+		Otherwise we assume ap_scan=1.
 	*/
-	class CWpa_Supplicant: public CWpa_SupplicantBase {
+	class CWpaSupplicant: public CWpaSupplicantBase {
 			Q_OBJECT
 		private:
 			QList<quint8> m_supportedChannels;
@@ -43,14 +48,14 @@ namespace libnutwireless {
 			 * @param m_ifname interface name
 			 * The interface's socket has to be at /var/run/wpa_supplicant/ifname_name
 			 */
-			CWpa_Supplicant(QObject * parent, QString m_ifname) : CWpa_SupplicantBase(parent, m_ifname) {
+			CWpaSupplicant(QObject * parent, QString m_ifname) : CWpaSupplicantBase(parent, m_ifname) {
 				m_apScanDefault = -1;
 				qDebug() << (QString("Constructor set ap_scan=%1").arg(QString::number(m_apScanDefault)));
 				m_lastWasAdHoc = false;
 				qDebug() << (QString("Constructor set m_lastWasAdHoc=%1").arg((m_lastWasAdHoc) ? "true" : "false"));
 				
 			}
-			~CWpa_Supplicant() {}
+			~CWpaSupplicant() {}
 			QList<quint8>& getSupportedChannels();
 			
 		public slots:
@@ -60,10 +65,20 @@ namespace libnutwireless {
 				@param msg the value that will be passed to wpa_supplicant
 			*/
 			void response(Request request, QString msg);
-			//
+			/** Select a configured network
+				ap_scan will be set automatically:
+				ap_scan=1 (or your default) for non-adhoc
+				ap_scan=2 for adhoc
+				It'll be set, if we select a network that needs a different ap_scan value.
+			*/
 			bool selectNetwork(int id);
 			bool enableNetwork(int id);
 			bool disableNetwork(int id);
+			/** Set the ap_scan value.
+				If it's 0 or 1 the value will be used as default ap_scan value.
+				Normally you do not have to call the ap_scan function.
+				See selectNetwork(int id) and CWpaSupplicant.
+			*/
 			bool ap_scan(int type=1);
 			bool save_config();
 			void disconnect_device();

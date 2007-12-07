@@ -29,7 +29,7 @@ namespace qnut {
 		Ui::apconf ui;
 		QRegExpValidator * hexValidator;
 		
-		libnutwireless::CWpa_Supplicant * supplicant;
+		libnutwireless::CWpaSupplicant * supplicant;
 		
 		int currentID;
 		bool wepEnabled;
@@ -62,7 +62,7 @@ namespace qnut {
 		 * @brief Creates the object and initializes the basic user interface.
 		 * @param parent parent widget
 		 */
-		CAccessPointConfig(libnutwireless::CWpa_Supplicant * wpa_supplicant, QWidget * parent = 0);
+		CAccessPointConfig(libnutwireless::CWpaSupplicant * wpa_supplicant, QWidget * parent = 0);
 		/// @brief Destroyes the object.
 		~CAccessPointConfig();
 	private slots:
