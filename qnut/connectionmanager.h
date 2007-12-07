@@ -58,12 +58,12 @@ namespace qnut {
 		inline void writeSettings();
 	public:
 		/**
-		 * @brief Creates the class and initializes the basic user interface and reads settings from "~/.qnut/qnut.conf".
+		 * @brief Creates the object, initializes the basic user interface and reads settings from "~/.qnut/qnut.conf".
 		 * @param parent parent widget
 		 */
 		CConnectionManager(QWidget * parent = 0);
 		
-		/// @brief Destroyes the class and writes the settings to "~/.qnut/qnut.conf".
+		/// @brief Destroyes the object and writes the settings to "~/.qnut/qnut.conf".
 		~CConnectionManager();
 	private slots:
 		void handleTabChanged(int index);
