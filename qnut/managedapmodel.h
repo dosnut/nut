@@ -39,6 +39,7 @@ namespace qnut {
 		/**
 		 * @brief Creates the object and initializes the model according to the given wpa_supplicant object.
 		 * @param wpaSupplicant pointer to a wpa_supplicant (if NULL nothing is displayed)
+		 * @param parent parent object
 		 */
 		CManagedAPModel(libnutwireless::CWpa_Supplicant * wpaSupplicant = NULL, QObject * parent = 0);
 		/// @brief Destroyes the object.

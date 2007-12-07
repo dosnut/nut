@@ -35,6 +35,7 @@ namespace qnut {
 		/**
 		 * @brief Creates the object and initializes the model according to the given interface.
 		 * @param data pointer to an interface (if NULL nothing is displayed)
+		 * @param parent parent object
 		 */
 		CInterfaceDetailsModel(libnutclient::CInterface * data = NULL, QObject * parent = 0);
 		/// @brief Destroyes the object.

@@ -32,6 +32,7 @@ namespace qnut {
 		/**
 		 * @brief Creates the object and initializes the model according to the given device manager.
 		 * @param deviceManager pointer to a device manager (if NULL nothing is displayed)
+		 * @param parent parent object
 		 */
 		COverViewModel(libnutclient::CDeviceManager * deviceManager, QObject * parent = 0);
 		/// @brief Destroyes the object.

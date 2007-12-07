@@ -30,6 +30,7 @@ namespace qnut {
 		/**
 		 * @brief Creates the object and initializes the model according to the given list of host addresses.
 		 * @param dnsList pointer to a list of host addresses (if NULL nothing is displayed)
+		 * @param parent parent object
 		 */
 		CDNSListModel(QList<QHostAddress> * dnsList, QObject * parent = 0);
 		/// @brief Destroyes the object.

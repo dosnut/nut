@@ -29,6 +29,7 @@ namespace qnut {
 		/**
 		 * @brief Creates the object and initializes the model according to the given device.
 		 * @param data pointer to a device (if NULL nothing is displayed)
+		 * @param parent parent object
 		 */
 		CEnvironmentTreeModel(libnutclient::CDevice * data, QObject * parent = 0);
 		/// @brief Destroyes the object.

@@ -28,6 +28,7 @@ namespace qnut {
 		/**
 		 * @brief Creates the object and initializes the model according to the given environment.
 		 * @param data pointer to an environment (if NULL nothing is displayed)
+		 * @param parent parent object
 		 */
 		CEnvironmentDetailsModel(libnutclient::CEnvironment * data = NULL, QObject * parent = 0);
 		/// @brief Destroyes the object.
