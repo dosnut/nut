@@ -14,7 +14,7 @@ extern "C" {
 }
 namespace libnutwireless {
 
-	/** NetworkFlags */
+	/** Enum of possible NetworkFlags */
 	typedef enum {NF_NONE, NF_CURRENT, NF_DISABLED} NetworkFlags;
 	
 	
@@ -27,20 +27,20 @@ namespace libnutwireless {
 	//AUTH_IEEE8021X = (AUTHALG_OPEN || LEAP) && KEYMGMT_IEEE8021X && (WKI_RSN || WKI_WPA) // This is not very clear yet
 
 
-	/*! Protocols. */
+	/** Enum of possible protocols. RSN=WPA2 */
 	typedef enum {PROTO_UNDEFINED=0, PROTO_WPA=1, PROTO_RSN=2, PROTO_DEFAULT=3} Protocols; //RSN=WPA2
-	/*! GroupCiphers. */
+	/** Enum of possible group ciphers. */
 	typedef enum {GCI_UNDEFINED=0, GCI_CCMP=2, GCI_TKIP=4, GCI_WEP104=8, GCI_WEP40=16, GCI_NONE=32, GCI_WRAP=64, GCI_DEF=30} GroupCiphers;
-	/** Pairwise Ciphers */
+	/** Enum of possible pairwise ciphers */
 	typedef enum {PCI_UNDEFINED=0, PCI_NONE=1, PCI_CCMP=2, PCI_TKIP=4, PCI_DEF=6} PairwiseCiphers;
-	/** Keymanagement */
+	/** Enum of possible  key management */
 	typedef enum {KM_UNDEFINED=0, KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8, KM_WPA_NONE=16, KM_OFF=32, KM_DEF=6} KeyManagement; //TODO:change parsers due to KM_OFF
-	/** AuthenticationAlgs */
+	/** Enum of possible authentication  algorithms */
 	typedef enum {AUTHALG_UNDEFINED=0, AUTHALG_OPEN=1, AUTHALG_SHARED=2, AUTHALG_LEAP=4} AuthenticationAlgs; //Default: automatic selection
 
 	
 	typedef enum {INTERACT_MSG, INTERACT_REQ,INTERACT_EVENT} InteractiveType;
-	/** Request type contains all possible request from wpa_supplicant. */
+	/** RequestType contains all possible requests from wpa_supplicant. */
 	typedef enum {REQ_FAIL, REQ_PASSWORD, REQ_IDENTITY, REQ_NEW_PASSWORD, REQ_PIN, REQ_OTP, REQ_PASSPHRASE} RequestType;
 	/** Possible events from wpa_supplicant, not complete */
 	typedef enum {EVENT_OTHER, EVENT_DISCONNECTED, EVENT_CONNECTED, EVENT_TERMINATING, EVENT_PASSWORD_CHANGED, EVENT_EAP_NOTIFICATION, EVENT_EAP_STARTED, EVENT_EAP_METHOD, EVENT_EAP_SUCCESS, EVENT_EAP_FAILURE } EventType;
@@ -253,7 +253,7 @@ namespace libnutwireless {
 		} value;
 	};
 	
-	/** One wpa_suplicant network variable */
+	/** One wpa_suplicant network variable. Reserved for future purpose. */
 	struct NetworkVariable {
 		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} Type;
 		QString name;
@@ -264,7 +264,7 @@ namespace libnutwireless {
 		} value;
 	};
 
-	/** request made by wpa_supplicant */
+	/** Request made by wpa_supplicant */
 	struct Request {
 		RequestType type;
 		int id;
@@ -272,48 +272,72 @@ namespace libnutwireless {
 
 
 	//Conversion functions
+	/** Convert ScanCiphers to GroupCiphers */
 	GroupCiphers toGroupCiphers(ScanCiphers cip);
+	/// Convert ScanCiphers to PairwiseCiphers
 	PairwiseCiphers toPairwiseCiphers(ScanCiphers cip);
+	/// Convert ScanAuthentication to KeyManagement
 	KeyManagement toKeyManagment(ScanAuthentication auth);
+	///Convert ScanAuthentication to AuthenticationAlgs
 	AuthenticationAlgs toAuthAlgs(ScanAuthentication auth);
+	///Convert ScanAuthentication to Protocols
 	Protocols toProtocols(ScanAuthentication auth);
 
-
+	///Convert GroupCiphers to QString
 	QString toString(GroupCiphers cip);
+	///Convert PairwiseCiphers to QString
 	QString toString(PairwiseCiphers cip);
+	///Convert KeyManagement to QString
 	QString toString(KeyManagement keym);
+	///Convert AuthenticationAlgs to QString
 	QString toString(AuthenticationAlgs algs);
+	///Convert Protocols to QString
 	QString toString(Protocols proto);
 
-
+	///Convert ScanCiphers to QString
 	QString toString(ScanCiphers cip);
+	///Convert ScanAuthentication to QString
 	QString toString(ScanAuthentication auth);
+	///Convert RequestType to QString
 	QString toString(RequestType reqt);
 	
+	///Convert EapolFlags to QString
 	QString toString(EapolFlags flags);
+	///Convert EapMethod to QString
 	QString toString(EapMethod method);
 
-	//Function converts the encoded scan values to real values
+	/// Function converts the encoded scan values to real values
 	WextSignal convertValues(WextRawScan &scan);
+	/// Function to convert the signal quality of a WextRawScan to a human readable string
 	QString signalQualityToString(WextRawScan scan);
-	QStringList signalQualityToStringList(WextRawScan scan);
 	
+	/** Convert frequency to channel: 2,4GHz => 1-14; 5GHz => 36-167
+		@return -1 on invalid values */
 	int frequencyToChannel(int freq);
+	/** Convert channel to frequency: 1-14 => 2,4GHz; 36-167 => 5GHz
+		@return -1 on invalid values */
 	int channelToFrequency(int channel);
 
+	///Convert QOOL to QString (QOOL_UNDEFINED="-1", QOOL_FALSE="0", QOOL_TRUE="1")
 	QString toNumberString(QOOL b);
+	///Convert QOOL to bool (QOOL_UNDEFINED=false, QOOL_FALSE=false, QOOL_TRUE=true)
 	bool toBool(QOOL b);
+	///Convert bool to QOOL (false=QOOL_FALSE, true=QOOL_TRUE)
 	QOOL toQOOL(bool b);
 
+	/// Convert bool to number (false=0; true=1)
 	inline int toNumber(bool b) {
 		return ((b)? 1 : 0);
 	}
+	/// Convert QOOL to number (QOOL_UNDEFINED=-1, QOOL_FALSE=0, QOOL_TRUE=1)
 	inline int toNumber(QOOL b) {
 		return ( (b == QOOL_UNDEFINED) ? -1 : ( (b == QOOL_TRUE) ? 1 : 0)); 
 	}
+	/// Convert QString to bool ("1" = true; otherwise false)
 	inline bool toBool(QString str) {
 		return ( ("1" == str) ? true : false);
 	}
+	/// Convert QString to QOOL ("-1"=QOOL_UNDEFINED, "0"=QOOL_FALSE, "1"=QOOL_TRUE)
 	inline QOOL toQOOL(QString str) {
 		if ("0" == str) {
 			return QOOL_FALSE;
