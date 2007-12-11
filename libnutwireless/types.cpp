@@ -487,6 +487,23 @@ NetworkConfig::NetworkConfig() {
 			wep_tx_keyidx = -1; //Default WEP key index (TX) (0..3)
 			peerkey = QOOL_UNDEFINED; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
 }
+NetworkConfig::NetworkConfig(ScanResult scan) {
+	NetworkConfig();
+	bssid = scan.bssid;
+	ssid = scan.ssid;
+	group = scan.group;
+	pairwise = scan.pairwise;
+	keyManagement = scan.keyManagement;
+	protocols =  scan.protocols;
+	if (scan.opmode == OPM_ADHOC) {
+		frequency = scan.freq;
+		mode = QOOL_TRUE;
+	}
+	else {
+		mode = QOOL_FALSE;
+	}
+}
+
 NetworkConfig::~NetworkConfig() {
 }
 EapNetworkConfig::EapNetworkConfig() {

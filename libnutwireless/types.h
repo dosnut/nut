@@ -401,6 +401,7 @@ namespace libnutwireless {
 	class NetworkConfig { //All without linebreak
 		public:
 			NetworkConfig();
+			NetworkConfig(ScanResult scan);
 			~NetworkConfig();
 			QString ssid;
 			libnutcommon::MacAddress bssid;
