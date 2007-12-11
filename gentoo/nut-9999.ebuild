@@ -81,5 +81,6 @@ pkg_postinst() {
 	elog "i.e. ctrl_interface_group=netdev"
 	elog "To start nuts add nuts to your default runlevel:"
 	elog "rc-update add nuts default"
+	elog "Remeber to read the documentation!"
 }
 
