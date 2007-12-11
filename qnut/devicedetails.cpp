@@ -33,7 +33,7 @@ namespace qnut {
 	{
 		m_Device = parentDevice;
 		
-		if (m_Device->getType() == DT_AIR)
+		if (m_Device->getWpaSupplicant())
 			m_WirelessSettings = new CWirelessSettings(m_Device);
 		else
 			m_WirelessSettings = NULL;
@@ -103,15 +103,23 @@ namespace qnut {
 	inline void CDeviceDetails::createActions() {
 		m_DeviceMenu = new QMenu(m_Device->getName(), NULL);
 		
-		m_DeviceMenu->addAction(QIcon(UI_ICON_ENABLE), tr("&Enable device"),
+		QAction * tempAction;
+		
+		tempAction = m_DeviceMenu->addAction(QIcon(UI_ICON_ENABLE), tr("&Enable device"),
 			m_Device, SLOT(enable()));
-		m_DeviceMenu->addAction(QIcon(UI_ICON_DISABLE), tr("&Disable device"),
+		tempAction->setEnabled(m_Device->getState() == DS_DEACTIVATED);
+		
+		tempAction = m_DeviceMenu->addAction(QIcon(UI_ICON_DISABLE), tr("&Disable device"),
 			m_Device, SLOT(disable()));
+		tempAction->setDisabled(m_Device->getState() == DS_DEACTIVATED);
+		
 		m_DeviceMenu->addSeparator();
 		m_DeviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("&Scripting settings..."),
 			this, SLOT(openScriptingSettings()));
-		m_DeviceMenu->addAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."),
+		
+		tempAction = m_DeviceMenu->addAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."),
 			this, SLOT(openWirelessSettings()));
+		tempAction->setEnabled(m_Device->getWpaSupplicant());
 		
 		m_DeviceActions = m_DeviceMenu->actions();
 		
@@ -120,17 +128,14 @@ namespace qnut {
 			this, SLOT(showTheeseDetails()));
 		
 		m_EnterEnvironmentAction = new QAction(QIcon(UI_ICON_FORCE), tr("E&nter environment"), this);
-		m_IPConfigurationAction  = new QAction(QIcon(UI_ICON_EDIT), tr("Set &IP configuration..."), this);
+		m_EnterEnvironmentAction->setEnabled(false);
 		ui.environmentTree->addAction(m_EnterEnvironmentAction);
+		
+		m_IPConfigurationAction  = new QAction(QIcon(UI_ICON_EDIT), tr("Set &IP configuration..."), this);
+		m_IPConfigurationAction->setEnabled(false);
 		ui.environmentTree->addAction(m_IPConfigurationAction);
 		
 		ui.environmentTree->setContextMenuPolicy(Qt::ActionsContextMenu);
-
-		m_DeviceActions[0]->setEnabled(m_Device->getState() == DS_DEACTIVATED);
-		m_DeviceActions[1]->setDisabled(m_Device->getState() == DS_DEACTIVATED);
-		m_DeviceActions[4]->setEnabled(m_Device->getType() == DT_AIR);
-		m_IPConfigurationAction->setEnabled(false);
-		m_EnterEnvironmentAction->setEnabled(false);
 		
 		connect(m_IPConfigurationAction, SIGNAL(triggered()), this, SLOT(openIPConfiguration()));
 	}
