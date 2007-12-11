@@ -47,30 +47,73 @@
 \end{frame}
 
 \subsection{Beispiel}
-\begin{frame}[fragile]{Konfigurationsbeispiel}
-\textbf{/etc/nuts/nuts.config}
+\begin{frame}[fragile]{Konfigurationsbeispiel 1}
 \tiny
 \begin{verbatim}
 device "eth0" {
+    no-auto-start; //Nicht beim starten von nuts aktivieren
+    dhcp; //Default environment dhcp (optional)
+    environment "zeroconf" zeroconf; //Zeroconf environment
+    environment "userdefineable" static user; //Environment mit benutzerdefinierbarem Interface
+    // Environment wird nach einer IP-Adresse in Verbindung mit MAC (optional) ausgewählt
+    environment "home" select arp 192.168.0.1 00:07:40:EC:D0:BE;
+};
+device "eth1" {
+    wpa-supplicant config "/etc/wpa_supplicant/wpa_supplicant.conf" driver "wext";
     dhcp;
-    environment "home" {
+    environment "infeap" {
+        select essid "infeap";
+    };
+    environment "static/dynamic" {
+        dhcp;
         static {
-            ip 192.168.0.86;
+            ip 192.168.0.61;
             netmask 255.255.255.0;
             gateway 192.168.0.1;
-            dns-server 192.168.0.1
+            dns-server 192.168.0.1;
         };
-        select arp 192.168.0.1 00:1A:4F:AA:AA:AA;
     };
-    environment "gwlaptop" select arp 129.69.212.17 00:00:1A:19:40:C7;
+    environment "zeroconf" {
+        zeroconf;
+    };
 };
+\end{verbatim}
+\end{frame}
 
+\begin{frame}[fragile]{Konfigurationsbeispiel 2}
+\fontsize{4.8}{5.8} \selectfont
+\begin{verbatim}
 device "eth1" {
-    no-auto-start;   // Nicht automatisch aktivieren
-    wpa-supplicant config "/etc/wpa_supplicant/wpa_supplicant.conf";
-    environment "infeap" select essid "infeap";
-    environment "zeroconf" zeroconf;
-    environment "user" static user;
+    wpa-supplicant config "/etc/wpa_supplicant/wpa_supplicant.conf" driver "wext";
+    dhcp;
+    environment "infeap" {
+        select essid "infeap";
+    };
+    environment "home" {
+        dhcp;
+        select or {
+            select and {
+                essid "buftop";
+                arp 192.168.0.1 00:07:40:EC:D0:BE;
+            };
+            select and {
+                essid "unten";
+                arp 192.168.178.1 00:15:0C:46:2D:C7;
+            };
+        };
+    };
+    environment "static/dynamic" {
+        dhcp;
+        static {
+            ip 192.168.0.61;
+            netmask 255.255.255.0;
+            gateway 192.168.0.1;
+            dns-server 192.168.0.1;
+        };
+    };
+    environment "zeroconf" {
+        zeroconf;
+    };
 };
 \end{verbatim}
 \end{frame}

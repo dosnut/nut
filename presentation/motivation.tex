@@ -9,6 +9,44 @@
 	\end{itemize}
 \end{frame}
 
+\begin{frame}[fragile]{Motivation-Beispielskript}
+\fontsize{4.8}{5.8} \selectfont
+\begin{verbatim}
+#!/bin/bash
+echo "* loading modules...";
+echo "  -> acer_acpi";
+modprobe -r acer_acpi;
+modprobe acer_acpi;
+if [ "$1" = "bcm" ]
+then
+    echo "  -> bcm43xx";
+    modprobe bcm43xx;
+else
+    echo "  -> ndiswrapper";
+    modprobe ndiswrapper;
+fi
+echo "* enabling wlan hardware...";
+echo "enabled: 1" > /proc/acpi/acer/wireless;
+sleep 0.1;
+if [ "$1" = "bcm" ]
+then
+    iwconfig wlan0 rate 11M;
+fi
+echo "* bringing up wlan interface...";
+if [ "$2" = "connect" -o "$1" = "connect" ]
+then
+    ifup wlan0;
+elif [ "$2" = "connect2" -o "$1" = "connect2" ]
+then
+    echo "* starting wpa supplicant...";
+    wpa_supplicant -B -i wlan0 -D wext -c /etc/wpa_supplicant/wpa_supplicant.conf;
+    sleep 1;
+    echo "* starting dhcp client"
+    dhclient wlan0
+fi
+\end{verbatim}
+\end{frame}
+
 \begin{frame}[<+-| alert@+>]{Motivation-Andere Netzwerkmanager}
 	\fontsize{7}{8.4}\selectfont
 	\begin{center}
