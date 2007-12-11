@@ -300,12 +300,12 @@
     <message>
         <location filename="apconf.ui" line="142"/>
         <source>General algorithm (group cipher)</source>
-        <translation>Allgemeiner Algorithmus (Gruppenziffer)</translation>
+        <translation>Allgemeiner Algorithmus (Gruppenchiffre)</translation>
     </message>
     <message>
         <location filename="apconf.ui" line="169"/>
         <source>Pairwise algorithm (pairwise cipher)</source>
-        <translation>Pairwise Algorithmus (Pairwiseziffer)</translation>
+        <translation>Pairwise Algorithmus (Pairwisechiffre)</translation>
     </message>
     <message>
         <location filename="apconf.ui" line="177"/>
