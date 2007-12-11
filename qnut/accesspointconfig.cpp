@@ -69,12 +69,15 @@ namespace qnut {
 		ui.rsnCheck->setEnabled(type > 0);
 		
 		if (type > 0) {
-			setWEPDisabled(ui.rsnCheck->isChecked());
+			wepEnabled = !ui.rsnCheck->isChecked();
+			if (wepEnabled)
+				ui.grpCipCombo->addItem("WEP");
 			ui.grpCipCombo->addItem("TKIP");
 			ui.grpCipCombo->addItem("CCMP");
 		}
 		else {
-			setWEPDisabled(false);
+			wepEnabled = true;
+			ui.grpCipCombo->addItem("WEP");
 		}
 	}
 	
@@ -83,13 +86,11 @@ namespace qnut {
 	}
 	
 	void CAccessPointConfig::setWEPDisabled(bool value) {
-		if (wepEnabled == value) {
-			wepEnabled = not value;
-			if (value)
-				ui.grpCipCombo->removeItem(1);
-			else
-				ui.grpCipCombo->insertItem(1, "WEP");
-		}
+		wepEnabled = not value;
+		if (value)
+			ui.grpCipCombo->removeItem(1);
+		else
+			ui.grpCipCombo->insertItem(1, "WEP");
 	}
 	
 	bool CAccessPointConfig::execute() {
