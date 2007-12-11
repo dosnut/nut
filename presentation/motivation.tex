@@ -1,4 +1,3 @@
-
 \section{Motivation}
 \subsection{}
 \begin{frame}[<+-| alert@+>]{Motivation}
@@ -8,4 +7,66 @@
 		\item Umständliches Starten aller notwendigen Teile (WLAN Konfigurieren, IP zuweisen, VPN aufbauen)
 		\item Unflexibel: Je nach Umgebung andere Konfiguration nötig
 	\end{itemize}
+\end{frame}
+
+\begin{frame}[<+-| alert@+>]{Motivation-Andere Netzwerkmanager}
+	\fontsize{7}{8.4}\selectfont
+	\begin{center}
+	\begin{tabular}{cc|c|c|c|c|c}
+		&					& kwifi		& gtkwifi	& wifi radar	& NetworkManager	& NUt \\
+		\hline
+		&Environments		& $X$			& $X$			& $X$			& $X$				& $\surd$ \\
+		\hline
+		\multirow{3}{*}{\begin{sideways} Gerät \end{sideways}}
+		& Ethernet			& $X$			& $X$			& $X$			& $\surd$			& $\surd$ \\
+		\cline{2-7}
+		& Drahtlos			& $\surd$		& $\surd$		& $\surd$		& $\surd$			& $\surd$ \\
+		\cline{2-7}
+		& PPP				& $X$			& $X$			& $X$			& $\surd$			& $X^{4}$ \\
+		\hline
+		\multirow{3}{*}{\begin{sideways} IP-Konf. \end{sideways}}
+		&static				& $\surd$		& $\surd$		& $\surd$		& $\surd$			& $\surd$ \\
+		\cline{2-7}
+		& dhcp				& $\surd$		& $\surd$		& $\surd$		& $\surd$			& $\surd$ \\
+		\cline{2-7}
+		& zeroconf			& $X$			& $X$			& $X$			& $\surd$			& $\surd$ \\
+		\hline
+		\multirow{4}{*}{\begin{sideways} WLAN \end{sideways}}
+		&unverschlüsselt	& $\surd$		& $\surd$		& $\surd$		& $\surd$			& $\surd^{3}$ \\
+		\cline{2-7}
+		&WEP				& $\surd$		& $\surd$		& $\surd$		& $\surd$			& $\surd^{3}$ \\
+		\cline{2-7}
+		&WPA				& $\surd$		& $\surd$		& $\surd$		& $\surd$			& $\surd^{3}$ \\
+		\cline{2-7}
+		&Konfig. speichern	& $\surd^{5}$	& $\surd^{5}$	& $\surd^{5}$	& $\surd^{5}$		& $\surd^{3}$
+	\end{tabular}
+	\end{center}
+	\textbf{1} built-in\\
+	\textbf{2} external\\
+	\textbf{3} über wpa\_supplicant\\
+	\textbf{4} mit Skripten möglich aber nicht als Konfigurationsoption verfügbar\\
+	\textbf{5} eigene \\
+\end{frame}
+
+\begin{frame}[<+-| alert@+>]{Motivation-NetworkManager<=>NUt}
+	\begin{tabular}{l|c|c}
+								& NetworkManager	& NUt \\
+		\hline
+		Environments			& X					& $\surd$ \\
+		\hline
+		Server-Skripte			& X					& $\surd$ \\
+		\hline
+		Nutzer-Skripte			& X					& $\surd$ \\
+		\hline
+		QT-GUI					& $\surd$(KDE3)		& $\surd$(Qt4) \\
+		\hline
+		GTK-GUI					& $\surd$(Gnome)	& X			\\
+		\hline
+		DBus-Interface			& $\surd$			& $\surd$	\\
+		\hline
+		Client-Library			& X					& $\surd$(Qt4)	\\
+		\hline
+		Autom. Netzwechsel		& $\surd$			& nur pro Gerät
+	\end{tabular}
+
 \end{frame}

@@ -371,18 +371,6 @@ QString signalQualityToString(WextRawScan scan) {
 	}
 	return ret;
 }
-QStringList signalQualityToStringList(WextRawScan scan) {
-	QString sigstr = signalQualityToString(scan);
-	QStringList tmp;
-	QStringList ret;
-	tmp = sigstr.split(' ');
-	foreach(QString i, tmp) {
-		if (i.contains('=')) {
-			ret.append(i.split('=')[1]);
-		}
-	}
-	return ret;
-}
 
 int frequencyToChannel(int freq) {
 	switch (freq) {
