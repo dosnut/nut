@@ -66,6 +66,7 @@ src_install() {
 	dodir /etc/nuts/events/default
 	insinto /etc/nuts/events/all
 	newins "${S}"/gentoo/start_avahi start_avahi
+	newins "${S}"/gentoo/ntp-date ntp-date
 
 	insinto /etc/dbus-1/system.d/
 	newins "${S}"/debian/nuts-dbus.conf nuts-dbus.conf

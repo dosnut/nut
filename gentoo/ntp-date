@@ -1,0 +1,7 @@
+#! /bin/bash
+if [ -f /etc/init.d/ntp-client ]; then
+	if [ "$NUT_STATUS" = static -o "$NUT_STATUS" = dhcp ]; then
+		#Just start it. Should be fast than checking if it's already running
+		/etc/init.d/ntp-client start
+	fi
+fi

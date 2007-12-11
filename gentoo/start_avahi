@@ -1,9 +1,10 @@
 #! /bin/bash
-
-/etc/init.d/avahi-daemon status
-if [ $? = 1 ]; then
-	if [ "$NUT_STATUS" = zeroconf ]; then
-		echo "Starting avahi-daemon"
-		/etc/init.d/avahi-daemon start
+if [ -f /etc/init.d/avahi-daemon ]; then
+	/etc/init.d/avahi-daemon status
+	if [ $? = 1 ]; then
+		if [ "$NUT_STATUS" = zeroconf ]; then
+			echo "Starting avahi-daemon"
+			/etc/init.d/avahi-daemon start
+		fi
 	fi
 fi
