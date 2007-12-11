@@ -54,8 +54,10 @@ device "eth0" {
     no-auto-start; //Nicht beim starten von nuts aktivieren
     dhcp; //Default environment dhcp (optional)
     environment "zeroconf" zeroconf; //Zeroconf environment
-    environment "userdefineable" static user; //Environment mit benutzerdefinierbarem Interface
-    // Environment wird nach einer IP-Adresse in Verbindung mit MAC (optional) ausgewählt
+    //Environment mit benutzerdefinierbarem Interface
+    environment "userdefineable" static user;
+    // Environment wird abhängig von einer IP-Adresse ausgewählt
+    // MAC-Adresse ist optional
     environment "home" select arp 192.168.0.1 00:07:40:EC:D0:BE;
 };
 device "eth1" {
@@ -72,9 +74,6 @@ device "eth1" {
             gateway 192.168.0.1;
             dns-server 192.168.0.1;
         };
-    };
-    environment "zeroconf" {
-        zeroconf;
     };
 };
 \end{verbatim}
