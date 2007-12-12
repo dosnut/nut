@@ -39,14 +39,14 @@ namespace qnut {
 	
 	void COverViewModel::deviceAdded(CDevice * device) {
 		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SIGNAL(layoutChanged()));
-		if (device->getType() == DT_AIR)
+		if (device->getWpaSupplicant())
 			connect(device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)), this, SIGNAL(layoutChanged()));
 		emit layoutChanged();
 	}
 	
 	void COverViewModel::deviceRemoved(CDevice * device) {
 		disconnect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SIGNAL(layoutChanged()));
-		if (device->getType() == DT_AIR)
+		if (device->getWpaSupplicant())
 			disconnect(device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)), this, SIGNAL(layoutChanged()));
 		emit layoutChanged();
 	}
@@ -125,7 +125,7 @@ namespace qnut {
 					return tr("none");
 			case OV_MOD_NETWORK:
 				if (data->getState() > DS_ACTIVATED) {
-					if (data->getType() == DT_AIR) {
+					if (data->getWpaSupplicant()) {
 						WextSignal signal = data->getWpaSupplicant()->getSignalQuality();
 						return data->getEssid() + " (" +
 							QString::number(signal.quality.value) + '/'+
