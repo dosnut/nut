@@ -132,7 +132,7 @@ namespace qnut {
 							QString::number(signal.quality.maximum) + ')';
 					}
 					else
-						return (data->getType() == DT_AIR) data->getEssid() : tr("local");
+						return (data->getType() == DT_AIR) ? data->getEssid() : tr("local");
 				}
 				else
 					return QString('-');
