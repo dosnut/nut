@@ -61,7 +61,6 @@ iconstarget.path = /usr/share/qnut/icons
 iconstarget.files = res/*.png
 langtarget.path = /usr/share/qnut/lang
 langtarget.files = qnut_*.qm
-langtarget.extra = lrelease qnut.pro -nounfinished
 shortcuttarget.path = /usr/share/applications
 shortcuttarget.files = qnut.desktop
 

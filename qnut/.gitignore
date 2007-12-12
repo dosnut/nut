@@ -2,7 +2,6 @@ build
 Makefile*
 ui
 moc_*
-*.qm
 fp
 qnut
 qnut_debug
