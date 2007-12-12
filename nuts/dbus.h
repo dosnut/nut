@@ -151,6 +151,9 @@ namespace nuts {
 			bool needUserSetup() { return m_interface->needUserSetup(); }
 			bool setUserConfig(libnutcommon::IPv4UserConfig userConfig) { return m_interface->setUserConfig(userConfig); }
 			libnutcommon::IPv4UserConfig getUserConfig() { return m_interface->getUserConfig(); }
+
+			//void activate() { m_interface->start();}
+			//void deactivate() { m_interface->stop();}
 		
 		signals:
 			void stateChanged(const libnutcommon::InterfaceProperties &properties);
