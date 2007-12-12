@@ -230,7 +230,7 @@ namespace qnut {
 			m_EnableDeviceAction->setEnabled(selectedDevice->getState() == DS_DEACTIVATED);
 			m_DisableDeviceAction->setDisabled(selectedDevice->getState() == DS_DEACTIVATED);
 			m_DeviceSettingsAction->setEnabled(true);
-			m_WirelessSettingsAction->setEnabled(selectedDevice->getType() == DT_AIR);
+			m_WirelessSettingsAction->setEnabled(selectedDevice->getWpaSupplicant());
 		}
 		else {
 			m_EnableDeviceAction->setEnabled(false);
