@@ -91,11 +91,11 @@ device "eth1" {
     environment "home" {
         dhcp;
         select or {
-            select and {
+            and {
                 essid "buftop";
                 arp 192.168.0.1 00:07:40:EC:D0:BE;
             };
-            select and {
+            and {
                 essid "unten";
                 arp 192.168.178.1 00:15:0C:46:2D:C7;
             };
