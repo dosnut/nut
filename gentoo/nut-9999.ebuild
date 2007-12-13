@@ -15,8 +15,8 @@ IUSE="debug"
 RDEPEND=">=x11-libs/qt-4.3.2
 		sys-apps/dbus"
 DEPEND="${RDEPEND}
-	>=sys-kernel/linux-headers-2.6
-	>=dev-libs/libnl-1.0_pre6
+	>=sys-kernel/linux-headers-2.6.23-r2
+	>=dev-libs/libnl-1.0_pre6-r1
 	sys-devel/bison
 	sys-devel/flex"
 
@@ -24,8 +24,8 @@ S=${WORKDIR}/${EGIT_PROJECT}
 
 pkg_setup() {
 	if ! built_with_use x11-libs/qt dbus ; then
-		eerror ">=qt4.3.2 requires dbus"
-		die "rebuild >=x11-libs/qt-4.3.2 with the dbus USE flag"
+		eerror "Nut requires >=qt4.3.2 to be built with dbus"
+		die "rebuild x11-libs/qt with the dbus USE flag"
 	fi
 	if ! qmake --version | grep -i qt4 ; then
 		eerror "qmake does not point to qmake-qt4"
@@ -37,6 +37,8 @@ pkg_setup() {
 
 src_unpack() {
 	git_src_unpack
+
+	epatch "$S"/gentoo/files/gentoo_linux_headers.diff || die 
 }
 
 src_compile() {
@@ -83,4 +85,3 @@ pkg_postinst() {
 	elog "rc-update add nuts default"
 	elog "Remeber to read the documentation!"
 }
-
