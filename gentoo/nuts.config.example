@@ -1,25 +1,114 @@
 device "eth0" {
-	dhcp;
-	static {
-		ip 192.168.0.50;
+	no-auto-start; //Do not start on server start-up
+	if no environment is defined, the interfaces are part of the default environment
+	dhcp; //default dhcp device (optional)
+	static { //define a default static device (optional)
+		ip 192.168.0.8;
 		netmask 255.255.255.0;
 		gateway 192.168.0.1;
 		dns-server 192.168.0.1;
 	};
-};
-device "eth1" {
-	no-auto-start;
-	wpa-supplicant config "/etc/wpa_supplicant/wpa_supplicant.conf" driver "wext";
-	environment "static" {
+	environment "zeroconf" zeroconf; //use zeroconf in this env.
+	environment "userdefineable" { //static user interface
+		static user;
+	};
+	//select this environment if ip with mac is available
+	//mac is optional
+	//env has one static and one dynamic interface
+	environment "home" {
+		select {
+			arp 192.168.0.1 02:04:22:5C:20:7E;
+		};
+		dhcp;
 		static {
-			ip 192.168.0.61
-			netmask 255.255.255.0
-			gateway 192.168.0.1
-			dns-server 192.168.0.1
+			ip 192.168.0.8;
+			netmask 255.255.255.0;
+			gateway 192.168.0.1;
+			dns-server 192.168.0.1;
 		};
 	};
-	environment "dynamic" {
+};
+device "eth1" {
+	dhcp;
+	//Set wpa_supplicant to be used
+	wpa-supplicant config "/etc/wpa_supplicant/wpa_supplicant.conf" driver "wext";
+	//select this env if connected to essid infeap
+	environment "infeap" {
+		select essid "infeap";
+	};
+	//select this env if connected to essid ap1/ap2 with ips and associated macs
+	environment "home" {
 		dhcp;
-	}
-
+		select or {
+			select and {
+				essid "ap1";
+				arp 192.168.0.1 02:04:22:5C:20:7E;
+			};
+			select and {
+				essid "ap2";
+				arp 192.168.0.2 04:18:01:26:2F:67;
+			};
+		};
+	};
+	environment "static/dynamic" {
+		dhcp;
+		static {
+			ip 192.168.0.61;
+			netmask 255.255.255.0;
+			gateway 192.168.0.1;
+			dns-server 192.168.0.1;
+		};
+	};
+	environment "static" {
+		static {
+			ip 192.168.0.61;
+			netmask 255.255.255.0;
+			gateway 192.168.0.1;
+			dns-server 192.168.0.1;
+		};
+	};
+	environment "zeroconf" {
+		zeroconf;
+	};
+};
+device "ath0" {
+	no-auto-start;
+	dhcp;
+	wpa-supplicant config "/etc/wpa_supplicant/wpa_supplicant.conf" driver "madwifi";
+	environment "infeap" {
+		select essid "infeap";
+	};
+	environment "home" {
+		dhcp;
+		select or {
+			select and {
+				essid "ap1";
+				arp 192.168.0.1 02:04:22:5C:20:7E;
+			};
+			select and {
+				essid "ap2";
+				arp 192.168.0.2 04:18:01:26:2F:67;
+			};
+		};
+	};
+	environment "static/dynamic" {
+		dhcp;
+		static {
+			ip 192.168.0.61;
+			netmask 255.255.255.0;
+			gateway 192.168.0.1;
+			dns-server 192.168.0.1;
+		};
+	};
+	environment "static" {
+		static {
+			ip 192.168.0.61;
+			netmask 255.255.255.0;
+			gateway 192.168.0.1;
+			dns-server 192.168.0.1;
+		};
+	};
+	environment "zeroconf" {
+		zeroconf;
+	};
 };
