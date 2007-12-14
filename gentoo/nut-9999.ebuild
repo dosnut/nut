@@ -18,7 +18,8 @@ DEPEND="${RDEPEND}
 	>=sys-kernel/linux-headers-2.6.23-r2
 	>=dev-libs/libnl-1.0_pre6-r1
 	sys-devel/bison
-	sys-devel/flex"
+	sys-devel/flex
+	>=net-wireless/wireless-tools-29"
 
 S=${WORKDIR}/${EGIT_PROJECT}
 
