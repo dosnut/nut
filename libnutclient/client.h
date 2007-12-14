@@ -188,7 +188,8 @@ namespace libnutclient {
 		inline libnutcommon::DeviceType getType() { return m_type; }
 		inline CEnvironment * getActiveEnvironment() { return m_activeEnvironment; }
 		/** If the device has a wpa_supplicant config, this function returns the pointer
-			to the wpa_supplicant object; See CWpaSupplicant
+			to the wpa_supplicant object; See CWpaSupplicant.
+			If no config file is present, the pointer will be null.
 		*/
 		inline libnutwireless::CWpaSupplicant * getWpaSupplicant() { return m_wpaSupplicant; }
 		inline int getIndex() { return m_index; }
