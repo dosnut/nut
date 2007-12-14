@@ -171,24 +171,68 @@ NetconfigStatus CWpaSupplicant::checkAdHocNetwork(NetworkConfig &config) {
 	failures.id = -1;
 	failures.failures = NCF_NONE;
 	failures.eap_failures = ENCF_NONE;
-	if (PROTO_WPA != config.protocols) {
-		failures.failures = (NetconfigFailures)(failures.failures | NCF_PROTO);
-	}
-	if (KM_WPA_NONE != config.keyManagement) {
-		failures.failures = (NetconfigFailures)(failures.failures | NCF_KEYMGMT);
-	}
-	if (PCI_NONE != config.pairwise) {
-		failures.failures = (NetconfigFailures)(failures.failures | NCF_PAIRWISE);
-	}
-	if ( !( (GCI_TKIP == config.group) != (GCI_CCMP == config.group) ) ) {
-		failures.failures = (NetconfigFailures)(failures.failures | NCF_GROUP);
-	}
+
 	//Options that need to be set:
 	if (config.frequency == -1) {
 		failures.failures = (NetconfigFailures) (failures.failures | NCF_FREQ);
 	}
 	if (config.ssid.isEmpty()) {
 		failures.failures = (NetconfigFailures) (failures.failures | NCF_SSID);
+	}
+
+	if (PROTO_UNDEFINED == config.protocols) { //WEP or none
+		//If wep_tx_keyidx is set then we have a wep-network else, plaintext
+		if (config.wep_tx_keyidx != -1) {
+			//wep key has to be set, keymgmt=NONE, ssid
+			switch (config.wep_tx_keyidx) {
+				case 0:
+					if (config.wep_key0.isEmpty()) {
+						failures.failures = (NetconfigFailures)(failures.failures | NCF_WEP_KEY0);
+						failures.failures = (NetconfigFailures)(failures.failures | NCF_WEP_KEY_IDX);
+					}
+					break;
+				case 1:
+					if (config.wep_key1.isEmpty()) {
+						failures.failures = (NetconfigFailures)(failures.failures | NCF_WEP_KEY1);
+						failures.failures = (NetconfigFailures)(failures.failures | NCF_WEP_KEY_IDX);
+					}
+					break;
+				case 2:
+					if (config.wep_key2.isEmpty()) {
+						failures.failures = (NetconfigFailures)(failures.failures | NCF_WEP_KEY2);
+						failures.failures = (NetconfigFailures)(failures.failures | NCF_WEP_KEY_IDX);
+					}
+					break;
+				case 3:
+					if (config.wep_key3.isEmpty()) {
+						failures.failures = (NetconfigFailures)(failures.failures | NCF_WEP_KEY3);
+						failures.failures = (NetconfigFailures)(failures.failures | NCF_WEP_KEY_IDX);
+					}
+				break;
+			}
+			if (config.keyManagement != KM_NONE) {
+				failures.failures = (NetconfigFailures)(failures.failures | NCF_KEYMGMT);
+			}
+		}
+		else {
+			if ( KM_OFF != config.keyManagement) {
+				failures.failures = (NetconfigFailures)(failures.failures | NCF_KEYMGMT);
+			}
+		}
+	}
+	else {
+		if (PROTO_WPA != config.protocols) {
+			failures.failures = (NetconfigFailures)(failures.failures | NCF_PROTO);
+		}
+		if (KM_WPA_NONE != config.keyManagement) {
+			failures.failures = (NetconfigFailures)(failures.failures | NCF_KEYMGMT);
+		}
+		if (PCI_NONE != config.pairwise) {
+			failures.failures = (NetconfigFailures)(failures.failures | NCF_PAIRWISE);
+		}
+		if ( !( (GCI_TKIP == config.group) != (GCI_CCMP == config.group) ) ) {
+			failures.failures = (NetconfigFailures)(failures.failures | NCF_GROUP);
+		}
 	}
 	return failures;
 }

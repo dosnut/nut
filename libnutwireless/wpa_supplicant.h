@@ -26,6 +26,8 @@ namespace libnutwireless {
 		On instantiation we set apScanDefault to 1. If you want to change this, call ap_scan with your desired value.
 		If the current network is an adhoc network, we assume the actual ap_scan value to be 2.
 		Otherwise we assume ap_scan=1.
+		When opening wpa_supplicant we check if the current network is an adhoc network.
+		If you later change into a normal network ap_scan will be set to apScanDefault.
 	*/
 	class CWpaSupplicant: public CWpaSupplicantBase {
 			Q_OBJECT
@@ -35,6 +37,9 @@ namespace libnutwireless {
 			//Edit/get network helper functions
 			EapNetworkConfig getEapNetworkConfig(int id);
 			EapNetconfigFailures editEapNetwork(int netid, EapNetworkConfig config);
+			/** This function is used to check if an adhoc network is configured properly.
+				It checks for plaintext,wep and wpa networks.
+			**/
 			NetconfigStatus checkAdHocNetwork(NetworkConfig &config);
 			
 			//Set ap_scan defaults
