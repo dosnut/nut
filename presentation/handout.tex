@@ -1,0 +1,79 @@
+\documentclass[ucs,blue,hyperref={pdfpagelabels=false},compress,handout]{beamer}
+
+\mode<presentation>{
+	%\usetheme{Berlin}
+	%\usetheme{Frankfurt}
+	%\usetheme{Warsaw}
+	%\usetheme{Copenhagen}
+	%\usetheme{Berkeley}
+	%\usetheme{Luebeck}
+
+%	\useoutertheme{infolines}
+
+	%\usecolortheme{seahorse}
+
+	%\setbeamercovered{transparent}
+
+	\useoutertheme{split} % default / infolines
+	\useoutertheme{nut} % default / infolines
+
+	\useinnertheme{default}
+	
+	\usecolortheme{whale}
+	%\usecolortheme{orchid}
+	
+	\setbeamerfont{block title}{size={}}
+
+	%\setbeamertemplate{headline}[nut]
+}
+
+\usepackage[ngerman]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{multirow}
+\usepackage{rotating}
+
+\title[NUT: Netzwerkmanager für Linux]{NUT: Network UTility - ein Netzwerkmanager für Linux}
+\date[\Today]{}
+
+\author
+[Daniel Bahrdt \and Stefan Bühler \and Oliver Groß]
+{Daniel Bahrdt \and Stefan Bühler \and Oliver Groß \and \hbox{Betreuer: Dr. Boris Koldehofe}}
+
+\hypersetup{pdfauthor={Daniel Bahrdt, Stefan Bühler, Oliver Groß}}
+
+\pgfdeclareimage[height=2.5ex]{ul-logo}{institutmitlogo}
+\pgfdeclareimage[height=2.5ex]{ur-logo}{qnut}
+\pgfdeclareimage[height=1.5cm]{ilogo}{institutmitlogo}
+\pgfdeclareimage[height=1.5cm]{plogo}{qnut}
+
+\titlegraphic{\pgfuseimage{ilogo} \hskip 1cm \pgfuseimage{plogo}}
+
+\institute
+{
+	Abteilung Verteilte Systeme \\
+	Institut für Parallele und Verteilte Systeme \\
+	Fakultät 5: Informatik, Elektrotechnik und Informationstechnik \\
+	Universität Stuttgart
+}
+
+\homepage{http://repo.or.cz/w/nut.git}
+
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+% \begin{frame}[<+-| alert@+>][t]{Überblick}
+% 	\tableofcontents[pausesections,pausesubsections]
+% \end{frame}
+
+\input{motivation}
+\input{nuts}
+\input{libnut}
+\input{qnut}
+\input{conclusion}
+
+\end{document}

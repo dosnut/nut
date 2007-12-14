@@ -1,6 +1,6 @@
 
 .PHONY:all
-all: presentation.pdf
+all: presentation.pdf handout.pdf
 
 SRC=${wildcard *.tex}
 SRC+=${wildcard *.sty}
@@ -9,16 +9,27 @@ SRC+=${wildcard *.jpg}
 SRC+=nutsstructure.pdf
 SRC+=libnutstructure.pdf
 
-TMP=presentation.nav presentation.out presentation.snm presentation.vrb
-TMP+=presentation.aux  presentation.log presentation.toc
+PRESTMP=presentation.nav presentation.out presentation.snm presentation.vrb
+PRESTMP+=presentation.aux  presentation.log presentation.toc
+
+HANDTMP=handout.nav handout.out handout.snm handout.vrb
+HANDTMP+=handout.aux  handout.log handout.toc
 
 presentation.pdf: ${SRC}
 	@echo Removing temporary files
-	@rm -f ${TMP}
+	@rm -f ${PRESTMP}
 	@pdflatex presentation.tex
 	@pdflatex presentation.tex
 	@echo Removing temporary files
-	@rm -f ${TMP}
+	@rm -f ${PRESTMP}
+
+handout.pdf: ${SRC}
+	@echo Removing temporary files
+	@rm -f ${HANDTMP}
+	@pdflatex handout.tex
+	@pdflatex handout.tex
+	@echo Removing temporary files
+	@rm -f ${HANDTMP}
 
 nutsstructure.pdf: nutsstructure.mp
 	@echo [MPOST] nutsstructure.mp
@@ -38,5 +49,5 @@ libnutstructure.pdf: libnutstructure.mp
 
 .PHONY: clean
 clean:
-	@echo Removing presentation.pdf
-	@rm -f presentation.pdf
+	@echo Removing presentation.pdf handout.pdf
+	@rm -f presentation.pdf handout.pdf
