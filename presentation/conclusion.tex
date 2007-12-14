@@ -1,0 +1,113 @@
+
+\section{Zusammenfassung}
+\subsection{Konkurenz}
+\begin{frame}[<+-| alert@+>]{Andere Netzwerkmanager}
+	\fontsize{7}{8.4}\selectfont
+	\begin{center}
+	\begin{tabular}{cc|c|c|c|c|c}
+		&					& kwifi		& gtkwifi	& wifi radar	& NetworkManager	& NUt \\
+		\hline
+		&Environments		& $X$			& $X$			& $X$			& $X$				& $\surd$ \\
+		\hline
+		\multirow{3}{*}{\begin{sideways} Gerät \end{sideways}}
+		& Ethernet			& $X$			& $X$			& $X$			& $\surd$			& $\surd$ \\
+		\cline{2-7}
+		& Drahtlos			& $\surd$		& $\surd$		& $\surd$		& $\surd$			& $\surd$ \\
+		\cline{2-7}
+		& PPP				& $X$			& $X$			& $X$			& $\surd$			& $X^{4}$ \\
+		\hline
+		\multirow{3}{*}{\begin{sideways} IP-Konf. \end{sideways}}
+		&static				& $\surd$		& $\surd$		& $\surd$		& $\surd$			& $\surd$ \\
+		\cline{2-7}
+		& dhcp				& $\surd$		& $\surd$		& $\surd$		& $\surd$			& $\surd$ \\
+		\cline{2-7}
+		& zeroconf			& $X$			& $X$			& $X$			& $\surd$			& $\surd$ \\
+		\hline
+		\multirow{4}{*}{\begin{sideways} WLAN \end{sideways}}
+		&unverschlüsselt	& $\surd$		& $\surd$		& $\surd$		& $\surd$			& $\surd^{3}$ \\
+		\cline{2-7}
+		&WEP				& $\surd$		& $\surd$		& $\surd$		& $\surd$			& $\surd^{3}$ \\
+		\cline{2-7}
+		&WPA				& $\surd$		& $\surd$		& $\surd$		& $\surd$			& $\surd^{3}$ \\
+		\cline{2-7}
+		&Konfig. speichern	& $\surd^{5}$	& $\surd^{5}$	& $\surd^{5}$	& $\surd^{5}$		& $\surd^{3}$
+	\end{tabular}
+	\end{center}
+	\textbf{1} built-in\\
+	\textbf{2} external\\
+	\textbf{3} über wpa\_supplicant\\
+	\textbf{4} mit Skripten möglich aber nicht als Konfigurationsoption verfügbar\\
+	\textbf{5} eigene \\
+\end{frame}
+
+\begin{frame}[<+-| alert@+>]{Motivation-NetworkManager<=>NUt}
+	\begin{tabular}{l|c|c}
+								& NetworkManager	& NUt \\
+		\hline
+		Environments			& $X$					& $\surd$ \\
+		\hline
+		Server-Skripte			& $X$					& $\surd$ \\
+		\hline
+		Nutzer-Skripte			& $X$					& $\surd$ \\
+		\hline
+		QT-GUI					& $\surd$(KDE3)			& $\surd$(Qt4) \\
+		\hline
+		GTK-GUI					& $\surd$(Gnome)		& $X$			\\
+		\hline
+		DBus-Interface			& $\surd$				& $\surd$	\\
+		\hline
+		Client-Library			& $X$					& $\surd$(Qt4)	\\
+		\hline
+		Autom. Netzwechsel		& $\surd$				& nur pro Gerät \\
+		\hline
+		Plugin-Struktur			& $\surd$				& $X$
+	\end{tabular}
+\end{frame}
+
+
+\subsection{Zukünftiges}
+\begin{frame}[<+-|alert@+>]{Mögliche zukünftige Änderungen}
+	\begin{itemize}
+		\item Bugfixes (sofern weitere nötig)
+		\item Server
+		\begin{itemize}
+			\item Fallback-Konfiguration für DHCP
+			\item Signal vom Server falls ein neues Netzwek gefunden wurde
+			\item PPP als Konfigurationsoption (momentan nur über Skripte)
+		\end{itemize}
+		\item libnut/qnut
+		\begin{itemize}
+			\item Etwas mehr Unabhängigkeit vom wpa\_supplicant
+			\item Mehr WLAN-Informationen (z.B. Übertragungsgeschwindigkeit)
+		\end{itemize}
+		\item Sehr zukünftiges
+		\begin{itemize}
+			\item DBus Interface generischer machen
+			\item Konsolenclient
+			\item IPv6
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\subsection{Fazit}
+\begin{frame}[<+-|alert@+>]{Warum brauche ich NUt?}
+	\begin{itemize}
+		\item Es ist kostenlos (GPL)
+		\item Es ist schnell
+		\item Es verbraucht wenig Speicher und keine CPU-Zeit (im Idle)
+		\item Es steuert alle gängigen vom wpa\_supplicant unterstützten
+		\item Es steuert alle Netzwerkadapter an
+		\item Es ist durch die Skripte enorm flexibel
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[<+-|alert@+>]{Ende}
+	\begin{center}
+		\begin{Large}
+			Homepage, Debuild Skripte und Ebuild:
+		\end{Large}
+		\begin{Huge}
+			http://repo.or.cz/w/nut.git
+		\end{Huge}
+	\end{center}
+\end{frame}
