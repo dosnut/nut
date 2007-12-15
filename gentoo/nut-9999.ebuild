@@ -10,7 +10,7 @@ SRC_URI=""
 LICENSE="GPL-2.0"
 SLOT="0"
 KEYWORDS="~x86 ~amd64"
-IUSE="debug"
+IUSE="debug wifi"
 
 RDEPEND=">=x11-libs/qt-4.3.2
 		sys-apps/dbus"
@@ -49,7 +49,7 @@ src_compile() {
 	else
 		qmake -recursive -Wall 'CONFIG+=release' 'DEFINES+=QT_NO_DEBUG_OUTPUT'
 	fi
-	make
+	make || die
 }
 
 src_install() {
