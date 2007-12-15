@@ -8,7 +8,6 @@
 #include "libnutcommon/common.h"
 
 #include "parsers.h"
-
 #include "wireless/iwlib.h"
 extern "C" {
 // #include <linux/wireless.h>
