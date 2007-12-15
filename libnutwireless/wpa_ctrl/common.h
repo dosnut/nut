@@ -1,6 +1,6 @@
 /*
  * wpa_supplicant/hostapd / common helper functions, etc.
- * Copyright (c) 2002-2006, Jouni Malinen <jkmaline@cc.hut.fi>
+ * Copyright (c) 2002-2007, Jouni Malinen <j@w1.fi>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -44,6 +44,12 @@
 #endif
 #endif /* CONFIG_TI_COMPILER */
 
+#ifdef __SYMBIAN32__
+#define __BIG_ENDIAN 4321
+#define __LITTLE_ENDIAN 1234
+#define __BYTE_ORDER __LITTLE_ENDIAN
+#endif /* __SYMBIAN32__ */
+
 #ifdef CONFIG_NATIVE_WINDOWS
 #include <winsock.h>
 
@@ -55,128 +61,17 @@ typedef int socklen_t;
 
 #endif /* CONFIG_NATIVE_WINDOWS */
 
-#if defined(__CYGWIN__) || defined(CONFIG_NATIVE_WINDOWS)
-
 #ifdef _MSC_VER
 #define inline __inline
+
+#undef vsnprintf
+#define vsnprintf _vsnprintf
+#undef close
+#define close closesocket
 #endif /* _MSC_VER */
 
-static inline unsigned short wpa_swap_16(unsigned short v)
-{
-	return ((v & 0xff) << 8) | (v >> 8);
-}
 
-static inline unsigned int wpa_swap_32(unsigned int v)
-{
-	return ((v & 0xff) << 24) | ((v & 0xff00) << 8) |
-		((v & 0xff0000) >> 8) | (v >> 24);
-}
-
-#define le_to_host16(n) (n)
-#define host_to_le16(n) (n)
-#define be_to_host16(n) wpa_swap_16(n)
-#define host_to_be16(n) wpa_swap_16(n)
-#define le_to_host32(n) (n)
-#define be_to_host32(n) wpa_swap_32(n)
-#define host_to_be32(n) wpa_swap_32(n)
-
-#else /* __CYGWIN__ */
-
-#ifndef __BYTE_ORDER
-#ifndef __LITTLE_ENDIAN
-#ifndef __BIG_ENDIAN
-#define __LITTLE_ENDIAN 1234
-#define __BIG_ENDIAN 4321
-#if defined(sparc)
-#define __BYTE_ORDER __BIG_ENDIAN
-#endif
-#endif /* __BIG_ENDIAN */
-#endif /* __LITTLE_ENDIAN */
-#endif /* __BYTE_ORDER */
-
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-#define le_to_host16(n) (n)
-#define host_to_le16(n) (n)
-#define be_to_host16(n) bswap_16(n)
-#define host_to_be16(n) bswap_16(n)
-#define le_to_host32(n) (n)
-#define be_to_host32(n) bswap_32(n)
-#define host_to_be32(n) bswap_32(n)
-#define le_to_host64(n) (n)
-#define host_to_le64(n) (n)
-#define be_to_host64(n) bswap_64(n)
-#define host_to_be64(n) bswap_64(n)
-#elif __BYTE_ORDER == __BIG_ENDIAN
-#define le_to_host16(n) bswap_16(n)
-#define host_to_le16(n) bswap_16(n)
-#define be_to_host16(n) (n)
-#define host_to_be16(n) (n)
-#define le_to_host32(n) bswap_32(n)
-#define be_to_host32(n) (n)
-#define host_to_be32(n) (n)
-#define le_to_host64(n) bswap_64(n)
-#define host_to_le64(n) bswap_64(n)
-#define be_to_host64(n) (n)
-#define host_to_be64(n) (n)
-#ifndef WORDS_BIGENDIAN
-#define WORDS_BIGENDIAN
-#endif
-#else
-#error Could not determine CPU byte order
-#endif
-
-#endif /* __CYGWIN__ */
-
-/* Macros for handling unaligned 16-bit variables */
-#define WPA_GET_BE16(a) ((u16) (((a)[0] << 8) | (a)[1]))
-#define WPA_PUT_BE16(a, val)			\
-	do {					\
-		(a)[0] = ((u16) (val)) >> 8;	\
-		(a)[1] = ((u16) (val)) & 0xff;	\
-	} while (0)
-
-#define WPA_GET_LE16(a) ((u16) (((a)[1] << 8) | (a)[0]))
-#define WPA_PUT_LE16(a, val)			\
-	do {					\
-		(a)[1] = ((u16) (val)) >> 8;	\
-		(a)[0] = ((u16) (val)) & 0xff;	\
-	} while (0)
-
-#define WPA_GET_BE24(a) ((((u32) (a)[0]) << 16) | (((u32) (a)[1]) << 8) | \
-			 ((u32) (a)[2]))
-#define WPA_PUT_BE24(a, val)				\
-	do {						\
-		(a)[0] = (u8) (((u32) (val)) >> 16);	\
-		(a)[1] = (u8) (((u32) (val)) >> 8);	\
-		(a)[2] = (u8) (((u32) (val)) & 0xff);	\
-	} while (0)
-
-#define WPA_GET_BE32(a) ((((u32) (a)[0]) << 24) | (((u32) (a)[1]) << 16) | \
-			 (((u32) (a)[2]) << 8) | ((u32) (a)[3]))
-#define WPA_PUT_BE32(a, val)				\
-	do {						\
-		(a)[0] = (u8) (((u32) (val)) >> 24);	\
-		(a)[1] = (u8) (((u32) (val)) >> 16);	\
-		(a)[2] = (u8) (((u32) (val)) >> 8);	\
-		(a)[3] = (u8) (((u32) (val)) & 0xff);	\
-	} while (0)
-
-#define WPA_PUT_BE64(a, val)				\
-	do {						\
-		(a)[0] = (u8) (((u64) (val)) >> 56);	\
-		(a)[1] = (u8) (((u64) (val)) >> 48);	\
-		(a)[2] = (u8) (((u64) (val)) >> 40);	\
-		(a)[3] = (u8) (((u64) (val)) >> 32);	\
-		(a)[4] = (u8) (((u64) (val)) >> 24);	\
-		(a)[5] = (u8) (((u64) (val)) >> 16);	\
-		(a)[6] = (u8) (((u64) (val)) >> 8);	\
-		(a)[7] = (u8) (((u64) (val)) & 0xff);	\
-	} while (0)
-
-
-#ifndef ETH_ALEN
-#define ETH_ALEN 6
-#endif
+/* Define platform specific integer types */
 
 #ifdef _MSC_VER
 typedef UINT64 u64;
@@ -218,6 +113,16 @@ typedef unsigned char u8;
 #define WPA_TYPES_DEFINED
 #endif /* CONFIG_TI_COMPILER */
 
+#ifdef __SYMBIAN32__
+#define __REMOVE_PLATSEC_DIAGNOSTICS__
+#include <e32def.h>
+typedef TUint64 u64;
+typedef TUint32 u32;
+typedef TUint16 u16;
+typedef TUint8 u8;
+#define WPA_TYPES_DEFINED
+#endif /* __SYMBIAN32__ */
+
 #ifndef WPA_TYPES_DEFINED
 #ifdef CONFIG_USE_INTTYPES_H
 #include <inttypes.h>
@@ -235,11 +140,155 @@ typedef int8_t s8;
 #define WPA_TYPES_DEFINED
 #endif /* !WPA_TYPES_DEFINED */
 
-#define hostapd_get_rand os_get_random
-int hwaddr_aton(const char *txt, u8 *addr);
-int hexstr2bin(const char *hex, u8 *buf, size_t len);
-void inc_byte_array(u8 *counter, size_t len);
-void wpa_get_ntp_timestamp(u8 *buf);
+
+/* Define platform specific byte swapping macros */
+
+#if defined(__CYGWIN__) || defined(CONFIG_NATIVE_WINDOWS)
+
+static inline unsigned short wpa_swap_16(unsigned short v)
+{
+	return ((v & 0xff) << 8) | (v >> 8);
+}
+
+static inline unsigned int wpa_swap_32(unsigned int v)
+{
+	return ((v & 0xff) << 24) | ((v & 0xff00) << 8) |
+		((v & 0xff0000) >> 8) | (v >> 24);
+}
+
+#define le_to_host16(n) (n)
+#define host_to_le16(n) (n)
+#define be_to_host16(n) wpa_swap_16(n)
+#define host_to_be16(n) wpa_swap_16(n)
+#define le_to_host32(n) (n)
+#define be_to_host32(n) wpa_swap_32(n)
+#define host_to_be32(n) wpa_swap_32(n)
+
+#define WPA_BYTE_SWAP_DEFINED
+
+#endif /* __CYGWIN__ || CONFIG_NATIVE_WINDOWS */
+
+
+#ifndef WPA_BYTE_SWAP_DEFINED
+
+#ifndef __BYTE_ORDER
+#ifndef __LITTLE_ENDIAN
+#ifndef __BIG_ENDIAN
+#define __LITTLE_ENDIAN 1234
+#define __BIG_ENDIAN 4321
+#if defined(sparc)
+#define __BYTE_ORDER __BIG_ENDIAN
+#endif
+#endif /* __BIG_ENDIAN */
+#endif /* __LITTLE_ENDIAN */
+#endif /* __BYTE_ORDER */
+
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+#define le_to_host16(n) ((__force u16) (le16) (n))
+#define host_to_le16(n) ((__force le16) (u16) (n))
+#define be_to_host16(n) bswap_16((__force u16) (be16) (n))
+#define host_to_be16(n) ((__force be16) bswap_16((n)))
+#define le_to_host32(n) ((__force u32) (le32) (n))
+#define host_to_le32(n) ((__force le32) (u32) (n))
+#define be_to_host32(n) bswap_32((__force u32) (be32) (n))
+#define host_to_be32(n) ((__force be32) bswap_32((n)))
+#define le_to_host64(n) ((__force u64) (le64) (n))
+#define host_to_le64(n) ((__force le64) (u64) (n))
+#define be_to_host64(n) bswap_64((__force u64) (be64) (n))
+#define host_to_be64(n) ((__force be64) bswap_64((n)))
+#elif __BYTE_ORDER == __BIG_ENDIAN
+#define le_to_host16(n) bswap_16(n)
+#define host_to_le16(n) bswap_16(n)
+#define be_to_host16(n) (n)
+#define host_to_be16(n) (n)
+#define le_to_host32(n) bswap_32(n)
+#define be_to_host32(n) (n)
+#define host_to_be32(n) (n)
+#define le_to_host64(n) bswap_64(n)
+#define host_to_le64(n) bswap_64(n)
+#define be_to_host64(n) (n)
+#define host_to_be64(n) (n)
+#ifndef WORDS_BIGENDIAN
+#define WORDS_BIGENDIAN
+#endif
+#else
+#error Could not determine CPU byte order
+#endif
+
+#define WPA_BYTE_SWAP_DEFINED
+#endif /* !WPA_BYTE_SWAP_DEFINED */
+
+
+/* Macros for handling unaligned memory accesses */
+
+#define WPA_GET_BE16(a) ((u16) (((a)[0] << 8) | (a)[1]))
+#define WPA_PUT_BE16(a, val)			\
+	do {					\
+		(a)[0] = ((u16) (val)) >> 8;	\
+		(a)[1] = ((u16) (val)) & 0xff;	\
+	} while (0)
+
+#define WPA_GET_LE16(a) ((u16) (((a)[1] << 8) | (a)[0]))
+#define WPA_PUT_LE16(a, val)			\
+	do {					\
+		(a)[1] = ((u16) (val)) >> 8;	\
+		(a)[0] = ((u16) (val)) & 0xff;	\
+	} while (0)
+
+#define WPA_GET_BE24(a) ((((u32) (a)[0]) << 16) | (((u32) (a)[1]) << 8) | \
+			 ((u32) (a)[2]))
+#define WPA_PUT_BE24(a, val)					\
+	do {							\
+		(a)[0] = (u8) ((((u32) (val)) >> 16) & 0xff);	\
+		(a)[1] = (u8) ((((u32) (val)) >> 8) & 0xff);	\
+		(a)[2] = (u8) (((u32) (val)) & 0xff);		\
+	} while (0)
+
+#define WPA_GET_BE32(a) ((((u32) (a)[0]) << 24) | (((u32) (a)[1]) << 16) | \
+			 (((u32) (a)[2]) << 8) | ((u32) (a)[3]))
+#define WPA_PUT_BE32(a, val)					\
+	do {							\
+		(a)[0] = (u8) ((((u32) (val)) >> 24) & 0xff);	\
+		(a)[1] = (u8) ((((u32) (val)) >> 16) & 0xff);	\
+		(a)[2] = (u8) ((((u32) (val)) >> 8) & 0xff);	\
+		(a)[3] = (u8) (((u32) (val)) & 0xff);		\
+	} while (0)
+
+#define WPA_GET_LE32(a) ((((u32) (a)[3]) << 24) | (((u32) (a)[2]) << 16) | \
+			 (((u32) (a)[1]) << 8) | ((u32) (a)[0]))
+#define WPA_PUT_LE32(a, val)					\
+	do {							\
+		(a)[3] = (u8) ((((u32) (val)) >> 24) & 0xff);	\
+		(a)[2] = (u8) ((((u32) (val)) >> 16) & 0xff);	\
+		(a)[1] = (u8) ((((u32) (val)) >> 8) & 0xff);	\
+		(a)[0] = (u8) (((u32) (val)) & 0xff);		\
+	} while (0)
+
+#define WPA_GET_BE64(a) ((((u64) (a)[0]) << 56) | (((u64) (a)[1]) << 48) | \
+			 (((u64) (a)[2]) << 40) | (((u64) (a)[3]) << 32) | \
+			 (((u64) (a)[4]) << 24) | (((u64) (a)[5]) << 16) | \
+			 (((u64) (a)[6]) << 8) | ((u64) (a)[7]))
+#define WPA_PUT_BE64(a, val)				\
+	do {						\
+		(a)[0] = (u8) (((u64) (val)) >> 56);	\
+		(a)[1] = (u8) (((u64) (val)) >> 48);	\
+		(a)[2] = (u8) (((u64) (val)) >> 40);	\
+		(a)[3] = (u8) (((u64) (val)) >> 32);	\
+		(a)[4] = (u8) (((u64) (val)) >> 24);	\
+		(a)[5] = (u8) (((u64) (val)) >> 16);	\
+		(a)[6] = (u8) (((u64) (val)) >> 8);	\
+		(a)[7] = (u8) (((u64) (val)) & 0xff);	\
+	} while (0)
+
+#define WPA_GET_LE64(a) ((((u64) (a)[7]) << 56) | (((u64) (a)[6]) << 48) | \
+			 (((u64) (a)[5]) << 40) | (((u64) (a)[4]) << 32) | \
+			 (((u64) (a)[3]) << 24) | (((u64) (a)[2]) << 16) | \
+			 (((u64) (a)[1]) << 8) | ((u64) (a)[0]))
+
+
+#ifndef ETH_ALEN
+#define ETH_ALEN 6
+#endif
 
 
 #ifdef __GNUC__
@@ -249,173 +298,6 @@ void wpa_get_ntp_timestamp(u8 *buf);
 #define PRINTF_FORMAT(a,b)
 #define STRUCT_PACKED
 #endif
-
-
-/* Debugging function - conditional printf and hex dump. Driver wrappers can
- * use these for debugging purposes. */
-
-enum { MSG_MSGDUMP, MSG_DEBUG, MSG_INFO, MSG_WARNING, MSG_ERROR };
-
-#ifdef CONFIG_NO_STDOUT_DEBUG
-
-#define wpa_debug_print_timestamp() do { } while (0)
-#define wpa_printf(args...) do { } while (0)
-#define wpa_hexdump(l,t,b,le) do { } while (0)
-#define wpa_hexdump_key(l,t,b,le) do { } while (0)
-#define wpa_hexdump_ascii(l,t,b,le) do { } while (0)
-#define wpa_hexdump_ascii_key(l,t,b,le) do { } while (0)
-#define wpa_debug_open_file(void) do { } while (0)
-#define wpa_debug_close_file(void) do { } while (0)
-
-#else /* CONFIG_NO_STDOUT_DEBUG */
-
-int wpa_debug_open_file(void);
-void wpa_debug_close_file(void);
-
-/**
- * wpa_debug_printf_timestamp - Print timestamp for debug output
- *
- * This function prints a timestamp in <seconds from 1970>.<microsoconds>
- * format if debug output has been configured to include timestamps in debug
- * messages.
- */
-void wpa_debug_print_timestamp(void);
-
-/**
- * wpa_printf - conditional printf
- * @level: priority level (MSG_*) of the message
- * @fmt: printf format string, followed by optional arguments
- *
- * This function is used to print conditional debugging and error messages. The
- * output may be directed to stdout, stderr, and/or syslog based on
- * configuration.
- *
- * Note: New line '\n' is added to the end of the text when printing to stdout.
- */
-void wpa_printf(int level, char *fmt, ...)
-PRINTF_FORMAT(2, 3);
-
-/**
- * wpa_hexdump - conditional hex dump
- * @level: priority level (MSG_*) of the message
- * @title: title of for the message
- * @buf: data buffer to be dumped
- * @len: length of the buf
- *
- * This function is used to print conditional debugging and error messages. The
- * output may be directed to stdout, stderr, and/or syslog based on
- * configuration. The contents of buf is printed out has hex dump.
- */
-void wpa_hexdump(int level, const char *title, const u8 *buf, size_t len);
-
-/**
- * wpa_hexdump_key - conditional hex dump, hide keys
- * @level: priority level (MSG_*) of the message
- * @title: title of for the message
- * @buf: data buffer to be dumped
- * @len: length of the buf
- *
- * This function is used to print conditional debugging and error messages. The
- * output may be directed to stdout, stderr, and/or syslog based on
- * configuration. The contents of buf is printed out has hex dump. This works
- * like wpa_hexdump(), but by default, does not include secret keys (passwords,
- * etc.) in debug output.
- */
-void wpa_hexdump_key(int level, const char *title, const u8 *buf, size_t len);
-
-/**
- * wpa_hexdump_ascii - conditional hex dump
- * @level: priority level (MSG_*) of the message
- * @title: title of for the message
- * @buf: data buffer to be dumped
- * @len: length of the buf
- *
- * This function is used to print conditional debugging and error messages. The
- * output may be directed to stdout, stderr, and/or syslog based on
- * configuration. The contents of buf is printed out has hex dump with both
- * the hex numbers and ASCII characters (for printable range) are shown. 16
- * bytes per line will be shown.
- */
-void wpa_hexdump_ascii(int level, const char *title, const u8 *buf,
-		       size_t len);
-
-/**
- * wpa_hexdump_ascii_key - conditional hex dump, hide keys
- * @level: priority level (MSG_*) of the message
- * @title: title of for the message
- * @buf: data buffer to be dumped
- * @len: length of the buf
- *
- * This function is used to print conditional debugging and error messages. The
- * output may be directed to stdout, stderr, and/or syslog based on
- * configuration. The contents of buf is printed out has hex dump with both
- * the hex numbers and ASCII characters (for printable range) are shown. 16
- * bytes per line will be shown. This works like wpa_hexdump_ascii(), but by
- * default, does not include secret keys (passwords, etc.) in debug output.
- */
-void wpa_hexdump_ascii_key(int level, const char *title, const u8 *buf,
-			   size_t len);
-
-#endif /* CONFIG_NO_STDOUT_DEBUG */
-
-
-#ifdef CONFIG_NO_WPA_MSG
-#define wpa_msg(args...) do { } while (0)
-#define wpa_msg_register_cb(f) do { } while (0)
-#else /* CONFIG_NO_WPA_MSG */
-/**
- * wpa_msg - Conditional printf for default target and ctrl_iface monitors
- * @ctx: Pointer to context data; this is the ctx variable registered
- *	with struct wpa_driver_ops::init()
- * @level: priority level (MSG_*) of the message
- * @fmt: printf format string, followed by optional arguments
- *
- * This function is used to print conditional debugging and error messages. The
- * output may be directed to stdout, stderr, and/or syslog based on
- * configuration. This function is like wpa_printf(), but it also sends the
- * same message to all attached ctrl_iface monitors.
- *
- * Note: New line '\n' is added to the end of the text when printing to stdout.
- */
-void wpa_msg(void *ctx, int level, char *fmt, ...) PRINTF_FORMAT(3, 4);
-
-typedef void (*wpa_msg_cb_func)(void *ctx, int level, const char *txt,
-				size_t len);
-
-/**
- * wpa_msg_register_cb - Register callback function for wpa_msg() messages
- * @func: Callback function (%NULL to unregister)
- */
-void wpa_msg_register_cb(wpa_msg_cb_func func);
-#endif /* CONFIG_NO_WPA_MSG */
-
-
-int wpa_snprintf_hex(char *buf, size_t buf_size, const u8 *data, size_t len);
-int wpa_snprintf_hex_uppercase(char *buf, size_t buf_size, const u8 *data,
-			       size_t len);
-
-
-#ifdef EAPOL_TEST
-#define WPA_ASSERT(a)						       \
-	do {							       \
-		if (!(a)) {					       \
-			printf("WPA_ASSERT FAILED '" #a "' "	       \
-			       "%s %s:%d\n",			       \
-			       __FUNCTION__, __FILE__, __LINE__);      \
-			exit(1);				       \
-		}						       \
-	} while (0)
-#else
-#define WPA_ASSERT(a) do { } while (0)
-#endif
-
-
-#ifdef _MSC_VER
-#undef vsnprintf
-#define vsnprintf _vsnprintf
-#undef close
-#define close closesocket
-#endif /* _MSC_VER */
 
 
 #ifdef CONFIG_ANSI_C_EXTRA
@@ -474,7 +356,50 @@ void perror(const char *s);
 
 #endif /* CONFIG_ANSI_C_EXTRA */
 
-#define wpa_zalloc(s) os_zalloc((s))
+#ifndef MAC2STR
+#define MAC2STR(a) (a)[0], (a)[1], (a)[2], (a)[3], (a)[4], (a)[5]
+#define MACSTR "%02x:%02x:%02x:%02x:%02x:%02x"
+#endif
+
+#ifndef BIT
+#define BIT(x) (1 << (x))
+#endif
+
+/*
+ * Definitions for sparse validation
+ * (http://kernel.org/pub/linux/kernel/people/josh/sparse/)
+ */
+#ifdef __CHECKER__
+#define __force __attribute__((force))
+#define __bitwise __attribute__((bitwise))
+#else
+#define __force
+#define __bitwise
+#endif
+
+typedef u16 __bitwise be16;
+typedef u16 __bitwise le16;
+typedef u32 __bitwise be32;
+typedef u32 __bitwise le32;
+typedef u64 __bitwise be64;
+typedef u64 __bitwise le64;
+
+typedef u16 __bitwise __be16;
+typedef u32 __bitwise __be32;
+typedef u64 __bitwise __be64;
+typedef u16 __bitwise __le16;
+typedef u32 __bitwise __le32;
+typedef u64 __bitwise __le64;
+
+
+#define hostapd_get_rand os_get_random
+int hwaddr_aton(const char *txt, u8 *addr);
+int hexstr2bin(const char *hex, u8 *buf, size_t len);
+void inc_byte_array(u8 *counter, size_t len);
+void wpa_get_ntp_timestamp(u8 *buf);
+int wpa_snprintf_hex(char *buf, size_t buf_size, const u8 *data, size_t len);
+int wpa_snprintf_hex_uppercase(char *buf, size_t buf_size, const u8 *data,
+			       size_t len);
 
 #ifdef CONFIG_NATIVE_WINDOWS
 void wpa_unicode2ascii_inplace(TCHAR *str);
@@ -486,7 +411,7 @@ TCHAR * wpa_strdup_tchar(const char *str);
 
 const char * wpa_ssid_txt(u8 *ssid, size_t ssid_len);
 
-typedef u32 __be32;
-typedef u64 __be64;
+
+#include "wpa_debug.h"
 
 #endif /* COMMON_H */

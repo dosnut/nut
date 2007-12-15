@@ -1,6 +1,6 @@
 /*
  * wpa_supplicant/hostapd / common helper functions, etc.
- * Copyright (c) 2002-2006, Jouni Malinen <jkmaline@cc.hut.fi>
+ * Copyright (c) 2002-2007, Jouni Malinen <j@w1.fi>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -15,15 +15,6 @@
 #include "includes.h"
 
 #include "common.h"
-
-
-#ifdef CONFIG_DEBUG_FILE
-static FILE *out_file = NULL;
-#endif /* CONFIG_DEBUG_FILE */
-int wpa_debug_use_file = 0;
-int wpa_debug_level = MSG_INFO;
-int wpa_debug_show_keys = 0;
-int wpa_debug_timestamp = 0;
 
 
 static int hex2num(char c)
@@ -130,286 +121,19 @@ void wpa_get_ntp_timestamp(u8 *buf)
 {
 	struct os_time now;
 	u32 sec, usec;
+	be32 tmp;
 
 	/* 64-bit NTP timestamp (time from 1900-01-01 00:00:00) */
 	os_get_time(&now);
-	sec = host_to_be32(now.sec + 2208988800U); /* Epoch to 1900 */
+	sec = now.sec + 2208988800U; /* Epoch to 1900 */
 	/* Estimate 2^32/10^6 = 4295 - 1/32 - 1/512 */
 	usec = now.usec;
-	usec = host_to_be32(4295 * usec - (usec >> 5) - (usec >> 9));
-	os_memcpy(buf, (u8 *) &sec, 4);
-	os_memcpy(buf + 4, (u8 *) &usec, 4);
+	usec = 4295 * usec - (usec >> 5) - (usec >> 9);
+	tmp = host_to_be32(sec);
+	os_memcpy(buf, (u8 *) &tmp, 4);
+	tmp = host_to_be32(usec);
+	os_memcpy(buf + 4, (u8 *) &tmp, 4);
 }
-
-
-
-#ifndef CONFIG_NO_STDOUT_DEBUG
-
-void wpa_debug_print_timestamp(void)
-{
-	struct os_time tv;
-
-	if (!wpa_debug_timestamp)
-		return;
-
-	os_get_time(&tv);
-#ifdef CONFIG_DEBUG_FILE
-	if (out_file) {
-		fprintf(out_file, "%ld.%06u: ", (long) tv.sec,
-			(unsigned int) tv.usec);
-	} else
-#endif /* CONFIG_DEBUG_FILE */
-	printf("%ld.%06u: ", (long) tv.sec, (unsigned int) tv.usec);
-}
-
-
-/**
- * wpa_printf - conditional printf
- * @level: priority level (MSG_*) of the message
- * @fmt: printf format string, followed by optional arguments
- *
- * This function is used to print conditional debugging and error messages. The
- * output may be directed to stdout, stderr, and/or syslog based on
- * configuration.
- *
- * Note: New line '\n' is added to the end of the text when printing to stdout.
- */
-void wpa_printf(int level, char *fmt, ...)
-{
-	va_list ap;
-
-	va_start(ap, fmt);
-	if (level >= wpa_debug_level) {
-		wpa_debug_print_timestamp();
-#ifdef CONFIG_DEBUG_FILE
-		if (out_file) {
-			vfprintf(out_file, fmt, ap);
-			fprintf(out_file, "\n");
-		} else {
-#endif /* CONFIG_DEBUG_FILE */
-		vprintf(fmt, ap);
-		printf("\n");
-#ifdef CONFIG_DEBUG_FILE
-		}
-#endif /* CONFIG_DEBUG_FILE */
-	}
-	va_end(ap);
-}
-
-
-static void _wpa_hexdump(int level, const char *title, const u8 *buf,
-			 size_t len, int show)
-{
-	size_t i;
-	if (level < wpa_debug_level)
-		return;
-	wpa_debug_print_timestamp();
-#ifdef CONFIG_DEBUG_FILE
-	if (out_file) {
-		fprintf(out_file, "%s - hexdump(len=%lu):",
-			title, (unsigned long) len);
-		if (buf == NULL) {
-			fprintf(out_file, " [NULL]");
-		} else if (show) {
-			for (i = 0; i < len; i++)
-				fprintf(out_file, " %02x", buf[i]);
-		} else {
-			fprintf(out_file, " [REMOVED]");
-		}
-		fprintf(out_file, "\n");
-	} else {
-#endif /* CONFIG_DEBUG_FILE */
-	printf("%s - hexdump(len=%lu):", title, (unsigned long) len);
-	if (buf == NULL) {
-		printf(" [NULL]");
-	} else if (show) {
-		for (i = 0; i < len; i++)
-			printf(" %02x", buf[i]);
-	} else {
-		printf(" [REMOVED]");
-	}
-	printf("\n");
-#ifdef CONFIG_DEBUG_FILE
-	}
-#endif /* CONFIG_DEBUG_FILE */
-}
-
-void wpa_hexdump(int level, const char *title, const u8 *buf, size_t len)
-{
-	_wpa_hexdump(level, title, buf, len, 1);
-}
-
-
-void wpa_hexdump_key(int level, const char *title, const u8 *buf, size_t len)
-{
-	_wpa_hexdump(level, title, buf, len, wpa_debug_show_keys);
-}
-
-
-static void _wpa_hexdump_ascii(int level, const char *title, const u8 *buf,
-			       size_t len, int show)
-{
-	size_t i, llen;
-	const u8 *pos = buf;
-	const size_t line_len = 16;
-
-	if (level < wpa_debug_level)
-		return;
-	wpa_debug_print_timestamp();
-#ifdef CONFIG_DEBUG_FILE
-	if (out_file) {
-		if (!show) {
-			fprintf(out_file,
-				"%s - hexdump_ascii(len=%lu): [REMOVED]\n",
-				title, (unsigned long) len);
-			return;
-		}
-		if (buf == NULL) {
-			fprintf(out_file,
-				"%s - hexdump_ascii(len=%lu): [NULL]\n",
-				title, (unsigned long) len);
-			return;
-		}
-		fprintf(out_file, "%s - hexdump_ascii(len=%lu):\n",
-			title, (unsigned long) len);
-		while (len) {
-			llen = len > line_len ? line_len : len;
-			fprintf(out_file, "    ");
-			for (i = 0; i < llen; i++)
-				fprintf(out_file, " %02x", pos[i]);
-			for (i = llen; i < line_len; i++)
-				fprintf(out_file, "   ");
-			fprintf(out_file, "   ");
-			for (i = 0; i < llen; i++) {
-				if (isprint(pos[i]))
-					fprintf(out_file, "%c", pos[i]);
-				else
-					fprintf(out_file, "_");
-			}
-			for (i = llen; i < line_len; i++)
-				fprintf(out_file, " ");
-			fprintf(out_file, "\n");
-			pos += llen;
-			len -= llen;
-		}
-	} else {
-#endif /* CONFIG_DEBUG_FILE */
-	if (!show) {
-		printf("%s - hexdump_ascii(len=%lu): [REMOVED]\n",
-		       title, (unsigned long) len);
-		return;
-	}
-	if (buf == NULL) {
-		printf("%s - hexdump_ascii(len=%lu): [NULL]\n",
-		       title, (unsigned long) len);
-		return;
-	}
-	printf("%s - hexdump_ascii(len=%lu):\n", title, (unsigned long) len);
-	while (len) {
-		llen = len > line_len ? line_len : len;
-		printf("    ");
-		for (i = 0; i < llen; i++)
-			printf(" %02x", pos[i]);
-		for (i = llen; i < line_len; i++)
-			printf("   ");
-		printf("   ");
-		for (i = 0; i < llen; i++) {
-			if (isprint(pos[i]))
-				printf("%c", pos[i]);
-			else
-				printf("_");
-		}
-		for (i = llen; i < line_len; i++)
-			printf(" ");
-		printf("\n");
-		pos += llen;
-		len -= llen;
-	}
-#ifdef CONFIG_DEBUG_FILE
-	}
-#endif /* CONFIG_DEBUG_FILE */
-}
-
-
-void wpa_hexdump_ascii(int level, const char *title, const u8 *buf, size_t len)
-{
-	_wpa_hexdump_ascii(level, title, buf, len, 1);
-}
-
-
-void wpa_hexdump_ascii_key(int level, const char *title, const u8 *buf,
-			   size_t len)
-{
-	_wpa_hexdump_ascii(level, title, buf, len, wpa_debug_show_keys);
-}
-
-
-int wpa_debug_open_file(void)
-{
-#ifdef CONFIG_DEBUG_FILE
-	static int count = 0;
-	char fname[64];
-	if (!wpa_debug_use_file)
-		return 0;
-#ifdef _WIN32
-	os_snprintf(fname, sizeof(fname), "\\Temp\\wpa_supplicant-log-%d.txt",
-		    count++);
-#else /* _WIN32 */
-	os_snprintf(fname, sizeof(fname), "/tmp/wpa_supplicant-log-%d.txt",
-		    count++);
-#endif /* _WIN32 */
-	out_file = fopen(fname, "w");
-	return out_file == NULL ? -1 : 0;
-#else /* CONFIG_DEBUG_FILE */
-	return 0;
-#endif /* CONFIG_DEBUG_FILE */
-}
-
-
-void wpa_debug_close_file(void)
-{
-#ifdef CONFIG_DEBUG_FILE
-	if (!wpa_debug_use_file)
-		return;
-	fclose(out_file);
-	out_file = NULL;
-#endif /* CONFIG_DEBUG_FILE */
-}
-
-#endif /* CONFIG_NO_STDOUT_DEBUG */
-
-
-#ifndef CONFIG_NO_WPA_MSG
-static wpa_msg_cb_func wpa_msg_cb = NULL;
-
-void wpa_msg_register_cb(wpa_msg_cb_func func)
-{
-	wpa_msg_cb = func;
-}
-
-
-void wpa_msg(void *ctx, int level, char *fmt, ...)
-{
-	va_list ap;
-	char *buf;
-	const int buflen = 2048;
-	int len;
-
-	buf = os_malloc(buflen);
-	if (buf == NULL) {
-		wpa_printf(MSG_ERROR, "wpa_msg: Failed to allocate message "
-			   "buffer");
-		return;
-	}
-	va_start(ap, fmt);
-	len = vsnprintf(buf, buflen, fmt, ap);
-	va_end(ap);
-	wpa_printf(level, "%s", buf);
-	if (wpa_msg_cb)
-		wpa_msg_cb(ctx, level, buf, len);
-	os_free(buf);
-}
-#endif /* CONFIG_NO_WPA_MSG */
 
 
 static inline int _wpa_snprintf_hex(char *buf, size_t buf_size, const u8 *data,
@@ -494,14 +218,14 @@ int getopt(int argc, char *const argv[], const char *optstring)
 		}
 	}
 
-	if (strcmp(argv[optind], "--") == 0) {
+	if (os_strcmp(argv[optind], "--") == 0) {
 		/* no more options */
 		optind++;
 		return EOF;
 	}
 
 	optopt = argv[optind][optchr];
-	cp = strchr(optstring, optopt);
+	cp = os_strchr(optstring, optopt);
 	if (cp == NULL || optopt == ':') {
 		if (argv[optind][++optchr] == '\0') {
 			optchr = 1;

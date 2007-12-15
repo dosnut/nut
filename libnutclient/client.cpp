@@ -406,6 +406,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) : CLibNut(
 	connect(m_dbusDevice, SIGNAL(stateChanged(int , int)),
 			this, SLOT(dbusStateChanged(int, int)));
 
+	#ifndef LIBNUT_NO_WIRELESS
 	//Only use wpa_supplicant if we need one
 	if (m_needWpaSupplicant) {
 		m_wpaSupplicant = new libnutwireless::CWpaSupplicant(this,m_name);
@@ -422,6 +423,9 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) : CLibNut(
 	else {
 		m_wpaSupplicant = NULL;
 	}
+	#else
+		m_wpaSupplicant = NULL;
+	#endif
 }
 CDevice::~CDevice() {
 	//CWpa_supplicant will be killed as child of CDevices
@@ -492,7 +496,7 @@ void CDevice::refreshAll() {
 			m_essid = QString();
 		}
 	}
-
+	#ifndef LIBNUT_NO_WIRELESS
 	if ( !(DS_DEACTIVATED == m_state) ) {
 		if (m_needWpaSupplicant) {
 			m_wpaSupplicant->open();
@@ -501,6 +505,7 @@ void CDevice::refreshAll() {
 	if (DT_AIR == m_type && DS_CARRIER <= m_state && m_wpaSupplicant != NULL) {
 		m_wpaSupplicant->setSignalQualityPollRate(500);
 	}
+	#endif
 }
 //Rebuilds the environment list
 void CDevice::rebuild(QList<QDBusObjectPath> paths) {
@@ -567,6 +572,7 @@ void CDevice::environmentChangedActive(const QString &newenv) {
 }
 //Every time our device changed from anything to active, our active environment may have changed
 void CDevice::dbusStateChanged(int newState, int oldState) {
+	#ifndef LIBNUT_NO_WIRELESS
 	//If switching from DS_DEACTIVATED to any other state then connect wpa_supplicant
 	if (DS_DEACTIVATED == oldState && !(DS_DEACTIVATED == newState) ) {
 		if (m_needWpaSupplicant) {
@@ -578,6 +584,7 @@ void CDevice::dbusStateChanged(int newState, int oldState) {
 			m_wpaSupplicant->close();
 		}
 	}
+	#endif
 	m_state = (DeviceState) newState;
 	//Workaround so far, as nuts does not send any environment changed information
 	if (DT_AIR == m_type && !(newState == DS_DEACTIVATED) ) {
@@ -592,9 +599,11 @@ void CDevice::dbusStateChanged(int newState, int oldState) {
 	else {
 		m_essid = QString();
 	}
+	#ifndef LIBNUT_NO_WIRELESS
 	if (DT_AIR == m_type && DS_CARRIER <= m_state && m_wpaSupplicant != NULL) {
 		m_wpaSupplicant->setSignalQualityPollRate(500);
 	}
+	#endif
 	emit(stateChanged(m_state));
 }
 

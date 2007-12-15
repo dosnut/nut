@@ -6,12 +6,13 @@
 #include <QTimerEvent>
 #include <QCoreApplication>
 #include "libnutcommon/common.h"
-#include "wpa_ctrl/wpa_ctrl.h"
+
 #include "parsers.h"
 
-#include <iwlib.h>
+#include "wireless/iwlib.h"
 extern "C" {
 // #include <linux/wireless.h>
+#include "wpa_ctrl/wpa_ctrl.h"
 #include <sys/time.h>
 #include <string.h>
 #include <stdlib.h>

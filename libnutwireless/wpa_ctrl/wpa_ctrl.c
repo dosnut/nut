@@ -1,6 +1,6 @@
 /*
  * wpa_supplicant/hostapd control interface library
- * Copyright (c) 2004-2006, Jouni Malinen <jkmaline@cc.hut.fi>
+ * Copyright (c) 2004-2007, Jouni Malinen <j@w1.fi>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -23,6 +23,7 @@
 #include "wpa_ctrl.h"
 #include "common.h"
 
+
 #if defined(CONFIG_CTRL_IFACE_UNIX) || defined(CONFIG_CTRL_IFACE_UDP)
 #define CTRL_IFACE_SOCKET
 #endif /* CONFIG_CTRL_IFACE_UNIX || CONFIG_CTRL_IFACE_UDP */
@@ -37,7 +38,7 @@
  * an identifier for the control interface connection and use this as one of
  * the arguments for most of the control interface library functions.
  */
-typedef struct wpa_ctrl {
+struct wpa_ctrl {
 #ifdef CONFIG_CTRL_IFACE_UDP
 	int s;
 	struct sockaddr_in local;
@@ -52,7 +53,7 @@ typedef struct wpa_ctrl {
 #ifdef CONFIG_CTRL_IFACE_NAMED_PIPE
 	HANDLE pipe;
 #endif /* CONFIG_CTRL_IFACE_NAMED_PIPE */
-} wpa_ctrl;
+};
 
 
 #ifdef CONFIG_CTRL_IFACE_UNIX
@@ -61,8 +62,10 @@ struct wpa_ctrl * wpa_ctrl_open(const char *ctrl_path)
 {
 	struct wpa_ctrl *ctrl;
 	static int counter = 0;
+	int ret;
+	size_t res;
 
-	ctrl = (wpa_ctrl*) os_malloc(sizeof(*ctrl));
+	ctrl = os_malloc(sizeof(*ctrl));
 	if (ctrl == NULL)
 		return NULL;
 	os_memset(ctrl, 0, sizeof(*ctrl));
@@ -74,8 +77,13 @@ struct wpa_ctrl * wpa_ctrl_open(const char *ctrl_path)
 	}
 
 	ctrl->local.sun_family = AF_UNIX;
-	os_snprintf(ctrl->local.sun_path, sizeof(ctrl->local.sun_path),
-		    "/tmp/wpa_ctrl_%d-%d", getpid(), counter++);
+	ret = os_snprintf(ctrl->local.sun_path, sizeof(ctrl->local.sun_path),
+			  "/tmp/wpa_ctrl_%d-%d", getpid(), counter++);
+	if (ret < 0 || (size_t) ret >= sizeof(ctrl->local.sun_path)) {
+		close(ctrl->s);
+		os_free(ctrl);
+		return NULL;
+	}
 	if (bind(ctrl->s, (struct sockaddr *) &ctrl->local,
 		    sizeof(ctrl->local)) < 0) {
 		close(ctrl->s);
@@ -84,8 +92,13 @@ struct wpa_ctrl * wpa_ctrl_open(const char *ctrl_path)
 	}
 
 	ctrl->dest.sun_family = AF_UNIX;
-	os_snprintf(ctrl->dest.sun_path, sizeof(ctrl->dest.sun_path), "%s",
-		    ctrl_path);
+	res = os_strlcpy(ctrl->dest.sun_path, ctrl_path,
+			 sizeof(ctrl->dest.sun_path));
+	if (res >= sizeof(ctrl->dest.sun_path)) {
+		close(ctrl->s);
+		os_free(ctrl);
+		return NULL;
+	}
 	if (connect(ctrl->s, (struct sockaddr *) &ctrl->dest,
 		    sizeof(ctrl->dest)) < 0) {
 		close(ctrl->s);
@@ -151,7 +164,7 @@ struct wpa_ctrl * wpa_ctrl_open(const char *ctrl_path)
 	len = sizeof(buf) - 1;
 	if (wpa_ctrl_request(ctrl, "GET_COOKIE", 10, buf, &len, NULL) == 0) {
 		buf[len] = '\0';
-		ctrl->cookie = strdup(buf);
+		ctrl->cookie = os_strdup(buf);
 	}
 
 	return ctrl;
@@ -183,16 +196,16 @@ int wpa_ctrl_request(struct wpa_ctrl *ctrl, const char *cmd, size_t cmd_len,
 #ifdef CONFIG_CTRL_IFACE_UDP
 	if (ctrl->cookie) {
 		char *pos;
-		_cmd_len = strlen(ctrl->cookie) + 1 + cmd_len;
-		cmd_buf = os_malloc(_cmd_len );
+		_cmd_len = os_strlen(ctrl->cookie) + 1 + cmd_len;
+		cmd_buf = os_malloc(_cmd_len);
 		if (cmd_buf == NULL)
 			return -1;
 		_cmd = cmd_buf;
 		pos = cmd_buf;
-		strcpy(pos, ctrl->cookie);
-		pos += strlen(ctrl->cookie);
+		os_strlcpy(pos, ctrl->cookie, _cmd_len);
+		pos += os_strlen(ctrl->cookie);
 		*pos++ = ' ';
-		memcpy(pos, cmd, cmd_len);
+		os_memcpy(pos, cmd, cmd_len);
 	} else
 #endif /* CONFIG_CTRL_IFACE_UDP */
 	{
@@ -287,13 +300,12 @@ int wpa_ctrl_recv(struct wpa_ctrl *ctrl, char *reply, size_t *reply_len)
 int wpa_ctrl_pending(struct wpa_ctrl *ctrl)
 {
 	struct timeval tv;
-	int res;
 	fd_set rfds;
 	tv.tv_sec = 0;
 	tv.tv_usec = 0;
 	FD_ZERO(&rfds);
 	FD_SET(ctrl->s, &rfds);
-	res = select(ctrl->s + 1, &rfds, NULL, NULL, &tv);
+	select(ctrl->s + 1, &rfds, NULL, NULL, &tv);
 	return FD_ISSET(ctrl->s, &rfds);
 }
 
@@ -318,7 +330,7 @@ struct wpa_ctrl * wpa_ctrl_open(const char *ctrl_path)
 	struct wpa_ctrl *ctrl;
 	DWORD mode;
 	TCHAR name[256];
-	int i;
+	int i, ret;
 
 	ctrl = os_malloc(sizeof(*ctrl));
 	if (ctrl == NULL)
@@ -327,17 +339,21 @@ struct wpa_ctrl * wpa_ctrl_open(const char *ctrl_path)
 
 #ifdef UNICODE
 	if (ctrl_path == NULL)
-		_snwprintf(name, 256, NAMED_PIPE_PREFIX);
+		ret = _snwprintf(name, 256, NAMED_PIPE_PREFIX);
 	else
-		_snwprintf(name, 256, NAMED_PIPE_PREFIX TEXT("-%S"),
-			   ctrl_path);
+		ret = _snwprintf(name, 256, NAMED_PIPE_PREFIX TEXT("-%S"),
+				 ctrl_path);
 #else /* UNICODE */
 	if (ctrl_path == NULL)
-		os_snprintf(name, 256, NAMED_PIPE_PREFIX);
+		ret = os_snprintf(name, 256, NAMED_PIPE_PREFIX);
 	else
-		os_snprintf(name, 256, NAMED_PIPE_PREFIX "-%s",
-			    ctrl_path);
+		ret = os_snprintf(name, 256, NAMED_PIPE_PREFIX "-%s",
+				  ctrl_path);
 #endif /* UNICODE */
+	if (ret < 0 || ret >= 256) {
+		os_free(ctrl);
+		return NULL;
+	}
 
 	for (i = 0; i < 10; i++) {
 		ctrl->pipe = CreateFile(name, GENERIC_READ | GENERIC_WRITE, 0,

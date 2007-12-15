@@ -6,6 +6,8 @@
 
 #ifndef LIBNUTWIRELESS_WPA_SUPPLICANT_H
 #define LIBNUTWIRELESS_WPA_SUPPLICANT_H
+
+#ifndef LIBNUT_NO_WIRELESS
 #include "base.h"
 #include <QDebug>
 
@@ -134,4 +136,13 @@ namespace libnutwireless {
 	};
 
 }
+#else
+	//Dummy namespace and class in case we don't want to have wpa_supplicant support 
+	namespace libnutwireless {
+		class CWpaSupplicant {
+			CWpaSupplicant() {}
+			~CWpaSupplicant() {}
+		};
+	}
+#endif
 #endif

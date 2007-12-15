@@ -1,3 +1,4 @@
+#ifndef LIBNUT_NO_WIRELESS
 #include "wpa_supplicant.h"
 #include <QDebug>
 
@@ -898,3 +899,4 @@ Capabilities CWpaSupplicant::getCapabilities() {
 	return caps;
 }
 }
+#endif

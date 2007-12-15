@@ -1,6 +1,6 @@
 /*
  * wpa_supplicant/hostapd / OS specific functions
- * Copyright (c) 2005-2006, Jouni Malinen <jkmaline@cc.hut.fi>
+ * Copyright (c) 2005-2006, Jouni Malinen <j@w1.fi>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -451,6 +451,19 @@ int os_snprintf(char *str, size_t size, const char *format, ...);
 #endif
 
 #endif /* OS_NO_C_LIB_DEFINES */
+
+
+/**
+ * os_strlcpy - Copy a string with size bound and NUL-termination
+ * @dest: Destination
+ * @src: Source
+ * @siz: Size of the target buffer
+ * Returns: Total length of the target string (length of src) (not including
+ * NUL-termination)
+ *
+ * This function matches in behavior with the strlcpy(3) function in OpenBSD.
+ */
+size_t os_strlcpy(char *dest, const char *src, size_t siz);
 
 
 #ifdef OS_REJECT_C_LIB_FUNCTIONS
