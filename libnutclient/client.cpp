@@ -159,8 +159,18 @@ void CDeviceManager::setInformation() {
 	QDBusReply<QList<QDBusObjectPath> > replydevs;
 	replydevs = m_dbusDevmgr->getDeviceList();
 	if (!replydevs.isValid()) {
-		qWarning() << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
+		//This is the first time we're trying to connect to nuts.
+		//If we're not allowed to do that, we should break here and print out a warning
+		if (QDBusError::AccessDenied == replydevs.error().type()) {
+			*log << tr("You are not allowed to connect to nuts.");
+			*log << tr("Please make sure you are in the correct group");
+			return;
+		}
+		else {
+			qWarning() << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
+		}
 	}
+	qDebug() << "Populating device list";
 	//Let's populate our own DeviceList
 	
 	CDevice * device;
