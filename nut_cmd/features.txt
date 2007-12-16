@@ -1,0 +1,9 @@
+list devices
+list environments
+(list interfaces)
+enable/disable device
+set environment
+
+get device type
+get device state
+get active environment
