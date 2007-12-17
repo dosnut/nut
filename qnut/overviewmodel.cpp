@@ -124,6 +124,7 @@ namespace qnut {
 					return tr("none");
 			case OV_MOD_NETWORK:
 				if (data->getState() > DS_ACTIVATED) {
+					#ifndef QNUT_NO_WIRELESS
 					if (data->getWpaSupplicant()) {
 						WextSignal signal = data->getWpaSupplicant()->getSignalQuality();
 						return data->getEssid() + " (" +
@@ -131,6 +132,7 @@ namespace qnut {
 							QString::number(signal.quality.maximum) + ')';
 					}
 					else
+					#endif
 						return (data->getType() == DT_AIR) ? data->getEssid() : tr("local");
 				}
 				else

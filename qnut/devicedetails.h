@@ -14,7 +14,9 @@
 #include "ui/ui_devdet.h"
 
 namespace qnut {
+	#ifndef QNUT_NO_WIRELESS
 	class CWirelessSettings;
+	#endif
 	class CDeviceDetails;
 	/// Hash of CDeviceDetails
 	typedef QHash<libnutclient::CDevice *, CDeviceDetails *> CDeviceDetailsHash;
@@ -46,7 +48,9 @@ namespace qnut {
 		
 		libnutclient::CDevice * m_Device;
 		
+		#ifndef QNUT_NO_WIRELESS
 		CWirelessSettings * m_WirelessSettings;
+		#endif
 		
 		QMenu * m_DeviceMenu;
 		QList<QAction *> m_DeviceActions;
@@ -96,8 +100,10 @@ namespace qnut {
 	public slots:
 		/// @brief Opens the scripting settings dialog.
 		void openScriptingSettings();
+		#ifndef QNUT_NO_WIRELESS
 		/// @brief Opens ths wireless settings window.
 		void openWirelessSettings();
+		#endif
 	signals:
 		/**
 		 * @brief Emitted when showing a pop-up message is requested.

@@ -66,10 +66,6 @@ shortcuttarget.files = qnut.desktop
 
 INSTALLS += target iconstarget langtarget shortcuttarget
 
-
-
-FORMS -= devopt.ui
-
 INCLUDEPATH += ..
 
 LIBS += ../libnutcommon/libnutcommon.a \

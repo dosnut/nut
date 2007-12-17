@@ -5,6 +5,7 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
+#ifndef QNUT_NO_WIRELESS
 #include <QHeaderView>
 #include <QMessageBox>
 #include "wirelesssettings.h"
@@ -280,3 +281,4 @@ namespace qnut {
 		ui.availableView->header()->resizeSections(QHeaderView::ResizeToContents);*/
 	}
 };
+#endif

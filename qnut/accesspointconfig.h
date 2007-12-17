@@ -8,6 +8,7 @@
 #ifndef QNUT_ACCESSPOINTCONFIG_H
 #define QNUT_ACCESSPOINTCONFIG_H
 
+#ifndef QNUT_NO_WIRELESS
 #include <QDialog>
 #include <libnutclient/client.h>
 #include "ui/ui_apconf.h"
@@ -83,5 +84,6 @@ namespace qnut {
 		void selectKeyFile();
 	};
 }
+#endif
 
 #endif

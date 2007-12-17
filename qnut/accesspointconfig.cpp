@@ -5,6 +5,7 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
+#ifndef QNUT_NO_WIRELESS
 #include <QFileDialog>
 #include <QToolTip>
 #include "accesspointconfig.h"
@@ -509,3 +510,4 @@ namespace qnut {
 			tr("Select key file"), "/", tr("Key files (%1)").arg("*.pem")));
 	}
 };
+#endif

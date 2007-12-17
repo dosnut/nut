@@ -8,6 +8,7 @@
 #ifndef QNUT_MANAGEDAPMODEL_H
 #define QNUT_MANAGEDAPMODEL_H
 
+#ifndef QNUT_NO_WIRELESS
 #include <QAbstractItemModel>
 #include <libnutclient/client.h>
 
@@ -61,5 +62,6 @@ namespace qnut {
 		libnutwireless::CWpaSupplicant * m_Supplicant;
 	};
 }
+#endif
 
 #endif

@@ -5,6 +5,7 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
+#ifndef QNUT_NO_WIRELESS
 #include <QIcon>
 #include "availableapmodel.h"
 #include "common.h"
@@ -203,3 +204,4 @@ namespace qnut {
 		return QModelIndex();
 	}
 };
+#endif

@@ -8,6 +8,7 @@
 #ifndef QNUT_ADHOCCONFIG_H
 #define QNUT_ADHOCCONFIG_H
 
+#ifndef QNUT_NO_WIRELESS
 #include <QDialog>
 #include <libnutclient/client.h>
 #include "ui/ui_adhoc.h"
@@ -55,5 +56,6 @@ namespace qnut {
 		void convertSSID(bool hex);
 	};
 };
+#endif
 
 #endif
