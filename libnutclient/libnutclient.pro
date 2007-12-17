@@ -22,11 +22,13 @@ INSTALLS += target
 DESTDIR = .
 
 DEFINES += CONFIG_CTRL_IFACE \
- CONFIG_CTRL_IFACE_UNIX
+ CONFIG_CTRL_IFACE_UNIX \
+ LIBNUT_NO_WIRELESS
+
 
 INCLUDEPATH += ../
 
 LIBS += ../libnutcommon/libnutcommon.a \
- ../libnutwireless/libnutwireless.a
+../libnutwireless/libnutwireless.a
 TARGETDEPS += ../libnutcommon/libnutcommon.a \
- ../libnutwireless/libnutwireless.a
+../libnutwireless/libnutwireless.a

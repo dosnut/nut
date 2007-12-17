@@ -9,7 +9,9 @@
 #include <QFile>
 #include <QTextStream>
 #include "libnutcommon/common.h"
+#ifndef LIBNUT_NO_WIRELESS
 #include <libnutwireless/wpa_supplicant.h>
+#endif
 #include "client_exceptions.h"
 
 namespace libnutclient {
@@ -158,7 +160,9 @@ namespace libnutclient {
 		CLog * log;
 		DBusDeviceInterface * m_dbusDevice;
 		libnutcommon::DeviceConfig m_config;
+		#ifndef LIBNUT_NO_WIRELESS
 		bool m_needWpaSupplicant;
+		#endif
 		void refreshAll();
 		void setActiveEnvironment(CEnvironment * env, QDBusObjectPath m_dbusPath);
 		void rebuild(QList<QDBusObjectPath> paths);
@@ -174,7 +178,9 @@ namespace libnutclient {
 		libnutcommon::DeviceState m_state;
 		libnutcommon::DeviceType m_type;
 		CEnvironment * m_activeEnvironment;
+		#ifndef LIBNUT_NO_WIRELESS
 		libnutwireless::CWpaSupplicant * m_wpaSupplicant;
+		#endif
 		int m_index;
 
 	private slots:
@@ -191,7 +197,9 @@ namespace libnutclient {
 			to the wpa_supplicant object; See CWpaSupplicant.
 			If no config file is present, the pointer will be null.
 		*/
+		#ifndef LIBNUT_NO_WIRELESS
 		inline libnutwireless::CWpaSupplicant * getWpaSupplicant() { return m_wpaSupplicant; }
+		#endif
 		inline int getIndex() { return m_index; }
 		
 		CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);

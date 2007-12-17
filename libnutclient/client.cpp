@@ -373,7 +373,9 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) : CLibNut(
 	QDBusReply<libnutcommon::DeviceConfig> replyconf = m_dbusDevice->getConfig();
 	if (replyconf.isValid()) {
 		m_config = replyconf.value();
+		#ifndef LIBNUT_NO_WIRELESS
 		m_needWpaSupplicant = !(m_config.wpaConfigFile().isEmpty());
+		#endif
 		*log << tr("(%2) wpa_supplicant config file at: %1").arg(m_config.wpaConfigFile(),m_name);
 	}
 	else {
@@ -433,8 +435,6 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) : CLibNut(
 	else {
 		m_wpaSupplicant = NULL;
 	}
-	#else
-		m_wpaSupplicant = NULL;
 	#endif
 }
 CDevice::~CDevice() {

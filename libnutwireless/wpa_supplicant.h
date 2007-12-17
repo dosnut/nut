@@ -136,13 +136,5 @@ namespace libnutwireless {
 	};
 
 }
-#else
-	//Dummy namespace and class in case we don't want to have wpa_supplicant support 
-	namespace libnutwireless {
-		class CWpaSupplicant {
-			CWpaSupplicant() {}
-			~CWpaSupplicant() {}
-		};
-	}
 #endif
 #endif
