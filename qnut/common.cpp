@@ -38,7 +38,10 @@ namespace qnut {
 	}
 
 	QString shortSummary(CDevice * device) {
-		return device->getName() + ": " + toStringTr(device->getState()) + ", " + activeIP(device);
+		if (device->getState() < DS_UNCONFIGURED)
+			return device->getName() + ": " + toStringTr(device->getState()) + ", " + activeIP(device);
+		else
+			return device->getName() + ": " + toStringTr(device->getState());
 	}
 
 	QString activeIP(CDevice * device) {
@@ -48,12 +51,13 @@ namespace qnut {
 		QString result = QString("");
 		
 		foreach (CInterface * i, device->getActiveEnvironment()->getInterfaces()) {
-			if (result.length() > 0) {
-				result += " (...)";
-				break;
-			}
-			else if (i->getState() != IFS_OFF) {
-				result += i->getIp().toString();
+			if (i->getState() != IFS_OFF) {
+				if (result.length() == 0)
+					result = i->getIp().toString();
+				else {
+					result += " (...)";
+					break;
+				}
 			}
 		}
 		
