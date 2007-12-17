@@ -79,7 +79,7 @@ namespace nuts {
 			Q_NOREPLY void enable();
 			Q_NOREPLY void disable();
 			Q_NOREPLY void setEnvironment(const QDBusObjectPath &path);
-			Q_NOREPLY void setEnvironment(int env) {
+			Q_NOREPLY void setEnvironment(qint32 env) {
 				m_device->setUserPreferredEnvironment(env);
 			}
 			

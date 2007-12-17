@@ -38,6 +38,7 @@ public Q_SLOTS: // METHODS
 	inline QDBusReply<QString> getEssid();
 	inline QDBusReply<libnutcommon::DeviceConfig> getConfig();
 	inline QDBusReply<void> setEnvironment(QDBusObjectPath envpath);
+	inline QDBusReply<void> setEnvironment(qint32 env);
 
 Q_SIGNALS: // SIGNALS
 	void environmentChangedActive(const QString &newenv);
@@ -194,6 +195,11 @@ inline QDBusReply<void> DBusDeviceInterface::setEnvironment(QDBusObjectPath envp
 	return callWithArgumentList(QDBus::NoBlock, QLatin1String("setEnvironment"), argumentList);
 }
 
+inline QDBusReply<void> DBusDeviceInterface::setEnvironment(qint32 env) {
+	QList<QVariant> argumentList;
+	argumentList << qVariantFromValue(env);
+	return callWithArgumentList(QDBus::NoBlock, QLatin1String("setEnvironment"), argumentList);
+}
 
 inline QDBusReply<QList<QDBusObjectPath> > DBusDeviceManagerInterface::getDeviceList() {
 	QList<QVariant> argumentList;
