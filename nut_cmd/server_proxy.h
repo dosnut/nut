@@ -71,8 +71,28 @@ public:
 	~DBusEnvironmentInterface();
 
 public Q_SLOTS: // METHODS
+	inline QDBusReply<QList<QDBusObjectPath> > getInterfaces();
 	inline QDBusReply<libnutcommon::EnvironmentProperties> getProperties();
 };
+
+/*
+* Proxy class for interface DBus.Interface
+*/
+class DBusInterfaceInterface_IPv4: public QDBusAbstractInterface {
+	Q_OBJECT
+public:
+	static inline const char *staticInterfaceName()
+	{ return NUT_DBUS_URL ".Interface_IPv4"; }
+
+public:
+	DBusInterfaceInterface_IPv4(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
+
+	~DBusInterfaceInterface_IPv4();
+
+public Q_SLOTS: // METHODS
+	inline QDBusReply<libnutcommon::InterfaceProperties> getProperties();
+};
+
 
 //DeviceInterface
 inline QDBusReply<void> DBusDeviceInterface::disable() {
@@ -113,9 +133,19 @@ inline QDBusReply<QList<QDBusObjectPath> > DBusDeviceManagerInterface::getDevice
 }
 
 //EnvironmentInterface
+inline QDBusReply<QList<QDBusObjectPath> > DBusEnvironmentInterface::getInterfaces() {
+	QList<QVariant> argumentList;
+	return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getInterfaces"), argumentList);
+}
 inline QDBusReply<libnutcommon::EnvironmentProperties> DBusEnvironmentInterface::getProperties() {
 	QList<QVariant> argumentList;
 	return callWithArgumentList(QDBus::Block, QLatin1String("getProperties"), argumentList);
+}
+
+//InterfaceInterface
+inline QDBusReply<libnutcommon::InterfaceProperties> DBusInterfaceInterface_IPv4::getProperties() {
+	QList<QVariant> argumentList;
+	return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
 }
 
 }

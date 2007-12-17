@@ -50,6 +50,21 @@ namespace nut_cmd {
 		}
 		return envList;
 	}
+	QStringList listInterfaceIndexes(QDBusConnection * connection, QString &envPath) {
+		DBusEnvironmentInterface dbusEnv(NUT_DBUS_URL, envPath,*connection, 0);
+		QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnv.getInterfaces();
+		QString ifPath;
+		QStringList ifList;
+		if (replyifs.isValid()) {
+			for (int i=0;i<replyifs.value().size();i++) {
+				ifList.append(QString::number(i));
+			}
+		}
+		else {
+			checkAccessRights(replyifs.error());
+		}
+		return ifList;
+	}
 
 	QString getDeviceName(QDBusConnection * connection, QString &devPath) {
 		return getDeviceProperties(connection,devPath).name;
@@ -75,6 +90,23 @@ namespace nut_cmd {
 	QString getEnvironmentState(QDBusConnection * connection, QString &envPath) {
 		bool active = getEnvironmentProperties(connection,envPath).active;
 		return (active) ? "active" : "deactive";
+	}
+	QString getInterfaceState(QDBusConnection * connection, QString &ifPath) {
+		return toString(getRawInterfaceProperties(connection,ifPath).ifState);
+	}
+	QString getInterfaceType(QDBusConnection * connection, QString &ifPath) {
+		return toString(getRawInterfaceProperties(connection,ifPath).ifState);
+	}
+	QStringList getInterfaceProperties(QDBusConnection * connection, QString &ifPath) {
+		libnutcommon::InterfaceProperties props = getRawInterfaceProperties(connection,ifPath);
+		QStringList propList;
+		propList.append(props.ip.toString());
+		propList.append(props.netmask.toString());
+		propList.append(props.gateway.toString());
+		foreach(QHostAddress i, props.dns) {
+			propList.append(i.toString());
+		}
+		return propList;
 	}
 
 	bool setEnvironment(QDBusConnection * connection, QString &devPath, int index) {
@@ -167,6 +199,20 @@ namespace nut_cmd {
 		}
 		return envPath;
 	}
+	QString getInterfacePathByIndex(QDBusConnection * connection, QString &envPath, qint32 index) {
+		DBusEnvironmentInterface dbusEnv(NUT_DBUS_URL, envPath,*connection, 0);
+		QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnv.getInterfaces();
+		QString ifPath;
+		if (replyifs.isValid()) {
+			if (index >= 0 && replyifs.value().size()-1 >= index && replyifs.value().size() > 0) {
+				ifPath = replyifs.value()[index].path();
+			}
+		}
+		else {
+			checkAccessRights(replyifs.error());
+		}
+		return ifPath;
+	}
 	
 	libnutcommon::DeviceProperties getDeviceProperties(QDBusConnection * connection, QString &devPath) {
 		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath ,*connection, 0);
@@ -188,6 +234,17 @@ namespace nut_cmd {
 			return libnutcommon::EnvironmentProperties();
 		}
 	}
+	libnutcommon::InterfaceProperties getRawInterfaceProperties(QDBusConnection * connection, QString &iface) {
+		DBusInterfaceInterface_IPv4 dbusIf(NUT_DBUS_URL,iface,*connection,0);
+		QDBusReply<libnutcommon::InterfaceProperties> replyprops = dbusIf.getProperties();
+		if (replyprops.isValid()) {
+			return replyprops.value();
+		}
+		else {
+			return libnutcommon::InterfaceProperties();
+		}
+	}
+
 	void checkAccessRights(QDBusError error) {
 		if (QDBusError::AccessDenied == error.type()) {
 			print(QString("AccessDenied"));

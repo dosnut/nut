@@ -18,12 +18,16 @@ namespace nut_cmd {
 	//Get functions
 	QStringList listDeviceNames(QDBusConnection * connection);
 	QStringList listEnvironmentNames(QDBusConnection * connection, QString &devPath);
+	QStringList listInterfaceIndexes(QDBusConnection * connection, QString &envPath);
 	QString getDeviceName(QDBusConnection * connection, QString &devPath);
 	QString getDeviceType(QDBusConnection * connection, QString &devPath);
 	QString getDeviceState(QDBusConnection * connection, QString &devPath);
 	QString getActiveEnvironment(QDBusConnection * connection, QString &devPath);
 	QString getEnvironmentName(QDBusConnection * connection, QString &envPath);
 	QString getEnvironmentState(QDBusConnection * connection, QString &envPath);
+	QString getInterfaceState(QDBusConnection * connection, QString &ifPath);
+	QString getInterfaceType(QDBusConnection * connection, QString &ifPath);
+	QStringList getInterfaceProperties(QDBusConnection * connection, QString &ifPath);
 	
 	//Set functions
 	bool setEnvironment(QDBusConnection * connection, QString &devPath, int index);
@@ -35,8 +39,10 @@ namespace nut_cmd {
 	QString getDevicePathByName(QDBusConnection * connection, QString & name);
 	QString getEnvironmentPathByName(QDBusConnection * connection, QString &devPath, QString &envName);
 	QString getEnvironmentPathByIndex(QDBusConnection * connection, QString &devPath, qint32 index);
+	QString getInterfacePathByIndex(QDBusConnection * connection, QString &envPath, qint32 index);
 	libnutcommon::DeviceProperties getDeviceProperties(QDBusConnection * connection, QString &devPath);
 	libnutcommon::EnvironmentProperties getEnvironmentProperties(QDBusConnection * connection, QString &env);
+	libnutcommon::InterfaceProperties getRawInterfaceProperties(QDBusConnection * connection, QString &iface);
 	void checkAccessRights(QDBusError error);
 }
 #endif

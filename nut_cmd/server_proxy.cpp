@@ -48,7 +48,19 @@ DBusEnvironmentInterface::DBusEnvironmentInterface(const QString &service, const
 DBusEnvironmentInterface::~DBusEnvironmentInterface()
 {
 }
+
+
+/*
+ * Implementation of interface class DBusInterfaceInterface_IPv4
+ */
+
+DBusInterfaceInterface_IPv4::DBusInterfaceInterface_IPv4(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
+    : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
+{
 }
 
-//Methods
+DBusInterfaceInterface_IPv4::~DBusInterfaceInterface_IPv4()
+{
+}
 
+}
