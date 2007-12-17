@@ -1,12 +1,17 @@
 #ifndef NUT_CMD_COMMANDS_H
 #define NUT_CMD_COMMANDS_H
-#include "../libnutclient/server_proxy.h"
+#include "server_proxy.h"
 #include "nut_cmd_types.h"
 #include <QDBusConnection>
 #include <QDBusConnectionInterface>
 #include <QDBusObjectPath>
 #include <QObject>
+#include <iostream>
 namespace nut_cmd {
+
+
+	void print(QStringList list);
+	void print(QString str);
 
 	//"Public functions"
 
@@ -29,8 +34,8 @@ namespace nut_cmd {
 	//"Private functions"
 	QString getDevicePathByName(QDBusConnection * connection, QString & name);
 	QString getEnvironmentPathByName(QDBusConnection * connection, QString &devPath, QString &envName);
-	DeviceProperties getDeviceProperties(QDBusConnection * connection, QDBusObjectPath &dev);
+	libnutcommon::DeviceProperties getDeviceProperties(QDBusConnection * connection, QString &devPath);
 	libnutcommon::EnvironmentProperties getEnvironmentProperties(QDBusConnection * connection, QString &env);
-	checkAccessRights(QDBusError error);
+	void checkAccessRights(QDBusError error);
 }
 #endif

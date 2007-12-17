@@ -1,15 +1,30 @@
 #include "nut_cmd_commands.h"
 namespace nut_cmd {
 
+	void print(QStringList list) {
+		foreach(QString i, list) {
+			std::cout << i.toLatin1().data();
+			std::cout.put('\n');
+		}
+	}
+	void print(QString str) {
+		std::cout << str.toLatin1().data();
+		std::cout.put('\n');
+	}
+
 	//"Public functions"
 	QStringList listDeviceNames(QDBusConnection * connection) {
-		//Get connection to device manager
-		DBusDeviceManagerInterface devmgr(NUT_DBUS_URL, "/manager",connection, null);
+		//Get *connection to device manager
+		DBusDeviceManagerInterface devmgr(NUT_DBUS_URL, "/manager",*connection, 0);
 		QDBusReply<QList<QDBusObjectPath> > replydevs = devmgr.getDeviceList();
 		QStringList devList;
+		QString devPath;
 		if (replydevs.isValid()) {
 			foreach(QDBusObjectPath i, replydevs.value()) {
-				devList.append(getDeviceName(connection,i.path()));
+				devPath = i.path();
+				devList.append(getDeviceName(connection,devPath));
+			}
+		}
 		else {
 			checkAccessRights(replydevs.error());
 		}
@@ -17,18 +32,21 @@ namespace nut_cmd {
 	}
 
 	QStringList listEnvironmentNames(QDBusConnection * connection, QString &devPath) {
-		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath,connection, null);
+		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath,*connection, 0);
 		QDBusReply<QList<QDBusObjectPath> > replyenvs = dbusDev.getEnvironments();
 		QStringList envList;
-		if (replyenvs.isValid) {
+		if (replyenvs.isValid()) {
+			QString envPath;
 			foreach(QDBusObjectPath i, replyenvs.value()) {
-				envList.append(getEnvironmentName(connection,i.path()));
+				envPath = i.path();
+				envList.append(getEnvironmentName(connection,envPath));
 			}
 		}
 		else {
 			checkAccessRights(replyenvs.error());
-			return false;
+			envList = QStringList();
 		}
+		return envList;
 	}
 
 	QString getDeviceName(QDBusConnection * connection, QString &devPath) {
@@ -60,45 +78,46 @@ namespace nut_cmd {
 	bool setEnvironment(QDBusConnection * connection, QString &devPath, int index) {
 		if (index < 0)
 			return false;
-		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath, connection, null);
+		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath, *connection, 0);
 		QDBusReply<QList<QDBusObjectPath> > replyenvs = dbusDev.getEnvironments();
-		if (replyenvs.isValid())
+		if (replyenvs.isValid()) {
 			if (index < replyenvs.value().size() && !replyenvs.value().isEmpty()) {
-				dev.setEnvironment(index);
+				dbusDev.setEnvironment(index);
 			}
 			else {
 				return false;
 			}
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	void setEnvironment(QDBusConnection * connection, QString &devPath, QString &envPath) {
-		DBusDeviceInterface dbusDev(NUT_DBUS_URL, dev, connection, null);
-		dev.setEnvironment(envPath);
+		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath, *connection, 0);
+		if (!devPath.isEmpty())
+			dbusDev.setEnvironment(QDBusObjectPath(envPath));
 	}
 
 	void enableDevice(QDBusConnection * connection, QString &devPath) {
-		DBusDeviceInterface dev(NUT_DBUS_URL, devPath, connection, null);
-		dev.enable();
+		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath, *connection, 0);
+		if (!devPath.isEmpty())
+			dbusDev.enable();
 	}
 
 	void disableDevice(QDBusConnection * connection, QString &devPath) {
-		DBusDeviceInterface dev(NUT_DBUS_URL, devPath, connection, null);
-		dev.disable();
+		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath, *connection, 0);
+		if (!devPath.isEmpty())
+			dbusDev.disable();
 	}
 
 	//"Private functions"
 	QString getDevicePathByName(QDBusConnection * connection, QString & name) {
-		DBusDeviceManagerInterface devmgr(NUT_DBUS_URL, "/manager",connection, null);
+		DBusDeviceManagerInterface devmgr(NUT_DBUS_URL, "/manager",*connection, 0);
 		QDBusReply<QList<QDBusObjectPath> > replydevs = devmgr.getDeviceList();
 		if (replydevs.isValid()) {
 			//Find device
-			QDBusReply<DeviceProperties> devprops;
-			foreach(QDBusObjectPath i, replydevs) {
-				DBusDeviceInterface dev(NUT_DBUS_URL, i.path() ,connection, null);
+			QDBusReply<libnutcommon::DeviceProperties> devprops;
+			foreach(QDBusObjectPath i, replydevs.value()) {
+				DBusDeviceInterface dev(NUT_DBUS_URL, i.path() ,*connection, 0);
 				devprops = dev.getProperties();
 				if (devprops.isValid()) {
 					if (devprops.value().name == name) {
@@ -115,12 +134,14 @@ namespace nut_cmd {
 	}
 	
 	QString getEnvironmentPathByName(QDBusConnection * connection, QString &devPath, QString &envName) {
-		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath, connection, null);
+		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath, *connection, 0);
 		QDBusReply<QList<QDBusObjectPath> > replyenvs = dbusDev.getEnvironments();
 		if (replyenvs.isValid()) {
 			//Find environment
+			QString envPath;
 			foreach(QDBusObjectPath i, replyenvs.value()) {
-				if (getEnvironmentName(connection,i) == envName)  {
+				envPath = i.path();
+				if (getEnvironmentName(connection,envPath) == envName)  {
 					return i.path();
 				}
 			}
@@ -131,18 +152,18 @@ namespace nut_cmd {
 		}
 	}
 	
-	libnutcommon::DeviceProperties getDeviceProperties(QDBusConnection * connection, QDBusObjectPath &dev) {
-		DBusDeviceInterface dev(NUT_DBUS_URL, dev.path() ,connection, null);
+	libnutcommon::DeviceProperties getDeviceProperties(QDBusConnection * connection, QString &devPath) {
+		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath ,*connection, 0);
 		QDBusReply<libnutcommon::DeviceProperties> replyprops = dbusDev.getProperties();
 		if (replyprops.isValid()) {
 			return replyprops.value();
 		}
 		else {
-			return DeviceProperties();
+			return libnutcommon::DeviceProperties();
 		}
 	}
 	libnutcommon::EnvironmentProperties getEnvironmentProperties(QDBusConnection * connection, QString &env) {
-		DBusEnvironmentInterface dbusEnv(NUT_DBUS_URL,env,connection,null);
+		DBusEnvironmentInterface dbusEnv(NUT_DBUS_URL,env,*connection,0);
 		QDBusReply<libnutcommon::EnvironmentProperties> replyprops = dbusEnv.getProperties();
 		if (replyprops.isValid()) {
 			return replyprops.value();
@@ -151,9 +172,9 @@ namespace nut_cmd {
 			return libnutcommon::EnvironmentProperties();
 		}
 	}
-	checkAccessRights(QDBusError error) {
+	void checkAccessRights(QDBusError error) {
 		if (QDBusError::AccessDenied == error.type()) {
-			print("AccessDenied");
+			print(QString("AccessDenied"));
 		}
 	}
 }
