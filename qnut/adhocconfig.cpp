@@ -1,13 +1,9 @@
 //
 // C++ Implementation: adhocconfig
 //
-// Description: 
-//
-//
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
-//
 //
 #include "adhocconfig.h"
 
@@ -15,23 +11,23 @@ namespace qnut {
 	using namespace libnutwireless;
 
 	CAdhocConfig::CAdhocConfig(CWpaSupplicant * wpa_supplicant, QWidget * parent) : QDialog(parent) {
-		supplicant = wpa_supplicant;
+		m_Supplicant = wpa_supplicant;
 		
 		ui.setupUi(this);
 		
-		foreach (quint8 i, supplicant->getSupportedChannels()) {
+		foreach (quint8 i, m_Supplicant->getSupportedChannels()) {
 			ui.channelCombo->addItem(QString::number(i));
 		}
 		
 		QRegExp regexp("[0123456789abcdefABCDEF]*");
-		hexValidator = new QRegExpValidator(regexp, this);
+		m_HexValidator = new QRegExpValidator(regexp, this);
 		
 		connect(ui.ssidHexCheck, SIGNAL(toggled(bool)), this, SLOT(convertSSID(bool)));
 		connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(verifyConfiguration()));
 	}
 	
 	CAdhocConfig::~CAdhocConfig() {
-		delete hexValidator;
+		delete m_HexValidator;
 	}
 	
 	void CAdhocConfig::verifyConfiguration() {
@@ -57,11 +53,11 @@ namespace qnut {
 		if ((!ui.pskLeaveButton->isChecked()) && (!ui.pskEdit->text().length() == 0))
 			config.psk = '\"' + ui.pskEdit->text() + '\"';
 		
-		if (currentID > -1) {
-			status = supplicant->editNetwork(currentID, config);
+		if (m_CurrentID > -1) {
+			status = m_Supplicant->editNetwork(m_CurrentID, config);
 		}
 		else {
-			status = supplicant->addNetwork(config);
+			status = m_Supplicant->addNetwork(config);
 		}
 		
 		if (status.failures != NCF_NONE) {
@@ -132,12 +128,12 @@ namespace qnut {
 		ui.pskLeaveButton->setVisible(false);
 		ui.pskLeaveButton->setChecked(false);
 		
-		currentID = -1;
+		m_CurrentID = -1;
 		return exec();
 	}
 	
 	bool CAdhocConfig::execute(int id) {
-		NetworkConfig config = supplicant->getNetworkConfig(id);
+		NetworkConfig config = m_Supplicant->getNetworkConfig(id);
 		
 		if (config.ssid[0] == '\"') {
 			ui.ssidHexCheck->setChecked(false);
@@ -154,13 +150,13 @@ namespace qnut {
 			ui.encCombo->setCurrentIndex(0);
 		
 		int channel = frequencyToChannel(config.frequency);
-		int channelIndex = supplicant->getSupportedChannels().indexOf(channel);
+		int channelIndex = m_Supplicant->getSupportedChannels().indexOf(channel);
 		ui.channelCombo->setCurrentIndex(channelIndex);
 		
 		ui.pskLeaveButton->setVisible(true);
 		ui.pskLeaveButton->setChecked(true);
 		
-		currentID = id;
+		m_CurrentID = id;
 		
 		return exec();
 	}
@@ -169,7 +165,7 @@ namespace qnut {
 		ui.ssidEdit->setText(scanResult.ssid);
 		
 		int channel = frequencyToChannel(scanResult.freq);
-		int channelIndex = supplicant->getSupportedChannels().indexOf(channel);
+		int channelIndex = m_Supplicant->getSupportedChannels().indexOf(channel);
 		ui.channelCombo->setCurrentIndex(channelIndex);
 		
 		if (scanResult.group & PCI_CCMP)
@@ -177,7 +173,7 @@ namespace qnut {
 		else
 			ui.encCombo->setCurrentIndex(0);
 		
-		currentID = -1;
+		m_CurrentID = -1;
 		
 		return exec();
 	}
@@ -185,7 +181,7 @@ namespace qnut {
 	void CAdhocConfig::convertSSID(bool hex) {
 		if (hex) {
 			ui.ssidEdit->setText(ui.ssidEdit->text().toAscii().toHex());
-			ui.ssidEdit->setValidator(hexValidator);
+			ui.ssidEdit->setValidator(m_HexValidator);
 		}
 		else {
 			ui.ssidEdit->setText(QByteArray::fromHex(ui.ssidEdit->text().toAscii()));
