@@ -10,7 +10,7 @@ SRC_URI=""
 LICENSE="GPL-2.0"
 SLOT="0"
 KEYWORDS="~x86 ~amd64"
-IUSE="debug wifi"
+IUSE="debug wifi X"
 
 RDEPEND=">=x11-libs/qt-4.3.2
 		sys-apps/dbus"
@@ -44,11 +44,23 @@ src_unpack() {
 
 src_compile() {
 	cd "${S}"
-	if use debug; then 
-		qmake
-	else
-		qmake -recursive -Wall 'CONFIG+=release' 'DEFINES+=QT_NO_DEBUG_OUTPUT'
+	config_defines = ""
+	config_realease = ""
+	if ! use debug; then 
+		config_release="release"
+		config_defines="$config_defines QT_NO_DEBUG_OUTPUT"
 	fi
+
+	if ! use wifi; then
+		config_defines="$config_defines LIBNUT_NO_WIRELESS QNUT_NO_WIRELESS"
+	fi
+	
+	if ! use X; then
+		#Patch nut.pro: we don't need libnutclient,libnutwireless and qnut
+		sed --in-place -e :a -e "s/libnutwireless\|libnutclient\|qnut//;ta" nut.pro
+	fi
+	
+	qmake -recursive -Wall "CONFIG+=$config_realease" "DEFINES+=$config_defines"
 	make || die
 }
 
