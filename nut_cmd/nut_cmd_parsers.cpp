@@ -43,7 +43,6 @@ namespace nut_cmd {
 		bool doDev = false;
 		//Now dispatch the commands:
 		foreach(NutCommand cmd, commands) {
-			print(toString(cmd.command));
 // 			qDebug() << "Dispatching a command:";
 // 			qDebug() << QString("Commands value: %1").arg(cmd.value); 
 			if (CMD_HELP == cmd.command) {
