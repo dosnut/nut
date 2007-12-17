@@ -13,13 +13,13 @@ KEYWORDS="~x86 ~amd64"
 IUSE="debug wifi X"
 
 RDEPEND=">=x11-libs/qt-4.3.2
-		sys-apps/dbus"
+		sys-apps/dbus
+		wifi? ( >=net-wireless/wpa_supplicant-0.6.0 )"
 DEPEND="${RDEPEND}
 	>=sys-kernel/linux-headers-2.6.23-r2
 	>=dev-libs/libnl-1.0_pre6-r1
 	sys-devel/bison
-	sys-devel/flex
-	>=net-wireless/wireless-tools-29"
+	sys-devel/flex"
 
 S=${WORKDIR}/${EGIT_PROJECT}
 
