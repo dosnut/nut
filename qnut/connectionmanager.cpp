@@ -1,3 +1,10 @@
+//
+// C++ Implementation: connectionmanager
+//
+// Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
+//
+// Copyright: See COPYING file that comes with this distribution
+//
 #include <QDate>
 #include "connectionmanager.h"
 #include "overviewmodel.h"

@@ -5,7 +5,6 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-//
 #ifndef QNUT_ACCESSPOINTCONFIG_H
 #define QNUT_ACCESSPOINTCONFIG_H
 
@@ -27,18 +26,18 @@ namespace qnut {
 		Q_OBJECT
 	private:
 		Ui::apconf ui;
-		QRegExpValidator * hexValidator;
+		QRegExpValidator * m_HexValidator;
 		
-		libnutwireless::CWpaSupplicant * supplicant;
+		libnutwireless::CWpaSupplicant * m_Supplicant;
 		
-		int currentID;
-		bool wepEnabled;
+		int m_CurrentID;
+		bool m_WEPEnabled;
 		
 		struct {
 			libnutwireless::GroupCiphers group;
 			libnutwireless::PairwiseCiphers pairwise;
 			libnutwireless::Protocols protocols;
-		} oldConfig;
+		} m_OldConfig;
 		
 		inline void convertLineEditText(QLineEdit * lineEdit, bool hex);
 		inline QString convertQuoted(QString text);

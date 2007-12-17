@@ -5,7 +5,6 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-//
 #ifndef QNUT_SCRIPTSETTINGS_H
 #define QNUT_SCRIPTSETTINGS_H
 

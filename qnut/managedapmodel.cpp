@@ -1,18 +1,14 @@
 //
 // C++ Implementation: managedapmodel
 //
-// Description: 
-//
-//
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-//
 #include <QIcon>
 #include "managedapmodel.h"
 #include "constants.h"
-#include <QDebug>
+
 namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutwireless;

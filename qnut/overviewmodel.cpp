@@ -5,7 +5,6 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-//
 #include <QIcon>
 #include "overviewmodel.h"
 #include "common.h"

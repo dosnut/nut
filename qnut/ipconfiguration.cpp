@@ -5,7 +5,6 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-//
 #include <QMessageBox>
 #include "ipconfiguration.h"
 #include "dnslistmodel.h"

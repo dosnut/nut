@@ -1,18 +1,14 @@
 //
 // C++ Implementation: environmentdetailsmodel
 //
-// Description: 
-//
-//
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-//
 #include <QIcon>
 #include "environmentdetailsmodel.h"
 #include "constants.h"
-#include <QDebug>
+
 #define ENVDET_MOD_STATEMENT 0
 #define ENVDET_MOD_VALUE     1
 

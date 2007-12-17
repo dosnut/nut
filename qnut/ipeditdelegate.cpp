@@ -1,17 +1,13 @@
 //
 // C++ Implementation: ipeditdelegate
 //
-// Description: 
-//
-//
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-//
-#include "ipeditdelegate.h"
 #include <QAbstractItemModel>
 #include <QLineEdit>
+#include "ipeditdelegate.h"
 
 namespace qnut {
 	CIPEditDelegate::CIPEditDelegate(QObject * parent) : QItemDelegate(parent) {
