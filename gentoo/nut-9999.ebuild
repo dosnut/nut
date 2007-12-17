@@ -104,7 +104,7 @@ pkg_postinst() {
 	elog "Remeber to read the documentation!"
 	elog ""
 	elog "Known bugs:"
-	elog "Qnut will use 99% cpu if you are not allowed to access nuts' dbus interface."
+	elog "Qnut/nut_cmd will use 99% cpu if you are not allowed to access nuts' dbus interface."
 	elog "This will be fixed in qt-4.3.4 (hopefully)"
 	elog "Configuring networks is not fully tested. Please make a back-up before you activate wpa_supplicant's config write feature."
 }
