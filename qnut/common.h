@@ -42,13 +42,6 @@ namespace qnut {
 		else
 			return address.toString();
 	}
-	
-	/**
-	 * @brief Returns a summary for the given signal statistics: "<quality>, <level>dBm, <noise>dBm".
-	 * @param signal the signal statistics
-	 */
-	QString signalSummary(libnutwireless::WextSignal signal);
-	
 };
 
 #endif

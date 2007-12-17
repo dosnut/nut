@@ -139,7 +139,34 @@ namespace qnut {
 	}
 	
 	void CWirelessSettings::updateSignalInfo(WextSignal signal) {
-		ui.signalLabel->setText(tr("Signal (Quality, Level, Noise): %1").arg(signalSummary(signal)));
+		QString quality = QString::number(signal.quality.value) + '/' + QString::number(signal.quality.maximum);
+		QString level;
+		QString noise;
+		
+		switch (signal.type) {
+		case WSR_RCPI:
+			level = QString::number(signal.level.rcpi);
+			noise = QString::number(signal.noise.rcpi);
+			break;
+		case WSR_ABSOLUTE:
+			level = QString::number(signal.level.nonrcpi.value);
+			noise = QString::number(signal.noise.nonrcpi.value);
+			break;
+		case WSR_RELATIVE:
+			level = QString::number(signal.level.nonrcpi.value) + '/' + QString::number(signal.level.nonrcpi.maximum);
+			noise = QString::number(signal.noise.nonrcpi.value) + '/' + QString::number(signal.noise.nonrcpi.maximum);
+			break;
+		default:
+			break;
+		}
+		
+		if (level.length() > 0)
+			ui.signalLabel->setText(tr("Signal (%1): %2").arg(
+				tr("Quality") + ", " + tr("Level") + ", " + tr("Noise"),
+				quality + ", " + level + "dBm, " + noise + "dBm"
+			));
+		else
+			ui.signalLabel->setText(tr("Signal quality: %1").arg(quality));
 	}
 	
 	void CWirelessSettings::handleManagedAPSelectionChanged(const QItemSelection & selected, const QItemSelection &) {

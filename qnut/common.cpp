@@ -39,9 +39,9 @@ namespace qnut {
 
 	QString shortSummary(CDevice * device) {
 		if (device->getState() < DS_UNCONFIGURED)
-			return device->getName() + ": " + toStringTr(device->getState()) + ", " + activeIP(device);
-		else
 			return device->getName() + ": " + toStringTr(device->getState());
+		else
+			return device->getName() + ": " + toStringTr(device->getState()) + ", " + activeIP(device);
 	}
 
 	QString activeIP(CDevice * device) {
@@ -65,31 +65,5 @@ namespace qnut {
 			return result;
 		else
 			return QString('-');
-	}
-	
-	QString signalSummary(libnutwireless::WextSignal signal) {
-		QString quality = QString::number(signal.quality.value) + '/' + QString::number(signal.quality.maximum);
-		QString level;
-		QString noise;
-		
-		switch (signal.type) {
-		case WSR_RCPI:
-			level = QString::number(signal.level.rcpi);
-			noise = QString::number(signal.noise.rcpi);
-			break;
-		case WSR_ABSOLUTE:
-			level = QString::number(signal.level.nonrcpi.value);
-			noise = QString::number(signal.noise.nonrcpi.value);
-			break;
-		case WSR_RELATIVE:
-			level = QString::number(signal.level.nonrcpi.value) + '/' + QString::number(signal.level.nonrcpi.maximum);
-			noise = QString::number(signal.noise.nonrcpi.value) + '/' + QString::number(signal.noise.nonrcpi.maximum);
-			break;
-		default:
-			level = '-';
-			noise = '-';
-		}
-		
-		return QString("%1, %2 dBm, %3 dBm").arg(quality, level, noise);
 	}
 };
