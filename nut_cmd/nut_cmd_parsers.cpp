@@ -100,7 +100,7 @@ namespace nut_cmd {
 						name.chop(1);
 						name.remove(0,1);
 
-						qDebug() << QString("Parsed setEnvironment with: %1").arg(name);
+// 						qDebug() << QString("Parsed setEnvironment with: %1").arg(name);
 						envPath = getEnvironmentPathByName(connection,devPath,name);
 						if (envPath.isEmpty()) {
 							print(QObject::tr("Environment not found"));
