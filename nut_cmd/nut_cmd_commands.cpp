@@ -143,15 +143,29 @@ namespace nut_cmd {
 			QString envPath;
 			foreach(QDBusObjectPath i, replyenvs.value()) {
 				envPath = i.path();
-				if (getEnvironmentName(connection,envPath) == envName)  {
-					return i.path();
+				if ( getEnvironmentName(connection,envPath) == envName)  {
+					break;
 				}
 			}
-			return QString();
+			return envPath;
 		}
 		else {
 			return QString();
 		}
+	}
+	QString getEnvironmentPathByIndex(QDBusConnection * connection, QString &devPath, qint32 index) {
+		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath,*connection, 0);
+		QDBusReply<QList<QDBusObjectPath> > replyenvs = dbusDev.getEnvironments();
+		QString envPath;
+		if (replyenvs.isValid()) {
+			if (index >= 0 && replyenvs.value().size()-1 >= index && replyenvs.value().size() > 0) {
+				envPath = replyenvs.value()[index].path();
+			}
+		}
+		else {
+			checkAccessRights(replyenvs.error());
+		}
+		return envPath;
 	}
 	
 	libnutcommon::DeviceProperties getDeviceProperties(QDBusConnection * connection, QString &devPath) {

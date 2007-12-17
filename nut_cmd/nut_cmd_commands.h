@@ -34,6 +34,7 @@ namespace nut_cmd {
 	//"Private functions"
 	QString getDevicePathByName(QDBusConnection * connection, QString & name);
 	QString getEnvironmentPathByName(QDBusConnection * connection, QString &devPath, QString &envName);
+	QString getEnvironmentPathByIndex(QDBusConnection * connection, QString &devPath, qint32 index);
 	libnutcommon::DeviceProperties getDeviceProperties(QDBusConnection * connection, QString &devPath);
 	libnutcommon::EnvironmentProperties getEnvironmentProperties(QDBusConnection * connection, QString &env);
 	void checkAccessRights(QDBusError error);

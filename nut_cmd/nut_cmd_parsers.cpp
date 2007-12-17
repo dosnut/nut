@@ -7,6 +7,7 @@ namespace nut_cmd {
 		print(QString("--listDevices %1").arg(QObject::tr("Lists available devices")));
 		print(QString("--device <devicename> %1").arg(QObject::tr("Choose device")));
 		print(QString("--environment <environment name> %1").arg(QObject::tr("Choose environment in given device")));
+		print(QString("--environment <environment index> %1").arg(QObject::tr("Choose environment in given device")));
 		print(QString("--listEnvironments %1").arg(QObject::tr("Lists environments of device set by --Device")));
 		print(QString("--enable %1").arg(QObject::tr("Enables given device")));
 		print(QString("--disable %1").arg(QObject::tr("Disables given device")));
@@ -36,6 +37,7 @@ namespace nut_cmd {
 		QString environmentName;
 		QString devPath;
 		QString envPath;
+		bool doEnvState = false;
 		//Now dispatch the commands:
 		foreach(NutCommand cmd, commands) {
 // 			qDebug() << "Dispatching a command:";
@@ -95,16 +97,6 @@ namespace nut_cmd {
 				}
 				else {
 					print(getDeviceType(connection,devPath));
-				}
-				return RETVAL_SUCCESS;
-			}
-			else if (CMD_STATE == cmd.command) { //no env set.
-				if (devPath.isEmpty()) {
-					print(QObject::tr("No device specified"));
-					return RETVAL_DEVICE_NOT_SPECIFIED;
-				}
-				else {
-					print(getDeviceState(connection,devPath));
 				}
 				return RETVAL_SUCCESS;
 			}
@@ -168,20 +160,39 @@ namespace nut_cmd {
 					return RETVAL_DEVICE_NOT_SPECIFIED;
 				}
 				else {
-					envPath == getEnvironmentPathByName(connection,devPath,cmd.value);
+					doEnvState = true;
+					bool ok;
+					qint32 index = cmd.value.toInt(&ok);
+					if (ok) { //try number first
+						envPath = getEnvironmentPathByIndex(connection,devPath,index);
+					}
+					else {
+						envPath = getEnvironmentPathByName(connection,devPath,cmd.value);
+					}
 				}
 			}
-			else if (CMD_STATE == cmd.command) { //env set.
-				if (devPath.isEmpty()) {
-					print(QObject::tr("No device specified"));
-					return RETVAL_DEVICE_NOT_SPECIFIED;
-				}
-				else if (envPath.isEmpty()) {
-					print(QObject::tr("No environment specified"));
-					return RETVAL_ENVIRONMENT_NOT_SPECIFIED;
+			else if (CMD_STATE == cmd.command) {
+				if (doEnvState) {
+					if (devPath.isEmpty()) {
+						print(QObject::tr("No device specified"));
+						return RETVAL_DEVICE_NOT_SPECIFIED;
+					}
+					else if (envPath.isEmpty()) {
+						print(QObject::tr("No environment specified"));
+						return RETVAL_ENVIRONMENT_NOT_SPECIFIED;
+					}
+					else {
+						print(getEnvironmentState(connection,envPath));
+					}
 				}
 				else {
-					getEnvironmentState(connection,envPath);
+					if (devPath.isEmpty()) {
+						print(QObject::tr("No device specified"));
+						return RETVAL_DEVICE_NOT_SPECIFIED;
+					}
+					else {
+						print(getDeviceState(connection,devPath));
+					}
 				}
 				return RETVAL_SUCCESS;
 			}
