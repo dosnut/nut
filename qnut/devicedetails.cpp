@@ -121,10 +121,11 @@ namespace qnut {
 		m_DeviceMenu->addSeparator();
 		m_DeviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("&Scripting settings..."),
 			this, SLOT(openScriptingSettings()));
-		
+		#ifndef QNUT_NO_WIRELESS
 		tempAction = m_DeviceMenu->addAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."),
 			this, SLOT(openWirelessSettings()));
 		tempAction->setEnabled(m_Device->getWpaSupplicant());
+		#endif
 		
 		m_DeviceActions = m_DeviceMenu->actions();
 		
