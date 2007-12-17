@@ -1,3 +1,10 @@
+//
+// C++ Implementation: common
+//
+// Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
+//
+// Copyright: See COPYING file that comes with this distribution
+//
 #include "common.h"
 
 namespace qnut {
@@ -38,7 +45,10 @@ namespace qnut {
 	}
 
 	QString shortSummary(CDevice * device) {
-		return device->getName() + ": " + toStringTr(device->getState()) + ", " + activeIP(device);
+		if (device->getState() < DS_UNCONFIGURED)
+			return device->getName() + ": " + toStringTr(device->getState());
+		else
+			return device->getName() + ": " + toStringTr(device->getState()) + ", " + activeIP(device);
 	}
 
 	QString activeIP(CDevice * device) {
@@ -48,12 +58,13 @@ namespace qnut {
 		QString result = QString("");
 		
 		foreach (CInterface * i, device->getActiveEnvironment()->getInterfaces()) {
-			if (result.length() > 0) {
-				result += " (...)";
-				break;
-			}
-			else if (i->getState() != IFS_OFF) {
-				result += i->getIp().toString();
+			if (i->getState() != IFS_OFF) {
+				if (result.length() == 0)
+					result = i->getIp().toString();
+				else {
+					result += " (...)";
+					break;
+				}
 			}
 		}
 		
@@ -61,31 +72,5 @@ namespace qnut {
 			return result;
 		else
 			return QString('-');
-	}
-	
-	QString signalSummary(libnutwireless::WextSignal signal) {
-		QString quality = QString::number(signal.quality.value) + '/' + QString::number(signal.quality.maximum);
-		QString level;
-		QString noise;
-		
-		switch (signal.type) {
-		case WSR_RCPI:
-			level = QString::number(signal.level.rcpi);
-			noise = QString::number(signal.noise.rcpi);
-			break;
-		case WSR_ABSOLUTE:
-			level = QString::number(signal.level.nonrcpi.value);
-			noise = QString::number(signal.noise.nonrcpi.value);
-			break;
-		case WSR_RELATIVE:
-			level = QString::number(signal.level.nonrcpi.value) + '/' + QString::number(signal.level.nonrcpi.maximum);
-			noise = QString::number(signal.noise.nonrcpi.value) + '/' + QString::number(signal.noise.nonrcpi.maximum);
-			break;
-		default:
-			level = '-';
-			noise = '-';
-		}
-		
-		return QString("%1, %2 dBm, %3 dBm").arg(quality, level, noise);
 	}
 };

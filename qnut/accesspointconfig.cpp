@@ -1,30 +1,27 @@
 //
 // C++ Implementation: accesspointconfig
 //
-// Description: 
-//
-//
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-//
-#include "accesspointconfig.h"
+#ifndef QNUT_NO_WIRELESS
 #include <QFileDialog>
 #include <QToolTip>
+#include "accesspointconfig.h"
 
 namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutwireless;
 	
 	CAccessPointConfig::CAccessPointConfig(CWpaSupplicant * wpa_supplicant, QWidget *parent) : QDialog(parent) {
-		supplicant = wpa_supplicant;
+		m_Supplicant = wpa_supplicant;
 		
 		ui.setupUi(this);
 		
-		oldConfig.group = GCI_UNDEFINED;
-		oldConfig.pairwise = PCI_UNDEFINED;
-		oldConfig.protocols = PROTO_UNDEFINED;
+		m_OldConfig.group = GCI_UNDEFINED;
+		m_OldConfig.pairwise = PCI_UNDEFINED;
+		m_OldConfig.protocols = PROTO_UNDEFINED;
 		
 		ui.pskLeaveButton->setVisible(false);
 		ui.passwordLeaveButton->setVisible(false);
@@ -34,7 +31,7 @@ namespace qnut {
 		ui.wep3LeaveButton->setVisible(false);
 		
 		QRegExp regexp("[0123456789abcdefABCDEF]*");
-		hexValidator = new QRegExpValidator(regexp, this);
+		m_HexValidator = new QRegExpValidator(regexp, this);
 		
 		connect(ui.ssidHexCheck, SIGNAL(toggled(bool)), this, SLOT(convertSSID(bool)));
 		connect(ui.wep0HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertWEPKey0(bool)));
@@ -55,7 +52,7 @@ namespace qnut {
 	}
 	
 	CAccessPointConfig::~CAccessPointConfig() {
-		delete hexValidator;
+		delete m_HexValidator;
 	}
 	
 	void CAccessPointConfig::setAuthConfig(int type) {
@@ -69,14 +66,14 @@ namespace qnut {
 		ui.rsnCheck->setEnabled(type > 0);
 		
 		if (type > 0) {
-			wepEnabled = !ui.rsnCheck->isChecked();
-			if (wepEnabled)
+			m_WEPEnabled = !ui.rsnCheck->isChecked();
+			if (m_WEPEnabled)
 				ui.grpCipCombo->addItem("WEP");
 			ui.grpCipCombo->addItem("TKIP");
 			ui.grpCipCombo->addItem("CCMP");
 		}
 		else {
-			wepEnabled = true;
+			m_WEPEnabled = true;
 			ui.grpCipCombo->addItem("WEP");
 		}
 	}
@@ -86,7 +83,7 @@ namespace qnut {
 	}
 	
 	void CAccessPointConfig::setWEPDisabled(bool value) {
-		wepEnabled = not value;
+		m_WEPEnabled = not value;
 		if (value)
 			ui.grpCipCombo->removeItem(1);
 		else
@@ -95,7 +92,7 @@ namespace qnut {
 	
 	bool CAccessPointConfig::execute() {
 		setAuthConfig(0);
-		currentID = -1;
+		m_CurrentID = -1;
 		return exec();
 	}
 	
@@ -120,7 +117,7 @@ namespace qnut {
 		else
 			ui.prwCipCombo->setCurrentIndex(0);
 		
-		if (wepEnabled) {
+		if (m_WEPEnabled) {
 			if (scanResult.group & GCI_CCMP)
 				ui.grpCipCombo->setCurrentIndex(3);
 			else if (scanResult.group & GCI_TKIP)
@@ -139,17 +136,17 @@ namespace qnut {
 				ui.grpCipCombo->setCurrentIndex(0);
 		}
 		
-		currentID = -1;
+		m_CurrentID = -1;
 		
 		return exec();
 	}
 	
 	bool CAccessPointConfig::execute(int id) {
-		NetworkConfig config = supplicant->getNetworkConfig(id);
+		NetworkConfig config = m_Supplicant->getNetworkConfig(id);
 		
-		oldConfig.pairwise = config.pairwise;
-		oldConfig.group = config.group;
-		oldConfig.protocols = config.protocols;
+		m_OldConfig.pairwise = config.pairwise;
+		m_OldConfig.group = config.group;
+		m_OldConfig.protocols = config.protocols;
 		
 		if (config.ssid[0] == '\"') {
 			ui.ssidHexCheck->setChecked(false);
@@ -183,7 +180,7 @@ namespace qnut {
 		else
 			ui.prwCipCombo->setCurrentIndex(0);
 		
-		if (wepEnabled) {
+		if (m_WEPEnabled) {
 			if (config.group & GCI_CCMP)
 				ui.grpCipCombo->setCurrentIndex(3);
 			else if (config.group & GCI_TKIP)
@@ -222,7 +219,7 @@ namespace qnut {
 		
 		ui.autoEnableCheck->setChecked(config.disabled);
 		
-		currentID = id;
+		m_CurrentID = id;
 		
 		return exec();
 	}
@@ -274,8 +271,8 @@ namespace qnut {
 		else if (ui.grpCipCombo->currentText() == "WEP")
 			config.group = (GroupCiphers)(GCI_WEP104 | GCI_WEP40);
 		
-		if (config.group & oldConfig.group) {
-			config.group = oldConfig.group;
+		if (config.group & m_OldConfig.group) {
+			config.group = m_OldConfig.group;
 		}
 		
 		if (ui.prwCipCombo->isEnabled()) {
@@ -288,8 +285,8 @@ namespace qnut {
 				config.pairwise = PCI_NONE; break;
 			}
 			
-			if (config.pairwise & oldConfig.pairwise) {
-				config.pairwise = oldConfig.pairwise;
+			if (config.pairwise & m_OldConfig.pairwise) {
+				config.pairwise = m_OldConfig.pairwise;
 			}
 		}
 		
@@ -305,8 +302,8 @@ namespace qnut {
 			else
 				config.protocols = PROTO_WPA;
 			
-			if (config.protocols & oldConfig.protocols) {
-				config.protocols = oldConfig.protocols;
+			if (config.protocols & m_OldConfig.protocols) {
+				config.protocols = m_OldConfig.protocols;
 			}
 			
 			if ((!ui.pskLeaveButton->isChecked()) && (!ui.pskEdit->text().isEmpty()))
@@ -324,8 +321,8 @@ namespace qnut {
 			else
 				config.protocols = PROTO_WPA;
 			
-			if (config.protocols & oldConfig.protocols) {
-				config.protocols = oldConfig.protocols;
+			if (config.protocols & m_OldConfig.protocols) {
+				config.protocols = m_OldConfig.protocols;
 			}
 			
 			writeEAPConfig(config.eap_config);
@@ -334,10 +331,10 @@ namespace qnut {
 			break;
 		}
 		
-		if (currentID > -1)
-			status = supplicant->editNetwork(currentID, config);
+		if (m_CurrentID > -1)
+			status = m_Supplicant->editNetwork(m_CurrentID, config);
 		else
-			status = supplicant->addNetwork(config);
+			status = m_Supplicant->addNetwork(config);
 		
 		if (status.failures != NCF_NONE) {
 			qDebug("general failures:");
@@ -457,7 +454,7 @@ namespace qnut {
 	inline void CAccessPointConfig::convertLineEditText(QLineEdit * lineEdit, bool hex) {
 		if (hex) {
 			lineEdit->setText(lineEdit->text().toAscii().toHex());
-			lineEdit->setValidator(hexValidator);
+			lineEdit->setValidator(m_HexValidator);
 		}
 		else {
 			lineEdit->setText(QByteArray::fromHex(lineEdit->text().toAscii()));
@@ -513,3 +510,4 @@ namespace qnut {
 			tr("Select key file"), "/", tr("Key files (%1)").arg("*.pem")));
 	}
 };
+#endif

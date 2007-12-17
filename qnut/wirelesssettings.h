@@ -8,6 +8,7 @@
 #ifndef QNUT_WIRELESSSETTINGS_H
 #define QNUT_WIRELESSSETTINGS_H
 
+#ifndef QNUT_NO_WIRELESS
 #include <QDialog>
 #include <libnutclient/client.h>
 #include "ui/ui_airset.h"
@@ -76,5 +77,6 @@ namespace qnut {
 		void toggleDetails(bool value);
 	};
 };
+#endif
 
 #endif

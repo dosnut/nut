@@ -8,6 +8,7 @@
 #ifndef QNUT_AVAILABLEAPMODEL_H
 #define QNUT_AVAILABLEAPMODEL_H
 
+#ifndef QNUT_NO_WIRELESS
 #include <QAbstractItemModel>
 #include <libnutclient/client.h>
 
@@ -66,5 +67,6 @@ namespace qnut {
 		QList<libnutwireless::ScanResult> m_Scans;
 	};
 }
+#endif
 
 #endif

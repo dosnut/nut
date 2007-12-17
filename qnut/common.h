@@ -1,6 +1,13 @@
 /*
 	TRANSLATOR qnut::QObject
 */
+//
+// C++ Interface: common
+//
+// Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
+//
+// Copyright: See COPYING file that comes with this distribution
+//
 #ifndef QNUT_COMMON_H
 #define QNUT_COMMON_H
 
@@ -42,13 +49,6 @@ namespace qnut {
 		else
 			return address.toString();
 	}
-	
-	/**
-	 * @brief Returns a summary for the given signal statistics: "<quality>, <level>dBm, <noise>dBm".
-	 * @param signal the signal statistics
-	 */
-	QString signalSummary(libnutwireless::WextSignal signal);
-	
 };
 
 #endif

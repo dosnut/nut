@@ -1,3 +1,10 @@
+//
+// C++ Implementation: connectionmanager
+//
+// Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
+//
+// Copyright: See COPYING file that comes with this distribution
+//
 #include <QDate>
 #include "connectionmanager.h"
 #include "overviewmodel.h"
@@ -77,13 +84,17 @@ namespace qnut {
 		m_EnableDeviceAction     = new QAction(QIcon(UI_ICON_ENABLE), tr("&Enable"), this);
 		m_DisableDeviceAction    = new QAction(QIcon(UI_ICON_DISABLE), tr("&Disable"), this);
 		m_DeviceSettingsAction   = new QAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("&Scripting settings..."), this);
+		#ifndef QNUT_NO_WIRELESS
 		m_WirelessSettingsAction = new QAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."), this);
+		#endif
 		m_ClearLogAction         = new QAction(QIcon(UI_ICON_CLEAR), tr("&Clear log"), this);
 		
 		m_EnableDeviceAction->setEnabled(false);
 		m_DisableDeviceAction->setEnabled(false);
 		m_DeviceSettingsAction->setEnabled(false);
+		#ifndef QNUT_NO_WIRELESS
 		m_WirelessSettingsAction->setEnabled(false);
+		#endif
 		
 		m_OverView.addAction(m_RefreshDevicesAction);
 		m_OverView.addAction(getSeparator(this));
@@ -91,7 +102,9 @@ namespace qnut {
 		m_OverView.addAction(m_DisableDeviceAction);
 		m_OverView.addAction(getSeparator(this));
 		m_OverView.addAction(m_DeviceSettingsAction);
+		#ifndef QNUT_NO_WIRELESS
 		m_OverView.addAction(m_WirelessSettingsAction);
+		#endif
 		
 		connect(m_RefreshDevicesAction, SIGNAL(triggered()), &m_DeviceManager, SLOT(rebuild()));
 		connect(m_ClearLogAction, SIGNAL(triggered()), &m_LogEdit, SLOT(clear()));
@@ -216,7 +229,9 @@ namespace qnut {
 			disconnect(m_EnableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(enable()));
 			disconnect(m_DisableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(disable()));
 			disconnect(m_DeviceSettingsAction, SIGNAL(triggered()), m_DeviceDetails[deselectedDevice], SLOT(openScriptingSettings()));
+			#ifndef QNUT_NO_WIRELESS
 			disconnect(m_WirelessSettingsAction, SIGNAL(triggered()), m_DeviceDetails[deselectedDevice], SLOT(openWirelessSettings()));
+			#endif
 		}
 		
 		if (!selectedIndexes.isEmpty()) {
@@ -225,18 +240,25 @@ namespace qnut {
 			connect(m_EnableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(enable()));
 			connect(m_DisableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(disable()));
 			connect(m_DeviceSettingsAction, SIGNAL(triggered()), m_DeviceDetails[selectedDevice], SLOT(openScriptingSettings()));
+			#ifndef QNUT_NO_WIRELESS
 			connect(m_WirelessSettingsAction, SIGNAL(triggered()), m_DeviceDetails[selectedDevice], SLOT(openWirelessSettings()));
+			#endif
 			
 			m_EnableDeviceAction->setEnabled(selectedDevice->getState() == DS_DEACTIVATED);
 			m_DisableDeviceAction->setDisabled(selectedDevice->getState() == DS_DEACTIVATED);
 			m_DeviceSettingsAction->setEnabled(true);
+			
+			#ifndef QNUT_NO_WIRELESS
 			m_WirelessSettingsAction->setEnabled(selectedDevice->getWpaSupplicant());
+			#endif
 		}
 		else {
 			m_EnableDeviceAction->setEnabled(false);
 			m_DisableDeviceAction->setEnabled(false);
 			m_DeviceSettingsAction->setEnabled(false);
+			#ifndef QNUT_NO_WIRELESS
 			m_WirelessSettingsAction->setEnabled(false);
+			#endif
 		}
 	}
 	

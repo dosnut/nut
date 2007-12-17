@@ -1,0 +1,6 @@
+build
+Makefile*
+moc_*
+nut_cmd
+Doxyfile
+backup

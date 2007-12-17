@@ -1,13 +1,9 @@
 //
 // C++ Interface: deviceoptionsmodel
 //
-// Description: 
-//
-//
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
-//
 //
 #ifndef QNUT_INTERFACEDETAILSMODEL_H
 #define QNUT_INTERFACEDETAILSMODEL_H

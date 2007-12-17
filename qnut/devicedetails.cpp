@@ -1,15 +1,10 @@
 //
 // C++ Implementation: deviceoptions
 //
-// Description: 
-//
-//
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-//
-
 #include <QHeaderView>
 #include <QProcess>
 #include <QDir>
@@ -21,7 +16,9 @@
 #include "environmentdetailsmodel.h"
 #include "ipconfiguration.h"
 #include "scriptsettings.h"
+#ifndef QNUT_NO_WIRELESS
 #include "wirelesssettings.h"
+#endif
 
 namespace qnut {
 	using namespace libnutclient;
@@ -33,10 +30,12 @@ namespace qnut {
 	{
 		m_Device = parentDevice;
 		
+		#ifndef QNUT_NO_WIRELESS
 		if (m_Device->getWpaSupplicant())
 			m_WirelessSettings = new CWirelessSettings(m_Device);
 		else
 			m_WirelessSettings = NULL;
+		#endif
 		
 		createView();
 		createActions();
@@ -60,10 +59,12 @@ namespace qnut {
 		disconnect(m_Device, SIGNAL(stateChanged(libnutcommon::DeviceState)),
 			this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
 		writeSettings();
+		#ifndef QNUT_NO_WIRELESS
 		if (m_WirelessSettings) {
 			m_WirelessSettings->close();
 			delete m_WirelessSettings;
 		}
+		#endif
 		delete m_DeviceMenu;
 	}
 	
@@ -75,6 +76,7 @@ namespace qnut {
 		m_Stettings.endGroup();
 		ui.showTrayCheck->setChecked(m_trayIcon->isVisible());
 		
+		#ifndef QNUT_NO_WIRELESS
 		if (m_WirelessSettings) {
 			m_Stettings.beginGroup("WirelessSettings");
 			m_WirelessSettings->resize(m_Stettings.value("size", QSize(646, 322)).toSize());
@@ -82,6 +84,7 @@ namespace qnut {
 			m_WirelessSettings->setDetailsVisible(m_Stettings.value("showDetails", false).toBool());
 			m_Stettings.endGroup();
 		}
+		#endif
 	}
 	
 	inline void CDeviceDetails::writeSettings() {
@@ -91,6 +94,7 @@ namespace qnut {
 		m_Stettings.setValue("showDetails", ui.detailsButton->isChecked());
 		m_Stettings.endGroup();
 		
+		#ifndef QNUT_NO_WIRELESS
 		if (m_WirelessSettings) {
 			m_Stettings.beginGroup("WirelessSettings");
 			m_Stettings.setValue("size", m_WirelessSettings->size());
@@ -98,6 +102,7 @@ namespace qnut {
 			m_Stettings.setValue("showDetails", m_WirelessSettings->detailsVisible());
 			m_Stettings.endGroup();
 		}
+		#endif
 	}
 	
 	inline void CDeviceDetails::createActions() {
@@ -243,10 +248,12 @@ namespace qnut {
 		dialog.execute(this);
 	}
 	
+	#ifndef QNUT_NO_WIRELESS
 	void CDeviceDetails::openWirelessSettings() {
 		m_WirelessSettings->show();
 		m_WirelessSettings->activateWindow();
 	}
+	#endif
 	
 	void CDeviceDetails::handleDeviceStateChange(DeviceState state) {
 		setHeadInfo();
