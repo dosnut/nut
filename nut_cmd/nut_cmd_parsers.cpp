@@ -43,9 +43,11 @@ namespace nut_cmd {
 		bool doDev = false;
 		//Now dispatch the commands:
 		foreach(NutCommand cmd, commands) {
+			print(toString(cmd.command));
 // 			qDebug() << "Dispatching a command:";
 // 			qDebug() << QString("Commands value: %1").arg(cmd.value); 
 			if (CMD_HELP == cmd.command) {
+				qDebug() << "help!";
 				help();
 				return RETVAL_SUCCESS;
 			}
@@ -282,10 +284,10 @@ namespace nut_cmd {
 		else if ("--type" == cmd || "-t" == cmd) {
 			return CMD_TYPE;
 		}
-		else if ("--state" == cmd || "-s") {
+		else if ("--state" == cmd || "-s" == cmd) {
 			return CMD_STATE;
 		}
-		else if ("--activeEnvironment" == cmd || "-a") {
+		else if ("--activeEnvironment" == cmd || "-a" == cmd) {
 			return CMD_ACTIVE_ENVIRONMENT;
 		}
 		else if ("--setEnvironment" == cmd || "-S" == cmd) {
@@ -334,21 +336,24 @@ namespace nut_cmd {
 				if (cmdNeedsArguments(command.command)) {
 					++cmdIter;
 					if (cmdIter != commands.end()) { //check if last arg
-						if (0 == cmdIter->indexOf("--")) { //again a command => value not specified
+						if (0 == cmdIter->indexOf("--") || 0 == cmdIter->indexOf("-")) { //again a command => value not specified
 							command.value = QString(); // Insert empty string for error reporting
 						}
 						else {
 							command.value = *cmdIter;
+							qDebug() << toString(command.command);
 							cmdList.append(command);
 							++cmdIter; //parse next one
 						}
 					}
 					else { //end of arg list
 						command.value = QString(); //Insert for error reporting
+						qDebug() << toString(command.command);
 						cmdList.append(command);
 					}
 				}
 				else { //insert command and do the next one
+					qDebug() << toString(command.command);
 					cmdList.append(command);
 					cmdIter++;
 				}
