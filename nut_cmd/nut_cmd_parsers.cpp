@@ -47,7 +47,6 @@ namespace nut_cmd {
 // 			qDebug() << "Dispatching a command:";
 // 			qDebug() << QString("Commands value: %1").arg(cmd.value); 
 			if (CMD_HELP == cmd.command) {
-				qDebug() << "help!";
 				help();
 				return RETVAL_SUCCESS;
 			}
@@ -341,19 +340,16 @@ namespace nut_cmd {
 						}
 						else {
 							command.value = *cmdIter;
-							qDebug() << toString(command.command);
 							cmdList.append(command);
 							++cmdIter; //parse next one
 						}
 					}
 					else { //end of arg list
 						command.value = QString(); //Insert for error reporting
-						qDebug() << toString(command.command);
 						cmdList.append(command);
 					}
 				}
 				else { //insert command and do the next one
-					qDebug() << toString(command.command);
 					cmdList.append(command);
 					cmdIter++;
 				}
