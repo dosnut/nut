@@ -14,7 +14,9 @@ namespace nut_cmd {
 		print(QString("--state %1").arg(QObject::tr("returns state of given device or environment")));
 		print(QString("--activeEnvironment %1").arg(QObject::tr("returns active Environment of given device")));
 		print(QString("--setEnvironment <environment name> %1").arg(QObject::tr("Activates the environment on the given device")));
-		print(QString("--setEnvironment <index> %1").arg(QObject::tr("Activates the environment on the given device")));
+		print(QString("--setEnvironment <index> %1").arg(
+		QObject::tr("Activates the environment on the given device. Index = line number from --listEnvironments starting with 0"))
+		);
 		print(""); print("");
 		print(QObject::tr("Examples:"));
 		print(QString("nut_cmd --device eth0 --enable %1").arg(QObject::tr("Enables device eth0")));
@@ -122,8 +124,14 @@ namespace nut_cmd {
 					return RETVAL_DEVICE_NOT_SPECIFIED;
 				}
 				else {
+// 					qDebug() << QString("Parsed setEnvironment with: %1").arg(cmd.value);
 					if (cmd.value.contains("\"")) { //Check if index or name
-						envPath = getEnvironmentPathByName(connection,devPath,cmd.value);
+						QString name = cmd.value;
+						name.chop(1);
+						name.remove(0,1);
+
+						qDebug() << QString("Parsed setEnvironment with: %1").arg(name);
+						envPath = getEnvironmentPathByName(connection,devPath,name);
 						if (envPath.isEmpty()) {
 							print(QObject::tr("Environment not found"));
 							return RETVAL_ENVIRONMENT_NOT_FOUND;
@@ -140,8 +148,16 @@ namespace nut_cmd {
 								return RETVAL_SUCCESS;
 							}
 						}
-						else {
-							return RETVAL_SUCCESS;
+						else { //QT strips ", so let's try it with name:
+							envPath = getEnvironmentPathByName(connection,devPath,cmd.value);
+							if (envPath.isEmpty()) {
+								print(QObject::tr("Environment not found"));
+								return RETVAL_ENVIRONMENT_NOT_FOUND;
+							}
+							else {
+								setEnvironment(connection,devPath,envPath);
+								return RETVAL_SUCCESS;
+							}
 						}
 					}
 				}

@@ -37,9 +37,11 @@ namespace nut_cmd {
 		QStringList envList;
 		if (replyenvs.isValid()) {
 			QString envPath;
+			int count = 0;
 			foreach(QDBusObjectPath i, replyenvs.value()) {
 				envPath = i.path();
-				envList.append(getEnvironmentName(connection,envPath));
+				envList.append(QString("%1 %2").arg(QString::number(count),getEnvironmentName(connection,envPath)));
+				count++;
 			}
 		}
 		else {
