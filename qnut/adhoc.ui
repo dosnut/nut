@@ -90,6 +90,11 @@
       <widget class="QComboBox" name="encCombo" >
        <item>
         <property name="text" >
+         <string>WEP</string>
+        </property>
+       </item>
+       <item>
+        <property name="text" >
          <string>TKIP</string>
         </property>
        </item>

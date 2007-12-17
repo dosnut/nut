@@ -36,23 +36,34 @@ namespace qnut {
 		NetworkConfig config;
 		
 		config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
-		
-		if (ui.encCombo->currentText() == "CCMP") {
-			config.group = GCI_CCMP;
-		}
-		else {
-			config.group = GCI_TKIP;
-		}
-		
-		config.mode = QOOL_TRUE;
-		config.protocols = PROTO_WPA;
-		
 		config.frequency = channelToFrequency(ui.channelCombo->currentText().toInt());
-		config.pairwise = PCI_NONE;
-		config.keyManagement = KM_WPA_NONE;
+		config.mode = QOOL_TRUE;
 		
-		if ((!ui.pskLeaveButton->isChecked()) && (!ui.pskEdit->text().length() == 0))
-			config.psk = '\"' + ui.pskEdit->text() + '\"';
+		switch (ui.encCombo->currentIndex()) {
+		case 0:
+			config.keyManagement = KM_OFF;
+			break;
+		case 1:
+			config.wep_tx_keyidx = 0;
+			config.keyManagement = KM_NONE;
+			
+			if ((!ui.pskLeaveButton->isChecked()) && (ui.pskEdit->text().length() != 0))
+				config.wep_key0 = '\"' + ui.pskEdit->text() + '\"';
+			break;
+		default:
+			if (ui.encCombo->currentText() == "CCMP")
+				config.group = GCI_CCMP;
+			else if (ui.encCombo->currentText() == "TKIP")
+				config.group = GCI_TKIP;
+			
+			config.protocols = PROTO_WPA;
+			config.pairwise = PCI_NONE;
+			config.keyManagement = KM_WPA_NONE;
+			
+			if ((!ui.pskLeaveButton->isChecked()) && (ui.pskEdit->text().length() != 0))
+				config.psk = '\"' + ui.pskEdit->text() + '\"';
+			break;
+		}
 		
 		if (m_CurrentID > -1) {
 			status = m_Supplicant->editNetwork(m_CurrentID, config);
@@ -146,6 +157,10 @@ namespace qnut {
 		}
 		
 		if (config.group & PCI_CCMP)
+			ui.encCombo->setCurrentIndex(3);
+		else if (config.group & PCI_TKIP)
+			ui.encCombo->setCurrentIndex(2);
+		else if (config.keyManagement & KM_NONE)
 			ui.encCombo->setCurrentIndex(1);
 		else
 			ui.encCombo->setCurrentIndex(0);
@@ -170,6 +185,10 @@ namespace qnut {
 		ui.channelCombo->setCurrentIndex(channelIndex);
 		
 		if (scanResult.group & PCI_CCMP)
+			ui.encCombo->setCurrentIndex(3);
+		else if (scanResult.group & PCI_TKIP)
+			ui.encCombo->setCurrentIndex(2);
+		else if (scanResult.keyManagement & KM_NONE)
 			ui.encCombo->setCurrentIndex(1);
 		else
 			ui.encCombo->setCurrentIndex(0);
