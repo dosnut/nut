@@ -116,7 +116,6 @@ namespace qnut {
 	}
 	
 	QModelIndex CManagedAPModel::index(int row, int column, const QModelIndex & parent) const {
-		//qDebug() << "index(" << row << column << ')';
 		if (m_Networks.isEmpty() || parent.isValid() || row >= m_Networks.count())
 			return QModelIndex();
 		else

@@ -75,7 +75,6 @@ namespace qnut {
 		if ((role == Qt::DecorationRole) && (index.column() == ENVDET_MOD_STATEMENT)) {
 			CDevice * device = dynamic_cast<CDevice *>(m_Environment->parent());
 			if (m_Environment == device->getActiveEnvironment()) {
-				qDebug() << "Internal Id:" << index.internalId();
 				if ((qint8)(m_Environment->getSelectResults()[index.internalId()]))
 					return QIcon(UI_ICON_SELECTED);
 			}
