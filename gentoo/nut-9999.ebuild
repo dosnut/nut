@@ -45,8 +45,10 @@ src_unpack() {
 src_compile() {
 	cd "${S}"
 	config_defines = ""
-	config_realease = ""
-	if ! use debug; then 
+	config_release = ""
+	if use debug; then 
+		config_release="debug"
+	else
 		config_release="release"
 		config_defines="$config_defines QT_NO_DEBUG_OUTPUT"
 	fi
@@ -60,7 +62,7 @@ src_compile() {
 		sed --in-place -e :a -e "s/libnutwireless\|libnutclient\|qnut//;ta" nut.pro
 	fi
 	
-	qmake -recursive -Wall "CONFIG+=$config_realease" "DEFINES+=$config_defines"
+	qmake -recursive -Wall "CONFIG+=$config_release" "DEFINES+=$config_defines"
 	make || die
 }
 
