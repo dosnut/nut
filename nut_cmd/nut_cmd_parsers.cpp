@@ -358,7 +358,7 @@ namespace nut_cmd {
 			}
 			
 		}
-		qSort(cmdList);
+		qStableSort(cmdList);
 		return cmdList;
 	}
 
