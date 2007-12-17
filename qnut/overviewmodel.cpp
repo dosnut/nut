@@ -38,15 +38,19 @@ namespace qnut {
 	
 	void COverViewModel::deviceAdded(CDevice * device) {
 		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SIGNAL(layoutChanged()));
+		#ifndef QNUT_NO_WIRELESS
 		if (device->getWpaSupplicant())
 			connect(device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)), this, SIGNAL(layoutChanged()));
+		#endif
 		emit layoutChanged();
 	}
 	
 	void COverViewModel::deviceRemoved(CDevice * device) {
 		disconnect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SIGNAL(layoutChanged()));
+		#ifndef QNUT_NO_WIRELESS
 		if (device->getWpaSupplicant())
 			disconnect(device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)), this, SIGNAL(layoutChanged()));
+		#endif
 		emit layoutChanged();
 	}
 	
