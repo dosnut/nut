@@ -1,0 +1,30 @@
+#! /bin/bash
+
+#List of wired devices
+WIRED_DEVICES="eth0"
+#List of wireless devices
+WIRELESS_DEVICES="eth1"
+
+#If a wired device comes up, stop all wireless devices.
+#On the other hand, if all wired devices are down activate wireless devices
+
+#check if the device is a wired device
+if echo $WIRED_DEVICES | grep -i $NUT_DEVICE
+then
+	#check if device is up; if up, disable all wireless devices
+	if [ $NUT_EVENT = up ]
+	then
+		for i in $WIRELESS_DEVICES; do
+			echo "Disabling device $i"
+			nut_cmd --device ${i} -0;
+		done
+	#State change, check for prev. change. if device was deactivated before, do nothing
+	#If device was up before, enable wireless devices
+	elif [ $NUT_OLD_STATE = up ] && [ $NUT_NEW_STATE = activated -o $NUT_NEW_STATE = deactivated ]
+	then
+		for i in $WIRELESS_DEVICES; do
+			echo "Enabling device $i";
+			nut_cmd --device $i -1;
+		done
+	fi
+fi

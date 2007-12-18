@@ -3,7 +3,7 @@ EGIT_REPO_URI="git://repo.or.cz/nut.git"
 
 inherit eutils flag-o-matic git
 
-DESCRIPTION="Network Utility like knetworkmanager"
+DESCRIPTION="An advanced network manager with event based script execution"
 HOMEPAGE="http://repo.or.cz/nut.git"
 SRC_URI=""
 
@@ -84,6 +84,7 @@ src_install() {
 	insinto /etc/nuts/events/all
 	newins "${S}"/gentoo/start_avahi start_avahi
 	newins "${S}"/gentoo/ntp-date ntp-date
+	newins "${S}"/gentoo/autoswitch_netcards autoswitch_netcards
 
 	insinto /etc/dbus-1/system.d/
 	newins "${S}"/debian/nuts-dbus.conf nuts-dbus.conf
@@ -101,7 +102,10 @@ pkg_postinst() {
 	elog ""
 	elog "To start nuts add nuts to your default runlevel:"
 	elog "rc-update add nuts default"
-	elog "Remeber to read the documentation!"
+	elog ""
+	elog "nuts as well as qnut support event based script execution"
+	elog "Have look at /etc/nuts/dispatch to see how to write your own (server) scripts and where to put them."
+	elog "For qnut, please have a look at the man page"
 	elog ""
 	elog "Known bugs:"
 	elog "Qnut/nut_cmd will use 99% cpu if you are not allowed to access nuts' dbus interface."

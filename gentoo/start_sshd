@@ -1,7 +1,7 @@
 #! /bin/bash
 if [ -f /etc/init.d/sshd ]; then
-	if [ "$NUT_ENVIRONMENT" = "home" ]; then
-		echo "Entered environment $NUT_ENVIRONMENT"
+	if [ "$NUT_ENVIRONMENT" = home ]; then
+		logger -p daemon.info -t "nuts:start_sshd" "Entered environment home"
 		/etc/init.d/sshd status
 		if [ $? = 0 ]; then
 			/etc/init.d/sshd reload

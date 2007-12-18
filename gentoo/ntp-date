@@ -1,7 +1,7 @@
 #! /bin/bash
 if [ -f /etc/init.d/ntp-client ]; then
-	if [ "$NUT_STATUS" = static -o "$NUT_STATUS" = dhcp ]; then
-		#Just start it. Should be fast than checking if it's already running
+	if [ "$NUT_STATUS" = dhcp -o "$NUT_STATUS" = static ]; then
+		logger -p daemon.info -t "nuts:ntp-date" "Updating time"
 		/etc/init.d/ntp-client start
 	fi
 fi
