@@ -1,3 +1,12 @@
+nut (0.4.2) unstable; urgency=low
+
+  * Ad-Hoc without encryption or with WEP.
+  * command line client
+  * new logo
+  * Many bug fixes.
+
+ -- Stefan Bühler <stbuehler@web.de>  Tue, 18 Dec 2007 16:10:49 +0100
+
 nut (0.4.1) unstable; urgency=low
 
   * Bug fix release.
