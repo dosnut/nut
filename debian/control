@@ -23,3 +23,12 @@ Description: Network UTility (substitute for ifupdown)
  which the clients use to control the server.
  .
  This package contains the Qt client.
+
+Package: nutcli
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the command line client.

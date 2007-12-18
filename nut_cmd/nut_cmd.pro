@@ -9,7 +9,7 @@ CODECFORTR = ISO-8859-1
 OBJECTS_DIR = build/
 MOC_DIR = build/
 
-TARGET = nut_cmd
+TARGET = cnut
 
 HEADERS += main.h nut_cmd_commands.h nut_cmd_parsers.h nut_cmd_types.h \
  server_proxy.h
