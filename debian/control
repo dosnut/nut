@@ -24,7 +24,7 @@ Description: Network UTility (substitute for ifupdown)
  .
  This package contains the Qt client.
 
-Package: nutcli
+Package: cnut
 Architecture: any
 Depends: ${shlibs:Depends}
 Description: Network UTility (substitute for ifupdown)
