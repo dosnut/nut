@@ -12,15 +12,16 @@
 #define UI_DIR_SCRIPT_ACTIVATED         "activated/"
 #define UI_DIR_SCRIPT_DEACTIVATED       "deactivated/"
 
-#define UI_PATH_TRANSLATIONS             "/usr/share/qnut/lang/"
-#define UI_PATH_ICONS                    "/usr/share/qnut/icons/"
+#define UI_PATH_TRANSLATIONS            "/usr/share/qnut/lang/"
+#define UI_PATH_ICONS                   "/usr/share/qnut/icons/"
 #define UI_PATH_WORK                    (QDir::toNativeSeparators(QDir::homePath()) + "/" UI_DIR_WORK)
 #define UI_PATH_DEV(a)                  ((UI_PATH_WORK + a) + '/')
 
 #define UI_FILE_LOG                     (UI_PATH_WORK + "qnut.log")
 #define UI_FILE_CONFIG                  (UI_PATH_WORK + "qnut.conf")
 
-#define UI_ICON_QNUT                    UI_PATH_ICONS "qnut.png"
+#define UI_ICON_QNUT                    UI_PATH_ICONS "qnut.svg"
+#define UI_ICON_QNUT_SMALL              UI_PATH_ICONS "qnut_small.svg"
 
 #define UI_ICON_ENABLE                  UI_PATH_ICONS "enable.png"
 #define UI_ICON_ENABLE_ALL              UI_PATH_ICONS "enable_all.png"

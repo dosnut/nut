@@ -13,7 +13,7 @@
 using namespace std;
 
 namespace qnut {
-	CTrayIcon::CTrayIcon(QObject * parent) : QSystemTrayIcon(QIcon(UI_ICON_QNUT), parent) {
+	CTrayIcon::CTrayIcon(QObject * parent) : QSystemTrayIcon(QIcon(UI_ICON_QNUT_SMALL), parent) {
 		m_DevicesMenu.setTitle(tr("Network &devices"));
 
 		m_TrayMenu.setTitle("QNUT");

@@ -272,6 +272,7 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::showAbout() {
+		//TODO new about box
 		QMessageBox::about(this, tr("About QNUT"), UI_NAME + "\nv" + QString(UI_VERSION));
 	}
 	
