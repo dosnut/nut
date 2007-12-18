@@ -16,7 +16,7 @@ then
 	then
 		for i in $WIRELESS_DEVICES; do
 			echo "Disabling device $i"
-			nut_cmd --device ${i} -0;
+			cnut --device ${i} -0;
 		done
 	#State change, check for prev. change. if device was deactivated before, do nothing
 	#If device was up before, enable wireless devices
@@ -24,7 +24,7 @@ then
 	then
 		for i in $WIRELESS_DEVICES; do
 			echo "Enabling device $i";
-			nut_cmd --device $i -1;
+			cnut --device $i -1;
 		done
 	fi
 fi
