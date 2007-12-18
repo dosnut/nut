@@ -18,16 +18,13 @@ HEADERS += wpa_supplicant.h \
  wpa_ctrl/build_config.h \
  wpa_ctrl/common.h \
  wpa_ctrl/os.h \
- wireless/iwlib.h \
- wpa_ctrl/wpa_debug.h \
- wireless/wireless.h
+ wpa_ctrl/wpa_debug.h
 SOURCES += wpa_supplicant.cpp \
  parsers.cpp \
  base.cpp \
  types.cpp \
  wpa_ctrl/wpa_ctrl.c \
  wpa_ctrl/common.c \
- wireless/iwlib.c \
  wpa_ctrl/wpa_debug.c \
  wpa_ctrl/os_unix.c
 

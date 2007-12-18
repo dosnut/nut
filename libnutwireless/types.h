@@ -5,9 +5,9 @@
 #include <QList>
 #include <QHostAddress>
 #include <libnutcommon/macaddress.h>
-#include "wireless/iwlib.h"
+#include <iwlib.h>
 extern "C" {
-// #include <linux/wireless.h>
+#include <linux/wireless.h>
 #include <sys/time.h>
 #include <string.h>
 #include <stdlib.h>

@@ -8,9 +8,9 @@
 #include "libnutcommon/common.h"
 
 #include "parsers.h"
-#include "wireless/iwlib.h"
+#include <iwlib.h>
 extern "C" {
-// #include <linux/wireless.h>
+#include <linux/wireless.h>
 #include "wpa_ctrl/wpa_ctrl.h"
 #include <sys/time.h>
 #include <string.h>
