@@ -44,8 +44,13 @@ namespace nut_cmd {
 		//Now dispatch the commands:
 		foreach(NutCommand cmd, commands) {
 // 			qDebug() << "Dispatching a command:";
-// 			qDebug() << QString("Commands value: %1").arg(cmd.value); 
-			if (CMD_HELP == cmd.command) {
+// 			qDebug() << QString("Commands value: %1").arg(cmd.value);
+			if (CMD_UNKNOWN == cmd.command) {
+				print(QString("Command not found: %1").arg(cmd.value));
+				help();
+				return RETVAL_UNKNOWN_COMMAND;
+			}
+			else if (CMD_HELP == cmd.command) {
 				help();
 				return RETVAL_SUCCESS;
 			}
@@ -349,6 +354,9 @@ namespace nut_cmd {
 					}
 				}
 				else { //insert command and do the next one
+					if (CMD_UNKNOWN == command.command) { //If command is unknow
+						command.value = *cmdIter;
+					}
 					cmdList.append(command);
 					cmdIter++;
 				}
