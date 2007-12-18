@@ -90,6 +90,11 @@
       <widget class="QComboBox" name="encCombo" >
        <item>
         <property name="text" >
+         <string>none</string>
+        </property>
+       </item>
+       <item>
+        <property name="text" >
          <string>WEP</string>
         </property>
        </item>
@@ -123,7 +128,7 @@
    <item row="3" column="0" >
     <widget class="QLabel" name="label_2" >
      <property name="text" >
-      <string>Pre Shared Key</string>
+      <string>(Pre Shared) Key</string>
      </property>
      <property name="buddy" >
       <cstring>pskEdit</cstring>
