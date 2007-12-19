@@ -16,6 +16,7 @@
 #include "adhocconfig.h"
 
 namespace qnut {
+	//TODO make only theese functios available that are supported by the wpa_supplicant
 	using namespace libnutcommon;
 	using namespace libnutclient;
 	using namespace libnutwireless;

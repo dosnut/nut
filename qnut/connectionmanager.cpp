@@ -272,8 +272,14 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::showAbout() {
-		//TODO new about box
-		QMessageBox::about(this, tr("About QNUT"), UI_NAME + "\nv" + QString(UI_VERSION));
+		QMessageBox aboutBox(this);
+		
+		aboutBox.setIconPixmap(QPixmap(UI_ICON_QNUT));
+		aboutBox.setWindowTitle(tr("About QNUT"));
+		aboutBox.setText(UI_NAME + "\nv" + QString(UI_VERSION));
+		aboutBox.setStandardButtons(QMessageBox::Ok);
+		
+		aboutBox.exec();
 	}
 	
 	void CConnectionManager::handleDeviceStateChange(DeviceState state) {
