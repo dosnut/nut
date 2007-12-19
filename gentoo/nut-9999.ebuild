@@ -17,7 +17,7 @@ RDEPEND=">=x11-libs/qt-4.3.2
 		wifi? ( >=net-wireless/wpa_supplicant-0.6.0 )
 		wifi? ( >=net-wireless/wireless-tools-29 )"
 DEPEND="${RDEPEND}
-	>=sys-kernel/linux-headers-2.6.23-r2
+	sys-kernel/linux-headers
 	>=dev-libs/libnl-1.0_pre6-r1
 	sys-devel/bison
 	sys-devel/flex"
