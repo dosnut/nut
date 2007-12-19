@@ -1,3 +1,9 @@
+nut (0.4.3) unstable; urgency=low
+
+  * Presentation release.
+
+ -- Stefan Bühler <stbuehler@web.de>  Wed, 19 Dec 2007 14:33:29 +0100
+
 nut (0.4.2) unstable; urgency=low
 
   * Ad-Hoc without encryption or with WEP.
