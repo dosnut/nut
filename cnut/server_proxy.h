@@ -73,6 +73,7 @@ public:
 public Q_SLOTS: // METHODS
 	inline QDBusReply<QList<QDBusObjectPath> > getInterfaces();
 	inline QDBusReply<libnutcommon::EnvironmentProperties> getProperties();
+	inline QDBusReply<libnutcommon::SelectResult> getSelectResult();
 };
 
 /*
@@ -135,17 +136,21 @@ inline QDBusReply<QList<QDBusObjectPath> > DBusDeviceManagerInterface::getDevice
 //EnvironmentInterface
 inline QDBusReply<QList<QDBusObjectPath> > DBusEnvironmentInterface::getInterfaces() {
 	QList<QVariant> argumentList;
-	return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getInterfaces"), argumentList);
+	return callWithArgumentList(QDBus::Block, QLatin1String("getInterfaces"), argumentList);
 }
 inline QDBusReply<libnutcommon::EnvironmentProperties> DBusEnvironmentInterface::getProperties() {
 	QList<QVariant> argumentList;
 	return callWithArgumentList(QDBus::Block, QLatin1String("getProperties"), argumentList);
 }
+inline QDBusReply<libnutcommon::SelectResult> DBusEnvironmentInterface::getSelectResult() {
+	QList<QVariant> argumentList;
+	return callWithArgumentList(QDBus::Block, QLatin1String("getSelectResult"), argumentList);
+}
 
 //InterfaceInterface
 inline QDBusReply<libnutcommon::InterfaceProperties> DBusInterfaceInterface_IPv4::getProperties() {
 	QList<QVariant> argumentList;
-	return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
+	return callWithArgumentList(QDBus::Block, QLatin1String("getProperties"), argumentList);
 }
 
 }

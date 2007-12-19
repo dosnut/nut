@@ -25,6 +25,7 @@ namespace nut_cmd {
 	QString getActiveEnvironment(QDBusConnection * connection, QString &devPath);
 	QString getEnvironmentName(QDBusConnection * connection, QString &envPath);
 	QString getEnvironmentState(QDBusConnection * connection, QString &envPath);
+	QString getEnvironmentSelectable(QDBusConnection * connection, QString &envPath);
 	QString getInterfaceState(QDBusConnection * connection, QString &ifPath);
 	QString getInterfaceType(QDBusConnection * connection, QString &ifPath);
 	QStringList getInterfaceProperties(QDBusConnection * connection, QString &ifPath);

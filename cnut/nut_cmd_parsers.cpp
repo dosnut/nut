@@ -18,8 +18,8 @@ namespace nut_cmd {
 		print(QString("--setEnvironment (-S) <environment name> %1").arg(QObject::tr("Activates the environment on the given device")));
 		print(QString("--properties (-p) %1").arg(QObject::tr("Returns interface properties (one ip per line): ip,netmask,gateway,dns-servers")));
 		print(QString("--setEnvironment (-S) <index> %1").arg(
-		QObject::tr("Activates the environment on the given device. Index = line number from --listEnvironments starting with 0"))
-		);
+		QObject::tr("Activates the environment on the given device. Index = line number from --listEnvironments starting with 0")));
+		print(QString("--selectable %1").arg("returns if an environment is selected,selectable or not selectable"));
 		print(""); print("");
 		print(QObject::tr("Examples:"));
 		print(QString("nut_cmd --device eth0 --enable %1").arg(QObject::tr("Enables device eth0")));
@@ -152,6 +152,16 @@ namespace nut_cmd {
 					else {
 						envPath = getEnvironmentPathByName(connection,devPath,cmd.value);
 					}
+				}
+			}
+			else if (CMD_SELECTABLE == cmd.command) {
+				if (envPath.isEmpty()) {
+					print(QObject::tr("No environment specified"));
+					return RETVAL_ENVIRONMENT_NOT_SPECIFIED;
+				}
+				else {
+					print(getEnvironmentSelectable(connection,envPath));
+					return RETVAL_SUCCESS;
 				}
 			}
 			else if (CMD_INTERFACE == cmd.command) {
@@ -299,6 +309,9 @@ namespace nut_cmd {
 		else if ("--environment" == cmd || "-E" == cmd) {
 			return CMD_ENVIRONMENT;
 		}
+		else if("--selectable" == cmd) {
+			return CMD_SELECTABLE;
+		}
 		else if("--interface" == cmd || "-I" == cmd) {
 			return CMD_INTERFACE;
 		}
@@ -361,7 +374,10 @@ namespace nut_cmd {
 					cmdIter++;
 				}
 			}
-			else {
+			else { //we have an unknown command:
+				command.command = CMD_UNKNOWN;
+				command.value = *cmdIter;
+				cmdList.append(command);
 				++cmdIter;
 			}
 			

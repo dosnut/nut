@@ -91,6 +91,30 @@ namespace nut_cmd {
 		bool active = getEnvironmentProperties(connection,envPath).active;
 		return (active) ? "active" : "deactive";
 	}
+	QString getEnvironmentSelectable(QDBusConnection * connection, QString &envPath) {
+		DBusEnvironmentInterface dbusEnv(NUT_DBUS_URL,envPath,*connection,0);
+		QDBusReply<libnutcommon::SelectResult> replyselres = dbusEnv.getSelectResult();
+		if (replyselres.isValid()) {
+			//Now check select result:
+			qint8 result = (qint8) replyselres.value();
+			if (libnutcommon::SelectResult::False == result) {
+				return QString("no");
+			}
+			else if (libnutcommon::SelectResult::True == result) {
+				return QString("selected");
+			}
+			else if (libnutcommon::SelectResult::User == result) {
+				return QString("yes");
+			}
+			else {
+				return QString("unknown");
+			}
+		}
+		else {
+			return QString();
+		}
+	
+	}
 	QString getInterfaceState(QDBusConnection * connection, QString &ifPath) {
 		return toString(getRawInterfaceProperties(connection,ifPath).ifState);
 	}
