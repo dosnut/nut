@@ -20,7 +20,55 @@ cnut \- command line client for the Network UTility Server (nuts)
 .SH SYNOPSIS
 .B cnut
 .SH DESCRIPTION
-command line client for the Network UTility Server (nuts)
+command line client for the Network UTility Server (nuts).
+.SH COMMAND LINE OPTIONS
+.TP
+\fB--list (-l)\fR
+Lists available devices, environments or interfaces
+.TP
+\fB--device (-D) <devicename>\fR
+Choose device
+.TP
+\fB--environment (-E) <environment name>\fR
+Choose environment in given device
+.TP
+\fB--environment (-E) <environment index>\fR
+Choose environment in given device
+.TP
+\fB--interface (-I) <interface index>\fR
+Choose interface in given environment
+.TP
+\fB--enable (-1)\fR
+Enables given device
+.TP
+\fB--disable (-0)\fR
+Disables given device
+.TP
+\fB--type (-t)\fR
+returns type of given device or interface
+.TP
+\fB--state (-s)\fR
+returns state of given device or environment or interface
+.TP
+\fB--activeEnvironment (-a)\fR
+returns active Environment of given device
+.TP
+\fB--setEnvironment (-S) <environment name>\fR
+Activates the environment on the given device
+.TP
+\fB--properties (-p)\fR
+Returns interface properties (one ip per line): ip,netmask,gateway,dns-servers
+.TP
+\fB--setEnvironment (-S) <index>\fR
+Activates the environment on the given device
+.TP
+\fB--selectable\fR
+returns if an environment is selected,selectable or not selectable
+.TP
+.SH EXAMPLES
+cnut --device eth0 --enable Enables device eth0
+cnut --device eth0 --state Shows state of device eth0
+cnut --device eth0 --environment "home" --state Shows state of environment home of device eth0
 .SH SEE ALSO
 .BR nuts (1).
 .SH AUTHOR
