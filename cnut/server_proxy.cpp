@@ -1,6 +1,6 @@
 #include "server_proxy.h"
 
-namespace nut_cmd {
+namespace cnut {
 /*
  * Implementation of interface class DBusDeviceInterface
  */

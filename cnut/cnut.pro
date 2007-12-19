@@ -11,9 +11,9 @@ MOC_DIR = build/
 
 TARGET = cnut
 
-HEADERS += main.h nut_cmd_commands.h nut_cmd_parsers.h nut_cmd_types.h \
+HEADERS += main.h cnut_commands.h cnut_parsers.h cnut_types.h \
  server_proxy.h
-SOURCES += main.cpp nut_cmd_commands.cpp nut_cmd_parsers.cpp  \
+SOURCES += main.cpp cnut_commands.cpp cnut_parsers.cpp  \
  server_proxy.cpp
 DESTDIR = .
 

@@ -1,7 +1,7 @@
 #ifndef NUT_CMD_TYPES_H
 #define NUT_CMD_TYPES_H
 #include <QList>
-namespace nut_cmd {
+namespace cnut {
 	//In order to sort, we define an order on our commands.
 	//But we don't really want to define comparison operators.
 	//Let's just define an bijective function between our commands and the set {0..n} and use int's operators
@@ -44,5 +44,5 @@ namespace nut_cmd {
 	RETVAL_DEVICE_NOT_FOUND, RETVAL_DEVICE_NOT_SPECIFIED, RETVAL_ENVIRONMENT_NOT_FOUND,RETVAL_ENVIRONMENT_NOT_SPECIFIED,RETVAL_INTERFACE_NOT_SPECIFIED,RETVAL_INTERFACE_NOT_FOUND
 	} NUT_CMD_RETVALS;
 }
-inline bool operator<(nut_cmd::NutCommand one, nut_cmd::NutCommand two) { return one.command < two.command;}
+inline bool operator<(cnut::NutCommand one, cnut::NutCommand two) { return one.command < two.command;}
 #endif

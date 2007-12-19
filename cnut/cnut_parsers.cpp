@@ -1,7 +1,7 @@
 //TODO: define return values
-#include "nut_cmd_parsers.h"
+#include "cnut_parsers.h"
 
-namespace nut_cmd {
+namespace cnut {
 	
 	void help() {
 		print(QString("--list (-l) %1").arg(QObject::tr("Lists available devices")));
@@ -22,9 +22,9 @@ namespace nut_cmd {
 		print(QString("--selectable %1").arg("returns if an environment is selected,selectable or not selectable"));
 		print(""); print("");
 		print(QObject::tr("Examples:"));
-		print(QString("nut_cmd --device eth0 --enable %1").arg(QObject::tr("Enables device eth0")));
-		print(QString("nut_cmd --device eth0 --state %1").arg(QObject::tr("Shows state of device eth0")));
-		print(QString("nut_cmd --device eth0 --environment \"home\" --state %1").arg(QObject::tr("Shows state of environment home of device eth0")));
+		print(QString("cnut --device eth0 --enable %1").arg(QObject::tr("Enables device eth0")));
+		print(QString("cnut --device eth0 --state %1").arg(QObject::tr("Shows state of device eth0")));
+		print(QString("cnut --device eth0 --environment \"home\" --state %1").arg(QObject::tr("Shows state of environment home of device eth0")));
 	}
 	
 	int dispatchCommands(CommandList commands, QDBusConnection * connection) {

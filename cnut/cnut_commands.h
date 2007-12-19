@@ -1,13 +1,13 @@
 #ifndef NUT_CMD_COMMANDS_H
 #define NUT_CMD_COMMANDS_H
 #include "server_proxy.h"
-#include "nut_cmd_types.h"
+#include "cnut_types.h"
 #include <QDBusConnection>
 #include <QDBusConnectionInterface>
 #include <QDBusObjectPath>
 #include <QObject>
 #include <iostream>
-namespace nut_cmd {
+namespace cnut {
 
 
 	void print(QStringList list);

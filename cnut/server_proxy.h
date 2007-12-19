@@ -12,7 +12,7 @@
 #include <QMetaType>
 #include "libnutcommon/common.h"
 
-namespace nut_cmd {
+namespace cnut {
 /*
 * Proxy class for interface DBus.Device
 */

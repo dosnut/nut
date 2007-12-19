@@ -1,5 +1,5 @@
 #include "main.h"
-using namespace nut_cmd;
+using namespace cnut;
 int main(int argc, char * argv[]) {
 
 	libnutcommon::init();

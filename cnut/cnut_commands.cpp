@@ -1,5 +1,5 @@
-#include "nut_cmd_commands.h"
-namespace nut_cmd {
+#include "cnut_commands.h"
+namespace cnut {
 
 	void print(QStringList list) {
 		foreach(QString i, list) {
