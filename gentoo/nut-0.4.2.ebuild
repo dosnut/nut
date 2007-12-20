@@ -49,8 +49,8 @@ src_unpack() {
 
 src_compile() {
 	cd "${S}"
-	config_defines = ""
-	config_release = ""
+	config_defines=""
+	config_release=""
 	if use debug; then 
 		config_release="debug"
 	else
