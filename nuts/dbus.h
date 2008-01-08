@@ -5,6 +5,7 @@
 #include <QDBusAbstractAdaptor>
 #include <QDBusObjectPath>
 #include <QHostAddress>
+#include <QTimerEvent>
 
 #include "libnutcommon/common.h"
 
@@ -31,6 +32,9 @@ namespace nuts {
 			DeviceManager * m_devmgr;
 			QHash<QString, DBusDevice *> m_dbusDevices;
 			static const QString m_dbusPath, m_dbusDevicesPath;
+			int m_timerId;
+			void startDBus();
+			void timerEvent(QTimerEvent *event);
 			
 		private slots:
 			void devAdded(QString devName, Device *dev);

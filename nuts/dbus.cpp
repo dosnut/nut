@@ -7,18 +7,28 @@ namespace nuts {
 	const QString DBusDeviceManager::m_dbusDevicesPath("/devices");
 
 	DBusDeviceManager::DBusDeviceManager(DeviceManager *devmgr)
-	: QDBusAbstractAdaptor(devmgr), m_dbusConnection(QDBusConnection::systemBus()), m_devmgr(devmgr) {
+	: QDBusAbstractAdaptor(devmgr), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("nuts_system_bus"))), m_devmgr(devmgr), m_timerId(-1) {
+		startDBus();
+	}
+	void DBusDeviceManager::startDBus() {
+		//Check if connection to dbus exists
+		if ( !m_dbusConnection.isConnected() ) {
+			log << "Please start dbus.";
+			log << "Otherwise you will not be able to control nuts" << endl;
+			m_timerId = startTimer(10000);
+			return;
+		}
 		//Register Service and device manager object
 		m_dbusConnection.registerService(NUT_DBUS_URL);
-		m_dbusConnection.registerObject(m_dbusPath, devmgr);
+		m_dbusConnection.registerObject(m_dbusPath, m_devmgr);
 		//Insert devices into devices Hash.
 		QHashIterator<QString, Device *> i(m_devmgr->getDevices());
 		while (i.hasNext()) {
 			i.next();
 			devAdded(i.key(), i.value());
 		}
-		connect(devmgr, SIGNAL(deviceAdded(QString, Device*)), SLOT(devAdded(QString, Device*)));
-		connect(devmgr, SIGNAL(deviceRemoved(QString, Device*)), SLOT(devRemoved(QString, Device*)));
+		connect(m_devmgr, SIGNAL(deviceAdded(QString, Device*)), SLOT(devAdded(QString, Device*)));
+		connect(m_devmgr, SIGNAL(deviceRemoved(QString, Device*)), SLOT(devRemoved(QString, Device*)));
 	}
 
 	DBusDeviceManager::~DBusDeviceManager() {
@@ -29,6 +39,16 @@ namespace nuts {
 	void DBusDeviceManager::stopDBus() {
 		m_dbusConnection.unregisterService(NUT_DBUS_URL);
 		m_dbusConnection.unregisterObject(m_dbusPath);
+	}
+	void DBusDeviceManager::timerEvent(QTimerEvent *event) {
+		if ( event->timerId() == m_timerId ) {
+			killTimer(m_timerId);
+			m_timerId = -1;
+			//try to connect to dbus
+			m_dbusConnection.disconnectFromBus(QString::fromLatin1("nuts_system_bus"));
+			m_dbusConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("nuts_system_bus")));
+			startDBus();
+		}
 	}
 	
 	//SLOT: Inserts device into device hash
