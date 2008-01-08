@@ -109,10 +109,12 @@ namespace libnutclient {
 		QDBusConnection m_dbusConnection;
 		CLog * log;
 		bool m_nutsstate;
+		int m_dbusTimerId;
 		CDeviceList m_devices;
 		void rebuild(QList<QDBusObjectPath> paths);
 		void setInformation();
 		void clearInformation();
+		void timerEvent(QTimerEvent *event);
 	private slots:
 		void dbusDeviceAdded(const QDBusObjectPath &objectpath);
 		void dbusDeviceRemoved(const QDBusObjectPath &objectpath);

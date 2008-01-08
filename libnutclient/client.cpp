@@ -83,7 +83,7 @@ void CLibNut::serviceCheck(QDBusConnectionInterface * interface) {
 ////////////////
 //CDeviceManager
 ///////////////
-CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), m_dbusConnection(QDBusConnection::systemBus()) {
+CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))), m_dbusTimerId(-1) {
 	//Init Hashtable
 	m_dbusDevices.reserve(10);
 }
@@ -97,8 +97,21 @@ CDeviceManager::~CDeviceManager() {
 }
 
 bool CDeviceManager::init(CLog * inlog) {
-	m_nutsstate = true;
 	log = inlog;
+	//Check if dbus is available
+	if ( !m_dbusConnection.isConnected() ) {
+		//another timer is running?
+		if (m_dbusTimerId != -1) {
+			killTimer(m_dbusTimerId);
+			m_dbusTimerId = -1;
+		}
+		*log << tr("Error while trying to access the dbus service");
+		*log << tr("Pleasse make sure that dbus is running");
+		m_dbusTimerId = startTimer(10000);
+		return false;
+	}
+
+	m_nutsstate = true;
 	//setup dbus connections
 	m_dbusConnectionInterface = m_dbusConnection.interface();
 	//Check if service is running
@@ -120,6 +133,22 @@ bool CDeviceManager::init(CLog * inlog) {
 	connect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 	connect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
 	return m_nutsstate;
+}
+
+void CDeviceManager::timerEvent(QTimerEvent *event) {
+	if (event->timerId() == m_dbusTimerId ) {
+		killTimer(m_dbusTimerId);
+		m_dbusTimerId = -1;
+		//Check if already connected to dbus:
+		if ( !m_dbusConnection.isConnected() ) {
+			m_dbusConnection.disconnectFromBus(QString::fromLatin1("libnut_system_bus"));
+			//Try to connect to dbus, we have to do it like that, as QDBusConnection::systemBus does not close the connection correctly
+			m_dbusConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus")));
+			*log << "Connecting to dbus";
+			//init connection
+			init(log);
+		}
+	}
 }
 
 //CDeviceManager private functions:
