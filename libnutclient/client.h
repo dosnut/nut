@@ -114,12 +114,13 @@ namespace libnutclient {
 		QHash<QDBusObjectPath, CDevice* > m_dbusDevices;
 		QDBusConnection m_dbusConnection;
 		CLog * log;
-		booCDeviceManagerCDeviceManagerl m_nutsstate;
+		bool m_nutsstate;
 		int m_dbusTimerId;
 		CDeviceList m_devices;
 		
 		//Infotify
-		QString m_pidfilePath;
+		QString m_dbusPidFilePath;
+		int m_dbusPid;
 		int m_inotifiyFd;
 		int m_inWatchProcFd;
 		int m_inWatchPidFd;
@@ -129,12 +130,14 @@ namespace libnutclient {
 		void setInformation();
 		void clearInformation();
 		void timerEvent(QTimerEvent *event);
-		void dbusKilled();
-		quint32 getDBusPid(); //return != 0; 0 = failure
+		void dbusKilled(bool doinit=true);
+		void setDBusPid(); //return != 0; 0 = failure
+		void setInotifier();
 	private slots:
 		void dbusDeviceAdded(const QDBusObjectPath &objectpath);
 		void dbusDeviceRemoved(const QDBusObjectPath &objectpath);
 		void dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner);
+		void inotifyEvent(int socket);
 	public:
 		/** @brief List of devices managed by the DeviceManager
 		*/
