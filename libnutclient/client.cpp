@@ -83,7 +83,23 @@ void CLibNut::serviceCheck(QDBusConnectionInterface * interface) {
 ////////////////
 //CDeviceManager
 ///////////////
-CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))), m_dbusTimerId(-1) {
+CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))), m_dbusTimerId(-1), m_inotifiyFd(-1),m_inWatchProcFd(-1), m_inWatchPidFd(0), m_inotifiySocketNotifier(0) {
+
+	//Init inotify
+	if ( QFile::exists("/var/run/dbus.pid") ) {
+		m_pidfilePath = "/var/run/dbus.pid";
+	}
+	else if ( QFile::exists("/var/run/dbus/pid") ) {
+		m_pidfilePath = "/var/run/dbus/pid";
+	}
+	m_inotifiyFd = inotify_init();
+	if (-1 != m_inotifiyFd) {
+		m_inotifiySocketNotifier = new QSocketNotifier(QSocketNotifier::Read,m_inotifiyFd);
+	}
+	else {
+		qWarning() << "Disabling inotify support";
+	}
+
 	//Init Hashtable
 	m_dbusDevices.reserve(10);
 }
@@ -100,6 +116,7 @@ bool CDeviceManager::init(CLog * inlog) {
 	log = inlog;
 	//Check if dbus is available
 	if ( !m_dbusConnection.isConnected() ) {
+		m_nutsstate = false;
 		//another timer is running?
 		if (m_dbusTimerId != -1) {
 			killTimer(m_dbusTimerId);
@@ -151,6 +168,71 @@ void CDeviceManager::timerEvent(QTimerEvent *event) {
 	}
 }
 
+//this function will just clear everything and start the dbus polling timer
+void CDeviceManager::dbusKilled() {
+	//Clean Device list:
+	m_dbusDevices.clear();
+	CDevice * dev;
+	while (!m_devices.isEmpty()) {
+		dev = m_devices.takeFirst();
+		emit(deviceRemoved(dev));
+		dev->deleteLater();
+	}
+	//Clean up everything else:
+// 	delete m_dbusConnectionInterface;
+	delete m_dbusDevmgr;
+	init(log);
+}
+quint32 CDeviceManager::getDBusPid() {
+	//Check in /var/run first then in /var/run/dbus
+	quint32 buffer = 0;
+	if (!m_pidfilePath.isEmpty()) {
+		std::ifstream pidfile;
+		pidfile.open(m_pidfilePath.data()->toAscii());
+		pidfile >> buffer;
+		pidfile.close;
+	}
+	if ( (0 != buffer) && QDir::exists(QString("/proc/%1").arg(QString::number(buffer))) ) {
+		return buffer;
+	}
+}
+
+void CDeviceManager::setInotifier() {
+	//Setup watch
+	if (-1 != m_inotifiyFd) {
+		if (-1 == m_inWatchProcFd) {
+			const char * path = (QString("/proc/%1").arg(QString::number(buffer))).data()->toAscii();
+			m_inWatchProcFd = inotify_add_watch(m_inotifiyFd,path,IN_DELETE_SELF);
+			m_inWatchPidFd = inotify_add_watch(m_inotifiyFd,path,IN_MODIFY);
+		}
+	}
+}
+
+void CDeviceManager::inotifyEvent(int socket) {
+	if (socket == m_inotifiyFd) {
+		struct inotify_event event;
+		int eventlen = sizeof(struct inotify_event);
+		int datalen = read(m_inotifiyFd,&buffer,buflen);
+		struct inotify_event * event = static_cast<struct inotify_event *>(buffer);
+		//Check watch:
+		if ( (event->wd == m_inWatchPidFd) && IN_MODIFY == event->mask ) { //Pid file
+			//Pid file was modified => new dbus-daemon was started
+		}
+		else if ( (event->wd == m_inWatchProcFd) && IN_DELETE_SELF == event->wd ) { //Proc file
+			//proc file was deleted, clear dbus part and wait for pid file modification
+			if ( 0 != inotify_rm_watch(m_inotifiyFd,m_inWatchProcFd) ) {
+				qWarning() << "Error removing watch descriptor";
+			}
+			m_inWatchProcFd = -1;
+			
+		}
+		
+	}
+	else {
+		qWarning() << "Unknown socket in inotify event";
+	}
+}
+
 //CDeviceManager private functions:
 //rebuilds the device list
 void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
@@ -172,6 +254,10 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 			device = new CDevice(this, i);
 		}
 		catch (CLI_ConnectionException &e) {
+			if ( !dbusConnected(&m_dbusConnection) ) {
+				dbusKilled();
+				return;
+			}
 			qWarning() << e.what();
 			continue;
 		}
@@ -196,6 +282,10 @@ void CDeviceManager::setInformation() {
 			return;
 		}
 		else {
+			if ( !dbusConnected(&m_dbusConnection) ) {
+				dbusKilled();
+				return;
+			}
 			qWarning() << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
 		}
 	}
@@ -213,6 +303,10 @@ void CDeviceManager::setInformation() {
 			device = new CDevice(this, i);
 		}
 		catch (CLI_DevConnectionException e) {
+			if ( !dbusConnected(&m_dbusConnection) ) {
+				dbusKilled();
+				return;
+			}
 			qWarning() << e.msg();
 			continue;
 		}
@@ -259,6 +353,10 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 			}
 			disconnect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 			disconnect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+			//start the dbus was killed timer TODO:replace with inotify
+			if (-1 == m_dbusTimerId) {
+				m_dbusTimerId = startTimer(5000);
+			}
  		}
 	}
 }
@@ -272,6 +370,10 @@ void CDeviceManager::dbusDeviceAdded(const QDBusObjectPath &objectpath) {
 			device = new CDevice(this, objectpath);
 		}
 		catch (CLI_DevConnectionException e) {
+			if ( !dbusConnected(&m_dbusConnection) ) {
+				dbusKilled();
+				return;
+			}
 			qWarning() << e.msg();
 			return;
 		}
@@ -279,7 +381,7 @@ void CDeviceManager::dbusDeviceAdded(const QDBusObjectPath &objectpath) {
 		m_devices.append(device);
 		device->m_index = m_devices.indexOf(device); // Set device index;
 		emit(deviceAdded(device));
-		}
+	}
 	else {
 		m_dbusDevices.value(objectpath)->refreshAll();
 	}
@@ -337,6 +439,10 @@ void CDeviceManager::refreshAll() {
 		}
 	}
 	else {
+		if ( !dbusConnected(&m_dbusConnection) ) {
+			dbusKilled();
+			return;
+		}
 		qWarning() << tr("(%1) Could not refresh device list").arg(toString(replydevs.error()));
 	}
 }
@@ -351,6 +457,10 @@ void CDeviceManager::rebuild() {
 		rebuild(replydevs.value());
 	}
 	else {
+		if ( !dbusConnected(&m_dbusConnection) ) {
+			dbusKilled();
+			return;
+		}
 		qWarning() << tr("(%1) Error while retrieving device list").arg(toString(replydevs.error()));
 	}
 }
@@ -424,6 +534,9 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) : CLibNut(
 			env = new CEnvironment(this,i);
 		}
 		catch (CLI_EnvConnectionException e) {
+			if ( !dbusConnected(m_dbusConnection) ) {
+				throw CLI_DevConnectionException(tr("(%1) Error while trying to add environment").arg(toString(replyEnv.error())));
+			}
 			qWarning() << e.msg();
 			continue;
 		}
@@ -507,6 +620,10 @@ void CDevice::refreshAll() {
 		}
 	}
 	else {
+		if ( !dbusConnected(m_dbusConnection) ) {
+			static_cast<CDeviceManager*>(parent())->dbusKilled();
+			return;
+		}
 		qWarning() << tr("(%1) Could not refresh environments").arg(toString(replyenvs.error()));
 	}
 	m_activeEnvironment = 0;
@@ -523,6 +640,10 @@ void CDevice::refreshAll() {
 		m_name = replyprop.value().name;
 	}
 	else {
+		if ( !dbusConnected(m_dbusConnection) ) {
+			static_cast<CDeviceManager*>(parent())->dbusKilled();
+			return;
+		}
 		qWarning() << tr("(%1) Could not refresh device properties").arg(toString(replyprop.error()));
 	}
 	if (DT_AIR == m_type) {
@@ -531,6 +652,10 @@ void CDevice::refreshAll() {
 			m_essid = replyessid.value();
 		}
 		else {
+			if ( !dbusConnected(m_dbusConnection) ) {
+				static_cast<CDeviceManager*>(parent())->dbusKilled();
+				return;
+			}
 			qWarning() << tr("(%1) Could not refresh device essid").arg(toString(replyessid.error()));
 			m_essid = QString();
 		}
@@ -562,6 +687,10 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 			env = new CEnvironment(this,i);
 		}
 		catch (CLI_ConnectionException &e) {
+			if ( !dbusConnected(m_dbusConnection) ) {
+				static_cast<CDeviceManager*>(parent())->dbusKilled();
+				return;
+			}
 			qWarning() << e.what();
 			continue;
 		}
@@ -625,13 +754,18 @@ void CDevice::dbusStateChanged(int newState, int oldState) {
 	}
 	#endif
 	m_state = (DeviceState) newState;
-	//Workaround so far, as nuts does not send any environment changed information
+
+	//get possible new essid
 	if (DT_AIR == m_type && !(newState == DS_DEACTIVATED) ) {
 		QDBusReply<QString> replyessid = m_dbusDevice->getEssid();
 		if (replyessid.isValid()) {
 			m_essid = replyessid.value();
 		}
 		else {
+			if ( !dbusConnected(m_dbusConnection) ) {
+				static_cast<CDeviceManager*>(parent())->dbusKilled();
+				return;
+			}
 			m_essid = QString();
 		}
 	}
@@ -717,6 +851,9 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut
 				interface = new CInterface(this,i);
 			}
 			catch (CLI_ConnectionException &e) {
+				if ( !dbusConnected(m_dbusConnection) ) {
+					throw CLI_EnvConnectionException(tr("(%1) Error while adding interfaces").arg(replyconf.error().name()));
+				}
 				qWarning() << e.what();
 				continue;
 			}
@@ -756,6 +893,10 @@ void CEnvironment::refreshAll() {
 		}
 	}
 	else {
+		if ( !dbusConnected(m_dbusConnection) ) {
+			static_cast<CDeviceManager*>(parent()->parent())->dbusKilled();
+			return;
+		}
 		qWarning() << tr("Error while refreshing environment properties");
 	}
 	getSelectResult(true); //functions saves SelectResult
@@ -787,6 +928,10 @@ void CEnvironment::refreshAll() {
 		}
 	}
 	else {
+		if ( !dbusConnected(m_dbusConnection) ) {
+			static_cast<CDeviceManager*>(parent()->parent())->dbusKilled();
+			return;
+		}
 		qWarning() << tr("Error while refreshing environment interfaces");
 	}
 }
@@ -844,6 +989,10 @@ libnutcommon::SelectResult& CEnvironment::getSelectResult(bool refresh) {
 			m_selectResult = reply.value();
 		}
 		else {
+			if ( !dbusConnected(m_dbusConnection) ) {
+				static_cast<CDeviceManager*>(parent()->parent())->dbusKilled();
+				return m_selectResult;
+			}
 			qWarning() << tr("(%1) Error while trying to get SelectResult").arg(toString(reply.error()));
 			m_selectResult = libnutcommon::SelectResult();
 		}
@@ -858,6 +1007,10 @@ QVector<libnutcommon::SelectResult>& CEnvironment::getSelectResults(bool refresh
 			m_selectResults = reply.value();
 		}
 		else {
+			if ( !dbusConnected(m_dbusConnection) ) {
+				static_cast<CDeviceManager*>(parent()->parent())->dbusKilled();
+				return m_selectResults;
+			}
 			qWarning() << tr("(%1) Error while trying to get SelectResults").arg(toString(reply.error()));
 			m_selectResults = QVector<libnutcommon::SelectResult>();
 		}
@@ -913,6 +1066,10 @@ void CInterface::refreshAll() {
 		getUserConfig(true); //Function will updated userConfig
 	}
 	else {
+		if ( !dbusConnected(m_dbusConnection) ) {
+			static_cast<CDeviceManager*>(parent()->parent()->parent())->dbusKilled();
+			return;
+		}
 		qWarning() << (tr("Error while refreshing interface at: %1").arg(m_dbusPath.path()));
 	}
 }
@@ -941,6 +1098,10 @@ bool CInterface::needUserSetup() {
 		return reply.value();
 	}
 	else {
+		if ( !dbusConnected(m_dbusConnection) ) {
+			static_cast<CDeviceManager*>(parent()->parent()->parent())->dbusKilled();
+			return false;
+		}
 		qWarning() << tr("Error while interface->needUserSetup at: %1").arg(m_dbusPath.path());
 	}
 	return false;
@@ -955,6 +1116,10 @@ bool CInterface::setUserConfig(const libnutcommon::IPv4UserConfig &cuserConfig) 
 		return false;
 	}
 	else {
+		if ( !dbusConnected(m_dbusConnection) ) {
+			static_cast<CDeviceManager*>(parent()->parent()->parent())->dbusKilled();
+			return false;
+		}
 		qWarning() << tr("(%1) Error while setting user config at: %2").arg(toString(reply.error()),m_dbusPath.path());
 	}
 	return false;
@@ -966,6 +1131,10 @@ libnutcommon::IPv4UserConfig CInterface::getUserConfig(bool refresh) {
 			m_userConfig = reply.value();
 		}
 		else {
+			if ( !dbusConnected(m_dbusConnection) ) {
+				static_cast<CDeviceManager*>(parent()->parent()->parent())->dbusKilled();
+				return m_userConfig;
+			}
 			qDebug() << tr("Error while getting user config at: %1").arg(m_dbusPath.path());
 			m_userConfig = libnutcommon::IPv4UserConfig();
 		}

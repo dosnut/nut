@@ -8,11 +8,16 @@
 #include <QDBusObjectPath>
 #include <QFile>
 #include <QTextStream>
+#include <fstream>
 #include "libnutcommon/common.h"
 #ifndef LIBNUT_NO_WIRELESS
 #include <libnutwireless/wpa_supplicant.h>
 #endif
 #include "client_exceptions.h"
+
+extern "C" {
+#include <sys/inotify.h>
+}
 
 namespace libnutclient {
 	class CDeviceManager;
@@ -81,6 +86,7 @@ namespace libnutclient {
 			QDBusConnection * m_dbusConnection;
 			/** Function to check if nuts is running */
 			void serviceCheck(QDBusConnectionInterface * interface);
+			inline bool dbusConnected(QDBusConnection * con) { return con->isConnected(); }
 		public:
 			CLibNut(QObject * parent) : QObject(parent) {}
 
@@ -108,13 +114,23 @@ namespace libnutclient {
 		QHash<QDBusObjectPath, CDevice* > m_dbusDevices;
 		QDBusConnection m_dbusConnection;
 		CLog * log;
-		bool m_nutsstate;
+		booCDeviceManagerCDeviceManagerl m_nutsstate;
 		int m_dbusTimerId;
 		CDeviceList m_devices;
+		
+		//Infotify
+		QString m_pidfilePath;
+		int m_inotifiyFd;
+		int m_inWatchProcFd;
+		int m_inWatchPidFd;
+		QSocketNotifier * m_inotifiySocketNotifier;
+		
 		void rebuild(QList<QDBusObjectPath> paths);
 		void setInformation();
 		void clearInformation();
 		void timerEvent(QTimerEvent *event);
+		void dbusKilled();
+		quint32 getDBusPid(); //return != 0; 0 = failure
 	private slots:
 		void dbusDeviceAdded(const QDBusObjectPath &objectpath);
 		void dbusDeviceRemoved(const QDBusObjectPath &objectpath);
