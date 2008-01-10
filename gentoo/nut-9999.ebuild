@@ -44,7 +44,14 @@ src_unpack() {
 	fi
 	git_src_unpack
 
-	epatch "$S"/gentoo/files/gentoo_linux_headers.diff || die 
+	epatch "$S"/gentoo/files/gentoo_linux_headers.diff || die
+
+	#Since version 0.4.4 we're using a new
+	#check which version of libnl is installed, if version is older than pre8,
+	#use old interface for pre6
+	if ! has_version =dev-libs/libnl-1.0_pre8 ; then
+		epatch "$S"/gentoo/files/gentoo_libnl8to6.diff || die
+	fi
 }
 
 src_compile() {
@@ -68,7 +75,7 @@ src_compile() {
 	fi
 	
 	qmake -recursive -Wall "CONFIG+=$config_release" "DEFINES+=$config_defines"
-	make || die
+	emake || die
 }
 
 src_install() {
