@@ -1,5 +1,3 @@
-#ifndef NUT_COMMON_DBUSMONITOR_H
-#define NUT_COMMON_DBUSMONITOR_H
 #include "dbusmonitor.h"
 #include <QDebug>
 
@@ -191,4 +189,4 @@ namespace libnutcommon {
 	}
 
 }
-#endif
+

@@ -1,3 +1,5 @@
+#ifndef NUT_COMMON_DBUSMONITOR_H
+#define NUT_COMMON_DBUSMONITOR_H
 #include <QObject>
 #include <QFile>
 #include <QSocketNotifier>
@@ -43,3 +45,4 @@ namespace libnutcommon {
 			void started();
 	};
 }
+#endif
