@@ -102,13 +102,13 @@ namespace nuts {
 	bool HardwareManager::init_netlink() {
 		nlh = nl_handle_alloc();
 		if (!nlh) return false;
-		nl_handle_set_peer_pid(nlh, 0);
+		nl_socket_set_peer_port(nlh, 0);
 		
 		if (nl_connect(nlh, NETLINK_ROUTE) != 0) goto cleanup;
-		if (nl_join_group(nlh, RTNLGRP_LINK) != 0) goto cleanup;
-		if (nl_join_group(nlh, RTNLGRP_IPV4_IFADDR) != 0) goto cleanup;
+		if (nl_socket_add_membership(nlh, RTNLGRP_LINK) != 0) goto cleanup;
+		if (nl_socket_add_membership(nlh, RTNLGRP_IPV4_IFADDR) != 0) goto cleanup;
 		
-		netlink_fd = nl_handle_get_fd(nlh);
+		netlink_fd = nl_socket_get_fd(nlh);
 		nlcache = rtnl_link_alloc_cache(nlh);
 		return true;
 	cleanup:
