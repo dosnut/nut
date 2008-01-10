@@ -1,5 +1,6 @@
 #ifndef LIBNUTCLIENT_CLIENT_H
 #define LIBNUTCLIENT_CLIENT_H
+#define DBUS_PID_FILE_DIR /var/run
 #include <QObject>
 #include <QList>
 #include <QHostAddress>
@@ -119,11 +120,13 @@ namespace libnutclient {
 		CDeviceList m_devices;
 		
 		//Infotify
-		QString m_dbusPidFilePath;
+		QString m_dbusPidFileDir;
+		QString m_dbusPidFileName;
 		int m_dbusPid;
-		int m_inotifiyFd;
+		int m_inotifyFd;
 		int m_inWatchProcFd;
 		int m_inWatchPidFd;
+		int m_inWatchPidDirFd;
 		QSocketNotifier * m_inotifiySocketNotifier;
 		
 		void rebuild(QList<QDBusObjectPath> paths);
