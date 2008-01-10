@@ -83,41 +83,15 @@ void CLibNut::serviceCheck(QDBusConnectionInterface * interface) {
 ////////////////
 //CDeviceManager
 ///////////////
-CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))), m_dbusTimerId(-1), m_dbusPid(-1),  m_inotifyFd(-1),m_inWatchProcFd(-1), m_inWatchPidFd(-1), m_inWatchPidDirFd(-1), m_inotifiySocketNotifier(0) {
-
-	//Init inotify
-	m_dbusPidFileDir = "/var/run";
-	m_dbusPidFileName = "dbus.pid";
-
-	qDebug() << "File dir to pidfile is" << m_dbusPidFileDir;
-	qDebug() << "File name of pidfile is " << m_dbusPidFileName;
-	m_inotifyFd = inotify_init();
-	qDebug() << "Filedescriptor for inotify is " << m_inotifyFd;
-	if (-1 != m_inotifyFd) {
-		m_inotifiySocketNotifier = new QSocketNotifier(m_inotifyFd,QSocketNotifier::Read,this);
-		if (0 != m_inotifiySocketNotifier) {
-			connect(m_inotifiySocketNotifier,SIGNAL(activated( int )),this,SLOT(inotifyEvent(int)));
-			m_inotifiySocketNotifier->setEnabled(true);
-			qDebug() << "Connected SocketNotifier for inotify";
-		//Set dbus pid and add the watches
-		setDBusPid();
-		setInotifier();
-		}
-		else {
-			qWarning() << "Could not initalize SocketNotifier for inotify";
-		}
-	}
-	else {
-		qWarning() << "Disabling inotify support";
-	}
-
-
-	//DEBUG
-// 	qDebug() << "Trying to read from socket";
-// 	inotifyEvent(m_inotifyFd);
-// 	qDebug() << "Read from socket";
-
-
+CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))), m_dbusTimerId(-1), m_dbusMonitor(this) {
+	
+	//Init dbus monitor
+	connect(&m_dbusMonitor,SIGNAL(stopped(void)),this,SLOT(dbusStopped(void)));
+	connect(&m_dbusMonitor,SIGNAL(started(void)),this,SLOT(dbusStarted(void)));
+	m_dbusMonitor.setPidFileDir("DBUS_PID_FILE_DIR");
+	m_dbusMonitor.setPidFileName("DBUS_PID_FILE_NAME");
+	m_dbusMonitor.setEnabled(true);
+	
 	//Init Hashtable
 	m_dbusDevices.reserve(10);
 }
@@ -127,16 +101,6 @@ CDeviceManager::~CDeviceManager() {
 	while (!m_devices.isEmpty()) {
 		device = m_devices.takeFirst();
 		delete device;
-	}
-	if (-1 != m_inotifyFd) {
-		if (-1 != m_inWatchProcFd) {
-			inotify_rm_watch(m_inotifyFd,m_inWatchProcFd);
-			m_inWatchProcFd = -1;
-		}
-		if (-1 != m_inWatchPidFd) {
-			inotify_rm_watch(m_inotifyFd,m_inWatchPidFd);
-			m_inWatchPidFd = -1;
-		}
 	}
 }
 
@@ -198,6 +162,10 @@ void CDeviceManager::timerEvent(QTimerEvent *event) {
 
 //this function will just clear everything and start the dbus polling timer
 void CDeviceManager::dbusKilled(bool doinit) {
+	//Kill all dbus polling timers:
+	if (-1 != m_dbusTimerId) {
+		killTimer(m_dbusTimerId);
+	}
 	//Clean Device list:
 	m_dbusDevices.clear();
 	CDevice * dev;
@@ -215,159 +183,6 @@ void CDeviceManager::dbusKilled(bool doinit) {
 	else { //kill came from inotify
 		m_dbusConnection.disconnectFromBus(QString::fromLatin1("libnut_system_bus"));
 	}
-}
-
-void CDeviceManager::setDBusPid() {
-	//Check in /var/run first then in /var/run/dbus
-	int buffer = 0;
-	QString dbusPidFilePath = m_dbusPidFileDir + "/" + m_dbusPidFileName;
-	if ( !m_dbusPidFileDir.isEmpty() && !m_dbusPidFileName.isEmpty() ) {
-		QByteArray path = dbusPidFilePath.toAscii();
-		std::ifstream pidfile;
-		pidfile.open(path.constData());
-		pidfile >> buffer;
-		pidfile.close();
-		if ( (0 != buffer) && QFile::exists(QString("/proc/%1").arg(QString::number(buffer))) ) {
-			m_dbusPid = buffer;
-		}
-		else {
-			m_dbusPid = -1;
-		}
-	}
-	else {
-		m_dbusPid = -1;
-	}
-	qDebug() << "Set dbus pid to:" << m_dbusPid;
-}
-
-void CDeviceManager::setInotifier() {
-	qDebug() << "(Inotify) Setting up watches";
-	//Setup watch
-	if ( (-1 != m_inotifyFd) ) {
-		//Setup proc watch, delete old if necessary
-		if (-1 != m_dbusPid) {
-			const char * path = (QString("/proc/%1").arg(QString::number(m_dbusPid))).toAscii().constData();
-			path = "/proc";
-			if (-1 == m_inWatchProcFd) {
-				m_inWatchProcFd = inotify_add_watch(m_inotifyFd,path, IN_DELETE | IN_MODIFY | IN_DELETE_SELF);
-				qDebug() << "Setup proc watch with " << m_inWatchProcFd << " at " << path;
-			}
-			else {
-				if ( 0 != inotify_rm_watch(m_inotifyFd,m_inWatchProcFd) ) {
-					qWarning() << "Error removing watch descriptor";
-				}
-				m_inWatchProcFd = inotify_add_watch(m_inotifyFd,path,IN_DELETE_SELF);
-				qDebug() << "Setup proc watch (but != -1) with " << m_inWatchProcFd;
-			}
-		}
-		//Setup pidfile directory watch
-		if ( QFile::exists(m_dbusPidFileDir) && (-1 == m_inWatchPidDirFd) ) {
-			m_inWatchPidDirFd = inotify_add_watch(m_inotifyFd,m_dbusPidFileDir.toAscii().constData(), IN_MODIFY);
-			qDebug() << "Setup Pid file dir watch with " << m_inWatchPidDirFd;
-		}
-	}
-}
-
-void CDeviceManager::inotifyEvent(int socket) {
-	qDebug() << "(Inotify) Event occured";
-	if (socket == m_inotifyFd) {
-// 		struct inotify_event;
-		unsigned char * buffer = NULL;
-		unsigned char * newbuf;
-		int bufferlen = sizeof(struct inotify_event) + 16;
-		int datalen = 0;
-		while (datalen == 0) {
-			//allocate buffer;
-			newbuf = (unsigned char *) realloc(buffer,bufferlen);
-			if (NULL != newbuf) {
-				buffer = newbuf;
-				memset(buffer,0,bufferlen);
-			}
-			else {
-				if (buffer) {
-					free(buffer);
-					buffer = NULL;
-				}
-				qDebug() << "Error allocating buffer";
-				return;
-			}
-			qDebug() << "(Inotify) Reading";
-			datalen = read(m_inotifyFd,buffer,bufferlen);
-			qDebug() << "(Inotify) Read" << strerror(errno) << datalen;
-			if ( datalen <= 0) {
-				datalen = 0;
-				bufferlen *= 2;
-			}
-		}
-		int currentIndex = 0;
-		struct inotify_event * event;
-		QString filename;
-		while (currentIndex+1 < datalen) {
-			//Cast and set next event
-			event = (struct inotify_event *) (buffer+currentIndex);
-			currentIndex += sizeof(struct inotify_event) + event->len;
-			filename = "";
-			if (event->len > 0) {
-				filename = QString::fromAscii(event->name);
-				qDebug() << "Filename is";
-				qDebug() << filename;
-				qDebug() << "Size: " << filename.size();
-				//Print out event type
-				if (event->mask & IN_CREATE) {
-					qDebug() << "(Inotify) created file";
-				}
-				if (event->mask & IN_DELETE) {
-					qDebug() << "File in dir was deleted";
-				}
-				if (event->mask & IN_MODIFY) {
-					qDebug() << "(Inotify) modify file";
-				}
-				if (event->mask % IN_DELETE_SELF) {
-					qDebug() << "(Inotify) deleted directory";
-				}
-			}
-			//process events
-
-			//Check watch:
-			if (event->wd == m_inWatchPidDirFd) { //Pid file
-				//Check file name
-				if ( (filename == m_dbusPidFileName) && (-1 == m_inWatchProcFd) ) {
-	
-					//set new dbuspid and set inotifier watch
-					setDBusPid();
-					setInotifier();
-					
-					//Connect to dbus and init if possible
-					m_dbusConnection.disconnectFromBus("libnut_system_bus");
-					m_dbusConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus")));
-					if (m_dbusConnection.isConnected()) {
-						init(log);
-					}
-					else { //if there still is no dbus daemon running, start polling
-						m_dbusConnection.disconnectFromBus("libnut_system_bus");
-						qWarning() << "Received inotify event, but no dbus was running";
-						init(log);
-					}
-				}
-			}
-			else if ( (event->wd == m_inWatchProcFd) && (IN_DELETE_SELF & event->mask) ) { //Proc file
-				//proc file was deleted, clear dbus part and wait for pid file modification
-				if ( 0 != inotify_rm_watch(m_inotifyFd,m_inWatchProcFd) ) {
-					qWarning() << "Error removing watch descriptor";
-				}
-				m_inWatchProcFd = -1;
-				dbusKilled(false);
-			}
-		}
-		//Free buffer
-		if (buffer) {
-			free(buffer);
-		}
-	}
-	else {
-		qWarning() << "Unknown socket in inotify event: " << m_inotifyFd << socket;
-	}
-	qDebug() << "(Inotify) Done processing event";
 }
 
 //CDeviceManager private functions:
@@ -538,6 +353,15 @@ void CDeviceManager::dbusDeviceRemoved(const QDBusObjectPath &objectpath) {
 	else {
 		m_dbusDevices.value(objectpath)->m_pendingRemoval = true;
 	}
+}
+
+void CDeviceManager::dbusStopped() {
+	dbusKilled(false);
+}
+void CDeviceManager::dbusStarted() {
+	//init connection
+	m_dbusConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus")));
+	init(log);
 }
 
 

@@ -10,9 +10,11 @@ CODECFORSRC = UTF-8
 
 SOURCES += macaddress.cpp config.cpp \
  common.cpp \
- device.cpp
+ device.cpp \
+ dbusmonitor.cpp
 HEADERS += macaddress.h   config.h   common.h config.h \
- device.h
+ device.h \
+ dbusmonitor.h
 
 OBJECTS_DIR = build/
 UI_DIR = build/

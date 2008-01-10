@@ -1,6 +1,5 @@
 #ifndef LIBNUTCLIENT_CLIENT_H
 #define LIBNUTCLIENT_CLIENT_H
-#define DBUS_PID_FILE_DIR /var/run
 #include <QObject>
 #include <QList>
 #include <QHostAddress>
@@ -9,16 +8,12 @@
 #include <QDBusObjectPath>
 #include <QFile>
 #include <QTextStream>
-#include <fstream>
 #include "libnutcommon/common.h"
+#include "libnutcommon/dbusmonitor.h"
 #ifndef LIBNUT_NO_WIRELESS
 #include <libnutwireless/wpa_supplicant.h>
 #endif
 #include "client_exceptions.h"
-
-extern "C" {
-#include <sys/inotify.h>
-}
 
 namespace libnutclient {
 	class CDeviceManager;
@@ -118,29 +113,21 @@ namespace libnutclient {
 		bool m_nutsstate;
 		int m_dbusTimerId;
 		CDeviceList m_devices;
-		
-		//Infotify
-		QString m_dbusPidFileDir;
-		QString m_dbusPidFileName;
-		int m_dbusPid;
-		int m_inotifyFd;
-		int m_inWatchProcFd;
-		int m_inWatchPidFd;
-		int m_inWatchPidDirFd;
-		QSocketNotifier * m_inotifiySocketNotifier;
+
+		libnutcommon::DBusMonitor m_dbusMonitor;
 		
 		void rebuild(QList<QDBusObjectPath> paths);
 		void setInformation();
 		void clearInformation();
 		void timerEvent(QTimerEvent *event);
 		void dbusKilled(bool doinit=true);
-		void setDBusPid(); //return != 0; 0 = failure
-		void setInotifier();
+
 	private slots:
 		void dbusDeviceAdded(const QDBusObjectPath &objectpath);
 		void dbusDeviceRemoved(const QDBusObjectPath &objectpath);
 		void dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner);
-		void inotifyEvent(int socket);
+		void dbusStopped();
+		void dbusStarted();
 	public:
 		/** @brief List of devices managed by the DeviceManager
 		*/
