@@ -16,7 +16,7 @@ extern "C" {
 
 namespace libnutcommon {
 
-	class DBusMonitor: public QObject {
+	class CDBusMonitor: public QObject {
 		Q_OBJECT
 		private:
 			QString m_dbusPidFileDir;
@@ -35,9 +35,9 @@ namespace libnutcommon {
 			void setNetlinkFd(int socket);
 			void setEnabled(bool enabled=true);
 		public:
-			DBusMonitor(QObject * parent, QString dbusPidFileDir, QString dbusPidFileName);
-			DBusMonitor(QObject * parent) : QObject(parent) {}
-			~DBusMonitor();
+			CDBusMonitor(QObject * parent, QString dbusPidFileDir, QString dbusPidFileName);
+			CDBusMonitor(QObject * parent);
+			~CDBusMonitor();
 			void setPidFileDir(QString dir);
 			void setPidFileName(QString name);
 		signals:

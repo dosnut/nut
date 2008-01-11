@@ -3,12 +3,13 @@
 
 namespace libnutcommon {
 
-	DBusMonitor::DBusMonitor(QObject * parent, QString dbusPidFileDir, QString dbusPidFileName) : QObject(parent), m_dbusPidFileDir(dbusPidFileDir), m_dbusPidFileName(dbusPidFileName) {
+	CDBusMonitor::CDBusMonitor(QObject * parent, QString dbusPidFileDir, QString dbusPidFileName) : QObject(parent), m_dbusPidFileDir(dbusPidFileDir), m_dbusPidFileName(dbusPidFileName) {
 		qDebug() << "File dir to pidfile is" << m_dbusPidFileDir;
 		qDebug() << "File name of pidfile is " << m_dbusPidFileName;
 	}
+	CDBusMonitor::CDBusMonitor(QObject * parent) : QObject(parent) {}
 
-	DBusMonitor::~DBusMonitor() {
+	CDBusMonitor::~CDBusMonitor() {
 		if (-1 != m_inotifyFd) {
 			if (-1 != m_inWatchPidDirFd) {
 				inotify_rm_watch(m_inotifyFd,m_inWatchPidDirFd);
@@ -17,17 +18,17 @@ namespace libnutcommon {
 		}
 	}
 
-	void DBusMonitor::setPidFileDir(QString dir) {
+	void CDBusMonitor::setPidFileDir(QString dir) {
 		if (QFile::exists(dir)) {
 			m_dbusPidFileDir = dir;
 		}
 	}
 
-	void DBusMonitor::setPidFileName(QString name) {
+	void CDBusMonitor::setPidFileName(QString name) {
 		m_dbusPidFileName = name;
 	}
 
-	void DBusMonitor::setEnabled(bool enabled) {
+	void CDBusMonitor::setEnabled(bool enabled) {
 		if (enabled) {
 			if (!m_dbusPidFileDir.isEmpty() && !m_dbusPidFileName.isEmpty()) {
 				return;
@@ -69,7 +70,7 @@ namespace libnutcommon {
 		}
 	}
 
-	void DBusMonitor::setDBusPid() {
+	void CDBusMonitor::setDBusPid() {
 		//Check in /var/run first then in /var/run/dbus
 		int buffer = 0;
 		QString dbusPidFilePath = m_dbusPidFileDir + "/" + m_dbusPidFileName;
@@ -92,7 +93,7 @@ namespace libnutcommon {
 		qDebug() << "Set dbus pid to:" << m_dbusPid;
 	}
 	
-	void DBusMonitor::setInotifier() {
+	void CDBusMonitor::setInotifier() {
 		qDebug() << "(Inotify) Setting up watches";
 		//Setup watch
 		if ( -1 != m_inotifyFd ) {
@@ -104,7 +105,7 @@ namespace libnutcommon {
 		}
 	}
 	
-	void DBusMonitor::inotifyEvent(int socket) {
+	void CDBusMonitor::inotifyEvent(int socket) {
 		qDebug() << "(Inotify) Event occured";
 		if (socket == m_inotifyFd) {
 	// 		struct inotify_event;

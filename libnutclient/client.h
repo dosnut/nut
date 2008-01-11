@@ -114,7 +114,7 @@ namespace libnutclient {
 		int m_dbusTimerId;
 		CDeviceList m_devices;
 
-		libnutcommon::DBusMonitor m_dbusMonitor;
+		libnutcommon::CDBusMonitor m_dbusMonitor;
 		
 		void rebuild(QList<QDBusObjectPath> paths);
 		void setInformation();
