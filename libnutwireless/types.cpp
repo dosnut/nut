@@ -269,6 +269,7 @@ WextSignal convertValues(WextRawScan &scan) {
 	WextSignal res;
 	//Set all non-signalquality info
 	res.frequency = scan.freq;
+	res.bitrates = scan.bitrates;
 // 	res.encoding = WSIG_QUALITY_ALLABS;
 	qDebug() << "hasRange:" << scan.hasRange;
 	if ( scan.hasRange && ((scan.quality.level != 0) || (scan.quality.updated & (IW_QUAL_DBM | IW_QUAL_RCPI))) ) {

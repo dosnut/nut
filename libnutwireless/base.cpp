@@ -330,6 +330,7 @@ namespace libnutwireless {
 				wextScan.keyManagement = i.keyManagement;
 				wextScan.protocols = i.protocols;
 				wextScan.opmode = i.opmode;
+				wextScan.bitrates = i.bitrates;
 				wextScanHash.insert(i.bssid.toString(), wextScan);
 			}
 			WextScan dummy;
@@ -350,6 +351,7 @@ namespace libnutwireless {
 					i->keyManagement = wextScanHashIter.value().keyManagement;
 					i->protocols = wextScanHashIter.value().protocols;
 					i->opmode = wextScanHashIter.value().opmode;
+					i->bitrates = wextScanHashIter.value().bitrates;
 					wextScanHash.erase(wextScanHashIter);
 					count++;
 				}
@@ -371,6 +373,7 @@ namespace libnutwireless {
 				scanresult.keyManagement = i.value().keyManagement;
 				scanresult.protocols = i.value().protocols;
 				scanresult.opmode = i.value().opmode;
+				scanresult.bitrates = i.value().bitrates;
 				m_wpaScanResults.append(scanresult);
 			}
 

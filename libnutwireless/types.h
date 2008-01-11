@@ -145,10 +145,11 @@ namespace libnutwireless {
 		WSR_UNKNOWN=0, WSR_RCPI=1, WSR_ABSOLUTE=2, WSR_RELATIVE=3
 	} WextSignalType; 
 	
-	/** signal quality in human readable format */
+	/** signal information in human readable format */
 	struct WextSignal {
 		int frequency;
 		WextSignalType type;
+		QList<qint32> bitrates; //Current bitrate
 		struct {
 			quint8 value;
 			quint8 maximum;
@@ -182,6 +183,7 @@ namespace libnutwireless {
 		KeyManagement keyManagement;
 		Protocols protocols;
 		OPMODE opmode;
+		QList<qint32> bitrates;
 	};
 	
 	/** One scan result (network) in human readable format */
@@ -195,7 +197,9 @@ namespace libnutwireless {
 		KeyManagement keyManagement;
 		Protocols protocols;
 		OPMODE opmode;
+		QList<qint32> bitrates;
 	};
+
 	struct MIBVariable;
 	typedef QList<MIBVariable> MIBVariables;
 	//enums are NOT complete, but maybe we schould change this to QString
