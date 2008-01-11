@@ -34,7 +34,7 @@ namespace libnutcommon {
 			CDBusMonitor(QObject * parent, QString dbusPidFileDir, QString dbusPidFileName);
 			CDBusMonitor(QObject * parent);
 			~CDBusMonitor();
-			void setPidFileDir(QString dir);
+			bool setPidFileDir(QString dir);
 			void setPidFileName(QString name);
 		signals:
 			void stopped();

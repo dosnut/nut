@@ -7,11 +7,12 @@ extern "C" {
 }
 namespace libnutcommon {
 
-	CDBusMonitor::CDBusMonitor(QObject * parent, QString dbusPidFileDir, QString dbusPidFileName) : QObject(parent), m_dbusPidFileDir(dbusPidFileDir), m_dbusPidFileName(dbusPidFileName) {
+	CDBusMonitor::CDBusMonitor(QObject * parent, QString dbusPidFileDir, QString dbusPidFileName) : QObject(parent), m_dbusPidFileDir(dbusPidFileDir), m_dbusPidFileName(dbusPidFileName), m_dbusPid(-1), m_inotifyFd(-1), m_inWatchPidDirFd(-1), m_inotifiySocketNotifier(0) {
 		qDebug() << "File dir to pidfile is" << m_dbusPidFileDir;
 		qDebug() << "File name of pidfile is " << m_dbusPidFileName;
 	}
-	CDBusMonitor::CDBusMonitor(QObject * parent) : QObject(parent) {}
+	CDBusMonitor::CDBusMonitor(QObject * parent) : QObject(parent), m_dbusPid(-1), m_inotifyFd(-1), m_inWatchPidDirFd(-1), m_inotifiySocketNotifier(0)
+	{}
 
 	CDBusMonitor::~CDBusMonitor() {
 		if (-1 != m_inotifyFd) {
@@ -22,22 +23,30 @@ namespace libnutcommon {
 		}
 	}
 
-	void CDBusMonitor::setPidFileDir(QString dir) {
+	bool CDBusMonitor::setPidFileDir(QString dir) {
+		qDebug() << "Try setting watch dir to " << dir;
 		if (QFile::exists(dir)) {
 			m_dbusPidFileDir = dir;
+			return true;
+		}
+		else {
+			qDebug() << "Failed setting watchdir";
+			return false;
 		}
 	}
 
 	void CDBusMonitor::setPidFileName(QString name) {
+		qDebug() << "Pid file name is " << name;
 		m_dbusPidFileName = name;
 	}
 
 	void CDBusMonitor::setEnabled(bool enabled) {
 		if (enabled) {
-			if (!m_dbusPidFileDir.isEmpty() && !m_dbusPidFileName.isEmpty()) {
+			if ( !(!m_dbusPidFileDir.isEmpty() && !m_dbusPidFileName.isEmpty()) ) {
+				qDebug() << "Failed enabling monitor";
 				return;
 			}
-			if (-1 != m_inotifyFd) {
+			if (-1 == m_inotifyFd) {
 				m_inotifyFd = inotify_init();
 			}
 			qDebug() << "Filedescriptor for inotify is " << m_inotifyFd;
@@ -103,7 +112,7 @@ namespace libnutcommon {
 		if ( -1 != m_inotifyFd ) {
 			//Setup pidfile directory watch
 			if ( QFile::exists(m_dbusPidFileDir) && (-1 == m_inWatchPidDirFd) ) {
-				m_inWatchPidDirFd = inotify_add_watch(m_inotifyFd,m_dbusPidFileDir.toAscii().constData(), IN_MODIFY);
+				m_inWatchPidDirFd = inotify_add_watch(m_inotifyFd,m_dbusPidFileDir.toAscii().constData(), IN_DELETE | IN_MODIFY);
 				qDebug() << "Setup Pid file dir watch with " << m_inWatchPidDirFd;
 			}
 		}
@@ -163,22 +172,31 @@ namespace libnutcommon {
 					if (event->mask & IN_MODIFY) {
 						qDebug() << "(Inotify) modify file";
 					}
-					if (event->mask % IN_DELETE_SELF) {
+					if (event->mask & IN_DELETE_SELF) {
 						qDebug() << "(Inotify) deleted directory";
 					}
 				}
 				//process events
 	
 				//Check watch:
+				qDebug() << "Watch file descriptor is " << m_inWatchPidDirFd << "from event" <<  event->wd;
+
 				if (event->wd == m_inWatchPidDirFd) { //Pid file
 					//Check file name
-					if ( (filename == m_dbusPidFileName) && (-1 == m_inWatchPidDirFd) ) {
-		
-						//set new dbuspid and set inotifier watch
-						setDBusPid();
-						setInotifier();
-						
-						emit started();
+					if ( (filename == m_dbusPidFileName) && (-1 != m_inWatchPidDirFd) ) {
+						qDebug() << "Filename is pid file name";
+						//This is a work around untill taskstats interface is ready:
+						if (event->mask & IN_MODIFY) {
+							//set new dbuspid and set inotifier watch
+							setDBusPid();
+							setInotifier();
+							qDebug() << "(Inotify) Dbus was started";
+							emit started();
+						}
+						else if (event->mask & IN_DELETE) {
+							qDebug() << "(Inotify) Dbus was stopped";
+							emit stopped();
+						}
 					}
 				}
 			}

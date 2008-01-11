@@ -83,14 +83,16 @@ void CLibNut::serviceCheck(QDBusConnectionInterface * interface) {
 ////////////////
 //CDeviceManager
 ///////////////
-CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))), m_dbusTimerId(-1), m_dbusMonitor(this) {
+CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), m_dbusDevmgr(0), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))), m_dbusTimerId(-1), m_dbusMonitor(this) {
 	
 	//Init dbus monitor
 	connect(&m_dbusMonitor,SIGNAL(stopped(void)),this,SLOT(dbusStopped(void)));
 	connect(&m_dbusMonitor,SIGNAL(started(void)),this,SLOT(dbusStarted(void)));
-	m_dbusMonitor.setPidFileDir("DBUS_PID_FILE_DIR");
-	m_dbusMonitor.setPidFileName("DBUS_PID_FILE_NAME");
+	m_dbusMonitor.setPidFileDir(DBUS_PID_FILE_DIR);
+	m_dbusMonitor.setPidFileName(DBUS_PID_FILE_NAME);
+	qDebug() << "Enabling DBusMonitor";
 	m_dbusMonitor.setEnabled(true);
+	qDebug() << "Enabled DBusMonitor";
 
 	//Init Hashtable
 	m_dbusDevices.reserve(10);
@@ -175,7 +177,10 @@ void CDeviceManager::dbusKilled(bool doinit) {
 		dev->deleteLater();
 	}
 	//Clean up everything else:
-	delete m_dbusDevmgr;
+	if (m_dbusDevmgr) {
+		delete m_dbusDevmgr;
+		m_dbusDevmgr = NULL;
+	}
 	if (doinit) { //kill came from error on accessing dbus
 		//init will start polling
 		init(log);
@@ -356,11 +361,16 @@ void CDeviceManager::dbusDeviceRemoved(const QDBusObjectPath &objectpath) {
 }
 
 void CDeviceManager::dbusStopped() {
+	*log << tr("The dbus daemon has been stopped. Please restart dbus and nuts");
 	dbusKilled(false);
 }
 void CDeviceManager::dbusStarted() {
-	//init connection
+	*log << tr("dbus has been started initiating dbus interface");
+	//delete all information in case this has not happended yet, but do not init
+	dbusKilled(false);
+	//open connection
 	m_dbusConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus")));
+	//init
 	init(log);
 }
 

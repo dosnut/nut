@@ -13,6 +13,9 @@
 #include <libnutwireless/wpa_supplicant.h>
 #endif
 #include "client_exceptions.h"
+//Hardcoded pidfile/pidfiledir
+#define DBUS_PID_FILE_DIR "/var/run"
+#define DBUS_PID_FILE_NAME "dbus.pid"
 
 namespace libnutclient {
 	class CDeviceManager;
@@ -131,7 +134,10 @@ namespace libnutclient {
 		/** @brief List of devices managed by the DeviceManager
 		*/
 		inline const CDeviceList& getDevices() { return m_devices; } //TODO:change to const
-
+		
+		/** @brief Returns the pointer to the libnutcommon::CDBusMonitor object
+		*/
+		inline const libnutcommon::CDBusMonitor * getDBusMonitor() { return &m_dbusMonitor; }
 
 		/** @brief Init function to initialize
 			It has to be called to start the device manager
