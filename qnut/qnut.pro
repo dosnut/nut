@@ -68,13 +68,8 @@ INSTALLS += target iconstarget langtarget shortcuttarget
 
 INCLUDEPATH += ..
 
-LIBS += ../libnutcommon/libnutcommon.a \
-../libnutwireless/libnutwireless.a \
-../libnutclient/libnutclient.a \
--L/lib \
- -liw
-TARGETDEPS += ../libnutcommon/libnutcommon.a \
-../libnutwireless/libnutwireless.a \
-../libnutclient/libnutclient.a
-QMAKE_CXXFLAGS_DEBUG += -pedantic \
--Wno-long-long
+LIBS += -Wl,--start-group ../libnutcommon/libnutcommon.a ../libnutwireless/libnutwireless.a ../libnutclient/libnutclient.a -Wl,--end-group
+LIBS += -liw
+
+TARGETDEPS += ../libnutcommon/libnutcommon.a ../libnutwireless/libnutwireless.a ../libnutclient/libnutclient.a
+QMAKE_CXXFLAGS_DEBUG += -pedantic -Wno-long-long
