@@ -15,7 +15,8 @@ IUSE="debug wifi X"
 RDEPEND=">=x11-libs/qt-4.3.2
 		sys-apps/dbus
 		wifi? ( >=net-wireless/wpa_supplicant-0.6.0 )
-		wifi? ( >=net-wireless/wireless-tools-29 )"
+		wifi? ( >=net-wireless/wireless-tools-29 )
+		bash-completion? ( app-shells/bash-completion )"
 DEPEND="${RDEPEND}
 	sys-kernel/linux-headers
 	>=dev-libs/libnl-1.0_pre6-r1
@@ -100,6 +101,11 @@ src_install() {
 
 	insinto /etc/dbus-1/system.d/
 	newins "${S}"/debian/nuts-dbus.conf nuts-dbus.conf
+
+	if use bash-completion; then
+		insinto /usr/share/bash-completion/
+		newins "${S}"/gentoo/cnut.bash_completion cnut
+	fi
 
 	doman "${S}"/debian/*.1
 }
