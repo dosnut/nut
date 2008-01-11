@@ -1,0 +1,95 @@
+_cnut_complete_environment() {
+	if echo ${COMP_WORDS[@]} | egrep -q "\-\-device|\-D" ; then
+		#check if named device exists
+		local devs=$(cnut --list)
+		for device in ${devs}; do
+			if echo ${COMP_WORDS[@]} | grep -q -w "${device}" ; then
+				#device was found now construct COMPREPLY
+				local envs=$(cnut --device "${device}" --list)
+				COMPREPLY=( $(compgen -W "${envs}" -- ${cur}) )
+				return 0
+			fi
+		done
+	fi
+	return 1
+}
+
+_cnut_complete_interface() {
+	if echo ${COMP_WORDS[@]} | egrep -q "\-\-device|\-D" ; then
+		if echo ${COMP_WORDS[@]} | egrep -q "\-\-environment|\-E" ; then
+			#check if named device exists then check for environment
+			local devs=$(cnut --list)
+			for device in ${devs}; do
+				if echo ${COMP_WORDS[@]} | grep -q -w "${device}" ; then
+					#device was found, check for environment
+					local envs=$(cnut --device "${device}" --list)
+					for environment in ${envs}; do
+						if echo ${COMP_WORDS[@]} | grep -q -w "${environment}" ; then
+							#environment was found, now list available interfaces
+							local ifs=$(cnut --device "${device}" --environment "${environment}" --list)
+							COMPREPLY=( $(compgen -W "${ifs}" -- ${cur}) )
+							return 0
+						fi
+					done
+				fi
+			done
+		fi
+	fi
+	return 1
+}
+
+_cnut_cmds()  {
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    short_opts="-l -D -E -I -1 -0 -t -s -a -S -p"
+    long_opts="--list --device --environment --interface --enable --disable --type --state --activeEnvironment --setEnvironment --properties --selectable --with-index"
+    opts="${long_opts} ${short_opts}"
+
+	case "${prev}" in
+	--device)
+		local devs=$(cnut --list)
+		COMPREPLY=( $(compgen -W "${devs}" -- ${cur}) )
+		return 0
+		;;
+	-D)
+		local devs=$(cnut --list)
+		COMPREPLY=( $(compgen -W "${devs}" -- ${cur}) )
+		return 0
+		;;
+	--environment)
+		_cnut_complete_environment
+		return 0
+		;;
+	-E)
+		_cnut_complete_environment
+		return 0
+		;;
+	--setEnvironment)
+		_cnut_complete_environment
+		return 0
+		;;
+	--S)
+		_cnut_complete_environment
+		return 0
+		;;
+	--interface)
+		_cnut_complete_interface
+		return 0
+		;;
+	-I)
+		_cnut_complete_interface
+		return 0
+		;;
+	*)
+		;;
+	esac
+
+	#Just display matching args
+	if [[ ${cur} == -* ]] ; then
+		COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+		return 0
+	fi
+}
+complete -F _cnut_cmds cnut
