@@ -4,7 +4,7 @@
 namespace cnut {
 	
 	void help() {
-		print(QString("--list (-l) %1").arg(QObject::tr("Lists available devices")));
+		print(QString("--list (-l) %1").arg(QObject::tr("Lists available devices/environments/interfaces")));
 		print(QString("--device (-D) <devicename> %1").arg(QObject::tr("Choose device")));
 		print(QString("--environment (-E) <environment name> %1").arg(QObject::tr("Choose environment in given device")));
 		print(QString("--environment (-E) <environment index> %1").arg(QObject::tr("Choose environment in given device")));
@@ -18,8 +18,9 @@ namespace cnut {
 		print(QString("--setEnvironment (-S) <environment name> %1").arg(QObject::tr("Activates the environment on the given device")));
 		print(QString("--properties (-p) %1").arg(QObject::tr("Returns interface properties (one ip per line): ip,netmask,gateway,dns-servers")));
 		print(QString("--setEnvironment (-S) <index> %1").arg(
-		QObject::tr("Activates the environment on the given device. Index = line number from --listEnvironments starting with 0")));
+		QObject::tr("Activates the environment on the given device.")));
 		print(QString("--selectable %1").arg("returns if an environment is selected,selectable or not selectable"));
+		print(QString("--with-index %1").arg(QObject::tr("In conjunction with --list and --device this will list environments with index in front of name")));
 		print(""); print("");
 		print(QObject::tr("Examples:"));
 		print(QString("cnut --device eth0 --enable %1").arg(QObject::tr("Enables device eth0")));
@@ -41,6 +42,7 @@ namespace cnut {
 		bool doEnv = false;
 		bool doIf = false;
 		bool doDev = false;
+		bool envNamesWithIndex = false;
 		//Now dispatch the commands:
 		foreach(NutCommand cmd, commands) {
 // 			qDebug() << "Dispatching a command:";
@@ -164,6 +166,9 @@ namespace cnut {
 					return RETVAL_SUCCESS;
 				}
 			}
+			else if (CMD_WITH_INDEX == cmd.command) {
+				envNamesWithIndex = true;
+			}
 			else if (CMD_INTERFACE == cmd.command) {
 				if (envPath.isEmpty()) {
 					print(QObject::tr("No environment specified"));
@@ -264,7 +269,12 @@ namespace cnut {
 						return RETVAL_DEVICE_NOT_SPECIFIED;
 					}
 					else {
-						print(listEnvironmentNames(connection,devPath));
+						if (envNamesWithIndex) {
+							print(listEnvironmentNamesWithIndex(connection,devPath));
+						}
+						else {
+							print(listEnvironmentNames(connection,devPath));
+						}
 					}
 				}
 				else { //List devices
@@ -311,6 +321,9 @@ namespace cnut {
 		}
 		else if("--selectable" == cmd) {
 			return CMD_SELECTABLE;
+		}
+		else if("--with-index" == cmd) {
+			return CMD_WITH_INDEX;
 		}
 		else if("--interface" == cmd || "-I" == cmd) {
 			return CMD_INTERFACE;

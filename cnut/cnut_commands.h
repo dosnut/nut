@@ -18,6 +18,7 @@ namespace cnut {
 	//Get functions
 	QStringList listDeviceNames(QDBusConnection * connection);
 	QStringList listEnvironmentNames(QDBusConnection * connection, QString &devPath);
+	QStringList listEnvironmentNamesWithIndex(QDBusConnection * connection, QString &devPath);
 	QStringList listInterfaceIndexes(QDBusConnection * connection, QString &envPath);
 	QString getDeviceName(QDBusConnection * connection, QString &devPath);
 	QString getDeviceType(QDBusConnection * connection, QString &devPath);

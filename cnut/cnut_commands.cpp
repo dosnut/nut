@@ -38,6 +38,28 @@ namespace cnut {
 		if (replyenvs.isValid()) {
 			QString envPath;
 			int count = 0;
+			QString envName;
+			foreach(QDBusObjectPath i, replyenvs.value()) {
+				envPath = i.path();
+				envName = getEnvironmentName(connection,envPath);
+				envList.append(envName.isEmpty() ? QString::number(count) : envName);
+				count++;
+			}
+		}
+		else {
+			checkAccessRights(replyenvs.error());
+			envList = QStringList();
+		}
+		return envList;
+	}
+
+	QStringList listEnvironmentNamesWithIndex(QDBusConnection * connection, QString &devPath) {
+		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath,*connection, 0);
+		QDBusReply<QList<QDBusObjectPath> > replyenvs = dbusDev.getEnvironments();
+		QStringList envList;
+		if (replyenvs.isValid()) {
+			QString envPath;
+			int count = 0;
 			foreach(QDBusObjectPath i, replyenvs.value()) {
 				envPath = i.path();
 				envList.append(QString("%1 %2").arg(QString::number(count),getEnvironmentName(connection,envPath)));
@@ -50,6 +72,7 @@ namespace cnut {
 		}
 		return envList;
 	}
+
 	QStringList listInterfaceIndexes(QDBusConnection * connection, QString &envPath) {
 		DBusEnvironmentInterface dbusEnv(NUT_DBUS_URL, envPath,*connection, 0);
 		QDBusReply<QList<QDBusObjectPath> > replyifs = dbusEnv.getInterfaces();
