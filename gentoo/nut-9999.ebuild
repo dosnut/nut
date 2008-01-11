@@ -1,7 +1,7 @@
 
 EGIT_REPO_URI="git://repo.or.cz/nut.git"
 
-inherit eutils flag-o-matic git
+inherit bash-completion eutils flag-o-matic git
 
 DESCRIPTION="An advanced network manager with event based script execution"
 HOMEPAGE="http://repo.or.cz/nut.git"
@@ -24,6 +24,7 @@ DEPEND="${RDEPEND}
 	sys-devel/flex"
 
 S=${WORKDIR}/${EGIT_PROJECT}
+
 
 pkg_setup() {
 	if ! built_with_use x11-libs/qt dbus ; then
@@ -102,10 +103,7 @@ src_install() {
 	insinto /etc/dbus-1/system.d/
 	newins "${S}"/debian/nuts-dbus.conf nuts-dbus.conf
 
-	if use bash-completion; then
-		insinto /usr/share/bash-completion/
-		newins "${S}"/gentoo/cnut.bash_completion cnut
-	fi
+	dobashcompletion "${S}"/gentoo/cnut.bash_completion cnut
 
 	doman "${S}"/debian/*.1
 }
@@ -131,4 +129,6 @@ pkg_postinst() {
 	elog "Qnut/cnut will use 99% cpu if you are not allowed to access nuts' dbus interface."
 	elog "This will be fixed in qt-4.4"
 	elog "Configuring networks is not fully tested. Please make a back-up before you activate wpa_supplicant's config write feature."
+	echo
+	bash-completion_pkg_postinst
 }
