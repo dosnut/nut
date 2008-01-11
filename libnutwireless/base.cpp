@@ -744,6 +744,11 @@ namespace libnutwireless {
 								} //else: we have a, key but check type later
 							}
 							break;
+
+						case SIOCGIWRATE:
+							singleres.bitrates.append((qint32) iwe.u.bitrate.value);
+							qDebug() << "Adding Bitrate: " << (qint32) iwe.u.bitrate.value;
+							break;
 						
 						case IWEVGENIE: //group/pairwsie ciphers etc.
 							//buffer = iwe.u.data.pointer
@@ -841,12 +846,17 @@ namespace libnutwireless {
 		memset(&wrq,0,sizeof(struct iwreq));
 		/* Get AP address */
 		if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWAP, &wrq) >= 0) {
-			qDebug() << "Got AP";
+			//Add mac address of current ap;
+			char buffer[128];
+			iw_saether_ntop(&(wrq.u.ap_addr), buffer);
+			res.bssid = libnutcommon::MacAddress(QString::fromAscii(buffer,128));
+			qDebug() << "Got AP: " << res.bssid.toString();
 		}
 		
 		/* Get bit rate */
 		if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWRATE, &wrq) >= 0) {
-			qDebug() << "Got bit rate";
+			res.bitrates.append((qint32) wrq.u.bitrate.value);
+			qDebug() << "Got bit rate: " << res.bitrates[0];
 		}
 		
 		/* Get Power Management settings */

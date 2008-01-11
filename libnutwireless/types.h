@@ -136,6 +136,7 @@ namespace libnutwireless {
 		KeyManagement keyManagement;
 		Protocols protocols;
 		OPMODE opmode;
+		QList<qint32> bitrates;
 		//Further information pending...
 	};
 
