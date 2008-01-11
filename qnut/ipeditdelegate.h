@@ -35,6 +35,6 @@ namespace qnut {
 	
 		void updateEditorGeometry(QWidget * editor, const QStyleOptionViewItem & option, const QModelIndex & index) const;
 	};
-};
+}
 
 #endif

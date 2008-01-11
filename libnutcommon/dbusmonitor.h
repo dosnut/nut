@@ -5,13 +5,10 @@
 #include <QSocketNotifier>
 #include <QDBusConnection>
 #include <QString>
-#include <fstream>
 
-extern "C" {
-#include <sys/inotify.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
+
+namespace libnutcommon {
+	class CDBusMonitor;
 }
 
 namespace libnutcommon {

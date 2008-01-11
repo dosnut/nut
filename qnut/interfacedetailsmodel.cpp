@@ -215,4 +215,4 @@ namespace qnut {
 	QModelIndex CInterfaceDetailsModel::parent(const QModelIndex &) const {
 		return QModelIndex();
 	}
-};
+}

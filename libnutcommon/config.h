@@ -143,7 +143,7 @@ namespace libnutcommon {
 				False = 0,    //!< Cannot select
 				User = 1,     //!< Do select only if user does want it
 				NotUser = 2,  //!< Should not happen; "only select if user does not want it..." is not good
-				True = 3,     //!< Select
+				True = 3     //!< Select
 			} bool_t;
 		protected:
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const SelectResult &data);
@@ -214,7 +214,7 @@ namespace libnutcommon {
 				SEL_ARP,        //!< Select if ipAddr is found on the network from the device; if macAddr != 0 it is matched too.
 				SEL_ESSID,      //!< Select if in wlan essid;
 				SEL_AND_BLOCK,  //!< Select a list of \link SelectRule SelectRules\endlink, results combined with AND
-				SEL_OR_BLOCK,   //!< Select a list of \link SelectRule SelectRules\endlink, results combined with OR
+				SEL_OR_BLOCK   //!< Select a list of \link SelectRule SelectRules\endlink, results combined with OR
 			} SelectType;
 			
 			SelectRule() : invert(false), selType(SEL_USER) { }
@@ -295,7 +295,7 @@ namespace libnutcommon {
 				DO_DHCP      = 1,   //!< Find ip/gateway/dns via DHCP
 				DO_ZEROCONF  = 2,   //!< Probe for ip in the IPv4 Link-Local range (RFC 3927).
 				DO_STATIC    = 4,   //!< Use values from config file.
-				DO_USERSTATIC = 8,	//!< Use values specified at runtime by a user
+				DO_USERSTATIC = 8	//!< Use values specified at runtime by a user
 			} Flags;
 			
 			/** @brief Unused/Unsupported. Could be used to overwrite some value with static configured ones.
@@ -305,7 +305,7 @@ namespace libnutcommon {
 				OW_IP        = 1,
 				OW_NETMASK   = 2,
 				OW_GATEWAY   = 4,
-				OW_DNSSERVER = 8,
+				OW_DNSSERVER = 8
 			} OverwriteFlags;
 		
 		protected:
@@ -364,14 +364,14 @@ namespace libnutcommon {
 	};
 }
 
-Q_DECLARE_METATYPE(libnutcommon::Config);
-Q_DECLARE_METATYPE(libnutcommon::DeviceConfig);
-Q_DECLARE_METATYPE(libnutcommon::SelectResult);
-Q_DECLARE_METATYPE(QVector< libnutcommon::SelectResult >);
-Q_DECLARE_METATYPE(libnutcommon::SelectRule);
-Q_DECLARE_METATYPE(libnutcommon::SelectConfig);
-Q_DECLARE_METATYPE(libnutcommon::EnvironmentConfig);
-Q_DECLARE_METATYPE(libnutcommon::IPv4Config);
-Q_DECLARE_METATYPE(libnutcommon::IPv4UserConfig);
+Q_DECLARE_METATYPE(libnutcommon::Config)
+Q_DECLARE_METATYPE(libnutcommon::DeviceConfig)
+Q_DECLARE_METATYPE(libnutcommon::SelectResult)
+Q_DECLARE_METATYPE(QVector< libnutcommon::SelectResult >)
+Q_DECLARE_METATYPE(libnutcommon::SelectRule)
+Q_DECLARE_METATYPE(libnutcommon::SelectConfig)
+Q_DECLARE_METATYPE(libnutcommon::EnvironmentConfig)
+Q_DECLARE_METATYPE(libnutcommon::IPv4Config)
+Q_DECLARE_METATYPE(libnutcommon::IPv4UserConfig)
 
 #endif

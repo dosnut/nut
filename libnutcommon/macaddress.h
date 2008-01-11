@@ -62,6 +62,6 @@ static inline uint qHash(const libnutcommon::MacAddress &key) {
 	return qHash(*((quint64*)data));
 }
 
-Q_DECLARE_METATYPE(libnutcommon::MacAddress);
+Q_DECLARE_METATYPE(libnutcommon::MacAddress)
 
 #endif

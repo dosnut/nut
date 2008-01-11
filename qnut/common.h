@@ -49,6 +49,6 @@ namespace qnut {
 		else
 			return address.toString();
 	}
-};
+}
 
 #endif

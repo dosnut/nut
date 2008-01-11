@@ -31,3 +31,5 @@ LIBS += ../libnutcommon/libnutcommon.a \
 ../libnutwireless/libnutwireless.a
 TARGETDEPS += ../libnutcommon/libnutcommon.a \
 ../libnutwireless/libnutwireless.a
+QMAKE_CXXFLAGS_DEBUG += -pedantic \
+-Wno-long-long

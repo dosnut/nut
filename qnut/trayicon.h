@@ -47,6 +47,6 @@ namespace qnut {
 	private slots:
 		void handleClicks(QSystemTrayIcon::ActivationReason reason);
 	};
-};
+}
 
 #endif

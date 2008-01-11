@@ -9,7 +9,6 @@
 #include <QFile>
 #include <QTextStream>
 #include "libnutcommon/common.h"
-#include "libnutcommon/dbusmonitor.h"
 #ifndef LIBNUT_NO_WIRELESS
 #include <libnutwireless/wpa_supplicant.h>
 #endif
@@ -31,7 +30,7 @@ namespace libnutclient {
 	typedef QList<CDevice *> CDeviceList;
 	typedef QList<CEnvironment *> CEnvironmentList;
 	typedef QList<CInterface *> CInterfaceList;
-};
+}
 
 namespace libnutclient {
 
@@ -341,6 +340,6 @@ namespace libnutclient {
 	signals:
 		void stateChanged(libnutcommon::InterfaceState state);
 	};
-};
+}
 #include "server_proxy.h"
 #endif

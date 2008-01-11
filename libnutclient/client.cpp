@@ -86,12 +86,12 @@ void CLibNut::serviceCheck(QDBusConnectionInterface * interface) {
 CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))), m_dbusTimerId(-1), m_dbusMonitor(this) {
 	
 	//Init dbus monitor
-	connect(&m_dbusMonitor,SIGNAL(stopped(void)),this,SLOT(dbusStopped(void)));
-	connect(&m_dbusMonitor,SIGNAL(started(void)),this,SLOT(dbusStarted(void)));
-	m_dbusMonitor.setPidFileDir("DBUS_PID_FILE_DIR");
-	m_dbusMonitor.setPidFileName("DBUS_PID_FILE_NAME");
-	m_dbusMonitor.setEnabled(true);
-	
+// 	connect(&m_dbusMonitor,SIGNAL(stopped(void)),this,SLOT(dbusStopped(void)));
+// 	connect(&m_dbusMonitor,SIGNAL(started(void)),this,SLOT(dbusStarted(void)));
+// 	m_dbusMonitor.setPidFileDir("DBUS_PID_FILE_DIR");
+// 	m_dbusMonitor.setPidFileName("DBUS_PID_FILE_NAME");
+// 	m_dbusMonitor.setEnabled(true);
+
 	//Init Hashtable
 	m_dbusDevices.reserve(10);
 }
@@ -1103,4 +1103,4 @@ libnutcommon::IPv4UserConfig CInterface::getUserConfig(bool refresh) {
 	return m_userConfig;
 }
 
-};
+}

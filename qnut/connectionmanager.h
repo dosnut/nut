@@ -79,6 +79,6 @@ namespace qnut {
 		void showDeviceOptions(QWidget * widget);
 		void showAbout();
 	};
-};
+}
 
 #endif

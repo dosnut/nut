@@ -366,4 +366,4 @@ namespace qnut {
 			}
 		}
 	}
-};
+}

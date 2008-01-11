@@ -76,3 +76,5 @@ LIBS += ../libnutcommon/libnutcommon.a \
 TARGETDEPS += ../libnutcommon/libnutcommon.a \
 ../libnutwireless/libnutwireless.a \
 ../libnutclient/libnutclient.a
+QMAKE_CXXFLAGS_DEBUG += -pedantic \
+-Wno-long-long

@@ -55,7 +55,7 @@ namespace qnut {
 		void verifyConfiguration();
 		void convertSSID(bool hex);
 	};
-};
+}
 #endif
 
 #endif

@@ -45,6 +45,6 @@ namespace qnut {
 	private:
 		libnutclient::CDevice * m_Device;
 	};
-};
+}
 
 #endif

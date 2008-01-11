@@ -183,4 +183,4 @@ namespace qnut {
 		else
 			return QModelIndex();
 	}
-};
+}

@@ -203,5 +203,5 @@ namespace qnut {
 	QModelIndex CAvailableAPModel::parent(const QModelIndex &) const {
 		return QModelIndex();
 	}
-};
+}
 #endif

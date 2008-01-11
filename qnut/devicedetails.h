@@ -118,6 +118,6 @@ namespace qnut {
 		 */
 		void showOptionsRequested(QWidget * widget);
 	};
-};
+}
 
 #endif

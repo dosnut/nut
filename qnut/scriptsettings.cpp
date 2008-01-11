@@ -61,4 +61,4 @@ namespace qnut {
 	CScriptSettings::CScriptSettings(QWidget * parent) : QDialog(parent) {
 		ui.setupUi(this);
 	}
-};
+}

@@ -202,4 +202,4 @@ namespace qnut {
 		
 		return createIndex(parentRuleIndex, 0, parentRule);
 	}
-};
+}

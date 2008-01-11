@@ -42,6 +42,6 @@ namespace qnut {
 		void handleSelectionChanged(const QItemSelection & selected);
 	};
 
-};
+}
 
 #endif

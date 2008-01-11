@@ -76,7 +76,7 @@ namespace qnut {
 		void disableSelectedNetwork();
 		void toggleDetails(bool value);
 	};
-};
+}
 #endif
 
 #endif

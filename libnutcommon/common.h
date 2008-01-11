@@ -33,14 +33,15 @@ static inline uint qHash(const QDBusObjectPath &key) {
 QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress &data);
 const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &data);
 
-Q_DECLARE_METATYPE(QHostAddress);
-Q_DECLARE_METATYPE(QList<QHostAddress>);
+Q_DECLARE_METATYPE(QHostAddress)
+Q_DECLARE_METATYPE(QList<QHostAddress>)
 
-Q_DECLARE_METATYPE(QVector< quint32 >);
-Q_DECLARE_METATYPE(QVector< QVector< quint32 > >);
+Q_DECLARE_METATYPE(QVector< quint32 >)
+Q_DECLARE_METATYPE(QVector< QVector< quint32 > >)
 
 #include "config.h"
 #include "device.h"
 #include "macaddress.h"
+#include "dbusmonitor.h"
 
 #endif

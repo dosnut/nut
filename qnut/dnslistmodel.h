@@ -41,6 +41,6 @@ namespace qnut {
 	private:
 		QList<QHostAddress> * m_DNSList;
 	};
-};
+}
 
 #endif

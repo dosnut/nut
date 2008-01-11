@@ -37,7 +37,8 @@ namespace libnutcommon {
 		argument << envprop.active;
 		argument.endStructure();
 		return argument;
-	};
+	}
+
 	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentProperties &envprop) {
 		argument.beginStructure();
 		argument >> envprop.name;

@@ -37,6 +37,6 @@ namespace qnut {
 		 */
 		CScriptSettings(QWidget * parent = 0);
 	};
-};
+}
 
 #endif

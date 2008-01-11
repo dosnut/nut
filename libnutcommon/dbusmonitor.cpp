@@ -1,6 +1,10 @@
 #include "dbusmonitor.h"
 #include <QDebug>
-
+#include <fstream>
+extern "C" {
+#include <sys/inotify.h>
+#include <errno.h>
+}
 namespace libnutcommon {
 
 	CDBusMonitor::CDBusMonitor(QObject * parent, QString dbusPidFileDir, QString dbusPidFileName) : QObject(parent), m_dbusPidFileDir(dbusPidFileDir), m_dbusPidFileName(dbusPidFileName) {

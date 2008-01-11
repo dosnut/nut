@@ -299,4 +299,4 @@ namespace qnut {
 		activateWindow();
 		m_TabWidget.setCurrentWidget(widget);
 	}
-};
+}

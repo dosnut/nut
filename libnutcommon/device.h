@@ -49,9 +49,9 @@ namespace libnutcommon {
 	QString toString(enum InterfaceState state);
 }
 
-Q_DECLARE_METATYPE(libnutcommon::DeviceProperties);
-Q_DECLARE_METATYPE(libnutcommon::DeviceState);
-Q_DECLARE_METATYPE(libnutcommon::EnvironmentProperties);
-Q_DECLARE_METATYPE(libnutcommon::InterfaceProperties);
+Q_DECLARE_METATYPE(libnutcommon::DeviceProperties)
+Q_DECLARE_METATYPE(libnutcommon::DeviceState)
+Q_DECLARE_METATYPE(libnutcommon::EnvironmentProperties)
+Q_DECLARE_METATYPE(libnutcommon::InterfaceProperties)
 
 #endif

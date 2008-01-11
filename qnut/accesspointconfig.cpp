@@ -509,5 +509,5 @@ namespace qnut {
 		ui.keyFileEdit->setText(QFileDialog::getOpenFileName(this,
 			tr("Select key file"), "/", tr("Key files (%1)").arg("*.pem")));
 	}
-};
+}
 #endif

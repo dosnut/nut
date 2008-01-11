@@ -125,5 +125,5 @@ namespace qnut {
 	QModelIndex CManagedAPModel::parent(const QModelIndex &) const {
 		return QModelIndex();
 	}
-};
+}
 #endif

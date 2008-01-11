@@ -73,4 +73,4 @@ namespace qnut {
 		else
 			return QString('-');
 	}
-};
+}

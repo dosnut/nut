@@ -180,4 +180,4 @@ namespace qnut {
 		}
 		return QVariant();
 	}
-};
+}

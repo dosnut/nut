@@ -281,5 +281,5 @@ namespace qnut {
 /*		ui.managedView->header()->resizeSections(QHeaderView::ResizeToContents);
 		ui.availableView->header()->resizeSections(QHeaderView::ResizeToContents);*/
 	}
-};
+}
 #endif

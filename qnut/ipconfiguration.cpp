@@ -60,4 +60,4 @@ namespace qnut {
 		QModelIndexList selectedIndexes = selected.indexes();
 		ui.removeButton->setDisabled(selectedIndexes.isEmpty());
 	}
-};
+}

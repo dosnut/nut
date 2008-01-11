@@ -19,3 +19,5 @@ HEADERS += macaddress.h   config.h   common.h config.h \
 OBJECTS_DIR = build/
 UI_DIR = build/
 MOC_DIR = build/
+QMAKE_CXXFLAGS_DEBUG += -pedantic \
+-Wno-long-long

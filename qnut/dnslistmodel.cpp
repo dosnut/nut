@@ -73,4 +73,4 @@ namespace qnut {
 		endRemoveRows();
 		return true;
 	}
-};
+}

@@ -52,6 +52,6 @@ namespace qnut {
 		void deviceRemoved(libnutclient::CDevice * device);
 	};
 
-};
+}
 
 #endif
