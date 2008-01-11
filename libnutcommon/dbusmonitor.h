@@ -29,7 +29,6 @@ namespace libnutcommon {
 		private slots:
 			void inotifyEvent(int socket);
 		public slots:
-			void setNetlinkFd(int socket);
 			void setEnabled(bool enabled=true);
 		public:
 			CDBusMonitor(QObject * parent, QString dbusPidFileDir, QString dbusPidFileName);
