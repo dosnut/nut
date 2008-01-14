@@ -38,7 +38,6 @@ namespace nuts {
 			static const QString m_dbusPath, m_dbusDevicesPath;
 			int m_timerId;
 			void startDBus();
-			void stopDBus();
 			void timerEvent(QTimerEvent *event);
 			libnutcommon::CDBusMonitor m_dbusMonitor;
 			
@@ -49,6 +48,7 @@ namespace nuts {
 			friend int mainApp(int argc, char* argv[]);
 			friend class DeviceManager;
 
+			void stopDBus();
 			void dbusStopped();
 			void dbusStarted();
 		public:

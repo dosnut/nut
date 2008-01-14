@@ -44,28 +44,33 @@ namespace nuts {
 			killTimer(m_timerId);
 		}
 		//clear all information
-		QHashIterator<QString, Device *> i(m_devmgr->getDevices());
-		while (i.hasNext()) {
-			i.next();
-			devRemoved(i.key(), i.value());
+		
+		QHash<QString, nuts::DBusDevice *>::iterator dev = m_dbusDevices.begin();
+		DBusDevice * dbusdev;
+		while (dev != m_dbusDevices.end()) {
+			dbusdev = *dev;
+			dev = m_dbusDevices.erase(dev);
+			delete dbusdev;
 		}
+		m_dbusConnection.unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
 		m_dbusConnection.unregisterService(NUT_DBUS_URL);
-		m_dbusConnection.unregisterObject(m_dbusPath);
 		m_dbusConnection.disconnectFromBus("nuts_system_bus");
 	}
 
-	void dbusStopped() {
+	void DBusDeviceManager::dbusStopped() {
 		stopDBus();
 	}
 	
-	void dbusStarted() {
+	void DBusDeviceManager::dbusStarted() {
 		//call stopDBus to clear all information
 		stopDBus();
+		m_dbusConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("nuts_system_bus")));
+		qDebug() << "Connected to dbus";
 		startDBus();
 	}
 
 	DBusDeviceManager::~DBusDeviceManager() {
-		m_dbusConnection.unregisterObject(m_dbusPath);
+		m_dbusConnection.unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
 		m_dbusConnection.unregisterService(NUT_DBUS_URL);
 	}
 	
