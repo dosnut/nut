@@ -9,6 +9,10 @@
 
 #include "libnutcommon/common.h"
 
+//Hardcoded pidfile/pidfiledir
+#define DBUS_PID_FILE_DIR "/var/run"
+#define DBUS_PID_FILE_NAME "dbus.pid"
+
 namespace nuts {
 	class DBusDeviceManager;
 	class DBusDevice;
@@ -34,7 +38,9 @@ namespace nuts {
 			static const QString m_dbusPath, m_dbusDevicesPath;
 			int m_timerId;
 			void startDBus();
+			void stopDBus();
 			void timerEvent(QTimerEvent *event);
+			libnutcommon::CDBusMonitor m_dbusMonitor;
 			
 		private slots:
 			void devAdded(QString devName, Device *dev);
@@ -42,8 +48,9 @@ namespace nuts {
 			
 			friend int mainApp(int argc, char* argv[]);
 			friend class DeviceManager;
-			void stopDBus();
-		
+
+			void dbusStopped();
+			void dbusStarted();
 		public:
 			DBusDeviceManager(DeviceManager *devmgr);
 			virtual ~DBusDeviceManager();

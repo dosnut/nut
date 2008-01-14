@@ -7,15 +7,22 @@ namespace nuts {
 	const QString DBusDeviceManager::m_dbusDevicesPath("/devices");
 
 	DBusDeviceManager::DBusDeviceManager(DeviceManager *devmgr)
-	: QDBusAbstractAdaptor(devmgr), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("nuts_system_bus"))), m_devmgr(devmgr), m_timerId(-1) {
+	: QDBusAbstractAdaptor(devmgr), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("nuts_system_bus"))), m_devmgr(devmgr), m_timerId(-1), m_dbusMonitor(0) {
 		startDBus();
+
+		//Init dbus monitor
+		connect(&m_dbusMonitor,SIGNAL(stopped(void)),this,SLOT(dbusStopped(void)));
+		connect(&m_dbusMonitor,SIGNAL(started(void)),this,SLOT(dbusStarted(void)));
+		m_dbusMonitor.setPidFileDir(DBUS_PID_FILE_DIR);
+		m_dbusMonitor.setPidFileName(DBUS_PID_FILE_NAME);
+		m_dbusMonitor.setEnabled(true);
+
 	}
 	void DBusDeviceManager::startDBus() {
 		//Check if connection to dbus exists
 		if ( !m_dbusConnection.isConnected() ) {
 			log << "Please start dbus.";
 			log << "Otherwise you will not be able to control nuts" << endl;
-			m_timerId = startTimer(10000);
 			return;
 		}
 		//Register Service and device manager object
@@ -31,15 +38,37 @@ namespace nuts {
 		connect(m_devmgr, SIGNAL(deviceRemoved(QString, Device*)), SLOT(devRemoved(QString, Device*)));
 	}
 
+	void DBusDeviceManager::stopDBus() {
+		//kill timers:
+		if (-1 != m_timerId) {
+			killTimer(m_timerId);
+		}
+		//clear all information
+		QHashIterator<QString, Device *> i(m_devmgr->getDevices());
+		while (i.hasNext()) {
+			i.next();
+			devRemoved(i.key(), i.value());
+		}
+		m_dbusConnection.unregisterService(NUT_DBUS_URL);
+		m_dbusConnection.unregisterObject(m_dbusPath);
+		m_dbusConnection.disconnectFromBus("nuts_system_bus");
+	}
+
+	void dbusStopped() {
+		stopDBus();
+	}
+	
+	void dbusStarted() {
+		//call stopDBus to clear all information
+		stopDBus();
+		startDBus();
+	}
+
 	DBusDeviceManager::~DBusDeviceManager() {
 		m_dbusConnection.unregisterObject(m_dbusPath);
 		m_dbusConnection.unregisterService(NUT_DBUS_URL);
 	}
 	
-	void DBusDeviceManager::stopDBus() {
-		m_dbusConnection.unregisterService(NUT_DBUS_URL);
-		m_dbusConnection.unregisterObject(m_dbusPath);
-	}
 	void DBusDeviceManager::timerEvent(QTimerEvent *event) {
 		if ( event->timerId() == m_timerId ) {
 			killTimer(m_timerId);
