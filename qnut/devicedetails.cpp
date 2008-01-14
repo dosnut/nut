@@ -342,7 +342,6 @@ namespace qnut {
 			
 			if (doExecuteScripts && workdir.exists(targetDir)) {
 				QStringList env;
-				QProcess process;
 				env << "QNUT_DEV_NAME="  + m_Device->getName();
 				env << "QNUT_DEV_STATE=" + libnutcommon::toString(state);
 				
@@ -358,10 +357,13 @@ namespace qnut {
 					}
 				}
 				
-				process.setEnvironment(env);
 				workdir.cd(targetDir);
 				foreach(QString i, workdir.entryList()) {
-					process.start(workdir.filePath(i));
+					QProcess * process(this);
+					process->setEnvironment(env);
+					process->start(workdir.filePath(i));
+					connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), process, SLOT(deleteLater()));
+					connect(process, SIGNAL(error(QProcess::ProcessError)), process, SLOT(deleteLater()));
 				}
 			}
 		}
