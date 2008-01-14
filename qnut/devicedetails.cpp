@@ -70,7 +70,7 @@ namespace qnut {
 	
 	inline void CDeviceDetails::readSettings() {
 		m_Stettings.beginGroup("Main");
-		m_ScriptFlags = m_Stettings.value("m_ScriptFlags", 0).toInt();
+		m_ScriptFlags = m_Stettings.value("scriptFlags", 0).toInt();
 		m_trayIcon->setVisible(m_Stettings.value("showTrayIcon", false).toBool());
 		ui.detailsButton->setChecked(m_Stettings.value("showDetails", false).toBool());
 		m_Stettings.endGroup();
