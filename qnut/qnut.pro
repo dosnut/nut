@@ -68,7 +68,7 @@ INSTALLS += target iconstarget langtarget shortcuttarget
 
 INCLUDEPATH += ..
 
-LIBS += -Wl,--start-group ../libnutcommon/libnutcommon.a ../libnutwireless/libnutwireless.a ../libnutclient/libnutclient.a -Wl,--end-group
+LIBS += ../libnutclient/libnutclient.a ../libnutwireless/libnutwireless.a ../libnutcommon/libnutcommon.a
 LIBS += -liw
 
 TARGETDEPS += ../libnutcommon/libnutcommon.a ../libnutwireless/libnutwireless.a ../libnutclient/libnutclient.a
