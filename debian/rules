@@ -6,7 +6,7 @@ include /usr/share/cdbs/1/class/qmake.mk
 $(patsubst %,binary-install/%,$(DEB_PACKAGES)) :: binary-install/%:
 	$(if $(wildcard debian/$(cdbs_curpkg)/usr/share/applications/*), dh_desktop -p$(cdbs_curpkg) $(DEB_DH_DESKTOP_ARGS))
 
-QMAKE=qmake-qt4 'CONFIG+=release' 'DEFINES+=QT_NO_DEBUG_OUTPUT'
+QMAKE=qmake-qt4 'CONFIG+=release' 'DEFINES+=QT_NO_DEBUG_OUTPUT CONFIG_DBUS_PID_DIR=/var/run/dbus CONFIG_DBUS_PID_NAME=pid'
 
 DEB_INSTALL_MANPAGES_nuts=debian/nuts.1
 DEB_INSTALL_MANPAGES_qnut=debian/qnut.1

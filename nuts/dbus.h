@@ -9,10 +9,6 @@
 
 #include "libnutcommon/common.h"
 
-//Hardcoded pidfile/pidfiledir
-#define DBUS_PID_FILE_DIR "/var/run"
-#define DBUS_PID_FILE_NAME "dbus.pid"
-
 namespace nuts {
 	class DBusDeviceManager;
 	class DBusDevice;

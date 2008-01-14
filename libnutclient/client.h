@@ -13,9 +13,6 @@
 #include <libnutwireless/wpa_supplicant.h>
 #endif
 #include "client_exceptions.h"
-//Hardcoded pidfile/pidfiledir
-#define DBUS_PID_FILE_DIR "/var/run"
-#define DBUS_PID_FILE_NAME "dbus.pid"
 
 namespace libnutclient {
 	class CDeviceManager;

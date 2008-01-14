@@ -6,6 +6,20 @@
 #include <QDBusConnection>
 #include <QString>
 
+//Hardcoded pidfile/pidfiledir
+#define NUT_COMMON_DBUSMONITOR_QUOTE(x) #x
+
+#ifdef  CONFIG_DBUS_PID_DIR
+#define DBUS_PID_FILE_DIR NUT_COMMON_DBUSMONITOR_QUOTE(CONFIG_DBUS_PID_DIR)
+#else
+#define DBUS_PID_FILE_DIR "/var/run"
+#endif
+
+#ifdef  CONFIG_DBUS_PID_NAME
+#define DBUS_PID_FILE_NAME NUT_COMMON_DBUSMONITOR_QUOTE(CONFIG_DBUS_PID_NAME)
+#else
+#define DBUS_PID_FILE_NAME "dbus.pid"
+#endif
 
 namespace libnutcommon {
 	class CDBusMonitor;
