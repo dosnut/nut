@@ -361,7 +361,7 @@ namespace qnut {
 				process.setEnvironment(env);
 				workdir.cd(targetDir);
 				foreach(QString i, workdir.entryList()) {
-					process.start(workdir.path() + '/' + i);
+					process.start(workdir.filePath(i));
 				}
 			}
 		}
