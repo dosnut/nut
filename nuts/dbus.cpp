@@ -65,7 +65,6 @@ namespace nuts {
 		//call stopDBus to clear all information
 		stopDBus();
 		m_dbusConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("nuts_system_bus")));
-		qDebug() << "Connected to dbus";
 		startDBus();
 	}
 
