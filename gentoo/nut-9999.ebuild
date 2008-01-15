@@ -49,7 +49,7 @@ src_unpack() {
 	#Since version 0.4.4 we're using a new
 	#check which version of libnl is installed, if version is older than pre8,
 	#use old interface for pre6
-	if ! has_version =dev-libs/libnl-1.0_pre8 ; then
+	if ! has_version \>=dev-libs/libnl-1.0\_pre8 ; then
 		epatch "$S"/gentoo/files/gentoo_libnl8to6.diff || die
 	fi
 
@@ -77,7 +77,7 @@ src_compile() {
 	fi
 	
 	qmake -recursive -Wall "CONFIG+=$config_release" "DEFINES+=$config_defines"
-	emake || die
+	emake -j1 || die
 }
 
 src_install() {
