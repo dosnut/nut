@@ -359,7 +359,7 @@ namespace qnut {
 				
 				workdir.cd(targetDir);
 				foreach(QString i, workdir.entryList()) {
-					QProcess * process(this);
+					QProcess * process = new QProcess(this);
 					process->setEnvironment(env);
 					process->start(workdir.filePath(i));
 					connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), process, SLOT(deleteLater()));
