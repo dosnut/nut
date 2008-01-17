@@ -89,6 +89,10 @@ namespace nuts {
 			Q_NOREPLY void setEnvironment(qint32 env) {
 				m_device->setUserPreferredEnvironment(env);
 			}
+			QString getActiveEnvironment();
+			qint32 getActiveEnvironmentIndex() {
+				return m_device->getEnvironment();
+			}
 			
 			QString getEssid() { return m_device->essid(); }
 		
@@ -128,6 +132,9 @@ namespace nuts {
 			QList<QDBusObjectPath> getInterfaces();
 			libnutcommon::SelectResult getSelectResult();
 			QVector<libnutcommon::SelectResult> getSelectResults();
+			qint32 getID() {
+				return m_environment->getID();
+			}
 		signals:
 			void interfaceAdded(const QDBusObjectPath &objectpath);
 			void interfaceRemoved(const QDBusObjectPath &objectpath);
