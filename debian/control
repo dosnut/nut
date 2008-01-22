@@ -2,8 +2,8 @@ Source: nut
 Section: admin
 Priority: important
 Maintainer: Stefan Bühler <stbuehler@web.de>
-Build-Depends: cdbs, debhelper (>= 5), qt4-dev-tools, libqt4-dev, bison, flex, libnl-dev (>= 1.1-1), libiw-dev
-Standards-Version: 3.7.2
+Build-Depends: cdbs, debhelper (>= 5), qt4-dev-tools, libqt4-dev, bison, flex, libnl-dev (>= 1.1-1), libiw-dev, dpatch
+Standards-Version: 3.7.3
 
 Package: nuts
 Architecture: any
