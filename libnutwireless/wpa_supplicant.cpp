@@ -423,7 +423,7 @@ NetworkConfig CWpaSupplicant::getNetworkConfig(int id) {
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"ssid");
 	if ("FAIL\n" != response) {
-		config.ssid = wpaCtrlCmd_GET_NETWORK(id,"ssid");
+		config.ssid = response;
 	}
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"bssid");
