@@ -29,8 +29,12 @@ void CWpaSupplicant::setApScanDefault() {
 QList<quint8>& CWpaSupplicant::getSupportedChannels() {
 	//create m_supportedChannels?
 	if (m_supportedChannels.isEmpty() && !m_supportedFrequencies.isEmpty()) {
+		int chan;
 		foreach(quint32 freq, m_supportedFrequencies) {
-			m_supportedChannels.append(frequencyToChannel(freq));
+			chan = frequencyToChannel(freq);
+			if (chan != -1) {
+				m_supportedChannels.append(chan);
+			}
 		}
 	}
 	return m_supportedChannels;
@@ -802,6 +806,7 @@ EapNetconfigFailures CWpaSupplicant::editEapNetwork(int netid, EapNetworkConfig 
 
 void CWpaSupplicant::removeNetwork(int id) {
 	wpaCtrlCmd_REMOVE_NETWORK(id);
+	emit networkListUpdated();
 }
 
 bool CWpaSupplicant::setBssid(int id, libnutcommon::MacAddress bssid) {
