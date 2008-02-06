@@ -542,6 +542,10 @@ NetworkConfig CWpaSupplicant::getNetworkConfig(int id) {
 	if ( config.keyManagement & (KM_IEEE8021X | KM_WPA_EAP)) {
 		config.eap_config = getEapNetworkConfig(id);
 	}
+	//Check if we have Wep or plaintext:
+	if ( (KM_NONE & config.keyManagement) && (-1 == config.wep_tx_keyidx) ) {
+		config.keyManagement = (KeyManagement) ((!KM_NONE & config.keyManagement) | KM_OFF);
+	}
 	return config;
 }
 

@@ -386,7 +386,15 @@ namespace libnutwireless {
 	
 	KeyManagement CWpaSupplicantParsers::parseKeyMgmt(QString str) {
 		int key = KM_UNDEFINED;
-		if (str.contains("NONE")) {
+		//WPA-NONE has to checked first. If Set, othe options should not be possible
+		if (str.contains("WPA-NONE")) {
+			key = (key | KM_WPA_NONE);
+		}
+		int idx = str.indexOf("NONE");
+		if (idx == 0) { //Check if it really is NONE at not WPA-NONE
+			key = (key | KM_NONE);
+		}
+		else if (0 < idx && '-' != str[idx-1]) {
 			key = (key | KM_NONE);
 		}
 		if (str.contains("WPA-PSK")) {
