@@ -6,6 +6,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 #ifndef QNUT_NO_WIRELESS
+#include <QMessageBox>
 #include "adhocconfig.h"
 
 namespace qnut {
@@ -162,14 +163,26 @@ namespace qnut {
 			ui.ssidEdit->setText(config.ssid);
 		}
 		
-		if (config.group & PCI_CCMP)
-			ui.encCombo->setCurrentIndex(3);
-		else if (config.group & PCI_TKIP)
-			ui.encCombo->setCurrentIndex(2);
-		else if (config.keyManagement & KM_NONE)
+		if (config.keyManagement & KM_NONE)
 			ui.encCombo->setCurrentIndex(1);
-		else
+		else if (config.keyManagement & KM_OFF)
 			ui.encCombo->setCurrentIndex(0);
+		else if (config.keyManagement & KM_WPA_NONE) {
+			if (config.group & PCI_CCMP)
+				ui.encCombo->setCurrentIndex(3);
+			else if (config.group & PCI_TKIP)
+				ui.encCombo->setCurrentIndex(2);
+			else {
+				QMessageBox::critical(this, tr("Error reading ap config"),
+					tr("Unsupported group cipers retrieved: %1").arg((quint32)(config.group)));
+				return 0;
+			}
+		}
+		else {
+			QMessageBox::critical(this, tr("Error reading ap config"),
+				tr("Unsupported key management retrieved: %1").arg((quint32)(config.keyManagement)));
+			return 0;
+		}
 		
 		int channel = frequencyToChannel(config.frequency);
 		int channelIndex = m_Supplicant->getSupportedChannels().indexOf(channel);
@@ -186,18 +199,39 @@ namespace qnut {
 	bool CAdhocConfig::execute(ScanResult scanResult) {
 		ui.ssidEdit->setText(scanResult.ssid);
 		
+		if (scanResult.keyManagement & KM_NONE)
+			ui.encCombo->setCurrentIndex(1);
+		else if (scanResult.keyManagement & KM_OFF)
+			ui.encCombo->setCurrentIndex(0);
+		else if (scanResult.keyManagement & KM_WPA_NONE) {
+			if (scanResult.group & PCI_CCMP)
+				ui.encCombo->setCurrentIndex(3);
+			else if (scanResult.group & PCI_TKIP)
+				ui.encCombo->setCurrentIndex(2);
+			else {
+				QMessageBox::critical(this, tr("Error reading ap config"),
+					tr("Unsupported group cipers retrieved: %1").arg((quint32)(scanResult.group)));
+				return 0;
+			}
+		}
+		else {
+			QMessageBox::critical(this, tr("Error reading ap config"),
+				tr("Unsupported key management retrieved: %1").arg((quint32)(scanResult.keyManagement)));
+			return 0;
+		}
+		
+// 		if (scanResult.group & PCI_CCMP)
+// 			ui.encCombo->setCurrentIndex(3);
+// 		else if (scanResult.group & PCI_TKIP)
+// 			ui.encCombo->setCurrentIndex(2);
+// 		else if (scanResult.keyManagement & KM_NONE)
+// 			ui.encCombo->setCurrentIndex(1);
+// 		else
+// 			ui.encCombo->setCurrentIndex(0);
+		
 		int channel = frequencyToChannel(scanResult.freq);
 		int channelIndex = m_Supplicant->getSupportedChannels().indexOf(channel);
 		ui.channelCombo->setCurrentIndex(channelIndex);
-		
-		if (scanResult.group & PCI_CCMP)
-			ui.encCombo->setCurrentIndex(3);
-		else if (scanResult.group & PCI_TKIP)
-			ui.encCombo->setCurrentIndex(2);
-		else if (scanResult.keyManagement & KM_NONE)
-			ui.encCombo->setCurrentIndex(1);
-		else
-			ui.encCombo->setCurrentIndex(0);
 		
 		m_CurrentID = -1;
 		

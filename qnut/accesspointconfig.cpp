@@ -8,6 +8,7 @@
 #ifndef QNUT_NO_WIRELESS
 #include <QFileDialog>
 #include <QToolTip>
+#include <QMessageBox>
 #include "accesspointconfig.h"
 
 namespace qnut {
@@ -335,6 +336,8 @@ namespace qnut {
 			status = m_Supplicant->editNetwork(m_CurrentID, config);
 		else
 			status = m_Supplicant->addNetwork(config);
+		
+		QStringList errormsg;
 		
 		if (status.failures != NCF_NONE) {
 			qDebug("general failures:");
