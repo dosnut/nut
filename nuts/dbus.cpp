@@ -194,7 +194,8 @@ namespace nuts {
 		int m_activeEnvironment = m_device->getEnvironment();
 		if (m_activeEnvironment >= 0) {
 			m_dbusProperties.activeEnvironment = m_dbusEnvironments[m_activeEnvironment]->getPath();
-		} else {
+		}
+		else {
 			m_dbusProperties.activeEnvironment = QString();
 		}
 		return m_dbusProperties;
@@ -217,6 +218,15 @@ namespace nuts {
 				m_device->setUserPreferredEnvironment((i->getEnvironment())->getID());
 				break;
 			}
+		}
+	}
+	QString DBusDevice::getActiveEnvironment() {
+		int m_activeEnvironment = m_device->getEnvironment();
+		if (m_activeEnvironment >= 0) {
+			return m_dbusEnvironments[m_activeEnvironment]->getPath();
+		}
+		else {
+			return m_dbusProperties.activeEnvironment = QString();
 		}
 	}
 	
