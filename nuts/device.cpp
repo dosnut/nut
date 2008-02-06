@@ -1245,6 +1245,10 @@ namespace nuts {
 			err << "Couldn't create UDP socket" << endl;
 			return false;
 		}
+		{
+			int opt = 1;
+			setsockopt(m_dhcp_unicast_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+		}
 		struct sockaddr_in sin;
 		sin.sin_family = AF_INET;
 		sin.sin_port = htons(68);
