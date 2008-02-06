@@ -394,7 +394,7 @@ namespace nuts {
 			void closeUnicastDHCP();
 			bool sendUnicastDHCP(DHCPPacket *packet);
 			bool registerXID(quint32 xid);
-			bool registerUnicastXID(quint32 xid);
+			bool registerUnicastXID(quint32 &xid);
 			void releaseXID();
 			void dhcpReceived(DHCPPacket *packet);
 			

@@ -1213,15 +1213,15 @@ namespace nuts {
 		return false;
 	}
 	
-	bool Interface_IPv4::registerUnicastXID(quint32 xid) {
+	bool Interface_IPv4::registerUnicastXID(quint32 &xid) {
 		releaseXID();
-		if (!xid) return false;
-		if (setupUnicastDHCP()) {
-			m_dhcp_xid_unicast = true;
-			m_dhcp_xid = xid;
-			return true;
-		}
-		return false;
+		xid = 0;
+		if (!setupUnicastDHCP()) return false;
+		xid = getRandomUInt32();
+		if (!xid) xid++;
+		m_dhcp_xid_unicast = true;
+		m_dhcp_xid = xid;
+		return true;
 	}
 	
 	void Interface_IPv4::releaseXID() {

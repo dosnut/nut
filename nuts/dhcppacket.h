@@ -104,7 +104,7 @@ namespace nuts {
 			QHash< quint8, QVector<quint8> > options;
 			QByteArray msgdata;
 			
-			bool sendUnicast;
+			bool sendUnicast, creationFailed;
 			QHostAddress unicast_addr;
 			
 		public:

@@ -173,6 +173,7 @@ namespace nuts {
 	}
 	
 	bool DHCPPacket::check() {
+		if (creationFailed) return false;
 		msgdata.clear();
 //		msgdata.fill(0, sizeof(headers) + sizeof(msg) + 308);
 		QDataStream s(&msgdata, QIODevice::WriteOnly);
@@ -296,8 +297,10 @@ namespace nuts {
 	
 	void DHCPClientPacket::doDHCPRenew(const QHostAddress &ip) {
 		// should be unicast to server
-		quint32 xid = getRandomUInt32();
-		while (!iface->registerUnicastXID(xid)) xid++;
+		quint32 xid = 0;
+		if (!iface->registerUnicastXID(xid)) {
+			creationFailed = true;
+		}
 		setXID(xid);
 		setMessageType(DHCP_REQUEST);
 		setClientAddress(ip);
