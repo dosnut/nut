@@ -36,7 +36,7 @@ namespace libnutwireless {
 			QSocketNotifier *m_eventSn;
 			bool m_logEnabled;
 			bool m_wpaConnected;
-			int m_timerId;
+			int m_connectTimerId; ///Timer id for connection timer
 			int m_wextTimerId;
 			int m_scanTimerId;
 			int m_wextTimerRate;
@@ -109,15 +109,18 @@ namespace libnutwireless {
 			//Need to do it that way, as inline fails otherwise
 			inline void printMessage(QString msg) { if (m_logEnabled) emit(message(msg));}
 
+			/** Open connection to wpa_supplicant */
 			void openWpa(bool time_call);
+			/** close the connection to the wpa_supplicant */
 			bool closeWpa(QString call_func, bool internal=true);
+			/**Dynamically adjust the time between two timer events for polling the wpa_supplicant interface on connection try*/
 			int dynamicTimerTime(int m_timerCount);
 
 		protected slots:
 			void readFromWpa(int socket);
 			void detachWpa();
 		protected:
-			//proposed time polling:
+			/**Function to dispatch the timer events */
 			void timerEvent(QTimerEvent *event);
 			
 			//Set ap_scan
