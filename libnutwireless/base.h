@@ -173,6 +173,7 @@ namespace libnutwireless {
 				Then we're trying to retrieve further information via wirelessExtension.
 			*/
 			void scanCompleted();
+			/** Emits messages from wpa_supplicant like rekying */
 			void message(QString msg);
 			void eventMessage(libnutwireless::EventType type);
 			void signalQualityUpdated(libnutwireless::WextSignal signal);
