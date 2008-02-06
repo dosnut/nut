@@ -1,6 +1,8 @@
 
 TEMPLATE = app
 CONFIG += qt qdbus
+CONFIG -= thread
+QT -= gui
 QT += network
 
 CODECFORSRC = UTF-8

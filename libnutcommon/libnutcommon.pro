@@ -1,5 +1,6 @@
 TEMPLATE = lib
 CONFIG += staticlib create_prl
+CONFIG -= thread
 TARGET = nutcommon
 
 CONFIG += qt warn_on qdbus exceptions

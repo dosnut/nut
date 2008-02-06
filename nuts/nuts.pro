@@ -2,6 +2,7 @@
 TEMPLATE = app
 
 CONFIG += qt warn_on qdbus exceptions
+CONFIG -= thread
 QT -= gui
 QT += network
 
