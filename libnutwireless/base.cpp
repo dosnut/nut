@@ -910,7 +910,9 @@ namespace libnutwireless {
 				for (int j=0; j < 9-e-3; j++) {
 					freqinmhz = freqinmhz/10;
 				}
-				m_supportedFrequencies.append(freqinmhz);
+				if (!m_supportedFrequencies.contains(freqinmhz)) { //Only add frequency that are not in our list
+					m_supportedFrequencies.append(freqinmhz);
+				}
 				qDebug() << m << e << freqinmhz << frequencyToChannel(freqinmhz);
 			}
 			qDebug() << "Done printing";
