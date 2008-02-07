@@ -29,18 +29,18 @@ namespace qnut {
 		
 		ui.nameLabel->setText(m_Device->getName());
 		
-		CManagedAPProxyModel * managedAPProxyModel = new CManagedAPProxyModel(this);
+		m_ManagedAPProxyModel = new CManagedAPProxyModel(this);
 		m_ManagedAPModel = new CManagedAPModel(m_Device->getWpaSupplicant(), this);
-		managedAPProxyModel->setSourceModel(m_ManagedAPModel);
+		m_ManagedAPProxyModel->setSourceModel(m_ManagedAPModel);
 		
-		CAvailableAPProxyModel * availableAPProxyModel = new CAvailableAPProxyModel(this);
+		m_AvailableAPProxyModel = new CAvailableAPProxyModel(this);
 		m_AvailableAPModel = new CAvailableAPModel(m_Device->getWpaSupplicant(), this);
-		availableAPProxyModel->setSourceModel(m_AvailableAPModel);
+		m_AvailableAPProxyModel->setSourceModel(m_AvailableAPModel);
 		
 		createActions();
 		
-		ui.managedView->setModel(managedAPProxyModel);
-		ui.availableView->setModel(availableAPProxyModel);
+		ui.managedView->setModel(m_ManagedAPProxyModel);
+		ui.availableView->setModel(m_AvailableAPProxyModel);
 		
 		ui.managedView->header()->setResizeMode(QHeaderView::ResizeToContents);
 		ui.availableView->header()->setResizeMode(QHeaderView::ResizeToContents);
@@ -190,22 +190,24 @@ namespace qnut {
 			ui.signalLabel->setText(tr("waiting for device properties..."));
 	}
 	
-	void CWirelessSettings::switchToSelectedNetwork() {
-		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
+	QModelIndex CWirelessSettings::selectedIndex(QTreeView * view) {
+		QModelIndexList selectedIndexes = view->selectionModel()->selectedIndexes();
 		
-		if (!selectedIndexes.isEmpty())
-			m_Device->getWpaSupplicant()->selectNetwork(selectedIndexes[0].internalId());
+		if (selectedIndexes.isEmpty())
+			return QModelIndex();
+		
+		QSortFilterProxyModel * proxyModel = dynamic_cast<QSortFilterProxyModel *>(view->model());
+		if (proxyModel)
+			return proxyModel->mapToSource(selectedIndexes[0]);
+		else
+			return selectedIndexes[0];
 	}
 	
 	void CWirelessSettings::addNetwork() {
-		QModelIndexList selectedIndexes = ui.availableView->selectionModel()->selectedIndexes();
+		QModelIndex index = selectedIndex(ui.availableView);
 		
-		if (selectedIndexes.isEmpty()) {
-			CAccessPointConfig dialog(m_Device->getWpaSupplicant(), this);
-			dialog.execute();
-		}
-		else {
-			ScanResult scan = m_AvailableAPModel->cachedScans()[selectedIndexes[0].row()];
+		if (index.isValid()) {
+			ScanResult scan = m_AvailableAPModel->cachedScans()[index.internalId()];
 			if (scan.opmode == OPM_ADHOC) {
 				CAdhocConfig dialog(m_Device->getWpaSupplicant(), this);
 				dialog.execute(scan);
@@ -215,6 +217,10 @@ namespace qnut {
 				dialog.execute(scan);
 			}
 		}
+		else {
+			CAccessPointConfig dialog(m_Device->getWpaSupplicant(), this);
+			dialog.execute();
+		}
 	}
 	
 	void CWirelessSettings::addAdhoc() {
@@ -222,9 +228,14 @@ namespace qnut {
 		dialog.execute();
 	}
 	
+	void CWirelessSettings::switchToSelectedNetwork() {
+		int id = m_ManagedAPModel->cachedNetworks()[selectedIndex(ui.managedView).internalId()].id;
+		
+		m_Device->getWpaSupplicant()->selectNetwork(id);
+	}
+	
 	void CWirelessSettings::removeSelectedNetwork() {
-		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
-		ShortNetworkInfo network = m_ManagedAPModel->cachedNetworks()[selectedIndexes[0].row()];
+		ShortNetworkInfo network = m_ManagedAPModel->cachedNetworks()[selectedIndex(ui.managedView).internalId()];
 		
 		if (QMessageBox::question(this, tr("Removing a managed network"), tr("Are you sure to remove \"%1\"?").arg(network.ssid),
 			QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
@@ -232,8 +243,7 @@ namespace qnut {
 	}
 	
 	void CWirelessSettings::configureSelectedNetwork() {
-		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
-		ShortNetworkInfo network = m_ManagedAPModel->cachedNetworks()[selectedIndexes[0].internalId()];
+		ShortNetworkInfo network = m_ManagedAPModel->cachedNetworks()[selectedIndex(ui.managedView).internalId()];
 		
 		bool accepted = false;
 		if (network.adhoc) {
@@ -247,9 +257,15 @@ namespace qnut {
 	}
 	
 	void CWirelessSettings::enableSelectedNetwork() {
-		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
-		int id = m_ManagedAPModel->cachedNetworks()[selectedIndexes[0].internalId()].id;
+		int id = m_ManagedAPModel->cachedNetworks()[selectedIndex(ui.managedView).internalId()].id;
+		
 		m_Device->getWpaSupplicant()->enableNetwork(id);
+	}
+	
+	void CWirelessSettings::disableSelectedNetwork() {
+		int id = m_ManagedAPModel->cachedNetworks()[selectedIndex(ui.managedView).internalId()].id;
+		
+		m_Device->getWpaSupplicant()->disableNetwork(id);
 	}
 	
 	void CWirelessSettings::enableNetworks() {
@@ -257,12 +273,6 @@ namespace qnut {
 		foreach (ShortNetworkInfo i, networks) {
 			m_Device->getWpaSupplicant()->enableNetwork(i.id);
 		}
-	}
-	
-	void CWirelessSettings::disableSelectedNetwork() {
-		QModelIndexList selectedIndexes = ui.managedView->selectionModel()->selectedIndexes();
-		int id = m_ManagedAPModel->cachedNetworks()[selectedIndexes[0].internalId()].id;
-		m_Device->getWpaSupplicant()->disableNetwork(id);
 	}
 	
 	void CWirelessSettings::toggleDetails(bool value) {

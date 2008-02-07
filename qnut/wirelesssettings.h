@@ -16,6 +16,8 @@
 namespace qnut {
 	class CManagedAPModel;
 	class CAvailableAPModel;
+	class CManagedAPProxyModel;
+	class CAvailableAPProxyModel;
 	
 	/**
 	 * @brief CWirelessSettings provides an UI to configure the wireless Connection for a given CDevice.
@@ -33,7 +35,9 @@ namespace qnut {
 		libnutclient::CDevice * m_Device;
 		
 		CManagedAPModel * m_ManagedAPModel;
+		CManagedAPProxyModel * m_ManagedAPProxyModel;
 		CAvailableAPModel * m_AvailableAPModel;
+		CAvailableAPProxyModel * m_AvailableAPProxyModel;
 		
 		QAction * m_EnableNetworkAction;
 		QAction * m_DisableNetworkAction;
@@ -46,6 +50,7 @@ namespace qnut {
 		QAction * m_RescanNetworksAction;
 		
 		inline void createActions();
+		QModelIndex selectedIndex(QTreeView * view);
 	public:
 		/// @brief returnes the visibility state of the details
 		inline bool detailsVisible() const { return m_ToggleDetailsAction->isChecked(); }
