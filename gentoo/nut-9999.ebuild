@@ -46,7 +46,7 @@ src_unpack() {
 	fi
 	git_src_unpack
 
-	#Since version 0.4.4 we're using a new
+	#Since version 0.4.4 we're using a newer libnl version
 	#check which version of libnl is installed, if version is older than pre8,
 	#use old interface for pre6
 	if ! has_version \>=dev-libs/libnl-1.0\_pre8 ; then
@@ -101,11 +101,11 @@ src_install() {
 	newins "${S}"/gentoo/autoswitch_netcards autoswitch_netcards
 
 	insinto /etc/dbus-1/system.d/
-	newins "${S}"/debian/nuts-dbus.conf nuts-dbus.conf
+	newins "${S}"/resources/nuts-dbus.conf nuts-dbus.conf
 
-	dobashcompletion "${S}"/gentoo/cnut.bash_completion cnut
+	dobashcompletion "${S}"/resources/cnut.bash_completion cnut
 
-	doman "${S}"/debian/*.1
+	doman "${S}"/resources/*.1
 }
 
 pkg_postinst() {
