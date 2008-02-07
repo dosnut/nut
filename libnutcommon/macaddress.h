@@ -35,12 +35,12 @@ namespace libnutcommon {
 			inline bool operator!=(const MacAddress &ma) const {
 				return !(*this == ma);
 			}
-			inline bool operator<(const MacAddress &a, const MacAddress &b) {
-				if ( *((quint32*)a.data) < *((quint32*)b.data) ) {
+			inline bool operator<(const MacAddress &b) {
+				if ( *((quint32*)data) < *((quint32*)b.data) ) {
 					return true;
 				}
-				else if ( *((quint32*)a.data) == *((quint32*)b.data) ) { //First is equal
-					return ( (*((quint16*)((a.data)+4))) < *((quint16*)((b.data)+4)) );
+				else if ( *((quint32*)data) == *((quint32*)b.data) ) { //First is equal
+					return ( (*((quint16*)(data+4))) < *((quint16*)((b.data)+4)) );
 				}
 				else {
 					return false;

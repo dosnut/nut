@@ -448,7 +448,7 @@ namespace libnutwireless {
 	}
 	/** Compare ShortNetworkinfo by Adhoc (adhoc is bigger)*/
 	inline bool lessThanAdhoc(ShortNetworkInfo a, ShortNetworkInfo b) {
-		return (a == false && b == true);
+		return (!a.adhoc && b.adhoc);
 	}
 
 	/**
