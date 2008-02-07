@@ -119,11 +119,37 @@ namespace qnut {
 		if (m_Networks.isEmpty() || parent.isValid() || row >= m_Networks.count())
 			return QModelIndex();
 		else
-			return createIndex(row, column, m_Networks[row].id);
+			return createIndex(row, column, row);
 	}
 	
 	QModelIndex CManagedAPModel::parent(const QModelIndex &) const {
 		return QModelIndex();
+	}
+	
+	CManagedAPProxyModel::CManagedAPProxyModel(QObject * parent) : QSortFilterProxyModel(parent) {
+		setDynamicSortFilter(true);
+	}
+	
+	bool CManagedAPProxyModel::lessThan(const QModelIndex & left, const QModelIndex & right) {
+		CManagedAPModel * source = dynamic_cast<CManagedAPModel *>(sourceModel());
+		if (!source)
+			return true;
+		
+		int leftID  = left.internalId();
+		int rightID = right.internalId();
+		
+		switch (left.column()) {
+			case UI_MANAP_ID:
+				return lessThanID(source->cachedNetworks()[leftID], source->cachedNetworks()[rightID]);
+			case UI_MANAP_SSID:
+				return lessThanSSID(source->cachedNetworks()[leftID], source->cachedNetworks()[rightID]);
+			case UI_MANAP_BSSID:
+				return lessThanBSSID(source->cachedNetworks()[leftID], source->cachedNetworks()[rightID]);
+			case UI_MANAP_STATUS:
+				return lessThanFlags(source->cachedNetworks()[leftID], source->cachedNetworks()[rightID]);
+		default:
+			return true;
+		}
 	}
 }
 #endif

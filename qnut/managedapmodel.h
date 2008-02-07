@@ -10,6 +10,7 @@
 
 #ifndef QNUT_NO_WIRELESS
 #include <QAbstractItemModel>
+#include <QSortFilterProxyModel>
 #include <libnutclient/client.h>
 
 #define UI_MANAP_SSID   0
@@ -60,6 +61,13 @@ namespace qnut {
 		void setWpaSupplicant(libnutwireless::CWpaSupplicant * wpaSupplicant);
 		QList<libnutwireless::ShortNetworkInfo> m_Networks;
 		libnutwireless::CWpaSupplicant * m_Supplicant;
+	};
+	
+	class CManagedAPProxyModel : public QSortFilterProxyModel {
+		Q_OBJECT
+	public:
+		CManagedAPProxyModel(QObject * parent = 0);
+		bool lessThan(const QModelIndex & left, const QModelIndex & right);
 	};
 }
 #endif

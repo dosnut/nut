@@ -204,7 +204,7 @@ namespace qnut {
 		return QModelIndex();
 	}
 	
-	CAvailableAPProxyModel::CAvailableAPProxyModel(QObject * parent) : QObject(parent) {
+	CAvailableAPProxyModel::CAvailableAPProxyModel(QObject * parent) : QSortFilterProxyModel(parent) {
 		setDynamicSortFilter(true);
 	}
 	
