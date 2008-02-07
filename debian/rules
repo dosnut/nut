@@ -9,6 +9,6 @@ $(patsubst %,binary-install/%,$(DEB_PACKAGES)) :: binary-install/%:
 
 QMAKE=qmake-qt4 'CONFIG+=release' 'DEFINES+=QT_NO_DEBUG_OUTPUT'
 
-DEB_INSTALL_MANPAGES_nuts=debian/nuts.1
-DEB_INSTALL_MANPAGES_qnut=debian/qnut.1
-DEB_INSTALL_MANPAGES_cnut=debian/cnut.1
+DEB_INSTALL_MANPAGES_nuts=resources/nuts.1
+DEB_INSTALL_MANPAGES_qnut=resources/qnut.1
+DEB_INSTALL_MANPAGES_cnut=resources/cnut.1
