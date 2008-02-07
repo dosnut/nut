@@ -117,7 +117,7 @@ bool CDeviceManager::init(CLog * inlog) {
 			m_dbusTimerId = -1;
 		}
 		*log << tr("Error while trying to access the dbus service");
-		*log << tr("Pleasse make sure that dbus is running");
+		*log << tr("Please make sure that dbus is running");
 // 		m_dbusTimerId = startTimer(10000);
 		return false;
 	}
