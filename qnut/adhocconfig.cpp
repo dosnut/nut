@@ -170,9 +170,9 @@ namespace qnut {
 		else if (config.keyManagement & KM_OFF)
 			ui.encCombo->setCurrentIndex(0);
 		else if (config.keyManagement & KM_WPA_NONE) {
-			if (config.group & PCI_CCMP)
+			if (config.group & GCI_CCMP)
 				ui.encCombo->setCurrentIndex(3);
-			else if (config.group & PCI_TKIP)
+			else if (config.group & GCI_TKIP)
 				ui.encCombo->setCurrentIndex(2);
 			else {
 				QMessageBox::critical(this, tr("Error reading ap config"),
