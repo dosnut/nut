@@ -30,21 +30,23 @@ namespace qnut {
 		ui.nameLabel->setText(m_Device->getName());
 		
 		
-		m_ManagedAPModel = new CManagedAPModel(m_Device->getWpaSupplicant());
-		m_AvailableAPModel = new CAvailableAPModel(m_Device->getWpaSupplicant());
+		m_ManagedAPModel = new CManagedAPModel(m_Device->getWpaSupplicant(), this);
+		managedAPProxyModel = new CManagedAPProxyModel(this);
+		managedAPProxyModel->setSourceModel(m_ManagedAPModel);
+		
+		m_AvailableAPModel = new CAvailableAPModel(m_Device->getWpaSupplicant(), this);
+		availableAPProxyModel = new CAvailableAPProxyModel(this);
+		availableAPProxyModel->setSourceModel(m_AvailableAPModel);
 		
 		createActions();
 		
-		ui.managedView->setModel(m_ManagedAPModel);
-		ui.availableView->setModel(m_AvailableAPModel);
+		ui.managedView->setModel(managedAPProxyModel);
+		ui.availableView->setModel(availableAPProxyModel);
 		
 		ui.managedView->header()->setResizeMode(QHeaderView::ResizeToContents);
 		ui.availableView->header()->setResizeMode(QHeaderView::ResizeToContents);
 		
 		updateUi(m_Device->getState());
-		
-/*		m_ManagedAPModel->setWpaSupplicant(m_Device->getWpaSupplicant());
-		m_AvailableAPModel->setWpaSupplicant(m_Device->getWpaSupplicant());*/
 		
 		ui.managedView->header()->setMinimumSectionSize(-1);
 		ui.availableView->header()->setMinimumSectionSize(-1);

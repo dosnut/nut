@@ -195,13 +195,45 @@ namespace qnut {
 	
 	QModelIndex CAvailableAPModel::index(int row, int column, const QModelIndex & parent) const {
 		if (!m_Scans.isEmpty() || parent.isValid() || row >= m_Scans.count())
-			return createIndex(row, column);
+			return createIndex(row, column, row);
 		else
 			return QModelIndex();
 	}
 	
 	QModelIndex CAvailableAPModel::parent(const QModelIndex &) const {
 		return QModelIndex();
+	}
+	
+	CAvailableAPProxyModel::CAvailableAPProxyModel(QObject * parent) : QObject(parent) {
+		setDynamicSortFilter(true);
+	}
+	
+	bool CAvailableAPProxyModel::lessThan(const QModelIndex & left, const QModelIndex & right) {
+		CAvailableAPModel * source = dynamic_cast<CAvailableAPModel *>(sourceModel());
+		if (!source)
+			return true;
+		
+		int leftIndex  = left.internalId();
+		int rightIndex = right.internalId();
+		
+		switch (left.column()) {
+		case UI_AVLAP_SSID:
+			return lessThanSSID(source->cachedScans()[leftIndex], source->cachedScans()[rightIndex]);
+		case UI_AVLAP_CHANNEL:
+			return lessThanFreq(source->cachedScans()[leftIndex], source->cachedScans()[rightIndex]);
+		case UI_AVLAP_KEYMGMT:
+			return lessThanKeyManagement(source->cachedScans()[leftIndex], source->cachedScans()[rightIndex]);
+		case UI_AVLAP_BSSID:
+			return lessThanBSSID(source->cachedScans()[leftIndex], source->cachedScans()[rightIndex]);
+		case UI_AVLAP_QUALITY:
+			return lessThanSignalQuality(source->cachedScans()[leftIndex], source->cachedScans()[rightIndex]);
+		case UI_AVLAP_LEVEL:
+			return lessThanSignalLevel(source->cachedScans()[leftIndex], source->cachedScans()[rightIndex]);
+		case UI_AVLAP_ENC:
+			return lessThanGroup(source->cachedScans()[leftIndex], source->cachedScans()[rightIndex]);
+		default:
+			return true;
+		}
 	}
 }
 #endif

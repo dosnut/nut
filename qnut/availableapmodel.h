@@ -66,6 +66,13 @@ namespace qnut {
 		libnutwireless::CWpaSupplicant * m_Supplicant;
 		QList<libnutwireless::ScanResult> m_Scans;
 	};
+	
+	class CAvailableAPProxyModel : public QSortFilterProxyModel {
+		Q_OBJECT
+	public:
+		CAvailableAPProxyModel(QObject * parent = 0);
+		bool lessThan(const QModelIndex & left, const QModelIndex & right);
+	};
 }
 #endif
 
