@@ -30,11 +30,11 @@ namespace libnutwireless {
 	/** Enum of possible protocols. RSN=WPA2 */
 	typedef enum {PROTO_UNDEFINED=0, PROTO_WPA=1, PROTO_RSN=2, PROTO_DEFAULT=3} Protocols; //RSN=WPA2
 	/** Enum of possible group ciphers. */
-	typedef enum {GCI_UNDEFINED=0, GCI_CCMP=2, GCI_TKIP=4, GCI_WEP104=8, GCI_WEP40=16, GCI_NONE=32, GCI_WRAP=64, GCI_DEF=30} GroupCiphers;
+	typedef enum {GCI_UNDEFINED=0,  GCI_NONE=2, GCI_WEP40=4, GCI_WEP104=8, GCI_TKIP=16, GCI_CCMP=32, GCI_WRAP=64, GCI_DEF=60} GroupCiphers;
 	/** Enum of possible pairwise ciphers */
-	typedef enum {PCI_UNDEFINED=0, PCI_NONE=1, PCI_CCMP=2, PCI_TKIP=4, PCI_DEF=6} PairwiseCiphers;
+	typedef enum {PCI_UNDEFINED=0, PCI_NONE=1, PCI_TKIP=2, PCI_CCMP=4, PCI_DEF=6} PairwiseCiphers;
 	/** Enum of possible  key management */
-	typedef enum {KM_UNDEFINED=0, KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8, KM_WPA_NONE=16, KM_OFF=32, KM_DEF=6} KeyManagement; //TODO:change parsers due to KM_OFF
+	typedef enum {KM_UNDEFINED=0, KM_OFF=2, KM_NONE=4, KM_WPA_NONE=8, KM_WPA_PSK=16, KM_WPA_EAP=32, KM_IEEE8021X=64, KM_DEF=48} KeyManagement; //TODO:change parsers due to KM_OFF
 	/** Enum of possible authentication  algorithms */
 	typedef enum {AUTHALG_UNDEFINED=0, AUTHALG_OPEN=1, AUTHALG_SHARED=2, AUTHALG_LEAP=4} AuthenticationAlgs; //Default: automatic selection
 
@@ -201,33 +201,53 @@ namespace libnutwireless {
 		OPMODE opmode;
 		QList<qint32> bitrates;
 	};
-	inline bool lessThanBssid(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+	//Comparison functions
+	/** Compare ScanResult by bssid */
+	inline bool lessThanBSSID(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		return (a.bssid < b.bssid);
 	}
-	inline bool lessThanSsid(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+	/** Compare ScanResult by ssid */
+	inline bool lessThanSSID(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		return (a.ssid < b.ssid);
 	}
+	/** Compare ScanResult by frequency */
 	inline bool lessThanFreq(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		return (a.freq < b.freq);
 	}
-	inline bool lessThanSignal(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+	/** Compare ScanResult by signal quality */
+	inline bool lessThanSignalQuality(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		return (a.signal.quality.value < b.signal.quality.value);
 	}
+	/** Compare ScanResult by signal level */
+	inline bool lessThanSignalLevel(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+		return (a.signal.level.rcpi < b.signal.level.rcpi);
+	}
+	/** Compare ScanResult by signal noise */
+	inline bool lessThanSignalNoise(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+		return (a.signal.noise.rcpi < b.signal.noise.rcpi);
+	}
+
+	/** Compare ScanResult by keymanagement rotocol (sort order in enum) */
 	inline bool lessThanKeyManagement(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		return ((int) a.keyManagement < (int) b.keyManagement);
 	}
+	/** Compare ScanResult by group (sort order in enum)  */
 	inline bool lessThanGroup(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		return ((int) a.group < (int) b.group);
 	}
+	/** Compare ScanResult by pairwise (sort order in enum) */
 	inline bool lessThanPairwise(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		return ((int) a.pairwise < (int) b.pairwise);
 	}
+	/** Compare ScanResult by protocol (sort order in enum) */
 	inline bool lessThanProtocols(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		return ((int) a.protocols < (int) b.protocols);
 	}
+	/** Compare ScanResult by operation mode. (Adhoc is bigger) */
 	inline bool lessThanOpmode(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		return (a.opmode == false && b.opmode == true);
 	}
+	/** Compare ScanResult by highest available bitrate */
 	bool lessThanBitrates(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		//Find the maximum of the a and b bitrates:
 		qint32 maxa = 0;
@@ -409,18 +429,24 @@ namespace libnutwireless {
 		NetworkFlags flags;
 		bool adhoc;
 	};
+	//Comparison functions
+	/** Compare ShortNetworkinfo by Id*/
 	inline bool lessThanId(ShortNetworkInfo a, ShortNetworkInfo b) {
 		return (a.id < b.id);
 	}
-	inline bool lessThanSsid(ShortNetworkInfo a, ShortNetworkInfo b) {
+	/** Compare ShortNetworkinfo by Ssid*/
+	inline bool lessThanSSID(ShortNetworkInfo a, ShortNetworkInfo b) {
 		return (a.ssid < b.ssid);
 	}
-	inline bool lessThanBssid(ShortNetworkInfo a, ShortNetworkInfo b) {
+	/** Compare ShortNetworkinfo by Bssid*/
+	inline bool lessThanBSSID(ShortNetworkInfo a, ShortNetworkInfo b) {
 		return (a.bssid < b.bssid);
 	}
+	/** Compare ShortNetworkinfo by NetworkFlags*/
 	inline bool lessThanFlags(ShortNetworkInfo a, ShortNetworkInfo b) {
 		return ((int) a.flags < (int) b.flags);
 	}
+	/** Compare ShortNetworkinfo by Adhoc (adhoc is bigger)*/
 	inline bool lessThanAdhoc(ShortNetworkInfo a, ShortNetworkInfo b) {
 		return (a == false && b == true);
 	}
