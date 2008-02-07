@@ -248,7 +248,7 @@ namespace libnutwireless {
 		return (!a.opmode && b.opmode);
 	}
 	/** Compare ScanResult by highest available bitrate */
-	bool lessThanBitrates(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+	inline bool lessThanBitrates(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		//Find the maximum of the a and b bitrates:
 		qint32 maxa = 0;
 		//Find maximum of a;
