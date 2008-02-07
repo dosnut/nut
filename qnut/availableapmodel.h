@@ -10,6 +10,7 @@
 
 #ifndef QNUT_NO_WIRELESS
 #include <QAbstractItemModel>
+#include <QSortFilterProxyModel>
 #include <libnutclient/client.h>
 
 #define UI_AVLAP_SSID    0
