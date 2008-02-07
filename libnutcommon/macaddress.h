@@ -35,6 +35,17 @@ namespace libnutcommon {
 			inline bool operator!=(const MacAddress &ma) const {
 				return !(*this == ma);
 			}
+			inline bool operator<(const MacAddress &a, const MacAddress &b) {
+				if ( *((quint32*)a.data) < *((quint32*)b.data) ) {
+					return true;
+				}
+				else if ( *((quint32*)a.data) == *((quint32*)b.data) ) { //First is equal
+					return ( (*((quint16*)((a.data)+4))) < *((quint16*)((b.data)+4)) );
+				}
+				else {
+					return false;
+				}
+			}
 			inline QString toString() const {
 				char buf[sizeof("00:00:00:00:00:00")];
 				sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",

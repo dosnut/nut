@@ -185,6 +185,8 @@ namespace libnutwireless {
 		OPMODE opmode;
 		QList<qint32> bitrates;
 	};
+
+
 	
 	/** One scan result (network) in human readable format */
 	struct ScanResult {
@@ -199,6 +201,52 @@ namespace libnutwireless {
 		OPMODE opmode;
 		QList<qint32> bitrates;
 	};
+	inline bool lessThanBssid(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+		return (a.bssid < b.bssid);
+	}
+	inline bool lessThanSsid(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+		return (a.ssid < b.ssid);
+	}
+	inline bool lessThanFreq(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+		return (a.freq < b.freq);
+	}
+	inline bool lessThanSignal(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+		return (a.signal.quality.value < b.signal.quality.value);
+	}
+	inline bool lessThanKeyManagement(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+		return ((int) a.keyManagement < (int) b.keyManagement);
+	}
+	inline bool lessThanGroup(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+		return ((int) a.group < (int) b.group);
+	}
+	inline bool lessThanPairwise(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+		return ((int) a.pairwise < (int) b.pairwise);
+	}
+	inline bool lessThanProtocols(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+		return ((int) a.protocols < (int) b.protocols);
+	}
+	inline bool lessThanOpmode(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+		return (a.opmode == false && b.opmode == true);
+	}
+	bool lessThanBitrates(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
+		//Find the maximum of the a and b bitrates:
+		qint32 maxa = 0;
+		//Find maximum of a;
+		for(QList<qint32>::iterator i = a.bitrates.begin(); i != a.bitrates.end(); ++i) {
+			if (*i > maxa) {
+				maxa = *i;
+			}
+		}
+		//Check if b has higher bitrate
+		for(QList<qint32>::iterator i = b.bitrates.begin(); i != b.bitrates.end(); ++i) {
+			if (*i > maxa) {
+				return true;
+			}
+		}
+		//b has no bitrate that is higher
+		return false;
+	}
+
 
 	struct MIBVariable;
 	typedef QList<MIBVariable> MIBVariables;
@@ -361,6 +409,21 @@ namespace libnutwireless {
 		NetworkFlags flags;
 		bool adhoc;
 	};
+	inline bool lessThanId(ShortNetworkInfo a, ShortNetworkInfo b) {
+		return (a.id < b.id);
+	}
+	inline bool lessThanSsid(ShortNetworkInfo a, ShortNetworkInfo b) {
+		return (a.ssid < b.ssid);
+	}
+	inline bool lessThanBssid(ShortNetworkInfo a, ShortNetworkInfo b) {
+		return (a.bssid < b.bssid);
+	}
+	inline bool lessThanFlags(ShortNetworkInfo a, ShortNetworkInfo b) {
+		return ((int) a.flags < (int) b.flags);
+	}
+	inline bool lessThanAdhoc(ShortNetworkInfo a, ShortNetworkInfo b) {
+		return (a == false && b == true);
+	}
 
 	/**
 		The eap network config class contains all information for configuring
