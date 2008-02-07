@@ -202,11 +202,11 @@ namespace libnutwireless {
 		QList<qint32> bitrates;
 	};
 	//Comparison functions
-	/** Compare ScanResult by bssid */
+	/** Compare ScanResult by BSSID */
 	inline bool lessThanBSSID(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		return (a.bssid < b.bssid);
 	}
-	/** Compare ScanResult by ssid */
+	/** Compare ScanResult by SSID */
 	inline bool lessThanSSID(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		return (a.ssid < b.ssid);
 	}
@@ -245,7 +245,7 @@ namespace libnutwireless {
 	}
 	/** Compare ScanResult by operation mode. (Adhoc is bigger) */
 	inline bool lessThanOpmode(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
-		return (a.opmode == false && b.opmode == true);
+		return (!a.opmode && b.opmode);
 	}
 	/** Compare ScanResult by highest available bitrate */
 	bool lessThanBitrates(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
@@ -430,15 +430,15 @@ namespace libnutwireless {
 		bool adhoc;
 	};
 	//Comparison functions
-	/** Compare ShortNetworkinfo by Id*/
-	inline bool lessThanId(ShortNetworkInfo a, ShortNetworkInfo b) {
+	/** Compare ShortNetworkinfo by ID*/
+	inline bool lessThanID(ShortNetworkInfo a, ShortNetworkInfo b) {
 		return (a.id < b.id);
 	}
-	/** Compare ShortNetworkinfo by Ssid*/
+	/** Compare ShortNetworkinfo by SSID*/
 	inline bool lessThanSSID(ShortNetworkInfo a, ShortNetworkInfo b) {
 		return (a.ssid < b.ssid);
 	}
-	/** Compare ShortNetworkinfo by Bssid*/
+	/** Compare ShortNetworkinfo by BSSID*/
 	inline bool lessThanBSSID(ShortNetworkInfo a, ShortNetworkInfo b) {
 		return (a.bssid < b.bssid);
 	}
