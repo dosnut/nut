@@ -57,7 +57,7 @@ namespace nuts {
 	}
 	
 	DHCPPacket::DHCPPacket(bool client)
-	: sendUnicast(false) {
+	: sendUnicast(false), creationFailed(false) {
 		memset(&msg, 0, sizeof(msg));
 		memset(&headers, 0, sizeof(headers));
 		headers.ip.protocol = IPPROTO_UDP;
@@ -80,7 +80,7 @@ namespace nuts {
 	}
 	
 	DHCPPacket::DHCPPacket(bool client, const QHostAddress &unicast_addr)
-	: sendUnicast(true), unicast_addr(unicast_addr) {
+	: sendUnicast(true), creationFailed(false), unicast_addr(unicast_addr) {
 		memset(&msg, 0, sizeof(msg));
 		memset(&headers, 0, sizeof(headers));
 		headers.ip.protocol = IPPROTO_UDP;
@@ -103,7 +103,7 @@ namespace nuts {
 	}
 	
 	DHCPPacket::DHCPPacket(QDataStream &in, quint32 from_ip)
-	: sendUnicast(false) {
+	: sendUnicast(false), creationFailed(false) {
 		memset(&headers, 0, sizeof(headers));
 		headers.ip.saddr = from_ip;
 		memset(&msg, 0, sizeof(msg));
