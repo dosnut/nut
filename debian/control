@@ -1,4 +1,4 @@
-Source: nut
+Source: network-utilities
 Section: admin
 Priority: important
 Maintainer: Stefan Bühler <stbuehler@web.de>
