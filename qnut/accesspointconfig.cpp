@@ -121,11 +121,13 @@ namespace qnut {
 			ui.prwCipCombo->setCurrentIndex(0);
 		
 		if (m_WEPEnabled) {
-			if (scanResult.group & GCI_CCMP)
-				ui.grpCipCombo->setCurrentIndex(3);
-			else if (scanResult.group & GCI_TKIP)
-				ui.grpCipCombo->setCurrentIndex(2);
-			else if ((scanResult.group & GCI_WEP104) || (scanResult.group & GCI_WEP40))
+			if (ui.keyManagementCombo->currentIndex())  {
+				if (scanResult.group & GCI_CCMP)
+					ui.grpCipCombo->setCurrentIndex(3);
+				else if (scanResult.group & GCI_TKIP)
+					ui.grpCipCombo->setCurrentIndex(2);
+			}
+			else if (!(scanResult.keyManagement & KM_OFF) && ((scanResult.group & GCI_WEP104) || (scanResult.group & GCI_WEP40)))
 				ui.grpCipCombo->setCurrentIndex(1);
 			else
 				ui.grpCipCombo->setCurrentIndex(0);
@@ -186,11 +188,13 @@ namespace qnut {
 			ui.prwCipCombo->setCurrentIndex(0);
 		
 		if (m_WEPEnabled) {
-			if (config.group & GCI_CCMP)
-				ui.grpCipCombo->setCurrentIndex(3);
-			else if (config.group & GCI_TKIP)
-				ui.grpCipCombo->setCurrentIndex(2);
-			else if ((config.group & GCI_WEP104) || (config.group & GCI_WEP40))
+			if (ui.keyManagementCombo->currentIndex()) {
+				if (config.group & GCI_CCMP)
+					ui.grpCipCombo->setCurrentIndex(3);
+				else if (config.group & GCI_TKIP)
+					ui.grpCipCombo->setCurrentIndex(2);
+			}
+			else if (!(scanResult.keyManagement & KM_OFF) && ((config.group & GCI_WEP104) || (config.group & GCI_WEP40)))
 				ui.grpCipCombo->setCurrentIndex(1);
 			else
 				ui.grpCipCombo->setCurrentIndex(0);
