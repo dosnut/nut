@@ -234,7 +234,7 @@ namespace qnut {
 		NetconfigStatus status;
 		NetworkConfig config;
 		
-		if (!ui.wep0Edit->text().isEmpty())
+		if (!ui.ssidEdit->text().isEmpty())
 			config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
 		
 		config.scan_ssid = toQOOL(ui.scanCheck->isChecked());
