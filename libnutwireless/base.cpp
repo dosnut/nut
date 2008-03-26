@@ -37,7 +37,7 @@ namespace libnutwireless {
 			
 			status = wpa_ctrl_request(cmd_ctrl, command.constData(), command.size(), reply, &reply_len,NULL);
 			if (0 == status) {
-				qDebug() << cmd << ":" << QString::fromUtf8(reply, reply_len) << "\nEOC";
+				qDebug() << cmd + " : " + QString::fromUtf8(reply, reply_len) + " EOC";
 				if (reply_len > 0) {
 					return QString::fromUtf8(reply, reply_len);
 				}
