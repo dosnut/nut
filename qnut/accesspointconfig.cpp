@@ -165,16 +165,18 @@ namespace qnut {
 			readEAPConfig(config.eap_config);
 			ui.passwordLeaveButton->setVisible(true);
 			ui.passwordLeaveButton->setChecked(true);
+			ui.rsnCheck->setChecked(config.protocols & PROTO_RSN);
 		}
 		else if (config.keyManagement & KM_WPA_PSK) {
 			ui.keyManagementCombo->setCurrentIndex(1);
 			ui.pskLeaveButton->setVisible(true);
 			ui.pskLeaveButton->setChecked(true);
+			ui.rsnCheck->setChecked(config.protocols & PROTO_RSN);
 		}
 		else
 			ui.keyManagementCombo->setCurrentIndex(0);
 		
-		ui.rsnCheck->setChecked(config.protocols & PROTO_RSN);
+//		ui.rsnCheck->setChecked(config.protocols & PROTO_RSN);
 		
 		if (config.pairwise & PCI_CCMP)
 			ui.prwCipCombo->setCurrentIndex(2);
@@ -220,6 +222,7 @@ namespace qnut {
 			}
 		}
 		
+		ui.scanCheck->setChecked(config.scan_ssid);
 		ui.autoEnableCheck->setChecked(config.disabled);
 		
 		m_CurrentID = id;
