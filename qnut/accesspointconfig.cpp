@@ -231,7 +231,8 @@ namespace qnut {
 		NetconfigStatus status;
 		NetworkConfig config;
 		
-		config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
+		if (!ui.wep0Edit->text().isEmpty())
+			config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
 		
 		config.scan_ssid = toQOOL(ui.scanCheck->isChecked());
 		config.disabled = toQOOL(ui.autoEnableCheck->isChecked());
@@ -240,19 +241,19 @@ namespace qnut {
 			config.bssid = MacAddress(ui.ssidEdit->text());
 		
 		if (ui.confTabs->isTabEnabled(3)) {
-			if (!ui.wep0LeaveButton->isChecked())
+			if (!(ui.wep0LeaveButton->isChecked() || ui.wep0Edit->text().isEmpty()))
 				config.wep_key0 = ui.wep0HexCheck->isChecked() ?
 					ui.wep0Edit->text() :
 					'\"' + ui.wep0Edit->text() + '\"';
-			if (!ui.wep1LeaveButton->isChecked())
+			if (!(ui.wep1LeaveButton->isChecked() || ui.wep1Edit->text().isEmpty()))
 				config.wep_key1 = ui.wep1HexCheck->isChecked() ?
 					ui.wep1Edit->text() :
 					'\"' + ui.wep1Edit->text() + '\"';
-			if (!ui.wep2LeaveButton->isChecked())
+			if (!(ui.wep2LeaveButton->isChecked() || ui.wep2Edit->text().isEmpty()))
 				config.wep_key2 = ui.wep2HexCheck->isChecked() ?
 					ui.wep2Edit->text() :
 					'\"' + ui.wep2Edit->text() + '\"';
-			if (!ui.wep3LeaveButton->isChecked())
+			if (!(ui.wep3LeaveButton->isChecked() || ui.wep3Edit->text().isEmpty()))
 				config.wep_key3 = ui.wep3HexCheck->isChecked() ?
 					ui.wep3Edit->text() :
 					'\"' + ui.wep3Edit->text() + '\"';
@@ -309,7 +310,7 @@ namespace qnut {
 				config.protocols = m_OldConfig.protocols;
 			}
 			
-			if ((!ui.pskLeaveButton->isChecked()) && (!ui.pskEdit->text().isEmpty()))
+			if (!(ui.pskLeaveButton->isChecked() || ui.pskEdit->text().isEmpty()))
 				config.psk = '\"' + ui.pskEdit->text() + '\"';
 			
 			break;

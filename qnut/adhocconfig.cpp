@@ -38,7 +38,8 @@ namespace qnut {
 		NetconfigStatus status;
 		NetworkConfig config;
 		
-		config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
+		if (!ui.ssidEdit->text().isEmpty())
+			config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
 		config.frequency = channelToFrequency(ui.channelCombo->currentText().toInt());
 		config.mode = QOOL_TRUE;
 		
@@ -50,7 +51,7 @@ namespace qnut {
 			config.wep_tx_keyidx = 0;
 			config.keyManagement = KM_NONE;
 			
-			if ((!ui.pskLeaveButton->isChecked()) && (ui.pskEdit->text().length() != 0))
+			if (!(ui.pskLeaveButton->isChecked() || ui.pskEdit->text().isEmpty()))
 				config.wep_key0 = '\"' + ui.pskEdit->text() + '\"';
 			break;
 		default:
@@ -63,7 +64,7 @@ namespace qnut {
 			config.pairwise = PCI_NONE;
 			config.keyManagement = KM_WPA_NONE;
 			
-			if ((!ui.pskLeaveButton->isChecked()) && (ui.pskEdit->text().length() != 0))
+			if (!(ui.pskLeaveButton->isChecked() || (ui.pskEdit->text().isEmpty())))
 				config.psk = '\"' + ui.pskEdit->text() + '\"';
 			break;
 		}
