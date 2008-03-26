@@ -11,7 +11,7 @@
 #include <QMessageBox>
 #include "accesspointconfig.h"
 
-#define FLAG_PREPARE_OUTPUT(a, b, c) if(a & c) b << "c";
+#define FLAG_PREPARE_OUTPUT(a, b, c) if(a & c) b << #c;
 
 namespace qnut {
 	using namespace libnutcommon;
