@@ -194,7 +194,7 @@ namespace qnut {
 				else if (config.group & GCI_TKIP)
 					ui.grpCipCombo->setCurrentIndex(2);
 			}
-			else if (!(scanResult.keyManagement & KM_OFF) && ((config.group & GCI_WEP104) || (config.group & GCI_WEP40)))
+			else if (!(config.keyManagement & KM_OFF) && ((config.group & GCI_WEP104) || (config.group & GCI_WEP40)))
 				ui.grpCipCombo->setCurrentIndex(1);
 			else
 				ui.grpCipCombo->setCurrentIndex(0);
