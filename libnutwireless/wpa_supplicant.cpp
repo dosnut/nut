@@ -375,22 +375,22 @@ NetconfigStatus CWpaSupplicant::editNetwork(int netid, NetworkConfig config) {
 	}
 	//Max. length of an wepkey in ascii is 16 (not documented, checked with wpa_supplicant 0.6.2)
 	if (!config.wep_key0.isEmpty()) {
-		if ((0 == config.wep_key0.indexOf("\"") && 16 > config.wep_key0.length()) || !setNetworkVariable(netid,"wep_key0",config.wep_key0)) {
+		if ((0 == config.wep_key0.indexOf("\"") && 16+2 < config.wep_key0.length()) || !setNetworkVariable(netid,"wep_key0",config.wep_key0)) {
 			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_WEP_KEY0);
 		}	
 	}
 	if (!config.wep_key1.isEmpty()) {
-		if ((0 == config.wep_key1.indexOf("\"") && 16 > config.wep_key1.length()) || !setNetworkVariable(netid,"wep_key1",config.wep_key1)) {
+		if ((0 == config.wep_key1.indexOf("\"") && 16+2 < config.wep_key1.length()) || !setNetworkVariable(netid,"wep_key1",config.wep_key1)) {
 			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_WEP_KEY1);
 		}	
 	}
 	if (!config.wep_key2.isEmpty()) {
-		if ((0 == config.wep_key2.indexOf("\"") && 16 > config.wep_key2.length()) || !setNetworkVariable(netid,"wep_key2",config.wep_key2)) {
+		if ((0 == config.wep_key2.indexOf("\"") && 16+2 < config.wep_key2.length()) || !setNetworkVariable(netid,"wep_key2",config.wep_key2)) {
 			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_WEP_KEY2);
 		}	
 	}
 	if (!config.wep_key3.isEmpty()) {
-		if ((0 == config.wep_key3.indexOf("\"") && 16 > config.wep_key3.length()) || !setNetworkVariable(netid,"wep_key3",config.wep_key3)) {
+		if ((0 == config.wep_key3.indexOf("\"") && 16+2 < config.wep_key3.length()) || !setNetworkVariable(netid,"wep_key3",config.wep_key3)) {
 			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_WEP_KEY3);
 		}	
 	}
