@@ -242,7 +242,7 @@ namespace qnut {
 			config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
 		
 		config.scan_ssid = toQOOL(ui.scanCheck->isChecked());
-		config.disabled = toQOOL(ui.autoEnableCheck->isChecked());
+		config.disabled = toQOOL(!ui.autoEnableCheck->isChecked());
 		
 		if (!ui.anyBSSIDCheck->isChecked())
 			config.bssid = MacAddress(ui.ssidEdit->text());
