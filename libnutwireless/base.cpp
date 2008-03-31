@@ -340,8 +340,12 @@ namespace libnutwireless {
 			for (QList<ScanResult>::Iterator i = m_wpaScanResults.begin(); i != m_wpaScanResults.end(); ++i ) {
 				if (wextScanHash.contains(i->bssid.toString())) { //We do have this network in our wext list
 					wextScanHashIter = wextScanHash.find(i->bssid.toString());
+					//Workaround for some cards that send wrong information via wext.
+					//If ssid is hidden (empty), then we do not set the information from the wext.
 					i->bssid = wextScanHashIter.value().bssid;
-					i->ssid = wextScanHashIter.value().ssid;
+					if (!wextScanHashIter.value().ssid.isEmpty()) { 
+						i->ssid = wextScanHashIter.value().ssid;
+					}
 					if (-1 != frequencyToChannel(wextScanHashIter.value().freq)) {
 						i->freq = wextScanHashIter.value().freq;
 					}
