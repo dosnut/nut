@@ -269,7 +269,7 @@ namespace qnut {
 	}
 	
 	void CWirelessSettings::enableNetworks() {
-		QList<ShortNetworkInfo> networks = static_cast<CManagedAPModel *>(ui.managedView->model())->cachedNetworks();
+		QList<ShortNetworkInfo> networks = m_ManagedAPModel->cachedNetworks();
 		foreach (ShortNetworkInfo i, networks) {
 			m_Device->getWpaSupplicant()->enableNetwork(i.id);
 		}
