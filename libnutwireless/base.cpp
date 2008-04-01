@@ -343,7 +343,7 @@ namespace libnutwireless {
 					//Workaround for some cards that send wrong information via wext.
 					//If ssid is hidden (empty), then we do not set the information from the wext.
 					i->bssid = wextScanHashIter.value().bssid;
-					if (!wextScanHashIter.value().ssid.isEmpty()) { 
+					if (!wextScanHashIter.value().ssid.isEmpty() || i->ssid.isEmpty()) { 
 						i->ssid = wextScanHashIter.value().ssid;
 					}
 					if (-1 != frequencyToChannel(wextScanHashIter.value().freq)) {
@@ -721,8 +721,8 @@ namespace libnutwireless {
 									singleres.ssid = QString("N/A");
 								}
 							}
-							else {
-								singleres.ssid = QString("<hidden>");
+							else { //Hidden essid or broken driver
+								singleres.ssid = QString();
 							}
 							break;
 
