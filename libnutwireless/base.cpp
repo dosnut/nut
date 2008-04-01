@@ -343,7 +343,10 @@ namespace libnutwireless {
 					//Workaround for some cards that send wrong information via wext.
 					//If ssid is hidden (empty), then we do not set the information from the wext.
 					i->bssid = wextScanHashIter.value().bssid;
-					if (!wextScanHashIter.value().ssid.isEmpty() || i->ssid.isEmpty()) { 
+					if (!wextScanHashIter.value().ssid.isEmpty() && i->ssid.isEmpty()) {
+						i->ssid = "<hidden>";
+					}
+					else if (!wextScanHashIter.value().ssid.isEmpty()) { 
 						i->ssid = wextScanHashIter.value().ssid;
 					}
 					if (-1 != frequencyToChannel(wextScanHashIter.value().freq)) {
