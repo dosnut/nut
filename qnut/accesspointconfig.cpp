@@ -245,7 +245,7 @@ namespace qnut {
 		config.disabled = toQOOL(!ui.autoEnableCheck->isChecked());
 		
 		if (!ui.anyBSSIDCheck->isChecked())
-			config.bssid = MacAddress(ui.ssidEdit->text());
+			config.bssid = MacAddress(ui.bssidEdit->text());
 		
 		if (ui.confTabs->isTabEnabled(3)) {
 			if (!(ui.wep0LeaveButton->isChecked() || ui.wep0Edit->text().isEmpty()))
