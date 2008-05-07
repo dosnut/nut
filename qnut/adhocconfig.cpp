@@ -207,34 +207,28 @@ namespace qnut {
 		else if (scanResult.keyManagement & KM_OFF)
 			ui.encCombo->setCurrentIndex(0);
 		else if (scanResult.keyManagement & KM_WPA_NONE) {
-			if (scanResult.group & PCI_CCMP)
+			if (scanResult.group & GCI_CCMP)
 				ui.encCombo->setCurrentIndex(3);
-			else if (scanResult.group & PCI_TKIP)
+			else if (scanResult.group & GCI_TKIP)
 				ui.encCombo->setCurrentIndex(2);
 			else {
 				QMessageBox::critical(this, tr("Error reading ap config"),
-					tr("Unsupported group cipers retrieved: %1").arg((quint32)(scanResult.group)));
+					tr("Unsupported group cipers retrieved: %1").arg(toString(scanResult.group)));
 				return 0;
 			}
 		}
 		else {
 			QMessageBox::critical(this, tr("Error reading ap config"),
-				tr("Unsupported key management retrieved: %1").arg((quint32)(scanResult.keyManagement)));
+				tr("Unsupported key management retrieved: %1").arg(toString(scanResult.keyManagement)));
 			return 0;
 		}
-		
-// 		if (scanResult.group & PCI_CCMP)
-// 			ui.encCombo->setCurrentIndex(3);
-// 		else if (scanResult.group & PCI_TKIP)
-// 			ui.encCombo->setCurrentIndex(2);
-// 		else if (scanResult.keyManagement & KM_NONE)
-// 			ui.encCombo->setCurrentIndex(1);
-// 		else
-// 			ui.encCombo->setCurrentIndex(0);
 		
 		int channel = frequencyToChannel(scanResult.freq);
 		int channelIndex = m_Supplicant->getSupportedChannels().indexOf(channel);
 		ui.channelCombo->setCurrentIndex(channelIndex);
+		
+		ui.pskLeaveButton->setVisible(false);
+		ui.pskLeaveButton->setChecked(false);
 		
 		m_CurrentID = -1;
 		
