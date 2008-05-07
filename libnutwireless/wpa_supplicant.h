@@ -67,7 +67,7 @@ namespace libnutwireless {
 			
 		public slots:
 			/**
-				Function to react to request made from wpa_supplicant:
+				Function to react to a request made from wpa_supplicant:
 				@param request Type of request
 				@param msg the value that will be passed to wpa_supplicant
 			*/

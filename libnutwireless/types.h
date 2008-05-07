@@ -227,7 +227,7 @@ namespace libnutwireless {
 		return (a.signal.noise.rcpi < b.signal.noise.rcpi);
 	}
 
-	/** Compare ScanResult by keymanagement rotocol (sort order in enum) */
+	/** Compare ScanResult by keymanagement protocol (sort order in enum) */
 	inline bool lessThanKeyManagement(libnutwireless::ScanResult a, libnutwireless::ScanResult b) {
 		return ((int) a.keyManagement < (int) b.keyManagement);
 	}
