@@ -103,98 +103,119 @@ Protocols toProtocols(ScanAuthentication auth) {
 
 QString toString(ScanCiphers cip) {
 //{CI_UNDEFINED=0, CI_NONE=1, CI_CCMP=2, CI_TKIP=4, CI_WEP104=8, CI_WEP40=16, CI_WEP=32} CIPHERS;
-	QString ret = "";
+	QStringList ret;;
 	if (CI_NONE & cip) {
-		ret.append("NONE ");
+		ret.append("NONE");
 	}
 	if (CI_CCMP & cip) {
-		ret.append("CCMP ");
+		ret.append("CCMP");
 	}
 	if (CI_TKIP & cip) {
-		ret.append("TKIP ");
+		ret.append("TKIP");
 	}
 	if (CI_WEP104 & cip) {
-		ret.append("WEP104 ");
+		ret.append("WEP104");
 	}
 	if (CI_WEP40 & cip) {
-		ret.append("WEP40 ");
+		ret.append("WEP40");
 	}
-	return ret;
+	return ret.join(" ");
 }
+
 QString toString(GroupCiphers cip) {
 	//{GCI_CCMP=2, GCI_TKIP=4, GCI_WEP104=8, GCI_WEP40=16, GCI_ALL=31} GroupCiphers;
-	QString ret;
-	if (cip & GCI_CCMP) {
-		ret.append("CCMP ");
+	if (cip) {
+		QStringList ret;
+		if (cip & GCI_CCMP) {
+			ret.append("CCMP");
+		}
+		if (cip & GCI_TKIP) {
+			ret.append("TKIP");
+		}
+		if (cip & GCI_WEP104) {
+			ret.append("WEP104");
+		}
+		if (cip & GCI_WEP40) {
+			ret.append("WEP40");
+		}
+		return ret.join(" ");
 	}
-	if (cip & GCI_TKIP) {
-		ret.append("TKIP ");
-	}
-	if (cip & GCI_WEP104) {
-		ret.append("WEP104 ");
-	}
-	if (cip & GCI_WEP40) {
-		ret.append("WEP40 ");
-	}
-	return ret;
+	return QObject::tr("UNDEFINED");
 }
+
 QString toString(PairwiseCiphers cip) {
 	//{PCI_NONE=1, PCI_CCMP=2, PCI_TKIP=4} PairwiseCiphers;
-	QString ret;
-	if (cip & PCI_NONE) {
-		ret.append("NONE ");
+	if (cip) {
+		QStringList ret;
+		if (cip & PCI_NONE) {
+			ret.append("NONE");
+		}
+		if (cip & PCI_CCMP) {
+			ret.append("CCMP");
+		}
+		if(cip & PCI_TKIP) {
+			ret.append("TKIP");
+		}
+		return ret.join(" ");
 	}
-	if (cip & PCI_CCMP) {
-		ret.append("CCMP ");
-	}
-	if(cip & PCI_TKIP) {
-		ret.append("TKIP ");
-	}
-	return ret;
+	return QObject::tr("UNDEFINED");
 }
+
 QString toString(KeyManagement keym) {
 	//{KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8}
-	QString ret;
-
-	if (keym & KM_OFF) { //For wpa_supplicant none/off is the same (none=wep, Off=plain)
-		ret.append("NONE ");
+	if (keym) {
+		QStringList ret;
+		if (keym & KM_OFF) { //For wpa_supplicant none/off is the same (none=wep, Off=plain)
+			ret.append("NONE");
+		}
+		if (keym & KM_NONE) {
+			ret.append("NONE");
+		}
+		if (keym & KM_WPA_PSK) {
+			ret.append("WPA-PSK");
+		}
+		if (keym & KM_WPA_EAP) {
+			ret.append("WPA-EAP");
+		}
+		if (keym & KM_IEEE8021X) {
+			ret.append("IEEE8021X");
+		}
+		if (keym & KM_WPA_NONE) {
+			ret.append("WPA-NONE");
+		}
+		return ret.join(" ");
 	}
-	if (keym & KM_NONE) {
-		ret.append("NONE ");
-	}
-	if (keym & KM_WPA_PSK) {
-		ret.append("WPA-PSK ");
-	}
-	if (keym & KM_WPA_EAP) {
-		ret.append("WPA-EAP ");
-	}
-	if (keym & KM_IEEE8021X) {
-		ret.append("IEEE8021X ");
-	}
-	if (keym & KM_WPA_NONE) {
-		ret.append("WPA-NONE ");
-	}
-	return ret;
+	return QObject::tr("UNDEFINED");
 }
 
 QString toString(AuthenticationAlgs algs) {
 	//{AUTHALG_UNDEFINED=0, AUTHALG_OPEN=1, AUTHALG_SHARED=2, AUTHALG_LEAP=4} AuthenticationAlgs;
-	QString ret;
-	if (AUTHALG_OPEN & algs) {
-		ret.append("OPEN ");
+	if (algs) {
+		QStringList ret;
+		if (AUTHALG_OPEN & algs) {
+			ret.append("OPEN");
+		}
+		if (AUTHALG_SHARED & algs) {
+			ret.append("SHARED");
+		}
+		if (AUTHALG_LEAP & algs) {
+			ret.append("LEAP");
+		}
+		return ret.join(" ");
 	}
-	if (AUTHALG_SHARED & algs) {
-		ret.append("SHARED ");
-	}
-	if (AUTHALG_LEAP & algs) {
-		ret.append("LEAP ");
-	}
-	return ret;
+	return QObject::tr("UNDEFINED");
 }
 
 QString toString(Protocols proto) {
 //{WKI_UNDEFINED=0, WKI_WPA=1, WKI_RSN=2} Protocols;
-	return QString("%1 %2").arg(((PROTO_WPA == proto) ? "WPA" : ""),((PROTO_RSN == proto) ? "RSN" : ""));
+	if (PROTO_RSN & PROTO_WPA)
+		return "WPA RSN";
+	else if (PROTO_WPA == proto)
+		return "WPA";
+	else if (PROTO_RSN == proto)
+		return "RSN";
+	else
+		return QObject::tr("UNDEFINED");
 }
 
 QString toString(EapolFlags flags) {
@@ -203,29 +224,32 @@ QString toString(EapolFlags flags) {
 
 QString toString(EapMethod method) {
 	//{EAP_ALL=127, EAPM_MD5=1,EAPM_MSCHAPV2=2,EAPM_OTP=4,EAPM_GTC=8,EAPM_TLS=16,EAPM_PEAP=32,EAPM_TTLS=64} EAP_METHOD;
-	QString ret;
-	if (EAPM_MD5 & method) {
-		ret.append("MD5 ");
+	if (method) {
+		QStringList ret;
+		if (EAPM_MD5 & method) {
+			ret.append("MD5");
+		}
+		if (EAPM_MSCHAPV2 & method) {
+			ret.append("MSCHAPV2");
+		}
+		if (EAPM_OTP & method) {
+			ret.append("OTP");
+		}
+		if (EAPM_GTC & method) {
+			ret.append("GTC");
+		}
+		if (EAPM_TLS & method) {
+			ret.append("TLS");
+		}
+		if (EAPM_PEAP & method) {
+			ret.append("PEAP");
+		}
+		if (EAPM_TTLS & method) {
+			ret.append("TTLS");
+		}
+		return ret.join(" ");
 	}
-	if (EAPM_MSCHAPV2 & method) {
-		ret.append("MSCHAPV2 ");
-	}
-	if (EAPM_OTP & method) {
-		ret.append("OTP ");
-	}
-	if (EAPM_GTC & method) {
-		ret.append("GTC ");
-	}
-	if (EAPM_TLS & method) {
-		ret.append("TLS ");
-	}
-	if (EAPM_PEAP & method) {
-		ret.append("PEAP ");
-	}
-	if (EAPM_TTLS & method) {
-		ret.append("TTLS ");
-	}
-	return ret;
+	return QObject::tr("UNDEFINED");
 }
 
 
