@@ -438,6 +438,7 @@ namespace libnutwireless {
 		else {
 			qDebug() << "Setting signal quality polling (starting timer)";
 			m_wextTimerRate = msec;
+			m_wextTimerId = startTimer(m_wextTimerRate);
 		}
 	}
 	int CWpaSupplicantBase::getSignalQualityPollRate() {
@@ -813,10 +814,10 @@ namespace libnutwireless {
 	}
 	
 	void CWpaSupplicantBase::readWirelessInfo() {
+		qDebug() << "Executing readWirelessInfo() with TimerRate of" << m_wextTimerRate;
 		if ( (m_wextFd == -1) || !m_wpaConnected) {
 			return;
 		}
-		qDebug() << "Executing readWirelessInfo() with TimerRate of" << m_wextTimerRate;
 		struct iw_range range;
 		memset(&range,0,sizeof(struct iw_range));
 		int hasRange = 0;
