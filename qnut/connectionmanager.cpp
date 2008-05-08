@@ -184,10 +184,6 @@ namespace qnut {
 		m_TabWidget.removeTab(m_TabWidget.indexOf(target));
 		m_TrayIcon.removeDeviceMenu(target->trayMenu());
 		delete target;
-		
-		m_EnableDeviceAction->setDisabled(m_DeviceManager.getDevices().isEmpty());
-		m_DisableDeviceAction->setDisabled(m_DeviceManager.getDevices().isEmpty());
-		
 	}
 	
 	void CConnectionManager::updateTrayIconInfo() {
