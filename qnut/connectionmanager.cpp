@@ -60,7 +60,7 @@ namespace qnut {
 		
 		createActions();
 		distributeActions();
-		ui.toolBar->addActions(ui.menuDevice->actions());
+		ui.toolBar->addActions(ui.menuEdit->actions());
 		
 		connect(ui.actionShowLog, SIGNAL(toggled(bool)), this, SLOT(showLog(bool)));
 		connect(ui.actionAboutQt, SIGNAL(triggered()), qApp , SLOT(aboutQt()));
@@ -114,23 +114,23 @@ namespace qnut {
 		switch (mode) {
 		case UI_ACTIONS_OVERVIEW:
 			//general device actions
-			ui.menuDevice->addActions(m_OverView.actions());
+			ui.menuEdit->addActions(m_OverView.actions());
 			break;
 		case UI_ACTIONS_LOG:
-			ui.menuDevice->addAction(m_RefreshDevicesAction);
-			ui.menuDevice->addSeparator();
-			ui.menuDevice->addAction(m_ClearLogAction);
+			ui.menuEdit->addAction(m_RefreshDevicesAction);
+			ui.menuEdit->addSeparator();
+			ui.menuEdit->addAction(m_ClearLogAction);
 			break;
 		case UI_ACTIONS_DEVICE: {
-				ui.menuDevice->addAction(m_RefreshDevicesAction);
-				ui.menuDevice->addSeparator();
+				ui.menuEdit->addAction(m_RefreshDevicesAction);
+				ui.menuEdit->addSeparator();
 				
 				CDeviceDetails * current = (CDeviceDetails *)(m_TabWidget.currentWidget());
 				
 				//current device actions
-				ui.menuDevice->addActions(current->deviceActions());
-				ui.menuDevice->addSeparator();
-				ui.menuDevice->addActions(current->environmentTreeActions());
+				ui.menuEdit->addActions(current->deviceActions());
+				ui.menuEdit->addSeparator();
+				ui.menuEdit->addActions(current->environmentTreeActions());
 			}
 			break;
 		default:
@@ -200,7 +200,7 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::handleTabChanged(int index) {
-		ui.menuDevice->clear();
+		ui.menuEdit->clear();
 		
 		if (index == 0)
 			distributeActions(UI_ACTIONS_OVERVIEW);
@@ -211,7 +211,7 @@ namespace qnut {
 		
 		ui.toolBar->setUpdatesEnabled(false);
 		ui.toolBar->clear();
-		ui.toolBar->addActions(ui.menuDevice->actions());
+		ui.toolBar->addActions(ui.menuEdit->actions());
 		ui.toolBar->setUpdatesEnabled(true);
 	}
 	
@@ -221,6 +221,7 @@ namespace qnut {
 		
 		if (!deselectedIndexes.isEmpty()) {
 			CDevice * deselectedDevice = static_cast<CDevice *>(deselectedIndexes[0].internalPointer());
+			
 			disconnect(deselectedDevice, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
 			disconnect(m_EnableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(enable()));
 			disconnect(m_DisableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(disable()));
@@ -230,8 +231,17 @@ namespace qnut {
 			#endif
 		}
 		
-		if (!selectedIndexes.isEmpty()) {
+		if (selectedIndexes.isEmpty()) {
+			m_EnableDeviceAction->setEnabled(false);
+			m_DisableDeviceAction->setEnabled(false);
+			m_DeviceSettingsAction->setEnabled(false);
+			#ifndef QNUT_NO_WIRELESS
+			m_WirelessSettingsAction->setEnabled(false);
+			#endif
+		}
+		else {
 			CDevice * selectedDevice = static_cast<CDevice *>(selectedIndexes[0].internalPointer());
+			
 			connect(selectedDevice, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
 			connect(m_EnableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(enable()));
 			connect(m_DisableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(disable()));
@@ -246,14 +256,6 @@ namespace qnut {
 			
 			#ifndef QNUT_NO_WIRELESS
 			m_WirelessSettingsAction->setEnabled(selectedDevice->getWpaSupplicant());
-			#endif
-		}
-		else {
-			m_EnableDeviceAction->setEnabled(false);
-			m_DisableDeviceAction->setEnabled(false);
-			m_DeviceSettingsAction->setEnabled(false);
-			#ifndef QNUT_NO_WIRELESS
-			m_WirelessSettingsAction->setEnabled(false);
 			#endif
 		}
 	}

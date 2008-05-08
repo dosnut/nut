@@ -14,33 +14,45 @@
    <string>Connection Manager</string>
   </property>
   <widget class="QWidget" name="centralwidget" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>38</y>
+     <width>629</width>
+     <height>328</height>
+    </rect>
+   </property>
    <layout class="QGridLayout" >
-    <property name="leftMargin" >
+    <property name="margin" >
      <number>4</number>
     </property>
-    <property name="topMargin" >
-     <number>4</number>
-    </property>
-    <property name="rightMargin" >
-     <number>4</number>
-    </property>
-    <property name="bottomMargin" >
-     <number>4</number>
-    </property>
-    <property name="horizontalSpacing" >
-     <number>4</number>
-    </property>
-    <property name="verticalSpacing" >
+    <property name="spacing" >
      <number>4</number>
     </property>
    </layout>
   </widget>
   <widget class="QStatusBar" name="statusBar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>366</y>
+     <width>629</width>
+     <height>24</height>
+    </rect>
+   </property>
    <property name="sizeGripEnabled" >
     <bool>false</bool>
    </property>
   </widget>
   <widget class="QToolBar" name="toolBar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>27</y>
+     <width>629</width>
+     <height>11</height>
+    </rect>
+   </property>
    <property name="windowTitle" >
     <string>Main Toolbar</string>
    </property>
@@ -63,7 +75,7 @@
      <x>0</x>
      <y>0</y>
      <width>629</width>
-     <height>25</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile" >
@@ -79,9 +91,9 @@
     <addaction name="actionAboutQNUT" />
     <addaction name="actionAboutQt" />
    </widget>
-   <widget class="QMenu" name="menuDevice" >
+   <widget class="QMenu" name="menuEdit" >
     <property name="title" >
-     <string>&amp;Device</string>
+     <string>&amp;Edit</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuView" >
@@ -92,7 +104,7 @@
     <addaction name="actionShowLog" />
    </widget>
    <addaction name="menuFile" />
-   <addaction name="menuDevice" />
+   <addaction name="menuEdit" />
    <addaction name="menuView" />
    <addaction name="menuHelp" />
   </widget>

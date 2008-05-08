@@ -2,7 +2,7 @@
 <!DOCTYPE TS><TS version="1.1" language="de">
 <defaultcodec></defaultcodec>
 <context>
-    <name></name>
+    <name>@default</name>
     <message>
         <location filename="constants.h" line="7"/>
         <source>QNUT - Qt client for Network UTility Server (NUTS)</source>
@@ -90,7 +90,7 @@
         <translation>Verwaltete Netzwerke</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="440"/>
+        <location filename="airset.ui" line="443"/>
         <source>Available networks</source>
         <translation>Netzwerke in Reichweite</translation>
     </message>
@@ -284,13 +284,8 @@
     </message>
     <message>
         <location filename="apconf.ui" line="55"/>
-        <source>HH:HH:HH:HH:HH:HH;0</source>
+        <source>HH:HH:HH:HH:HH:HH; </source>
         <translation></translation>
-    </message>
-    <message>
-        <location filename="apconf.ui" line="58"/>
-        <source>:::::</source>
-        <translation>:::::</translation>
     </message>
     <message>
         <location filename="apconf.ui" line="65"/>
@@ -337,6 +332,11 @@
         <source>Enable SSID scanning (slower but needed if SSID is hidden)</source>
         <translation>Suche nach SSID (ist zwar langsamer, wird aber benötitgt, wenn die SSID versteckt wird)</translation>
     </message>
+    <message>
+        <location filename="apconf.ui" line="58"/>
+        <source>00:00:00:00:00:00</source>
+        <translation></translation>
+    </message>
 </context>
 <context>
     <name>connMan</name>
@@ -346,54 +346,54 @@
         <translation>Verbindungsmanager</translation>
     </message>
     <message>
-        <location filename="connman.ui" line="45"/>
+        <location filename="connman.ui" line="57"/>
         <source>Main Toolbar</source>
         <translation>Hauptwerkzeugleiste</translation>
     </message>
     <message>
-        <location filename="connman.ui" line="71"/>
+        <location filename="connman.ui" line="83"/>
         <source>&amp;File</source>
         <translation>&amp;Datei</translation>
     </message>
     <message>
-        <location filename="connman.ui" line="77"/>
+        <location filename="connman.ui" line="89"/>
         <source>&amp;Help</source>
         <translation>&amp;Hilfe</translation>
     </message>
     <message>
-        <location filename="connman.ui" line="84"/>
-        <source>&amp;Device</source>
-        <translation>&amp;Netzwerkgerät</translation>
-    </message>
-    <message>
-        <location filename="connman.ui" line="89"/>
+        <location filename="connman.ui" line="101"/>
         <source>&amp;View</source>
         <translation>&amp;Ansicht</translation>
     </message>
     <message>
-        <location filename="connman.ui" line="101"/>
+        <location filename="connman.ui" line="113"/>
         <source>&amp;Close</source>
         <translation>&amp;Schließen</translation>
     </message>
     <message>
-        <location filename="connman.ui" line="106"/>
+        <location filename="connman.ui" line="118"/>
         <source>About &amp;Qt</source>
         <translation>Über &amp;Qt</translation>
     </message>
     <message>
-        <location filename="connman.ui" line="111"/>
+        <location filename="connman.ui" line="123"/>
         <source>&amp;About QNUT</source>
         <translation>Über Q&amp;NUT</translation>
     </message>
     <message>
-        <location filename="connman.ui" line="119"/>
+        <location filename="connman.ui" line="131"/>
         <source>Show &amp;balloon tips</source>
         <translation>Zeige Sprech&amp;blasen</translation>
     </message>
     <message>
-        <location filename="connman.ui" line="127"/>
+        <location filename="connman.ui" line="139"/>
         <source>Show &amp;log</source>
         <translation>Zeige &amp;Protokoll</translation>
+    </message>
+    <message>
+        <location filename="connman.ui" line="96"/>
+        <source>&amp;Edit</source>
+        <translation>&amp;Bearbeiten</translation>
     </message>
 </context>
 <context>
@@ -838,57 +838,57 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="475"/>
+        <location filename="../libnutwireless/base.cpp" line="483"/>
         <source>Warning, no timer present while trying to get scan results</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="831"/>
+        <location filename="../libnutwireless/base.cpp" line="839"/>
         <source>(Wireless Extension) No device present</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="508"/>
+        <location filename="../libnutwireless/base.cpp" line="516"/>
         <source>(Wireless Extension) Device not supported</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="567"/>
+        <location filename="../libnutwireless/base.cpp" line="575"/>
         <source>Range information are not available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="617"/>
+        <location filename="../libnutwireless/base.cpp" line="625"/>
         <source>(%1) Failed to read scan data : %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="800"/>
+        <location filename="../libnutwireless/base.cpp" line="808"/>
         <source>No Scanresults available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="833"/>
+        <location filename="../libnutwireless/base.cpp" line="841"/>
         <source>(Wireless Extension) device not supported</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="948"/>
+        <location filename="../libnutwireless/base.cpp" line="956"/>
         <source>Error occured while fetching wireless info: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="961"/>
+        <location filename="../libnutwireless/base.cpp" line="969"/>
         <source>Auto-resetting timer to 10 seconds</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="967"/>
+        <location filename="../libnutwireless/base.cpp" line="975"/>
         <source>Cannot fetch wireless information as your wireless extension is too old</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="968"/>
+        <location filename="../libnutwireless/base.cpp" line="976"/>
         <source>Think about updating your kernel (it&apos;s way too old)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -896,42 +896,42 @@
 <context>
     <name>qnut::CAccessPointConfig</name>
     <message>
-        <location filename="accesspointconfig.cpp" line="477"/>
+        <location filename="accesspointconfig.cpp" line="485"/>
         <source>%1 chars</source>
         <translation>%1 Zeichen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="511"/>
+        <location filename="accesspointconfig.cpp" line="519"/>
         <source>Select CA certificate file</source>
         <translation>CA Zertifikat auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="516"/>
+        <location filename="accesspointconfig.cpp" line="524"/>
         <source>Certificate files (%1)</source>
         <translation>Zertifikate (%1)</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="516"/>
+        <location filename="accesspointconfig.cpp" line="524"/>
         <source>Select client certificate file</source>
         <translation>Client Zertifikat auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="521"/>
+        <location filename="accesspointconfig.cpp" line="529"/>
         <source>Select key file</source>
         <translation>Schlüsseldatei auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="521"/>
+        <location filename="accesspointconfig.cpp" line="529"/>
         <source>Key files (%1)</source>
         <translation>Schlüsseldateien (%1)</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="403"/>
+        <location filename="accesspointconfig.cpp" line="411"/>
         <source>Error on applying settings</source>
         <translation>Fehler beim Setzen der Einstellungen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="404"/>
+        <location filename="accesspointconfig.cpp" line="412"/>
         <source>WPA supplicant reported the following errors:</source>
         <translation>Der WPA Supplicant meldete folgende Fehler:</translation>
     </message>
@@ -939,27 +939,27 @@
 <context>
     <name>qnut::CAdhocConfig</name>
     <message>
-        <location filename="adhocconfig.cpp" line="139"/>
+        <location filename="adhocconfig.cpp" line="140"/>
         <source>Error on applying settings</source>
         <translation>Fehler beim Setzen der Einstellungen</translation>
     </message>
     <message>
-        <location filename="adhocconfig.cpp" line="140"/>
+        <location filename="adhocconfig.cpp" line="141"/>
         <source>WPA supplicant reported the following errors:</source>
         <translation>Der WPA Supplicant meldete folgende Fehler:</translation>
     </message>
     <message>
-        <location filename="adhocconfig.cpp" line="220"/>
+        <location filename="adhocconfig.cpp" line="221"/>
         <source>Error reading ap config</source>
         <translation>Fehler beim Einlesen der Netzwerkkonfiguration</translation>
     </message>
     <message>
-        <location filename="adhocconfig.cpp" line="215"/>
+        <location filename="adhocconfig.cpp" line="216"/>
         <source>Unsupported group cipers retrieved: %1</source>
         <translation>Nichtunterstützte Gruppenchiffre: %1</translation>
     </message>
     <message>
-        <location filename="adhocconfig.cpp" line="221"/>
+        <location filename="adhocconfig.cpp" line="222"/>
         <source>Unsupported key management retrieved: %1</source>
         <translation>Nichtunterstützte Schlüsselverwaltung: %1</translation>
     </message>
@@ -1070,17 +1070,17 @@
         <translation>Protokoll &amp;leeren</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="197"/>
+        <location filename="connectionmanager.cpp" line="193"/>
         <source>no devices present</source>
         <translation>keine Geräte vorhanden</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="278"/>
+        <location filename="connectionmanager.cpp" line="276"/>
         <source>About QNUT</source>
         <translation>Über QNUT</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="292"/>
+        <location filename="connectionmanager.cpp" line="290"/>
         <source>Log</source>
         <translation>Protokoll</translation>
     </message>
@@ -1497,102 +1497,102 @@ Klick here to open the device details.</source>
         <translation>Einstellungen der drahtlosen Verbindung für &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="228"/>
+        <location filename="wirelesssettings.cpp" line="240"/>
         <source>Removing a managed network</source>
         <translation>Entferne ein verwaltetes Netzwerk</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="228"/>
+        <location filename="wirelesssettings.cpp" line="240"/>
         <source>Are you sure to remove &quot;%1&quot;?</source>
         <translation>Sind Sie sich sicher, dass sie &quot;%1&quot; entfernen möchten?</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="77"/>
+        <location filename="wirelesssettings.cpp" line="78"/>
         <source>&amp;Enable</source>
         <translation>&amp;Aktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="78"/>
+        <location filename="wirelesssettings.cpp" line="79"/>
         <source>Enable &amp;all</source>
         <translation>A&amp;lle Aktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="79"/>
+        <location filename="wirelesssettings.cpp" line="80"/>
         <source>&amp;Disable</source>
         <translation>&amp;Deaktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="80"/>
+        <location filename="wirelesssettings.cpp" line="81"/>
         <source>S&amp;witch</source>
         <translation>&amp;Wechseln</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="81"/>
+        <location filename="wirelesssettings.cpp" line="82"/>
         <source>&amp;Configure...</source>
         <translation>&amp;Konfigurieren...</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="86"/>
+        <location filename="wirelesssettings.cpp" line="87"/>
         <source>&amp;Remove</source>
         <translation>&amp;Entfernen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="82"/>
+        <location filename="wirelesssettings.cpp" line="83"/>
         <source>Add &amp;network</source>
         <translation>&amp;Netzwerk hinzufügen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="83"/>
+        <location filename="wirelesssettings.cpp" line="84"/>
         <source>Add ad-&amp;hoc</source>
         <translation>Ad-&amp;hoc Netz hinzufügen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="85"/>
+        <location filename="wirelesssettings.cpp" line="86"/>
         <source>&amp;Save configuration</source>
         <translation>Konfiguration &amp;speichern</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="84"/>
+        <location filename="wirelesssettings.cpp" line="85"/>
         <source>Re&amp;load configuration</source>
         <translation>Konfiguration akt&amp;ualisieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="87"/>
+        <location filename="wirelesssettings.cpp" line="88"/>
         <source>Detailed &amp;view</source>
         <translation>De&amp;tailierte Ansicht</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="189"/>
+        <location filename="wirelesssettings.cpp" line="190"/>
         <source>waiting for device properties...</source>
         <translation>warte auf Geräteeigenschaften...</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="88"/>
+        <location filename="wirelesssettings.cpp" line="89"/>
         <source>Scan ne&amp;tworks</source>
         <translation>Ne&amp;tzwerke suchen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="166"/>
+        <location filename="wirelesssettings.cpp" line="167"/>
         <source>Signal (%1): %2</source>
         <translation>Signal (%1): %2</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="167"/>
+        <location filename="wirelesssettings.cpp" line="168"/>
         <source>Quality</source>
         <translation>Qualität</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="167"/>
+        <location filename="wirelesssettings.cpp" line="168"/>
         <source>Level</source>
         <translation>Pegel</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="167"/>
+        <location filename="wirelesssettings.cpp" line="168"/>
         <source>Noise</source>
         <translation>Rauschen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="171"/>
+        <location filename="wirelesssettings.cpp" line="172"/>
         <source>Signal quality: %1</source>
         <translation>Signalqualität: %1</translation>
     </message>
