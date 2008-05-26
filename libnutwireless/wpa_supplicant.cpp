@@ -290,10 +290,8 @@ NetconfigStatus CWpaSupplicant::editNetwork(int netid, NetworkConfig config) {
 	if (!setNetworkVariable(netid,"ssid",config.ssid) ) {
 		failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_SSID);
 	}
-	if (!config.bssid.zero()) {
-		if (! setNetworkVariable(netid,"bssid",config.bssid.toString()) ) {
+	if (! setBssid(netid,config.bssid.toString()) ) { //Always set bssid, otherwise wpa_supplicant doesn't care about "any" bssid
 			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_BSSID);
-		}
 	}
 	if (config.disabled != QOOL_UNDEFINED) {
 		if (!setNetworkVariable(netid,"disabled",toNumberString(config.disabled)) ) {
