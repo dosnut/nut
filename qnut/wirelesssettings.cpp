@@ -163,13 +163,22 @@ namespace qnut {
 			break;
 		}
 		
-		if (level.length() > 0)
+		if (level.isEmpty())
+			ui.qualityLabel->setText(m_Device->getEssid() + '\n' +
+				tr("Channel") + ": " + QString::number(frequencyToChannel(signal.frequency)) + '\n' +
+				tr("Quality") + ": " + quality);
+		else
+			ui.qualityLabel->setText(m_Device->getEssid() + '\n' +
+				tr("Channel") + ": " + QString::number(frequencyToChannel(signal.frequency)) + '\n' +
+				tr("Quality") + ", " + tr("Level") + ", " + tr("Noise") + ": " + quality + ", " + level + "dBm, " + noise + "dBm");
+		
+/*		if (level.length() > 0)
 			ui.signalLabel->setText(tr("Signal (%1): %2").arg(
 				tr("Quality") + ", " + tr("Level") + ", " + tr("Noise"),
 				quality + ", " + level + "dBm, " + noise + "dBm"
 			));
 		else
-			ui.signalLabel->setText(tr("Signal quality: %1").arg(quality));
+			ui.signalLabel->setText(tr("Signal quality: %1").arg(quality));*/
 	}
 	
 	void CWirelessSettings::handleManagedAPSelectionChanged(const QItemSelection & selected, const QItemSelection &) {
@@ -182,12 +191,12 @@ namespace qnut {
 	
 	void CWirelessSettings::updateUi(DeviceState state) {
 		ui.iconLabel->setPixmap(QPixmap(iconFile(m_Device)));
-		ui.stateLabel->setText(toStringTr(m_Device->getState()));
+		ui.stateLabel->setText(toStringTr(state));
 		
 		if (state <= DS_ACTIVATED)
-			ui.signalLabel->setText("not assigned to accesspoint");
+			ui.qualityLabel->setText("not assigned to accesspoint");
 		else if (state == DS_CARRIER)
-			ui.signalLabel->setText(tr("waiting for device properties..."));
+			ui.qualityLabel->setText(tr("waiting for device properties..."));
 	}
 	
 	QModelIndex CWirelessSettings::selectedIndex(QTreeView * view) {
