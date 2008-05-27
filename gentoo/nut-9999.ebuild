@@ -12,7 +12,9 @@ SLOT="0"
 KEYWORDS="~x86 ~amd64"
 IUSE="debug wifi X"
 
-RDEPEND=">=x11-libs/qt-4.3.2
+RDEPEND=">=x11-libs/qt-gui-4.4.0
+		>=x11-libs/qt-svg-4.4.0
+		>=x11-libs/qt-dbus-4.4.0
 		sys-apps/dbus
 		wifi? ( >=net-wireless/wpa_supplicant-0.6.0 )
 		wifi? ( >=net-wireless/wireless-tools-29 )
@@ -27,10 +29,6 @@ S=${WORKDIR}/${EGIT_PROJECT}
 
 
 pkg_setup() {
-	if ! built_with_use x11-libs/qt dbus ; then
-		eerror "Nut requires >=qt4.3.2 to be built with dbus"
-		die "rebuild x11-libs/qt with the dbus USE flag"
-	fi
 	if ! qmake --version | grep -i qt4 ; then
 		eerror "qmake does not point to qmake-qt4"
 		die "Install qmake-qt4 and set symlinks correctly"
@@ -124,11 +122,6 @@ pkg_postinst() {
 	elog "nuts as well as qnut support event based script execution"
 	elog "Have look at /etc/nuts/dispatch to see how to write your own (server) scripts and where to put them."
 	elog "For qnut, please have a look at the man page"
-	elog ""
-	elog "Known bugs:"
-	elog "Qnut/cnut will use 99% cpu if you are not allowed to access nuts' dbus interface."
-	elog "This will be fixed in qt-4.4"
-	elog "Configuring networks is not fully tested. Please make a back-up before you activate wpa_supplicant's config write feature."
 	echo
 	bash-completion_pkg_postinst
 }
