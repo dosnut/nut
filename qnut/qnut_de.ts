@@ -10,6 +10,14 @@
     </message>
 </context>
 <context>
+    <name>QObject</name>
+    <message>
+        <location filename="../libnutwireless/types.cpp" line="252"/>
+        <source>UNDEFINED</source>
+        <translation>UNDEFINIERT</translation>
+    </message>
+</context>
+<context>
     <name>adhoc</name>
     <message>
         <location filename="adhoc.ui" line="13"/>
@@ -70,29 +78,34 @@
 <context>
     <name>airset</name>
     <message>
-        <location filename="airset.ui" line="92"/>
+        <location filename="airset.ui" line="56"/>
         <source>no device</source>
         <translation>kein Netzwerkgerät</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="105"/>
+        <location filename="airset.ui" line="69"/>
         <source>unknown state</source>
         <translation>unbekannter Status</translation>
     </message>
     <message>
         <location filename="airset.ui" line="112"/>
-        <source>unknown signal</source>
-        <translation>unbekanntes Signal</translation>
+        <source>unknown</source>
+        <translation>unbekannt</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="363"/>
+        <location filename="airset.ui" line="365"/>
         <source>Managed networks</source>
         <translation>Verwaltete Netzwerke</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="443"/>
+        <location filename="airset.ui" line="423"/>
         <source>Available networks</source>
         <translation>Netzwerke in Reichweite</translation>
+    </message>
+    <message>
+        <location filename="airset.ui" line="102"/>
+        <source>Signal</source>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -896,42 +909,42 @@
 <context>
     <name>qnut::CAccessPointConfig</name>
     <message>
-        <location filename="accesspointconfig.cpp" line="485"/>
+        <location filename="accesspointconfig.cpp" line="487"/>
         <source>%1 chars</source>
         <translation>%1 Zeichen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="519"/>
+        <location filename="accesspointconfig.cpp" line="521"/>
         <source>Select CA certificate file</source>
         <translation>CA Zertifikat auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="524"/>
+        <location filename="accesspointconfig.cpp" line="526"/>
         <source>Certificate files (%1)</source>
         <translation>Zertifikate (%1)</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="524"/>
+        <location filename="accesspointconfig.cpp" line="526"/>
         <source>Select client certificate file</source>
         <translation>Client Zertifikat auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="529"/>
+        <location filename="accesspointconfig.cpp" line="531"/>
         <source>Select key file</source>
         <translation>Schlüsseldatei auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="529"/>
+        <location filename="accesspointconfig.cpp" line="531"/>
         <source>Key files (%1)</source>
         <translation>Schlüsseldateien (%1)</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="411"/>
+        <location filename="accesspointconfig.cpp" line="413"/>
         <source>Error on applying settings</source>
         <translation>Fehler beim Setzen der Einstellungen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="412"/>
+        <location filename="accesspointconfig.cpp" line="414"/>
         <source>WPA supplicant reported the following errors:</source>
         <translation>Der WPA Supplicant meldete folgende Fehler:</translation>
     </message>
@@ -1497,12 +1510,12 @@ Klick here to open the device details.</source>
         <translation>Einstellungen der drahtlosen Verbindung für &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="240"/>
+        <location filename="wirelesssettings.cpp" line="249"/>
         <source>Removing a managed network</source>
         <translation>Entferne ein verwaltetes Netzwerk</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="240"/>
+        <location filename="wirelesssettings.cpp" line="249"/>
         <source>Are you sure to remove &quot;%1&quot;?</source>
         <translation>Sind Sie sich sicher, dass sie &quot;%1&quot; entfernen möchten?</translation>
     </message>
@@ -1562,7 +1575,7 @@ Klick here to open the device details.</source>
         <translation>De&amp;tailierte Ansicht</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="190"/>
+        <location filename="wirelesssettings.cpp" line="199"/>
         <source>waiting for device properties...</source>
         <translation>warte auf Geräteeigenschaften...</translation>
     </message>
@@ -1572,29 +1585,29 @@ Klick here to open the device details.</source>
         <translation>Ne&amp;tzwerke suchen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="167"/>
-        <source>Signal (%1): %2</source>
-        <translation>Signal (%1): %2</translation>
-    </message>
-    <message>
-        <location filename="wirelesssettings.cpp" line="168"/>
+        <location filename="wirelesssettings.cpp" line="173"/>
         <source>Quality</source>
         <translation>Qualität</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="168"/>
+        <location filename="wirelesssettings.cpp" line="173"/>
         <source>Level</source>
         <translation>Pegel</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="168"/>
+        <location filename="wirelesssettings.cpp" line="173"/>
         <source>Noise</source>
         <translation>Rauschen</translation>
     </message>
     <message>
+        <location filename="wirelesssettings.cpp" line="171"/>
+        <source>Channel</source>
+        <translation>Kanal</translation>
+    </message>
+    <message>
         <location filename="wirelesssettings.cpp" line="172"/>
-        <source>Signal quality: %1</source>
-        <translation>Signalqualität: %1</translation>
+        <source>Bitrate</source>
+        <translation></translation>
     </message>
 </context>
 <context>
