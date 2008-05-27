@@ -238,6 +238,10 @@ void CDeviceManager::setInformation() {
 			*log << tr("Please make sure you are in the correct group");
 			return;
 		}
+		else if (QDBusError::InvalidSignature == replydevs.error().type()) { //Workaround qt returning wrong Error (Should be AccessDenied)
+			*log << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
+			*log << tr("Maybe you don't have sufficient rights");
+		}
 		else {
 			if ( !dbusConnected(&m_dbusConnection) ) {
 				dbusKilled();
