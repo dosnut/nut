@@ -164,12 +164,12 @@ namespace qnut {
 		}
 		
 		if (level.isEmpty())
-			ui.qualityLabel->setText(m_Device->getEssid() + '\n' +
-				tr("Channel") + ": " + QString::number(frequencyToChannel(signal.frequency)) + '\n' +
+			ui.qualityLabel->setText(m_Device->getEssid() + " (" + tr("Channel") + ' ' + QString::number(frequencyToChannel(signal.frequency)) + ")\n" +
+				tr("Bitrate") + ": " + QString::number(signal.bitrates[0] / 1000000) + "Mb/s\n" +
 				tr("Quality") + ": " + quality);
 		else
-			ui.qualityLabel->setText(m_Device->getEssid() + '\n' +
-				tr("Channel") + ": " + QString::number(frequencyToChannel(signal.frequency)) + '\n' +
+			ui.qualityLabel->setText(m_Device->getEssid() + " (" + tr("Channel") + ' ' + QString::number(frequencyToChannel(signal.frequency)) + ")\n" +
+				tr("Bitrate") + ": " + QString::number(signal.bitrates[0] / 1000000) + "Mb/s\n" +
 				tr("Quality") + ", " + tr("Level") + ", " + tr("Noise") + ": " + quality + ", " + level + "dBm, " + noise + "dBm");
 		
 /*		if (level.length() > 0)
