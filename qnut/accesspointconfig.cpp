@@ -162,6 +162,9 @@ namespace qnut {
 			ui.ssidEdit->setText(config.ssid);
 		}
 		
+		ui.anyBSSIDCheck->setChecked(config.bssid.zero());
+		ui.bssidEdit->setText(config.bssid.toString());
+		
 		if ((config.keyManagement & KM_WPA_EAP) || (config.keyManagement & KM_IEEE8021X)) {
 			ui.keyManagementCombo->setCurrentIndex(2);
 			readEAPConfig(config.eap_config);
