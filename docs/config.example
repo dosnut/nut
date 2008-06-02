@@ -1,92 +1,80 @@
+// this is an example for the nuts configuration file (nuts.config)
+// located at /etc/nuts/
+
+// the most simple way to manage a device ist the following:
+// here we have a device called eth0 with nothing more than the default
+// environment and a dhcp configured interface
 device "eth0";
 
-device "eth0" {
-	no-dhcp;
-	environment "dhcp" {
-		select user;
-		dhcp {
-			label-index 2;
-		};
-	}
-	environment "user" {
-		static user;
-	};
-	environment "user" {
+// if you have 2 configurations (at home, at work etc.) you can yuse this
+// common way for defining a device (here eth1) with 2 enviromnents:
+device "eth1" {
+	// the default environment has a single dhcp configured inteface
+	dhcp;
+	// at home we have an interface with static ip address config
+	// and we are at home if there is a computer (for example a router)
+	// with the ip 192.168.0.1
+	environment "atHome" {
+		// basic arp statement for selecting this environment
+		select arp 192.168.0.1;
+		// a interface with static ip
 		static {
-			ip user;
-			label-index auto;
+			ip 192.168.0.42;
+			netmask 255.255.255.0;
+			gateway 192.168.0.1;
+			dns-server 192.168.0.1;
 		};
 	};
+	// at work we have a dynamic ip
+	environment "atWork" {
+		select arp 100.35.16.42;
+		dhcp;
+	}
+};
+
+// a more complex example
+device "wlan0" {
+	// this device is not activated by default on startup
+	no-auto-start;
+	
+	// this device requires the wpa_supplicant for connection so we specify a config
+	// file and a driver (wext is the default fallback if no driver is given)
+	wpa-supplicant config "/etc/wpa_supplicant/wpa_supplicant.conf" driver "wext";
+	
+	// the interface configuration for the default environment shall be dhcp so we
+	// don't have to sepcify it
+	
+	// the short form for a environment with a dhcp configured interface
+	environment "EAPNet" select essid "eapnet";
+	
+	// at home we have a static and a dynamic interface if we find one of the
+	// two ip with the given mac address in the specified network
 	environment "home" {
-		select {
-			user;
+		// one of the statements has to be satisfied
+		select or {
+			// both statements have to be satisfied
+			and {
+				essid "homenet";
+				arp 192.168.0.1 00:07:40:EC:D0:BE;
+			};
+			and {
+				essid "friendnet";
+				arp 192.168.178.1 00:15:0C:46:2D:C7;
+			};
 		};
 		dhcp;
 		static {
-			ip 10.0.0.50/24;
-			gateway 10.0.0.1;
-			dns-server 10.0.0.1;
-			dns-server 10.0.0.2;
-			label-index 3;
+			ip 192.168.0.61;
+			netmask 255.255.255.0;
+			gateway 192.168.0.1;
+			dns-server 192.168.0.1;
 		};
-	};
-}
-
-device "eth0" {
-	environment "default" {
-		dhcp {
-			default gateway 192.168.0.1;
-		}; /* Force dhcp */
 	};
 	
-	environment "uni" {
-		select {
-			arp 129.69.220.254;
-			arp 129.69.220.254 00:00:0C:07:AC:00;
-		};
-		static {
-			ip 10.0.0.50/24;
-			gateway 10.0.0.1;
-			dns-server 10.0.0.1;
-			dns-server 10.0.0.2;
-		};
-	}
+	// we can also let the user (client) specify the interface configuation
+	environment "userdefinable" static user;
+	
+	// if we want to have a peer to peer network (ad-hoc) we might define the
+	// following environment with a zeroconf interface
+	environment "adhoc" { zeroconf; select essid "myadhoc"; };
 };
-
-device "eth1" {
-	wlan {
-		/* mode "default" */ wpa-config "/etc/nut/wpa_eth1.config";
-		mode "infeap" {
-			wpa-config "/etc/nut/wpa_eth1.infeap.config";
-		};
-		mode "infvpn" wpa-config "/etc/nut/wpa_eth1.infvpn.config";
-		mode "user" wpa-config user;
-	};
-	environment "inf" {
-		select {
-			essid "infvpn";
-			essid "infeap";
-		}
-		dhcp;
-	};
-};
-
-
-----------------------
-
-
-/etc/nut/eth0/env-down/*
-/etc/nut/eth0/env-up/*
-/etc/nut/eth0/up/*
-/etc/nut/eth0/pre-down/*
-/etc/nut/eth0/post-down/*
-
-/etc/nut/eth0/up/samba-stop:
-#!/bin/bash
-
-if [ $ENVIRONMENT -eq "home" ]
-then
-	/etc/init.d/samba start
-else
-	/etc/init.d/samba stop
-fi
