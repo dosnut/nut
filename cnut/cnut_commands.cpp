@@ -296,5 +296,11 @@ namespace cnut {
 		if (QDBusError::AccessDenied == error.type()) {
 			print(QString("AccessDenied"));
 		}
+		else if (QDBusError::InvalidSignature == error.type()) {
+			print(QString("AccessDenied(InvalidSignature)"));
+		}
+		else {
+			print(QDBusError::errorString(error.type()));
+		}
 	}
 }
