@@ -56,6 +56,8 @@ namespace nuts {
 		signals:
 			void deviceAdded(const QDBusObjectPath &objectpath);
 			void deviceRemoved(const QDBusObjectPath &objectpath);
+			void deviceAdded(const QString &devname);
+			void deviceRemoved(const QString &devname);
 	};
 	
 	class DBusDevice: public QDBusAbstractAdaptor {
@@ -89,16 +91,19 @@ namespace nuts {
 			Q_NOREPLY void setEnvironment(qint32 env) {
 				m_device->setUserPreferredEnvironment(env);
 			}
+			qint32 getState() { return m_device->getState(); }
+			qint32 getType() { return m_device->hasWLAN() ? libnutcommon::DT_AIR : libnutcommon::DT_ETH; }
 			QString getActiveEnvironment();
 			qint32 getActiveEnvironmentIndex() {
 				return m_device->getEnvironment();
 			}
-			
+			QList<qint32> getEnvironmentIds();
 			QString getEssid() { return m_device->essid(); }
 		
 		signals:
 			void stateChanged(int newState, int oldState);
 			void environmentChangedActive(const QString &objectpath);
+			void environmentChangedActive(qint32 envId);
 			void newWirelessNetworkFound();
 	};
 	
@@ -132,9 +137,10 @@ namespace nuts {
 			QList<QDBusObjectPath> getInterfaces();
 			libnutcommon::SelectResult getSelectResult();
 			QVector<libnutcommon::SelectResult> getSelectResults();
-			qint32 getID() {
-				return m_environment->getID();
-			}
+
+			qint32 getID() { return m_environment->getID(); }
+			QString getName() { return m_environment->getName(); }
+			bool getState() { return (m_device->getEnvironment() == m_environment->getID()); }
 		signals:
 			void interfaceAdded(const QDBusObjectPath &objectpath);
 			void interfaceRemoved(const QDBusObjectPath &objectpath);
@@ -165,6 +171,13 @@ namespace nuts {
 			bool needUserSetup() { return m_interface->needUserSetup(); }
 			bool setUserConfig(libnutcommon::IPv4UserConfig userConfig) { return m_interface->setUserConfig(userConfig); }
 			libnutcommon::IPv4UserConfig getUserConfig() { return m_interface->getUserConfig(); }
+
+			//generic information
+			qint32 getState() { return m_interface->getState(); }
+			QHostAddress getIP() { return m_interface->ip; }
+			QHostAddress getNetmask() { return m_interface->netmask; }
+			QHostAddress getGateway() { return m_interface->gateway; }
+			QList<QHostAddress> getDns() { return m_interface->dnsserver; }
 
 			//void activate() { m_interface->start();}
 			//void deactivate() { m_interface->stop();}

@@ -89,12 +89,14 @@ namespace nuts {
 		DBusDevice *dbus_device = new DBusDevice(dev, &m_dbusConnection, m_dbusDevicesPath);
 		m_dbusDevices.insert(devName, dbus_device);
 		emit deviceAdded(QDBusObjectPath(dbus_device->getPath()));
+		emit deviceAdded(devName);
 	}
 	
 	
 	void DBusDeviceManager::devRemoved(QString devName, Device* /* *dev */) {
 		DBusDevice *dbus_device = m_dbusDevices[devName];
 		emit deviceRemoved(QDBusObjectPath(dbus_device->getPath()));
+		emit deviceRemoved(devName);
 		m_dbusDevices.remove(devName);
 		// dbus_device is deleted as child of dev
 	}
@@ -185,6 +187,8 @@ namespace nuts {
 			else {
 				emit( environmentChangedActive( m_dbusEnvironments[m_activeEnvironment]->getPath() ) );
 			}
+			//emit generice environmentChangedActive
+			emit environmentChangedActive(newEnvironment);
 		}
 	}
 
@@ -208,6 +212,14 @@ namespace nuts {
 		}
 		return paths;
 	}
+	QList<qint32> DBusDevice::getEnvironmentIds() {
+		QList<qint32> envs;
+		foreach (nuts::Environment* env, m_device->getEnvironments()) {
+			envs.append(env->getID());
+		}
+		return envs;
+	}
+
 	libnutcommon::DeviceConfig DBusDevice::getConfig() {
 		return (m_device->getConfig());
 	}
