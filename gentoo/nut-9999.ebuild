@@ -12,9 +12,11 @@ SLOT="0"
 KEYWORDS="~x86 ~amd64"
 IUSE="debug wifi X"
 
-RDEPEND=">=x11-libs/qt-gui-4.4.0
-		>=x11-libs/qt-svg-4.4.0
+RDEPEND="
+		X? ( >=x11-libs/qt-gui-4.4.0 )
+		X? ( >=x11-libs/qt-svg-4.4.0 )
 		>=x11-libs/qt-dbus-4.4.0
+		>=x11-libs/qt-core-4.4.0
 		sys-apps/dbus
 		wifi? ( >=net-wireless/wpa_supplicant-0.6.0 )
 		wifi? ( >=net-wireless/wireless-tools-29 )
