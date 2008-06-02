@@ -108,8 +108,8 @@ namespace nuts {
 		}
 		return paths;
 	}
-	QList<QString> DBusDeviceManager::getDeviceNames() {
-		QList<QString> names;
+	QStringList DBusDeviceManager::getDeviceNames() {
+		QStringList names;
 		foreach (nuts::Device* dev, m_devmgr->getDevices()) {
 			names.append(dev->getName());
 		}

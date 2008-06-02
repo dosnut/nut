@@ -53,7 +53,7 @@ namespace nuts {
 	
 		public slots:
 			QList<QDBusObjectPath> getDeviceList();
-			QList<QString> getDeviceNames();
+			QStringList getDeviceNames();
 		signals:
 			void deviceAdded(const QDBusObjectPath &objectpath);
 			void deviceRemoved(const QDBusObjectPath &objectpath);
