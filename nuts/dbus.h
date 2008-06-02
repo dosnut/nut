@@ -53,6 +53,7 @@ namespace nuts {
 	
 		public slots:
 			QList<QDBusObjectPath> getDeviceList();
+			QList<QString> getDeviceNames();
 		signals:
 			void deviceAdded(const QDBusObjectPath &objectpath);
 			void deviceRemoved(const QDBusObjectPath &objectpath);
@@ -141,6 +142,7 @@ namespace nuts {
 			qint32 getID() { return m_environment->getID(); }
 			QString getName() { return m_environment->getName(); }
 			bool getState() { return (m_device->getEnvironment() == m_environment->getID()); }
+			QList<qint32> getInterfaceIds();
 		signals:
 			void interfaceAdded(const QDBusObjectPath &objectpath);
 			void interfaceRemoved(const QDBusObjectPath &objectpath);

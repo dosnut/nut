@@ -108,6 +108,13 @@ namespace nuts {
 		}
 		return paths;
 	}
+	QList<QString> DBusDeviceManager::getDeviceNames() {
+		QList<QString> names;
+		foreach (nuts::Device* dev, m_devmgr->getDevices()) {
+			names.append(dev->getName());
+		}
+		return names;
+	}
 
 	DBusDevice::DBusDevice(Device *dev, QDBusConnection *connection, const QString &path)
 	: QDBusAbstractAdaptor(dev), m_device(dev), m_dbusConnection(connection) {
@@ -318,6 +325,14 @@ namespace nuts {
 		#endif
 		return paths;
 	}
+	QList<qint32> DBusEnvironment::getInterfaceIds() {
+		QList<qint32> ifs;
+		foreach(nuts::Interface *i, m_environment->getInterfaces()) {
+			ifs.append(i->getIndex());
+		}
+		return ifs;
+	}
+
 	libnutcommon::SelectResult DBusEnvironment::getSelectResult() {
 		return m_environment->getSelectResult();
 	}
