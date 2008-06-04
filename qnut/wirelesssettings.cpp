@@ -8,6 +8,7 @@
 #ifndef QNUT_NO_WIRELESS
 #include <QHeaderView>
 #include <QMessageBox>
+#include <QMenu>
 #include "wirelesssettings.h"
 #include "managedapmodel.h"
 #include "common.h"
@@ -75,6 +76,8 @@ namespace qnut {
 		
 		QAction * reloadNetworksAction;
 		
+		QMenu * manageNetworksMenu;
+		
 		m_EnableNetworkAction    = new QAction(QIcon(UI_ICON_ENABLE), tr("&Enable"), this);
 		enableNetworksAction     = new QAction(QIcon(UI_ICON_ENABLE_ALL), tr("Enable &all"), this);
 		m_DisableNetworkAction   = new QAction(QIcon(UI_ICON_DISABLE), tr("&Disable"), this);
@@ -87,6 +90,9 @@ namespace qnut {
 		m_RemoveNetworkAction    = new QAction(QIcon(UI_ICON_REMOVE), tr("&Remove"), this);
 		m_ToggleDetailsAction    = new QAction(QIcon(UI_ICON_DETAILED), tr("Detailed &view"), this);
 		m_RescanNetworksAction   = new QAction(QIcon(UI_ICON_SEARCH), tr("Scan ne&tworks"), this);
+		
+		manageNetworksMenu       = new QMenu(tr("Manage networks"));
+		manageNetworksMenu->setIcon(QIcon(UI_ICON_EDIT));
 		
 		m_ToggleDetailsAction->setCheckable(true);
 		m_ToggleDetailsAction->setChecked(true);
@@ -111,7 +117,6 @@ namespace qnut {
 		connect(reloadNetworksAction, SIGNAL(triggered()), m_ManagedAPModel, SLOT(updateNetworks()));
 		
 		ui.managedView->addAction(m_EnableNetworkAction);
-		ui.managedView->addAction(enableNetworksAction);
 		ui.managedView->addAction(m_DisableNetworkAction);
 		ui.managedView->addAction(getSeparator(this));
 		ui.managedView->addAction(m_SwitchNetworkAction);
@@ -119,6 +124,8 @@ namespace qnut {
 		ui.managedView->addAction(getSeparator(this));
 		ui.managedView->addAction(addAdhocAction);
 		ui.managedView->addAction(m_RemoveNetworkAction);
+		ui.managedView->addAction(getSeparator(this));
+		ui.managedView->addAction(manageNetworksMenu->menuAction());
 		ui.managedView->setContextMenuPolicy(Qt::ActionsContextMenu);
 		
 		ui.availableView->addAction(addNetworkAction);
@@ -126,15 +133,20 @@ namespace qnut {
 		ui.availableView->addAction(m_RescanNetworksAction);
 		ui.availableView->setContextMenuPolicy(Qt::ActionsContextMenu);
 		
+		manageNetworksMenu->addAction(enableNetworksAction);
+		manageNetworksMenu->addSeparator();
+		manageNetworksMenu->addAction(m_SaveNetworksAction);
+		manageNetworksMenu->addAction(reloadNetworksAction);
+		
 		ui.enableNetworkButton->setDefaultAction(m_EnableNetworkAction);
-		ui.enableNetworksButton->setDefaultAction(enableNetworksAction);
 		ui.disableNetworkButton->setDefaultAction(m_DisableNetworkAction);
 		ui.switchNetworkButton->setDefaultAction(m_SwitchNetworkAction);
 		ui.configureNetworkButton->setDefaultAction(m_ConfigureNetworkAction);
 		ui.removeNetworkButton->setDefaultAction(m_RemoveNetworkAction);
-		ui.saveNetworksButton->setDefaultAction(m_SaveNetworksAction);
-		ui.reloadNetworksButton->setDefaultAction(reloadNetworksAction);
 		ui.toggleDetailsButton->setDefaultAction(m_ToggleDetailsAction);
+		
+		ui.manageNetworksButton->setMenu(manageNetworksMenu);
+		ui.manageNetworksButton->setText(tr("Manage all..."));
 		
 		ui.addNetworkButton->setDefaultAction(addNetworkAction);
 		ui.addAdhocButton->setDefaultAction(addAdhocAction);
@@ -189,6 +201,7 @@ namespace qnut {
 	}
 	
 	void CWirelessSettings::updateUi(DeviceState state) {
+		
 		ui.iconLabel->setPixmap(QPixmap(iconFile(m_Device)));
 		ui.stateLabel->setText(toStringTr(state));
 		
