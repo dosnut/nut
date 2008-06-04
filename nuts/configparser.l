@@ -28,6 +28,8 @@ no-dhcp     return NODHCP;
 zeroconf    return ZEROCONF;
 no-zeroconf return NOZEROCONF;
 static      return STATIC;
+timeout     return TIMEOUT;
+fallback    return FALLBACK;
 
 ip          return IP;
 netmask     return NETMASK;

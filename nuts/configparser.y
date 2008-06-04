@@ -9,6 +9,7 @@
 	
 	static void configparsererror (ConfigParser *cp, const char* s);
 	
+	//Check if invoked action worked (e.g. newDevice -> device creation worked)
 	#define CHECK(action) do { if (!(cp->action)) YYERROR; } while (0)
 %}
 
@@ -22,7 +23,7 @@
 %token DEVICE ENVIRONMENT
 %token NOAUTOSTART
 %token DEFAULT
-%token DHCP NODHCP ZEROCONF NOZEROCONF STATIC
+%token DHCP NODHCP ZEROCONF NOZEROCONF STATIC TIMEOUT FALLBACK
 %token IP NETMASK GATEWAY DNSSERVER
 %token LABELINDEX
 %token SELECT USER ARP ESSID
@@ -93,7 +94,30 @@ environmentoption: dhcpconfig
 ;
 
 dhcpconfig: DHCP { CHECK(envDHCP()); } ';' { CHECK(finishDHCP()); }
+	| DHCP { CHECK(envDHCP()); } FALLBACK { CHECK(envFallback()); } fallbackconfig { CHECK(finishFallback()); } { CHECK(finishDHCP()); }
 ;
+
+fallbackconfig: fallbackoptions
+ 	| '{' fallbackoptionsbracket '}' ';'
+ 	| '{' fallbackoptionsbracket '}'
+;
+
+fallbackoptions: INTEGER fallbackinterface { CHECK(envFallbackTimeout($1)); }
+	| fallbackinterface
+	| INTEGER { CHECK(envFallbackTimeout($1)); } ';'
+;
+
+fallbackoptionsbracket: timeout fallbackinterface
+	| fallbackinterface timeout
+	| fallbackinterface
+	| timeout
+;
+
+fallbackinterface: zeroconf
+	| STATIC { CHECK(envStatic());  } staticconfig { CHECK(finishStatic()); }
+;
+
+timeout: TIMEOUT INTEGER ';' { CHECK(envFallbackTimeout($2));}
 
 zeroconf: ZEROCONF { CHECK(envZeroconf()); } ';' { CHECK(finishZeroconf()); }
 ;
@@ -103,7 +127,7 @@ static: STATIC { CHECK(envStatic());  } staticconfig { CHECK(finishStatic()); }
 ;
 
 staticconfig: '{' staticoptions '}'
-	|  '{' staticoptions '}' ';'
+ 	|  '{' staticoptions '}' ';' 
 	| staticoption_ip
 ;
 
@@ -120,7 +144,7 @@ staticoption: staticoption_ip
 staticoption_ip: IP IPv4_VAL ';' { CHECK(staticIP(*$2)); delete $2; }
 ;
 
-staticoption_netmask: NETMASK IPv4_VAL ';' { CHECK(staticNetmak(*$2)); delete $2; }
+staticoption_netmask: NETMASK IPv4_VAL ';' { CHECK(staticNetmask(*$2)); delete $2; }
 ;
 
 staticoption_gateway: GATEWAY IPv4_VAL ';' { CHECK(staticGateway(*$2)); delete $2; }
