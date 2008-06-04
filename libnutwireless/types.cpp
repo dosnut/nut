@@ -294,6 +294,7 @@ WextSignal convertValues(WextRawScan &scan) {
 	//Set all non-signalquality info
 	res.frequency = scan.freq;
 	res.bitrates = scan.bitrates;
+	res.ssid = scan.ssid;
 	res.bssid = scan.bssid;
 // 	res.encoding = WSIG_QUALITY_ALLABS;
 	qDebug() << "hasRange:" << scan.hasRange;

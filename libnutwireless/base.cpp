@@ -855,6 +855,7 @@ namespace libnutwireless {
 		
 		struct iwreq wrq;
 		memset(&wrq,0,sizeof(struct iwreq));
+		
 		/* Get AP address */
 		if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWAP, &wrq) >= 0) {
 			//Add mac address of current ap;
@@ -863,6 +864,32 @@ namespace libnutwireless {
 			res.bssid = libnutcommon::MacAddress(QString::fromAscii(buffer,128));
 			qDebug() << "Got AP: " << res.bssid.toString();
 		}
+		
+		/* Get ssid */
+		quint8 * buffer = new quint8[IW_ESSID_MAX_SIZE];
+		memset(buffer, '\0', IW_ESSID_MAX_SIZE);
+		wrq.u.essid.pointer = (void *)buffer;
+		wrq.u.essid.length = IW_ESSID_MAX_SIZE;
+		if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWESSID, &wrq) >= 0) {
+			if (wrq.u.essid.length > IW_ESSID_MAX_SIZE)
+				wrq.u.essid.length = IW_ESSID_MAX_SIZE;
+			if (wrq.u.essid.flags) {
+				/* Does it have an ESSID index ? */
+				if ( wrq.u.essid.pointer && wrq.u.essid.length ) {
+					if ( (wrq.u.essid.flags & IW_ENCODE_INDEX) > 1) {
+						res.ssid = QString("%1 [%2]").arg(QString::fromAscii((char*) wrq.u.essid.pointer, wrq.u.essid.length), QString::number(wrq.u.essid.flags & IW_ENCODE_INDEX));
+					}
+					else {
+						res.ssid = QString::fromAscii((char*) wrq.u.essid.pointer, wrq.u.essid.length);
+					}
+				}
+				else {
+					res.ssid = "N/A";
+				}
+			}
+			qDebug() << "Got ssid: " << res.ssid;
+		}
+		delete[] buffer;
 		
 		/* Get bit rate */
 		if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWRATE, &wrq) >= 0) {
@@ -876,7 +903,8 @@ namespace libnutwireless {
 			qDebug() << "Got power";
 		}
 		/* workaround */
-			
+		
+		
 		/* Get range stuff */
 		qDebug() << QString("Getting range stuff for %1").arg(m_ifname.toAscii().data());
 		if (iw_get_range_info(m_wextFd, m_ifname.toAscii().data(), &range) >= 0) {
