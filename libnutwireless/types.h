@@ -150,6 +150,7 @@ namespace libnutwireless {
 		int frequency;
 		WextSignalType type;
 		QList<qint32> bitrates; //Current bitrate
+		libnutcommon::MacAddress bssid;
 		struct {
 			quint8 value;
 			quint8 maximum;
