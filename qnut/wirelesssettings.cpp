@@ -165,7 +165,7 @@ namespace qnut {
 			break;
 		}
 		
-		ui.signalLabel->setText(m_Device->getEssid() + " (" +
+		ui.signalLabel->setText(signal.ssid + " (" +
 			tr("Channel") + ' ' + QString::number(frequencyToChannel(signal.frequency)) + ')');
 		ui.bssidLabel->setText(signal.bssid.toString());
 		ui.qualityLabel->setText(tr("Quality") + ": " + quality);
