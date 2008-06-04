@@ -145,6 +145,7 @@ namespace qnut {
 		QString quality = QString::number(signal.quality.value) + '/' + QString::number(signal.quality.maximum);
 		QString level;
 		QString noise;
+		bool showLevelNoise = true;
 		
 		switch (signal.type) {
 		case WSR_RCPI:
@@ -160,25 +161,23 @@ namespace qnut {
 			noise = QString::number(signal.noise.nonrcpi.value) + '/' + QString::number(signal.noise.nonrcpi.maximum);
 			break;
 		default:
+			showLevelNoise = false;
 			break;
 		}
 		
-		if (level.isEmpty())
-			ui.qualityLabel->setText(m_Device->getEssid() + " (" + tr("Channel") + ' ' + QString::number(frequencyToChannel(signal.frequency)) + ")\n" +
-				tr("Bitrate") + ": " + QString::number(signal.bitrates[0] / 1000000) + "Mb/s\n" +
-				tr("Quality") + ": " + quality);
-		else
-			ui.qualityLabel->setText(m_Device->getEssid() + " (" + tr("Channel") + ' ' + QString::number(frequencyToChannel(signal.frequency)) + ")\n" +
-				tr("Bitrate") + ": " + QString::number(signal.bitrates[0] / 1000000) + "Mb/s\n" +
-				tr("Quality") + ", " + tr("Level") + ", " + tr("Noise") + ": " + quality + ", " + level + "dBm, " + noise + "dBm");
+		ui.signalLabel->setText(m_Device->getEssid() + " (" +
+			tr("Channel") + ' ' + QString::number(frequencyToChannel(signal.frequency)) + ')');
+		ui.bssidLabel->setText(signal.bssid.toString());
+		ui.qualityLabel->setText(tr("Quality") + ": " + quality);
+		ui.rateLabel->setText(tr("Bitrate") + ": " + QString::number(signal.bitrates[0] / 1000000) + "Mb/s");
 		
-/*		if (level.length() > 0)
-			ui.signalLabel->setText(tr("Signal (%1): %2").arg(
-				tr("Quality") + ", " + tr("Level") + ", " + tr("Noise"),
-				quality + ", " + level + "dBm, " + noise + "dBm"
-			));
-		else
-			ui.signalLabel->setText(tr("Signal quality: %1").arg(quality));*/
+		ui.qualityLevelLine->setVisible(showLevelNoise);
+		ui.levelLabel->setVisible(showLevelNoise);
+		ui.noiseLabel->setVisible(showLevelNoise);
+		if (showLevelNoise) {
+			ui.levelLabel->setText(tr("Level") + ": " + level + "dBm");
+			ui.noiseLabel->setText(tr("Noise") + ": " + noise + "dBm");
+		}
 	}
 	
 	void CWirelessSettings::handleManagedAPSelectionChanged(const QItemSelection & selected, const QItemSelection &) {
@@ -193,10 +192,14 @@ namespace qnut {
 		ui.iconLabel->setPixmap(QPixmap(iconFile(m_Device)));
 		ui.stateLabel->setText(toStringTr(state));
 		
-		if (state <= DS_ACTIVATED)
-			ui.qualityLabel->setText("not assigned to accesspoint");
-		else if (state == DS_CARRIER)
-			ui.qualityLabel->setText(tr("waiting for device properties..."));
+		if (state <= DS_ACTIVATED) {
+			ui.signalLabel->setText(tr("no signal info"));
+			ui.bssidLabel->setText("00:00:00:00:00:00");
+			ui.qualityLabel->setText(tr("Quality") + ": 0/0");
+			ui.rateLabel->setText(tr("Bitrate") + ": 0Mb/s");
+			ui.levelLabel->setText(tr("Level") + ": 0");
+			ui.noiseLabel->setText(tr("Noise") + ": 0");
+		}
 	}
 	
 	QModelIndex CWirelessSettings::selectedIndex(QTreeView * view) {
