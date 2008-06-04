@@ -164,6 +164,7 @@ namespace nuts {
 		m_devices.remove(ifName);
 	}
 	
+	//Initialize with default values, add environments, connect to dm-events
 	Device::Device(DeviceManager* dm, const QString &name, libnutcommon::DeviceConfig *config, bool hasWLAN)
 	: QObject(dm), m_arp(this), m_dm(dm), m_name(name), m_interfaceIndex(-1), m_config(config), m_activeEnv(-1), m_nextEnv(-1), m_userEnv(-1), m_waitForEnvSelects(0), m_state(libnutcommon::DS_DEACTIVATED), m_dhcp_client_socket(-1), m_hasWLAN(hasWLAN), m_wpa_supplicant(0) {
 		connect(this, SIGNAL(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState, Device*)), &m_dm->m_events, SLOT(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState, Device*)));
@@ -657,7 +658,7 @@ namespace nuts {
 	}
 	
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, libnutcommon::IPv4Config *config)
-	: Interface(env, index), m_dhcp_timer_id(-1), m_dm(env->m_device->m_dm), m_dhcp_xid(0), m_dhcpstate(DHCPS_OFF), m_zc_state(ZCS_OFF), m_zc_arp_probe(0), m_config(config), m_ifstate(libnutcommon::IFS_OFF) {
+	: Interface(env, index), m_dhcp_timer_id(-1), m_fallback_timer_id(-1), m_dm(env->m_device->m_dm), m_dhcp_xid(0), m_dhcpstate(DHCPS_OFF), m_zc_state(ZCS_OFF), m_zc_arp_probe(0), m_config(config), m_ifstate(libnutcommon::IFS_OFF) {
 		m_needUserSetup = m_config->getFlags() & libnutcommon::IPv4Config::DO_USERSTATIC;
 		connect(this, SIGNAL(statusChanged(libnutcommon::InterfaceState, Interface_IPv4*)), &m_env->m_device->m_dm->m_events, SLOT(interfaceStatusChanged(libnutcommon::InterfaceState, Interface_IPv4*)));
 	}
@@ -728,6 +729,14 @@ namespace nuts {
 			m_dhcp_timer_id = startTimer(msec);
 		else
 			m_dhcp_timer_id = -1;
+	}
+
+	void Interface_IPv4::fallback_set_timeout(int sec) {
+		if (m_fallback_timer_id != -1) killTimer(m_fallback_timer_id);
+		if (sec != -1)
+			m_fallback_timer_id = startTimer(sec*1000);
+		else
+			m_fallback_timer_id = -1;
 	}
 	
 	void Interface_IPv4::zeroconf_setup_interface() {
@@ -972,34 +981,43 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::timerEvent(QTimerEvent *tevt) {
-		if (tevt->timerId() != m_dhcp_timer_id) {
+		if (tevt->timerId() == m_fallback_timer_id) {
+			startFallback();
+		}
+		else if (tevt->timerId() == m_dhcp_timer_id) {
+			dhcp_set_timeout(-1);
+			switch (m_dhcpstate) {
+				case DHCPS_SELECTING:
+					m_dhcpstate = DHCPS_INIT;
+					break;
+				case DHCPS_REQUESTING:
+					m_dhcpstate = DHCPS_INIT;
+					break;
+				case DHCPS_BOUND:
+					m_dhcpstate = DHCPS_RENEWING;
+					break;
+				case DHCPS_RENEWING:
+					m_dhcpstate = DHCPS_REBINDING;
+					break;
+				case DHCPS_REBINDING:
+					m_dhcpstate = DHCPS_INIT_START;
+					break;
+				default:
+					break;
+			}
+			dhcpAction();
+		}
+		else {
 			err << "Unrequested timer Event: " << tevt->timerId() << endl;
-//			return;
 		}
-		dhcp_set_timeout(-1);
-		switch (m_dhcpstate) {
-			case DHCPS_SELECTING:
-				m_dhcpstate = DHCPS_INIT;
-				break;
-			case DHCPS_REQUESTING:
-				m_dhcpstate = DHCPS_INIT;
-				break;
-			case DHCPS_BOUND:
-				m_dhcpstate = DHCPS_RENEWING;
-				break;
-			case DHCPS_RENEWING:
-				m_dhcpstate = DHCPS_REBINDING;
-				break;
-			case DHCPS_REBINDING:
-				m_dhcpstate = DHCPS_INIT_START;
-				break;
-			default:
-				break;
-		}
-		dhcpAction();
 	}
 	
 	void Interface_IPv4::startDHCP() {
+		//Start timer for fallback timeout:
+		if (m_config->getTimeOut() > 0) {
+			qDebug() << "Starting fallback timer";
+			fallback_set_timeout(m_config->getTimeOut());
+		}
 		m_dhcpstate = DHCPS_INIT_START;
 		dhcpAction();
 	}
@@ -1042,6 +1060,24 @@ namespace nuts {
 		dnsserver = m_userConfig.dnsservers();
 		m_ifstate = libnutcommon::IFS_STATIC;
 		systemUp();
+	}
+
+	void Interface_IPv4::startFallback() {
+		qDebug() << "Starting Fallback";
+		fallback_set_timeout(-1);
+		if (m_ifstate != ip.isNull() || false == m_env->m_ifUpStatus[m_index]) { //TODO:Find a better way to check interface state
+			qDebug() << "Device is not up, executing fallback; Flags:" << m_config->getFlags();
+			if (m_config->getFlags() == (libnutcommon::IPv4Config::DO_DHCP | libnutcommon::IPv4Config::DO_ZEROCONF)) {
+				qDebug() << "Starting Zeroconf-Fallback";
+				stopDHCP();
+				startZeroconf();
+			}
+			if (m_config->getFlags() == (libnutcommon::IPv4Config::DO_DHCP | libnutcommon::IPv4Config::DO_STATIC)) {
+				qDebug() << "Starting Static-Fallback";
+				stopDHCP();
+				startStatic();
+			}
+		}
 	}
 
 	void Interface_IPv4::start() {

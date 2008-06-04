@@ -315,6 +315,8 @@ namespace nuts {
 			int m_dhcp_retry;        // count retries
 			virtual void timerEvent(QTimerEvent *event);
 			void dhcp_set_timeout(int msec);
+			void fallback_set_timeout(int sec);
+			int m_fallback_timer_id;
 		
 		protected:
 			enum dhcp_state {
@@ -386,6 +388,8 @@ namespace nuts {
 			void startZeroconf();
 			void startStatic();
 			void startUserStatic();
+
+			void startFallback();
 			
 			void systemUp();
 			void systemDown();
