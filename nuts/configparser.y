@@ -98,8 +98,8 @@ dhcpconfig: DHCP { CHECK(envDHCP()); } ';' { CHECK(finishDHCP()); }
 ;
 
 fallbackconfig: fallbackoptions
- 	| '{' fallbackoptionsbracket '}' ';'
- 	| '{' fallbackoptionsbracket '}'
+	| '{' fallbackoptionsbracket '}' ';'
+	| '{' fallbackoptionsbracket '}'
 ;
 
 fallbackoptions: INTEGER fallbackinterface { CHECK(envFallbackTimeout($1)); }
@@ -127,7 +127,7 @@ static: STATIC { CHECK(envStatic());  } staticconfig { CHECK(finishStatic()); }
 ;
 
 staticconfig: '{' staticoptions '}'
- 	|  '{' staticoptions '}' ';' 
+	|  '{' staticoptions '}' ';' 
 	| staticoption_ip
 ;
 
