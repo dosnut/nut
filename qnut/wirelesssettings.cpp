@@ -60,7 +60,7 @@ namespace qnut {
 		connect(ui.managedView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(switchToSelectedNetwork()));
 		
 		if (m_Device->getWpaSupplicant()) {
-			connect(m_Device->getWpaSupplicant(), SIGNAL(stateChanged(bool)), this, SLOT(setEnabled(bool)));
+//			connect(m_Device->getWpaSupplicant(), SIGNAL(stateChanged(bool)), this, SLOT(setEnabled(bool)));
 			connect(m_SaveNetworksAction, SIGNAL(triggered()), m_Device->getWpaSupplicant(), SLOT(save_config()));
 			connect(m_RescanNetworksAction, SIGNAL(triggered()), m_Device->getWpaSupplicant(), SLOT(scan()));
 			connect(m_Device->getWpaSupplicant(), SIGNAL(signalQualityUpdated(libnutwireless::WextSignal)),
@@ -147,6 +147,7 @@ namespace qnut {
 		
 		ui.manageNetworksButton->setMenu(manageNetworksMenu);
 		ui.manageNetworksButton->setText(tr("Manage all..."));
+		ui.manageNetworksButton->setIcon(QIcon(UI_ICON_EDIT));
 		
 		ui.addNetworkButton->setDefaultAction(addNetworkAction);
 		ui.addAdhocButton->setDefaultAction(addAdhocAction);
@@ -201,6 +202,8 @@ namespace qnut {
 	}
 	
 	void CWirelessSettings::updateUi(DeviceState state) {
+		ui.managedAvailableSplitter->setEnabled(state >= DS_ACTIVATED && m_Device->getWpaSupplicant());
+		ui.actionsWidget->setEnabled(state >= DS_ACTIVATED && m_Device->getWpaSupplicant());
 		
 		ui.iconLabel->setPixmap(QPixmap(iconFile(m_Device)));
 		ui.stateLabel->setText(toStringTr(state));
