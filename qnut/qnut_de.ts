@@ -78,34 +78,54 @@
 <context>
     <name>airset</name>
     <message>
-        <location filename="airset.ui" line="56"/>
+        <location filename="airset.ui" line="59"/>
         <source>no device</source>
         <translation>kein Netzwerkgerät</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="69"/>
+        <location filename="airset.ui" line="72"/>
         <source>unknown state</source>
         <translation>unbekannter Status</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="112"/>
-        <source>unknown</source>
-        <translation>unbekannt</translation>
-    </message>
-    <message>
-        <location filename="airset.ui" line="365"/>
+        <location filename="airset.ui" line="429"/>
         <source>Managed networks</source>
         <translation>Verwaltete Netzwerke</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="423"/>
+        <location filename="airset.ui" line="487"/>
         <source>Available networks</source>
         <translation>Netzwerke in Reichweite</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="102"/>
-        <source>Signal</source>
+        <location filename="airset.ui" line="112"/>
+        <source>Level: 0</source>
+        <translation>Pegel: 0</translation>
+    </message>
+    <message>
+        <location filename="airset.ui" line="119"/>
+        <source>Noise: 0</source>
+        <translation>Rauschen: 0</translation>
+    </message>
+    <message>
+        <location filename="airset.ui" line="132"/>
+        <source>no signal info</source>
+        <translation>keine Signalinformationen</translation>
+    </message>
+    <message>
+        <location filename="airset.ui" line="139"/>
+        <source>Rate: 0Mb/s</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="airset.ui" line="146"/>
+        <source>00:00:00:00:00:00</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="airset.ui" line="153"/>
+        <source>Quality: 0/0</source>
+        <translation>Qualität: 0/0</translation>
     </message>
 </context>
 <context>
@@ -478,82 +498,82 @@
 <context>
     <name>libnutclient::CDevice</name>
     <message>
-        <location filename="../libnutclient/client.cpp" line="462"/>
+        <location filename="../libnutclient/client.cpp" line="466"/>
         <source>Device properties fetched</source>
         <translation>Geräteeigenschaften geholt</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="468"/>
+        <location filename="../libnutclient/client.cpp" line="472"/>
         <source>(%1) Error while retrieving dbus&apos; device information</source>
         <translation>(%1) Fehler beim Übertragen der Geräteinformationen über DBus</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="630"/>
+        <location filename="../libnutclient/client.cpp" line="634"/>
         <source>(%1) Could not refresh device essid</source>
         <translation>(%1) Konnte die Geräte-Essid nicht aktualisieren</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="489"/>
+        <location filename="../libnutclient/client.cpp" line="493"/>
         <source>(%2) wpa_supplicant config file at: %1</source>
         <translation>(%2) Pfad zur wpa_supplicant Konfigurationsdatei: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="492"/>
+        <location filename="../libnutclient/client.cpp" line="496"/>
         <source>(%2) Error(%1) while retrieving device config</source>
         <translation>(%2) Fehler(%1) beim Übertragen der Gerätekonfiguration</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="498"/>
+        <location filename="../libnutclient/client.cpp" line="502"/>
         <source>(%1) Error while trying to get environment list</source>
         <translation>(%1) Fehler beim Übertragen der Umgebungsliste</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="598"/>
+        <location filename="../libnutclient/client.cpp" line="602"/>
         <source>(%1) Could not refresh environments</source>
         <translation>(%1) Die Umgebungen konnten nicht aktualisiert werden</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="618"/>
+        <location filename="../libnutclient/client.cpp" line="622"/>
         <source>(%1) Could not refresh device properties</source>
         <translation>(%1) Die Geräteeigenschaften konnten nicht aktualisert werden</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="455"/>
+        <location filename="../libnutclient/client.cpp" line="459"/>
         <source>Getting device properties at: %1</source>
         <translation>Hole Geräteeigenschaften: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="463"/>
+        <location filename="../libnutclient/client.cpp" line="467"/>
         <source>Name : %1</source>
         <translation>Name: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="464"/>
+        <location filename="../libnutclient/client.cpp" line="468"/>
         <source>Type: %1</source>
         <translation>Typ: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="465"/>
+        <location filename="../libnutclient/client.cpp" line="469"/>
         <source>State: %1</source>
         <translation>Status: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="503"/>
+        <location filename="../libnutclient/client.cpp" line="507"/>
         <source>Adding Environment at: %1</source>
         <translation>Füge Umbegung hinzu: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="522"/>
+        <location filename="../libnutclient/client.cpp" line="526"/>
         <source>Active Environement: %1</source>
         <translation>Aktive Umbegung: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="608"/>
+        <location filename="../libnutclient/client.cpp" line="612"/>
         <source>Refreshing active environment: %1</source>
         <translation>Aktualisiere aktive Umbegung: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="509"/>
+        <location filename="../libnutclient/client.cpp" line="513"/>
         <source>(%1) Error while trying to add environment</source>
         <translation>(%1) Fehler beim Versuch eine Umgebung hinzuzufügen</translation>
     </message>
@@ -566,32 +586,32 @@
         <translation>Bitte NUTS starten. Gehe in Leerauf</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="246"/>
+        <location filename="../libnutclient/client.cpp" line="250"/>
         <source>(%1) Failed to get DeviceList</source>
         <translation>(%1) Fehler beim Übertragen der Geräteliste</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="291"/>
+        <location filename="../libnutclient/client.cpp" line="295"/>
         <source>NUTS has been started</source>
         <translation>NUTS wurde gestartet</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="305"/>
+        <location filename="../libnutclient/client.cpp" line="309"/>
         <source>NUTS has been stopped</source>
         <translation>NUTS wurde gestartet</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="417"/>
+        <location filename="../libnutclient/client.cpp" line="421"/>
         <source>(%1) Could not refresh device list</source>
         <translation>(%1) Die Geräteliste konnte nicht übertragen werden</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="435"/>
+        <location filename="../libnutclient/client.cpp" line="439"/>
         <source>(%1) Error while retrieving device list</source>
         <translation>(%1) Fehler beim Übertragen der Geräteliste</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="324"/>
+        <location filename="../libnutclient/client.cpp" line="328"/>
         <source>Adding device at: %1</source>
         <translation>Füge Gerät hinzu: %1</translation>
     </message>
@@ -611,12 +631,12 @@
         <translation>Bitte stellen sie sicher, dass sie der richtigen Gruppe Mitglied sind</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="364"/>
+        <location filename="../libnutclient/client.cpp" line="368"/>
         <source>The dbus daemon has been stopped. Please restart dbus and nuts</source>
         <translation>Der DBus-Dienst wurde angehalten. Bitte starten sie DBus</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="368"/>
+        <location filename="../libnutclient/client.cpp" line="372"/>
         <source>dbus has been started initiating dbus interface</source>
         <translation>DBus wurde gestartet. Initialisiere DBus-Schnittstelle</translation>
     </message>
@@ -625,56 +645,61 @@
         <source>Please make sure that dbus is running</source>
         <translation>Bitte stellen sie sicher, dass DBus läuft</translation>
     </message>
+    <message>
+        <location filename="../libnutclient/client.cpp" line="243"/>
+        <source>Maybe you don&apos;t have sufficient rights</source>
+        <translation>Möglicherweise haben sie nicht die benötigten Rechte</translation>
+    </message>
 </context>
 <context>
     <name>libnutclient::CEnvironment</name>
     <message>
-        <location filename="../libnutclient/client.cpp" line="858"/>
+        <location filename="../libnutclient/client.cpp" line="862"/>
         <source>default</source>
         <translation>Standard</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="863"/>
+        <location filename="../libnutclient/client.cpp" line="867"/>
         <source>untitled (%1)</source>
         <translation>Unbenannt (%1)</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="802"/>
+        <location filename="../libnutclient/client.cpp" line="806"/>
         <source>Error while retrieving environment properties</source>
         <translation>Fehler beim Übertragen der Umgebungseigenschaftem</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="837"/>
+        <location filename="../libnutclient/client.cpp" line="841"/>
         <source>Error while retrieving environment&apos;s interfaces</source>
         <translation>Fehler beim Übertragen der Schnittstellen der Umgebung</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="871"/>
+        <location filename="../libnutclient/client.cpp" line="875"/>
         <source>Error while refreshing environment properties</source>
         <translation>Fehler beim Aktualisieren der Umgebungseigenschaften</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="906"/>
+        <location filename="../libnutclient/client.cpp" line="910"/>
         <source>Error while refreshing environment interfaces</source>
         <translation>Fehler beim Aktualisieren der Schnittstellen der Umgebung</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="967"/>
+        <location filename="../libnutclient/client.cpp" line="971"/>
         <source>(%1) Error while trying to get SelectResult</source>
         <translation>(%1) Fehler beim Übertragen der Ergebnisses der Auswahlkriterien</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="985"/>
+        <location filename="../libnutclient/client.cpp" line="989"/>
         <source>(%1) Error while trying to get SelectResults</source>
         <translation>(%1) Fehler beim Übertragen der Ergebnisse der Auswahlkriterien</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="810"/>
+        <location filename="../libnutclient/client.cpp" line="814"/>
         <source>(%1) Error while retrieving environment config</source>
         <translation>(%1) Fehler beim Empfang der Umgebungskonfiguration</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="826"/>
+        <location filename="../libnutclient/client.cpp" line="830"/>
         <source>(%1) Error while adding interfaces</source>
         <translation>(%1) Fehler beim Hinzufügen der Schnittstellen</translation>
     </message>
@@ -682,37 +707,37 @@
 <context>
     <name>libnutclient::CInterface</name>
     <message>
-        <location filename="../libnutclient/client.cpp" line="1056"/>
+        <location filename="../libnutclient/client.cpp" line="1060"/>
         <source>Interface state of %1 has changed to %2</source>
         <translation>Schnittstelle %1 änderte ihren Zustand nach %2</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="1012"/>
+        <location filename="../libnutclient/client.cpp" line="1016"/>
         <source>(%1) Error while retrieving interface properties</source>
         <translation>(%1) Fehler beim Empfang der Schnittstelleneigenschaften</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="1020"/>
+        <location filename="../libnutclient/client.cpp" line="1024"/>
         <source>(%1) Error while retrieving interface config</source>
         <translation>(%1) Fehler beim Empfang der Schnittstellenkonfiguration</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="1044"/>
+        <location filename="../libnutclient/client.cpp" line="1048"/>
         <source>Error while refreshing interface at: %1</source>
         <translation>Fehler beim Aktualisieren der Schnittstelle: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="1076"/>
+        <location filename="../libnutclient/client.cpp" line="1080"/>
         <source>Error while interface-&gt;needUserSetup at: %1</source>
         <translation>Fehler beim Aufruf &quot;interface-&gt;needUserSetup&quot;: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="1094"/>
+        <location filename="../libnutclient/client.cpp" line="1098"/>
         <source>(%1) Error while setting user config at: %2</source>
         <translation>(%1) Fehler beim setzten der benutzerdefinierten Konfiguration: %2</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="1109"/>
+        <location filename="../libnutclient/client.cpp" line="1113"/>
         <source>Error while getting user config at: %1</source>
         <translation>Fehler beim Empfang der benutzerdefinierten Konfiguration: %1</translation>
     </message>
@@ -886,22 +911,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="956"/>
+        <location filename="../libnutwireless/base.cpp" line="984"/>
         <source>Error occured while fetching wireless info: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="969"/>
+        <location filename="../libnutwireless/base.cpp" line="997"/>
         <source>Auto-resetting timer to 10 seconds</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="975"/>
+        <location filename="../libnutwireless/base.cpp" line="1003"/>
         <source>Cannot fetch wireless information as your wireless extension is too old</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="976"/>
+        <location filename="../libnutwireless/base.cpp" line="1004"/>
         <source>Think about updating your kernel (it&apos;s way too old)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -909,42 +934,42 @@
 <context>
     <name>qnut::CAccessPointConfig</name>
     <message>
-        <location filename="accesspointconfig.cpp" line="487"/>
+        <location filename="accesspointconfig.cpp" line="490"/>
         <source>%1 chars</source>
         <translation>%1 Zeichen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="521"/>
+        <location filename="accesspointconfig.cpp" line="524"/>
         <source>Select CA certificate file</source>
         <translation>CA Zertifikat auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="526"/>
+        <location filename="accesspointconfig.cpp" line="529"/>
         <source>Certificate files (%1)</source>
         <translation>Zertifikate (%1)</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="526"/>
+        <location filename="accesspointconfig.cpp" line="529"/>
         <source>Select client certificate file</source>
         <translation>Client Zertifikat auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="531"/>
+        <location filename="accesspointconfig.cpp" line="534"/>
         <source>Select key file</source>
         <translation>Schlüsseldatei auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="531"/>
+        <location filename="accesspointconfig.cpp" line="534"/>
         <source>Key files (%1)</source>
         <translation>Schlüsseldateien (%1)</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="413"/>
+        <location filename="accesspointconfig.cpp" line="416"/>
         <source>Error on applying settings</source>
         <translation>Fehler beim Setzen der Einstellungen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="414"/>
+        <location filename="accesspointconfig.cpp" line="417"/>
         <source>WPA supplicant reported the following errors:</source>
         <translation>Der WPA Supplicant meldete folgende Fehler:</translation>
     </message>
@@ -1505,109 +1530,119 @@ Klick here to open the device details.</source>
 <context>
     <name>qnut::CWirelessSettings</name>
     <message>
-        <location filename="wirelesssettings.cpp" line="27"/>
+        <location filename="wirelesssettings.cpp" line="28"/>
         <source>Wireless Settings for &quot;%1&quot;</source>
         <translation>Einstellungen der drahtlosen Verbindung für &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="249"/>
+        <location filename="wirelesssettings.cpp" line="268"/>
         <source>Removing a managed network</source>
         <translation>Entferne ein verwaltetes Netzwerk</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="249"/>
+        <location filename="wirelesssettings.cpp" line="268"/>
         <source>Are you sure to remove &quot;%1&quot;?</source>
         <translation>Sind Sie sich sicher, dass sie &quot;%1&quot; entfernen möchten?</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="78"/>
+        <location filename="wirelesssettings.cpp" line="81"/>
         <source>&amp;Enable</source>
         <translation>&amp;Aktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="79"/>
+        <location filename="wirelesssettings.cpp" line="82"/>
         <source>Enable &amp;all</source>
         <translation>A&amp;lle Aktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="80"/>
+        <location filename="wirelesssettings.cpp" line="83"/>
         <source>&amp;Disable</source>
         <translation>&amp;Deaktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="81"/>
+        <location filename="wirelesssettings.cpp" line="84"/>
         <source>S&amp;witch</source>
         <translation>&amp;Wechseln</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="82"/>
+        <location filename="wirelesssettings.cpp" line="85"/>
         <source>&amp;Configure...</source>
         <translation>&amp;Konfigurieren...</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="87"/>
+        <location filename="wirelesssettings.cpp" line="90"/>
         <source>&amp;Remove</source>
         <translation>&amp;Entfernen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="83"/>
+        <location filename="wirelesssettings.cpp" line="86"/>
         <source>Add &amp;network</source>
         <translation>&amp;Netzwerk hinzufügen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="84"/>
+        <location filename="wirelesssettings.cpp" line="87"/>
         <source>Add ad-&amp;hoc</source>
         <translation>Ad-&amp;hoc Netz hinzufügen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="86"/>
+        <location filename="wirelesssettings.cpp" line="89"/>
         <source>&amp;Save configuration</source>
         <translation>Konfiguration &amp;speichern</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="85"/>
+        <location filename="wirelesssettings.cpp" line="88"/>
         <source>Re&amp;load configuration</source>
         <translation>Konfiguration akt&amp;ualisieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="88"/>
+        <location filename="wirelesssettings.cpp" line="91"/>
         <source>Detailed &amp;view</source>
         <translation>De&amp;tailierte Ansicht</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="199"/>
-        <source>waiting for device properties...</source>
-        <translation>warte auf Geräteeigenschaften...</translation>
-    </message>
-    <message>
-        <location filename="wirelesssettings.cpp" line="89"/>
+        <location filename="wirelesssettings.cpp" line="92"/>
         <source>Scan ne&amp;tworks</source>
         <translation>Ne&amp;tzwerke suchen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="173"/>
+        <location filename="wirelesssettings.cpp" line="214"/>
         <source>Quality</source>
         <translation>Qualität</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="173"/>
+        <location filename="wirelesssettings.cpp" line="216"/>
         <source>Level</source>
         <translation>Pegel</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="173"/>
+        <location filename="wirelesssettings.cpp" line="217"/>
         <source>Noise</source>
         <translation>Rauschen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="171"/>
+        <location filename="wirelesssettings.cpp" line="182"/>
         <source>Channel</source>
         <translation>Kanal</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="172"/>
+        <location filename="wirelesssettings.cpp" line="215"/>
         <source>Bitrate</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="wirelesssettings.cpp" line="94"/>
+        <source>Manage networks</source>
+        <translation>Netzwerke verwalten</translation>
+    </message>
+    <message>
+        <location filename="wirelesssettings.cpp" line="149"/>
+        <source>Manage all...</source>
+        <translation>Verwalten...</translation>
+    </message>
+    <message>
+        <location filename="wirelesssettings.cpp" line="212"/>
+        <source>no signal info</source>
+        <translation>keine Signalinformationen</translation>
     </message>
 </context>
 <context>
