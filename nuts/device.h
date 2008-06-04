@@ -390,6 +390,7 @@ namespace nuts {
 			void startUserStatic();
 
 			void startFallback();
+			void checkFallbackRunning();
 			
 			void systemUp();
 			void systemDown();

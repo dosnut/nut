@@ -877,10 +877,12 @@ namespace nuts {
 					releaseXID();
 					return;
 				case DHCPS_INIT_START:
+					checkFallbackRunning();
 					m_dhcp_retry = 0;
 					// fall through:
 					// dhcpstate = DHCPS_INIT;
 				case DHCPS_INIT:
+					checkFallbackRunning();
 					dhcp_send_discover();
 					m_dhcpstate = DHCPS_SELECTING;
 					break;
@@ -1014,10 +1016,7 @@ namespace nuts {
 	
 	void Interface_IPv4::startDHCP() {
 		//Start timer for fallback timeout:
-		if (m_config->getTimeOut() > 0) {
-			qDebug() << "Starting fallback timer";
-			fallback_set_timeout(m_config->getTimeOut());
-		}
+		checkFallbackRunning();
 		m_dhcpstate = DHCPS_INIT_START;
 		dhcpAction();
 	}
@@ -1063,20 +1062,26 @@ namespace nuts {
 	}
 
 	void Interface_IPv4::startFallback() {
-		qDebug() << "Starting Fallback";
 		fallback_set_timeout(-1);
 		if (m_ifstate != ip.isNull() || false == m_env->m_ifUpStatus[m_index]) { //TODO:Find a better way to check interface state
-			qDebug() << "Device is not up, executing fallback; Flags:" << m_config->getFlags();
 			if (m_config->getFlags() == (libnutcommon::IPv4Config::DO_DHCP | libnutcommon::IPv4Config::DO_ZEROCONF)) {
-				qDebug() << "Starting Zeroconf-Fallback";
+				//create new interface with dhcp only.
 				stopDHCP();
 				startZeroconf();
 			}
 			if (m_config->getFlags() == (libnutcommon::IPv4Config::DO_DHCP | libnutcommon::IPv4Config::DO_STATIC)) {
-				qDebug() << "Starting Static-Fallback";
 				stopDHCP();
 				startStatic();
 			}
+		}
+	}
+	
+	
+	void Interface_IPv4::checkFallbackRunning() {
+		if (( -1 == m_fallback_timer_id && m_config->getTimeOut() > 0) && (
+			( m_config->getFlags() == (libnutcommon::IPv4Config::DO_DHCP | libnutcommon::IPv4Config::DO_ZEROCONF)) ||
+			( m_config->getFlags() == (libnutcommon::IPv4Config::DO_DHCP | libnutcommon::IPv4Config::DO_STATIC)) ) ) {
+			fallback_set_timeout(m_config->getTimeOut()*1000);
 		}
 	}
 
