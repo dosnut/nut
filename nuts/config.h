@@ -26,9 +26,11 @@ namespace nuts {
 			libnutcommon::DeviceConfig *m_curdevconfig;
 			libnutcommon::EnvironmentConfig *m_curenvconfig;
 			libnutcommon::IPv4Config *m_curipv4config;
+			bool m_curisfallback;
+			
 			QStack<quint32> m_selBlocks;
 			
-			local_env_config *m_cur_env, *m_def_env;
+			local_env_config *m_cur_env, *m_def_env; //TODO:Whats that?
 			
 			void selectAdd(const libnutcommon::SelectRule &rule);
 		
@@ -61,6 +63,10 @@ namespace nuts {
 			bool envDHCP();
 			bool finishDHCP();
 			
+			bool envFallback();
+			bool finishFallback();
+			bool envFallbackTimeout(int timeout);
+			
 			bool envZeroconf();
 			bool finishZeroconf();
 			
@@ -70,7 +76,7 @@ namespace nuts {
 			bool staticUser();
 			
 			bool staticIP(const QHostAddress &addr);
-			bool staticNetmak(const QHostAddress &addr);
+			bool staticNetmask(const QHostAddress &addr);
 			bool staticGateway(const QHostAddress &addr);
 			bool staticDNS(const QHostAddress &addr);
 

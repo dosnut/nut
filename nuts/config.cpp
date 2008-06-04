@@ -18,7 +18,7 @@ extern FILE *configparserin;
 
 namespace nuts {
 	ConfigParser::ConfigParser(const QString &configFile)
-	: m_configFile(configFile), m_config(new libnutcommon::Config()) {
+	: m_configFile(configFile), m_config(new libnutcommon::Config()), m_curisfallback(false) {
 		failed = false;
 		configparserin = fopen(m_configFile.toUtf8().constData(), "r");
 		if (!configparserin)
@@ -142,37 +142,87 @@ namespace nuts {
 		m_curipv4config = 0;
 		return true;
 	}
+	bool ConfigParser::envFallback() {
+		if (!m_curipv4config) return false;
+		m_curisfallback = true;
+		//Set timeout to -1 to later check if user has set time out
+		m_curipv4config->m_timeout = -1;
+		return true;;
+	}
+	bool ConfigParser::finishFallback() {
+		m_curisfallback = false;
+		if (-1 == m_curipv4config->m_timeout) //user did not set timeout, set default
+			m_curipv4config->m_timeout = 30;
+		return true;
+	}
+	bool ConfigParser::envFallbackTimeout(int timeout) {
+		if (!m_curenvconfig) return false;
+		if (!m_curipv4config) return false;
+		if (-1 != m_curipv4config->m_timeout) return false; //timeout was set before
+		m_curipv4config->m_timeout = timeout;
+		return true;
+	}
 	
 	bool ConfigParser::envZeroconf() {
-		m_curipv4config = 0;
-		if (!m_curenvconfig) return false;
-		if (m_cur_env->m_haszeroconf) return false;
-		m_curipv4config = new libnutcommon::IPv4Config(libnutcommon::IPv4Config::DO_ZEROCONF);
-		return true;
+		if (m_curisfallback) {
+			if (!m_curenvconfig) return false;
+			if (!m_curipv4config) return false;
+			if (libnutcommon::IPv4Config::DO_DHCP != m_curipv4config->getFlags()) return false; //Check if this is the first time fallback is configured (dhcp only)
+			m_curipv4config->m_flags = m_curipv4config->m_flags | libnutcommon::IPv4Config::DO_ZEROCONF;
+			return true;
+		}
+		else { //not in fallback, configuring "real" interface
+			m_curipv4config = 0;
+			if (!m_curenvconfig) return false;
+			if (m_cur_env->m_haszeroconf) return false; //TODO:wahts happening here?
+			m_curipv4config = new libnutcommon::IPv4Config(libnutcommon::IPv4Config::DO_ZEROCONF);
+			return true;
+		}
 	}
 	
 	bool ConfigParser::finishZeroconf() {
-		if (!m_curenvconfig) return false;
-		if (!m_curipv4config) return false;
-		m_cur_env->m_haszeroconf = true;
-		m_curenvconfig->m_ipv4Interfaces.push_back(m_curipv4config);
-		m_curipv4config = 0;
-		return true;
+		if (m_curisfallback) {
+			//is there anything to check?
+			return true;
+		}
+		else {
+			if (!m_curenvconfig) return false;
+			if (!m_curipv4config) return false;
+			m_cur_env->m_haszeroconf = true;
+			m_curenvconfig->m_ipv4Interfaces.push_back(m_curipv4config);
+			m_curipv4config = 0;
+			return true;
+		}
 	}
 	
 	bool ConfigParser::envStatic() {
-		m_curipv4config = 0;
-		if (!m_curenvconfig) return false;
-		m_curipv4config = new libnutcommon::IPv4Config(libnutcommon::IPv4Config::DO_STATIC);
-		return true;
+		if (m_curisfallback) {
+			if (!m_curenvconfig) return false;
+			if (!m_curipv4config) return false;
+			if (libnutcommon::IPv4Config::DO_DHCP != m_curipv4config->getFlags()) return false; //Check if this is the first time fallback is configured (dhcp only)
+			m_curipv4config->m_flags = m_curipv4config->m_flags | libnutcommon::IPv4Config::DO_STATIC;
+			return true;
+		}
+		else {
+			m_curipv4config = 0;
+			if (!m_curenvconfig) return false;
+			m_curipv4config = new libnutcommon::IPv4Config(libnutcommon::IPv4Config::DO_STATIC);
+			return true;
+		}
 	}
 	
 	bool ConfigParser::finishStatic() {
-		if (!m_curenvconfig) return false;
-		if (!m_curipv4config) return false;
-		m_curenvconfig->m_ipv4Interfaces.push_back(m_curipv4config);
-		m_curipv4config = 0;
-		return true;
+		if (m_curisfallback) {
+			//anything to check here?
+			return true;
+		}
+		else {
+			if (!m_curenvconfig) return false;
+			if (!m_curipv4config) return false;
+			m_curenvconfig->m_ipv4Interfaces.push_back(m_curipv4config);
+			m_curipv4config = 0;
+			return true;
+		}
 	}
 	
 	bool ConfigParser::staticUser() {
@@ -182,30 +232,61 @@ namespace nuts {
 	}
 	
 	bool ConfigParser::staticIP(const QHostAddress &addr) {
-		if (!m_curipv4config) return false;
-		if (!m_curipv4config->m_static_ip.isNull()) return false;
-		m_curipv4config->m_static_ip = addr;
-		return true;
+		if (m_curisfallback) { //TODO:Check if we have to do anything else
+			if (!m_curipv4config) return false;
+			if (!m_curipv4config->m_static_ip.isNull()) return false;
+			m_curipv4config->m_static_ip = addr;
+			return true;
+		}
+		else {
+			if (!m_curipv4config) return false;
+			if (!m_curipv4config->m_static_ip.isNull()) return false;
+			m_curipv4config->m_static_ip = addr;
+			return true;
+		}
 	}
 	
-	bool ConfigParser::staticNetmak(const QHostAddress &addr) {
-		if (!m_curipv4config) return false;
-		if (!m_curipv4config->m_static_netmask.isNull()) return false;
-		m_curipv4config->m_static_netmask = addr;
-		return true;
+	bool ConfigParser::staticNetmask(const QHostAddress &addr) {
+		if (m_curisfallback) { //TODO:Check if we have to do anything else
+			if (!m_curipv4config) return false;
+			if (!m_curipv4config->m_static_netmask.isNull()) return false;
+			m_curipv4config->m_static_netmask = addr;
+			return true;
+		}
+		else {
+			if (!m_curipv4config) return false;
+			if (!m_curipv4config->m_static_netmask.isNull()) return false;
+			m_curipv4config->m_static_netmask = addr;
+			return true;
+		}
 	}
 	
 	bool ConfigParser::staticGateway(const QHostAddress &addr) {
-		if (!m_curipv4config) return false;
-		if (!m_curipv4config->m_static_gateway.isNull()) return false;
-		m_curipv4config->m_static_gateway = addr;
-		return true;
+		if (m_curisfallback) { //TODO:Check if we have to do anything else
+			if (!m_curipv4config) return false;
+			if (!m_curipv4config->m_static_gateway.isNull()) return false;
+			m_curipv4config->m_static_gateway = addr;
+			return true;
+		}
+		else {
+			if (!m_curipv4config) return false;
+			if (!m_curipv4config->m_static_gateway.isNull()) return false;
+			m_curipv4config->m_static_gateway = addr;
+			return true;
+		}
 	}
 	
 	bool ConfigParser::staticDNS(const QHostAddress &addr) {
-		if (!m_curipv4config) return false;
-		m_curipv4config->m_static_dnsservers.push_back(addr);
-		return true;
+		if (m_curisfallback) { //TODO:Check if we have to do anything else
+			if (!m_curipv4config) return false;
+			m_curipv4config->m_static_dnsservers.push_back(addr);
+			return true;
+		}
+		else {
+			if (!m_curipv4config) return false;
+			m_curipv4config->m_static_dnsservers.push_back(addr);
+			return true;
+		}
 	}
 	
 	void ConfigParser::selectAdd(const libnutcommon::SelectRule &rule) {
