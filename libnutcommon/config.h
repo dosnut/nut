@@ -318,6 +318,7 @@ namespace libnutcommon {
 			
 			int m_flags;
 			int m_overwriteFlags;
+			int m_timeout;
 		
 		public:	
 			IPv4Config(int flags = IPv4Config::DO_DHCP | IPv4Config::DO_ZEROCONF, int overwriteFlags = 0);
@@ -329,6 +330,7 @@ namespace libnutcommon {
 			
 			Flags getFlags() const { return (Flags) m_flags; }
 			OverwriteFlags getOverwriteFlags() const { return (OverwriteFlags) m_overwriteFlags; }
+			int getTimeOut() const { return m_timeout; }
 	};
 	
 	/** @brief If an interface has to be configured by the user (IPv4Config::DO_USERSTATIC), he/she has to
