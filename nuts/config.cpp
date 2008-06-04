@@ -16,6 +16,8 @@ extern FILE *configparserin;
  * be deleted by ~Config() !
  */
 
+#define FALLBACK_TIMEOUT 60
+
 namespace nuts {
 	ConfigParser::ConfigParser(const QString &configFile)
 	: m_configFile(configFile), m_config(new libnutcommon::Config()), m_curisfallback(false) {
@@ -152,7 +154,7 @@ namespace nuts {
 	bool ConfigParser::finishFallback() {
 		m_curisfallback = false;
 		if (-1 == m_curipv4config->m_timeout) //user did not set timeout, set default
-			m_curipv4config->m_timeout = 30;
+			m_curipv4config->m_timeout = FALLBACK_TIMEOUT;
 		return true;
 	}
 	bool ConfigParser::envFallbackTimeout(int timeout) {
