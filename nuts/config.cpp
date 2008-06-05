@@ -98,12 +98,13 @@ namespace nuts {
 	}
 	
 	//This will create a new Environment using ppp with a single interface using dhcp
-	bool ConfigParser::devPPP(const QString &name, const QString &command) {
+	bool ConfigParser::devPPP(const QString &name, const QString &start_command, const QString &stop_command) {
 		//Add environment;
 		m_cur_env = 0; m_curenvconfig = 0;
 		if (!m_curdevconfig) return false;
 		m_curenvconfig = new libnutcommon::EnvironmentConfig(name);
-		m_curenvconfig->m_ppp_command = command;
+		m_curenvconfig->m_ppp_start_command = start_command;
+		m_curenvconfig->m_ppp_stop_command = stop_command;
 		m_curdevconfig->m_environments.push_back(m_curenvconfig);
 		m_cur_env = new local_env_config();
 		

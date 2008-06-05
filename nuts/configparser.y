@@ -73,7 +73,7 @@ wpasupplicant: WPASUPPLICANT DRIVER STRING CONFIG STRING ';' { CHECK(devWPASuppC
 	| WPASUPPLICANT CONFIG STRING DRIVER STRING ';' { CHECK(devWPASuppConfig(*$5, *$3)); delete $5; delete $3; }
 ;
 
-ppp: PPP STRING STRING ';' { CHECK(devPPP(*$2,*$3)); delete $2; delete $3; }
+ppp: PPP STRING STRING STRING ';' { CHECK(devPPP(*$2,*$3, *$4)); delete $2; delete $3; delete $4;}
 
 environment: ENVIRONMENT STRING { CHECK(devEnvironment(*$2)); } environmentconfig { CHECK(finishEnvironment()); delete $2; }
 	| ENVIRONMENT { CHECK(devEnvironment("")); } environmentconfig { CHECK(finishEnvironment()); }
