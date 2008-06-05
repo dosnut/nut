@@ -23,7 +23,7 @@
 %token DEVICE ENVIRONMENT
 %token NOAUTOSTART
 %token DEFAULT
-%token DHCP NODHCP ZEROCONF NOZEROCONF STATIC TIMEOUT FALLBACK PPP
+%token DHCP NODHCP ZEROCONF NOZEROCONF STATIC TIMEOUT FALLBACK
 %token IP NETMASK GATEWAY DNSSERVER
 %token LABELINDEX
 %token SELECT USER ARP ESSID
@@ -63,7 +63,6 @@ deviceoptions:
 
 deviceoption: { CHECK(devDefaultEnvironment()); } environmentoption
 	| environment
-	| ppp
 	| wpasupplicant
 	| NOAUTOSTART { CHECK(devNoAutoStart()); } ';'
 ;
@@ -72,8 +71,6 @@ wpasupplicant: WPASUPPLICANT DRIVER STRING CONFIG STRING ';' { CHECK(devWPASuppC
 	| WPASUPPLICANT CONFIG STRING ';' { CHECK(devWPASuppConfig("wext", *$3)); delete $3; }
 	| WPASUPPLICANT CONFIG STRING DRIVER STRING ';' { CHECK(devWPASuppConfig(*$5, *$3)); delete $5; delete $3; }
 ;
-
-ppp: PPP STRING STRING ';' { CHECK(devPPP(*$2,*$3)); delete $2; delete $3; }
 
 environment: ENVIRONMENT STRING { CHECK(devEnvironment(*$2)); } environmentconfig { CHECK(finishEnvironment()); delete $2; }
 	| ENVIRONMENT { CHECK(devEnvironment("")); } environmentconfig { CHECK(finishEnvironment()); }
@@ -100,17 +97,17 @@ dhcpconfig: DHCP { CHECK(envDHCP()); } ';' { CHECK(finishDHCP()); }
 	| DHCP { CHECK(envDHCP()); } FALLBACK { CHECK(envFallback()); } fallbackconfig { CHECK(finishFallback()); } { CHECK(finishDHCP()); }
 ;
 
-fallbackconfig: fallbackoption
-	| '{' fallbackoptionbracket '}' ';'
-	| '{' fallbackoptionbracket '}'
+fallbackconfig: fallbackoptions
+	| '{' fallbackoptionsbracket '}' ';'
+	| '{' fallbackoptionsbracket '}'
 ;
 
-fallbackoption: INTEGER fallbackinterface { CHECK(envFallbackTimeout($1)); }
+fallbackoptions: INTEGER fallbackinterface { CHECK(envFallbackTimeout($1)); }
 	| fallbackinterface
 	| INTEGER { CHECK(envFallbackTimeout($1)); } ';'
 ;
 
-fallbackoptionbracket: timeout fallbackinterface
+fallbackoptionsbracket: timeout fallbackinterface
 	| fallbackinterface timeout
 	| fallbackinterface
 	| timeout

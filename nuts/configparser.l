@@ -18,7 +18,6 @@
 
 device      return DEVICE;
 environment return ENVIRONMENT;
-ppp         return PPP;
 
 no-auto-start return NOAUTOSTART;
 
