@@ -705,6 +705,8 @@ namespace nuts {
 	}
 	
 	void Interface_IPv4::dhcp_setup_interface(DHCPPacket *ack, bool renewing) {
+		//stop fallback
+		fallback_set_timeout(-1);
 		if (renewing) {
 			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
 		} else {
@@ -1021,6 +1023,7 @@ namespace nuts {
 		dhcpAction();
 	}
 	void Interface_IPv4::stopDHCP() {
+		fallback_set_timeout(-1);
 		switch (m_dhcpstate) {
 			case DHCPS_INITREBOOT:  // nothing to do ??
 			case DHCPS_REBOOTING:  // nothing to do ??
