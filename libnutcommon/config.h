@@ -263,6 +263,7 @@ namespace libnutcommon {
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentConfig &data);
 			
 			QString m_name;
+			QString m_ppp_command;
 			QList<IPv4Config*> m_ipv4Interfaces;
 			SelectConfig m_select;
 			
