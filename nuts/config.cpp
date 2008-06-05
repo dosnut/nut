@@ -97,37 +97,6 @@ namespace nuts {
 		return true;
 	}
 	
-	//This will create a new Environment using ppp with a single interface using dhcp
-	bool ConfigParser::devPPP(const QString &name, const QString &command) {
-		//Add environment;
-		m_cur_env = 0; m_curenvconfig = 0;
-		if (!m_curdevconfig) return false;
-		m_curenvconfig = new libnutcommon::EnvironmentConfig(name);
-		m_curenvconfig->m_ppp_command = command;
-		m_curdevconfig->m_environments.push_back(m_curenvconfig);
-		m_cur_env = new local_env_config();
-		
-		//Add dhcp interface to environment
-		m_curipv4config = 0;
-		if (!m_curenvconfig) return false;
-		if (m_cur_env->m_hasdhcp) return false;
-		m_curipv4config = new libnutcommon::IPv4Config(libnutcommon::IPv4Config::DO_DHCP);
-		
-		//Finish adding
-		if (!m_curenvconfig) return false;
-		if (!m_curipv4config) return false;
-		m_cur_env->m_hasdhcp = true;
-		m_curenvconfig->m_ipv4Interfaces.push_back(m_curipv4config);
-		m_curipv4config = 0;
-
-		//finish environment
-		if (!m_curenvconfig) return true;
-		finishEnvironment(m_curenvconfig, m_cur_env);
-		delete m_cur_env;
-		m_cur_env = 0; m_curenvconfig = 0;
-		return true;
-	}
-	
 	bool ConfigParser::devNoAutoStart() {
 		if (!m_curdevconfig) return false;
 		m_curdevconfig->m_noAutoStart = true;

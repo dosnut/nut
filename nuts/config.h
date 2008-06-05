@@ -51,8 +51,6 @@ namespace nuts {
 			bool devEnvironment(const QString &name);
 			bool finishEnvironment();
 			
-			bool devPPP(const QString &name, const QString &command);
-			
 			bool devDefaultEnvironment();
 			bool devNoAutoStart();
 			bool devWPASuppConfig(const QString &driver, const QString &config);
