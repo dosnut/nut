@@ -315,7 +315,7 @@ namespace nuts {
 			int m_dhcp_retry;        // count retries
 			virtual void timerEvent(QTimerEvent *event);
 			void dhcp_set_timeout(int msec);
-			void fallback_set_timeout(int sec);
+			void fallback_set_timeout(int msec);
 			int m_fallback_timer_id;
 		
 		protected:

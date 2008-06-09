@@ -733,10 +733,10 @@ namespace nuts {
 			m_dhcp_timer_id = -1;
 	}
 
-	void Interface_IPv4::fallback_set_timeout(int sec) {
+	void Interface_IPv4::fallback_set_timeout(int msec) {
 		if (m_fallback_timer_id != -1) killTimer(m_fallback_timer_id);
-		if (sec != -1)
-			m_fallback_timer_id = startTimer(sec*1000);
+		if (msec != -1)
+			m_fallback_timer_id = startTimer(msec);
 		else
 			m_fallback_timer_id = -1;
 	}
@@ -879,7 +879,6 @@ namespace nuts {
 					releaseXID();
 					return;
 				case DHCPS_INIT_START:
-					checkFallbackRunning();
 					m_dhcp_retry = 0;
 					// fall through:
 					// dhcpstate = DHCPS_INIT;
