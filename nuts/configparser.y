@@ -18,6 +18,7 @@
 	QHostAddress *addr;
 	libnutcommon::MacAddress *macAddr;
 	int i;
+	bool b;
 }
 
 %token DEVICE ENVIRONMENT
@@ -36,6 +37,7 @@
 %token <addr> IPv4_VAL
 %token <macAddr> MACADDR
 %token <i> INTEGER
+%token <b> BOOL
 
 %error-verbose
 
@@ -97,17 +99,17 @@ dhcpconfig: DHCP { CHECK(envDHCP()); } ';' { CHECK(finishDHCP()); }
 	| DHCP { CHECK(envDHCP()); } FALLBACK { CHECK(envFallback()); } fallbackconfig { CHECK(finishFallback()); } { CHECK(finishDHCP()); }
 ;
 
-fallbackconfig: fallbackoptions
-	| '{' fallbackoptionsbracket '}' ';'
-	| '{' fallbackoptionsbracket '}'
+fallbackconfig: fallbackoption
+	| '{' fallbackoptionbracket '}' ';'
+	| '{' fallbackoptionbracket '}'
 ;
 
-fallbackoptions: INTEGER fallbackinterface { CHECK(envFallbackTimeout($1)); }
+fallbackoption: INTEGER fallbackinterface { CHECK(envFallbackTimeout($1)); }
 	| fallbackinterface
 	| INTEGER { CHECK(envFallbackTimeout($1)); } ';'
 ;
 
-fallbackoptionsbracket: timeout fallbackinterface
+fallbackoptionbracket: timeout fallbackinterface
 	| fallbackinterface timeout
 	| fallbackinterface
 	| timeout

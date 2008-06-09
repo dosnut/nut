@@ -319,6 +319,7 @@ namespace libnutcommon {
 			int m_flags;
 			int m_overwriteFlags;
 			int m_timeout;
+			bool m_continue_dhcp;
 		
 		public:	
 			IPv4Config(int flags = IPv4Config::DO_DHCP | IPv4Config::DO_ZEROCONF, int overwriteFlags = 0);

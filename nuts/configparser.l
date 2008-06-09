@@ -52,6 +52,9 @@ wpa-supplicant  return WPASUPPLICANT;
 config      return CONFIG;
 driver      return DRIVER;
 
+(0|1|true|false|TRUE|FALSE|True|False) {
+			yylval.b = ((strcmp(yytext,"1") || strcmp(yytext,"true") || strcmp(yytext,"TRUE") || strcmp(yytext,"True")) ? true : false); return BOOL;}
+
 ([[:digit:]]{1,3}\.){3}[[:digit:]]{1,3} {
             yylval.addr = new QHostAddress(QString(yytext)); return IPv4_VAL; }
 
