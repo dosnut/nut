@@ -24,7 +24,8 @@
 %token DEVICE ENVIRONMENT
 %token NOAUTOSTART
 %token DEFAULT
-%token DHCP NODHCP ZEROCONF NOZEROCONF STATIC TIMEOUT FALLBACK
+%token DHCP NODHCP ZEROCONF NOZEROCONF STATIC 
+%token FALLBACK TIMEOUT CONTINUEDHCP
 %token IP NETMASK GATEWAY DNSSERVER
 %token LABELINDEX
 %token SELECT USER ARP ESSID
@@ -134,7 +135,7 @@ fallbackinterface: zeroconf
 timeout: TIMEOUT INTEGER ';' { CHECK(envFallbackTimeout($2));}
 ;
 
-continuedhcp: continue-dhcp BOOL ';' { CHECK(envFallbackContinueDhcp($2)); }
+continuedhcp: CONTINUEDHCP BOOL ';' { CHECK(envFallbackContinueDhcp($2)); }
 ;
 
 zeroconf: ZEROCONF { CHECK(envZeroconf()); } ';' { CHECK(finishZeroconf()); }

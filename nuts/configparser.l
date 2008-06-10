@@ -30,6 +30,7 @@ no-zeroconf return NOZEROCONF;
 static      return STATIC;
 timeout     return TIMEOUT;
 fallback    return FALLBACK;
+continue-dhcp return CONTINUEDHCP;
 
 ip          return IP;
 netmask     return NETMASK;
