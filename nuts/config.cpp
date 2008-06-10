@@ -155,6 +155,11 @@ namespace nuts {
 		m_curisfallback = false;
 		if (-1 == m_curipv4config->m_timeout) //user did not set timeout, set default
 			m_curipv4config->m_timeout = FALLBACK_TIMEOUT;
+		//check if interface type was defined, if not, set zeroconf
+		if ( !(m_curipv4config->getFlags() & libnutcommon::IPv4Config::DO_STATIC ||
+			m_curipv4config->getFlags() & libnutcommon::IPv4Config::DO_ZEROCONF) ) {
+			m_curipv4config->m_flags |= libnutcommon::IPv4Config::DO_ZEROCONF;
+		}
 		return true;
 	}
 	bool ConfigParser::envFallbackTimeout(int timeout) {

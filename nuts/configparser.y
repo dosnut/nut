@@ -120,12 +120,12 @@ fallbackoptionbracket:
 	| continuedhcp timeout
 	| continuedhcp fallbackinterface
 	| fallbackinterface continuedhcp
+	| fallbackinterface timeout
 	| timeout continuedhcp
 	| timeout fallbackinterface
-	| fallbackinterface timeout
+	| continuedhcp
 	| fallbackinterface
 	| timeout
-	| continuedhcp
 ;
 
 fallbackinterface: zeroconf
