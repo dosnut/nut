@@ -66,6 +66,7 @@ namespace nuts {
 			bool envFallback();
 			bool finishFallback();
 			bool envFallbackTimeout(int timeout);
+			bool envFallbackContinueDhcp(bool con);
 			
 			bool envZeroconf();
 			bool finishZeroconf();

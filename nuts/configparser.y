@@ -109,10 +109,22 @@ fallbackoption: INTEGER fallbackinterface { CHECK(envFallbackTimeout($1)); }
 	| INTEGER { CHECK(envFallbackTimeout($1)); } ';'
 ;
 
-fallbackoptionbracket: timeout fallbackinterface
+fallbackoptionbracket:
+	| continuedhcp fallbackinterface timeout
+	| continuedhcp timeout fallbackinterface
+	| fallbackinterface continuedhcp timeout
+	| fallbackinterface timeout continuedhcp
+	| timeout continuedhcp fallbackinterface
+	| timeout fallbackinterface continuedhcp
+	| continuedhcp timeout
+	| continuedhcp fallbackinterface
+	| fallbackinterface continuedhcp
+	| timeout continuedhcp
+	| timeout fallbackinterface
 	| fallbackinterface timeout
 	| fallbackinterface
 	| timeout
+	| continuedhcp
 ;
 
 fallbackinterface: zeroconf
@@ -120,6 +132,10 @@ fallbackinterface: zeroconf
 ;
 
 timeout: TIMEOUT INTEGER ';' { CHECK(envFallbackTimeout($2));}
+;
+
+continuedhcp: continue-dhcp BOOL ';' { CHECK(envFallbackContinueDhcp($2)); }
+;
 
 zeroconf: ZEROCONF { CHECK(envZeroconf()); } ';' { CHECK(finishZeroconf()); }
 ;

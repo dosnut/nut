@@ -164,6 +164,13 @@ namespace nuts {
 		m_curipv4config->m_timeout = timeout;
 		return true;
 	}
+
+	bool ConfigParser::envFallbackContinueDhcp(bool con) {
+		if (!m_curenvconfig) return false;
+		if (!m_curipv4config) return false;
+		m_curipv4config->m_continue_dhcp = con;
+		return true;
+	}
 	
 	bool ConfigParser::envZeroconf() {
 		if (m_curisfallback) {

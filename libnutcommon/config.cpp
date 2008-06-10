@@ -202,7 +202,7 @@ namespace libnutcommon {
 	}
 	
 	IPv4Config::IPv4Config(int flags, int overwriteFlags)
-	: m_flags(flags), m_overwriteFlags(overwriteFlags), m_timeout(0) {
+	: m_flags(flags), m_overwriteFlags(overwriteFlags), m_timeout(0), m_continue_dhcp(false) {
 	}
 
 	// called by common.cpp: init()
