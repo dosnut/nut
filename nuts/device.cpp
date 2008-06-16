@@ -773,7 +773,8 @@ namespace nuts {
 			m_zc_state =ZCS_OFF;
 			return;
 		}
-		m_zc_arp_probe->setReserve(m_config->getFlags() & libnutcommon::IPv4Config::DO_DHCP);
+		// This did lead to segfaults... ;_)
+		// m_zc_arp_probe->setReserve(m_config->getFlags() & libnutcommon::IPv4Config::DO_DHCP);
 		connect(m_zc_arp_probe, SIGNAL(conflict(QHostAddress, libnutcommon::MacAddress)), SLOT(zc_probe_conflict()));
 		connect(m_zc_arp_probe, SIGNAL(ready(QHostAddress)), SLOT(zc_probe_ready()));
 	}
