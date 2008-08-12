@@ -155,6 +155,12 @@ namespace nuts {
 		m_curisfallback = false;
 		if (-1 == m_curipv4config->m_timeout) //user did not set timeout, set default
 			m_curipv4config->m_timeout = FALLBACK_TIMEOUT;
+		//TODO:Remove nasty workaround; Priority: mid
+		//Description: If fallback time-out is below 7 seconds; timer problems occure: Zerconf does not work anymore
+		//(guess: 3 ARPProbe, after that no announce -> no ip is set)
+		if (m_curipv4config->m_timeout < 10) {
+			m_curipv4config->m_timeout = 10;
+		}
 		//check if interface type was defined, if not, set zeroconf
 		if ( !(m_curipv4config->getFlags() & libnutcommon::IPv4Config::DO_STATIC ||
 			m_curipv4config->getFlags() & libnutcommon::IPv4Config::DO_ZEROCONF) ) {
