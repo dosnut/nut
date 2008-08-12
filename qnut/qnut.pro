@@ -59,7 +59,7 @@ DESTDIR = .
 
 target.path = /usr/bin
 iconstarget.path = /usr/share/qnut/icons
-iconstarget.files = res/*.png res/qnut.svg res/qnut_small.svg
+iconstarget.files = res/*.svg
 langtarget.path = /usr/share/qnut/lang
 langtarget.files = qnut_*.qm
 shortcuttarget.path = /usr/share/applications

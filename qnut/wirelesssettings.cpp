@@ -205,7 +205,7 @@ namespace qnut {
 		ui.managedAvailableSplitter->setEnabled(state >= DS_ACTIVATED && m_Device->getWpaSupplicant());
 		ui.actionsWidget->setEnabled(state >= DS_ACTIVATED && m_Device->getWpaSupplicant());
 		
-		ui.iconLabel->setPixmap(QPixmap(iconFile(m_Device)));
+		ui.iconLabel->setPixmap(QIcon(iconFile(m_Device)).pixmap(48,48));
 		ui.stateLabel->setText(toStringTr(state));
 		
 		if (state <= DS_ACTIVATED) {

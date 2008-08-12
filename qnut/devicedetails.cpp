@@ -162,7 +162,7 @@ namespace qnut {
 	}
 	
 	inline void CDeviceDetails::setHeadInfo() {
-		ui.iconLabel->setPixmap(QPixmap(iconFile(m_Device)));
+		ui.iconLabel->setPixmap(QIcon(iconFile(m_Device)).pixmap(48,48));
 		ui.statusLabel->setText(toStringTr(m_Device->getState()));
 	}
 	
