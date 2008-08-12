@@ -1093,6 +1093,7 @@ namespace nuts {
 		if (m_config->getFlags() & libnutcommon::IPv4Config::DO_DHCP) {
 			startDHCP();
 		} else if (m_config->getFlags() & libnutcommon::IPv4Config::DO_USERSTATIC) {
+			updateNeedUserSetup(!m_userConfig.valid()); //Check if user config is set otherwise let user set:
 			if (m_needUserSetup) {
 				m_ifstate = libnutcommon::IFS_WAITFORCONFIG;
 				emit statusChanged(m_ifstate, this);
@@ -1366,7 +1367,10 @@ namespace nuts {
 			m_ifstate = libnutcommon::IFS_WAITFORCONFIG;
 			emit statusChanged(m_ifstate, this);
 		} else {
-			startUserStatic();
+			//check if environment is active:
+			if (m_env->getID() == m_env->m_device->getEnvironment()) {
+				startUserStatic();
+			}
 		}
 		return true;
 	}
