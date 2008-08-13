@@ -2,6 +2,8 @@
 #include "log.h"
 #include <QHashIterator>
 
+// #include <QDebug>
+
 namespace nuts {
 	const QString DBusDeviceManager::m_dbusPath("/manager");
 	const QString DBusDeviceManager::m_dbusDevicesPath("/devices");
@@ -55,6 +57,7 @@ namespace nuts {
 		m_dbusConnection.unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
 		m_dbusConnection.unregisterService(NUT_DBUS_URL);
 		m_dbusConnection.disconnectFromBus("nuts_system_bus");
+// 		qDebug() << "Deleted dev-manager";
 	}
 
 	void DBusDeviceManager::dbusStopped() {
@@ -148,7 +151,13 @@ namespace nuts {
 	}
 	
 	DBusDevice::~DBusDevice() {
+		DBusEnvironment * dbusenv;
+		while (!m_dbusEnvironments.isEmpty()) {
+			dbusenv = m_dbusEnvironments.takeFirst();
+			delete dbusenv;
+		}
 		m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+// 		qDebug() << "Deleted device";
 	}
 	
 	QString DBusDevice::getPath() {
@@ -286,7 +295,13 @@ namespace nuts {
 	}
 	
 	DBusEnvironment::~DBusEnvironment() {
+		DBusInterface_IPv4 * dbusiface;
+		while (!m_dbusInterfacesIPv4.isEmpty()) {
+			dbusiface = m_dbusInterfacesIPv4.takeFirst();
+			delete dbusiface;
+		}
 		m_dbusConnection->unregisterObject(m_dbusPath);
+// 		qDebug() << "deleted environment";
 	}
 	
 	QString DBusEnvironment::getPath() {
@@ -361,6 +376,7 @@ namespace nuts {
 	}
 	
 	DBusInterface_IPv4::~DBusInterface_IPv4() {
+// 		qDebug() << "deleted interface";
 	}
 
 	QString DBusInterface_IPv4::getPath() {
