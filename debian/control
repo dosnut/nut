@@ -15,6 +15,17 @@ Description: Network UTility (substitute for ifupdown)
  .
  This package contains the server.
 
+Package: nuts-dbg
+Architecture: any
+Depends: nuts (= ${binary:Version})
+Priority: extra
+Recommends: wpasupplicant
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the debug symbols for the server.
+
 Package: qnut
 Architecture: any
 Depends: ${shlibs:Depends}
@@ -24,6 +35,16 @@ Description: Network UTility (substitute for ifupdown)
  .
  This package contains the Qt client.
 
+Package: qnut-dbg
+Architecture: any
+Depends: qnut (= ${binary:Version})
+Priority: extra
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the debug symbols for the Qt client.
+
 Package: cnut
 Architecture: any
 Depends: ${shlibs:Depends}
@@ -32,3 +53,13 @@ Description: Network UTility (substitute for ifupdown)
  which the clients use to control the server.
  .
  This package contains the command line client.
+
+Package: cnut-dbg
+Architecture: any
+Depends: cnut (= ${binary:Version})
+Priority: extra
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the debug symbols for the command line client.
