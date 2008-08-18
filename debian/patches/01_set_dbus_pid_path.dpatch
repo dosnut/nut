@@ -1,8 +1,7 @@
 #! /bin/sh /usr/share/dpatch/dpatch-run
 ## 01_set_dbus_pid_path.dpatch by  <stbuehler@web.de>
 ##
-## All lines beginning with `## DP:' are a description of the patch.
-## DP: No description.
+## DP: Change hardcoded dbus pid path
 
 @DPATCH@
 diff -urNad nut~/libnutcommon/dbusmonitor.h nut/libnutcommon/dbusmonitor.h
