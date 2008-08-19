@@ -6,7 +6,7 @@
 // environment and a dhcp configured interface
 device "eth0";
 
-// if you have 2 configurations (at home, at work etc.) you can yuse this
+// if you have 2 configurations (at home, at work etc.) you can use this
 // common way for defining a device (here eth1) with 2 enviromnents:
 device "eth1" {
 	// the default environment has a single dhcp configured inteface
@@ -40,6 +40,14 @@ device "wlan0" {
 	// this device requires the wpa_supplicant for connection so we specify a config
 	// file and a driver (wext is the default fallback if no driver is given)
 	wpa-supplicant config "/etc/wpa_supplicant/wpa_supplicant.conf" driver "wext";
+
+	// note: if you want to access the wpa_supplicant (and modify its config) from a
+	//       client like qnut you should add lines like the following to your
+	//       wpa_supplicant.conf:
+	//
+	//       ctrl_interface=/var/run/wpa_supplicant
+	//       ctrl_interface_group=netdev
+	//       update_config=1
 	
 	// the interface configuration for the default environment shall be dhcp so we
 	// don't have to sepcify it
