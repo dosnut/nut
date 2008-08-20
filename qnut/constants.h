@@ -23,50 +23,50 @@
 #define UI_ICON_QNUT                    UI_PATH_ICONS "qnut.svg"
 #define UI_ICON_QNUT_SMALL              UI_PATH_ICONS "qnut_small.svg"
 
-#define UI_ICON_ENABLE                  UI_PATH_ICONS "enable.svg"
-#define UI_ICON_ENABLE_ALL              UI_PATH_ICONS "enable_all.svg"
-#define UI_ICON_DISABLE                 UI_PATH_ICONS "disable.svg"
+#define UI_ICON_ENABLE                  UI_PATH_ICONS "enable.png"
+#define UI_ICON_ENABLE_ALL              UI_PATH_ICONS "enable_all.png"
+#define UI_ICON_DISABLE                 UI_PATH_ICONS "disable.png"
 
-#define UI_ICON_SELECTED                UI_PATH_ICONS "selected.svg"
-#define UI_ICON_UNSELECTED              UI_PATH_ICONS "unselected.svg"
+#define UI_ICON_SELECTED                UI_PATH_ICONS "selected.png"
+#define UI_ICON_UNSELECTED              UI_PATH_ICONS "unselected.png"
 
-#define UI_ICON_SCRIPT_SETTINGS         UI_PATH_ICONS "script_settings.svg"
-#define UI_ICON_CONFIGURE               UI_PATH_ICONS "configure.svg"
-#define UI_ICON_EDIT                    UI_PATH_ICONS "edit.svg"
-#define UI_ICON_RELOAD                  UI_PATH_ICONS "reload.svg"
-#define UI_ICON_CLEAR                   UI_PATH_ICONS "clear.svg"
-#define UI_ICON_SAVE                    UI_PATH_ICONS "save.svg"
+#define UI_ICON_SCRIPT_SETTINGS         UI_PATH_ICONS "script_settings.png"
+#define UI_ICON_CONFIGURE               UI_PATH_ICONS "configure.png"
+#define UI_ICON_EDIT                    UI_PATH_ICONS "edit.png"
+#define UI_ICON_RELOAD                  UI_PATH_ICONS "reload.png"
+#define UI_ICON_CLEAR                   UI_PATH_ICONS "clear.png"
+#define UI_ICON_SAVE                    UI_PATH_ICONS "save.png"
 
-#define UI_ICON_ADD                     UI_PATH_ICONS "add.svg"
-#define UI_ICON_REMOVE                  UI_PATH_ICONS "remove.svg"
+#define UI_ICON_ADD                     UI_PATH_ICONS "add.png"
+#define UI_ICON_REMOVE                  UI_PATH_ICONS "remove.png"
 
-#define UI_ICON_ADD_ADHOC               UI_PATH_ICONS "add_adhoc.svg"
+#define UI_ICON_ADD_ADHOC               UI_PATH_ICONS "add_adhoc.png"
 
-#define UI_ICON_FORCE                   UI_PATH_ICONS "force.svg"
-#define UI_ICON_WARNING                 UI_PATH_ICONS "warning.svg"
-#define UI_ICON_SEARCH                  UI_PATH_ICONS "search.svg"
+#define UI_ICON_FORCE                   UI_PATH_ICONS "force.png"
+#define UI_ICON_WARNING                 UI_PATH_ICONS "warning.png"
+#define UI_ICON_SEARCH                  UI_PATH_ICONS "search.png"
 
-#define UI_ICON_AIR                     UI_PATH_ICONS "air.svg"
-#define UI_ICON_ADHOC                   UI_PATH_ICONS "adhoc.svg"
+#define UI_ICON_AIR                     UI_PATH_ICONS "air.png"
+#define UI_ICON_ADHOC                   UI_PATH_ICONS "adhoc.png"
 
 #define UI_ICON_DETAILED                UI_PATH_ICONS "view_detailed"
 
-#define UI_ICON_ETH_UP                  UI_PATH_ICONS "eth_up.svg"
-#define UI_ICON_ETH_UNCONFIGURED        UI_PATH_ICONS "eth_unconfigured.svg"
-#define UI_ICON_ETH_CARRIER             UI_PATH_ICONS "eth_carrier.svg"
-#define UI_ICON_ETH_ACTIVATED           UI_PATH_ICONS "eth.svg"
-#define UI_ICON_ETH_DEACTIVATED         UI_PATH_ICONS "eth_deactivated.svg"
+#define UI_ICON_ETH_UP                  UI_PATH_ICONS "eth_up.png"
+#define UI_ICON_ETH_UNCONFIGURED        UI_PATH_ICONS "eth_unconfigured.png"
+#define UI_ICON_ETH_CARRIER             UI_PATH_ICONS "eth_carrier.png"
+#define UI_ICON_ETH_ACTIVATED           UI_PATH_ICONS "eth_activated.png"
+#define UI_ICON_ETH_DEACTIVATED         UI_PATH_ICONS "eth_deactivated.png"
 
-#define UI_ICON_AIR_UP                  UI_PATH_ICONS "air_up.svg"
-#define UI_ICON_AIR_UNCONFIGURED        UI_PATH_ICONS "air_unconfigured.svg"
-#define UI_ICON_AIR_CARRIER             UI_PATH_ICONS "air_carrier.svg"
-#define UI_ICON_AIR_ACTIVATED           UI_PATH_ICONS "air.svg"
-#define UI_ICON_AIR_DEACTIVATED         UI_PATH_ICONS "air_deactivated.svg"
+#define UI_ICON_AIR_UP                  UI_PATH_ICONS "air_up.png"
+#define UI_ICON_AIR_UNCONFIGURED        UI_PATH_ICONS "air_unconfigured.png"
+#define UI_ICON_AIR_CARRIER             UI_PATH_ICONS "air_carrier.png"
+#define UI_ICON_AIR_ACTIVATED           UI_PATH_ICONS "air_activated.png"
+#define UI_ICON_AIR_DEACTIVATED         UI_PATH_ICONS "air_deactivated.png"
 
-#define UI_ICON_ENVIRONMENT             UI_PATH_ICONS "environment.svg"
+#define UI_ICON_ENVIRONMENT             UI_PATH_ICONS "environment.png"
 
-#define UI_ICON_INTERFACE               UI_PATH_ICONS "interface.svg"
-#define UI_ICON_INTERFACE_ACTIVE        UI_PATH_ICONS "interface_active.svg"
+#define UI_ICON_INTERFACE               UI_PATH_ICONS "interface.png"
+#define UI_ICON_INTERFACE_ACTIVE        UI_PATH_ICONS "interface_active.png"
 
 #define UI_FLAG_SCRIPT_NONE             0x00
 #define UI_FLAG_SCRIPT_UP               0x01
