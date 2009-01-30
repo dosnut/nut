@@ -294,11 +294,13 @@ namespace qnut {
 		if (ui.prwCipCombo->isEnabled()) {
 			switch (ui.prwCipCombo->currentIndex()) {
 			case 0:
-				config.pairwise = PCI_TKIP; break;
+				config.pairwise = PCI_NONE; break;
 			case 1:
+				config.pairwise = PCI_TKIP; break;
+			case 2:
 				config.pairwise = PCI_CCMP; break;
 			default:
-				config.pairwise = PCI_NONE; break;
+				break;
 			}
 			
 			if (config.pairwise & m_OldConfig.pairwise) {
