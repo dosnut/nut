@@ -44,12 +44,12 @@ namespace qnut {
 		QWidget * mainwin = dynamic_cast<QWidget *>(parent());
 		switch (reason) {
 			case Trigger:
-				if (mainwin->isVisible()) {
-					mainwin->close();
-				}
-				else {
+				if (mainwin->isMinimized() || !mainwin->isVisible()) {
 					mainwin->show();
+					mainwin->setWindowState(mainwin->windowState() & ~Qt::WindowMinimized | Qt::WindowActive);
 				}
+				else
+					mainwin->close();
 				break;
 			default:
 				break;
