@@ -22,6 +22,7 @@ namespace libnutcommon {
 	void init();
 }
 
+#if QT_VERSION < 0x040500
 static inline bool operator== (const QDBusObjectPath &p1, const QDBusObjectPath &p2){
 	return (p1.path() == p2.path());
 }
@@ -29,6 +30,7 @@ static inline bool operator== (const QDBusObjectPath &p1, const QDBusObjectPath 
 static inline uint qHash(const QDBusObjectPath &key) {
 	return qHash(key.path());
 }
+#endif
 
 QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress &data);
 const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &data);
