@@ -162,8 +162,6 @@ namespace qnut {
 			CEnvironment * parentData = static_cast<CEnvironment *>(parent.internalPointer());
 			return createIndex(row, column, parentData->getInterfaces()[row]);
 		}
-		
-		return QModelIndex();
 	}
 	
 	QModelIndex CEnvironmentTreeModel::parent(const QModelIndex & index) const {

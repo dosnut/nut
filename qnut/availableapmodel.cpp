@@ -39,15 +39,16 @@ namespace qnut {
 		emit layoutChanged();
 	}
 	
-	int CAvailableAPModel::columnCount(const QModelIndex &) const {
-		return 6;
+	bool CAvailableAPModel::hasChildren(const QModelIndex & parent) const {
+		return !parent.isValid();
 	}
 	
 	int CAvailableAPModel::rowCount(const QModelIndex & parent) const {
-		if (!parent.isValid())
-			return m_Scans.count();
-		else
-			return 0;
+		return parent.isValid() ? 0 : m_Scans.count();
+	}
+	
+	int CAvailableAPModel::columnCount(const QModelIndex &) const {
+		return 6;
 	}
 	
 	QVariant CAvailableAPModel::data(const QModelIndex & index, int role) const {

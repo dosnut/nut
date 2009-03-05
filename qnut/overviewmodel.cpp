@@ -68,31 +68,22 @@ namespace qnut {
 		return QModelIndex();
 	}
 	
-	int COverViewModel::columnCount(const QModelIndex & parent) const {
-		if (m_Devices == NULL)
-			return 0;
-			
-		if (parent.isValid())
-			return 0;
-		
-		return 6;
+	int COverViewModel::columnCount(const QModelIndex & /*parent*/) const {
+		return m_Devices == NULL ? 0 : 6;
 	}
 	
-	QModelIndex COverViewModel::index(int row, int column, const QModelIndex & parent) const {
-		if ((m_Devices == NULL) || (parent.isValid()) || (row >= m_Devices->size()))
-			return QModelIndex();
-		else
-			return createIndex(row, column, (void *)(m_Devices->at(row)));
+	QModelIndex COverViewModel::index(int row, int column, const QModelIndex & /*parent*/) const {
+		return (m_Devices == NULL) || (row >= m_Devices->size()) ?
+			QModelIndex() :
+			createIndex(row, column, (void *)(m_Devices->at(row)));
+	}
+	
+	bool COverViewModel::hasChildren(const QModelIndex & parent) const {
+		return !(m_Devices == NULL || parent.isValid());
 	}
 	
 	int COverViewModel::rowCount(const QModelIndex & parent) const {
-		if (m_Devices == NULL)
-			return 0;
-		
-		if (!parent.isValid())
-			return m_Devices->count();
-		
-		return 0;
+		return m_Devices == NULL || parent.isValid() ? 0 : m_Devices->count();
 	}
 	
 	QVariant COverViewModel::data(const QModelIndex & index, int role) const {
@@ -101,9 +92,6 @@ namespace qnut {
 		
 		if (!index.isValid())
 			return QVariant();
-		
-/*		if (index.row() >= m_Devices->size())
-			return QVariant();*/
 		
 		CDevice * data = (CDevice *)(index.internalPointer());
 		

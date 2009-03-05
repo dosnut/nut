@@ -7,6 +7,8 @@
 //
 #ifndef QNUT_NO_WIRELESS
 #include <QIcon>
+#include <QFont>
+#include <QApplication>
 #include "managedapmodel.h"
 #include "constants.h"
 
@@ -39,15 +41,16 @@ namespace qnut {
 		emit layoutChanged();
 	}
 	
-	int CManagedAPModel::columnCount(const QModelIndex &) const {
-		return 4;
+	bool CManagedAPModel::hasChildren(const QModelIndex & parent) const {
+		return !parent.isValid();
 	}
 	
 	int CManagedAPModel::rowCount(const QModelIndex & parent) const {
-		if (!parent.isValid())
-			return m_Networks.count();
-		else
-			return 0;
+		return parent.isValid() ? 0 : m_Networks.count();
+	}
+	
+	int CManagedAPModel::columnCount(const QModelIndex &) const {
+		return 4;
 	}
 	
 	QVariant CManagedAPModel::data(const QModelIndex & index, int role) const {
@@ -56,6 +59,12 @@ namespace qnut {
 		
 		if ((role == Qt::DecorationRole) && (index.column() == 0))
 			return QIcon(m_Networks[index.row()].adhoc ? UI_ICON_ADHOC : UI_ICON_AIR_ACTIVATED);
+		
+		if (role == Qt::FontRole && m_Networks[index.row()].flags == NF_CURRENT) {
+			QFont font = QApplication::font();
+			font.setBold(true);
+			return font;
+		}
 		
 		if (role != Qt::DisplayRole)
 			return QVariant();
@@ -91,7 +100,7 @@ namespace qnut {
 		if ((m_Networks.isEmpty()) || (!index.isValid()))
 			return 0;
 		
-		return (m_Networks[index.row()].flags == NF_CURRENT) ? Qt::ItemIsEnabled | Qt::ItemIsSelectable : Qt::ItemIsSelectable;
+		return /*(m_Networks[index.row()].flags == NF_CURRENT) ? */Qt::ItemIsEnabled | Qt::ItemIsSelectable/* : Qt::ItemIsSelectable*/;
 	}
 	
 	QVariant CManagedAPModel::headerData(int section, Qt::Orientation orientation, int role) const {
@@ -115,8 +124,8 @@ namespace qnut {
 		return QVariant();
 	}
 	
-	QModelIndex CManagedAPModel::index(int row, int column, const QModelIndex & parent) const {
-		if (m_Networks.isEmpty() || parent.isValid() || row >= m_Networks.count())
+	QModelIndex CManagedAPModel::index(int row, int column, const QModelIndex & /*parent*/) const {
+		if (m_Networks.isEmpty() || row >= m_Networks.count())
 			return QModelIndex();
 		else
 			return createIndex(row, column, row);
