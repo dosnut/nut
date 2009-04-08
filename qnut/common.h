@@ -29,10 +29,20 @@ namespace qnut {
 	 */
 	QAction * getSeparator(QObject * parent);
 	/**
-	 * @brief Returns a summary string for the given device: "<name>: <state>, <current ip>".
+	 * @brief Returns a short summary string for the given device: "<name>: <state>, <current ip>".
 	 * @param device pointer to an existing instance of a CDevice
 	 */
 	QString shortSummary(libnutclient::CDevice * device);
+	/**
+	 * @brief Returns a summary string of device details for the given device: "(<type>)\n<state> (<current ip>)\n<network>".
+	 * @param device pointer to an existing instance of a CDevice
+	 */
+	QString detailsSummary(libnutclient::CDevice * device);
+	/**
+	 * @brief Returns the current network name the given device is connected to.
+	 * @param device pointer to an existing instance of a CDevice
+	 */
+	QString currentNetwork(libnutclient::CDevice * device);
 	/**
 	 * @brief Returns the active ip address for the given device ("(...)" will be added if there is more than one ip address).
 	 * @param device pointer to an existing instance of a CDevice

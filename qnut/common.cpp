@@ -6,6 +6,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 #include "common.h"
+#include <libnutclient/client.h>
 
 namespace qnut {
 	using namespace libnutcommon;
@@ -51,6 +52,33 @@ namespace qnut {
 			return device->getName() + ": " + toStringTr(device->getState()) + ", " + activeIP(device);
 	}
 
+	QString detailsSummary(CDevice * device) {
+		QString result = ('(' + toStringTr(device->getType()) + ')') + '\n' +
+			toStringTr(device->getState());
+		
+		if (device->getState() >= DS_UNCONFIGURED) {
+			result += ' ';
+			result += '(' + activeIP(device) + ')';
+			if (device->getType() == DT_AIR)
+				result += '\n' + QObject::tr("connected to: %1").arg(currentNetwork(device));
+		}
+		
+		return result;
+	}
+	
+	QString currentNetwork(CDevice * device) {
+#ifndef QNUT_NO_WIRELESS
+		if (device->getWpaSupplicant()) {
+			WextSignal signal = device->getWpaSupplicant()->getSignalQuality();
+			return device->getEssid() + " (" +
+				QString::number(signal.quality.value) + '/'+
+				QString::number(signal.quality.maximum) + ')';
+		}
+		else
+#endif
+			return (device->getType() == DT_AIR) ? device->getEssid() : QObject::tr("local");
+	}
+	
 	QString activeIP(CDevice * device) {
 		if (device->getState() < DS_UNCONFIGURED)
 			return QString('-');
