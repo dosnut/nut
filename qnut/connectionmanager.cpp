@@ -9,6 +9,7 @@
 #include "connectionmanager.h"
 #include "overviewmodel.h"
 #include "common.h"
+#include "deviceitemdelegate.h"
 
 namespace qnut {
 	using namespace libnutclient;
@@ -18,7 +19,8 @@ namespace qnut {
 		QMainWindow(parent),
 		m_DeviceManager(this),
 		m_LogFile(this, UI_FILE_LOG),
-		m_Stettings(UI_FILE_CONFIG, QSettings::IniFormat, this),
+		//TODO change this to "organization-application" parameters
+		m_Settings(UI_FILE_CONFIG, QSettings::IniFormat, this),
 		m_TrayIcon(this)
 	{
 		setWindowIcon(m_TrayIcon.icon());
@@ -31,7 +33,7 @@ namespace qnut {
 		m_LogEdit.setAcceptRichText(false);
 		
 		//m_OverView.setSortingEnabled(true);
-		m_OverView.setModel(new COverViewModel(&(m_DeviceManager)));
+		m_OverView.setModel(new COverViewModel(&(m_DeviceManager), this));
 		m_OverView.setContextMenuPolicy(Qt::ActionsContextMenu);
 		m_OverView.setRootIsDecorated(false);
 		m_OverView.setItemsExpandable(false);
@@ -69,6 +71,7 @@ namespace qnut {
 		connect(&m_TrayIcon, SIGNAL(messageClicked()), this, SLOT(show()));
 		connect(m_OverView.selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(handleSelectionChanged(const QItemSelection &, const QItemSelection &)));
+		connect(&m_OverView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(showDeviceDetails(const QModelIndex &)));
 		
 		m_TrayIcon.show();
 		m_DeviceManager.init(&m_LogFile);
@@ -139,27 +142,27 @@ namespace qnut {
 	}
 	
 	inline void CConnectionManager::readSettings() {
-		m_Stettings.beginGroup("Main");
-		ui.actionShowBalloonTips->setChecked(m_Stettings.value("showBalloonTips", true).toBool());
-		ui.actionShowLog->setChecked(m_Stettings.value("showLog", true).toBool());
-		m_Stettings.endGroup();
+		m_Settings.beginGroup("Main");
+		ui.actionShowBalloonTips->setChecked(m_Settings.value("showBalloonTips", true).toBool());
+		ui.actionShowLog->setChecked(m_Settings.value("showLog", true).toBool());
+		m_Settings.endGroup();
 		
-		m_Stettings.beginGroup("ConnectionManager");
-		resize(m_Stettings.value("size", QSize(646, 322)).toSize());
-		move(m_Stettings.value("pos", QPoint(200, 200)).toPoint());
-		m_Stettings.endGroup();
+		m_Settings.beginGroup("ConnectionManager");
+		resize(m_Settings.value("size", QSize(646, 322)).toSize());
+		move(m_Settings.value("pos", QPoint(200, 200)).toPoint());
+		m_Settings.endGroup();
 	}
 	
 	inline void CConnectionManager::writeSettings() {
-		m_Stettings.beginGroup("Main");
-		m_Stettings.setValue("showBalloonTips", ui.actionShowBalloonTips->isChecked());
-		m_Stettings.setValue("showLog", ui.actionShowLog->isChecked());
-		m_Stettings.endGroup();
+		m_Settings.beginGroup("Main");
+		m_Settings.setValue("showBalloonTips", ui.actionShowBalloonTips->isChecked());
+		m_Settings.setValue("showLog", ui.actionShowLog->isChecked());
+		m_Settings.endGroup();
 		
-		m_Stettings.beginGroup("ConnectionManager");
-		m_Stettings.setValue("size", size());
-		m_Stettings.setValue("pos", pos());
-		m_Stettings.endGroup();
+		m_Settings.beginGroup("ConnectionManager");
+		m_Settings.setValue("size", size());
+		m_Settings.setValue("pos", pos());
+		m_Settings.endGroup();
 	}
 	
 	void CConnectionManager::addUiDevice(CDevice * device) {
@@ -292,9 +295,14 @@ namespace qnut {
 			m_TabWidget.removeTab(m_TabWidget.count()-1);
 	}
 	
-	void CConnectionManager::showDeviceOptions(QWidget * widget) {
+	void CConnectionManager::showDeviceDetails(QWidget * widget) {
 		show();
 		activateWindow();
 		m_TabWidget.setCurrentWidget(widget);
+	}
+	
+	void CConnectionManager::showDeviceDetails(const QModelIndex & index) {
+		CDevice * selectedDevice = static_cast<CDevice *>(index.internalPointer());
+		showDeviceDetails(m_DeviceDetails[selectedDevice]);
 	}
 }

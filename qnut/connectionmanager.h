@@ -35,7 +35,7 @@ namespace qnut {
 		libnutclient::CLog m_LogFile;
 		
 		CDeviceDetailsHash m_DeviceDetails;
-		QSettings m_Stettings;
+		QSettings m_Settings;
 		
 		CTrayIcon m_TrayIcon;
 		QTabWidget m_TabWidget;
@@ -76,7 +76,8 @@ namespace qnut {
 		void addUiDevice(libnutclient::CDevice * device);
 		void removeUiDevice(libnutclient::CDevice * device);
 		void handleDeviceStateChange(libnutcommon::DeviceState state);
-		void showDeviceOptions(QWidget * widget);
+		void showDeviceDetails(QWidget * widget);
+		void showDeviceDetails(const QModelIndex & index);
 		void showAbout();
 	};
 }
