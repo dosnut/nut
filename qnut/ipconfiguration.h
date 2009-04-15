@@ -29,8 +29,9 @@ namespace qnut {
 		/**
 		 * @brief Opens the dialog and returns true if changes are made.
 		 * @param config existing user configuration
+		 * @param remember state variable if config is desired to be saved
 		 */
-		bool execute(libnutcommon::IPv4UserConfig & config);
+		bool execute(libnutcommon::IPv4UserConfig & config, bool & remember);
 		/**
 		 * @brief Creates the object and initializes its user interface.
 		 * @param parent parent widget
@@ -39,6 +40,9 @@ namespace qnut {
 	private slots:
 		void addDNS();
 		void removeDNS();
+		
+		void importConfig();
+		void exportConfig();
 		void handleSelectionChanged(const QItemSelection & selected);
 	};
 

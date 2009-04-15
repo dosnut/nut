@@ -43,7 +43,7 @@ namespace qnut {
 		Q_OBJECT
 	private:
 		Ui::devdet ui;
-		QSettings m_Stettings;
+		QSettings m_Settings;
 		quint8 m_ScriptFlags;
 		
 		libnutclient::CDevice * m_Device;
@@ -59,6 +59,8 @@ namespace qnut {
 		QAction * m_IPConfigurationAction;
 		
 		QSystemTrayIcon * m_trayIcon;
+		
+		QSet<libnutclient::CInterface *> m_IPConfigsToRemember;
 		
 		inline void readSettings();
 		inline void writeSettings();

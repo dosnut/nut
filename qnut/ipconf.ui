@@ -105,25 +105,12 @@
      <property name="title">
       <string>DNS list</string>
      </property>
-     <layout class="QVBoxLayout">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <widget class="QListView" name="dnsList"/>
       </item>
       <item>
-       <layout class="QHBoxLayout">
-        <item>
-         <spacer name="spacer1">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
+       <layout class="QHBoxLayout" name="horizontalLayout2">
         <item>
          <widget class="QPushButton" name="addButton">
           <property name="enabled">
@@ -133,6 +120,32 @@
            <string>Add</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="dnsEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="inputMask">
+           <string>000.000.000.000;_</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="spacer1">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>13</width>
+            <height>13</height>
+           </size>
+          </property>
+         </spacer>
         </item>
         <item>
          <widget class="QPushButton" name="removeButton">
@@ -152,7 +165,7 @@
    <item>
     <widget class="QCheckBox" name="rememberCheck">
      <property name="text">
-      <string>Remember theese settings</string>
+      <string>Remember settings for this interface</string>
      </property>
     </widget>
    </item>

@@ -8,7 +8,7 @@
 #ifndef QNUT_IPEDITDELEGATE_H
 #define QNUT_IPEDITDELEGATE_H
 
-#include <QItemDelegate>
+#include <QStyledItemDelegate>
 
 namespace qnut {
 	/**
@@ -19,7 +19,7 @@ namespace qnut {
 	 * 
 	 * As editor QLineEdit with an input mask for ip addresses is used.
 	 */
-	class CIPEditDelegate : public QItemDelegate {
+	class CIPEditDelegate : public QStyledItemDelegate {
 		Q_OBJECT
 	public:
 		/**
@@ -32,8 +32,6 @@ namespace qnut {
 		
 		void setEditorData(QWidget * editor, const QModelIndex & index) const;
 		void setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index) const;
-	
-		void updateEditorGeometry(QWidget * editor, const QStyleOptionViewItem & option, const QModelIndex & index) const;
 	};
 }
 

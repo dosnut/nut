@@ -54,13 +54,13 @@ namespace qnut {
 		return false;
 	}
 	
-	bool CDNSListModel::appendRow(QHostAddress address) {
+	QModelIndex CDNSListModel::appendRow(QHostAddress address) {
 		beginInsertRows(QModelIndex(), m_DNSList->size(), m_DNSList->size());
 		
 		*m_DNSList << address;
 		
 		endInsertRows();
-		return true;
+		return index(m_DNSList->size()-1);
 	}
 	
 	bool CDNSListModel::removeRows(int position, int rows, const QModelIndex &) {

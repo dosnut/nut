@@ -6,15 +6,19 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 #include <QAbstractItemModel>
+#include <QHostAddress>
+#include <QEvent>
 #include <QLineEdit>
+#include <QDebug>
 #include "ipeditdelegate.h"
 
 namespace qnut {
-	CIPEditDelegate::CIPEditDelegate(QObject * parent) : QItemDelegate(parent) {
+	CIPEditDelegate::CIPEditDelegate(QObject * parent) : QStyledItemDelegate(parent) {
 	}
 	
 	QWidget * CIPEditDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem &, const QModelIndex &) const {
 		QLineEdit * editor = new QLineEdit(parent);
+		editor->setFrame(false);
 		editor->setInputMask("000.000.000.000;_");
 		return editor;
 	}
@@ -31,9 +35,5 @@ namespace qnut {
 		QString value = lineEdit->text();
 		
 		model->setData(index, value, Qt::EditRole);
-	}
-	
-	void CIPEditDelegate::updateEditorGeometry(QWidget * editor, const QStyleOptionViewItem & option, const QModelIndex &) const {
-		editor->setGeometry(option.rect);
 	}
 }

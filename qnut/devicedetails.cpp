@@ -26,7 +26,7 @@ namespace qnut {
 	
 	CDeviceDetails::CDeviceDetails(CDevice * parentDevice, QWidget * parent) :
 		QWidget(parent),
-		m_Stettings(UI_PATH_DEV(parentDevice->getName()) + "dev.conf", QSettings::IniFormat, this)
+		m_Settings(UI_PATH_DEV(parentDevice->getName()) + "dev.conf", QSettings::IniFormat, this)
 	{
 		m_Device = parentDevice;
 		
@@ -69,40 +69,108 @@ namespace qnut {
 	}
 	
 	inline void CDeviceDetails::readSettings() {
-		m_Stettings.beginGroup("Main");
-		m_ScriptFlags = m_Stettings.value("scriptFlags", 0).toInt();
-		m_trayIcon->setVisible(m_Stettings.value("showTrayIcon", false).toBool());
-		ui.detailsButton->setChecked(m_Stettings.value("showDetails", false).toBool());
-		m_Stettings.endGroup();
+		m_Settings.beginGroup("Main");
+		m_ScriptFlags = m_Settings.value("scriptFlags", 0).toInt();
+		m_trayIcon->setVisible(m_Settings.value("showTrayIcon", false).toBool());
+		ui.detailsButton->setChecked(m_Settings.value("showDetails", false).toBool());
+		m_Settings.endGroup();
 		ui.showTrayCheck->setChecked(m_trayIcon->isVisible());
 		
 		#ifndef QNUT_NO_WIRELESS
 		if (m_WirelessSettings) {
-			m_Stettings.beginGroup("WirelessSettings");
-			m_WirelessSettings->resize(m_Stettings.value("size", QSize(646, 322)).toSize());
-			m_WirelessSettings->move(m_Stettings.value("pos", QPoint(200, 200)).toPoint());
-			m_WirelessSettings->setDetailsVisible(m_Stettings.value("showDetails", false).toBool());
-			m_Stettings.endGroup();
+			m_Settings.beginGroup("WirelessSettings");
+			m_WirelessSettings->resize(m_Settings.value("size", QSize(646, 322)).toSize());
+			m_WirelessSettings->move(m_Settings.value("pos", QPoint(200, 200)).toPoint());
+			m_WirelessSettings->setDetailsVisible(m_Settings.value("showDetails", false).toBool());
+			m_Settings.endGroup();
 		}
 		#endif
+		
+		if (m_Settings.childGroups().contains("IPconfigurations")) {
+			m_Settings.beginGroup("IPconfigurations");
+			
+			foreach (CEnvironment * i, m_Device->getEnvironments()) {
+				if (m_Settings.childGroups().contains(i->getName())) {
+					m_Settings.beginGroup(i->getName());
+					foreach (CInterface * j, i->getInterfaces()) {
+						if (j->getConfig().getFlags() & IPv4Config::DO_USERSTATIC && m_Settings.childGroups().contains(QString::number(j->getIndex()))) {
+							libnutcommon::IPv4UserConfig config;
+							
+							m_Settings.beginGroup(QString::number(j->getIndex()));
+							config.setIP(QHostAddress(m_Settings.value("ip").toString()));
+							config.setNetmask(QHostAddress(m_Settings.value("netmask").toString()));
+							config.setGateway(QHostAddress(m_Settings.value("gateway").toString()));
+							
+							QList<QHostAddress> dnsServers;
+							int size = m_Settings.beginReadArray("dnsServers");
+							for (int k = 0; k < size; ++k) {
+								m_Settings.setArrayIndex(k);
+								QHostAddress dnsServer(m_Settings.value("address").toString());
+								if (!dnsServer.isNull())
+									dnsServers << dnsServer;
+							}
+							m_Settings.endArray();
+							
+							config.setDnsservers(dnsServers);
+							m_Settings.endGroup();
+							
+							if (config.valid())
+								j->setUserConfig(config);
+							
+							m_IPConfigsToRemember.insert(j);
+						}
+					}
+					m_Settings.endGroup();
+				}
+			}
+			
+			m_Settings.endGroup();
+		}
 	}
 	
 	inline void CDeviceDetails::writeSettings() {
-		m_Stettings.beginGroup("Main");
-		m_Stettings.setValue("scriptFlags", m_ScriptFlags);
-		m_Stettings.setValue("showTrayIcon", m_trayIcon->isVisible());
-		m_Stettings.setValue("showDetails", ui.detailsButton->isChecked());
-		m_Stettings.endGroup();
+		m_Settings.beginGroup("Main");
+		m_Settings.setValue("scriptFlags", m_ScriptFlags);
+		m_Settings.setValue("showTrayIcon", m_trayIcon->isVisible());
+		m_Settings.setValue("showDetails", ui.detailsButton->isChecked());
+		m_Settings.endGroup();
 		
 		#ifndef QNUT_NO_WIRELESS
 		if (m_WirelessSettings) {
-			m_Stettings.beginGroup("WirelessSettings");
-			m_Stettings.setValue("size", m_WirelessSettings->size());
-			m_Stettings.setValue("pos", m_WirelessSettings->pos());
-			m_Stettings.setValue("showDetails", m_WirelessSettings->detailsVisible());
-			m_Stettings.endGroup();
+			m_Settings.beginGroup("WirelessSettings");
+			m_Settings.setValue("size", m_WirelessSettings->size());
+			m_Settings.setValue("pos", m_WirelessSettings->pos());
+			m_Settings.setValue("showDetails", m_WirelessSettings->detailsVisible());
+			m_Settings.endGroup();
 		}
 		#endif
+		
+		if (m_Settings.childGroups().contains("IPconfigurations"))
+			m_Settings.remove("IPconfigurations");
+		
+		if (!m_IPConfigsToRemember.isEmpty()) {
+			m_Settings.beginGroup("IPconfigurations");
+			
+			foreach (CInterface * i, m_IPConfigsToRemember) {
+				m_Settings.beginGroup(qobject_cast<CEnvironment *>(i->parent())->getName());
+				m_Settings.beginGroup(QString::number(i->getIndex()));
+				
+				m_Settings.setValue("ip", i->getUserConfig().ip().toString());
+				m_Settings.setValue("netmask", i->getUserConfig().netmask().toString());
+				m_Settings.setValue("gateway", i->getUserConfig().gateway().toString());
+				m_Settings.beginWriteArray("dnsServers", i->getUserConfig().dnsservers().size());
+				for (int k = 0; k < i->getUserConfig().dnsservers().size(); ++k) {
+					m_Settings.setArrayIndex(k);
+					m_Settings.setValue("address", i->getUserConfig().dnsservers()[k].toString());
+				}
+				m_Settings.endArray();
+				
+				m_Settings.endGroup();
+				m_Settings.endGroup();
+			}
+			
+			m_Settings.endGroup();
+		}
 	}
 	
 	inline void CDeviceDetails::createActions() {
@@ -240,8 +308,15 @@ namespace qnut {
 		
 		CInterface * interface = static_cast<CInterface *>(selectedIndex.internalPointer());
 		libnutcommon::IPv4UserConfig config = interface->getUserConfig(true);
-		if (dialog.execute(config))
+		bool remember = m_IPConfigsToRemember.contains(interface);
+		if (dialog.execute(config, remember)) {
 			interface->setUserConfig(config);
+			
+			if (remember)
+				m_IPConfigsToRemember.insert(interface);
+			else
+				m_IPConfigsToRemember.remove(interface);
+		}
 	}
 	
 	void CDeviceDetails::openScriptingSettings() {

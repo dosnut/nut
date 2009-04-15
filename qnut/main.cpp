@@ -24,6 +24,8 @@ int main(int argc, char * argv[])
 		}
 	}
 	
+	QDir::setCurrent(QDir::homePath());
+	
 	CConnectionManager mainwin;
 	return app.exec();
 }
