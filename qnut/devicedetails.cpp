@@ -241,7 +241,7 @@ namespace qnut {
 	}
 	
 	void CDeviceDetails::showTheeseDetails() {
-		emit showOptionsRequested(this);
+		emit showDetailsRequested(this);
 	}
 	
 	void CDeviceDetails::handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {

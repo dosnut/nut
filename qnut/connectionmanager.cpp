@@ -174,7 +174,7 @@ namespace qnut {
 		m_TrayIcon.addDeviceMenu(newDeviceOptions->trayMenu());
 		
 		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(updateTrayIconInfo()));
-		connect(newDeviceOptions, SIGNAL(showOptionsRequested(QWidget *)), this, SLOT(showDeviceOptions(QWidget *)));
+		connect(newDeviceOptions, SIGNAL(showDetailsRequested(QWidget *)), this, SLOT(showDeviceDetails(QWidget *)));
 		connect(newDeviceOptions, SIGNAL(showMessageRequested(QString, QString, QSystemTrayIcon *)),
 		        this,             SLOT(showMessage(QString, QString, QSystemTrayIcon *)));
 	}

@@ -118,7 +118,7 @@ namespace qnut {
 		 * @brief Emitted when showing this widget is requested.
 		 * @param widget pointer to this instance
 		 */
-		void showOptionsRequested(QWidget * widget);
+		void showDetailsRequested(QWidget * widget);
 	};
 }
 
