@@ -131,10 +131,6 @@ namespace libnutclient {
 	private slots:
 		//dbus return methods
 		void dbusretGetDeviceList(QList<QDBusObjectPath> devices);
-		void dbusretGetDeviceList() { qDebug() << "Leeres"; }
-		void dbusretGetDeviceList(QDBusMessage reply) { qDebug() << "mit reply"; }
-		void dbusretGetDeviceList(qint64 bl) { qDebug() << "zahlen" << bl; }
-		void dbuserrGetDeviceList(QDBusError error);
 
 		void dbusDeviceAdded(const QDBusObjectPath &objectpath);
 		void dbusDeviceRemoved(const QDBusObjectPath &objectpath);
@@ -162,7 +158,7 @@ namespace libnutclient {
 		~CDeviceManager();
 	public slots:
 		void refreshAll();
-		void rebuild();
+// 		void rebuild();
 	signals:
 		void deviceAdded(libnutclient::CDevice * device);
 		void deviceRemoved(libnutclient::CDevice * device); //nach entfernen aus der liste aber vor dem löschen

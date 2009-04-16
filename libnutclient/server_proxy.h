@@ -13,11 +13,51 @@
 #include "libnutcommon/common.h"
 
 namespace libnutclient {
+
+
+class CDevice;
+
+/*
+* Proxy class for interface DBus.DeviceManager
+*/
+class DBusDeviceManagerInterface: public QDBusAbstractInterface {
+	Q_OBJECT
+public:
+	static inline const char *staticInterfaceName()
+	{ return NUT_DBUS_URL ".DeviceManager"; }
+
+public:
+	DBusDeviceManagerInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
+
+	~DBusDeviceManagerInterface();
+
+public slots: // METHODS
+	void getDeviceList();
+// 	QDBusReply<bool> createBridge(QList<QDBusObjectPath> devicePaths);
+// 	QDBusReply<bool> destroyBridge(QDBusObjectPath devicePath);
+// 	QDBusReply<bool> addToBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths);
+
+private slots:
+	void dbret_errorOccured(QDBusError error);
+
+	void dbret_getDeviceList(QList<QDBusObjectPath> devices);
+	
+signals: // SIGNALS
+	//Return functions
+	void gotDeviceList(QList<QDBusObjectPath> devices);
+// 	void createdBridge(bool worked);
+// 	void destroyedBrdige(bool worked);
+	//DBUS-SIGNALS
+	void deviceAdded(const QDBusObjectPath &objectpath);
+	void deviceRemoved(const QDBusObjectPath &objectpath);
+
+	void errorOccured(QDBusError error);
+	void queueErrorOccured();
+};
+
 /*
 * Proxy class for interface DBus.Device
 */
-class CDevice;
-
 class DBusDeviceInterface: public QDBusAbstractInterface {
 	Q_OBJECT
 public:
@@ -47,27 +87,6 @@ Q_SIGNALS: // SIGNALS
 	
 };
 
-/*
-* Proxy class for interface DBus.DeviceManager
-*/
-class DBusDeviceManagerInterface: public QDBusAbstractInterface {
-	Q_OBJECT
-public:
-	static inline const char *staticInterfaceName()
-	{ return NUT_DBUS_URL ".DeviceManager"; }
-
-public:
-	DBusDeviceManagerInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
-
-	~DBusDeviceManagerInterface();
-
-public Q_SLOTS: // METHODS
-	inline QDBusReply<QList<QDBusObjectPath> > getDeviceList();
-
-Q_SIGNALS: // SIGNALS
-	void deviceAdded(const QDBusObjectPath &objectpath);
-	void deviceRemoved(const QDBusObjectPath &objectpath);
-};
 
 /*
 * Proxy class for interface DBus.Environment
@@ -189,6 +208,7 @@ inline QDBusReply<libnutcommon::DeviceConfig> DBusDeviceInterface::getConfig() {
 	}
 	return msg;
 }
+
 inline QDBusReply<void> DBusDeviceInterface::setEnvironment(QDBusObjectPath envpath) {
 	QList<QVariant> argumentList;
 	argumentList << qVariantFromValue(envpath);
@@ -200,13 +220,6 @@ inline QDBusReply<void> DBusDeviceInterface::setEnvironment(qint32 env) {
 	argumentList << qVariantFromValue(env);
 	return callWithArgumentList(QDBus::NoBlock, QLatin1String("setEnvironment"), argumentList);
 }
-
-inline QDBusReply<QList<QDBusObjectPath> > DBusDeviceManagerInterface::getDeviceList() {
-	QList<QVariant> argumentList;
-	return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getDeviceList"), argumentList);
-}
-
-
 
 //Methods
 
