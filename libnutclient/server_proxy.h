@@ -71,16 +71,33 @@ public:
 	~DBusDeviceInterface();
 
 public Q_SLOTS: // METHODS
-	inline QDBusReply<void> disable();
-	inline QDBusReply<void> enable();
-	inline QDBusReply<QList<QDBusObjectPath> > getEnvironments();
-	inline QDBusReply<libnutcommon::DeviceProperties> getProperties();
-	inline QDBusReply<QString> getEssid();
-	inline QDBusReply<libnutcommon::DeviceConfig> getConfig();
-	inline QDBusReply<void> setEnvironment(QDBusObjectPath envpath);
-	inline QDBusReply<void> setEnvironment(qint32 env);
+	void disable();
+	void enable();
+	void setEnvironment(QDBusObjectPath envpath);
+	void setEnvironment(qint32 env);
+	void getEnvironments();
+	void getProperties();
+	void getEssid();
+	void getConfig();
+	void getActiveEnvironment();
+
+private slots:
+	void dbret_dummy(QDBusMessage msg) {};
+	void dbret_getEnvironments(QList<QDBusObjectPath> envs) { emit gotEnvironments(envs); }
+	void dbret_getProperties(libnutcommon::DeviceProperties props) { emit gotProperties(props); }
+	void dbret_getEssid(QString essid) { emit gotEssid(essid); }
+	void dbret_getConfig(libnutcommon::DeviceConfig config) { emit gotConfig(config); }
+	void dbret_getActiveEnvironment(QString activeEnv) { emit gotActiveEnvironment(activeEnv); }
 
 Q_SIGNALS: // SIGNALS
+	//Return function signals
+	void gotEnvironments(QList<QDBusObjectPath> envs);
+	void gotProperties(libnutcommon::DeviceProperties props);
+	void gotEssid(QString essid);
+	void gotConfig(libnutcommon::DeviceConfig config);
+	void gotActiveEnvironment(QString activeEnv);
+
+	//DBUS Signals
 	void environmentChangedActive(const QString &newenv);
 	void stateChanged(int newState, int oldState);
 	void newWirelssNetworkFound();
@@ -157,69 +174,9 @@ typedef DBus::DBusInterfaceInterface_IPv4 Interface;
 
 namespace libnutclient {
 //Methods
-inline QDBusReply<void> DBusDeviceInterface::disable() {
-	QList<QVariant> argumentList;
-	return callWithArgumentList(QDBus::NoBlock, QLatin1String("disable"), argumentList);
-}
 
-inline QDBusReply<void> DBusDeviceInterface::enable() {
-	QList<QVariant> argumentList;
-	return callWithArgumentList(QDBus::NoBlock, QLatin1String("enable"), argumentList);
-}
 
-inline QDBusReply<QList<QDBusObjectPath> > DBusDeviceInterface::getEnvironments() {
-	QList<QVariant> argumentList;
-	QDBusMessage msg;
-	if (m_device->incrementLock()) {
-		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getEnvironments"), argumentList);
-		m_device->decrementLock();
-	}
-	else {
-		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
-	}
-	return msg;
-}
-inline QDBusReply<libnutcommon::DeviceProperties> DBusDeviceInterface::getProperties() {
-	QList<QVariant> argumentList;
-	return callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
-}
-inline QDBusReply<QString> DBusDeviceInterface::getEssid() {
-	QList<QVariant> argumentList;
-	QDBusMessage msg;
-	if (m_device->incrementLock()) {
-		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getEssid"), argumentList);
-		m_device->decrementLock();
-	}
-	else {
-		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
-	}
-	return msg;
-}
 
-inline QDBusReply<libnutcommon::DeviceConfig> DBusDeviceInterface::getConfig() {
-	QList<QVariant> argumentList;
-	QDBusMessage msg;
-	if (m_device->incrementLock()) {
-		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList);
-		m_device->decrementLock();
-	}
-	else {
-		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
-	}
-	return msg;
-}
-
-inline QDBusReply<void> DBusDeviceInterface::setEnvironment(QDBusObjectPath envpath) {
-	QList<QVariant> argumentList;
-	argumentList << qVariantFromValue(envpath);
-	return callWithArgumentList(QDBus::NoBlock, QLatin1String("setEnvironment"), argumentList);
-}
-
-inline QDBusReply<void> DBusDeviceInterface::setEnvironment(qint32 env) {
-	QList<QVariant> argumentList;
-	argumentList << qVariantFromValue(env);
-	return callWithArgumentList(QDBus::NoBlock, QLatin1String("setEnvironment"), argumentList);
-}
 
 //Methods
 

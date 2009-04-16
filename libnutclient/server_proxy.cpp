@@ -48,6 +48,71 @@ DBusDeviceInterface::~DBusDeviceInterface()
 }
 
 
+void DBusDeviceInterface::disable() {
+	QList<QVariant> argumentList;
+	bool worked = callWithCallback(QLatin1String("disable"), argumentList, this, SLOT(dbret_dummy(QDBusMessage)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured();
+}
+
+void DBusDeviceInterface::enable() {
+	QList<QVariant> argumentList;
+	bool worked = callWithCallback(QLatin1String("enable"), argumentList, this, SLOT(dbret_dummy(QDBusMessage)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured();
+}
+
+void DBusDeviceInterface::setEnvironment(QDBusObjectPath envpath) {
+	QList<QVariant> argumentList;
+	argumentList << qVariantFromValue(envpath);
+	bool worked = callWithCallback(QLatin1String("setEnvironment"), argumentList, this, SLOT(dbret_dummy(QDBusMessage)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured();
+}
+
+void DBusDeviceInterface::setEnvironment(qint32 env) {
+	QList<QVariant> argumentList;
+	argumentList << qVariantFromValue(env);
+	bool worked = callWithCallback(QLatin1String("setEnvironment"), argumentList, this, SLOT(dbret_dummy(QDBusMessage)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured();
+}
+
+void DBusDeviceInterface::getEnvironments() {
+	QList<QVariant> argumentList;
+	bool worked = callWithCallback(QLatin1String("getEnvironment"), argumentList, this, SLOT(dbret_getEnvironments(QList<QDBusObjectPath>)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured();
+}
+
+void DBusDeviceInterface::getProperties() {
+	QList<QVariant> argumentList;
+	bool worked = callWithCallback(QLatin1String("getProperties"), argumentList, this, SLOT(dbret_getProperties(libnutcommon::DeviceProperties props)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured();
+}
+void DBusDeviceInterface::getEssid() {
+	QList<QVariant> argumentList;
+	bool worked = callWithCallback(QLatin1String("getEssid"), argumentList, this, SLOT(dbret_getEssid(QString)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured();
+}
+
+void DBusDeviceInterface::getConfig() {
+	QList<QVariant> argumentList;
+	bool worked = callWithCallback(QLatin1String("getConfig"), argumentList, this, SLOT(dbret_getConfig(libnutcommon::DeviceConfig)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured();
+}
+
+
+void DBusDeviceInterface::getActiveEnvironment() {
+	QList<QVariant> argumentList;
+	bool worked = callWithCallback(QLatin1String("getActiveEnvironment"), argumentList, this, SLOT(dbret_getActiveEnvironment(QString), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured();
+}
+
 
 /*
  * Implementation of interface class DBusEnvironmentInterface

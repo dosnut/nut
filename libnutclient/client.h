@@ -214,6 +214,13 @@ namespace libnutclient {
 	private slots:
 		void environmentChangedActive(const QString &newenv);
 		void dbusStateChanged(int newState, int oldState);
+
+		void dbusretGetProperties(DeviceProperties);
+		void dbusretGetEssid(QString essid);
+		void dbusretGetEnvironments(QList<QDBusObjectPath> envs);
+		void dbusretGetActiveEnvironment(QString activeEnv);
+		void dbusretGetConfig(libnutcommon::DeviceConfig config);
+		
 	public:
 		inline const CEnvironmentList& getEnvironments() { return m_environments; }
 		inline const QString& getName() { return m_name; }
@@ -242,9 +249,16 @@ namespace libnutclient {
 		void setEnvironment(CEnvironment * environment);
 		
 	signals:
+		void newDataAvailable();
 		void environmentChangedActive(libnutclient::CEnvironment * current, libnutclient::CEnvironment * previous);
 		void stateChanged(libnutcommon::DeviceState newState);
 		void newWirelessNetworkFound();
+		void gotProperties(libnutcommon::DeviceProperties properties);
+		void gotEssid(QString essid);
+		void gotActiveEnvironment(QString activeEnv);
+		void gotConfig(libnutcommon::DeviceConfig config);
+		void gotEnvironments();
+		
 	};
 	
 	/** @brief The Environment manages the interfaces
