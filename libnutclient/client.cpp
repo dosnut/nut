@@ -524,80 +524,13 @@ CDevice::~CDevice() {
  *  it will just refresh the information
  */
 void CDevice::refreshAll() {
-	//Refresh environment list
-	QDBusReply<QList<QDBusObjectPath> > replyenvs = m_dbusDevice->getEnvironments();
-	if (replyenvs.isValid()) {
-		//Compare local with remote list:
-		//if they are equal just refresh otherwise rebuild
-		bool envequal = (m_dbusEnvironments.size() == replyenvs.value().size());
-		if (envequal) {
-			foreach(QDBusObjectPath i, replyenvs.value()) {
-				if ( !m_dbusEnvironments.contains(i) ) {
-					envequal = false;
-					break;
-				}
-			}
-		}
-		if (envequal) {
-			foreach(CEnvironment * i, m_environments) {
-				i->refreshAll();
-			}
-		}
-		else {
-			rebuild(replyenvs.value());
-		}
-	}
-	else {
-		if ( !dbusConnected(m_dbusConnection) ) {
-			static_cast<CDeviceManager*>(parent())->dbusKilled();
-			return;
-		}
-		qWarning() << tr("(%1) Could not refresh environments").arg(toString(replyenvs.error()));
-	}
-	m_activeEnvironment = 0;
-	//now refresh the rest of our device properties:
-	QDBusReply<DeviceProperties> replyprop = m_dbusDevice->getProperties();
-	if (replyprop.isValid()) {
-		if (!replyprop.value().activeEnvironment.isEmpty()) {
-			m_dbusActiveEnvironment = QDBusObjectPath(replyprop.value().activeEnvironment);
-			m_activeEnvironment = m_dbusEnvironments.value(m_dbusActiveEnvironment);
-		}
-		*log << tr("Refreshing active environment: %1").arg(m_dbusActiveEnvironment.path());
-		m_state = (DeviceState) replyprop.value().state;
-		m_type = replyprop.value().type;
-		m_name = replyprop.value().name;
-	}
-	else {
-		if ( !dbusConnected(m_dbusConnection) ) {
-			static_cast<CDeviceManager*>(parent())->dbusKilled();
-			return;
-		}
-		qWarning() << tr("(%1) Could not refresh device properties").arg(toString(replyprop.error()));
-	}
-	if (DT_AIR == m_type) {
-		QDBusReply<QString> replyessid = m_dbusDevice->getEssid();
-		if (replyessid.isValid()) {
-			m_essid = replyessid.value();
-		}
-		else {
-			if ( !dbusConnected(m_dbusConnection) ) {
-				static_cast<CDeviceManager*>(parent())->dbusKilled();
-				return;
-			}
-			qWarning() << tr("(%1) Could not refresh device essid").arg(toString(replyessid.error()));
-			m_essid = QString();
-		}
-	}
-	#ifndef LIBNUT_NO_WIRELESS
-	if ( !(DS_DEACTIVATED == m_state) ) {
-		if (m_needWpaSupplicant) {
-			m_wpaSupplicant->open();
-		}
-	}
-	if (DT_AIR == m_type && DS_CARRIER <= m_state && m_wpaSupplicant != NULL) {
-		m_wpaSupplicant->setSignalQualityPollRate(500);
-	}
-	#endif
+	*log << tr("Refreshing device");
+	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
+	m_dbusDevice->getProperties();
+
+	*log << tr("Placing getEnvironments call at: %1").arg(m_dbusPath.path());
+	m_dbusDevice->getEnvironments();
+
 }
 //Rebuilds the environment list
 void CDevice::rebuild(QList<QDBusObjectPath> paths) {
@@ -685,17 +618,7 @@ void CDevice::dbusStateChanged(int newState, int oldState) {
 
 	//get possible new essid
 	if (DT_AIR == m_type && !(newState == DS_DEACTIVATED) ) {
-		QDBusReply<QString> replyessid = m_dbusDevice->getEssid();
-		if (replyessid.isValid()) {
-			m_essid = replyessid.value();
-		}
-		else {
-			if ( !dbusConnected(m_dbusConnection) ) {
-				static_cast<CDeviceManager*>(parent())->dbusKilled();
-				return;
-			}
-			m_essid = QString();
-		}
+		m_dbusDevice->getEssid();
 	}
 	else {
 		m_essid = QString();
@@ -735,23 +658,24 @@ void CDevice::dbusretGetEssid(QString essid) {
 }
 
 void CDevice::dbusretGetEnvironments(QList<QDBusObjectPath> envs) {
-
-	CEnvironment * env;
-	foreach(QDBusObjectPath i, envs) {
-		*log << tr("Adding Environment at: %1").arg(i.path());
-		try {
-			env = new CEnvironment(this,i);
-		}
-		catch (CLI_EnvConnectionException e) {
-			if ( !dbusConnected(m_dbusConnection) ) {
-				throw CLI_DevConnectionException(tr("(%1) Error while trying to add environment").arg(toString(replyEnv.error())));
+	//Compare local with remote list:
+	//if they are equal just refresh otherwise rebuild
+	bool envequal = (m_dbusEnvironments.size() == envs.size());
+	if (envequal) {
+		foreach(QDBusObjectPath i, envs) {
+			if ( !m_dbusEnvironments.contains(i) ) {
+				envequal = false;
+				break;
 			}
-			qWarning() << e.msg();
-			continue;
 		}
-		m_dbusEnvironments.insert(i,env);
-		m_environments.append(env);
-		env->m_index = m_environments.indexOf(env);
+	}
+	if (envequal) {
+		foreach(CEnvironment * i, m_environments) {
+			i->refreshAll();
+		}
+	}
+	else {
+		rebuild(envs);
 	}
 	
 	emit gotEnvironments();
@@ -764,10 +688,10 @@ void CDevice::dbusretGetEnvironments(QList<QDBusObjectPath> envs) {
 
 void CDevice::dbusretGetActiveEnvironment(QString activeEnv) {
 		m_dbusActiveEnvironment = QDBusObjectPath(activeEnv);
-		m_activeEnvironment = m_dbusEnvironments.value(m_dbusActiveEnvironment, 0); //TODO:Define acitve env undefined
+		m_activeEnvironment = m_dbusEnvironments.value(m_dbusActiveEnvironment, NULL);
 		*log << tr("Active Environement: %1").arg(m_dbusActiveEnvironment.path());
 
-		emit gotEssid();
+		emit gotActiveEnvironment(m_activeEnvironment);
 		emit newDataAvailable();
 }
 

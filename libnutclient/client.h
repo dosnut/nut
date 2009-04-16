@@ -257,7 +257,7 @@ namespace libnutclient {
 		void newWirelessNetworkFound();
 		void gotProperties(libnutcommon::DeviceProperties properties);
 		void gotEssid(QString essid);
-		void gotActiveEnvironment(QString activeEnv);
+		void gotActiveEnvironment(CEnvironment activeEnv);
 		void gotConfig(libnutcommon::DeviceConfig config);
 		void gotEnvironments();
 		
