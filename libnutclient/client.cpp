@@ -83,7 +83,7 @@ void CLibNut::serviceCheck(QDBusConnectionInterface * interface) {
 ////////////////
 //CDeviceManager
 ///////////////
-CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), m_dbusDevmgr(0), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))), m_dbusTimerId(-1), m_dbusMonitor(this) {
+CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), m_dbusDevmgr(0), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))), m_dbusTimerId(-1), m_dbusPath("/manager"), m_dbusMonitor(this), m_dbusInterface(0) {
 	
 	//Init dbus monitor
 	connect(&m_dbusMonitor,SIGNAL(stopped(void)),this,SLOT(dbusStopped(void)));
@@ -134,7 +134,7 @@ bool CDeviceManager::init(CLog * inlog) {
 		m_nutsstate = false;
 	}
 	//Attach to DbusDevicemanager
-	m_dbusDevmgr = new DBusDeviceManagerInterface(NUT_DBUS_URL, "/manager",m_dbusConnection, this);
+	m_dbusDevmgr = new DBusDeviceManagerInterface(NUT_DBUS_URL, m_dbusPath,m_dbusConnection, this);
 	if (m_nutsstate) {
 		setInformation();
 		emit(stateChanged(true));
@@ -228,54 +228,54 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 void CDeviceManager::setInformation() {
 	//get devicelist etc.
 	qDebug() << "setInformation()";
-	QDBusReply<QList<QDBusObjectPath> > replydevs;
-	replydevs = m_dbusDevmgr->getDeviceList();
-	if (!replydevs.isValid()) {
-		//This is the first time we're trying to connect to nuts.
-		//If we're not allowed to do that, we should break here and print out a warning
-		if (QDBusError::AccessDenied == replydevs.error().type()) {
-			*log << tr("You are not allowed to connect to nuts.");
-			*log << tr("Please make sure you are in the correct group");
-			return;
-		}
-		else if (QDBusError::InvalidSignature == replydevs.error().type()) { //Workaround qt returning wrong Error (Should be AccessDenied)
-			*log << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
-			*log << tr("Maybe you don't have sufficient rights");
+// 	QDBusReply<QList<QDBusObjectPath> > replydevs;
+// 	replydevs = m_dbusDevmgr->getDeviceList();
+// 	if (!replydevs.isValid()) {
+// 		//This is the first time we're trying to connect to nuts.
+// 		//If we're not allowed to do that, we should break here and print out a warning
+// 		if (QDBusError::AccessDenied == replydevs.error().type()) {
+// 			*log << tr("You are not allowed to connect to nuts.");
+// 			*log << tr("Please make sure you are in the correct group");
+// 			return;
+// 		}
+// 		else if (QDBusError::InvalidSignature == replydevs.error().type()) { //Workaround qt returning wrong Error (Should be AccessDenied)
+// 			*log << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
+// 			*log << tr("Maybe you don't have sufficient rights");
+// 		}
+// 		else {
+			if ( !dbusConnected(&m_dbusConnection) ) {
+				dbusKilled();
+				return;
+			}
+// 			qWarning() << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
+// 		}
+// 	}
+	qDebug() << "Populating device list";
+	if (!m_dbusInterface) {
+		QLatin1String interfaceName(NUT_DBUS_URL ".DeviceManager");
+		m_dbusInterface = new QDBusInterface( NUT_DBUS_URL, m_dbusPath, interfaceName, m_dbusConnection, this);
+		if (!m_dbusInterface->isValid()) {
+			qDebug() << "Interface is invalid!";
 		}
 		else {
-			if ( !dbusConnected(&m_dbusConnection) ) {
-				dbusKilled();
-				return;
-			}
-			qWarning() << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
+			qDebug() << "Interface is valid";
 		}
 	}
-	qDebug() << "Populating device list";
 	//Let's populate our own DeviceList
+	QList<QVariant> devListArgs;
+	QLatin1String methodName("getDeviceList");
+	bool devListCall = m_dbusInterface->callWithCallback(methodName, devListArgs, this, SLOT(dbusretGetDeviceList(QList< QDBusObjectPath >)), SLOT(dbuserrGetDeviceList(QDBusError)) );
+	if (!devListCall)
+		qDebug() << "Placing call failed";
+	else
+		qDebug() << "Placed call";
+// 	QString dbService = QLatin1String(NUT_DBUS_URL);
+// 	QString dbPath = m_dbusPath.toLatin1();
+// 	QString dbInterface = QLatin1String(NUT_DBUS_URL ".DeviceManager");
+// 	QString dbMethod = QLatin1String("getDeviceList");
+// 	devMessage = QDBusMessage::createMethodCall(dbService, dbPath, dbInterface, dbMethod);
+// 	m_dbusConnection.callWithCallback(devMessage, this,SLOT(dbusretGetDeviceList(qint64)), SLOT(dbuserrGetDeviceList(void)), 5000);
 	
-	CDevice * device;
-	foreach (QDBusObjectPath i, replydevs.value()) {
-		//Only add device if it's not already in our list;
-		if (m_dbusDevices.contains(i)) {
-			continue;
-		}
-		//Add device
-		try {
-			device = new CDevice(this, i);
-		}
-		catch (CLI_DevConnectionException e) {
-			if ( !dbusConnected(&m_dbusConnection) ) {
-				dbusKilled();
-				return;
-			}
-			qWarning() << e.msg();
-			continue;
-		}
-		m_devices.append(device);
-		device->m_index = m_devices.indexOf(device); // Set device index;
-		m_dbusDevices.insert(i, device);
-		emit(deviceAdded(device));
-	}
 }
 void CDeviceManager::clearInformation() {
 	//Clean Device list:
@@ -320,6 +320,37 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 			}
  		}
 	}
+}
+//DBUS CALL AND ERROR FUNCTIONS
+void CDeviceManager::dbusretGetDeviceList(QList<QDBusObjectPath> devices) {
+	qDebug() << "objectpaths";
+	CDevice * device;
+	foreach (QDBusObjectPath i, devices) {
+		//Only add device if it's not already in our list;
+		if (m_dbusDevices.contains(i)) {
+			continue;
+		}
+		//Add device
+		try {
+			device = new CDevice(this, i);
+		}
+		catch (CLI_DevConnectionException e) {
+			if ( !dbusConnected(&m_dbusConnection) ) {
+				dbusKilled();
+				return;
+			}
+			qWarning() << e.msg();
+			continue;
+		}
+		m_devices.append(device);
+		device->m_index = m_devices.indexOf(device); // Set device index;
+		m_dbusDevices.insert(i, device);
+		emit(deviceAdded(device));
+	}
+}
+
+void CDeviceManager::dbuserrGetDeviceList(QDBusError error) {
+	qDebug() << QDBusError::errorString(error.type());
 }
 
 //CDeviceManager DBUS-SLOTS:
@@ -376,6 +407,47 @@ void CDeviceManager::dbusStarted() {
 	m_dbusConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus")));
 	//init
 	init(log);
+}
+
+bool CDeviceManager::createBridge(QList<CDevice *> devices) {
+	//check if devices are non-bridges and assemble dbus path list
+	QList<QDBusObjectPath> devpaths;
+	foreach(CDevice * device, devices) {
+		if (device->m_type & DT_BRIDGE)
+			return false;
+		devpaths.append(device->m_dbusPath);
+	}
+	QDBusReply<bool> reply = m_dbusDevmgr->createBridge(devpaths);
+	if (reply.isValid()) {
+		return reply.value();
+	}
+	else {
+		if ( !dbusConnected(&m_dbusConnection) ) {
+			dbusKilled();
+		}
+		qWarning() << tr("(%1) Could not create bridge").arg(toString(reply.error()));
+		return false;
+	}
+}
+
+bool CDeviceManager::destroyBridge(CDevice * device) {
+	//Check if device is a bridge:
+	if (DT_BRIDGE != device->m_type) {
+		return false;
+	}
+	else {
+		QDBusReply<bool> reply = m_dbusDevmgr->destroyBridge(device->m_dbusPath);
+		if (reply.isValid()) {
+			return reply.value();
+		}
+		else {
+			if ( !dbusConnected(&m_dbusConnection) ) {
+				dbusKilled();
+			}
+			qWarning() << tr("(%1) Could not create bridge").arg(toString(reply.error()));
+			return false;
+		}
+	}
 }
 
 

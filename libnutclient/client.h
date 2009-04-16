@@ -6,6 +6,7 @@
 #include <QDBusConnectionInterface>
 #include <QDBusReply>
 #include <QDBusObjectPath>
+#include <QDBusInterface>
 #include <QFile>
 #include <QTextStream>
 #include "libnutcommon/common.h"
@@ -104,6 +105,7 @@ namespace libnutclient {
 		friend class CEnvironment;
 		friend class CInterface;
 		friend class DBusDeviceManagerInterface;
+		friend class QDBusConnection; //neseccary for qdbuscalls?
 	private:
 		DBusDeviceManagerInterface * m_dbusDevmgr;
 		QHash<QDBusObjectPath, CDevice* > m_dbusDevices;
@@ -112,9 +114,14 @@ namespace libnutclient {
 		bool m_nutsstate;
 		int m_dbusTimerId;
 		CDeviceList m_devices;
+		qint32 m_dbusCallTimeout;
+		QString m_dbusPath;
+
+		QDBusMessage devMessage;
 
 		libnutcommon::CDBusMonitor m_dbusMonitor;
 		
+		QDBusInterface * m_dbusInterface;
 		void rebuild(QList<QDBusObjectPath> paths);
 		void setInformation();
 		void clearInformation();
@@ -122,6 +129,13 @@ namespace libnutclient {
 		void dbusKilled(bool doinit=true);
 
 	private slots:
+		//dbus return methods
+		void dbusretGetDeviceList(QList<QDBusObjectPath> devices);
+		void dbusretGetDeviceList() { qDebug() << "Leeres"; }
+		void dbusretGetDeviceList(QDBusMessage reply) { qDebug() << "mit reply"; }
+		void dbusretGetDeviceList(qint64 bl) { qDebug() << "zahlen" << bl; }
+		void dbuserrGetDeviceList(QDBusError error);
+
 		void dbusDeviceAdded(const QDBusObjectPath &objectpath);
 		void dbusDeviceRemoved(const QDBusObjectPath &objectpath);
 		void dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner);
@@ -140,7 +154,10 @@ namespace libnutclient {
 			It has to be called to start the device manager
 		*/
 		bool init(CLog * inlog);
-
+		
+		bool createBridge(QList<CDevice *> devices);
+		bool destroyBridge(CDevice * device);
+		
 		CDeviceManager(QObject * parent);
 		~CDeviceManager();
 	public slots:
