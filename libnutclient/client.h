@@ -215,13 +215,15 @@ namespace libnutclient {
 		void environmentChangedActive(const QString &newenv);
 		void dbusStateChanged(int newState, int oldState);
 
-		void dbusretGetProperties(DeviceProperties);
+		void dbusretGetProperties(libnutcommon::DeviceProperties props);
 		void dbusretGetEssid(QString essid);
 		void dbusretGetEnvironments(QList<QDBusObjectPath> envs);
 		void dbusretGetActiveEnvironment(QString activeEnv);
 		void dbusretGetConfig(libnutcommon::DeviceConfig config);
 		
 	public:
+		//Initializes this device
+		bool init();
 		inline const CEnvironmentList& getEnvironments() { return m_environments; }
 		inline const QString& getName() { return m_name; }
 		inline const QString& getEssid() { return m_essid; }

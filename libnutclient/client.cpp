@@ -476,10 +476,10 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) : CLibNut(
 
 
 bool CDevice::init() {
-	log = parent->log;
+	log = ((CDeviceManager*)parent())->log;
 	//get m_dbusConnection from parent:
-	m_dbusConnection = &(parent->m_dbusConnection);
-	m_dbusConnectionInterface = parent->m_dbusConnectionInterface;
+	m_dbusConnection = &(((CDeviceManager*)parent())->m_dbusConnection);
+	m_dbusConnectionInterface = ((CDeviceManager*)parent())->m_dbusConnectionInterface;
 	//Service check
 	serviceCheck(m_dbusConnectionInterface); //TODO:Remove exception garbage
 	//connect to dbus-object
@@ -709,7 +709,7 @@ void CDevice::dbusStateChanged(int newState, int oldState) {
 }
 
 //CDevice private slots for dbus communication
-void CDevice::dbusretGetProperties(DeviceProperties props) {
+void CDevice::dbusretGetProperties(libnutcommon::DeviceProperties props) {
 	m_name = props.name;
 	m_type = props.type;
 	m_state = (DeviceState) props.state;
@@ -773,7 +773,7 @@ void CDevice::dbusretGetActiveEnvironment(QString activeEnv) {
 
 void CDevice::dbusretGetConfig(libnutcommon::DeviceConfig config) {
 
-	m_config = config
+	m_config = config;
 	#ifndef LIBNUT_NO_WIRELESS
 	m_needWpaSupplicant = !(m_config.wpaConfigFile().isEmpty());
 

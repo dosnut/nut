@@ -82,7 +82,7 @@ public Q_SLOTS: // METHODS
 	void getActiveEnvironment();
 
 private slots:
-	void dbret_dummy(QDBusMessage msg) {};
+	void dbret_dummy(QDBusMessage) {};
 	void dbret_getEnvironments(QList<QDBusObjectPath> envs) { emit gotEnvironments(envs); }
 	void dbret_getProperties(libnutcommon::DeviceProperties props) { emit gotProperties(props); }
 	void dbret_getEssid(QString essid) { emit gotEssid(essid); }
