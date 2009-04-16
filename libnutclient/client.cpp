@@ -143,6 +143,8 @@ bool CDeviceManager::init(CLog * inlog) {
 	//Connect dbus-signals to own slots:
 	connect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 	connect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+	connect(m_dbusDevmgr, SIGNAL(gotDeviceList(QList<QDBusObjectPath>)), this, SLOT(dbusretGetDeviceList(QList<QDBusObjectPath>)));
+	connect(m_dbusDevmgr, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusretErrorOccured(QDBusError)));
 	return m_nutsstate;
 }
 
@@ -191,7 +193,7 @@ void CDeviceManager::dbusKilled(bool doinit) {
 }
 
 //CDeviceManager private functions:
-//rebuilds the device list
+//rebuilds the device list and populates it on start-up
 void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 	//Only rebuild when nuts is available
 	if (!m_nutsstate) {
@@ -250,32 +252,8 @@ void CDeviceManager::setInformation() {
 // 			qWarning() << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
 // 		}
 // 	}
-	qDebug() << "Populating device list";
-	if (!m_dbusInterface) {
-		QLatin1String interfaceName(NUT_DBUS_URL ".DeviceManager");
-		m_dbusInterface = new QDBusInterface( NUT_DBUS_URL, m_dbusPath, interfaceName, m_dbusConnection, this);
-		if (!m_dbusInterface->isValid()) {
-			qDebug() << "Interface is invalid!";
-		}
-		else {
-			qDebug() << "Interface is valid";
-		}
-	}
-	//Let's populate our own DeviceList
-	QList<QVariant> devListArgs;
-	QLatin1String methodName("getDeviceList");
-	bool devListCall = m_dbusInterface->callWithCallback(methodName, devListArgs, this, SLOT(dbusretGetDeviceList(QList< QDBusObjectPath >)), SLOT(dbuserrGetDeviceList(QDBusError)) );
-	if (!devListCall)
-		qDebug() << "Placing call failed";
-	else
-		qDebug() << "Placed call";
-// 	QString dbService = QLatin1String(NUT_DBUS_URL);
-// 	QString dbPath = m_dbusPath.toLatin1();
-// 	QString dbInterface = QLatin1String(NUT_DBUS_URL ".DeviceManager");
-// 	QString dbMethod = QLatin1String("getDeviceList");
-// 	devMessage = QDBusMessage::createMethodCall(dbService, dbPath, dbInterface, dbMethod);
-// 	m_dbusConnection.callWithCallback(devMessage, this,SLOT(dbusretGetDeviceList(qint64)), SLOT(dbuserrGetDeviceList(void)), 5000);
-	
+	qDebug() << "Placing getDeviceList Call";
+	m_dbusDevmgr->getDeviceList();
 }
 void CDeviceManager::clearInformation() {
 	//Clean Device list:
@@ -304,6 +282,8 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 			}
 			connect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 			connect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+			connect(m_dbusDevmgr, SIGNAL(gotDeviceList(QList<QDBusObjectPath>)), this, SLOT(dbusretGetDeviceList(QList<QDBusObjectPath>)));
+			connect(m_dbusDevmgr, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusretErrorOccured(QDBusError)));
 		}
 		else if (newOwner.isEmpty()) { //nuts stops
 			*log<< tr("NUTS has been stopped");
@@ -314,6 +294,8 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 			}
 			disconnect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 			disconnect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+			disconnect(m_dbusDevmgr, SIGNAL(gotDeviceList(QList<QDBusObjectPath>)), this, SLOT(dbusretGetDeviceList(QList<QDBusObjectPath>)));
+			disconnect(m_dbusDevmgr, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusretErrorOccured(QDBusError)));
 			//start the dbus was killed timer TODO:replace with inotify
 			if (-1 == m_dbusTimerId) {
 				m_dbusTimerId = startTimer(5000);
@@ -323,34 +305,34 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 }
 //DBUS CALL AND ERROR FUNCTIONS
 void CDeviceManager::dbusretGetDeviceList(QList<QDBusObjectPath> devices) {
-	qDebug() << "objectpaths";
-	CDevice * device;
-	foreach (QDBusObjectPath i, devices) {
-		//Only add device if it's not already in our list;
-		if (m_dbusDevices.contains(i)) {
-			continue;
-		}
-		//Add device
-		try {
-			device = new CDevice(this, i);
-		}
-		catch (CLI_DevConnectionException e) {
-			if ( !dbusConnected(&m_dbusConnection) ) {
-				dbusKilled();
+		//If a device is missing or there are too many m_devices in our Hash
+		//Then rebuild complete tree, otherwise just call refresh on child
+		bool equal = true;
+		if ( (m_dbusDevices.size() == devices.size()) ) {
+			foreach(QDBusObjectPath i, devices) {
+				if ( !m_dbusDevices.contains(i) ) {
+					equal = false;
+					break;
+				}
+			}
+			if ( equal ) {
+				foreach(CDevice * i, m_devices) {
+					i->refreshAll();
+				}
+			}
+			else {
+				rebuild(devices);
 				return;
 			}
-			qWarning() << e.msg();
-			continue;
 		}
-		m_devices.append(device);
-		device->m_index = m_devices.indexOf(device); // Set device index;
-		m_dbusDevices.insert(i, device);
-		emit(deviceAdded(device));
-	}
+		else {
+			rebuild(devices);
+			return;
+		}
 }
 
-void CDeviceManager::dbuserrGetDeviceList(QDBusError error) {
-	qDebug() << QDBusError::errorString(error.type());
+void CDeviceManager::dbusretErrorOccured(QDBusError error) {
+	qDebug() << "Error occured in dbus: " << QDBusError::errorString(error.type());
 }
 
 //CDeviceManager DBUS-SLOTS:
@@ -410,44 +392,46 @@ void CDeviceManager::dbusStarted() {
 }
 
 bool CDeviceManager::createBridge(QList<CDevice *> devices) {
-	//check if devices are non-bridges and assemble dbus path list
-	QList<QDBusObjectPath> devpaths;
-	foreach(CDevice * device, devices) {
-		if (device->m_type & DT_BRIDGE)
-			return false;
-		devpaths.append(device->m_dbusPath);
-	}
-	QDBusReply<bool> reply = m_dbusDevmgr->createBridge(devpaths);
-	if (reply.isValid()) {
-		return reply.value();
-	}
-	else {
-		if ( !dbusConnected(&m_dbusConnection) ) {
-			dbusKilled();
-		}
-		qWarning() << tr("(%1) Could not create bridge").arg(toString(reply.error()));
-		return false;
-	}
+	return false;
+// 	//check if devices are non-bridges and assemble dbus path list
+// 	QList<QDBusObjectPath> devpaths;
+// 	foreach(CDevice * device, devices) {
+// 		if (device->m_type & DT_BRIDGE)
+// 			return false;
+// 		devpaths.append(device->m_dbusPath);
+// 	}
+// 	QDBusReply<bool> reply = m_dbusDevmgr->createBridge(devpaths);
+// 	if (reply.isValid()) {
+// 		return reply.value();
+// 	}
+// 	else {
+// 		if ( !dbusConnected(&m_dbusConnection) ) {
+// 			dbusKilled();
+// 		}
+// 		qWarning() << tr("(%1) Could not create bridge").arg(toString(reply.error()));
+// 		return false;
+// 	}
 }
 
 bool CDeviceManager::destroyBridge(CDevice * device) {
-	//Check if device is a bridge:
-	if (DT_BRIDGE != device->m_type) {
-		return false;
-	}
-	else {
-		QDBusReply<bool> reply = m_dbusDevmgr->destroyBridge(device->m_dbusPath);
-		if (reply.isValid()) {
-			return reply.value();
-		}
-		else {
-			if ( !dbusConnected(&m_dbusConnection) ) {
-				dbusKilled();
-			}
-			qWarning() << tr("(%1) Could not create bridge").arg(toString(reply.error()));
-			return false;
-		}
-	}
+	return false;
+// 	//Check if device is a bridge:
+// 	if (DT_BRIDGE != device->m_type) {
+// 		return false;
+// 	}
+// 	else {
+// 		QDBusReply<bool> reply = m_dbusDevmgr->destroyBridge(device->m_dbusPath);
+// 		if (reply.isValid()) {
+// 			return reply.value();
+// 		}
+// 		else {
+// 			if ( !dbusConnected(&m_dbusConnection) ) {
+// 				dbusKilled();
+// 			}
+// 			qWarning() << tr("(%1) Could not create bridge").arg(toString(reply.error()));
+// 			return false;
+// 		}
+// 	}
 }
 
 
@@ -458,59 +442,26 @@ void CDeviceManager::refreshAll() {
 		return;
 	}
 	//Get our current DeviceList
-	QDBusReply<QList<QDBusObjectPath> > replydevs = m_dbusDevmgr->getDeviceList();
-	if (replydevs.isValid()) {
-		//If a device is missing or there are too many m_devices in our Hash
-		//Then rebuild complete tree, otherwise just call refresh on child
-		bool equal = true;
-		if ( (m_dbusDevices.size() == replydevs.value().size()) ) {
-			foreach(QDBusObjectPath i, replydevs.value()) {
-				if ( !m_dbusDevices.contains(i) ) {
-					equal = false;
-					break;
-				}
-			}
-			if ( equal ) {
-				foreach(CDevice * i, m_devices) {
-					i->refreshAll();
-				}
-			}
-			else {
-				rebuild(replydevs.value());
-				return;
-			}
-		}
-		else {
-			rebuild(replydevs.value());
-			return;
-		}
-	}
-	else {
-		if ( !dbusConnected(&m_dbusConnection) ) {
-			dbusKilled();
-			return;
-		}
-		qWarning() << tr("(%1) Could not refresh device list").arg(toString(replydevs.error()));
-	}
+	m_dbusDevmgr->getDeviceList();
 }
 
-void CDeviceManager::rebuild() {
-	//Do not rebuild if nuts is not running
-	if (!m_nutsstate) {
-		return;
-	}
-	QDBusReply<QList<QDBusObjectPath> > replydevs = m_dbusDevmgr->getDeviceList();
-	if (replydevs.isValid()) {
-		rebuild(replydevs.value());
-	}
-	else {
-		if ( !dbusConnected(&m_dbusConnection) ) {
-			dbusKilled();
-			return;
-		}
-		qWarning() << tr("(%1) Error while retrieving device list").arg(toString(replydevs.error()));
-	}
-}
+// void CDeviceManager::rebuild() {
+// 	//Do not rebuild if nuts is not running
+// 	if (!m_nutsstate) {
+// 		return;
+// 	}
+// 	QDBusReply<QList<QDBusObjectPath> > replydevs = m_dbusDevmgr->getDeviceList();
+// 	if (replydevs.isValid()) {
+// 		rebuild(replydevs.value());
+// 	}
+// 	else {
+// 		if ( !dbusConnected(&m_dbusConnection) ) {
+// 			dbusKilled();
+// 			return;
+// 		}
+// 		qWarning() << tr("(%1) Error while retrieving device list").arg(toString(replydevs.error()));
+// 	}
+// }
 
 
 

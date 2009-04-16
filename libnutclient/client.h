@@ -132,6 +132,8 @@ namespace libnutclient {
 		//dbus return methods
 		void dbusretGetDeviceList(QList<QDBusObjectPath> devices);
 
+		void dbusretErrorOccured(QDBusError error);
+
 		void dbusDeviceAdded(const QDBusObjectPath &objectpath);
 		void dbusDeviceRemoved(const QDBusObjectPath &objectpath);
 		void dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner);
