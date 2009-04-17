@@ -21,7 +21,7 @@ void DBusDeviceManagerInterface::getDeviceList() {
 	QList<QVariant> devListArgs;
 	bool devListCall = callWithCallback(QLatin1String("getDeviceList"), devListArgs, this, SLOT(dbret_getDeviceList(QList< QDBusObjectPath >)), SLOT(dbret_errorOccured(QDBusError)) );
 	if (!devListCall)
-		emit queueErrorOccured();
+		emit queueErrorOccured("getDeviceList");
 }
 
 void DBusDeviceManagerInterface::dbret_errorOccured(QDBusError error) {
@@ -45,6 +45,7 @@ DBusDeviceInterface::DBusDeviceInterface(const QString &service, const QString &
 
 DBusDeviceInterface::~DBusDeviceInterface()
 {
+	qDebug() << "BANG, GONE";
 }
 
 
@@ -52,14 +53,14 @@ void DBusDeviceInterface::disable() {
 	QList<QVariant> argumentList;
 	bool worked = callWithCallback(QLatin1String("disable"), argumentList, this, SLOT(dbret_dummy(QDBusMessage)), SLOT(dbret_errorOccured(QDBusError)));
 	if (!worked)
-		emit queueErrorOccured();
+		emit queueErrorOccured("disable");
 }
 
 void DBusDeviceInterface::enable() {
 	QList<QVariant> argumentList;
 	bool worked = callWithCallback(QLatin1String("enable"), argumentList, this, SLOT(dbret_dummy(QDBusMessage)), SLOT(dbret_errorOccured(QDBusError)));
 	if (!worked)
-		emit queueErrorOccured();
+		emit queueErrorOccured("enable");
 }
 
 void DBusDeviceInterface::setEnvironment(QDBusObjectPath envpath) {
@@ -67,7 +68,7 @@ void DBusDeviceInterface::setEnvironment(QDBusObjectPath envpath) {
 	argumentList << qVariantFromValue(envpath);
 	bool worked = callWithCallback(QLatin1String("setEnvironment"), argumentList, this, SLOT(dbret_dummy(QDBusMessage)), SLOT(dbret_errorOccured(QDBusError)));
 	if (!worked)
-		emit queueErrorOccured();
+		emit queueErrorOccured("setEnvironment");
 }
 
 void DBusDeviceInterface::setEnvironment(qint32 env) {
@@ -75,42 +76,42 @@ void DBusDeviceInterface::setEnvironment(qint32 env) {
 	argumentList << qVariantFromValue(env);
 	bool worked = callWithCallback(QLatin1String("setEnvironment"), argumentList, this, SLOT(dbret_dummy(QDBusMessage)), SLOT(dbret_errorOccured(QDBusError)));
 	if (!worked)
-		emit queueErrorOccured();
+		emit queueErrorOccured("setEnvironment(int)");
 }
 
 void DBusDeviceInterface::getEnvironments() {
 	QList<QVariant> argumentList;
 	bool worked = callWithCallback(QLatin1String("getEnvironment"), argumentList, this, SLOT(dbret_getEnvironments(QList<QDBusObjectPath>)), SLOT(dbret_errorOccured(QDBusError)));
 	if (!worked)
-		emit queueErrorOccured();
+		emit queueErrorOccured("getEnvironments");
 }
 
 void DBusDeviceInterface::getProperties() {
 	QList<QVariant> argumentList;
-	bool worked = callWithCallback(QLatin1String("getProperties"), argumentList, this, SLOT(dbret_getProperties(libnutcommon::DeviceProperties props)), SLOT(dbret_errorOccured(QDBusError)));
+	bool worked = callWithCallback(QLatin1String("getProperties"), argumentList, this, SLOT(dbret_getProperties(libnutcommon::DeviceProperties)), SLOT(dbret_errorOccured(QDBusError)));
 	if (!worked)
-		emit queueErrorOccured();
+		emit queueErrorOccured("getProperties");
 }
 void DBusDeviceInterface::getEssid() {
 	QList<QVariant> argumentList;
 	bool worked = callWithCallback(QLatin1String("getEssid"), argumentList, this, SLOT(dbret_getEssid(QString)), SLOT(dbret_errorOccured(QDBusError)));
 	if (!worked)
-		emit queueErrorOccured();
+		emit queueErrorOccured("getEssid");
 }
 
 void DBusDeviceInterface::getConfig() {
 	QList<QVariant> argumentList;
 	bool worked = callWithCallback(QLatin1String("getConfig"), argumentList, this, SLOT(dbret_getConfig(libnutcommon::DeviceConfig)), SLOT(dbret_errorOccured(QDBusError)));
 	if (!worked)
-		emit queueErrorOccured();
+		emit queueErrorOccured("getConfig");
 }
 
 
 void DBusDeviceInterface::getActiveEnvironment() {
 	QList<QVariant> argumentList;
-	bool worked = callWithCallback(QLatin1String("getActiveEnvironment"), argumentList, this, SLOT(dbret_getActiveEnvironment(QString), SLOT(dbret_errorOccured(QDBusError)));
+	bool worked = callWithCallback(QLatin1String("getActiveEnvironment"), argumentList, this, SLOT(dbret_getActiveEnvironment(QString)), SLOT(dbret_errorOccured(QDBusError)));
 	if (!worked)
-		emit queueErrorOccured();
+		emit queueErrorOccured("getActiveEnvironment");
 }
 
 

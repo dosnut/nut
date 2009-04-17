@@ -26,6 +26,8 @@ public:
 	static inline const char *staticInterfaceName()
 	{ return NUT_DBUS_URL ".DeviceManager"; }
 
+	enum { GET_DEVICE_LIST };
+
 public:
 	DBusDeviceManagerInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = 0);
 
@@ -51,8 +53,8 @@ signals: // SIGNALS
 	void deviceAdded(const QDBusObjectPath &objectpath);
 	void deviceRemoved(const QDBusObjectPath &objectpath);
 
-	void errorOccured(QDBusError error);
-	void queueErrorOccured();
+	void errorOccured(QDBusError error/*, int method */); //TODO:Finer errors, needz zem with the call
+	void queueErrorOccured(QString method);
 };
 
 /*
@@ -96,6 +98,9 @@ Q_SIGNALS: // SIGNALS
 	void gotEssid(QString essid);
 	void gotConfig(libnutcommon::DeviceConfig config);
 	void gotActiveEnvironment(QString activeEnv);
+
+	void errorOccured(QDBusError error);
+	void queueErrorOccured(QString method);
 
 	//DBUS Signals
 	void environmentChangedActive(const QString &newenv);

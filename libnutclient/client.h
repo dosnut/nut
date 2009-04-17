@@ -139,6 +139,9 @@ namespace libnutclient {
 		void dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner);
 		void dbusStopped();
 		void dbusStarted();
+
+		void deviceInitializationFailed(CDevice * device);
+
 	public:
 		/** @brief List of devices managed by the DeviceManager
 		*/
@@ -191,9 +194,6 @@ namespace libnutclient {
 		#ifndef LIBNUT_NO_WIRELESS
 		bool m_needWpaSupplicant;
 		#endif
-		void refreshAll();
-		void setActiveEnvironment(CEnvironment * env, QDBusObjectPath m_dbusPath);
-		void rebuild(QList<QDBusObjectPath> paths);
 		
 		//Locking functions;
 		bool m_pendingRemoval;
@@ -211,7 +211,14 @@ namespace libnutclient {
 		#endif
 		int m_index;
 
+	//private  methods
+		void refreshAll();
+		void setActiveEnvironment(CEnvironment * env, QDBusObjectPath m_dbusPath);
+		void rebuild(QList<QDBusObjectPath> paths);
+
+
 	private slots:
+
 		void environmentChangedActive(const QString &newenv);
 		void dbusStateChanged(int newState, int oldState);
 
@@ -221,9 +228,10 @@ namespace libnutclient {
 		void dbusretGetActiveEnvironment(QString activeEnv);
 		void dbusretGetConfig(libnutcommon::DeviceConfig config);
 		
+		void dbusret_errorOccured() { qDebug() << "Error occured"; }
 	public:
 		//Initializes this device
-		bool init();
+		void init();
 		inline const CEnvironmentList& getEnvironments() { return m_environments; }
 		inline const QString& getName() { return m_name; }
 		inline const QString& getEssid() { return m_essid; }
@@ -251,13 +259,17 @@ namespace libnutclient {
 		void setEnvironment(CEnvironment * environment);
 		
 	signals:
+
+		void failedInitialization(CDevice * device); //TODO:Implement this: has to be called if init fails
+
+
 		void newDataAvailable();
 		void environmentChangedActive(libnutclient::CEnvironment * current, libnutclient::CEnvironment * previous);
 		void stateChanged(libnutcommon::DeviceState newState);
 		void newWirelessNetworkFound();
 		void gotProperties(libnutcommon::DeviceProperties properties);
 		void gotEssid(QString essid);
-		void gotActiveEnvironment(CEnvironment activeEnv);
+		void gotActiveEnvironment(libnutclient::CEnvironment * activeEnv);
 		void gotConfig(libnutcommon::DeviceConfig config);
 		void gotEnvironments();
 		

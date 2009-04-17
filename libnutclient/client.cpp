@@ -83,7 +83,15 @@ void CLibNut::serviceCheck(QDBusConnectionInterface * interface) {
 ////////////////
 //CDeviceManager
 ///////////////
-CDeviceManager::CDeviceManager(QObject * parent) : CLibNut(parent), m_dbusDevmgr(0), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))), m_dbusTimerId(-1), m_dbusPath("/manager"), m_dbusMonitor(this), m_dbusInterface(0) {
+CDeviceManager::CDeviceManager(QObject * parent) :
+	CLibNut(parent),
+	m_dbusDevmgr(0),
+	m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))),
+	log(0),
+	m_dbusTimerId(-1), m_dbusPath("/manager"),
+	m_dbusMonitor(this),
+	m_dbusInterface(0) 
+{
 	
 	//Init dbus monitor
 	connect(&m_dbusMonitor,SIGNAL(stopped(void)),this,SLOT(dbusStopped(void)));
@@ -151,6 +159,17 @@ bool CDeviceManager::init(CLog * inlog) {
 	return m_nutsstate;
 }
 
+void CDeviceManager::deviceInitializationFailed(CDevice * device) {
+	m_dbusDevices.take(device->m_dbusPath);
+	m_devices.removeAll(device);
+	//Rebuild device->index for qnut
+	foreach(CDevice * dev, m_devices) {
+		dev->m_index = m_devices.indexOf(dev);
+	}
+	emit(deviceRemoved(device));
+	device->deleteLater();
+}
+
 void CDeviceManager::timerEvent(QTimerEvent *event) {
 	if (event->timerId() == m_dbusTimerId ) {
 		killTimer(m_dbusTimerId);
@@ -212,20 +231,12 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 	}
 	//Build new m_devices
 	foreach(QDBusObjectPath i, paths) {
-		try {
-			device = new CDevice(this, i);
-		}
-		catch (CLI_ConnectionException &e) {
-			if ( !dbusConnected(&m_dbusConnection) ) {
-				dbusKilled();
-				return;
-			}
-			qWarning() << e.what();
-			continue;
-		}
+		device = new CDevice(this, i);
 		m_dbusDevices.insert(i, device);
 		m_devices.append(device);
 		device->m_index = m_devices.indexOf(device); // Set device index;
+		connect(device,SIGNAL(failedInitialization(CDevice*)), this, SLOT(deviceInitializationFailed(CDevice*)));
+		device->init();
 		emit(deviceAdded(device));
 	}
 }
@@ -471,12 +482,21 @@ void CDeviceManager::refreshAll() {
 /////////
 //CDevice
 /////////
-CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) : CLibNut(parent), /*parent(parent),*/ m_dbusPath(m_dbusPath), m_pendingRemoval(false), m_lockCount(0), m_wpaSupplicant(0) { //TODO:Init all! pointers to 0
-}
+CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) : 
+	CLibNut(parent),
+	/*parent(parent),*/
+	m_dbusPath(m_dbusPath),
+	log(parent->log),
+	m_dbusDevice(0),
+	m_needWpaSupplicant(false),
+	m_pendingRemoval(false),
+	m_lockCount(0),
+	m_activeEnvironment(0),
+	m_wpaSupplicant(0)
+{} //TODO:Init all! pointers to 0
 
 
-bool CDevice::init() {
-	log = ((CDeviceManager*)parent())->log;
+void CDevice::init() {
 	//get m_dbusConnection from parent:
 	m_dbusConnection = &(((CDeviceManager*)parent())->m_dbusConnection);
 	m_dbusConnectionInterface = ((CDeviceManager*)parent())->m_dbusConnectionInterface;
@@ -486,9 +506,11 @@ bool CDevice::init() {
 	m_dbusDevice = new DBusDeviceInterface(NUT_DBUS_URL, m_dbusPath.path(),*m_dbusConnection, this);
 	
 	//DBus interface is available: connect:
+	connect(m_dbusDevice, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusret_errorOccured()));
+
 	connect(m_dbusDevice, SIGNAL(gotEnvironments(QList<QDBusObjectPath>)), this, SLOT(dbusretGetEnvironments(QList<QDBusObjectPath>)));
 	connect(m_dbusDevice, SIGNAL(gotProperties(libnutcommon::DeviceProperties)), this, SLOT(dbusretGetProperties(libnutcommon::DeviceProperties)));
-	connect(m_dbusDevice, SIGNAL(gotEssid(QString)), this, SLOT(dbretGetEssid(QString)));
+	connect(m_dbusDevice, SIGNAL(gotEssid(QString)), this, SLOT(dbusretGetEssid(QString)));
 	connect(m_dbusDevice, SIGNAL(gotConfig(libnutcommon::DeviceConfig)), this, SLOT(dbusretGetConfig(libnutcommon::DeviceConfig)));
 	connect(m_dbusDevice, SIGNAL(gotActiveEnvironment(QString)), this, SLOT(dbusretGetActiveEnvironment(QString)));
 
@@ -718,7 +740,7 @@ void CDevice::dbusretGetConfig(libnutcommon::DeviceConfig config) {
 	}
 	#endif
 
-	emit gotConfig();
+	emit gotConfig(m_config);
 	emit newDataAvailable();
 }
 
