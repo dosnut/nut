@@ -210,7 +210,7 @@ namespace qnut {
 	}
 	
 	bool CAvailableAPProxyModel::lessThan(const QModelIndex & left, const QModelIndex & right) {
-		CAvailableAPModel * source = dynamic_cast<CAvailableAPModel *>(sourceModel());
+		CAvailableAPModel * source = qobject_cast<CAvailableAPModel *>(sourceModel());
 		if (!source)
 			return true;
 		

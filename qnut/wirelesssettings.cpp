@@ -224,7 +224,7 @@ namespace qnut {
 		if (selectedIndexes.isEmpty())
 			return QModelIndex();
 		
-		QSortFilterProxyModel * proxyModel = dynamic_cast<QSortFilterProxyModel *>(view->model());
+		QSortFilterProxyModel * proxyModel = qobject_cast<QSortFilterProxyModel *>(view->model());
 		if (proxyModel)
 			return proxyModel->mapToSource(selectedIndexes[0]);
 		else

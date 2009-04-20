@@ -275,7 +275,7 @@ namespace qnut {
 			
 			if (targetIndex.parent().isValid()) {
 				CInterface * interface = static_cast<CInterface *>(targetIndex.internalPointer());
-				environment = dynamic_cast<CEnvironment *>(interface->parent());
+				environment = qobject_cast<CEnvironment *>(interface->parent());
 				
 				m_IPConfigurationAction->setEnabled(interface->getConfig().getFlags() & libnutcommon::IPv4Config::DO_USERSTATIC);
 				ui.detailsView->setRootIsDecorated(false);

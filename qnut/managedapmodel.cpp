@@ -140,7 +140,7 @@ namespace qnut {
 	}
 	
 	bool CManagedAPProxyModel::lessThan(const QModelIndex & left, const QModelIndex & right) {
-		CManagedAPModel * source = dynamic_cast<CManagedAPModel *>(sourceModel());
+		CManagedAPModel * source = qobject_cast<CManagedAPModel *>(sourceModel());
 		if (!source)
 			return true;
 		

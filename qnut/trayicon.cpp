@@ -41,12 +41,12 @@ namespace qnut {
 	}
 	
 	void CTrayIcon::handleClicks(QSystemTrayIcon::ActivationReason reason) {
-		QWidget * mainwin = dynamic_cast<QWidget *>(parent());
+		QWidget * mainwin = qobject_cast<QWidget *>(parent());
 		switch (reason) {
 			case Trigger:
 				if (mainwin->isMinimized() || !mainwin->isVisible()) {
 					mainwin->show();
-					mainwin->setWindowState(mainwin->windowState() & ~Qt::WindowMinimized | Qt::WindowActive);
+					mainwin->setWindowState((mainwin->windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
 				}
 				else
 					mainwin->close();
