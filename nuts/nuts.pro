@@ -1,8 +1,10 @@
 
 TEMPLATE = app
 
-CONFIG += qt warn_on qdbus exceptions
-CONFIG -= thread
+CONFIG += qt warn_on qdbus exceptions \
+ debug
+CONFIG -= thread \
+ release
 QT -= gui
 QT += network
 
@@ -27,9 +29,11 @@ DESTDIR = .
 
 INCLUDEPATH += ../
 
-LIBS +=  -lnl ../libnutcommon/libnutcommon.a
 TARGETDEPS += ../libnutcommon/libnutcommon.a
 
 TARGET = nuts
 target.path = /usr/sbin/
 INSTALLS += target
+LIBS += ../libnutcommon/libnutcommon.a \
+  -lnl
+
