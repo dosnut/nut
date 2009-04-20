@@ -13,8 +13,20 @@ QT += network
 
 CODECFORSRC = UTF-8
 
-HEADERS += client.h server_proxy.h client_exceptions.h
-SOURCES += client.cpp server_proxy.cpp
+HEADERS += client.h server_proxy.h client_exceptions.h \
+ cinterface.h \
+ cenvironment.h \
+ cdevice.h \
+ cdevicemanager.h \
+ clibnut.h \
+ clog.h
+SOURCES += client.cpp server_proxy.cpp \
+ cinterface.cpp \
+ clibnut.cpp \
+ clog.cpp \
+ cdevicemanager.cpp \
+ cdevice.cpp \
+ cenvironment.cpp
 
 OBJECTS_DIR = build/
 UI_DIR = build/
