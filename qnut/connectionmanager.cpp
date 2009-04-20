@@ -108,7 +108,7 @@ namespace qnut {
 		m_OverView.addAction(m_WirelessSettingsAction);
 		#endif
 		
-		connect(m_RefreshDevicesAction, SIGNAL(triggered()), &m_DeviceManager, SLOT(rebuild()));
+		connect(m_RefreshDevicesAction, SIGNAL(triggered()), &m_DeviceManager, SLOT(refreshAll()));
 		connect(m_ClearLogAction, SIGNAL(triggered()), &m_LogEdit, SLOT(clear()));
 	}
 	
