@@ -12,7 +12,7 @@
 
 namespace libnutcommon {
 	enum DeviceState  { DS_DEACTIVATED, DS_ACTIVATED, DS_CARRIER, DS_UNCONFIGURED, DS_UP };
-	enum DeviceType { DT_ETH=0, DT_AIR=1, DT_PPP=2 };
+	enum DeviceType { DT_ETH=0, DT_AIR=1, DT_PPP=2, DT_BRIDGE=4};
 	struct DeviceProperties {
 		QString name;
 		QString activeEnvironment;

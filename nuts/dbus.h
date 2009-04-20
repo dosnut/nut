@@ -54,6 +54,16 @@ namespace nuts {
 		public slots:
 			QList<QDBusObjectPath> getDeviceList();
 			QStringList getDeviceNames();
+
+			bool createBridge(QList<QDBusObjectPath> devicePaths);
+			bool createBridge(QList<qint32> deviceIds);
+			bool createBridge(QList<QString> deviceNames);
+			bool addToBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths);
+			bool addToBridge(qint32 bridgeId, QList<qint32> deviceIds);
+			bool destroyBridge(QDBusObjectPath devicePath);
+			bool destroyBridge(qint32 deviceId);
+			bool destroyBridge(QString deviceName);
+
 		signals:
 			void deviceAdded(const QDBusObjectPath &objectpath);
 			void deviceRemoved(const QDBusObjectPath &objectpath);

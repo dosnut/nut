@@ -56,7 +56,10 @@ namespace nuts {
 		}
 		m_dbusConnection.unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
 		m_dbusConnection.unregisterService(NUT_DBUS_URL);
-		m_dbusConnection.disconnectFromBus("nuts_system_bus");
+		m_dbusConnection.disconnectFromBus(QString::fromLatin1("nuts_system_bus"));
+		if (m_dbusConnection.isConnected()) {
+			qDebug() << "(BIG FAT WARNING) Dbus is connected after disconnect";
+		}
 // 		qDebug() << "Deleted dev-manager";
 	}
 
@@ -109,6 +112,7 @@ namespace nuts {
 		foreach (DBusDevice *dbus_device, m_dbusDevices) {
 			paths.append(QDBusObjectPath(dbus_device->getPath()));
 		}
+		qDebug() << "Returining device list";
 		return paths;
 	}
 	QStringList DBusDeviceManager::getDeviceNames() {
@@ -118,6 +122,16 @@ namespace nuts {
 		}
 		return names;
 	}
+
+	bool DBusDeviceManager::createBridge(QList<QDBusObjectPath> devicePaths){ return false; }
+	bool DBusDeviceManager::createBridge(QList<qint32> deviceIds){ return false; }
+	bool DBusDeviceManager::createBridge(QList<QString> deviceNames){ return false; }
+	bool DBusDeviceManager::addToBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths){ return false; }
+	bool DBusDeviceManager::addToBridge(qint32 bridgeId, QList<qint32> deviceIds){ return false; }
+	bool DBusDeviceManager::destroyBridge(QDBusObjectPath devicePath){ return false; }
+	bool DBusDeviceManager::destroyBridge(qint32 deviceId){ return false; }
+	bool DBusDeviceManager::destroyBridge(QString deviceName){ return false; }
+
 
 	DBusDevice::DBusDevice(Device *dev, QDBusConnection *connection, const QString &path)
 	: QDBusAbstractAdaptor(dev), m_device(dev), m_dbusConnection(connection) {
