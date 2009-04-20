@@ -9,7 +9,6 @@
 #include "connectionmanager.h"
 #include "overviewmodel.h"
 #include "common.h"
-#include "deviceitemdelegate.h"
 
 namespace qnut {
 	using namespace libnutclient;
