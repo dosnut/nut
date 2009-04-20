@@ -491,8 +491,11 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) :
 	m_needWpaSupplicant(false),
 	m_pendingRemoval(false),
 	m_lockCount(0),
+	m_state(libnutcommon::DS_UNCONFIGURED),
+	m_type(libnutcommon::DT_ETH),
 	m_activeEnvironment(0),
-	m_wpaSupplicant(0)
+	m_wpaSupplicant(0),
+	m_index(-1)
 {} //TODO:Init all! pointers to 0
 
 
