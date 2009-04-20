@@ -261,6 +261,7 @@ namespace libnutclient {
 	signals:
 
 		void failedInitialization(CDevice * device); //TODO:Implement this: has to be called if init fails
+		void initialization();
 
 
 		void newDataAvailable();

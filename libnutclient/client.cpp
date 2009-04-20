@@ -236,8 +236,8 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 		m_devices.append(device);
 		device->m_index = m_devices.indexOf(device); // Set device index;
 		connect(device,SIGNAL(failedInitialization(CDevice*)), this, SLOT(deviceInitializationFailed(CDevice*)));
-		device->init();
 		emit(deviceAdded(device));
+		device->init();
 	}
 }
 

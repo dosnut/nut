@@ -90,6 +90,7 @@ private slots:
 	void dbret_getEssid(QString essid) { emit gotEssid(essid); }
 	void dbret_getConfig(libnutcommon::DeviceConfig config) { emit gotConfig(config); }
 	void dbret_getActiveEnvironment(QString activeEnv) { emit gotActiveEnvironment(activeEnv); }
+	void dbret_errorOccured(QDBusError error) { emit errorOccured(error); }
 
 Q_SIGNALS: // SIGNALS
 	//Return function signals
