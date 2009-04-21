@@ -6,6 +6,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 #include <QDir>
+#include <libnutclient/client.h>
 #include "scriptsettings.h"
 #include "devicedetails.h"
 #include "constants.h"

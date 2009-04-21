@@ -9,7 +9,7 @@
 #define QNUT_IPCONFIGURATION_H
 
 #include <QDialog>
-#include <libnutclient/client.h>
+#include <libnutcommon/config.h>
 #include "ui/ui_ipconf.h"
 
 namespace qnut {

@@ -11,7 +11,7 @@
 #ifndef QNUT_NO_WIRELESS
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
-#include <libnutclient/client.h>
+#include <libnutwireless/wpa_supplicant.h>
 
 #define UI_MANAP_SSID   0
 #define UI_MANAP_STATUS 1

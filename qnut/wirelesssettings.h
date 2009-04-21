@@ -10,8 +10,13 @@
 
 #ifndef QNUT_NO_WIRELESS
 #include <QDialog>
-#include <libnutclient/client.h>
+#include <libnutwireless/types.h>
+#include <libnutcommon/device.h>
 #include "ui/ui_airset.h"
+
+namespace libnutclient {
+	class CDevice;
+}
 
 namespace qnut {
 	class CManagedAPModel;

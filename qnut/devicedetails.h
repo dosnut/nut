@@ -10,8 +10,13 @@
 
 #include <QSystemTrayIcon>
 #include <QSettings>
-#include <libnutclient/client.h>
+#include <libnutcommon/device.h>
 #include "ui/ui_devdet.h"
+
+namespace libnutclient {
+	class CDevice;
+	class CInterface;
+}
 
 namespace qnut {
 	#ifndef QNUT_NO_WIRELESS

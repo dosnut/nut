@@ -6,6 +6,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 #include <QIcon>
+#include <libnutclient/client.h>
 #include "overviewmodel.h"
 #include "common.h"
 

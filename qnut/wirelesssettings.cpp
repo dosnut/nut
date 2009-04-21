@@ -9,9 +9,11 @@
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QMenu>
+#include <libnutclient/client.h>
 #include "wirelesssettings.h"
 #include "managedapmodel.h"
 #include "common.h"
+#include "constants.h"
 #include "availableapmodel.h"
 #include "accesspointconfig.h"
 #include "adhocconfig.h"

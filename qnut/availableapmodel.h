@@ -11,7 +11,7 @@
 #ifndef QNUT_NO_WIRELESS
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
-#include <libnutclient/client.h>
+#include <libnutwireless/types.h>
 
 #define UI_AVLAP_SSID    0
 #define UI_AVLAP_KEYMGMT 1
@@ -20,6 +20,10 @@
 #define UI_AVLAP_CHANNEL 4
 #define UI_AVLAP_QUALITY 5
 #define UI_AVLAP_LEVEL   6
+
+namespace libnutwireless {
+	class CWpaSupplicant;
+}
 
 namespace qnut {
 	/**

@@ -9,7 +9,10 @@
 #define QNUT_ENVIRONMENTTREEMODEL_H
 
 #include <QAbstractItemModel>
-#include <libnutclient/client.h>
+
+namespace libnutclient {
+	class CDevice;
+}
 
 namespace qnut {
 	/**

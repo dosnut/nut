@@ -14,8 +14,10 @@
 #include <QAction>
 #include <QString>
 #include <QHostAddress>
-#include <libnutclient/client.h>
-#include "constants.h"
+
+namespace libnutclient {
+	class CDevice;
+}
 
 namespace qnut {
 	/**

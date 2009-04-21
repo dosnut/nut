@@ -9,8 +9,10 @@
 #include <QProcess>
 #include <QDir>
 #include <QMenu>
+#include <libnutclient/client.h>
 #include "devicedetails.h"
 #include "common.h"
+#include "constants.h"
 #include "environmenttreemodel.h"
 #include "interfacedetailsmodel.h"
 #include "environmentdetailsmodel.h"

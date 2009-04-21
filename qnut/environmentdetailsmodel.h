@@ -9,7 +9,11 @@
 #define QNUT_ENVIRONMENTDETAILSMODEL_H
 
 #include <QAbstractItemModel>
-#include <libnutclient/client.h>
+#include <libnutcommon/config.h>
+
+namespace libnutclient {
+	class CEnvironment;
+}
 
 namespace qnut {
 	/**

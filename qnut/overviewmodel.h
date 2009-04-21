@@ -9,7 +9,12 @@
 #define QNUT_OVERVIEWMODEL_H
 
 #include <QAbstractItemModel>
-#include <libnutclient/client.h>
+#include <QList>
+
+namespace libnutclient {
+	class CDeviceManager;
+	class CDevice;
+}
 
 namespace qnut {
 	/**
@@ -47,7 +52,7 @@ namespace qnut {
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
 	private:
-		const libnutclient::CDeviceList * m_Devices;
+		const QList<libnutclient::CDevice *> * m_Devices;
 	private slots:
 		void deviceAdded(libnutclient::CDevice * device);
 		void deviceRemoved(libnutclient::CDevice * device);

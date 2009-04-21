@@ -6,8 +6,10 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 #include <QIcon>
+#include <libnutclient/client.h>
 #include "environmenttreemodel.h"
 #include "common.h"
+#include "constants.h"
 
 #define ENVTREE_MOD_ITEM    0
 #define ENVTREE_MOD_STATUS  1

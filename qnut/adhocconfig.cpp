@@ -7,6 +7,7 @@
 //
 #ifndef QNUT_NO_WIRELESS
 #include <QMessageBox>
+#include <libnutwireless/wpa_supplicant.h>
 #include "adhocconfig.h"
 
 #define FLAG_PREPARE_OUTPUT(a, b, c) if(a & c) b << #c;

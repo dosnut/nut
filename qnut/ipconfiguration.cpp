@@ -8,12 +8,13 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDir>
+#include <QSettings>
 #include "ipconfiguration.h"
 #include "dnslistmodel.h"
 #include "ipeditdelegate.h"
 
 namespace qnut {
-	using namespace libnutclient;
+	using namespace libnutcommon;
 	
 	CIPConfiguration::CIPConfiguration(QWidget * parent) : QDialog(parent) {
 		ui.setupUi(this);

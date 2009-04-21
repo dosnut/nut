@@ -10,8 +10,12 @@
 
 #ifndef QNUT_NO_WIRELESS
 #include <QDialog>
-#include <libnutclient/client.h>
+#include <libnutwireless/types.h>
 #include "ui/ui_apconf.h"
+
+namespace libnutwireless {
+	class CWpaSupplicant;
+}
 
 namespace qnut {
 	/**

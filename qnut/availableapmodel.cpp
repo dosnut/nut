@@ -7,8 +7,10 @@
 //
 #ifndef QNUT_NO_WIRELESS
 #include <QIcon>
+#include <libnutwireless/wpa_supplicant.h>
 #include "availableapmodel.h"
 #include "common.h"
+#include "constants.h"
 
 namespace qnut {
 	using namespace libnutcommon;

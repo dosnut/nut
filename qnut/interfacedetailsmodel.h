@@ -9,7 +9,10 @@
 #define QNUT_INTERFACEDETAILSMODEL_H
 
 #include <QAbstractItemModel>
-#include <libnutclient/client.h>
+
+namespace libnutclient {
+	class CInterface;
+}
 
 namespace qnut {
 	/**

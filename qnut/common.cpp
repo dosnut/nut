@@ -5,8 +5,9 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-#include "common.h"
 #include <libnutclient/client.h>
+#include "common.h"
+#include "constants.h"
 
 namespace qnut {
 	using namespace libnutcommon;
