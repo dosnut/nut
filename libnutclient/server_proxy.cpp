@@ -131,7 +131,7 @@ DBusEnvironmentInterface::~DBusEnvironmentInterface()
 
 void DBusEnvironmentInterface::getInterfaces() {
 	QList<QVariant> argumentList;
-	bool worked = callWithCallback(QLatin1String("getInterfaces"), argumentList, this, SLOT(dbret_getInterfaces(QList<QDBusObjectPath>), SLOT(dbret_errorOccured(QDBusError)));
+	bool worked = callWithCallback(QLatin1String("getInterfaces"), argumentList, this, SLOT(dbret_getInterfaces(QList<QDBusObjectPath>)), SLOT(dbret_errorOccured(QDBusError)));
 	if (!worked)
 		emit queueErrorOccured("getInterfaces");
 }
@@ -180,84 +180,62 @@ DBusInterfaceInterface_IPv4::~DBusInterfaceInterface_IPv4()
 {
 }
 
-inline QDBusReply<void> DBusInterfaceInterface_IPv4::activate() {
+void DBusInterfaceInterface_IPv4::activate() {
 	QList<QVariant> argumentList;
-	return callWithArgumentList(QDBus::NoBlock, QLatin1String("activate"), argumentList);
+	bool worked = callWithCallback(QLatin1String("activate"), argumentList, this, SLOT(dbret_dummy(QDBusMessage)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured("activate");
 }
 
-inline QDBusReply<void> DBusInterfaceInterface_IPv4::deactivate() {
+void DBusInterfaceInterface_IPv4::deactivate() {
 	QList<QVariant> argumentList;
-	return callWithArgumentList(QDBus::NoBlock, QLatin1String("deactivate"), argumentList);
+	bool worked = callWithCallback(QLatin1String("deactivate"), argumentList, this, SLOT(dbret_dummy(QDBusMessage)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured("deactivate");
 }
 
-inline QDBusReply<libnutcommon::InterfaceProperties> DBusInterfaceInterface_IPv4::getProperties() {
+void DBusInterfaceInterface_IPv4::getProperties() {
 	QList<QVariant> argumentList;
-	QDBusMessage msg;
-	if ( m_device->incrementLock() ) {
-		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getProperties"), argumentList);
-		m_device->decrementLock();
-	}
-	else {
-		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
-	}
-	return msg;
-}
-inline QDBusReply<libnutcommon::IPv4Config> DBusInterfaceInterface_IPv4::getConfig() {
-	QList<QVariant> argumentList;
-	QDBusMessage msg;
-	if ( m_device->incrementLock() ) {
-		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getConfig"), argumentList); 
-		m_device->decrementLock();
-	}
-	else {
-		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
-	}
-	return msg;
-}
-inline QDBusReply<void> DBusInterfaceInterface_IPv4::setDynamic() {
-	QList<QVariant> argumentList;
-	return callWithArgumentList(QDBus::NoBlock, QLatin1String("setDynamic"), argumentList);
+	bool worked = callWithCallback(QLatin1String("getProperties"), argumentList, this, SLOT(dbret_getProperties(libnutcommon::InterfaceProperties)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured("getProperties");
 }
 
-inline QDBusReply<bool> DBusInterfaceInterface_IPv4::needUserSetup() {
+
+void DBusInterfaceInterface_IPv4::getConfig() {
 	QList<QVariant> argumentList;
-	QDBusMessage msg;
-	if ( m_device->incrementLock() ) {
-		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("needUserSetup"), argumentList);
-		m_device->decrementLock();
-	}
-	else {
-		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
-	}
-	return msg;
+	bool worked = callWithCallback(QLatin1String("getConfig"), argumentList, this, SLOT(dbret_getConfig(libnutcommon::IPv4Config)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured("getConfig");
 }
-inline QDBusReply<bool> DBusInterfaceInterface_IPv4::setUserConfig(libnutcommon::IPv4UserConfig userConfig) {
+void DBusInterfaceInterface_IPv4::setDynamic() {
 	QList<QVariant> argumentList;
-	QDBusMessage msg;
+	bool worked = callWithCallback(QLatin1String("setDynamic"), argumentList, this, SLOT(dbret_dummy(QDBusMessage)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured("setDynamic");
+}
+
+void DBusInterfaceInterface_IPv4::needUserSetup() {
+	QList<QVariant> argumentList;
+	bool worked = callWithCallback(QLatin1String("needUserSetup"), argumentList, this, SLOT(dbret_getNeedUserSetup(bool)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured("needUserSetup");
+}
+
+void DBusInterfaceInterface_IPv4::setUserConfig(libnutcommon::IPv4UserConfig userConfig) {
+	QList<QVariant> argumentList;
 	argumentList << qVariantFromValue(userConfig);
-	if ( m_device->incrementLock() ) {
-		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("setUserConfig"), argumentList);
-		m_device->decrementLock();
-	}
-	else {
-		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
-	}
-	return msg;
+	bool worked = callWithCallback(QLatin1String("setUserConfig"), argumentList, this, SLOT(dbret_getSetUserConfig(bool)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured("setUserConfig");
 }
-inline QDBusReply<libnutcommon::IPv4UserConfig> DBusInterfaceInterface_IPv4::getUserConfig() {
+
+void DBusInterfaceInterface_IPv4::getUserConfig() {
 	QList<QVariant> argumentList;
-	QDBusMessage msg;
-	if ( m_device->incrementLock() ) {
-		msg = callWithArgumentList(QDBus::BlockWithGui, QLatin1String("getUserConfig"), argumentList);
-		m_device->decrementLock();
-	}
-	else {
-		msg.createErrorReply(QDBusError::AccessDenied, "Server removed Device");
-	}
-	return msg;
+	bool worked = callWithCallback(QLatin1String("getUserConfig"), argumentList, this, SLOT(dbret_getUserConfig(libnutcommon::IPv4UserConfig)), SLOT(dbret_errorOccured(QDBusError)));
+	if (!worked)
+		emit queueErrorOccured("getUserConfig");
 }
 
-}
 
-//Methods
-
+} //end namespace

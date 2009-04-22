@@ -14,57 +14,131 @@ using namespace libnutcommon;
 ////////////
 //CInterface
 ////////////
-CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ m_dbusPath(dbusPath) {
-	log = parent->log;
+CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) :
+	CLibNut(parent),
+	/*parent(parent),*/
+	m_dbusPath(dbusPath),
+	log(parent->log),
+	m_propertiesFetched(false),
+	m_configFetched(false),
+	m_userConfigFetched(false),
+	m_needUserSetupFeteched(false),
+	m_initCompleted(false)
+{
 	//Attach to dbus
 	m_dbusConnection = parent->m_dbusConnection;
 	m_dbusConnectionInterface = parent->m_dbusConnectionInterface;
+}//TODO::init all vars to default
+
+void CInterface::init() {
 	m_dbusInterface = new DBusInterfaceInterface_IPv4(NUT_DBUS_URL, m_dbusPath.path(), *m_dbusConnection, this);
 	serviceCheck(m_dbusConnectionInterface);
-	//Get properties:
-	QDBusReply<InterfaceProperties> replyprops = m_dbusInterface->getProperties();
-	if (replyprops.isValid()) {
-		m_state = replyprops.value().ifState;
-		m_ip = replyprops.value().ip;
-		m_netmask = replyprops.value().netmask;
-		m_gateway = replyprops.value().gateway;
-		m_dnsservers = replyprops.value().dns;
-	}
-	else {
-		throw CLI_IfConnectionException(tr("(%1) Error while retrieving interface properties").arg(replyprops.error().name()));
-	}
-	//Get Config
-	QDBusReply<libnutcommon::IPv4Config> replyconf = m_dbusInterface->getConfig();
-	if (replyconf.isValid()) {
-		m_config = replyconf.value();
-	}
-	else {
-		throw CLI_IfConnectionException(tr("(%1) Error while retrieving interface config").arg(replyconf.error().name()));
-	}
-	getUserConfig(true); //Function will updated userConfig
+
+	connect(m_dbusInterface, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusret_errorOccured(QDBusError)));
+
+	connect(m_dbusInterface,SIGNAL(gotProperties(libnutcommon::InterfaceProperties)), this, SLOT(dbusretGetProperties(libnutcommon::InterfaceProperties)));
+
+	connect(m_dbusInterface,SIGNAL(gotConfig(libnutcommon::InterfaceConfig)),this,SLOT(dbusretGetConfig(libnutcommon::InterfaceConfig)));
+
+	connect(m_dbusInterface,SIGNAL(gotUserConfig(libnutcommon::IPv4UserConfig)),this,SLOT(dbusretGetUserConfig(libnutcommon::IPv4UserConfig)));
+
+	connect(m_dbusInterface,SIGNAL(gotNeedUserSetup(bool)),this,SLOT(dbusretGetNeedUserSetup(bool)));
+	
+	connect(m_dbusInterface,SIGNAL(gotSetUserConfig(bool)),this,SLOT(dbusretSetUserConfig(bool)));
 
 	connect(m_dbusInterface, SIGNAL(stateChanged(libnutcommon::InterfaceProperties)), this, SLOT(dbusStateChanged(libnutcommon::InterfaceProperties)));
+
+	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
+	m_dbusInterface->getProperties();
+
+	*log << tr("Placing getConfig call at: %1").arg(m_dbusPath.path());
+	m_dbusInterface->getConfig();
+
+	*log << tr("Placing getUserConfig call at: %1").arg(m_dbusPath.path());
+	m_dbusInterface->getUserConfig();
+
+	*log << tr("Placing needUserSetup call at: %1").arg(m_dbusPath.path());
+	m_dbusInterface->needUserSetup();
 }
+
 CInterface::~CInterface() {
 }
+
+void CInterface::checkInitCompleted() {
+	if ( m_propertiesFetched && m_configFetched && m_userConfigFetched && m_needUserSetupFeteched && 	!m_initCompleted) {
+		m_initCompleted = true;
+		qDebug() << "InterfaceInit completed";
+		emit initializationCompleted(this);
+	}
+}
+
+//dbus return functions
+void CInterface::dbusretGetProperties(libnutcommon::InterfaceProperties properties) {
+	m_state = properties.ifState;
+	m_ip = properties.ip;
+	m_netmask = properties.netmask;
+	m_gateway = properties.gateway;
+	m_dnsservers = properties.dns;
+
+	m_propertiesFetched = true;
+	checkInitCompleted();
+
+	emit newDataAvailable();
+}
+
+void CInterface::dbusretGetConfig(libnutcommon::IPv4Config config) {
+	m_config = config;
+	
+	m_configFetched = true;
+	checkInitCompleted();
+	
+	emit newDataAvailable();
+}
+
+
+void CInterface::dbusretGetNeedUserSetup(bool need) {
+	m_needUserSetup = need;
+
+	m_needUserSetupFeteched = true;
+	checkInitCompleted();
+	
+	emit newDataAvailable();
+}
+
+void CInterface::dbusretSetUserConfig(bool worked) {
+	m_dbusInterface->getUserConfig(); //in case someone else set one and a cached one is wrong
+	emit setUserConfig(worked);
+}
+
+void CInterface::dbusretGetUserConfig(libnutcommon::IPv4UserConfig config) {
+	m_userConfig = config;
+	
+	m_userConfigFetched = true;
+	checkInitCompleted();
+	
+	emit newDataAvailable();	
+}
+
+void CInterface::dbusret_errorOccured(QDBusError error, QString method) {
+	qDebug() << "Error occured in dbus: " << QDBusError::errorString(error.type()) << "at" << method;
+	if (!m_initCompleted) { //error during init
+		emit initializationFailed(this);
+	}
+}
+
 //CInterface private functions:
 void CInterface::refreshAll() {
-	QDBusReply<InterfaceProperties> replyprops = m_dbusInterface->getProperties();
-	if (replyprops.isValid()) {
-		m_state = replyprops.value().ifState;
-		m_ip = replyprops.value().ip;
-		m_netmask = replyprops.value().netmask;
-		m_gateway = replyprops.value().gateway;
-		m_dnsservers = replyprops.value().dns;
-		getUserConfig(true); //Function will updated userConfig
-	}
-	else {
-		if ( !dbusConnected(m_dbusConnection) ) {
-			static_cast<CDeviceManager*>(parent()->parent()->parent())->dbusKilled();
-			return;
-		}
-		qWarning() << (tr("Error while refreshing interface at: %1").arg(m_dbusPath.path()));
-	}
+	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
+	m_dbusInterface->getProperties();
+
+	*log << tr("Placing getConfig call at: %1").arg(m_dbusPath.path());
+	m_dbusInterface->getConfig();
+
+	*log << tr("Placing getUserConfig call at: %1").arg(m_dbusPath.path());
+	m_dbusInterface->getUserConfig();
+
+	*log << tr("Placing needUserSetup call at: %1").arg(m_dbusPath.path());
+	m_dbusInterface->needUserSetup();
 }
 //CInterface private slots
 void CInterface::dbusStateChanged(libnutcommon::InterfaceProperties properties) {
@@ -74,7 +148,7 @@ void CInterface::dbusStateChanged(libnutcommon::InterfaceProperties properties) 
 	m_netmask = properties.netmask;
 	m_gateway = properties.gateway;
 	m_dnsservers = properties.dns;
-	getUserConfig(true); //Function will updated userConfig
+	m_dbusInterface->needUserSetup(); //refresh needUserSetup information
 	*log << tr("Interface state of %1 has changed to %2").arg(m_dbusPath.path(),libnutclient::toStringTr(m_state));
 	emit(stateChanged(m_state));
 }
@@ -82,55 +156,23 @@ void CInterface::dbusStateChanged(libnutcommon::InterfaceProperties properties) 
 void CInterface::activate() {
 	m_dbusInterface->activate();
 }
+
 void CInterface::deactivate() {
 	m_dbusInterface->deactivate();
 }
+
 bool CInterface::needUserSetup() {
-	QDBusReply<bool> reply = m_dbusInterface->needUserSetup();
-	if (reply.isValid()) {
-		return reply.value();
-	}
-	else {
-		if ( !dbusConnected(m_dbusConnection) ) {
-			static_cast<CDeviceManager*>(parent()->parent()->parent())->dbusKilled();
-			return false;
-		}
-		qWarning() << tr("Error while interface->needUserSetup at: %1").arg(m_dbusPath.path());
-	}
-	return false;
+	m_dbusInterface->needUserSetup();
+	return m_needUserSetup;
 }
-bool CInterface::setUserConfig(const libnutcommon::IPv4UserConfig &cuserConfig) {
-	QDBusReply<bool> reply = m_dbusInterface->setUserConfig(cuserConfig);
-	if (reply.isValid()) {
-		if (reply.value()) {
-			m_userConfig = cuserConfig;
-			return true;
-		}
-		return false;
-	}
-	else {
-		if ( !dbusConnected(m_dbusConnection) ) {
-			static_cast<CDeviceManager*>(parent()->parent()->parent())->dbusKilled();
-			return false;
-		}
-		qWarning() << tr("(%1) Error while setting user config at: %2").arg(toString(reply.error()),m_dbusPath.path());
-	}
-	return false;
+
+void CInterface::setUserConfig(const libnutcommon::IPv4UserConfig &cuserConfig) {
+	m_dbusInterface->setUserConfig(cuserConfig);
 }
+
 libnutcommon::IPv4UserConfig CInterface::getUserConfig(bool refresh) {
 	if (refresh) {
-		QDBusReply<libnutcommon::IPv4UserConfig> reply = m_dbusInterface->getUserConfig();
-		if (reply.isValid()) {
-			m_userConfig = reply.value();
-		}
-		else {
-			if ( !dbusConnected(m_dbusConnection) ) {
-				static_cast<CDeviceManager*>(parent()->parent()->parent())->dbusKilled();
-				return m_userConfig;
-			}
-			qDebug() << tr("Error while getting user config at: %1").arg(m_dbusPath.path());
-			m_userConfig = libnutcommon::IPv4UserConfig();
-		}
+		m_dbusInterface->getUserConfig();
 	}
 	return m_userConfig;
 }

@@ -88,6 +88,9 @@ namespace libnutclient {
 		void dbusretGetConfig(libnutcommon::DeviceConfig config);
 		
 		void dbusret_errorOccured(QDBusError error, QString method = QString());
+
+		void environmentInitializationFailed(CEnvironment * environment);
+		void environmentInitializationCompleted(CEnvironment * environment);
 	public:
 		//Initializes this device
 		void init();

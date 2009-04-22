@@ -43,10 +43,28 @@ namespace libnutclient {
 		QHostAddress m_netmask;
 		QHostAddress m_gateway;
 		QList<QHostAddress> m_dnsservers;
+		bool m_needUserSetup;
 		int m_index;
+
+		bool m_propertiesFetched;
+		bool m_configFetched;
+		bool m_userConfigFetched;
+		bool m_needUserSetupFeteched;
+		bool m_initCompleted;
+
 		void refreshAll();
+		void checkInitCompleted();
 	private slots:
 		void dbusStateChanged(libnutcommon::InterfaceProperties properties);
+
+		//dbus return functions
+		void dbusretGetProperties(libnutcommon::InterfaceProperties properties);
+		void dbusretGetConfig(libnutcommon::IPv4Config config);
+		void dbusretGetNeedUserSetup(bool need);
+		void dbusretSetUserConfig(bool worked);
+		void dbusretGetUserConfig(libnutcommon::IPv4UserConfig config);
+
+		void dbusret_errorOccured(QDBusError error, QString method = QString());
 	public:
 		inline libnutcommon::InterfaceState getState() const { return m_state; }
 		inline const QHostAddress& getIp() { return m_ip;}
@@ -60,14 +78,22 @@ namespace libnutclient {
 
 		CInterface(CEnvironment * parent, QDBusObjectPath dbusPath);
 		~CInterface();
+
+		void init();
 	public slots:
 		void activate();
 		void deactivate();
 		bool needUserSetup();
-		bool setUserConfig(const libnutcommon::IPv4UserConfig &cuserConfig);
+		void setUserConfig(const libnutcommon::IPv4UserConfig &cuserConfig);
 		
 	signals:
+		void initializationFailed(CInterface * interface); //TODO:Implement this: has to be called if init fails
+		void initializationCompleted(CInterface * interface);
+
+		void newDataAvailable();
+
 		void stateChanged(libnutcommon::InterfaceState state);
+		void setUserConfig(bool worked);
 	};
 }
 

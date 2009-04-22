@@ -3,6 +3,8 @@
 #include "server_proxy.h"
 #include "clog.h"
 #include "client_exceptions.h"
+#include "cdevice.h"
+#include "cinterface.h"
 
 namespace libnutclient {
 using namespace libnutcommon;
@@ -11,72 +13,66 @@ using namespace libnutcommon;
 //CEnvironment
 //////////////
 
-CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) : CLibNut(parent), /*parent(parent),*/ m_dbusPath(dbusPath) {
-	//Set log.
-	log = parent->log;
-	m_state = false;
-	//First attach to dbus
+CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) :
+	CLibNut(parent),
+	/*parent(parent),*/
+	m_dbusPath(dbusPath),
+	log(parent->log),
+	m_state(false),
+	m_propertiesFetched(false),
+	m_interfacesFetched(false),
+	m_configFetched(false),
+	m_selectResultFetched(false),
+	m_selectResultsFetched(false),
+	m_initCompleted(false)
+{
 	m_dbusConnection = parent->m_dbusConnection;
 	m_dbusConnectionInterface = parent->m_dbusConnectionInterface;
+} //TODO:Init all vars to default
+
+//Initializes the environment
+void CEnvironment::init() {
 	serviceCheck(m_dbusConnectionInterface);
 	m_dbusEnvironment = new DBusEnvironmentInterface(NUT_DBUS_URL, m_dbusPath.path(),*m_dbusConnection,this);
 
-	//get Environment properties
-	QDBusReply<EnvironmentProperties> replyprop = m_dbusEnvironment->getProperties();
-	if (replyprop.isValid()) {
-		if (parent->m_environments.size() == 0)
-			//standard environment
-			m_name = tr("default");
-		else {
-			m_name = replyprop.value().name;
-			//environment untitled
-			if (m_name.length() == 0)
-				m_name = tr("untitled (%1)").arg(parent->m_environments.size());
-		}
-		qDebug() << QString("Environmentname: %1").arg(m_name);
-		m_state = replyprop.value().active;
-	}
-	else {
-		throw CLI_EnvConnectionException(tr("Error while retrieving environment properties").arg(toString(replyprop.error())));
-	}
-	//Get environment config
-	QDBusReply<libnutcommon::EnvironmentConfig> replyconf = m_dbusEnvironment->getConfig();
-	if (replyconf.isValid()) {
-		m_config = replyconf.value();
-	}
-	else {
-		throw CLI_EnvConnectionException(tr("(%1) Error while retrieving environment config").arg(replyconf.error().name()));
-	}
-	//Get select results
-	getSelectResult(true); //functions saves SelectResult
-	getSelectResults(true); //functions saves SelectResults
+	connect(m_dbusEnvironment, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusret_errorOccured(QDBusError)));
 
-	//Get Interfaces
- 	QDBusReply<QList<QDBusObjectPath> > replyifs = m_dbusEnvironment->getInterfaces();
-	if (replyifs.isValid()) {
-		CInterface * interface;
-		foreach(QDBusObjectPath i, replyifs.value()) {
-			try {
-				interface = new CInterface(this,i);
-			}
-			catch (CLI_ConnectionException &e) {
-				if ( !dbusConnected(m_dbusConnection) ) {
-					throw CLI_EnvConnectionException(tr("(%1) Error while adding interfaces").arg(replyconf.error().name()));
-				}
-				qWarning() << e.what();
-				continue;
-			}
-			m_dbusInterfaces.insert(i,interface);
-			m_interfaces.append(interface);
-			interface->m_index = m_interfaces.indexOf(interface);
-		}
-	}
-	else {
-		throw CLI_EnvConnectionException(tr("Error while retrieving environment's interfaces"));
-	}
+	connect(m_dbusEnvironment,SIGNAL(gotProperties(libnutcommon::EnvironmentProperties)), this, SLOT(dbusretGetProperties(libnutcommon::EnvironmentProperties)));
+	connect(m_dbusEnvironment,SIGNAL(gotConfig(libnutcommon::EnvironmentConfig)),this,SLOT(dbusretGetConfig(libnutcommon::EnvironmentConfig)));
+	connect(m_dbusEnvironment,SIGNAL(gotInterfaces(QList< QDBusObjectPath >)),this,SLOT(dbusretGetInterfaces(QList<QDBusObjectPath>)));
+	connect(m_dbusEnvironment,SIGNAL(gotSelectResult(libnutcommon::SelectResult)),this,SLOT(dbusretGetSelectResult(libnutcommon::SelectResult)));
+	connect(m_dbusEnvironment,SIGNAL(gotSelectResults(QVector< libnutcommon :: SelectResult >)),this,SLOT(dbusretGetSelectResults(QVector<libnutcommon::SelectResult>)));
+
 	connect(m_dbusEnvironment, SIGNAL(stateChanged(bool )), this, SLOT(dbusStateChanged(bool )));
+
+
+	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
+	m_dbusEnvironment->getProperties();
+
+	*log << tr("Placing getConfig call at: %1").arg(m_dbusPath.path());
+	m_dbusEnvironment->getConfig();
+
+	*log << tr("Placing getInterfaces call at: %1").arg(m_dbusPath.path());
+	m_dbusEnvironment->getInterfaces();
+
+	*log << tr("Placing getSelectResult call at: %1").arg(m_dbusPath.path());
+	m_dbusEnvironment->getSelectResult();
+
+	*log << tr("Placing getSelectResults call at: %1").arg(m_dbusPath.path());
+	m_dbusEnvironment->getSelectResults();
 }
+
 CEnvironment::~CEnvironment() {
+
+	disconnect(m_dbusEnvironment, SIGNAL(stateChanged(bool )), this, SLOT(dbusStateChanged(bool )));
+	disconnect(m_dbusEnvironment, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusret_errorOccured(QDBusError)));
+
+	disconnect(m_dbusEnvironment,SIGNAL(gotProperties(libnutcommon::EnvironmentProperties)), this, SLOT(dbusretGetProperties(libnutcommon::EnvironmentProperties)));
+	disconnect(m_dbusEnvironment,SIGNAL(gotConfig(libnutcommon::EnvironmentConfig)),this,SLOT(dbusretGetConfig(libnutcommon::EnvironmentConfig)));
+	disconnect(m_dbusEnvironment,SIGNAL(gotInterfaces(QList< QDBusObjectPath >)),this,SLOT(dbusretGetInterfaces(QList<QDBusObjectPath>)));
+	disconnect(m_dbusEnvironment,SIGNAL(gotSelectResult(libnutcommon::SelectResult)),this,SLOT(dbusretGetSelectResult(libnutcommon::SelectResult)));
+	disconnect(m_dbusEnvironment,SIGNAL(gotSelectResults(QVector< libnutcommon :: SelectResult >)),this,SLOT(dbusretGetSelectResults(QVector<libnutcommon::SelectResult>)));
+	
 	CInterface * interface;
 	while (!m_interfaces.isEmpty()) {
 		interface = m_interfaces.takeFirst();
@@ -85,65 +81,133 @@ CEnvironment::~CEnvironment() {
 	}
 }
 
+void CEnvironment::checkInitCompleted() {
+	if ( m_propertiesFetched && m_interfacesFetched && m_configFetched && m_selectResultFetched && 	m_selectResultsFetched && !m_initCompleted) {
+		m_initCompleted = true;
+		qDebug() << "EnvironmentInit completed:" << m_name;
+		emit initializationCompleted(this);
+	}
+}
+
+
+void CEnvironment::dbusretGetInterfaces(QList<QDBusObjectPath> interfaces) {
+	//Check if we need to rebuild the interface list or just refresh them:
+	bool ifequal = (interfaces.size() == m_dbusInterfaces.size());
+	if (ifequal) {
+		foreach(QDBusObjectPath i, interfaces) {
+			if (!m_dbusInterfaces.contains(i)) {
+				ifequal = false;
+				break;
+			}
+		}
+		if (ifequal) {
+			foreach (CInterface * i, m_interfaces) {
+				i->refreshAll();
+			}
+		}
+		else {
+			rebuild(interfaces);
+			return;
+		}
+	}
+	else {
+		rebuild(interfaces);
+		return;
+	}
+}
+
+void CEnvironment::dbusretGetProperties(libnutcommon::EnvironmentProperties properties) {
+	if (qobject_cast<CDevice*>(parent())->m_dbusEnvironments.size() == 0) { //standard environment
+		m_name = tr("default");
+	}
+	else {
+		m_name = properties.name;
+		//environment untitled
+		if (m_name.length() == 0)
+			m_name = tr("untitled (%1)").arg(qobject_cast<CDevice*>(parent())->m_dbusEnvironments.size());
+	}
+	qDebug() << QString("Environmentname: %1").arg(m_name);
+	m_state = properties.active;
+
+	m_propertiesFetched = true;
+	checkInitCompleted();
+
+	emit newDataAvailable();
+}
+
+void CEnvironment::dbusretGetConfig(libnutcommon::EnvironmentConfig config) {
+	m_config = config;
+	
+	m_configFetched = true;
+	checkInitCompleted();
+	
+	emit newDataAvailable();
+}
+
+void CEnvironment::dbusretGetSelectResult(libnutcommon::SelectResult selectResult) {
+	m_selectResult = selectResult;
+	
+	m_selectResultFetched = true;
+	checkInitCompleted();
+	
+	emit newDataAvailable();
+}
+
+void CEnvironment::dbusretGetSelectResults(QVector<libnutcommon::SelectResult> selectResults) {
+	m_selectResults = selectResults;
+
+	m_selectResultsFetched = true;
+	checkInitCompleted();
+	
+	emit newDataAvailable();
+}
+
+void CEnvironment::dbusret_errorOccured(QDBusError error, QString method) {
+	qDebug() << "Error occured in dbus: " << QDBusError::errorString(error.type()) << "at" << method;
+	if (!m_initCompleted) { //error during init
+		emit initializationFailed(this);
+	}
+}
+
+
+void CEnvironment::interfaceInitializationFailed(CInterface * interface) {
+	if (!m_initCompleted) { //failure in init phase
+		emit initializationFailed(this);
+	}
+}
+
+void CEnvironment::interfaceInitializationCompleted(CInterface * interface) {
+	m_interfaces.append(interface);
+	interface->m_index = m_interfaces.indexOf(interface);
+
+	if (m_interfaces.size() == m_dbusInterfaces.size()) { //check if all interfaces are ready
+		m_interfacesFetched = true;
+		checkInitCompleted();
+	}
+	emit newDataAvailable();
+}
+
+
 //CEnvironment private functions
 
 void CEnvironment::refreshAll() {
-	//Retrieve properties and select config, then interfaces:
-	QDBusReply<EnvironmentProperties> replyprop = m_dbusEnvironment->getProperties();
-	if (replyprop.isValid()) {
-		if (static_cast<CDevice *>(parent())->m_environments[0] == this)
-			//standard environment
-			m_name = tr("default");
-		else {
-			m_name = replyprop.value().name;
-			//environment untitled
-			if (m_name.length() == 0)
-				m_name = tr("untitled (%1)").arg(static_cast<CDevice *>(parent())->m_environments.size());
-		}
-	}
-	else {
-		if ( !dbusConnected(m_dbusConnection) ) {
-			static_cast<CDeviceManager*>(parent()->parent())->dbusKilled();
-			return;
-		}
-		qWarning() << tr("Error while refreshing environment properties");
-	}
-	getSelectResult(true); //functions saves SelectResult
-	getSelectResults(true); //functions saves SelectResults
-	QDBusReply<QList<QDBusObjectPath> > replyifs = m_dbusEnvironment->getInterfaces();
-	if (replyifs.isValid()) {
-		//Check if we need to rebuild the interface list or just refresh them:
-		bool ifequal = (replyifs.value().size() == m_dbusInterfaces.size());
-		if (ifequal) {
-			foreach(QDBusObjectPath i, replyifs.value()) {
-				if (!m_dbusInterfaces.contains(i)) {
-					ifequal = false;
-					break;
-				}
-			}
-			if (ifequal) {
-				foreach (CInterface * i, m_interfaces) {
-					i->refreshAll();
-				}
-			}
-			else {
-				rebuild(replyifs.value());
-				return;
-			}
-		}
-		else {
-			rebuild(replyifs.value());
-			return;
-		}
-	}
-	else {
-		if ( !dbusConnected(m_dbusConnection) ) {
-			static_cast<CDeviceManager*>(parent()->parent())->dbusKilled();
-			return;
-		}
-		qWarning() << tr("Error while refreshing environment interfaces");
-	}
+
+	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
+	m_dbusEnvironment->getProperties();
+
+	*log << tr("Placing getConfig call at: %1").arg(m_dbusPath.path());
+	m_dbusEnvironment->getConfig();
+
+	*log << tr("Placing getInterfaces call at: %1").arg(m_dbusPath.path());
+	m_dbusEnvironment->getInterfaces();
+
+	*log << tr("Placing getSelectResult call at: %1").arg(m_dbusPath.path());
+	m_dbusEnvironment->getSelectResult();
+
+	*log << tr("Placing getSelectResults call at: %1").arg(m_dbusPath.path());
+	m_dbusEnvironment->getSelectResults();
 }
+
 void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 	//Remove all interfaces
 	m_dbusInterfaces.clear();
@@ -155,19 +219,9 @@ void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 	}
 	//Now rebuild:
 	foreach(QDBusObjectPath i, paths) {
-		try {
-			interface = new CInterface(this,i);
-		}
-		catch (CLI_ConnectionException &e) {
-			qWarning() << e.what();
-			continue;
-		}
+		interface = new CInterface(this,i);
 		m_dbusInterfaces.insert(i,interface);
-		m_interfaces.append(interface);
-		interface->m_index = m_interfaces.indexOf(interface);
 	}
-	getSelectResult(true); //functions saves SelectResult
-	getSelectResults(true); //functions saves SelectResults
 }
 
 //CEnvironment private slots:
@@ -185,7 +239,7 @@ void CEnvironment::dbusSelectResultChanged(libnutcommon::SelectResult result, QV
 
 //CEnvironment SLOTS
 void CEnvironment::enter() {
-	static_cast<CDevice *>(parent())->setEnvironment(this);
+	qobject_cast<CDevice *>(parent())->setEnvironment(this);
 }
 libnutcommon::EnvironmentConfig& CEnvironment::getConfig() {
 	return m_config;
@@ -193,36 +247,14 @@ libnutcommon::EnvironmentConfig& CEnvironment::getConfig() {
 
 libnutcommon::SelectResult& CEnvironment::getSelectResult(bool refresh) {
 	if (refresh) {
-		QDBusReply<libnutcommon::SelectResult> reply = m_dbusEnvironment->getSelectResult();
-		if (reply.isValid()) {
-			m_selectResult = reply.value();
-		}
-		else {
-			if ( !dbusConnected(m_dbusConnection) ) {
-				static_cast<CDeviceManager*>(parent()->parent())->dbusKilled();
-				return m_selectResult;
-			}
-			qWarning() << tr("(%1) Error while trying to get SelectResult").arg(toString(reply.error()));
-			m_selectResult = libnutcommon::SelectResult();
-		}
+		m_dbusEnvironment->getSelectResult();
 	}
 	return m_selectResult;
 }
 
 QVector<libnutcommon::SelectResult>& CEnvironment::getSelectResults(bool refresh) {
 	if (refresh) {
-		QDBusReply<QVector<libnutcommon::SelectResult> > reply = m_dbusEnvironment->getSelectResults();
-		if (reply.isValid()) {
-			m_selectResults = reply.value();
-		}
-		else {
-			if ( !dbusConnected(m_dbusConnection) ) {
-				static_cast<CDeviceManager*>(parent()->parent())->dbusKilled();
-				return m_selectResults;
-			}
-			qWarning() << tr("(%1) Error while trying to get SelectResults").arg(toString(reply.error()));
-			m_selectResults = QVector<libnutcommon::SelectResult>();
-		}
+		m_dbusEnvironment->getSelectResults();
 	}
 	return m_selectResults;
 }

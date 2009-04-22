@@ -4,6 +4,7 @@
 #include "clog.h"
 #include "server_proxy.h"
 #include "client_exceptions.h"
+#include "cenvironment.h"
 #include "libnutwireless/wpa_supplicant.h"
 
 namespace libnutclient {
@@ -103,29 +104,17 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 	CEnvironment * env;
 	while ( !m_environments.isEmpty() ) {
 		env = m_environments.takeFirst();
-// 		emit(environmentRemoved(env)); //Pending for removal
 		delete env;
 	}
 	//now rebuild:
 	foreach(QDBusObjectPath i, paths) {
-		try {
-			env = new CEnvironment(this,i);
-		}
-		catch (CLI_ConnectionException &e) {
-			if ( !dbusConnected(m_dbusConnection) ) {
-				static_cast<CDeviceManager*>(parent())->dbusKilled();
-				return;
-			}
-			qWarning() << e.what();
-			continue;
-		}
+		env = new CEnvironment(this,i);
 		m_dbusEnvironments.insert(i,env);
-		m_environments.append(env);
-		env->m_index = m_environments.indexOf(env);
+		connect(env,SIGNAL(initializationFailed(CEnvironment*)),this,SLOT(environmentInitializationFailed(CEnvironment*)));
+		connect(env,SIGNAL(initializationCompleted(CEnvironment*)),this,SLOT(environmentInitializationCompleted(CEnvironment*)));
+		env->init();
 	}
-// 	emit(environmentsUpdated()); //Pending for removal
 }
-
 
 void CDevice::checkInitCompleted() {
 	if ( m_propertiesFetched && m_environmentsFetched && m_essidFetched && m_configFetched && m_activeEnvFetched && !m_initCompleted) {
@@ -263,12 +252,8 @@ void CDevice::dbusretGetEnvironments(QList<QDBusObjectPath> envs) {
 		rebuild(envs);
 	}
 	
-	//Set active env:
+	//Set active env (we can do this here, as we habe all envs in our hash and only set the pointer)
 	m_dbusDevice->getActiveEnvironment();
-
-	m_environmentsFetched = true;
-	qDebug() << "envs feteched";
-	checkInitCompleted();
 
 	emit gotEnvironments();
 	emit newDataAvailable();
@@ -328,6 +313,22 @@ void CDevice::dbusret_errorOccured(QDBusError error, QString method) {
 	if (!m_initCompleted) { //error during init
 		emit initializationFailed(this);
 	}
+}
+
+void CDevice::environmentInitializationFailed(CEnvironment * device) {
+	if (!m_initCompleted) { //failure in init phase
+		emit initializationFailed(this);
+	}
+}
+
+void CDevice::environmentInitializationCompleted(CEnvironment * environment) {
+	m_environments.append(environment);
+	environment->m_index = m_environments.indexOf(environment);
+	if (m_environments.size() == m_dbusEnvironments.size()) { //check if all interfaces are ready
+		m_environmentsFetched = true;
+		checkInitCompleted();
+	}
+	emit newDataAvailable();
 }
 
 

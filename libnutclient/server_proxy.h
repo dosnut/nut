@@ -140,16 +140,16 @@ private slots:
 	void dbret_getConfig(libnutcommon::EnvironmentConfig config) { emit gotConfig(config); }
 	void dbret_getSelectResult(libnutcommon::SelectResult selectResult) { emit gotSelectResult(selectResult); }
 	void dbret_getSelectResults(QVector<libnutcommon::SelectResult> selectResults) { emit gotSelectResults(selectResults); }
-	void dbret_errorOccured(QDBusError error) { emit errorOccured(error); }
+	void dbret_errorOccured(QDBusError error) { emit errorOccured(error,""); }
 
 Q_SIGNALS: // SIGNALS
 	
 	//dbus return functions
 	void gotInterfaces(QList<QDBusObjectPath>);
 	void gotProperties(libnutcommon::EnvironmentProperties properties);
-	void getConfig(libnutcommon::EnvironmentConfig config);
-	void getSelectResult(libnutcommon::SelectResult selectResult);
-	void getSelectResults(QVector<libnutcommon::SelectResult> selectResults);
+	void gotConfig(libnutcommon::EnvironmentConfig config);
+	void gotSelectResult(libnutcommon::SelectResult selectResult);
+	void gotSelectResults(QVector<libnutcommon::SelectResult> selectResults);
 
 	void errorOccured(QDBusError error, QString method);
 	void queueErrorOccured(QString method);
@@ -182,8 +182,8 @@ public Q_SLOTS: // METHODS
 	void getProperties();
 	void getConfig();
 	void setDynamic();
-	void needUserSetup();
-	void setUserConfig(libnutcommon::IPv4UserConfig userConfig);
+	void needUserSetup(); //returns bool
+	void setUserConfig(libnutcommon::IPv4UserConfig userConfig); //returns bool
 	void getUserConfig();
 
 private slots:
@@ -191,10 +191,9 @@ private slots:
 	void dbret_getProperties(libnutcommon::InterfaceProperties properties) { emit gotProperties(properties); }
 	void dbret_getConfig(libnutcommon::IPv4Config config) { emit gotConfig(config); }
 	void dbret_getNeedUserSetup(bool need) { emit gotNeedUserSetup(need); }
-	void dbret_getSetUserConfig(libnutcommon::IPv4UserConfig userConfig) { emit gotSetUserConfig(userConfig); }
+	void dbret_getSetUserConfig(bool worked) { emit gotSetUserConfig(worked); }
 	void dbret_getUserConfig(libnutcommon::IPv4UserConfig userConfig) { emit gotUserConfig(userConfig); }
-	void dbret_errorOccured(QDBusError error) { emit errorOccured(error); }
-		
+	void dbret_errorOccured(QDBusError error) { emit errorOccured(error,""); }
 
 Q_SIGNALS: // SIGNALS
 	
@@ -219,3 +218,4 @@ typedef DBus::DBusEnvironmentInterface Environment;
 typedef DBus::DBusInterfaceInterface_IPv4 Interface;
 }*/
 }
+#endif
