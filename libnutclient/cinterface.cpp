@@ -34,11 +34,11 @@ void CInterface::init() {
 	m_dbusInterface = new DBusInterfaceInterface_IPv4(NUT_DBUS_URL, m_dbusPath.path(), *m_dbusConnection, this);
 	serviceCheck(m_dbusConnectionInterface);
 
-	connect(m_dbusInterface, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusret_errorOccured(QDBusError)));
+	connect(m_dbusInterface, SIGNAL(errorOccured(QDBusError,QString)), this, SLOT(dbusret_errorOccured(QDBusError)));
 
 	connect(m_dbusInterface,SIGNAL(gotProperties(libnutcommon::InterfaceProperties)), this, SLOT(dbusretGetProperties(libnutcommon::InterfaceProperties)));
 
-	connect(m_dbusInterface,SIGNAL(gotConfig(libnutcommon::InterfaceConfig)),this,SLOT(dbusretGetConfig(libnutcommon::InterfaceConfig)));
+	connect(m_dbusInterface,SIGNAL(gotConfig(libnutcommon::IPv4Config)),this,SLOT(dbusretGetConfig(libnutcommon::IPv4Config)));
 
 	connect(m_dbusInterface,SIGNAL(gotUserConfig(libnutcommon::IPv4UserConfig)),this,SLOT(dbusretGetUserConfig(libnutcommon::IPv4UserConfig)));
 
@@ -65,7 +65,7 @@ CInterface::~CInterface() {
 }
 
 void CInterface::checkInitCompleted() {
-	if ( m_propertiesFetched && m_configFetched && m_userConfigFetched && m_needUserSetupFeteched && 	!m_initCompleted) {
+	if ( m_propertiesFetched && m_configFetched && m_userConfigFetched && m_needUserSetupFeteched && !m_initCompleted) {
 		m_initCompleted = true;
 		qDebug() << "InterfaceInit completed";
 		emit initializationCompleted(this);

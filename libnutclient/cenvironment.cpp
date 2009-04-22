@@ -35,7 +35,7 @@ void CEnvironment::init() {
 	serviceCheck(m_dbusConnectionInterface);
 	m_dbusEnvironment = new DBusEnvironmentInterface(NUT_DBUS_URL, m_dbusPath.path(),*m_dbusConnection,this);
 
-	connect(m_dbusEnvironment, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusret_errorOccured(QDBusError)));
+	connect(m_dbusEnvironment, SIGNAL(errorOccured(QDBusError,QString)), this, SLOT(dbusret_errorOccured(QDBusError)));
 
 	connect(m_dbusEnvironment,SIGNAL(gotProperties(libnutcommon::EnvironmentProperties)), this, SLOT(dbusretGetProperties(libnutcommon::EnvironmentProperties)));
 	connect(m_dbusEnvironment,SIGNAL(gotConfig(libnutcommon::EnvironmentConfig)),this,SLOT(dbusretGetConfig(libnutcommon::EnvironmentConfig)));
@@ -181,9 +181,13 @@ void CEnvironment::interfaceInitializationCompleted(CInterface * interface) {
 	interface->m_index = m_interfaces.indexOf(interface);
 
 	if (m_interfaces.size() == m_dbusInterfaces.size()) { //check if all interfaces are ready
+		qDebug() << "Feteched all Interfaces";
 		m_interfacesFetched = true;
 		checkInitCompleted();
 	}
+// 	else {
+// 		qDebug() << "Interface count" << m_interfaces.size() << m_dbusInterfaces.size(); 
+// 	}
 	emit newDataAvailable();
 }
 
@@ -221,6 +225,9 @@ void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 	foreach(QDBusObjectPath i, paths) {
 		interface = new CInterface(this,i);
 		m_dbusInterfaces.insert(i,interface);
+		connect(interface,SIGNAL(initializationFailed(CInterface*)),this,SLOT(interfaceInitializationFailed(CInterface*)));
+		connect(interface,SIGNAL(initializationCompleted(CInterface*)),this,SLOT(interfaceInitializationCompleted(CInterface*)));
+		interface->init();
 	}
 }
 
