@@ -123,14 +123,13 @@ namespace nuts {
 		return names;
 	}
 
-	bool DBusDeviceManager::createBridge(QList<QDBusObjectPath> devicePaths){ return false; }
-	bool DBusDeviceManager::createBridge(QList<qint32> deviceIds){ return false; }
-	bool DBusDeviceManager::createBridge(QList<QString> deviceNames){ return false; }
-	bool DBusDeviceManager::addToBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths){ return false; }
-	bool DBusDeviceManager::addToBridge(qint32 bridgeId, QList<qint32> deviceIds){ return false; }
-	bool DBusDeviceManager::destroyBridge(QDBusObjectPath devicePath){ return false; }
-	bool DBusDeviceManager::destroyBridge(qint32 deviceId){ return false; }
-	bool DBusDeviceManager::destroyBridge(QString deviceName){ return false; }
+	bool DBusDeviceManager::createBridge(QString name) { return false; }
+	bool DBusDeviceManager::destroyBridge(QDBusObjectPath devicePath) { return false; }
+	bool DBusDeviceManager::destroyBridge(qint32 deviceId) { return false; }
+	bool DBusDeviceManager::addToBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths) { return false; }
+	bool DBusDeviceManager::addToBridge(qint32 bridgeId, QList<qint32> deviceIds) { return false; }
+	bool DBusDeviceManager::removeFromBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths) { return false; }
+	bool DBusDeviceManager::removeFromBridge(qint32 bridgeId, QList<qint32> deviceIds) { return false; }
 
 
 	DBusDevice::DBusDevice(Device *dev, QDBusConnection *connection, const QString &path)

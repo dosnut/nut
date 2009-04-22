@@ -55,14 +55,14 @@ namespace nuts {
 			QList<QDBusObjectPath> getDeviceList();
 			QStringList getDeviceNames();
 
-			bool createBridge(QList<QDBusObjectPath> devicePaths);
-			bool createBridge(QList<qint32> deviceIds);
-			bool createBridge(QList<QString> deviceNames);
-			bool addToBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths);
-			bool addToBridge(qint32 bridgeId, QList<qint32> deviceIds);
+			
+			bool createBridge(QString name);
 			bool destroyBridge(QDBusObjectPath devicePath);
 			bool destroyBridge(qint32 deviceId);
-			bool destroyBridge(QString deviceName);
+			bool addToBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths);
+			bool addToBridge(qint32 bridgeId, QList<qint32> deviceIds);
+			bool removeFromBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths);
+			bool removeFromBridge(qint32 bridgeId, QList<qint32> deviceIds);
 
 		signals:
 			void deviceAdded(const QDBusObjectPath &objectpath);
