@@ -6,7 +6,10 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 #include <QIcon>
-#include <libnutclient/client.h>
+#include <libnutclient/cdevicemanager.h>
+#include <libnutclient/cdevice.h>
+#include <libnutclient/cenvironment.h>
+#include <libnutwireless/wpa_supplicant.h>
 #include "overviewmodel.h"
 #include "common.h"
 

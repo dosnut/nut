@@ -9,7 +9,8 @@
 #define QNUT_CONNECTIONMANAGER_H
 
 #include <QtGui>
-#include <libnutclient/client.h>
+#include <libnutclient/cdevicemanager.h>
+#include <libnutclient/clog.h>
 #include "ui/ui_connman.h"
 #include "trayicon.h"
 #include "devicedetails.h"

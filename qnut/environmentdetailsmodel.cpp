@@ -6,7 +6,8 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 #include <QIcon>
-#include <libnutclient/client.h>
+#include <libnutclient/cdevice.h>
+#include <libnutclient/cenvironment.h>
 #include "environmentdetailsmodel.h"
 #include "constants.h"
 

@@ -9,7 +9,10 @@
 #include <QProcess>
 #include <QDir>
 #include <QMenu>
-#include <libnutclient/client.h>
+#include <libnutclient/cdevice.h>
+#include <libnutclient/cenvironment.h>
+#include <libnutclient/cinterface.h>
+
 #include "devicedetails.h"
 #include "common.h"
 #include "constants.h"
@@ -18,6 +21,7 @@
 #include "environmentdetailsmodel.h"
 #include "ipconfiguration.h"
 #include "scriptsettings.h"
+
 #ifndef QNUT_NO_WIRELESS
 #include "wirelesssettings.h"
 #endif

@@ -5,7 +5,10 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-#include <libnutclient/client.h>
+#include <libnutclient/cdevice.h>
+#include <libnutclient/cenvironment.h>
+#include <libnutclient/cinterface.h>
+#include <libnutwireless/wpa_supplicant.h>
 #include "common.h"
 #include "constants.h"
 
