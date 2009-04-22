@@ -57,9 +57,9 @@ namespace nuts {
 		m_dbusConnection.unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
 		m_dbusConnection.unregisterService(NUT_DBUS_URL);
 		m_dbusConnection.disconnectFromBus(QString::fromLatin1("nuts_system_bus"));
-		if (m_dbusConnection.isConnected()) {
-			qDebug() << "(BIG FAT WARNING) Dbus is connected after disconnect";
-		}
+// 		if (m_dbusConnection.isConnected()) {
+// 			qDebug() << "(BIG FAT WARNING) Dbus is connected after disconnect";
+// 		}
 // 		qDebug() << "Deleted dev-manager";
 	}
 
@@ -112,7 +112,7 @@ namespace nuts {
 		foreach (DBusDevice *dbus_device, m_dbusDevices) {
 			paths.append(QDBusObjectPath(dbus_device->getPath()));
 		}
-		qDebug() << "Returining device list";
+// 		qDebug() << "Returining device list";
 		return paths;
 	}
 	QStringList DBusDeviceManager::getDeviceNames() {
