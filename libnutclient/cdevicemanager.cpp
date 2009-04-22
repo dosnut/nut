@@ -98,7 +98,7 @@ void CDeviceManager::deviceInitializationFailed(CDevice * device) {
 	device->deleteLater();
 }
 
-void deviceInitializationCompleted(CDevice * device) {
+void CDeviceManager::deviceInitializationCompleted(CDevice * device) {
 }
 
 void CDeviceManager::timerEvent(QTimerEvent *event) {
