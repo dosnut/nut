@@ -20,7 +20,7 @@ HEADERS += client.h server_proxy.h client_exceptions.h \
  cdevicemanager.h \
  clibnut.h \
  clog.h
-SOURCES += client.cpp server_proxy.cpp \
+SOURCES += server_proxy.cpp \
  cinterface.cpp \
  clibnut.cpp \
  clog.cpp \

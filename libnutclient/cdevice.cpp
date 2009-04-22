@@ -21,6 +21,12 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) :
 	m_needWpaSupplicant(false),
 	m_pendingRemoval(false),
 	m_lockCount(0),
+	m_propertiesFetched(false),
+	m_environmentsFetched(false),
+	m_essidFetched(false),
+	m_configFetched(false),
+	m_activeEnvFetched(false),
+	m_initCompleted(false),
 	m_state(libnutcommon::DS_UNCONFIGURED),
 	m_type(libnutcommon::DT_ETH),
 	m_activeEnvironment(0),
@@ -39,7 +45,7 @@ void CDevice::init() {
 	m_dbusDevice = new DBusDeviceInterface(NUT_DBUS_URL, m_dbusPath.path(),*m_dbusConnection, this);
 	
 	//DBus interface is available: connect:
-	connect(m_dbusDevice, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusret_errorOccured()));
+	connect(m_dbusDevice, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusret_errorOccured(QDBusError)));
 
 	connect(m_dbusDevice, SIGNAL(gotEnvironments(QList<QDBusObjectPath>)), this, SLOT(dbusretGetEnvironments(QList<QDBusObjectPath>)));
 	connect(m_dbusDevice, SIGNAL(gotProperties(libnutcommon::DeviceProperties)), this, SLOT(dbusretGetProperties(libnutcommon::DeviceProperties)));
@@ -56,6 +62,9 @@ void CDevice::init() {
 
 	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
 	m_dbusDevice->getProperties();
+
+	*log << tr("Placing getConfig call at %1").arg(m_dbusPath.path());
+	m_dbusDevice->getConfig();
 
 	*log << tr("Placing getEnvironments call at: %1").arg(m_dbusPath.path());
 	m_dbusDevice->getEnvironments();
@@ -117,6 +126,14 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 // 	emit(environmentsUpdated()); //Pending for removal
 }
 
+
+void CDevice::checkInitCompleted() {
+	if ( m_propertiesFetched && m_environmentsFetched && m_essidFetched && m_configFetched && m_activeEnvFetched && !m_initCompleted) {
+		m_initCompleted = true;
+		qDebug() << "Device init completed:" << m_name;
+		emit initializationCompleted(this);
+	}
+}
 
 //Locking functions
 bool CDevice::incrementLock() {
@@ -200,6 +217,14 @@ void CDevice::dbusretGetProperties(libnutcommon::DeviceProperties props) {
 	if (DT_AIR == m_type) {
 		m_dbusDevice->getEssid();
 	}
+	else {
+		m_essidFetched = true;
+		qDebug() << "essid feteched";
+	}
+
+	m_propertiesFetched = true;
+	qDebug() << "Properties feteched";
+	checkInitCompleted();
 
 	emit gotProperties(props);
 	emit newDataAvailable();
@@ -208,6 +233,11 @@ void CDevice::dbusretGetProperties(libnutcommon::DeviceProperties props) {
 
 void CDevice::dbusretGetEssid(QString essid) {
 	m_essid = essid;
+
+	m_essidFetched = true;
+	qDebug() << "essid feteched";
+	checkInitCompleted();
+	
 	emit gotEssid(essid);
 	emit newDataAvailable();
 }
@@ -233,18 +263,29 @@ void CDevice::dbusretGetEnvironments(QList<QDBusObjectPath> envs) {
 		rebuild(envs);
 	}
 	
-	emit gotEnvironments();
-	emit newDataAvailable();
-
 	//Set active env:
 	m_dbusDevice->getActiveEnvironment();
 
+	m_environmentsFetched = true;
+	qDebug() << "envs feteched";
+	checkInitCompleted();
+
+	emit gotEnvironments();
+	emit newDataAvailable();
 }
 
 void CDevice::dbusretGetActiveEnvironment(QString activeEnv) {
-		m_dbusActiveEnvironment = QDBusObjectPath(activeEnv);
-		m_activeEnvironment = m_dbusEnvironments.value(m_dbusActiveEnvironment, NULL);
-		*log << tr("Active Environement: %1").arg(m_dbusActiveEnvironment.path());
+		if (activeEnv.isEmpty()) { //active env is not set
+			m_activeEnvironment = 0;
+		}
+		else {
+			m_activeEnvironment = m_dbusEnvironments.value(QDBusObjectPath(activeEnv), NULL);
+		}
+		*log << tr("Active Environement: %1").arg(activeEnv);
+
+		m_activeEnvFetched = true;
+		qDebug() << "activeenv fetched";
+		checkInitCompleted();
 
 		emit gotActiveEnvironment(m_activeEnvironment);
 		emit newDataAvailable();
@@ -273,10 +314,21 @@ void CDevice::dbusretGetConfig(libnutcommon::DeviceConfig config) {
 	}
 	#endif
 
+	m_configFetched = true;
+	qDebug() << "config feteched";
+	checkInitCompleted();
+
 	emit gotConfig(m_config);
 	emit newDataAvailable();
 }
 
+
+void CDevice::dbusret_errorOccured(QDBusError error, QString method) {
+	qDebug() << "Error occured in dbus: " << QDBusError::errorString(error.type()) << "at" << method;
+	if (!m_initCompleted) { //error during init
+		emit initializationFailed(this);
+	}
+}
 
 
 //CDevice SLOTS

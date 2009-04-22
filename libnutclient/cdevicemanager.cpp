@@ -89,16 +89,20 @@ bool CDeviceManager::init(CLog * inlog) {
 
 void CDeviceManager::deviceInitializationFailed(CDevice * device) {
 	m_dbusDevices.take(device->m_dbusPath);
-	m_devices.removeAll(device);
+	if (m_devices.removeAll(device) > 0 ) { //Check if device got into devlist (should not happen)
 	//Rebuild device->index for qnut
-	foreach(CDevice * dev, m_devices) {
-		dev->m_index = m_devices.indexOf(dev);
+		foreach(CDevice * dev, m_devices) {
+			dev->m_index = m_devices.indexOf(dev);
+		}
 	}
-	emit(deviceRemoved(device));
+// 	emit(deviceRemoved(device));
 	device->deleteLater();
 }
 
 void CDeviceManager::deviceInitializationCompleted(CDevice * device) {
+	m_devices.append(device);
+	device->m_index = m_devices.indexOf(device); // Set device index;
+	emit(deviceAdded(device));
 }
 
 void CDeviceManager::timerEvent(QTimerEvent *event) {
@@ -164,10 +168,8 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 	foreach(QDBusObjectPath i, paths) {
 		device = new CDevice(this, i);
 		m_dbusDevices.insert(i, device);
-		m_devices.append(device);
-		device->m_index = m_devices.indexOf(device); // Set device index;
-		connect(device,SIGNAL(failedInitialization(CDevice*)), this, SLOT(deviceInitializationFailed(CDevice*)));
-		emit(deviceAdded(device));
+		connect(device,SIGNAL(initializationFailed(CDevice*)), this, SLOT(deviceInitializationFailed(CDevice*)));
+		connect(device,SIGNAL(initializationCompleted(CDevice*)),this,SLOT(deviceInitializationCompleted(CDevice*)));
 		device->init();
 	}
 }

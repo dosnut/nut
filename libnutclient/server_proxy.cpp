@@ -81,7 +81,7 @@ void DBusDeviceInterface::setEnvironment(qint32 env) {
 
 void DBusDeviceInterface::getEnvironments() {
 	QList<QVariant> argumentList;
-	bool worked = callWithCallback(QLatin1String("getEnvironment"), argumentList, this, SLOT(dbret_getEnvironments(QList<QDBusObjectPath>)), SLOT(dbret_errorOccured(QDBusError)));
+	bool worked = callWithCallback(QLatin1String("getEnvironments"), argumentList, this, SLOT(dbret_getEnvironments(QList<QDBusObjectPath>)), SLOT(dbret_errorOccured(QDBusError)));
 	if (!worked)
 		emit queueErrorOccured("getEnvironments");
 }

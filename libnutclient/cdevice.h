@@ -37,7 +37,6 @@ namespace libnutclient {
 	private:
 		//CDeviceManager * parent;
 		QDBusObjectPath m_dbusPath;
-		QDBusObjectPath m_dbusActiveEnvironment;
 		QHash<QDBusObjectPath, CEnvironment*> m_dbusEnvironments;
 		CLog * log;
 		DBusDeviceInterface * m_dbusDevice;
@@ -49,6 +48,14 @@ namespace libnutclient {
 		//Locking functions;
 		bool m_pendingRemoval;
 		int m_lockCount;
+
+		//device init variables
+		bool m_propertiesFetched;
+		bool m_environmentsFetched;
+		bool m_essidFetched;
+		bool m_configFetched;
+		bool m_activeEnvFetched;
+		bool m_initCompleted;
 		
 		//Device information
 		CEnvironmentList m_environments;
@@ -66,6 +73,7 @@ namespace libnutclient {
 		void refreshAll();
 		void setActiveEnvironment(CEnvironment * env, QDBusObjectPath m_dbusPath);
 		void rebuild(QList<QDBusObjectPath> paths);
+		void checkInitCompleted();
 
 
 	private slots:
@@ -79,7 +87,7 @@ namespace libnutclient {
 		void dbusretGetActiveEnvironment(QString activeEnv);
 		void dbusretGetConfig(libnutcommon::DeviceConfig config);
 		
-		void dbusret_errorOccured() { qDebug() << "Error occured"; }
+		void dbusret_errorOccured(QDBusError error, QString method = QString());
 	public:
 		//Initializes this device
 		void init();
@@ -111,8 +119,8 @@ namespace libnutclient {
 		
 	signals:
 
-		void failedInitialization(CDevice * device); //TODO:Implement this: has to be called if init fails
-		void initialization();
+		void initializationFailed(CDevice * device); //TODO:Implement this: has to be called if init fails
+		void initializationCompleted(CDevice * device);
 
 
 		void newDataAvailable();
