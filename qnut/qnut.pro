@@ -15,13 +15,13 @@ UI_DIR = ui/
 
 TARGET = qnut
 
-FORMS = connman.ui \
- ipconf.ui \
+FORMS = ipconf.ui \
  scrset.ui \
  airset.ui \
  apconf.ui \
  devdet.ui \
  adhoc.ui
+
 TRANSLATIONS = qnut_de.ts
 
 HEADERS += connectionmanager.h trayicon.h \

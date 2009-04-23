@@ -8,14 +8,17 @@
 #ifndef QNUT_CONNECTIONMANAGER_H
 #define QNUT_CONNECTIONMANAGER_H
 
-#include <QtGui>
+#include <QMainWindow>
+#include <QTreeView>
+#include <QTextEdit>
+#include <QHash>
 #include <libnutclient/cdevicemanager.h>
 #include <libnutclient/clog.h>
-#include "ui/ui_connman.h"
 #include "trayicon.h"
-#include "devicedetails.h"
 
 namespace qnut {
+	class CDeviceDetails;
+	
 	/**
 	 * @brief CConnectionManager acts as the main class (and window) of the application
 	 * @author Oliver Groß <z.o.gross@gmx.de>
@@ -29,19 +32,32 @@ namespace qnut {
 	 */
 	class CConnectionManager : public QMainWindow {
 		Q_OBJECT
-	private:
-		Ui::connMan ui;
+	public:
+		/**
+		 * @brief Creates the object, initializes the basic user interface and reads settings from "~/.qnut/qnut.conf".
+		 * @param parent parent widget
+		 */
+		CConnectionManager(QWidget * parent = 0);
 		
+		/// @brief Destroyes the object and writes the settings to "~/.qnut/qnut.conf".
+		~CConnectionManager();
+	private:
 		libnutclient::CDeviceManager m_DeviceManager;
 		libnutclient::CLog m_LogFile;
 		
-		CDeviceDetailsHash m_DeviceDetails;
+		QHash<libnutclient::CDevice *, CDeviceDetails *> m_DeviceDetails;
 		QSettings m_Settings;
 		
 		CTrayIcon m_TrayIcon;
 		QTabWidget m_TabWidget;
 		QTreeView m_OverView;
 		QTextEdit m_LogEdit;
+		
+		QMenu * m_EditMenu;
+		QToolBar * m_ToolBar;
+		
+		QAction * m_ShowLogAction;
+		QAction * m_ShowBalloonTipsAction;
 		
 		QAction * m_RefreshDevicesAction;
 		QAction * m_ClearLogAction;
@@ -59,15 +75,6 @@ namespace qnut {
 		
 		inline void readSettings();
 		inline void writeSettings();
-	public:
-		/**
-		 * @brief Creates the object, initializes the basic user interface and reads settings from "~/.qnut/qnut.conf".
-		 * @param parent parent widget
-		 */
-		CConnectionManager(QWidget * parent = 0);
-		
-		/// @brief Destroyes the object and writes the settings to "~/.qnut/qnut.conf".
-		~CConnectionManager();
 	private slots:
 		void handleTabChanged(int index);
 		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);

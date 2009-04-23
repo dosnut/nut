@@ -23,8 +23,8 @@ namespace qnut {
 	class CWirelessSettings;
 	#endif
 	class CDeviceDetails;
-	/// Hash of CDeviceDetails
-	typedef QHash<libnutclient::CDevice *, CDeviceDetails *> CDeviceDetailsHash;
+	// / Hash of CDeviceDetails
+// 	typedef QHash<libnutclient::CDevice *, CDeviceDetails *> CDeviceDetailsHash;
 	
 	/**
 	 * @brief CDeviceDetails interacts directly with CDevice.
