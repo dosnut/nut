@@ -31,8 +31,13 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) :
 }//TODO::init all vars to default
 
 void CInterface::init() {
+	if (!serviceCheck()) {
+		emit initializationFailed();
+		emit dbusErrorOccured();
+		return;
+	}
+
 	m_dbusInterface = new DBusInterfaceInterface_IPv4(NUT_DBUS_URL, m_dbusPath.path(), *m_dbusConnection, this);
-	serviceCheck(m_dbusConnectionInterface);
 
 	connect(m_dbusInterface, SIGNAL(errorOccured(QDBusError,QString)), this, SLOT(dbusret_errorOccured(QDBusError)));
 
@@ -123,6 +128,9 @@ void CInterface::dbusret_errorOccured(QDBusError error, QString method) {
 	qDebug() << "Error occured in dbus: " << QDBusError::errorString(error.type()) << "at" << method;
 	if (!m_initCompleted) { //error during init
 		emit initializationFailed(this);
+	}
+	if (!serviceCheck()) {
+		emit dbusErrorOccured();
 	}
 }
 

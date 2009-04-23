@@ -42,16 +42,23 @@ QString toString(QDBusError error) {
 //CLibNut
 ///////////////
 //Check if service up
-void CLibNut::serviceCheck(QDBusConnectionInterface * interface) {
-	QDBusReply<bool> reply = interface->isServiceRegistered(NUT_DBUS_URL);
-	if (reply.isValid()) {
-		if (!reply.value()) {
-			throw CLI_ConnectionInitException(tr("Please start NUTS"));
+bool CLibNut::serviceCheck() {
+	if (!m_dbusConnection->isConnected()) {
+		return false;
+	}
+
+	if (m_dbusConnectionInterface) {
+		QDBusReply<bool> reply = m_dbusConnectionInterface->isServiceRegistered(NUT_DBUS_URL);
+		if (reply.isValid()) {
+			if (!reply.value()) {
+				return false;
+			}
+		}
+		else {
+			return false;
 		}
 	}
-	else {
-		throw CLI_ConnectionInitException(tr("(%1)Error while setting-up dbusconnection").arg(toString(reply.error())));
-	}
+	return true;
 }
 
 }

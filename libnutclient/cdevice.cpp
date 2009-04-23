@@ -40,8 +40,13 @@ void CDevice::init() {
 	//get m_dbusConnection from parent:
 	m_dbusConnection = &(qobject_cast<CDeviceManager*>(parent())->m_dbusConnection);
 	m_dbusConnectionInterface = qobject_cast<CDeviceManager*>(parent())->m_dbusConnectionInterface;
-	//Service check
-	serviceCheck(m_dbusConnectionInterface); //TODO:Remove exception garbage
+
+	if (!serviceCheck()) {
+		emit initializationFailed(this);
+		emit dbusErrorOccured();
+		return;
+	}
+
 	//connect to dbus-object
 	m_dbusDevice = new DBusDeviceInterface(NUT_DBUS_URL, m_dbusPath.path(),*m_dbusConnection, this);
 	
@@ -312,6 +317,9 @@ void CDevice::dbusret_errorOccured(QDBusError error, QString method) {
 	qDebug() << "Error occured in dbus: " << QDBusError::errorString(error.type()) << "at" << method;
 	if (!m_initCompleted) { //error during init
 		emit initializationFailed(this);
+	}
+	if (!serviceCheck()) {
+		emit dbusErrorOccured();
 	}
 }
 

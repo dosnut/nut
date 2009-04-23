@@ -63,7 +63,7 @@ namespace libnutclient {
 		//dbus return methods
 		void dbusretGetDeviceList(QList<QDBusObjectPath> devices);
 
-		void dbusretErrorOccured(QDBusError error);
+		void dbusretErrorOccured(QDBusError error, QString method=QString());
 
 		void dbusDeviceAdded(const QDBusObjectPath &objectpath);
 		void dbusDeviceRemoved(const QDBusObjectPath &objectpath);
@@ -73,6 +73,8 @@ namespace libnutclient {
 
 		void deviceInitializationFailed(CDevice * device);
 		void deviceInitializationCompleted(CDevice * device);
+
+		void globalDBusErrorOccured(QDBusError error = QDBusMessage::createError(QDBusError::InternalError).error());
 
 	public:
 		/** @brief List of devices managed by the DeviceManager

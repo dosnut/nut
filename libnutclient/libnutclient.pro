@@ -13,8 +13,7 @@ QT += network
 
 CODECFORSRC = UTF-8
 
-HEADERS += client.h server_proxy.h client_exceptions.h \
- cinterface.h \
+HEADERS += client.h server_proxy.h cinterface.h \
  cenvironment.h \
  cdevice.h \
  cdevicemanager.h \

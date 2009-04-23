@@ -32,7 +32,11 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) :
 
 //Initializes the environment
 void CEnvironment::init() {
-	serviceCheck(m_dbusConnectionInterface);
+	if (!serviceCheck()) {
+		emit initializationFailed(this);
+		emit dbusErrorOccured();
+		return;
+	}
 	m_dbusEnvironment = new DBusEnvironmentInterface(NUT_DBUS_URL, m_dbusPath.path(),*m_dbusConnection,this);
 
 	connect(m_dbusEnvironment, SIGNAL(errorOccured(QDBusError,QString)), this, SLOT(dbusret_errorOccured(QDBusError)));
@@ -166,6 +170,9 @@ void CEnvironment::dbusret_errorOccured(QDBusError error, QString method) {
 	qDebug() << "Error occured in dbus: " << QDBusError::errorString(error.type()) << "at" << method;
 	if (!m_initCompleted) { //error during init
 		emit initializationFailed(this);
+	}
+	if (!serviceCheck()) {
+		emit dbusErrorOccured();
 	}
 }
 
