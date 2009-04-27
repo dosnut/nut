@@ -71,12 +71,7 @@ INCLUDEPATH += ..
 
 
 QMAKE_CXXFLAGS_DEBUG += -pedantic -Wno-long-long
-TARGETDEPS += ../libnutclient/libnutclient.a \
-  ../libnutwireless/libnutwireless.a \
-  ../libnutcommon/libnutcommon.a
-
-LIBS += ../libnutcommon/libnutcommon.a \
-  ../libnutwireless/libnutwireless.a \
-  ../libnutclient/libnutclient.a \
-  -liw
+LIBS += ../libnutclient/libnutclient.a ../libnutwireless/libnutwireless.a ../libnutcommon/libnutcommon.a
+LIBS += -liw
+TARGETDEPS += ../libnutcommon/libnutcommon.a ../libnutwireless/libnutwireless.a ../libnutclient/libnutclient.a
 
