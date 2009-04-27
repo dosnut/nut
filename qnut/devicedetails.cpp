@@ -9,6 +9,8 @@
 #include <QProcess>
 #include <QDir>
 #include <QMenu>
+#include <QApplication>
+#include <QClipboard>
 #include <libnutclient/cdevice.h>
 #include <libnutclient/cenvironment.h>
 #include <libnutclient/cinterface.h>
@@ -30,8 +32,7 @@ namespace qnut {
 	using namespace libnutclient;
 	using namespace libnutcommon;
 	
-	CDeviceDetails::CDeviceDetails(CDevice * parentDevice, QWidget * parent) :
-		QWidget(parent),
+	CDeviceDetails::CDeviceDetails(CDevice * parentDevice, QWidget * parent) : QWidget(parent),
 		m_Settings(UI_PATH_DEV(parentDevice->getName()) + "dev.conf", QSettings::IniFormat, this)
 	{
 		m_Device = parentDevice;
@@ -48,6 +49,7 @@ namespace qnut {
 		
 		m_trayIcon->setToolTip(shortSummary(m_Device));
 		m_trayIcon->setContextMenu(m_DeviceMenu);
+		
 		connect(m_trayIcon, SIGNAL(messageClicked()), this, SLOT(showTheeseDetails()));
 		connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 			this, SLOT(handleTrayActivated(QSystemTrayIcon::ActivationReason)));
@@ -218,12 +220,18 @@ namespace qnut {
 		ui.environmentTree->setContextMenuPolicy(Qt::ActionsContextMenu);
 		
 		connect(m_IPConfigurationAction, SIGNAL(triggered()), this, SLOT(openIPConfiguration()));
+		
+		tempAction = new QAction(/*QIcon(UI_ICON_COPY),*/  tr("&Copy property"), this);
+		connect(tempAction, SIGNAL(triggered()), this, SLOT(copySelectedProperty()));
+		ui.detailsView->addAction(tempAction);
 	}
 	
 	inline void CDeviceDetails::createView() {
 		m_trayIcon = new QSystemTrayIcon(QIcon(iconFile(m_Device)), this);
 		
 		ui.setupUi(this);
+		
+		ui.detailsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 		
 		connect(ui.showTrayCheck, SIGNAL(toggled(bool)), m_trayIcon, SLOT(setVisible(bool)));
 		
@@ -237,7 +245,11 @@ namespace qnut {
 	
 	inline void CDeviceDetails::setHeadInfo() {
 		ui.iconLabel->setPixmap(QPixmap(iconFile(m_Device)));
+		
 		ui.statusLabel->setText(toStringTr(m_Device->getState()));
+		ui.networkLabel->setText(tr("connected to: %1").arg(currentNetwork(m_Device, false)));
+		
+		ui.networkLabel->setVisible(m_Device->getState() > DS_CARRIER);
 	}
 	
 	void CDeviceDetails::handleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
@@ -323,6 +335,21 @@ namespace qnut {
 			else
 				m_IPConfigsToRemember.remove(interface);
 		}
+	}
+	
+	void CDeviceDetails::copySelectedProperty() {
+		QModelIndex target = ui.detailsView->selectionModel()->selectedRows(1)[0];
+		QString property = target.data().toString();
+		
+		if (property.isEmpty()) {
+			target = ui.detailsView->selectionModel()->selectedRows(0)[0];
+			property = target.data().toString();
+		}
+		
+		if (property.isEmpty())
+			return;
+		
+		QApplication::clipboard()->setText(property);
 	}
 	
 	void CDeviceDetails::openScriptingSettings() {

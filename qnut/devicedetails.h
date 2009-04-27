@@ -8,6 +8,7 @@
 #ifndef QNUT_DEVICEDETAILS_H
 #define QNUT_DEVICEDETAILS_H
 
+#include <QWidget>
 #include <QSystemTrayIcon>
 #include <QSettings>
 #include <libnutcommon/device.h>
@@ -22,9 +23,6 @@ namespace qnut {
 	#ifndef QNUT_NO_WIRELESS
 	class CWirelessSettings;
 	#endif
-	class CDeviceDetails;
-	// / Hash of CDeviceDetails
-// 	typedef QHash<libnutclient::CDevice *, CDeviceDetails *> CDeviceDetailsHash;
 	
 	/**
 	 * @brief CDeviceDetails interacts directly with CDevice.
@@ -104,6 +102,7 @@ namespace qnut {
 		void handleDeviceStateChange(libnutcommon::DeviceState state);
 		void showTheeseDetails();
 		void openIPConfiguration();
+		void copySelectedProperty();
 	public slots:
 		/// @brief Opens the scripting settings dialog.
 		void openScriptingSettings();

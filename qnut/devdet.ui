@@ -1,56 +1,71 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <author>Oliver Groß</author>
  <class>devdet</class>
- <widget class="QWidget" name="devdet" >
-  <property name="geometry" >
+ <widget class="QWidget" name="devdet">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>536</width>
-    <height>274</height>
+    <height>284</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Device Details</string>
   </property>
-  <layout class="QVBoxLayout" >
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QHBoxLayout" >
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="iconLabel" >
-       <property name="sizePolicy" >
-        <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+      <widget class="QLabel" name="iconLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="text" >
+       <property name="text">
         <string/>
        </property>
-       <property name="pixmap" >
+       <property name="pixmap">
         <pixmap>../../../../../../usr/share/qnut/icons/clear.png</pixmap>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="statusLabel" >
-       <property name="sizePolicy" >
-        <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text" >
-        <string>unknown status</string>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
        </property>
       </widget>
      </item>
      <item>
-      <spacer>
-       <property name="orientation" >
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="statusLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>unknown status</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="networkLabel">
+         <property name="text">
+          <string>unknown network</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>161</width>
          <height>20</height>
@@ -59,14 +74,14 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="detailsButton" >
-       <property name="text" >
+      <widget class="QPushButton" name="detailsButton">
+       <property name="text">
         <string>Show Details</string>
        </property>
-       <property name="checkable" >
+       <property name="checkable">
         <bool>true</bool>
        </property>
-       <property name="checked" >
+       <property name="checked">
         <bool>true</bool>
        </property>
       </widget>
@@ -74,36 +89,36 @@
     </layout>
    </item>
    <item>
-    <widget class="QSplitter" name="splitter" >
-     <property name="sizePolicy" >
-      <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+    <widget class="QSplitter" name="splitter">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="orientation" >
+     <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <property name="childrenCollapsible" >
+     <property name="childrenCollapsible">
       <bool>false</bool>
      </property>
-     <widget class="QTreeView" name="environmentTree" >
-      <property name="sizePolicy" >
-       <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+     <widget class="QTreeView" name="environmentTree">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>3</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="iconSize" >
+      <property name="iconSize">
        <size>
         <width>18</width>
         <height>18</height>
        </size>
       </property>
      </widget>
-     <widget class="QTreeView" name="detailsView" >
-      <property name="sizePolicy" >
-       <sizepolicy vsizetype="Expanding" hsizetype="Preferred" >
+     <widget class="QTreeView" name="detailsView">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
         <horstretch>2</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -112,13 +127,16 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="showTrayCheck" >
-     <property name="text" >
+    <widget class="QCheckBox" name="showTrayCheck">
+     <property name="text">
       <string>Show tray icon for this device</string>
      </property>
     </widget>
    </item>
   </layout>
+  <zorder>splitter</zorder>
+  <zorder>showTrayCheck</zorder>
+  <zorder>networkLabel</zorder>
  </widget>
  <resources/>
  <connections>
@@ -128,11 +146,11 @@
    <receiver>detailsView</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>348</x>
      <y>23</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>299</x>
      <y>201</y>
     </hint>

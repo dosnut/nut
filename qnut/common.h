@@ -36,7 +36,7 @@ namespace qnut {
 	 */
 	QString shortSummary(libnutclient::CDevice * device);
 	/**
-	 * @brief Returns a summary string of device details for the given device: "(<type>)\n<state> (<current ip>)\n<network>".
+	 * @brief Returns a summary string of device details for the given device: "Type: <type>\nState: <state> (<current ip>)\nConnected to: <network>".
 	 * @param device pointer to an existing instance of a CDevice
 	 */
 	QString detailsSummary(libnutclient::CDevice * device);
@@ -44,7 +44,7 @@ namespace qnut {
 	 * @brief Returns the current network name the given device is connected to.
 	 * @param device pointer to an existing instance of a CDevice
 	 */
-	QString currentNetwork(libnutclient::CDevice * device);
+	QString currentNetwork(libnutclient::CDevice * device, bool appendQuality = true);
 	/**
 	 * @brief Returns the active ip address for the given device ("(...)" will be added if there is more than one ip address).
 	 * @param device pointer to an existing instance of a CDevice

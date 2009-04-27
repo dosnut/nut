@@ -37,6 +37,15 @@ namespace qnut {
 			case DS_DEACTIVATED:    return QString(UI_ICON_AIR_DEACTIVATED);
 			default:                break;
 			}
+		case DT_BRIDGE:
+			switch (device->getState()) {
+			case DS_UP:             return QString(UI_ICON_BRIDGE_UP);
+			case DS_UNCONFIGURED:   return QString(UI_ICON_BRIDGE_UNCONFIGURED);
+			case DS_CARRIER:        return QString(UI_ICON_BRIDGE_CARRIER);
+			case DS_ACTIVATED:      return QString(UI_ICON_BRIDGE_ACTIVATED);
+			case DS_DEACTIVATED:    return QString(UI_ICON_BRIDGE_DEACTIVATED);
+			default:                break;
+			}
 		default:
 			break;
 		}
@@ -57,22 +66,22 @@ namespace qnut {
 	}
 
 	QString detailsSummary(CDevice * device) {
-		QString result = ('(' + toStringTr(device->getType()) + ')') + '\n' +
-			toStringTr(device->getState());
+		QString result = QObject::tr("Type: %1").arg(toStringTr(device->getType())) + '\n' +
+			QObject::tr("State: %1").arg(toStringTr(device->getState()));
 		
 		if (device->getState() >= DS_UNCONFIGURED) {
 			result += ' ';
 			result += '(' + activeIP(device) + ')';
 			if (device->getType() == DT_AIR)
-				result += '\n' + QObject::tr("connected to: %1").arg(currentNetwork(device));
+				result += '\n' + QObject::tr("Connected to: %1").arg(currentNetwork(device));
 		}
 		
 		return result;
 	}
 	
-	QString currentNetwork(CDevice * device) {
+	QString currentNetwork(CDevice * device, bool appendQuality) {
 #ifndef QNUT_NO_WIRELESS
-		if (device->getWpaSupplicant()) {
+		if (appendQuality && device->getWpaSupplicant()) {
 			WextSignal signal = device->getWpaSupplicant()->getSignalQuality();
 			return device->getEssid() + " (" +
 				QString::number(signal.quality.value) + '/'+
