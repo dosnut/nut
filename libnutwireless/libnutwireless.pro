@@ -1,12 +1,10 @@
 TEMPLATE = lib
 CONFIG += static create_prl
-CONFIG -= thread \
- release
+CONFIG -= thread
 TARGET = nutwireless
 
 CONFIG += qt warn_on qdbus exceptions \
- staticlib \
- debug
+ staticlib
 QT -= gui
 QT += network
 
