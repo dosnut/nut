@@ -49,7 +49,7 @@
 #define UI_ICON_AIR                     UI_PATH_ICONS "air.png"
 #define UI_ICON_ADHOC                   UI_PATH_ICONS "adhoc.png"
 
-#define UI_ICON_DETAILED                UI_PATH_ICONS "view_detailed"
+#define UI_ICON_DETAILED                UI_PATH_ICONS "view_detailed.png"
 
 #define UI_ICON_ETH_UP                  UI_PATH_ICONS "eth_up.png"
 #define UI_ICON_ETH_UNCONFIGURED        UI_PATH_ICONS "eth_unconfigured.png"
@@ -62,6 +62,12 @@
 #define UI_ICON_AIR_CARRIER             UI_PATH_ICONS "air_carrier.png"
 #define UI_ICON_AIR_ACTIVATED           UI_PATH_ICONS "air_activated.png"
 #define UI_ICON_AIR_DEACTIVATED         UI_PATH_ICONS "air_deactivated.png"
+
+#define UI_ICON_BRIDGE_UP               UI_PATH_ICONS "bridge_up.png"
+#define UI_ICON_BRIDGE_UNCONFIGURED     UI_PATH_ICONS "bridge_unconfigured.png"
+#define UI_ICON_BRIDGE_CARRIER          UI_PATH_ICONS "bridge_carrier.png"
+#define UI_ICON_BRIDGE_ACTIVATED        UI_PATH_ICONS "bridge_activated.png"
+#define UI_ICON_BRIDGE_DEACTIVATED      UI_PATH_ICONS "bridge_deactivated.png"
 
 #define UI_ICON_ENVIRONMENT             UI_PATH_ICONS "environment.png"
 

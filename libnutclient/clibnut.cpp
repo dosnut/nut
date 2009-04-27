@@ -15,10 +15,11 @@ QString toStringTr(DeviceState state) {
 }
 QString toStringTr(DeviceType type) {
 	switch (type) {
-		case DT_ETH: return CLibNut::tr("Ethernet");
-		case DT_AIR: return CLibNut::tr("Wireless");
-		case DT_PPP: return CLibNut::tr("PPP");
-		default:     return QString();
+		case DT_ETH:    return CLibNut::tr("Ethernet");
+		case DT_AIR:    return CLibNut::tr("Wireless");
+		case DT_PPP:    return CLibNut::tr("PPP");
+		case DT_BRIDGE: return CLibNut::tr("Bridge");
+		default:        return QString();
 	}
 }
 QString toStringTr(InterfaceState state) {
