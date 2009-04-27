@@ -1,8 +1,6 @@
 #include "clibnut.h"
 #include "libnutcommon/common.h"
 
-#include "client_exceptions.h"
-
 namespace libnutclient {
 using namespace libnutcommon;
 QString toStringTr(DeviceState state) {
@@ -43,7 +41,10 @@ QString toString(QDBusError error) {
 ///////////////
 //Check if service up
 bool CLibNut::serviceCheck() {
-	if (!m_dbusConnection->isConnected()) {
+	if (!m_dbusConnection) {
+		return false;
+	}
+	else if (!m_dbusConnection->isConnected()) {
 		return false;
 	}
 
@@ -57,6 +58,9 @@ bool CLibNut::serviceCheck() {
 		else {
 			return false;
 		}
+	}
+	else {
+		return false;
 	}
 	return true;
 }

@@ -2,7 +2,6 @@
 #include "libnutcommon/common.h"
 #include "server_proxy.h"
 #include "clog.h"
-#include "client_exceptions.h"
 #include "cdevice.h"
 #include "cinterface.h"
 
@@ -18,7 +17,9 @@ CEnvironment::CEnvironment(CDevice * parent, QDBusObjectPath dbusPath) :
 	/*parent(parent),*/
 	m_dbusPath(dbusPath),
 	log(parent->log),
+	m_dbusEnvironment(0),
 	m_state(false),
+	m_index(-1),
 	m_propertiesFetched(false),
 	m_interfacesFetched(false),
 	m_configFetched(false),
@@ -50,19 +51,19 @@ void CEnvironment::init() {
 	connect(m_dbusEnvironment, SIGNAL(stateChanged(bool )), this, SLOT(dbusStateChanged(bool )));
 
 
-	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
 	m_dbusEnvironment->getProperties();
 
-	*log << tr("Placing getConfig call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getConfig call at: %1").arg(m_dbusPath.path());
 	m_dbusEnvironment->getConfig();
 
-	*log << tr("Placing getInterfaces call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getInterfaces call at: %1").arg(m_dbusPath.path());
 	m_dbusEnvironment->getInterfaces();
 
-	*log << tr("Placing getSelectResult call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getSelectResult call at: %1").arg(m_dbusPath.path());
 	m_dbusEnvironment->getSelectResult();
 
-	*log << tr("Placing getSelectResults call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getSelectResults call at: %1").arg(m_dbusPath.path());
 	m_dbusEnvironment->getSelectResults();
 }
 
@@ -121,15 +122,8 @@ void CEnvironment::dbusretGetInterfaces(QList<QDBusObjectPath> interfaces) {
 }
 
 void CEnvironment::dbusretGetProperties(libnutcommon::EnvironmentProperties properties) {
-	if (qobject_cast<CDevice*>(parent())->m_dbusEnvironments.size() == 0) { //standard environment
-		m_name = tr("default");
-	}
-	else {
-		m_name = properties.name;
-		//environment untitled
-		if (m_name.length() == 0)
-			m_name = tr("untitled (%1)").arg(qobject_cast<CDevice*>(parent())->m_dbusEnvironments.size());
-	}
+	m_name = properties.name;
+
 	qDebug() << QString("Environmentname: %1").arg(m_name);
 	m_state = properties.active;
 
@@ -203,19 +197,19 @@ void CEnvironment::interfaceInitializationCompleted(CInterface * interface) {
 
 void CEnvironment::refreshAll() {
 
-	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
 	m_dbusEnvironment->getProperties();
 
-	*log << tr("Placing getConfig call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getConfig call at: %1").arg(m_dbusPath.path());
 	m_dbusEnvironment->getConfig();
 
-	*log << tr("Placing getInterfaces call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getInterfaces call at: %1").arg(m_dbusPath.path());
 	m_dbusEnvironment->getInterfaces();
 
-	*log << tr("Placing getSelectResult call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getSelectResult call at: %1").arg(m_dbusPath.path());
 	m_dbusEnvironment->getSelectResult();
 
-	*log << tr("Placing getSelectResults call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getSelectResults call at: %1").arg(m_dbusPath.path());
 	m_dbusEnvironment->getSelectResults();
 }
 
@@ -234,6 +228,7 @@ void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 		m_dbusInterfaces.insert(i,interface);
 		connect(interface,SIGNAL(initializationFailed(CInterface*)),this,SLOT(interfaceInitializationFailed(CInterface*)));
 		connect(interface,SIGNAL(initializationCompleted(CInterface*)),this,SLOT(interfaceInitializationCompleted(CInterface*)));
+		connect(interface,SIGNAL(dbusErrorOccured(QDBusError)), this, SLOT(dbusret_errorOccured(QDBusError)));
 		interface->init();
 	}
 }

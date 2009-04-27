@@ -25,9 +25,12 @@ namespace libnutclient {
 			QDBusConnection * m_dbusConnection;
 			/** Function to check if nuts is running */
 			bool serviceCheck();
-			inline bool dbusConnected(QDBusConnection * con) { return con->isConnected(); }
+			inline bool dbusConnected() { return m_dbusConnection->isConnected(); }
 		public:
-			CLibNut(QObject * parent) : QObject(parent) {}
+			CLibNut(QObject * parent) : QObject(parent), m_dbusConnectionInterface(0), m_dbusConnection(0) {}
+
+		signals:
+			void dbusErrorOccured(QDBusError error = QDBusError());
 
 	};
 

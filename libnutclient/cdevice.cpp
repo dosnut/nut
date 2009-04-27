@@ -3,7 +3,6 @@
 #include "cdevicemanager.h"
 #include "clog.h"
 #include "server_proxy.h"
-#include "client_exceptions.h"
 #include "cenvironment.h"
 #include "libnutwireless/wpa_supplicant.h"
 
@@ -19,7 +18,9 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) :
 	m_dbusPath(m_dbusPath),
 	log(parent->log),
 	m_dbusDevice(0),
+#ifndef LIBNUT_NO_WIRELESS
 	m_needWpaSupplicant(false),
+#endif
 	m_pendingRemoval(false),
 	m_lockCount(0),
 	m_propertiesFetched(false),
@@ -38,7 +39,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) :
 
 void CDevice::init() {
 	//get m_dbusConnection from parent:
-	m_dbusConnection = &(qobject_cast<CDeviceManager*>(parent())->m_dbusConnection);
+	m_dbusConnection = &(qobject_cast<CDeviceManager*>(parent())->m_dbusGlobalConnection);
 	m_dbusConnectionInterface = qobject_cast<CDeviceManager*>(parent())->m_dbusConnectionInterface;
 
 	if (!serviceCheck()) {
@@ -66,13 +67,13 @@ void CDevice::init() {
 			this, SLOT(dbusStateChanged(int, int)));
 
 
-	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
 	m_dbusDevice->getProperties();
 
-	*log << tr("Placing getConfig call at %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getConfig call at %1").arg(m_dbusPath.path());
 	m_dbusDevice->getConfig();
 
-	*log << tr("Placing getEnvironments call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getEnvironments call at: %1").arg(m_dbusPath.path());
 	m_dbusDevice->getEnvironments();
 }
 
@@ -94,11 +95,11 @@ CDevice::~CDevice() {
  *  it will just refresh the information
  */
 void CDevice::refreshAll() {
-	*log << tr("Refreshing device");
-	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Refreshing device");
+// 	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
 	m_dbusDevice->getProperties();
 
-	*log << tr("Placing getEnvironments call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getEnvironments call at: %1").arg(m_dbusPath.path());
 	m_dbusDevice->getEnvironments();
 
 }
@@ -117,6 +118,7 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 		m_dbusEnvironments.insert(i,env);
 		connect(env,SIGNAL(initializationFailed(CEnvironment*)),this,SLOT(environmentInitializationFailed(CEnvironment*)));
 		connect(env,SIGNAL(initializationCompleted(CEnvironment*)),this,SLOT(environmentInitializationCompleted(CEnvironment*)));
+		connect(env,SIGNAL(dbusErrorOccured(QDBusError)),this,SLOT(dbusret_errorOccured(QDBusError)));
 		env->init();
 	}
 }
@@ -229,7 +231,7 @@ void CDevice::dbusretGetEssid(QString essid) {
 	m_essid = essid;
 
 	m_essidFetched = true;
-	qDebug() << "essid feteched";
+	qDebug() << "essid fetched";
 	checkInitCompleted();
 	
 	emit gotEssid(essid);
@@ -323,7 +325,7 @@ void CDevice::dbusret_errorOccured(QDBusError error, QString method) {
 	}
 }
 
-void CDevice::environmentInitializationFailed(CEnvironment * device) {
+void CDevice::environmentInitializationFailed(CEnvironment * environment) {
 	if (!m_initCompleted) { //failure in init phase
 		emit initializationFailed(this);
 	}

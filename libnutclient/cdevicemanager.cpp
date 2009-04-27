@@ -3,7 +3,6 @@
 #include "server_proxy.h"
 #include "cdevice.h"
 #include "clog.h"
-#include "client_exceptions.h"
 
 namespace libnutclient {
 using namespace libnutcommon;
@@ -13,14 +12,16 @@ using namespace libnutcommon;
 ///////////////
 CDeviceManager::CDeviceManager(QObject * parent) :
 	CLibNut(parent),
+	m_dbusGlobalConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))),
 	m_dbusDevmgr(0),
-	m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))),
 	log(0),
-	m_dbusTimerId(-1), m_dbusPath("/manager"),
+	m_nutsstate(false),
+	m_dbusTimerId(-1),
+	m_dbusPath("/manager"),
 	m_dbusMonitor(this),
 	m_dbusInterface(0) 
 {
-	
+	m_dbusConnection = &m_dbusGlobalConnection;
 	//Init dbus monitor
 	connect(&m_dbusMonitor,SIGNAL(stopped(void)),this,SLOT(dbusStopped(void)));
 	connect(&m_dbusMonitor,SIGNAL(started(void)),this,SLOT(dbusStarted(void)));
@@ -45,7 +46,7 @@ CDeviceManager::~CDeviceManager() {
 bool CDeviceManager::init(CLog * inlog) {
 	log = inlog;
 	//Check if dbus is available
-	if ( !m_dbusConnection.isConnected() ) {
+	if ( !dbusConnected() ) {
 		m_nutsstate = false;
 		//another timer is running?
 		if (m_dbusTimerId != -1) {
@@ -60,14 +61,14 @@ bool CDeviceManager::init(CLog * inlog) {
 
 	m_nutsstate = true;
 	//setup dbus connections
-	m_dbusConnectionInterface = m_dbusConnection.interface();
+	m_dbusConnectionInterface = m_dbusConnection->interface();
 	//Check if service is running
 	if (!serviceCheck()) {
 		*log << tr("Please start nuts. Starting idle mode");
 		m_nutsstate = false;
 	}
 	//Attach to DbusDevicemanager
-	m_dbusDevmgr = new DBusDeviceManagerInterface(NUT_DBUS_URL, m_dbusPath,m_dbusConnection, this);
+	m_dbusDevmgr = new DBusDeviceManagerInterface(NUT_DBUS_URL, m_dbusPath,*m_dbusConnection, this);
 
 	connect(m_dbusConnectionInterface, SIGNAL(serviceOwnerChanged(const QString &, const QString &, const QString &)), this, SLOT(dbusServiceOwnerChanged(const QString &, const QString &, const QString &)));
 	//Connect dbus-signals to own slots:
@@ -102,12 +103,10 @@ void CDeviceManager::deviceInitializationCompleted(CDevice * device) {
 	emit(deviceAdded(device));
 }
 
-void CDeviceManager::globalDBusErrorOccured(QDBusError error) {
+void CDeviceManager::globalDBusErrorOccured(QDBusError /*error*/) {
 	if (!dbusConnected()) {
 		dbusKilled(true); //do init to start the dbus polling
 	}
-	if (
-
 }
 
 void CDeviceManager::timerEvent(QTimerEvent *event) {
@@ -115,10 +114,12 @@ void CDeviceManager::timerEvent(QTimerEvent *event) {
 		killTimer(m_dbusTimerId);
 		m_dbusTimerId = -1;
 		//Check if already connected to dbus:
-		if ( !m_dbusConnection.isConnected() ) {
-			m_dbusConnection.disconnectFromBus(QString::fromLatin1("libnut_system_bus"));
+		if ( !dbusConnected() ) {
+			m_dbusGlobalConnection.disconnectFromBus(QString::fromLatin1("libnut_system_bus"));
+			m_dbusConnection = 0;
 			//Try to connect to dbus, we have to do it like that, as QDBusConnection::systemBus does not close the connection correctly
-			m_dbusConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus")));
+			m_dbusGlobalConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus")));
+			m_dbusConnection = &m_dbusGlobalConnection;
 			*log << "Connecting to dbus";
 			//init connection
 			init(log);
@@ -150,7 +151,8 @@ void CDeviceManager::dbusKilled(bool doinit) {
 		init(log);
 	}
 	else { //kill came from inotify
-		m_dbusConnection.disconnectFromBus(QString::fromLatin1("libnut_system_bus"));
+		m_dbusGlobalConnection.disconnectFromBus(QString::fromLatin1("libnut_system_bus"));
+		m_dbusConnection = 0;
 	}
 }
 
@@ -175,6 +177,7 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 		m_dbusDevices.insert(i, device);
 		connect(device,SIGNAL(initializationFailed(CDevice*)), this, SLOT(deviceInitializationFailed(CDevice*)));
 		connect(device,SIGNAL(initializationCompleted(CDevice*)),this,SLOT(deviceInitializationCompleted(CDevice*)));
+		connect(device,SIGNAL(dbusErrorOccured(QDBusError)),this,SLOT(globalDBusErrorOccured(QDBusError)));
 		device->init();
 	}
 }
@@ -266,12 +269,12 @@ void CDeviceManager::dbusretGetDeviceList(QList<QDBusObjectPath> devices) {
 void CDeviceManager::dbusretErrorOccured(QDBusError error, QString method) {
 	qDebug() << "Error occured in dbus: " << QDBusError::errorString(error.type());
 
-	if (QDBusError::AccessDenied == replydevs.error().type()) {
+	if (QDBusError::AccessDenied == error.type()) {
 		*log << tr("You are not allowed to connect to nuts.");
 		*log << tr("Please make sure you are in the correct group");
 	}
-	else if (QDBusError::InvalidSignature == replydevs.error().type()) { //Workaround qt returning wrong Error (Should be AccessDenied)
-		*log << tr("(%1) Failed to get DeviceList").arg(toString(replydevs.error()));
+	else if (QDBusError::InvalidSignature == error.type()) { //Workaround qt returning wrong Error (Should be AccessDenied)
+		*log << tr("(%1) Failed to get DeviceList").arg(toString(error));
 		*log << tr("Maybe you don't have sufficient rights");
 	}
 	if (!serviceCheck()) {
@@ -284,10 +287,11 @@ void CDeviceManager::dbusDeviceAdded(const QDBusObjectPath &objectpath) {
 	if (!m_dbusDevices.contains(objectpath)) {
 		*log << tr("Adding device at: %1").arg(objectpath.path());
 		CDevice * device;
-		device = new CDevice(this, i);
-		m_dbusDevices.insert(i, device);
+		device = new CDevice(this, objectpath);
+		m_dbusDevices.insert(objectpath, device);
 		connect(device,SIGNAL(initializationFailed(CDevice*)), this, SLOT(deviceInitializationFailed(CDevice*)));
 		connect(device,SIGNAL(initializationCompleted(CDevice*)),this,SLOT(deviceInitializationCompleted(CDevice*)));
+		connect(device,SIGNAL(dbusErrorOccured(QDBusError)),this,SLOT(dbusretErrorOccured(QDBusError, QString)));
 		device->init();
 	}
 	else {
@@ -321,7 +325,8 @@ void CDeviceManager::dbusStarted() {
 	//delete all information in case this has not happended yet, but do not init
 	dbusKilled(false);
 	//open connection
-	m_dbusConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus")));
+	m_dbusGlobalConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus")));
+	m_dbusConnection = &m_dbusGlobalConnection;
 	//init
 	init(log);
 }

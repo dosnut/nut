@@ -2,7 +2,6 @@
 #include "libnutcommon/common.h"
 #include "cenvironment.h"
 #include "server_proxy.h"
-#include "client_exceptions.h"
 #include "clog.h"
 
 // #include <QDBusObjectPath>
@@ -19,6 +18,9 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) :
 	/*parent(parent),*/
 	m_dbusPath(dbusPath),
 	log(parent->log),
+	m_dbusInterface(0),
+	m_needUserSetup(false),
+	m_index(-1),
 	m_propertiesFetched(false),
 	m_configFetched(false),
 	m_userConfigFetched(false),
@@ -32,7 +34,7 @@ CInterface::CInterface(CEnvironment * parent, QDBusObjectPath dbusPath) :
 
 void CInterface::init() {
 	if (!serviceCheck()) {
-		emit initializationFailed();
+		emit initializationFailed(this);
 		emit dbusErrorOccured();
 		return;
 	}
@@ -53,16 +55,16 @@ void CInterface::init() {
 
 	connect(m_dbusInterface, SIGNAL(stateChanged(libnutcommon::InterfaceProperties)), this, SLOT(dbusStateChanged(libnutcommon::InterfaceProperties)));
 
-	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
 	m_dbusInterface->getProperties();
 
-	*log << tr("Placing getConfig call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getConfig call at: %1").arg(m_dbusPath.path());
 	m_dbusInterface->getConfig();
 
-	*log << tr("Placing getUserConfig call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getUserConfig call at: %1").arg(m_dbusPath.path());
 	m_dbusInterface->getUserConfig();
 
-	*log << tr("Placing needUserSetup call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing needUserSetup call at: %1").arg(m_dbusPath.path());
 	m_dbusInterface->needUserSetup();
 }
 
@@ -136,16 +138,16 @@ void CInterface::dbusret_errorOccured(QDBusError error, QString method) {
 
 //CInterface private functions:
 void CInterface::refreshAll() {
-	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
 	m_dbusInterface->getProperties();
 
-	*log << tr("Placing getConfig call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getConfig call at: %1").arg(m_dbusPath.path());
 	m_dbusInterface->getConfig();
 
-	*log << tr("Placing getUserConfig call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing getUserConfig call at: %1").arg(m_dbusPath.path());
 	m_dbusInterface->getUserConfig();
 
-	*log << tr("Placing needUserSetup call at: %1").arg(m_dbusPath.path());
+// 	*log << tr("Placing needUserSetup call at: %1").arg(m_dbusPath.path());
 	m_dbusInterface->needUserSetup();
 }
 //CInterface private slots

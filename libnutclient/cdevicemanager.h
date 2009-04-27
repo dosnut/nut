@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QDBusMessage>
 
 #include "libnutcommon/dbusmonitor.h"
 #include "clibnut.h"
@@ -38,9 +39,9 @@ namespace libnutclient {
 		friend class DBusDeviceManagerInterface;
 // 		friend class QDBusConnection; //neseccary for qdbuscalls?
 	private:
+		QDBusConnection m_dbusGlobalConnection;
 		DBusDeviceManagerInterface * m_dbusDevmgr;
 		QHash<QDBusObjectPath, CDevice* > m_dbusDevices;
-		QDBusConnection m_dbusConnection;
 		CLog * log;
 		bool m_nutsstate;
 		int m_dbusTimerId;
@@ -74,7 +75,7 @@ namespace libnutclient {
 		void deviceInitializationFailed(CDevice * device);
 		void deviceInitializationCompleted(CDevice * device);
 
-		void globalDBusErrorOccured(QDBusError error = QDBusMessage::createError(QDBusError::InternalError).error());
+		void globalDBusErrorOccured(QDBusError error = QDBusError());
 
 	public:
 		/** @brief List of devices managed by the DeviceManager
