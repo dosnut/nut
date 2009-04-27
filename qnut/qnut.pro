@@ -1,9 +1,7 @@
 
 TEMPLATE = app
-CONFIG += qt qdbus \
- debug
-CONFIG -= thread \
- release
+CONFIG += qt qdbus
+CONFIG -= thread
 QT += network
 
 CODECFORSRC = UTF-8
@@ -71,11 +69,14 @@ INSTALLS += target iconstarget langtarget shortcuttarget
 
 INCLUDEPATH += ..
 
-LIBS += ../libnutclient/libnutclient.a ../libnutwireless/libnutwireless.a ../libnutcommon/libnutcommon.a \
- -liw
 
 QMAKE_CXXFLAGS_DEBUG += -pedantic -Wno-long-long
 TARGETDEPS += ../libnutclient/libnutclient.a \
   ../libnutwireless/libnutwireless.a \
   ../libnutcommon/libnutcommon.a
+
+LIBS += ../libnutcommon/libnutcommon.a \
+  ../libnutwireless/libnutwireless.a \
+  ../libnutclient/libnutclient.a \
+  -liw
 

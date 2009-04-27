@@ -1,13 +1,11 @@
 
 TEMPLATE = lib
 CONFIG += static create_prl
-CONFIG -= thread \
- release
+CONFIG -= thread
 TARGET = nutclient
 
 CONFIG += qt warn_on qdbus exceptions \
- staticlib \
- debug
+ staticlib
 QT -= gui
 QT += network
 
@@ -43,9 +41,10 @@ INCLUDEPATH += ../
 
 QMAKE_CXXFLAGS_DEBUG += -pedantic \
 -Wno-long-long
-LIBS += ../libnutwireless/libnutwireless.a \
-  ../libnutcommon/libnutcommon.a
 
 TARGETDEPS += ../libnutwireless/libnutwireless.a \
   ../libnutcommon/libnutcommon.a
+
+LIBS += ../libnutcommon/libnutcommon.a \
+  ../libnutwireless/libnutwireless.a
 
