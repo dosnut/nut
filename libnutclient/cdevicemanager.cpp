@@ -217,7 +217,7 @@ void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString 
 			connect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 			connect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
 			connect(m_dbusDevmgr, SIGNAL(gotDeviceList(QList<QDBusObjectPath>)), this, SLOT(dbusretGetDeviceList(QList<QDBusObjectPath>)));
-			connect(m_dbusDevmgr, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusretErrorOccured(QDBusError,QString)));
+			connect(m_dbusDevmgr, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusretErrorOccured(QDBusError)));
 		}
 		else if (newOwner.isEmpty()) { //nuts stops
 			*log<< tr("NUTS has been stopped");
@@ -291,7 +291,7 @@ void CDeviceManager::dbusDeviceAdded(const QDBusObjectPath &objectpath) {
 		m_dbusDevices.insert(objectpath, device);
 		connect(device,SIGNAL(initializationFailed(CDevice*)), this, SLOT(deviceInitializationFailed(CDevice*)));
 		connect(device,SIGNAL(initializationCompleted(CDevice*)),this,SLOT(deviceInitializationCompleted(CDevice*)));
-		connect(device,SIGNAL(dbusErrorOccured(QDBusError)),this,SLOT(dbusretErrorOccured(QDBusError, QString)));
+		connect(device,SIGNAL(dbusErrorOccured(QDBusError)),this,SLOT(globalDBusErrorOccured(QDBusError)));
 		device->init();
 	}
 	else {

@@ -45,7 +45,6 @@ DBusDeviceInterface::DBusDeviceInterface(const QString &service, const QString &
 
 DBusDeviceInterface::~DBusDeviceInterface()
 {
-	qDebug() << "BANG, GONE";
 }
 
 

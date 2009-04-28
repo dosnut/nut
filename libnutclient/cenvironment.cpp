@@ -70,7 +70,7 @@ void CEnvironment::init() {
 CEnvironment::~CEnvironment() {
 
 	disconnect(m_dbusEnvironment, SIGNAL(stateChanged(bool )), this, SLOT(dbusStateChanged(bool )));
-	disconnect(m_dbusEnvironment, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusret_errorOccured(QDBusError)));
+	disconnect(m_dbusEnvironment, SIGNAL(errorOccured(QDBusError,QString)), this, SLOT(dbusret_errorOccured(QDBusError)));
 
 	disconnect(m_dbusEnvironment,SIGNAL(gotProperties(libnutcommon::EnvironmentProperties)), this, SLOT(dbusretGetProperties(libnutcommon::EnvironmentProperties)));
 	disconnect(m_dbusEnvironment,SIGNAL(gotConfig(libnutcommon::EnvironmentConfig)),this,SLOT(dbusretGetConfig(libnutcommon::EnvironmentConfig)));
