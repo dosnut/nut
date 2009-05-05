@@ -16,6 +16,7 @@ Description: Network UTility (substitute for ifupdown)
  This package contains the server.
 
 Package: nuts-dbg
+Section: debug
 Architecture: any
 Depends: nuts (= ${binary:Version})
 Priority: extra
@@ -36,6 +37,7 @@ Description: Network UTility (substitute for ifupdown)
  This package contains the Qt client.
 
 Package: qnut-dbg
+Section: debug
 Architecture: any
 Depends: qnut (= ${binary:Version})
 Priority: extra
@@ -55,6 +57,7 @@ Description: Network UTility (substitute for ifupdown)
  This package contains the command line client.
 
 Package: cnut-dbg
+Section: debug
 Architecture: any
 Depends: cnut (= ${binary:Version})
 Priority: extra

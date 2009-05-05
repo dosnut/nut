@@ -1,3 +1,9 @@
+network-utilities (0.5.1-2) unstable; urgency=low
+
+  * Library is completely async
+
+ -- Stefan Bühler <source@stbuehler.de>  Tue, 05 May 2009 12:51:02 +0000
+
 network-utilities (0.5.0) unstable; urgency=low
 
   * Many fixes/workarounds.
