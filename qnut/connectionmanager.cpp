@@ -98,6 +98,8 @@ namespace qnut {
 		currentMenu = menuBar()->addMenu(tr("&File"));
 		
 		currentMenu->addAction(tr("&Close"), this, SLOT(close()));
+		currentMenu->addSeparator();
+		currentMenu->addAction(tr("&Quit"), qApp, SLOT(quit()), Qt::CTRL+Qt::Key_Q);
 		
 		m_EditMenu = menuBar()->addMenu(tr("&Edit"));
 		
