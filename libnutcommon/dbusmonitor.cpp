@@ -24,7 +24,7 @@ namespace libnutcommon {
 	}
 
 	bool CDBusMonitor::setPidFileDir(QString dir) {
-		qDebug() << "Try setting watch dir to " << dir;
+		qDebug() << "Trying to set watch dir to " << dir;
 		if (QFile::exists(dir)) {
 			m_dbusPidFileDir = dir;
 			return true;
