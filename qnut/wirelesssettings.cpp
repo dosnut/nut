@@ -19,7 +19,7 @@
 #include "adhocconfig.h"
 
 namespace qnut {
-	//TODO make only theese functios available that are supported by the wpa_supplicant
+	//TODO make only theese functions available that are supported by the wpa_supplicant
 	using namespace libnutcommon;
 	using namespace libnutclient;
 	using namespace libnutwireless;
@@ -93,7 +93,7 @@ namespace qnut {
 		m_ToggleDetailsAction    = new QAction(QIcon(UI_ICON_DETAILED), tr("Detailed &view"), this);
 		m_RescanNetworksAction   = new QAction(QIcon(UI_ICON_SEARCH), tr("Scan ne&tworks"), this);
 		
-		manageNetworksMenu       = new QMenu(tr("Manage networks"));
+		manageNetworksMenu       = new QMenu(tr("More..."));
 		manageNetworksMenu->setIcon(QIcon(UI_ICON_EDIT));
 		
 		m_ToggleDetailsAction->setCheckable(true);
@@ -148,7 +148,7 @@ namespace qnut {
 		ui.toggleDetailsButton->setDefaultAction(m_ToggleDetailsAction);
 		
 		ui.manageNetworksButton->setMenu(manageNetworksMenu);
-		ui.manageNetworksButton->setText(tr("Manage all..."));
+		ui.manageNetworksButton->setText(manageNetworksMenu->title());
 		ui.manageNetworksButton->setIcon(QIcon(UI_ICON_EDIT));
 		
 		ui.addNetworkButton->setDefaultAction(addNetworkAction);
