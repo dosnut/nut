@@ -63,12 +63,11 @@ namespace qnut {
 		return index(m_DNSList->size()-1);
 	}
 	
-	bool CDNSListModel::removeRows(int position, int rows, const QModelIndex &) {
-		beginRemoveRows(QModelIndex(), position, position+rows-1);
+	bool CDNSListModel::removeRows(int position, int rows, const QModelIndex & parent) {
+		beginRemoveRows(parent, position, position+rows-1);
 	
-		for (int row = 0; row < rows; ++row) {
-			m_DNSList->removeAt(position);
-		}
+		for (int i = position; i < position+rows; ++i)
+			m_DNSList->removeAt(i);
 	
 		endRemoveRows();
 		return true;
