@@ -1,8 +1,9 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <author>Oliver Groß</author>
  <class>airset</class>
- <widget class="QWidget" name="airset" >
-  <property name="geometry" >
+ <widget class="QWidget" name="airset">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -10,65 +11,65 @@
     <height>512</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string/>
   </property>
-  <layout class="QGridLayout" name="gridLayout" >
-   <item row="0" column="0" >
-    <widget class="QFrame" name="deviceFrame" >
-     <property name="minimumSize" >
+  <layout class="QGridLayout" name="mainLayout">
+   <item row="0" column="0">
+    <widget class="QFrame" name="deviceFrame">
+     <property name="minimumSize">
       <size>
        <width>0</width>
        <height>0</height>
       </size>
      </property>
-     <property name="frameShape" >
+     <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
-     <property name="frameShadow" >
+     <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2" >
+     <layout class="QHBoxLayout" name="deviceFrameLayout">
       <item>
-       <widget class="QLabel" name="iconLabel" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Preferred" hsizetype="Maximum" >
+       <widget class="QLabel" name="iconLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="text" >
+        <property name="text">
          <string/>
         </property>
-        <property name="pixmap" >
+        <property name="pixmap">
          <pixmap>../../../../../../usr/share/qnut/icons/clear.png</pixmap>
         </property>
        </widget>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout" >
+       <layout class="QVBoxLayout" name="devicelayout">
         <item>
-         <widget class="QLabel" name="nameLabel" >
-          <property name="font" >
+         <widget class="QLabel" name="nameLabel">
+          <property name="font">
            <font>
             <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
-          <property name="text" >
+          <property name="text">
            <string>no device</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="stateLabel" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+         <widget class="QLabel" name="stateLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="text" >
+          <property name="text">
            <string>unknown state</string>
           </property>
          </widget>
@@ -78,27 +79,27 @@
      </layout>
     </widget>
    </item>
-   <item row="0" column="1" >
-    <widget class="QFrame" name="signalFrame" >
-     <property name="sizePolicy" >
-      <sizepolicy vsizetype="Preferred" hsizetype="Expanding" >
+   <item row="0" column="1">
+    <widget class="QFrame" name="signalFrame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="frameShape" >
+     <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
-     <property name="frameShadow" >
+     <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2" >
-      <item rowspan="3" row="0" column="7" >
-       <spacer>
-        <property name="orientation" >
+     <layout class="QGridLayout" name="signalFrameLayout">
+      <item row="0" column="7" rowspan="3">
+       <spacer name="signalFrameSpacer">
+        <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
-        <property name="sizeHint" stdset="0" >
+        <property name="sizeHint" stdset="0">
          <size>
           <width>40</width>
           <height>20</height>
@@ -106,64 +107,64 @@
         </property>
        </spacer>
       </item>
-      <item row="0" column="6" >
-       <widget class="QLabel" name="levelLabel" >
-        <property name="text" >
+      <item row="0" column="6">
+       <widget class="QLabel" name="levelLabel">
+        <property name="text">
          <string>Level: 0</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="6" >
-       <widget class="QLabel" name="noiseLabel" >
-        <property name="text" >
+      <item row="2" column="6">
+       <widget class="QLabel" name="noiseLabel">
+        <property name="text">
          <string>Noise: 0</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0" colspan="3" >
-       <widget class="QLabel" name="signalLabel" >
-        <property name="font" >
+      <item row="0" column="0" colspan="3">
+       <widget class="QLabel" name="signalLabel">
+        <property name="font">
          <font>
           <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>
-        <property name="text" >
+        <property name="text">
          <string>no signal info</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="4" >
-       <widget class="QLabel" name="rateLabel" >
-        <property name="text" >
+      <item row="2" column="4">
+       <widget class="QLabel" name="rateLabel">
+        <property name="text">
          <string>Rate: 0Mb/s</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="3" >
-       <widget class="QLabel" name="bssidLabel" >
-        <property name="text" >
+      <item row="2" column="0" colspan="3">
+       <widget class="QLabel" name="bssidLabel">
+        <property name="text">
          <string>00:00:00:00:00:00</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="4" >
-       <widget class="QLabel" name="qualityLabel" >
-        <property name="text" >
+      <item row="0" column="4">
+       <widget class="QLabel" name="qualityLabel">
+        <property name="text">
          <string>Quality: 0/0</string>
         </property>
        </widget>
       </item>
-      <item rowspan="3" row="0" column="3" >
-       <widget class="Line" name="signalQualityline" >
-        <property name="orientation" >
+      <item row="0" column="3" rowspan="3">
+       <widget class="Line" name="signalQualityline">
+        <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>
-      <item rowspan="3" row="0" column="5" >
-       <widget class="Line" name="qualityLevelLine" >
-        <property name="orientation" >
+      <item row="0" column="5" rowspan="3">
+       <widget class="Line" name="qualityLevelLine">
+        <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
        </widget>
@@ -171,213 +172,213 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="0" >
-    <widget class="QWidget" native="1" name="actionsWidget" >
-     <property name="sizePolicy" >
-      <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+   <item row="1" column="0">
+    <widget class="QWidget" name="actionsWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2" >
+     <layout class="QVBoxLayout" name="actionsLayout">
       <item>
-       <widget class="QToolButton" name="rescanNetworksButton" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <widget class="QToolButton" name="rescanNetworksButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="toolButtonStyle" >
+        <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
-        <property name="autoRaise" >
+        <property name="autoRaise">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="Line" name="scanManagedLine" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <widget class="Line" name="scanManagedLine">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="orientation" >
+        <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="switchNetworkButton" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <widget class="QToolButton" name="switchNetworkButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="text" >
+        <property name="text">
          <string/>
         </property>
-        <property name="toolButtonStyle" >
+        <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
-        <property name="autoRaise" >
+        <property name="autoRaise">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="configureNetworkButton" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <widget class="QToolButton" name="configureNetworkButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="toolButtonStyle" >
+        <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
-        <property name="autoRaise" >
+        <property name="autoRaise">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="enableNetworkButton" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <widget class="QToolButton" name="enableNetworkButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="toolButtonStyle" >
+        <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
-        <property name="autoRaise" >
+        <property name="autoRaise">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="disableNetworkButton" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <widget class="QToolButton" name="disableNetworkButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="toolButtonStyle" >
+        <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
-        <property name="autoRaise" >
+        <property name="autoRaise">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="manageNetworksButton" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <widget class="QToolButton" name="manageNetworksButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="popupMode" >
+        <property name="popupMode">
          <enum>QToolButton::InstantPopup</enum>
         </property>
-        <property name="toolButtonStyle" >
+        <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
-        <property name="autoRaise" >
+        <property name="autoRaise">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toggleDetailsButton" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <widget class="QToolButton" name="toggleDetailsButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="toolButtonStyle" >
+        <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
-        <property name="autoRaise" >
+        <property name="autoRaise">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="Line" name="managedAvailableLine" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <widget class="Line" name="managedAvailableLine">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="orientation" >
+        <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="addAdhocButton" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <widget class="QToolButton" name="addAdhocButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="toolButtonStyle" >
+        <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
-        <property name="autoRaise" >
+        <property name="autoRaise">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="addNetworkButton" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <widget class="QToolButton" name="addNetworkButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="toolButtonStyle" >
+        <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
-        <property name="autoRaise" >
+        <property name="autoRaise">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="removeNetworkButton" >
-        <property name="sizePolicy" >
-         <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+       <widget class="QToolButton" name="removeNetworkButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="toolButtonStyle" >
+        <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
-        <property name="autoRaise" >
+        <property name="autoRaise">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <spacer>
-        <property name="orientation" >
+       <spacer name="actionsSpacer">
+        <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
-        <property name="sizeHint" stdset="0" >
+        <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
           <height>3</height>
@@ -388,147 +389,146 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="1" >
-    <widget class="QSplitter" name="managedAvailableSplitter" >
-     <property name="sizePolicy" >
-      <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="orientation" >
+   <item row="1" column="1">
+    <widget class="QSplitter" name="managedAvailableAPSplitter">
+     <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <widget class="QWidget" native="1" name="managedWidget" >
-      <layout class="QGridLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
-       <item row="0" column="1" >
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
+     <property name="childrenCollapsible">
+      <bool>false</bool>
+     </property>
+     <widget class="QWidget" name="">
+      <layout class="QVBoxLayout" name="managedAPLayout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <spacer name="managedAPLSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="managedAPLabel">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Managed networks</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="managedAPRSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
-       <item row="0" column="2" >
-        <widget class="QLabel" name="managedLabel" >
-         <property name="font" >
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text" >
-          <string>Managed networks</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3" >
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="1" colspan="3" >
-        <widget class="QTreeView" name="managedView" >
-         <property name="iconSize" >
+       <item>
+        <widget class="QTreeView" name="managedView">
+         <property name="iconSize">
           <size>
            <width>24</width>
            <height>24</height>
           </size>
          </property>
-         <property name="rootIsDecorated" >
+         <property name="rootIsDecorated">
           <bool>false</bool>
          </property>
-         <property name="uniformRowHeights" >
+         <property name="uniformRowHeights">
           <bool>true</bool>
          </property>
-         <property name="sortingEnabled" >
+         <property name="sortingEnabled">
           <bool>true</bool>
          </property>
-         <property name="allColumnsShowFocus" >
+         <property name="allColumnsShowFocus">
           <bool>true</bool>
          </property>
-         <property name="wordWrap" >
+         <property name="wordWrap">
           <bool>true</bool>
          </property>
         </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" native="1" name="availableWidget" >
-      <layout class="QGridLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
-       <item row="0" column="1" >
-        <widget class="QLabel" name="availableLabel" >
-         <property name="font" >
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text" >
-          <string>Available networks</string>
-         </property>
-        </widget>
+     <widget class="QWidget" name="">
+      <layout class="QVBoxLayout" name="availableAPLayout">
+       <item>
+        <layout class="QHBoxLayout" name="availableAPHeaderLayout">
+         <item>
+          <spacer name="availableAPLSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="availableAPLabel">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Available networks</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="availableAPRSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
-       <item row="1" column="0" colspan="3" >
-        <widget class="QTreeView" name="availableView" >
-         <property name="rootIsDecorated" >
+       <item>
+        <widget class="QTreeView" name="availableView">
+         <property name="rootIsDecorated">
           <bool>false</bool>
          </property>
-         <property name="uniformRowHeights" >
+         <property name="uniformRowHeights">
           <bool>true</bool>
          </property>
-         <property name="sortingEnabled" >
+         <property name="sortingEnabled">
           <bool>true</bool>
          </property>
-         <property name="allColumnsShowFocus" >
+         <property name="allColumnsShowFocus">
           <bool>true</bool>
          </property>
         </widget>
-       </item>
-       <item row="0" column="2" >
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="0" column="0" >
-        <spacer>
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>

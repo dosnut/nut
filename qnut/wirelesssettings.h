@@ -39,6 +39,9 @@ namespace qnut {
 		Ui::airset ui;
 		libnutclient::CDevice * m_Device;
 		
+		QAbstractItemView * m_VisibleAPView;
+		QAbstractItemView * m_HiddenAPView;
+		
 		CManagedAPModel * m_ManagedAPModel;
 		CManagedAPProxyModel * m_ManagedAPProxyModel;
 		CAvailableAPModel * m_AvailableAPModel;
@@ -53,9 +56,10 @@ namespace qnut {
 		QAction * m_ToggleDetailsAction;
 		QAction * m_SaveNetworksAction;
 		QAction * m_RescanNetworksAction;
+		QAction * m_AutoSaveNetworksAction;
 		
 		inline void createActions();
-		QModelIndex selectedIndex(QTreeView * view);
+		QModelIndex selectedIndex(QAbstractItemView * view);
 	public:
 		/// @brief returnes the visibility state of the details
 		inline bool detailsVisible() const { return m_ToggleDetailsAction->isChecked(); }

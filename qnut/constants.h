@@ -49,6 +49,10 @@
 #define UI_ICON_AIR                     UI_PATH_ICONS "air.png"
 #define UI_ICON_ADHOC                   UI_PATH_ICONS "adhoc.png"
 
+#define UI_ICON_AIR_DOWN                UI_PATH_ICONS "air_down.png"
+#define UI_ICON_ADHOC_DOWN              UI_PATH_ICONS "adhoc_down.png"
+#define UI_ICON_ADHOC_ACTIVATED         UI_PATH_ICONS "adhoc_activated.png"
+
 #define UI_ICON_DETAILED                UI_PATH_ICONS "view_detailed.png"
 
 #define UI_ICON_ETH_UP                  UI_PATH_ICONS "eth_up.png"

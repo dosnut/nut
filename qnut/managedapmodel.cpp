@@ -53,12 +53,45 @@ namespace qnut {
 		return 4;
 	}
 	
+	inline QString toStringTr(NetworkFlags flags) {
+		switch (flags) {
+		case NF_CURRENT:
+			return QObject::tr("selected");
+		case NF_DISABLED:
+			return QObject::tr("disabled");
+		default:
+			return QObject::tr("enabled");
+		}
+	}
+	
+	inline QString toStringTr(libnutcommon::MacAddress bssid) {
+		if (bssid.zero())
+			return QObject::tr("any");
+		else
+			return bssid.toString();
+	}
+	
 	QVariant CManagedAPModel::data(const QModelIndex & index, int role) const {
 		if (!index.isValid())
 			return QVariant();
 		
-		if ((role == Qt::DecorationRole) && (index.column() == 0))
-			return QIcon(m_Networks[index.row()].adhoc ? UI_ICON_ADHOC : UI_ICON_AIR_ACTIVATED);
+		if (role == Qt::ToolTipRole) {
+			return tr("id: %1\nstatus: %2\nBSSID: %3").arg(index.row()).arg(
+				toStringTr(m_Networks[index.row()].flags),
+				toStringTr(m_Networks[index.row()].bssid)
+				);
+		}
+		
+		if ((role == Qt::DecorationRole) && (index.column() == 0)) {
+			switch (m_Networks[index.row()].flags) {
+			case NF_CURRENT:
+				return QIcon(m_Networks[index.row()].adhoc ? UI_ICON_ADHOC_ACTIVATED : UI_ICON_AIR_ACTIVATED);
+			case NF_DISABLED:
+				return QIcon(m_Networks[index.row()].adhoc ? UI_ICON_ADHOC_DOWN : UI_ICON_AIR_DOWN);
+			default:
+				return QIcon(m_Networks[index.row()].adhoc ? UI_ICON_ADHOC : UI_ICON_AIR);
+			}
+		}
 		
 		if (role == Qt::FontRole && m_Networks[index.row()].flags == NF_CURRENT) {
 			QFont font = QApplication::font();
@@ -75,20 +108,9 @@ namespace qnut {
 		case UI_MANAP_SSID:
 			return m_Networks[index.row()].ssid;
 		case UI_MANAP_BSSID:
-			if (m_Networks[index.row()].bssid.zero())
-				return tr("any");
-			else
-				return m_Networks[index.row()].bssid.toString();
+			return toStringTr(m_Networks[index.row()].bssid);
 		case UI_MANAP_STATUS:
-			//strange "flags"
-			switch (m_Networks[index.row()].flags) {
-			case NF_CURRENT:
-				return tr("selected");
-			case NF_DISABLED:
-				return tr("disabled");
-			default:
-				return tr("enabled");
-			}
+			return toStringTr(m_Networks[index.row()].flags);
 		default:
 			break;
 		}
