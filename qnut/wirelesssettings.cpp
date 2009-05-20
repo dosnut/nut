@@ -158,6 +158,7 @@ namespace qnut {
 		m_VisibleAPView->addAction(manageNetworksMenu->menuAction());
 		m_VisibleAPView->setContextMenuPolicy(Qt::ActionsContextMenu);
 		m_HiddenAPView->addActions(m_VisibleAPView->actions());
+		m_HiddenAPView->setContextMenuPolicy(Qt::ActionsContextMenu);
 		
 		ui.availableView->addAction(addNetworkAction);
 		ui.availableView->addAction(getSeparator(this));
@@ -361,6 +362,7 @@ namespace qnut {
 		m_HiddenAPView->hide();
 // 		ui.managedWidget->layout()->removeWidget(m_HiddenAPView);
 // 		ui.managedWidget->layout()->addWidget(m_VisibleAPView);
+		m_VisibleAPView->selectionModel()->clear();
 		m_VisibleAPView->show();
 		
 		if (value) {
