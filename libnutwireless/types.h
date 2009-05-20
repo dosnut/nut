@@ -438,7 +438,7 @@ namespace libnutwireless {
 	}
 	/** Compare ShortNetworkinfo by SSID*/
 	inline bool lessThanSSID(ShortNetworkInfo a, ShortNetworkInfo b) {
-		return (a.ssid < b.ssid);
+		return QString::localeAwareCompare(a.ssid, b.ssid) < 0;
 	}
 	/** Compare ShortNetworkinfo by BSSID*/
 	inline bool lessThanBSSID(ShortNetworkInfo a, ShortNetworkInfo b) {
