@@ -46,14 +46,9 @@ namespace nuts {
 			killTimer(m_timerId);
 		}
 		//clear all information
-		
-		QHash<QString, nuts::DBusDevice *>::iterator dev = m_dbusDevices.begin();
-		DBusDevice * dbusdev;
-		while (dev != m_dbusDevices.end()) {
-			dbusdev = *dev;
-			dev = m_dbusDevices.erase(dev);
-			delete dbusdev;
-		}
+		//dbus_devices deleted as child of Device
+		m_dbusDevices.clear();
+
 		m_dbusConnection.unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
 		m_dbusConnection.unregisterService(NUT_DBUS_URL);
 		m_dbusConnection.disconnectFromBus(QString::fromLatin1("nuts_system_bus"));
@@ -164,11 +159,7 @@ namespace nuts {
 	}
 	
 	DBusDevice::~DBusDevice() {
-		DBusEnvironment * dbusenv;
-		while (!m_dbusEnvironments.isEmpty()) {
-			dbusenv = m_dbusEnvironments.takeFirst();
-			delete dbusenv;
-		}
+		m_dbusEnvironments.clear();
 		m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
 // 		qDebug() << "Deleted device";
 	}
@@ -308,11 +299,8 @@ namespace nuts {
 	}
 	
 	DBusEnvironment::~DBusEnvironment() {
-		DBusInterface_IPv4 * dbusiface;
-		while (!m_dbusInterfacesIPv4.isEmpty()) {
-			dbusiface = m_dbusInterfacesIPv4.takeFirst();
-			delete dbusiface;
-		}
+		//deleted as child of Interface
+		m_dbusInterfacesIPv4.clear();
 		m_dbusConnection->unregisterObject(m_dbusPath);
 // 		qDebug() << "deleted environment";
 	}
