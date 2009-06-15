@@ -87,7 +87,7 @@ namespace nuts {
 			void environmentChanged(int newEnvironment);
 		
 		public:
-			DBusDevice(DBusDeviceManager *dbus_devmgr, Device *dev, QDBusConnection *connection, const QString &path);
+			DBusDevice(Device *dev, QDBusConnection *connection, const QString &path);
 			virtual ~DBusDevice();
 			
 			QString getPath();
@@ -136,7 +136,7 @@ namespace nuts {
 		private slots:
 			void selectResultReady();
 		public:
-			DBusEnvironment(DBusDevice * dbus_device, Environment *env, QDBusConnection *connection, const QString &path, Device* dev);
+			DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path, Device* dev);
 			virtual ~DBusEnvironment();
 			inline Environment * getEnvironment() const { return m_environment; }
 	
@@ -173,7 +173,7 @@ namespace nuts {
 		private slots:
 			void interfaceStatusChanged(libnutcommon::InterfaceState state);
 		public:
-			DBusInterface_IPv4(DBusEnvironment * dbus_env, Interface_IPv4 *iface, QDBusConnection *connection, const QString &path);
+			DBusInterface_IPv4(Interface_IPv4 *iface, QDBusConnection *connection, const QString &path);
 			virtual ~DBusInterface_IPv4();
 	
 			QString getPath();

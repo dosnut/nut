@@ -45,7 +45,7 @@ namespace nuts {
 		if (-1 != m_timerId) {
 			killTimer(m_timerId);
 		}
-		//clear all information
+		//clear all informations
 		QHash<QString, nuts::DBusDevice *>::iterator dev = m_dbusDevices.begin();
 		DBusDevice * dbusdev;
 		while (dev != m_dbusDevices.end()) {
@@ -76,7 +76,6 @@ namespace nuts {
 	}
 
 	DBusDeviceManager::~DBusDeviceManager() {
-		//DBusDevices are deleted as child of DBusDeviceManager
 		m_dbusConnection.unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
 		m_dbusConnection.unregisterService(NUT_DBUS_URL);
 	}
@@ -94,7 +93,7 @@ namespace nuts {
 	
 	//SLOT: Inserts device into device hash
 	void DBusDeviceManager::devAdded(QString devName, Device *dev) {
-		DBusDevice *dbus_device = new DBusDevice(this, dev, &m_dbusConnection, m_dbusDevicesPath);
+		DBusDevice *dbus_device = new DBusDevice(dev, &m_dbusConnection, m_dbusDevicesPath);
 		m_dbusDevices.insert(devName, dbus_device);
 		emit deviceAdded(QDBusObjectPath(dbus_device->getPath()));
 		emit deviceAdded(devName);
@@ -106,7 +105,7 @@ namespace nuts {
 		emit deviceRemoved(QDBusObjectPath(dbus_device->getPath()));
 		emit deviceRemoved(devName);
 		m_dbusDevices.remove(devName);
-		delete dbus_device;
+		// dbus_device is deleted as child of dev
 	}
 	
 	QList<QDBusObjectPath> DBusDeviceManager::getDeviceList() {
@@ -134,8 +133,8 @@ namespace nuts {
 	bool DBusDeviceManager::removeFromBridge(qint32 bridgeId, QList<qint32> deviceIds) { return false; }
 
 
-	DBusDevice::DBusDevice(DBusDeviceManager *dbus_devmgr, Device *dev, QDBusConnection *connection, const QString &path)
-	: QDBusAbstractAdaptor(dbus_devmgr), m_device(dev), m_dbusConnection(connection) {
+	DBusDevice::DBusDevice(Device *dev, QDBusConnection *connection, const QString &path)
+	: QDBusAbstractAdaptor(dev), m_device(dev), m_dbusConnection(connection) {
 
 		//Set Device Properties
 		m_dbusProperties.type = m_device->hasWLAN() ? libnutcommon::DT_AIR : libnutcommon::DT_ETH;
@@ -148,7 +147,7 @@ namespace nuts {
 		
 		//Add Environments
 		foreach (Environment *env, m_device->getEnvironments()) {
-			DBusEnvironment *dbus_env = new DBusEnvironment(this, env, m_dbusConnection, m_dbusPath,m_device);
+			DBusEnvironment *dbus_env = new DBusEnvironment(env, m_dbusConnection, m_dbusPath,m_device);
 			m_dbusEnvironments.append(dbus_env);
 		}
 
@@ -166,7 +165,7 @@ namespace nuts {
 	}
 	
 	DBusDevice::~DBusDevice() {
-	//DBusEnvironments are deleted as child of DBusDevice
+		m_dbusEnvironments.clear();
 		m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
 // 		qDebug() << "Deleted device";
 	}
@@ -286,8 +285,8 @@ namespace nuts {
 		m_device->disable();
 	}
 
-	DBusEnvironment::DBusEnvironment(DBusDevice * dbus_device, Environment *env, QDBusConnection *connection, const QString &path, Device * dev)
-	: QDBusAbstractAdaptor(dbus_device), m_environment(env), m_dbusConnection(connection), m_device(dev) {
+	DBusEnvironment::DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path, Device * dev)
+	: QDBusAbstractAdaptor(env), m_environment(env), m_dbusConnection(connection), m_device(dev) {
 		//Set dbus path an register object
 		m_dbusPath = path + QString("/%1").arg(m_environment->getID());
 		m_dbusConnection->registerObject(m_dbusPath, m_environment);
@@ -297,7 +296,7 @@ namespace nuts {
 			//Check if interface is IPv4 or IPv6
 			Interface_IPv4 *ifv4 = dynamic_cast<Interface_IPv4*>(interface);
 			if (ifv4) {
-				DBusInterface_IPv4 *dbus_interface = new DBusInterface_IPv4(this, ifv4, m_dbusConnection, m_dbusPath);
+				DBusInterface_IPv4 *dbus_interface = new DBusInterface_IPv4(ifv4, m_dbusConnection, m_dbusPath);
 				m_dbusInterfacesIPv4.append(dbus_interface);
 				emit(interfaceAdded(QDBusObjectPath(dbus_interface->getPath())));
 			}
@@ -305,7 +304,7 @@ namespace nuts {
 			else {
 				Interface_IPv6 *if6 = dynamic_cast<Interface_IPv6*>(interface);
 				if (if6) {
-					DBusInterface_IPv6 *dbus_interface = new DBusInterface_IPv6(this, ifv6, m_dbusConnection, m_dbusPath);
+					DBusInterface_IPv6 *dbus_interface = new DBusInterface_IPv6(ifv6, m_dbusConnection, m_dbusPath);
 					m_dbusInterfacesIPv6.append(dbus_interface);
 					emit(interfaceAdded(dbus_interface->getPath()));
 				}
@@ -315,7 +314,8 @@ namespace nuts {
 	}
 	
 	DBusEnvironment::~DBusEnvironment() {
-		//DBusInterfaces are deleted as child of DBusEnvironment
+		//deleted as child of Interface
+		m_dbusInterfacesIPv4.clear();
 		m_dbusConnection->unregisterObject(m_dbusPath);
 // 		qDebug() << "deleted environment";
 	}
@@ -386,8 +386,8 @@ namespace nuts {
 	}
 
 
-	DBusInterface_IPv4::DBusInterface_IPv4(DBusEnvironment * dbus_env, Interface_IPv4 *iface, QDBusConnection *connection, const QString &path)
-	: QDBusAbstractAdaptor(dbus_env), m_interface(iface), m_dbusConnection(connection) {
+	DBusInterface_IPv4::DBusInterface_IPv4(Interface_IPv4 *iface, QDBusConnection *connection, const QString &path)
+	: QDBusAbstractAdaptor(iface), m_interface(iface), m_dbusConnection(connection) {
 		m_dbusPath = path + QString("/%1").arg(m_interface->getIndex());
 		m_dbusConnection->registerObject(m_dbusPath, m_interface);
 		//Set Interface properties
