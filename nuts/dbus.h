@@ -91,7 +91,8 @@ namespace nuts {
 			virtual ~DBusDevice();
 			
 			QString getPath();
-	
+			void dbusStopped();
+
 		public slots:
 			libnutcommon::DeviceProperties getProperties();
 			QList<QDBusObjectPath> getEnvironments();
@@ -140,6 +141,7 @@ namespace nuts {
 			inline Environment * getEnvironment() const { return m_environment; }
 	
 			QString getPath();
+			void dbusStopped();
 			void emitChange(bool change);
 	
 		public slots:

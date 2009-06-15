@@ -51,6 +51,7 @@ namespace nuts {
 		while (dev != m_dbusDevices.end()) {
 			dbusdev = *dev;
 			dev = m_dbusDevices.erase(dev);
+			dbusdev->dbusStopped();
 			delete dbusdev;
 		}
 
@@ -172,6 +173,15 @@ namespace nuts {
 	
 	QString DBusDevice::getPath() {
 		return m_dbusPath;
+	}
+
+	void DBusDevice::dbusStopped() {
+		DBusEnvironment * env;
+		while (!m_dbusEnvironments.isEmpty()) {
+			env = m_dbusEnvironments.takeFirst();
+			env->dbusStopped();
+			delete env;
+		}
 	}
 
 	void DBusDevice::stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState) {
@@ -312,6 +322,20 @@ namespace nuts {
 	
 	QString DBusEnvironment::getPath() {
 		return m_dbusPath;
+	}
+	void DBusEnvironment::dbusStopped() {
+		DBusInterface_IPv4 * ifs;
+		while (! m_dbusInterfacesIPv4.isEmpty()) {
+			ifs = m_dbusInterfacesIPv4.takeFirst();
+			delete ifs;
+		}
+		#ifdef IPv6
+		DBusInterface_IPv6 * ifs6;
+		while (! m_dbusInterfacesIPv6.isEmpty()) {
+			ifs6 = m_dbusInterfacesIPv6.takeFirst();
+			delete ifs6;
+		}
+		#endif
 	}
 
 	void DBusEnvironment::selectResultReady() {
