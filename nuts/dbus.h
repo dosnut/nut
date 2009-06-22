@@ -33,10 +33,19 @@ namespace nuts {
 			QHash<QString, DBusDevice *> m_dbusDevices;
 			static const QString m_dbusPath, m_dbusDevicesPath;
 			int m_timerId;
-			void startDBus();
-			void timerEvent(QTimerEvent *event);
 			libnutcommon::CDBusMonitor m_dbusMonitor;
+			bool registered;
+
+			void initTree();
+			void timerEvent(QTimerEvent *event);
 			
+			
+			/** Registers DeviceManager+subtree with dbus **/
+			void registerAll();
+			/** Unregisters DeviceManager+subtree with dbus **/
+			void unregisterAll();
+			/**Sets a new dbus connection for all subtrees **/
+			void setAllDBusConnection(QDBusConnection * connection);
 		private slots:
 			void devAdded(QString devName, Device *dev);
 			void devRemoved(QString devName, Device *dev);
@@ -81,6 +90,7 @@ namespace nuts {
 			QString m_dbusPath;
 			libnutcommon::DeviceProperties m_dbusProperties;
 			int m_activeEnvironment;
+			bool registered;
 		
 		private slots:
 			void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState);
@@ -91,7 +101,9 @@ namespace nuts {
 			virtual ~DBusDevice();
 			
 			QString getPath();
-			void dbusStopped();
+			void registerAll();
+			void unregisterAll();
+			void setAllDBusConnection(QDBusConnection * connection);
 
 		public slots:
 			libnutcommon::DeviceProperties getProperties();
@@ -132,6 +144,7 @@ namespace nuts {
 			QString m_dbusPath;
 			libnutcommon::EnvironmentProperties m_dbusProperties;
 			Device * m_device;
+			bool registered;
 
 		private slots:
 			void selectResultReady();
@@ -141,7 +154,9 @@ namespace nuts {
 			inline Environment * getEnvironment() const { return m_environment; }
 	
 			QString getPath();
-			void dbusStopped();
+			void registerAll();
+			void unregisterAll();
+			void setAllDBusConnection(QDBusConnection * connection);
 			void emitChange(bool change);
 	
 		public slots:
@@ -170,6 +185,7 @@ namespace nuts {
 			QDBusConnection *m_dbusConnection;
 			QString m_dbusPath;
 			libnutcommon::InterfaceProperties m_dbusProperties;
+			bool registered;
 		private slots:
 			void interfaceStatusChanged(libnutcommon::InterfaceState state);
 		public:
@@ -177,6 +193,9 @@ namespace nuts {
 			virtual ~DBusInterface_IPv4();
 	
 			QString getPath();
+			void registerAll();
+			void unregisterAll();
+			void setAllDBusConnection(QDBusConnection * connection) { m_dbusConnection = connection; }
 		
 		public slots:
 			libnutcommon::InterfaceProperties getProperties();

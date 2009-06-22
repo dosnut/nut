@@ -3,14 +3,19 @@
 #include <QHashIterator>
 
 // #include <QDebug>
+#define DBUS_POLL_RATE 5000
 
 namespace nuts {
 	const QString DBusDeviceManager::m_dbusPath("/manager");
 	const QString DBusDeviceManager::m_dbusDevicesPath("/devices");
 
 	DBusDeviceManager::DBusDeviceManager(DeviceManager *devmgr)
-	: QDBusAbstractAdaptor(devmgr), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("nuts_system_bus"))), m_devmgr(devmgr), m_timerId(-1), m_dbusMonitor(0) {
-		startDBus();
+	: QDBusAbstractAdaptor(devmgr), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("nuts_system_bus"))), m_devmgr(devmgr), m_timerId(-1), m_dbusMonitor(0),registered(0) {
+
+		initTree();
+		registerAll();
+		connect(m_devmgr, SIGNAL(deviceAdded(QString, Device*)), SLOT(devAdded(QString, Device*)));
+		connect(m_devmgr, SIGNAL(deviceRemoved(QString, Device*)), SLOT(devRemoved(QString, Device*)));
 
 		//Init dbus monitor
 		connect(&m_dbusMonitor,SIGNAL(stopped(void)),this,SLOT(dbusStopped(void)));
@@ -19,49 +24,58 @@ namespace nuts {
 		m_dbusMonitor.setPidFileName(DBUS_PID_FILE_NAME);
 		m_dbusMonitor.setEnabled(true);
 
+		//start dbus connection check timer
+		m_timerId = startTimer(DBUS_POLL_RATE);
+
 	}
-	void DBusDeviceManager::startDBus() {
-		//Check if connection to dbus exists
-		if ( !m_dbusConnection.isConnected() ) {
-			log << "Please start dbus.";
-			log << "Otherwise you will not be able to control nuts" << endl;
-			return;
+
+	void DBusDeviceManager::registerAll() {
+		if (!registered) {
+			m_dbusConnection.registerService(NUT_DBUS_URL);
+			m_dbusConnection.registerObject(m_dbusPath,m_devmgr);
+			registered = true;
 		}
-		//Register Service and device manager object
-		m_dbusConnection.registerService(NUT_DBUS_URL);
-		m_dbusConnection.registerObject(m_dbusPath, m_devmgr);
+		QHash<QString, nuts::DBusDevice *>::iterator dbusdev = m_dbusDevices.begin();
+		while (dbusdev != m_dbusDevices.end()) {
+			(*dbusdev)->registerAll();
+			dbusdev++;
+		}
+	}
+
+	void DBusDeviceManager::unregisterAll() {
+		QHash<QString, nuts::DBusDevice *>::iterator dbusdev = m_dbusDevices.begin();
+		while (dbusdev != m_dbusDevices.end()) {
+			(*dbusdev)->unregisterAll();
+			dbusdev++;
+		}
+		//unregister self
+		if (registered) {
+			m_dbusConnection.unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+			m_dbusConnection.unregisterService(NUT_DBUS_URL);
+			registered = false;
+		}
+	}
+	
+	void DBusDeviceManager::setAllDBusConnection(QDBusConnection * connection) {
+		QHash<QString, nuts::DBusDevice *>::iterator dbusdev = m_dbusDevices.begin();
+		while (dbusdev != m_dbusDevices.end()) {
+			(*dbusdev)->setAllDBusConnection(connection);
+			dbusdev++;
+		}
+	}
+
+	void DBusDeviceManager::initTree() {
 		//Insert devices into devices Hash.
 		QHashIterator<QString, Device *> i(m_devmgr->getDevices());
 		while (i.hasNext()) {
 			i.next();
 			devAdded(i.key(), i.value());
 		}
-		connect(m_devmgr, SIGNAL(deviceAdded(QString, Device*)), SLOT(devAdded(QString, Device*)));
-		connect(m_devmgr, SIGNAL(deviceRemoved(QString, Device*)), SLOT(devRemoved(QString, Device*)));
 	}
 
 	void DBusDeviceManager::stopDBus() {
-		//kill timers:
-		if (-1 != m_timerId) {
-			killTimer(m_timerId);
-		}
-		//clear all informations
-		QHash<QString, nuts::DBusDevice *>::iterator dev = m_dbusDevices.begin();
-		DBusDevice * dbusdev;
-		while (dev != m_dbusDevices.end()) {
-			dbusdev = *dev;
-			dev = m_dbusDevices.erase(dev);
-			dbusdev->dbusStopped();
-			delete dbusdev;
-		}
-
-		m_dbusConnection.unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
-		m_dbusConnection.unregisterService(NUT_DBUS_URL);
+		unregisterAll();
 		m_dbusConnection.disconnectFromBus(QString::fromLatin1("nuts_system_bus"));
-// 		if (m_dbusConnection.isConnected()) {
-// 			qDebug() << "(BIG FAT WARNING) Dbus is connected after disconnect";
-// 		}
-// 		qDebug() << "Deleted dev-manager";
 	}
 
 	void DBusDeviceManager::dbusStopped() {
@@ -71,40 +85,56 @@ namespace nuts {
 	void DBusDeviceManager::dbusStarted() {
 		//call stopDBus to clear all information
 		stopDBus();
-		m_dbusConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("nuts_system_bus")));
-		startDBus();
+		m_dbusConnection = QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("nuts_system_bus"));
+		setAllDBusConnection(&m_dbusConnection);
+		registerAll();
+
+		//Restart dbus connection check timer
+		if (-1 == m_timerId)
+			m_timerId = startTimer(DBUS_POLL_RATE);
 	}
 
 	DBusDeviceManager::~DBusDeviceManager() {
-		m_dbusConnection.unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
-		m_dbusConnection.unregisterService(NUT_DBUS_URL);
+		if (registered) {
+			m_dbusConnection.unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+			m_dbusConnection.unregisterService(NUT_DBUS_URL);
+		}
 	}
 	
 	void DBusDeviceManager::timerEvent(QTimerEvent *event) {
 		if ( event->timerId() == m_timerId ) {
-			killTimer(m_timerId);
-			m_timerId = -1;
-			//try to connect to dbus
-			m_dbusConnection.disconnectFromBus(QString::fromLatin1("nuts_system_bus"));
-			m_dbusConnection = QDBusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("nuts_system_bus")));
-			startDBus();
+			if (!m_dbusConnection.isConnected()) {
+				killTimer(m_timerId);
+				m_timerId = -1;
+				//DBusMonitor will start dbus
+				log << "dbus has been stopped, please restart it";
+				dbusStopped();
+			}
 		}
 	}
 	
 	//SLOT: Inserts device into device hash
 	void DBusDeviceManager::devAdded(QString devName, Device *dev) {
-		DBusDevice *dbus_device = new DBusDevice(dev, &m_dbusConnection, m_dbusDevicesPath);
-		m_dbusDevices.insert(devName, dbus_device);
+		DBusDevice *dbus_device;
+		if (!m_dbusDevices.contains(devName)) {
+			dbus_device = new DBusDevice(dev, &m_dbusConnection, m_dbusDevicesPath);
+			m_dbusDevices.insert(devName, dbus_device);
+		}
+		else {
+			dbus_device = m_dbusDevices.value(devName);
+		}
 		emit deviceAdded(QDBusObjectPath(dbus_device->getPath()));
 		emit deviceAdded(devName);
 	}
 	
 	
 	void DBusDeviceManager::devRemoved(QString devName, Device* /* *dev */) {
-		DBusDevice *dbus_device = m_dbusDevices[devName];
-		emit deviceRemoved(QDBusObjectPath(dbus_device->getPath()));
-		emit deviceRemoved(devName);
-		m_dbusDevices.remove(devName);
+		if (m_dbusDevices.contains(devName)) {
+			DBusDevice * dbus_device = m_dbusDevices[devName];
+			emit deviceRemoved(QDBusObjectPath(dbus_device->getPath()));
+			emit deviceRemoved(devName);
+			m_dbusDevices.remove(devName);
+		}
 		// dbus_device is deleted as child of dev
 	}
 	
@@ -113,9 +143,9 @@ namespace nuts {
 		foreach (DBusDevice *dbus_device, m_dbusDevices) {
 			paths.append(QDBusObjectPath(dbus_device->getPath()));
 		}
-// 		qDebug() << "Returining device list";
 		return paths;
 	}
+
 	QStringList DBusDeviceManager::getDeviceNames() {
 		QStringList names;
 		foreach (nuts::Device* dev, m_devmgr->getDevices()) {
@@ -124,17 +154,17 @@ namespace nuts {
 		return names;
 	}
 
-	bool DBusDeviceManager::createBridge(QString name) { return false; }
-	bool DBusDeviceManager::destroyBridge(QDBusObjectPath devicePath) { return false; }
-	bool DBusDeviceManager::destroyBridge(qint32 deviceId) { return false; }
-	bool DBusDeviceManager::addToBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths) { return false; }
-	bool DBusDeviceManager::addToBridge(qint32 bridgeId, QList<qint32> deviceIds) { return false; }
-	bool DBusDeviceManager::removeFromBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths) { return false; }
-	bool DBusDeviceManager::removeFromBridge(qint32 bridgeId, QList<qint32> deviceIds) { return false; }
+	bool DBusDeviceManager::createBridge(QString /*name*/) { return false; }
+	bool DBusDeviceManager::destroyBridge(QDBusObjectPath /*devicePath*/) { return false; }
+	bool DBusDeviceManager::destroyBridge(qint32 /*deviceId*/) { return false; }
+	bool DBusDeviceManager::addToBridge(QDBusObjectPath /*bridge*/, QList<QDBusObjectPath> /*devicePaths*/) { return false; }
+	bool DBusDeviceManager::addToBridge(qint32 /*bridgeId*/, QList<qint32> /*deviceIds*/) { return false; }
+	bool DBusDeviceManager::removeFromBridge(QDBusObjectPath /*bridge*/, QList<QDBusObjectPath> /*devicePaths*/) { return false; }
+	bool DBusDeviceManager::removeFromBridge(qint32 /*bridgeId*/, QList<qint32> /*deviceIds*/) { return false; }
 
 
 	DBusDevice::DBusDevice(Device *dev, QDBusConnection *connection, const QString &path)
-	: QDBusAbstractAdaptor(dev), m_device(dev), m_dbusConnection(connection) {
+	: QDBusAbstractAdaptor(dev), m_device(dev), m_dbusConnection(connection), registered(false) {
 
 		//Set Device Properties
 		m_dbusProperties.type = m_device->hasWLAN() ? libnutcommon::DT_AIR : libnutcommon::DT_ETH;
@@ -143,7 +173,6 @@ namespace nuts {
 
 		//Set dbus device path an register objects
 		m_dbusPath = path + '/' + dev->getName();
-		m_dbusConnection->registerObject(m_dbusPath, m_device);
 		
 		//Add Environments
 		foreach (Environment *env, m_device->getEnvironments()) {
@@ -165,21 +194,39 @@ namespace nuts {
 	}
 	
 	DBusDevice::~DBusDevice() {
-		m_dbusEnvironments.clear();
-		m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
-// 		qDebug() << "Deleted device";
+		if (registered) {
+			m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+		}
 	}
 	
 	QString DBusDevice::getPath() {
 		return m_dbusPath;
 	}
 
-	void DBusDevice::dbusStopped() {
-		DBusEnvironment * env;
-		while (!m_dbusEnvironments.isEmpty()) {
-			env = m_dbusEnvironments.takeFirst();
-			env->dbusStopped();
-			delete env;
+	void DBusDevice::registerAll() {
+		if (!registered && m_dbusConnection->isConnected()) {
+			m_dbusConnection->registerObject(m_dbusPath, m_device);
+			registered = true;
+		}
+		foreach(DBusEnvironment * dbusenv, m_dbusEnvironments) {
+			dbusenv->registerAll();
+		}
+	}
+
+	void DBusDevice::unregisterAll() {
+		foreach(DBusEnvironment * dbusenv, m_dbusEnvironments) {
+			dbusenv->unregisterAll();
+		}
+		if (registered) {
+			m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+			registered = false;
+		}
+	}
+
+	void DBusDevice::setAllDBusConnection(QDBusConnection * connection) {
+		m_dbusConnection = connection;
+		foreach(DBusEnvironment * dbusenv, m_dbusEnvironments) {
+			dbusenv->setAllDBusConnection(connection);
 		}
 	}
 
@@ -286,10 +333,9 @@ namespace nuts {
 	}
 
 	DBusEnvironment::DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path, Device * dev)
-	: QDBusAbstractAdaptor(env), m_environment(env), m_dbusConnection(connection), m_device(dev) {
+	: QDBusAbstractAdaptor(env), m_environment(env), m_dbusConnection(connection), m_device(dev), registered(false) {
 		//Set dbus path an register object
 		m_dbusPath = path + QString("/%1").arg(m_environment->getID());
-		m_dbusConnection->registerObject(m_dbusPath, m_environment);
 		
 		//Insert interfaces
 		foreach (Interface *interface, m_environment->getInterfaces()) {
@@ -314,26 +360,53 @@ namespace nuts {
 	}
 	
 	DBusEnvironment::~DBusEnvironment() {
-		//deleted as child of Interface
-		m_dbusInterfacesIPv4.clear();
-		m_dbusConnection->unregisterObject(m_dbusPath);
-// 		qDebug() << "deleted environment";
+		if (registered) {
+			m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+		}
 	}
 	
 	QString DBusEnvironment::getPath() {
 		return m_dbusPath;
 	}
-	void DBusEnvironment::dbusStopped() {
-		DBusInterface_IPv4 * ifs;
-		while (! m_dbusInterfacesIPv4.isEmpty()) {
-			ifs = m_dbusInterfacesIPv4.takeFirst();
-			delete ifs;
+
+	void DBusEnvironment::registerAll() {
+		if (!registered && m_dbusConnection->isConnected()) {
+			m_dbusConnection->registerObject(m_dbusPath, m_environment);
+			registered = true;
+		}
+		foreach(DBusInterface_IPv4 * ifs, m_dbusInterfacesIPv4) {
+			ifs->registerAll();
 		}
 		#ifdef IPv6
-		DBusInterface_IPv6 * ifs6;
-		while (! m_dbusInterfacesIPv6.isEmpty()) {
-			ifs6 = m_dbusInterfacesIPv6.takeFirst();
-			delete ifs6;
+		foreach(DBusInterface_IPv6 * ifs, m_dbusInterfacesIPv6) {
+			ifs->registerAll();
+		}
+		#endif
+	}
+
+	void DBusEnvironment::unregisterAll() {
+		foreach(DBusInterface_IPv4 * ifs, m_dbusInterfacesIPv4) {
+			ifs->unregisterAll();
+		}
+		#ifdef IPv6
+		foreach(DBusInterface_IPv6 * ifs, m_dbusInterfacesIPv6) {
+			ifs->unregisterAll();
+		}
+		#endif
+		if (registered) {
+			m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+			registered = false;
+		}
+	}
+
+	void DBusEnvironment::setAllDBusConnection(QDBusConnection * connection) {
+		m_dbusConnection = connection;
+		foreach(DBusInterface_IPv4 * ifs, m_dbusInterfacesIPv4) {
+			ifs->setAllDBusConnection(connection);
+		}
+		#ifdef IPv6
+		foreach(DBusInterface_IPv6 * ifs, m_dbusInterfacesIPv6) {
+			ifs->setAllDBusConnection(connection);
 		}
 		#endif
 	}
@@ -370,6 +443,7 @@ namespace nuts {
 		#endif
 		return paths;
 	}
+
 	QList<qint32> DBusEnvironment::getInterfaceIds() {
 		QList<qint32> ifs;
 		foreach(nuts::Interface *i, m_environment->getInterfaces()) {
@@ -387,9 +461,8 @@ namespace nuts {
 
 
 	DBusInterface_IPv4::DBusInterface_IPv4(Interface_IPv4 *iface, QDBusConnection *connection, const QString &path)
-	: QDBusAbstractAdaptor(iface), m_interface(iface), m_dbusConnection(connection) {
+	: QDBusAbstractAdaptor(iface), m_interface(iface), m_dbusConnection(connection), registered(false) {
 		m_dbusPath = path + QString("/%1").arg(m_interface->getIndex());
-		m_dbusConnection->registerObject(m_dbusPath, m_interface);
 		//Set Interface properties
 		m_dbusProperties.ip = m_interface->ip;
 		m_dbusProperties.gateway = m_interface->gateway;
@@ -406,7 +479,21 @@ namespace nuts {
 	}
 	
 	DBusInterface_IPv4::~DBusInterface_IPv4() {
-// 		qDebug() << "deleted interface";
+		m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+	}
+
+	void DBusInterface_IPv4::registerAll() {
+		if (!registered && m_dbusConnection->isConnected()) {
+			m_dbusConnection->registerObject(m_dbusPath, m_interface);
+			registered = true;
+		}
+	}
+
+	void DBusInterface_IPv4::unregisterAll() {
+		if (registered) {
+			m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+			registered = false;
+		}
 	}
 
 	QString DBusInterface_IPv4::getPath() {
