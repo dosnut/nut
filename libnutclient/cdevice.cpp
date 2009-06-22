@@ -84,7 +84,7 @@ CDevice::~CDevice() {
 	while (!m_environments.isEmpty()) {
 		env = m_environments.takeFirst();
 // 		emit(environmentsUpdated()); //Pending for removal
-		delete env;
+		env->deleteLater();
 	}
 }
 
@@ -110,7 +110,7 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 	CEnvironment * env;
 	while ( !m_environments.isEmpty() ) {
 		env = m_environments.takeFirst();
-		delete env;
+		env->deleteLater();
 	}
 	//now rebuild:
 	foreach(QDBusObjectPath i, paths) {

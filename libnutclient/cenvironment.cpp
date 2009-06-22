@@ -82,7 +82,7 @@ CEnvironment::~CEnvironment() {
 	while (!m_interfaces.isEmpty()) {
 		interface = m_interfaces.takeFirst();
 		emit(interfacesUpdated());
-		delete interface;
+		interface->deleteLater();
 	}
 }
 
@@ -220,7 +220,7 @@ void CEnvironment::rebuild(const QList<QDBusObjectPath> &paths) {
 	while (!m_interfaces.isEmpty()) {
 		interface = m_interfaces.takeFirst();
 		emit(interfacesUpdated());
-		delete interface;
+		interface->deleteLater();
 	}
 	//Now rebuild:
 	foreach(QDBusObjectPath i, paths) {

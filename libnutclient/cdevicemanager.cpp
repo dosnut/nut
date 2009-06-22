@@ -39,7 +39,7 @@ CDeviceManager::~CDeviceManager() {
 	CDevice * device;
 	while (!m_devices.isEmpty()) {
 		device = m_devices.takeFirst();
-		delete device;
+		device->deleteLater();
 	}
 }
 
@@ -169,7 +169,7 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 	while (!m_devices.isEmpty()) {
 		device = m_devices.takeFirst();
 		emit(deviceRemoved(device));
-		delete device;
+		device->deleteLater();
 	}
 	//Build new m_devices
 	foreach(QDBusObjectPath i, paths) {
@@ -196,7 +196,7 @@ void CDeviceManager::clearInformation() {
 	while (!m_devices.isEmpty()) {
 		dev = m_devices.takeFirst();
 		emit(deviceRemoved(dev));
-		delete dev;
+		dev->deleteLater();
 	}
 }
 
