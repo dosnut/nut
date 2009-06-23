@@ -459,10 +459,10 @@ namespace libnutwireless {
 			if (m_scanTimerId != -1) {
 				killTimer(m_scanTimerId);
 				m_scanTimerId = -1;
-				printMessage("We're already scanning!");
+				printMessage("Already scanning!");
 			}
 			//Return scanresults from wpa_supplicant immediately
-			setScanResults(QList<WextRawScan>());
+// 			setScanResults(QList<WextRawScan>());
 			m_scanTimeoutCount = 0;
 			m_scanTimerId = startTimer(CWPA_SCAN_TIMER_TIME);
 		}
