@@ -150,6 +150,7 @@ namespace qnut {
 		
 		connect(m_RefreshDevicesAction, SIGNAL(triggered()), &m_DeviceManager, SLOT(refreshAll()));
 		connect(m_ClearLogAction, SIGNAL(triggered()), &m_LogEdit, SLOT(clear()));
+		connect(m_ShowLogAction, SIGNAL(toggled(bool)), this, SLOT(showLog(bool)));
 	}
 	
 	inline void CConnectionManager::distributeActions(int mode) {
