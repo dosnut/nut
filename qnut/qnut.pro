@@ -20,7 +20,7 @@ FORMS = ipconf.ui \
  devdet.ui \
  adhoc.ui
 
-TRANSLATIONS = qnut_de.ts
+TRANSLATIONS = qnut_de.ts qnut_pt_BR.ts
 
 HEADERS += connectionmanager.h trayicon.h \
  constants.h \
