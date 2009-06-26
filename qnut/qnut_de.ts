@@ -1,20 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS><TS version="1.1" language="de">
-<defaultcodec></defaultcodec>
+<!DOCTYPE TS>
+<TS version="2.0" language="de">
 <context>
-    <name>@default</name>
+    <name></name>
     <message>
-        <location filename="constants.h" line="7"/>
+        <location filename="constants.h" line="5"/>
         <source>QNUT - Qt client for Network UTility Server (NUTS)</source>
         <translation>QNUT - Qt Client für den Network UTility Server (NUTS)</translation>
     </message>
 </context>
 <context>
+    <name>CLibNut</name>
+    <message>
+        <source>up</source>
+        <translation type="obsolete">verbunden</translation>
+    </message>
+    <message>
+        <source>unconfigured</source>
+        <translation type="obsolete">unkonfiguriert</translation>
+    </message>
+    <message>
+        <source>got carrier</source>
+        <translation type="obsolete">physikalisch verbunden</translation>
+    </message>
+    <message>
+        <source>activated</source>
+        <translation type="obsolete">aktiviert</translation>
+    </message>
+    <message>
+        <source>deactivated</source>
+        <translation type="obsolete">deaktiviert</translation>
+    </message>
+    <message>
+        <source>Wireless</source>
+        <translation type="obsolete">Drahtlos</translation>
+    </message>
+    <message>
+        <source>off</source>
+        <translation type="obsolete">aus</translation>
+    </message>
+    <message>
+        <source>static</source>
+        <translation type="obsolete">statisch</translation>
+    </message>
+    <message>
+        <source>zeroconf</source>
+        <translation type="obsolete">zerconf</translation>
+    </message>
+    <message>
+        <source>wait for config</source>
+        <translation type="obsolete">unkonfiguriert</translation>
+    </message>
+</context>
+<context>
     <name>QObject</name>
     <message>
-        <location filename="../libnutwireless/types.cpp" line="252"/>
-        <source>UNDEFINED</source>
-        <translation>UNDEFINIERT</translation>
+        <source>selected</source>
+        <translation type="obsolete">ausgewählt</translation>
+    </message>
+    <message>
+        <source>disabled</source>
+        <translation type="obsolete">deaktiviert</translation>
+    </message>
+    <message>
+        <source>enabled</source>
+        <translation type="obsolete">auswählbar</translation>
+    </message>
+    <message>
+        <source>any</source>
+        <translation type="obsolete">jede</translation>
+    </message>
+    <message>
+        <source>Type: %1</source>
+        <translation type="obsolete">Typ: %1</translation>
+    </message>
+    <message>
+        <source>State: %1</source>
+        <translation type="obsolete">Status: %1</translation>
+    </message>
+    <message>
+        <source>Connected to: %1</source>
+        <translation type="obsolete">Verbunden mit: %1</translation>
+    </message>
+    <message>
+        <source>local</source>
+        <translation type="obsolete">lokal</translation>
     </message>
 </context>
 <context>
@@ -78,52 +148,52 @@
 <context>
     <name>airset</name>
     <message>
-        <location filename="airset.ui" line="59"/>
+        <location filename="airset.ui" line="60"/>
         <source>no device</source>
         <translation>kein Netzwerkgerät</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="72"/>
+        <location filename="airset.ui" line="73"/>
         <source>unknown state</source>
         <translation>unbekannter Status</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="429"/>
+        <location filename="airset.ui" line="426"/>
         <source>Managed networks</source>
         <translation>Verwaltete Netzwerke</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="487"/>
+        <location filename="airset.ui" line="498"/>
         <source>Available networks</source>
         <translation>Netzwerke in Reichweite</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="112"/>
+        <location filename="airset.ui" line="113"/>
         <source>Level: 0</source>
         <translation>Pegel: 0</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="119"/>
+        <location filename="airset.ui" line="120"/>
         <source>Noise: 0</source>
         <translation>Rauschen: 0</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="132"/>
+        <location filename="airset.ui" line="133"/>
         <source>no signal info</source>
         <translation>keine Signalinformationen</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="139"/>
+        <location filename="airset.ui" line="140"/>
         <source>Rate: 0Mb/s</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="airset.ui" line="146"/>
+        <location filename="airset.ui" line="147"/>
         <source>00:00:00:00:00:00</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="airset.ui" line="153"/>
+        <location filename="airset.ui" line="154"/>
         <source>Quality: 0/0</source>
         <translation>Qualität: 0/0</translation>
     </message>
@@ -246,6 +316,8 @@
         <translation>CA Datei</translation>
     </message>
     <message>
+        <location filename="apconf.ui" line="417"/>
+        <location filename="apconf.ui" line="437"/>
         <location filename="apconf.ui" line="472"/>
         <source>...</source>
         <translation>...</translation>
@@ -301,11 +373,20 @@
         <translation>Automatische Auswahl dieses Zugangsknotens ermöglichen</translation>
     </message>
     <message>
+        <location filename="apconf.ui" line="262"/>
+        <location filename="apconf.ui" line="494"/>
+        <location filename="apconf.ui" line="538"/>
+        <location filename="apconf.ui" line="565"/>
+        <location filename="apconf.ui" line="592"/>
         <location filename="apconf.ui" line="619"/>
         <source>leave unchanged</source>
         <translation>unverändert lassen</translation>
     </message>
     <message>
+        <location filename="apconf.ui" line="35"/>
+        <location filename="apconf.ui" line="531"/>
+        <location filename="apconf.ui" line="558"/>
+        <location filename="apconf.ui" line="585"/>
         <location filename="apconf.ui" line="612"/>
         <source>hex. chars</source>
         <translation>hex. Zeichen</translation>
@@ -372,82 +453,29 @@
     </message>
 </context>
 <context>
-    <name>connMan</name>
-    <message>
-        <location filename="connman.ui" line="14"/>
-        <source>Connection Manager</source>
-        <translation>Verbindungsmanager</translation>
-    </message>
-    <message>
-        <location filename="connman.ui" line="57"/>
-        <source>Main Toolbar</source>
-        <translation>Hauptwerkzeugleiste</translation>
-    </message>
-    <message>
-        <location filename="connman.ui" line="83"/>
-        <source>&amp;File</source>
-        <translation>&amp;Datei</translation>
-    </message>
-    <message>
-        <location filename="connman.ui" line="89"/>
-        <source>&amp;Help</source>
-        <translation>&amp;Hilfe</translation>
-    </message>
-    <message>
-        <location filename="connman.ui" line="101"/>
-        <source>&amp;View</source>
-        <translation>&amp;Ansicht</translation>
-    </message>
-    <message>
-        <location filename="connman.ui" line="113"/>
-        <source>&amp;Close</source>
-        <translation>&amp;Schließen</translation>
-    </message>
-    <message>
-        <location filename="connman.ui" line="118"/>
-        <source>About &amp;Qt</source>
-        <translation>Über &amp;Qt</translation>
-    </message>
-    <message>
-        <location filename="connman.ui" line="123"/>
-        <source>&amp;About QNUT</source>
-        <translation>Über Q&amp;NUT</translation>
-    </message>
-    <message>
-        <location filename="connman.ui" line="131"/>
-        <source>Show &amp;balloon tips</source>
-        <translation>Zeige Sprech&amp;blasen</translation>
-    </message>
-    <message>
-        <location filename="connman.ui" line="139"/>
-        <source>Show &amp;log</source>
-        <translation>Zeige &amp;Protokoll</translation>
-    </message>
-    <message>
-        <location filename="connman.ui" line="96"/>
-        <source>&amp;Edit</source>
-        <translation>&amp;Bearbeiten</translation>
-    </message>
-</context>
-<context>
     <name>devdet</name>
     <message>
-        <location filename="devdet.ui" line="14"/>
+        <location filename="devdet.ui" line="15"/>
         <source>Device Details</source>
         <translation>Gerätedetails</translation>
     </message>
     <message>
-        <location filename="devdet.ui" line="44"/>
+        <location filename="devdet.ui" line="50"/>
         <source>unknown status</source>
         <translation>unbekannter Status</translation>
     </message>
     <message>
-        <location filename="devdet.ui" line="64"/>
+        <location filename="devdet.ui" line="57"/>
+        <source>unknown network</source>
+        <translation>unbekanntes Netzwerk</translation>
+    </message>
+    <message>
+        <location filename="devdet.ui" line="79"/>
         <source>Show Details</source>
         <translation>Zeige Details</translation>
     </message>
     <message>
-        <location filename="devdet.ui" line="117"/>
+        <location filename="devdet.ui" line="132"/>
         <source>Show tray icon for this device</source>
         <translation>Zeige Symbol im Systembereich für dieses Gerät</translation>
     </message>
@@ -455,367 +483,245 @@
 <context>
     <name>ipconf</name>
     <message>
-        <location filename="ipconf.ui" line="20"/>
+        <location filename="ipconf.ui" line="21"/>
         <source>IP Configuration</source>
         <translation>IP Konfiguration</translation>
     </message>
     <message>
-        <location filename="ipconf.ui" line="28"/>
+        <location filename="ipconf.ui" line="32"/>
         <source>&amp;IP-Address:</source>
         <translation>&amp;IP-Adresse:</translation>
     </message>
     <message>
-        <location filename="ipconf.ui" line="129"/>
+        <location filename="ipconf.ui" line="48"/>
+        <location filename="ipconf.ui" line="74"/>
+        <location filename="ipconf.ui" line="97"/>
+        <location filename="ipconf.ui" line="133"/>
         <source>000.000.000.000;_</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="ipconf.ui" line="54"/>
+        <location filename="ipconf.ui" line="58"/>
         <source>&amp;Netmask:</source>
         <translation>&amp;Netzmaske:</translation>
     </message>
     <message>
-        <location filename="ipconf.ui" line="90"/>
+        <location filename="ipconf.ui" line="81"/>
         <source>&amp;Gateway:</source>
         <translation>&amp;Gateway:</translation>
     </message>
     <message>
-        <location filename="ipconf.ui" line="102"/>
+        <location filename="ipconf.ui" line="106"/>
         <source>DNS list</source>
         <translation>DNS Liste</translation>
     </message>
     <message>
-        <location filename="ipconf.ui" line="116"/>
+        <location filename="ipconf.ui" line="120"/>
         <source>Add</source>
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="ipconf.ui" line="152"/>
+        <location filename="ipconf.ui" line="156"/>
         <source>Remove</source>
         <translation>Entfernen</translation>
+    </message>
+    <message>
+        <location filename="ipconf.ui" line="168"/>
+        <source>Remember settings for this interface</source>
+        <translation>Einstellungen für dieses Interface speichern</translation>
+    </message>
+    <message>
+        <location filename="ipconf.ui" line="177"/>
+        <source>Import...</source>
+        <translation>Importieren...</translation>
+    </message>
+    <message>
+        <location filename="ipconf.ui" line="184"/>
+        <source>Export...</source>
+        <translation>Exportieren...</translation>
     </message>
 </context>
 <context>
     <name>libnutclient::CDevice</name>
     <message>
-        <location filename="../libnutclient/client.cpp" line="466"/>
+        <location filename="../libnutclient/cdevice.cpp" line="207"/>
         <source>Device properties fetched</source>
-        <translation>Geräteeigenschaften geholt</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="472"/>
-        <source>(%1) Error while retrieving dbus&apos; device information</source>
-        <translation>(%1) Fehler beim Übertragen der Geräteinformationen über DBus</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="634"/>
-        <source>(%1) Could not refresh device essid</source>
-        <translation>(%1) Konnte die Geräte-Essid nicht aktualisieren</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="493"/>
-        <source>(%2) wpa_supplicant config file at: %1</source>
-        <translation>(%2) Pfad zur wpa_supplicant Konfigurationsdatei: %1</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="496"/>
-        <source>(%2) Error(%1) while retrieving device config</source>
-        <translation>(%2) Fehler(%1) beim Übertragen der Gerätekonfiguration</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="502"/>
-        <source>(%1) Error while trying to get environment list</source>
-        <translation>(%1) Fehler beim Übertragen der Umgebungsliste</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="602"/>
-        <source>(%1) Could not refresh environments</source>
-        <translation>(%1) Die Umgebungen konnten nicht aktualisiert werden</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="622"/>
-        <source>(%1) Could not refresh device properties</source>
-        <translation>(%1) Die Geräteeigenschaften konnten nicht aktualisert werden</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="459"/>
-        <source>Getting device properties at: %1</source>
-        <translation>Hole Geräteeigenschaften: %1</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="467"/>
+        <location filename="../libnutclient/cdevice.cpp" line="208"/>
         <source>Name : %1</source>
         <translation>Name: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="468"/>
+        <location filename="../libnutclient/cdevice.cpp" line="209"/>
         <source>Type: %1</source>
         <translation>Typ: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="469"/>
+        <location filename="../libnutclient/cdevice.cpp" line="210"/>
         <source>State: %1</source>
         <translation>Status: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="507"/>
-        <source>Adding Environment at: %1</source>
-        <translation>Füge Umbegung hinzu: %1</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="526"/>
+        <location filename="../libnutclient/cdevice.cpp" line="276"/>
         <source>Active Environement: %1</source>
-        <translation>Aktive Umbegung: %1</translation>
+        <translation>Aktive Umgebung: %1</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="612"/>
-        <source>Refreshing active environment: %1</source>
-        <translation>Aktualisiere aktive Umbegung: %1</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="513"/>
-        <source>(%1) Error while trying to add environment</source>
-        <translation>(%1) Fehler beim Versuch eine Umgebung hinzuzufügen</translation>
+        <location filename="../libnutclient/cdevice.cpp" line="294"/>
+        <source>(%2) wpa_supplicant config file at: %1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>libnutclient::CDeviceManager</name>
     <message>
-        <location filename="../libnutclient/client.cpp" line="133"/>
-        <source>Please start nuts. Starting idle mode</source>
-        <translation>Bitte NUTS starten. Gehe in Leerauf</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="250"/>
-        <source>(%1) Failed to get DeviceList</source>
-        <translation>(%1) Fehler beim Übertragen der Geräteliste</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="295"/>
-        <source>NUTS has been started</source>
-        <translation>NUTS wurde gestartet</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="309"/>
-        <source>NUTS has been stopped</source>
-        <translation>NUTS wurde gestartet</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="421"/>
-        <source>(%1) Could not refresh device list</source>
-        <translation>(%1) Die Geräteliste konnte nicht übertragen werden</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="439"/>
-        <source>(%1) Error while retrieving device list</source>
-        <translation>(%1) Fehler beim Übertragen der Geräteliste</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="328"/>
-        <source>Adding device at: %1</source>
-        <translation>Füge Gerät hinzu: %1</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="119"/>
+        <location filename="../libnutclient/cdevicemanager.cpp" line="56"/>
         <source>Error while trying to access the dbus service</source>
-        <translation>Fehler beim Versuch auf den DBus-Dienst zuzugreifen</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="237"/>
-        <source>You are not allowed to connect to nuts.</source>
-        <translation>Sie sind nicht berechtigt sich mit NUTS zu verbinden.</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="238"/>
-        <source>Please make sure you are in the correct group</source>
-        <translation>Bitte stellen sie sicher, dass sie der richtigen Gruppe Mitglied sind</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="368"/>
-        <source>The dbus daemon has been stopped. Please restart dbus and nuts</source>
-        <translation>Der DBus-Dienst wurde angehalten. Bitte starten sie DBus</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="372"/>
-        <source>dbus has been started initiating dbus interface</source>
-        <translation>DBus wurde gestartet. Initialisiere DBus-Schnittstelle</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="120"/>
+        <location filename="../libnutclient/cdevicemanager.cpp" line="57"/>
         <source>Please make sure that dbus is running</source>
-        <translation>Bitte stellen sie sicher, dass DBus läuft</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="243"/>
+        <location filename="../libnutclient/cdevicemanager.cpp" line="67"/>
+        <source>Please start nuts. Starting idle mode</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../libnutclient/cdevicemanager.cpp" line="207"/>
+        <source>NUTS has been started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../libnutclient/cdevicemanager.cpp" line="223"/>
+        <source>NUTS has been stopped</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../libnutclient/cdevicemanager.cpp" line="273"/>
+        <source>You are not allowed to connect to nuts.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../libnutclient/cdevicemanager.cpp" line="274"/>
+        <source>Please make sure you are in the correct group</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../libnutclient/cdevicemanager.cpp" line="277"/>
+        <source>(%1) Failed to get DeviceList</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../libnutclient/cdevicemanager.cpp" line="278"/>
         <source>Maybe you don&apos;t have sufficient rights</source>
-        <translation>Möglicherweise haben sie nicht die benötigten Rechte</translation>
-    </message>
-</context>
-<context>
-    <name>libnutclient::CEnvironment</name>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="862"/>
-        <source>default</source>
-        <translation>Standard</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="867"/>
-        <source>untitled (%1)</source>
-        <translation>Unbenannt (%1)</translation>
+        <location filename="../libnutclient/cdevicemanager.cpp" line="288"/>
+        <source>Adding device at: %1</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="806"/>
-        <source>Error while retrieving environment properties</source>
-        <translation>Fehler beim Übertragen der Umgebungseigenschaftem</translation>
+        <location filename="../libnutclient/cdevicemanager.cpp" line="320"/>
+        <source>The dbus daemon has been stopped. Please restart dbus and nuts</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="841"/>
-        <source>Error while retrieving environment&apos;s interfaces</source>
-        <translation>Fehler beim Übertragen der Schnittstellen der Umgebung</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="875"/>
-        <source>Error while refreshing environment properties</source>
-        <translation>Fehler beim Aktualisieren der Umgebungseigenschaften</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="910"/>
-        <source>Error while refreshing environment interfaces</source>
-        <translation>Fehler beim Aktualisieren der Schnittstellen der Umgebung</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="971"/>
-        <source>(%1) Error while trying to get SelectResult</source>
-        <translation>(%1) Fehler beim Übertragen der Ergebnisses der Auswahlkriterien</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="989"/>
-        <source>(%1) Error while trying to get SelectResults</source>
-        <translation>(%1) Fehler beim Übertragen der Ergebnisse der Auswahlkriterien</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="814"/>
-        <source>(%1) Error while retrieving environment config</source>
-        <translation>(%1) Fehler beim Empfang der Umgebungskonfiguration</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="830"/>
-        <source>(%1) Error while adding interfaces</source>
-        <translation>(%1) Fehler beim Hinzufügen der Schnittstellen</translation>
+        <location filename="../libnutclient/cdevicemanager.cpp" line="324"/>
+        <source>dbus has been started initiating dbus interface</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>libnutclient::CInterface</name>
     <message>
-        <location filename="../libnutclient/client.cpp" line="1060"/>
+        <location filename="../libnutclient/cinterface.cpp" line="162"/>
         <source>Interface state of %1 has changed to %2</source>
-        <translation>Schnittstelle %1 änderte ihren Zustand nach %2</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="1016"/>
-        <source>(%1) Error while retrieving interface properties</source>
-        <translation>(%1) Fehler beim Empfang der Schnittstelleneigenschaften</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="1024"/>
-        <source>(%1) Error while retrieving interface config</source>
-        <translation>(%1) Fehler beim Empfang der Schnittstellenkonfiguration</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="1048"/>
-        <source>Error while refreshing interface at: %1</source>
-        <translation>Fehler beim Aktualisieren der Schnittstelle: %1</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="1080"/>
-        <source>Error while interface-&gt;needUserSetup at: %1</source>
-        <translation>Fehler beim Aufruf &quot;interface-&gt;needUserSetup&quot;: %1</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="1098"/>
-        <source>(%1) Error while setting user config at: %2</source>
-        <translation>(%1) Fehler beim setzten der benutzerdefinierten Konfiguration: %2</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/client.cpp" line="1113"/>
-        <source>Error while getting user config at: %1</source>
-        <translation>Fehler beim Empfang der benutzerdefinierten Konfiguration: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>libnutclient::CLibNut</name>
     <message>
-        <location filename="../libnutclient/client.cpp" line="75"/>
         <source>Please start NUTS</source>
-        <translation>Bitte starten sie NUTS</translation>
+        <translation type="obsolete">Bitte starten sie NUTS</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="79"/>
         <source>(%1)Error while setting-up dbusconnection</source>
-        <translation>(%1) Fehler beim Erstellen der DBus-Verbindung</translation>
+        <translation type="obsolete">(%1) Fehler beim Erstellen der DBus-Verbindung</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="18"/>
+        <location filename="../libnutclient/clibnut.cpp" line="11"/>
         <source>up</source>
         <translation>verbunden</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="19"/>
+        <location filename="../libnutclient/clibnut.cpp" line="12"/>
         <source>unconfigured</source>
         <translation>unkonfiguriert</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="20"/>
+        <location filename="../libnutclient/clibnut.cpp" line="13"/>
         <source>got carrier</source>
         <translation>physikalisch verbunden</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="21"/>
+        <location filename="../libnutclient/clibnut.cpp" line="14"/>
         <source>activated</source>
         <translation>aktiviert</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="22"/>
+        <location filename="../libnutclient/clibnut.cpp" line="15"/>
         <source>deactivated</source>
         <translation>deaktiviert</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="28"/>
+        <location filename="../libnutclient/clibnut.cpp" line="21"/>
         <source>Ethernet</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="29"/>
+        <location filename="../libnutclient/clibnut.cpp" line="22"/>
         <source>Wireless</source>
         <translation>Drahtlos</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="30"/>
+        <location filename="../libnutclient/clibnut.cpp" line="23"/>
         <source>PPP</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="36"/>
+        <location filename="../libnutclient/clibnut.cpp" line="24"/>
+        <source>Bridge</source>
+        <translation>Brücke</translation>
+    </message>
+    <message>
+        <location filename="../libnutclient/clibnut.cpp" line="30"/>
         <source>off</source>
         <translation>aus</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="37"/>
+        <location filename="../libnutclient/clibnut.cpp" line="31"/>
         <source>static</source>
         <translation>statisch</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="38"/>
+        <location filename="../libnutclient/clibnut.cpp" line="32"/>
         <source>dynamic</source>
         <translation>dynamisch</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="39"/>
+        <location filename="../libnutclient/clibnut.cpp" line="33"/>
         <source>zeroconf</source>
         <translation>zerconf</translation>
     </message>
     <message>
-        <location filename="../libnutclient/client.cpp" line="40"/>
+        <location filename="../libnutclient/clibnut.cpp" line="34"/>
         <source>wait for config</source>
         <translation>unkonfiguriert</translation>
     </message>
@@ -851,6 +757,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../libnutwireless/base.cpp" line="183"/>
+        <location filename="../libnutwireless/base.cpp" line="191"/>
         <location filename="../libnutwireless/base.cpp" line="199"/>
         <source>Could not open wpa_supplicant control interface</source>
         <translation type="unfinished"></translation>
@@ -881,6 +789,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../libnutwireless/base.cpp" line="514"/>
         <location filename="../libnutwireless/base.cpp" line="839"/>
         <source>(Wireless Extension) No device present</source>
         <translation type="unfinished"></translation>
@@ -932,44 +841,58 @@
     </message>
 </context>
 <context>
+    <name>libnutwireless::QObject</name>
+    <message>
+        <location filename="../libnutwireless/types.cpp" line="146"/>
+        <location filename="../libnutwireless/types.cpp" line="164"/>
+        <location filename="../libnutwireless/types.cpp" line="191"/>
+        <location filename="../libnutwireless/types.cpp" line="209"/>
+        <location filename="../libnutwireless/types.cpp" line="221"/>
+        <location filename="../libnutwireless/types.cpp" line="255"/>
+        <source>UNDEFINED</source>
+        <translation>UNDEFINIERT</translation>
+    </message>
+</context>
+<context>
     <name>qnut::CAccessPointConfig</name>
     <message>
-        <location filename="accesspointconfig.cpp" line="490"/>
+        <location filename="accesspointconfig.cpp" line="493"/>
         <source>%1 chars</source>
         <translation>%1 Zeichen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="524"/>
+        <location filename="accesspointconfig.cpp" line="527"/>
         <source>Select CA certificate file</source>
         <translation>CA Zertifikat auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="529"/>
+        <location filename="accesspointconfig.cpp" line="527"/>
+        <location filename="accesspointconfig.cpp" line="532"/>
         <source>Certificate files (%1)</source>
         <translation>Zertifikate (%1)</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="529"/>
+        <location filename="accesspointconfig.cpp" line="532"/>
         <source>Select client certificate file</source>
         <translation>Client Zertifikat auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="534"/>
+        <location filename="accesspointconfig.cpp" line="537"/>
         <source>Select key file</source>
         <translation>Schlüsseldatei auswählen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="534"/>
+        <location filename="accesspointconfig.cpp" line="537"/>
         <source>Key files (%1)</source>
         <translation>Schlüsseldateien (%1)</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="416"/>
+        <location filename="accesspointconfig.cpp" line="419"/>
         <source>Error on applying settings</source>
         <translation>Fehler beim Setzen der Einstellungen</translation>
     </message>
     <message>
-        <location filename="accesspointconfig.cpp" line="417"/>
+        <location filename="accesspointconfig.cpp" line="420"/>
         <source>WPA supplicant reported the following errors:</source>
         <translation>Der WPA Supplicant meldete folgende Fehler:</translation>
     </message>
@@ -977,27 +900,32 @@
 <context>
     <name>qnut::CAdhocConfig</name>
     <message>
-        <location filename="adhocconfig.cpp" line="140"/>
+        <location filename="adhocconfig.cpp" line="141"/>
         <source>Error on applying settings</source>
         <translation>Fehler beim Setzen der Einstellungen</translation>
     </message>
     <message>
-        <location filename="adhocconfig.cpp" line="141"/>
+        <location filename="adhocconfig.cpp" line="142"/>
         <source>WPA supplicant reported the following errors:</source>
         <translation>Der WPA Supplicant meldete folgende Fehler:</translation>
     </message>
     <message>
-        <location filename="adhocconfig.cpp" line="221"/>
+        <location filename="adhocconfig.cpp" line="180"/>
+        <location filename="adhocconfig.cpp" line="186"/>
+        <location filename="adhocconfig.cpp" line="216"/>
+        <location filename="adhocconfig.cpp" line="222"/>
         <source>Error reading ap config</source>
         <translation>Fehler beim Einlesen der Netzwerkkonfiguration</translation>
     </message>
     <message>
-        <location filename="adhocconfig.cpp" line="216"/>
+        <location filename="adhocconfig.cpp" line="181"/>
+        <location filename="adhocconfig.cpp" line="217"/>
         <source>Unsupported group cipers retrieved: %1</source>
         <translation>Nichtunterstützte Gruppenchiffre: %1</translation>
     </message>
     <message>
-        <location filename="adhocconfig.cpp" line="222"/>
+        <location filename="adhocconfig.cpp" line="187"/>
+        <location filename="adhocconfig.cpp" line="223"/>
         <source>Unsupported key management retrieved: %1</source>
         <translation>Nichtunterstützte Schlüsselverwaltung: %1</translation>
     </message>
@@ -1005,57 +933,61 @@
 <context>
     <name>qnut::CAvailableAPModel</name>
     <message>
-        <location filename="availableapmodel.cpp" line="152"/>
+        <location filename="availableapmodel.cpp" line="78"/>
+        <location filename="availableapmodel.cpp" line="134"/>
+        <location filename="availableapmodel.cpp" line="155"/>
         <source>undefined</source>
         <translation>undefiniert</translation>
     </message>
     <message>
-        <location filename="availableapmodel.cpp" line="143"/>
+        <location filename="availableapmodel.cpp" line="81"/>
+        <location filename="availableapmodel.cpp" line="136"/>
+        <location filename="availableapmodel.cpp" line="146"/>
         <source>none</source>
         <translation>keine</translation>
     </message>
     <message>
-        <location filename="availableapmodel.cpp" line="176"/>
+        <location filename="availableapmodel.cpp" line="179"/>
         <source>SSID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="availableapmodel.cpp" line="180"/>
+        <location filename="availableapmodel.cpp" line="183"/>
         <source>Key management</source>
         <translation>Schlüsselverwaltung</translation>
     </message>
     <message>
-        <location filename="availableapmodel.cpp" line="182"/>
+        <location filename="availableapmodel.cpp" line="185"/>
         <source>BSSID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="availableapmodel.cpp" line="81"/>
+        <location filename="availableapmodel.cpp" line="84"/>
         <source>WEP</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="availableapmodel.cpp" line="84"/>
+        <location filename="availableapmodel.cpp" line="87"/>
         <source>WPA PSK (ad-hoc)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="availableapmodel.cpp" line="178"/>
+        <location filename="availableapmodel.cpp" line="181"/>
         <source>Channel</source>
         <translation>Kanal</translation>
     </message>
     <message>
-        <location filename="availableapmodel.cpp" line="184"/>
+        <location filename="availableapmodel.cpp" line="187"/>
         <source>Quality</source>
         <translation>Qualität</translation>
     </message>
     <message>
-        <location filename="availableapmodel.cpp" line="186"/>
+        <location filename="availableapmodel.cpp" line="189"/>
         <source>Level</source>
         <translation>Pegel</translation>
     </message>
     <message>
-        <location filename="availableapmodel.cpp" line="188"/>
+        <location filename="availableapmodel.cpp" line="191"/>
         <source>Encryption (general; pairwise)</source>
         <translation>Verschlüsselung (Allgemein; Pairwise)</translation>
     </message>
@@ -1063,67 +995,147 @@
 <context>
     <name>qnut::CConnectionManager</name>
     <message>
-        <location filename="connectionmanager.cpp" line="41"/>
+        <location filename="connectionmanager.cpp" line="53"/>
         <source>Overview</source>
         <translation>Übersicht</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="54"/>
+        <location filename="connectionmanager.cpp" line="66"/>
         <source>Cannot create/open log file.</source>
         <translation>Konnte Protokolldatei nicht öffnen/anlegen.</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="58"/>
+        <location filename="connectionmanager.cpp" line="70"/>
         <source>%1 (v%2) started</source>
         <translation>%1 (v%2) gestartet</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="83"/>
+        <location filename="connectionmanager.cpp" line="73"/>
+        <source>QNUT - Connection Manager</source>
+        <translation>QNUT - Verbindungsmanager</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="77"/>
+        <source>Main Toolbar</source>
+        <translation>Hauptwerkzeugleiste</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="98"/>
+        <source>&amp;File</source>
+        <translation>&amp;Datei</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="100"/>
+        <source>&amp;Close</source>
+        <translation>&amp;Schließen</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="102"/>
+        <source>&amp;Quit</source>
+        <translation>&amp;Beenden</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="104"/>
+        <source>&amp;Edit</source>
+        <translation>&amp;Bearbeiten</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="106"/>
+        <source>&amp;View</source>
+        <translation>&amp;Ansicht</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="108"/>
+        <source>Show &amp;balloon tips</source>
+        <translation>Zeige Sprech&amp;blasen</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="109"/>
+        <source>Show balloon tips on certain events like state changes</source>
+        <translation>Zeige Sprechblasen bei bestimmten Ereignissen (z.b. Verbindungsänderungen)</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="112"/>
+        <source>Show &amp;log</source>
+        <translation>Zeige &amp;Protokoll</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="113"/>
+        <source>Show log tab</source>
+        <translation>Zeige Protokollkartei</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="116"/>
+        <source>&amp;Help</source>
+        <translation>&amp;Hilfe</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="118"/>
+        <source>&amp;About QNUT</source>
+        <translation>Über Q&amp;NUT</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="119"/>
+        <source>Show about dialog of QNUT</source>
+        <translation>Zeige Informationsdialog von QNUT</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="121"/>
+        <source>About &amp;Qt</source>
+        <translation>Über &amp;Qt</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="122"/>
+        <source>Show about dialog of Qt</source>
+        <translation>Zeige Informationsdialog von Qt</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="125"/>
         <source>&amp;Refresh devices</source>
         <translation>&amp;Geräte aktualisieren</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="84"/>
+        <location filename="connectionmanager.cpp" line="126"/>
         <source>&amp;Enable</source>
         <translation>&amp;Aktivieren</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="85"/>
+        <location filename="connectionmanager.cpp" line="127"/>
         <source>&amp;Disable</source>
         <translation>&amp;Deaktivieren</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="86"/>
+        <location filename="connectionmanager.cpp" line="128"/>
         <source>&amp;Scripting settings...</source>
         <translation>&amp;Skripteinstellungen...</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="88"/>
+        <location filename="connectionmanager.cpp" line="130"/>
         <source>&amp;Wireless settings...</source>
         <translation>Drahtlose &amp;Kommunikations-Einstellungen...</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="90"/>
+        <location filename="connectionmanager.cpp" line="132"/>
         <source>&amp;Clear log</source>
         <translation>Protokoll &amp;leeren</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="193"/>
+        <location filename="connectionmanager.cpp" line="237"/>
         <source>no devices present</source>
         <translation>keine Geräte vorhanden</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="276"/>
+        <location filename="connectionmanager.cpp" line="320"/>
         <source>About QNUT</source>
         <translation>Über QNUT</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="290"/>
+        <location filename="connectionmanager.cpp" line="334"/>
         <source>Log</source>
         <translation>Protokoll</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="54"/>
+        <location filename="connectionmanager.cpp" line="66"/>
         <source>ERROR: %1</source>
         <translation>Fehler: %1</translation>
     </message>
@@ -1131,84 +1143,100 @@
 <context>
     <name>qnut::CDeviceDetails</name>
     <message>
-        <location filename="devicedetails.cpp" line="113"/>
+        <location filename="devicedetails.cpp" line="189"/>
         <source>&amp;Enable device</source>
         <translation>Gerät &amp;aktivieren</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="117"/>
+        <location filename="devicedetails.cpp" line="193"/>
         <source>&amp;Disable device</source>
         <translation>Gerät &amp;deaktivieren</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="133"/>
+        <location filename="devicedetails.cpp" line="209"/>
         <source>En&amp;vironments...</source>
         <translation>&amp;Umgebungen...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="122"/>
+        <location filename="devicedetails.cpp" line="198"/>
         <source>&amp;Scripting settings...</source>
         <translation>&amp;Skripteinstellungen...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="125"/>
+        <location filename="devicedetails.cpp" line="201"/>
         <source>&amp;Wireless settings...</source>
         <translation>Einstellungen der drahtlosen &amp;Kommunikation...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="136"/>
+        <location filename="devicedetails.cpp" line="212"/>
         <source>E&amp;nter environment</source>
         <translation>&amp;Betrete Umgebung</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="140"/>
+        <location filename="devicedetails.cpp" line="216"/>
         <source>Set &amp;IP configuration...</source>
         <translation>Setzte &amp;IP-Konfiguration...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="285"/>
+        <location filename="devicedetails.cpp" line="224"/>
+        <source>&amp;Copy property</source>
+        <translation>Eigenschaft in Zwischenablage &amp;kopieren</translation>
+    </message>
+    <message>
+        <location filename="devicedetails.cpp" line="250"/>
+        <source>connected to: %1</source>
+        <translation>verbunden mit: %1</translation>
+    </message>
+    <message>
+        <location filename="devicedetails.cpp" line="381"/>
+        <location filename="devicedetails.cpp" line="385"/>
+        <location filename="devicedetails.cpp" line="389"/>
+        <location filename="devicedetails.cpp" line="393"/>
         <source>QNUT - %1 ...</source>
         <translation>QNUT - %1 ...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="274"/>
+        <location filename="devicedetails.cpp" line="382"/>
         <source>... is now up and running.</source>
         <translation>... ist jetzt verbunden.</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="282"/>
+        <location filename="devicedetails.cpp" line="390"/>
         <source>... is now activated an waits for carrier.</source>
         <translation>... ist jetzt aktiviert und wartet
 auf eine physikalische Verbindung.</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="286"/>
+        <location filename="devicedetails.cpp" line="394"/>
         <source>... is now deactivated</source>
         <translation>... ist jetzt deaktiviert</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="307"/>
+        <location filename="devicedetails.cpp" line="403"/>
+        <location filename="devicedetails.cpp" line="407"/>
+        <location filename="devicedetails.cpp" line="411"/>
+        <location filename="devicedetails.cpp" line="415"/>
         <source>QNUT</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="296"/>
+        <location filename="devicedetails.cpp" line="404"/>
         <source>%1 is now up and running.</source>
         <translation>%1 ist jetzt verbunden.</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="304"/>
+        <location filename="devicedetails.cpp" line="412"/>
         <source>%1 is now activated an waits for carrier.</source>
         <translation>%1 ist jetzt aktiviert und wartet
 auf eine physikalische Verbindung.</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="308"/>
+        <location filename="devicedetails.cpp" line="416"/>
         <source>%1 is now deactivated</source>
         <translation>%1 ist jetzt deaktiviert</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="278"/>
+        <location filename="devicedetails.cpp" line="386"/>
         <source>... got carrier but needs configuration.
 
 Klick here to open the device details.</source>
@@ -1219,7 +1247,7 @@ Klicken sie hier, um die Details
 dieses Gerätes anzuzeigen.</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="300"/>
+        <location filename="devicedetails.cpp" line="408"/>
         <source>%1 got carrier but needs configuration.
 
 Klick here to open the device details.</source>
@@ -1229,62 +1257,62 @@ Klick here to open the device details.</source>
 <context>
     <name>qnut::CEnvironmentDetailsModel</name>
     <message>
-        <location filename="environmentdetailsmodel.cpp" line="92"/>
+        <location filename="environmentdetailsmodel.cpp" line="94"/>
         <source>not by user</source>
         <translation>automatisch</translation>
     </message>
     <message>
-        <location filename="environmentdetailsmodel.cpp" line="94"/>
+        <location filename="environmentdetailsmodel.cpp" line="96"/>
         <source>not by arp</source>
         <translation>ARP nicht</translation>
     </message>
     <message>
-        <location filename="environmentdetailsmodel.cpp" line="96"/>
+        <location filename="environmentdetailsmodel.cpp" line="98"/>
         <source>not by ssid</source>
         <translation>SSID nicht</translation>
     </message>
     <message>
-        <location filename="environmentdetailsmodel.cpp" line="98"/>
+        <location filename="environmentdetailsmodel.cpp" line="100"/>
         <source>at least one not</source>
         <translation>mindestens eines nicht</translation>
     </message>
     <message>
-        <location filename="environmentdetailsmodel.cpp" line="100"/>
+        <location filename="environmentdetailsmodel.cpp" line="102"/>
         <source>all not</source>
         <translation>alle nicht</translation>
     </message>
     <message>
-        <location filename="environmentdetailsmodel.cpp" line="107"/>
+        <location filename="environmentdetailsmodel.cpp" line="109"/>
         <source>by user</source>
         <translation>Benutzer</translation>
     </message>
     <message>
-        <location filename="environmentdetailsmodel.cpp" line="109"/>
+        <location filename="environmentdetailsmodel.cpp" line="111"/>
         <source>by arp</source>
         <translation>ARP</translation>
     </message>
     <message>
-        <location filename="environmentdetailsmodel.cpp" line="111"/>
+        <location filename="environmentdetailsmodel.cpp" line="113"/>
         <source>by ssid</source>
         <translation>SSID</translation>
     </message>
     <message>
-        <location filename="environmentdetailsmodel.cpp" line="113"/>
+        <location filename="environmentdetailsmodel.cpp" line="115"/>
         <source>all</source>
         <translation>alle</translation>
     </message>
     <message>
-        <location filename="environmentdetailsmodel.cpp" line="115"/>
+        <location filename="environmentdetailsmodel.cpp" line="117"/>
         <source>at least one</source>
         <translation>mindestens eins</translation>
     </message>
     <message>
-        <location filename="environmentdetailsmodel.cpp" line="159"/>
+        <location filename="environmentdetailsmodel.cpp" line="161"/>
         <source>Statement</source>
         <translation>Kriterium</translation>
     </message>
     <message>
-        <location filename="environmentdetailsmodel.cpp" line="161"/>
+        <location filename="environmentdetailsmodel.cpp" line="163"/>
         <source>Value</source>
         <translation>Wert</translation>
     </message>
@@ -1292,27 +1320,27 @@ Klick here to open the device details.</source>
 <context>
     <name>qnut::CEnvironmentTreeModel</name>
     <message>
-        <location filename="environmenttreemodel.cpp" line="89"/>
+        <location filename="environmenttreemodel.cpp" line="93"/>
         <source>active</source>
         <translation>aktiv</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="107"/>
+        <location filename="environmenttreemodel.cpp" line="111"/>
         <source>none</source>
         <translation>keine</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="139"/>
+        <location filename="environmenttreemodel.cpp" line="143"/>
         <source>Item</source>
         <translation>Objekt</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="141"/>
+        <location filename="environmenttreemodel.cpp" line="145"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="143"/>
+        <location filename="environmenttreemodel.cpp" line="147"/>
         <source>IP-Address</source>
         <translation>IP-Adresse</translation>
     </message>
@@ -1320,105 +1348,121 @@ Klick here to open the device details.</source>
 <context>
     <name>qnut::CIPConfiguration</name>
     <message>
-        <location filename="ipconfiguration.cpp" line="49"/>
-        <source>Faild to add dns server</source>
-        <translation>Fehler beim Hinzufügen des DNS-Server</translation>
-    </message>
-    <message>
-        <location filename="ipconfiguration.cpp" line="49"/>
+        <location filename="ipconfiguration.cpp" line="59"/>
         <source>Address is invalid.</source>
         <translation>Adresse ist ungültig.</translation>
+    </message>
+    <message>
+        <location filename="ipconfiguration.cpp" line="59"/>
+        <source>Adding failed</source>
+        <translation>Fehler beim Hinzufügen</translation>
+    </message>
+    <message>
+        <location filename="ipconfiguration.cpp" line="75"/>
+        <location filename="ipconfiguration.cpp" line="103"/>
+        <source>Import IP configuration</source>
+        <translation>Import einer IP Konfiguration</translation>
+    </message>
+    <message>
+        <location filename="ipconfiguration.cpp" line="75"/>
+        <location filename="ipconfiguration.cpp" line="103"/>
+        <source>Configuration files (*.ipconf *.conf)</source>
+        <translation>Konfigurationsdateien (*.ipconf *.conf)</translation>
     </message>
 </context>
 <context>
     <name>qnut::CInterfaceDetailsModel</name>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="70"/>
+        <location filename="interfacedetailsmodel.cpp" line="72"/>
         <source>Type</source>
         <translation>Typ</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="72"/>
+        <location filename="interfacedetailsmodel.cpp" line="74"/>
         <source>IP-Address</source>
         <translation>IP-Adresse</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="74"/>
+        <location filename="interfacedetailsmodel.cpp" line="76"/>
         <source>Netmask</source>
         <translation>Netzwerkmaske</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="76"/>
+        <location filename="interfacedetailsmodel.cpp" line="78"/>
         <source>Gateway</source>
         <translation>Gateway</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="78"/>
+        <location filename="interfacedetailsmodel.cpp" line="80"/>
         <source>DNS sever #%1</source>
         <translation>DNS-Server #%1</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="116"/>
+        <location filename="interfacedetailsmodel.cpp" line="118"/>
         <source>unknown</source>
         <translation>unbekannt</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="87"/>
+        <location filename="interfacedetailsmodel.cpp" line="89"/>
         <source>user defined static</source>
         <translation>benutzerdefiniert statisch</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="94"/>
+        <location filename="interfacedetailsmodel.cpp" line="96"/>
         <source>dynamic (DHCP)</source>
         <translation>dynamisch (DHCP)</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="91"/>
+        <location filename="interfacedetailsmodel.cpp" line="93"/>
         <source>fallback: zeroconf</source>
         <translation>Ausweichlösung: zeroconf</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="93"/>
+        <location filename="interfacedetailsmodel.cpp" line="95"/>
         <source>fallback: static</source>
         <translation>Ausweichlösung: statisch</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="105"/>
+        <location filename="interfacedetailsmodel.cpp" line="101"/>
+        <location filename="interfacedetailsmodel.cpp" line="107"/>
         <source>static</source>
         <translation>statisch</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="103"/>
+        <location filename="interfacedetailsmodel.cpp" line="105"/>
         <source>static (fallback)</source>
         <translation>statisch (ausgewichen)</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="107"/>
+        <location filename="interfacedetailsmodel.cpp" line="109"/>
         <source>dynamic</source>
         <translation>dynamic</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="110"/>
+        <location filename="interfacedetailsmodel.cpp" line="112"/>
         <source>zeroconf (fallback)</source>
         <translation>zerconf (ausgewichen)</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="112"/>
+        <location filename="interfacedetailsmodel.cpp" line="99"/>
+        <location filename="interfacedetailsmodel.cpp" line="114"/>
         <source>zeroconf</source>
         <translation>zerconf</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="146"/>
+        <location filename="interfacedetailsmodel.cpp" line="126"/>
+        <location filename="interfacedetailsmodel.cpp" line="137"/>
+        <location filename="interfacedetailsmodel.cpp" line="148"/>
         <source>none</source>
         <translation>keine</translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="190"/>
+        <location filename="interfacedetailsmodel.cpp" line="192"/>
         <source>Detail</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="interfacedetailsmodel.cpp" line="192"/>
+        <location filename="interfacedetailsmodel.cpp" line="194"/>
         <source>Value</source>
         <translation>Wert</translation>
     </message>
@@ -1426,42 +1470,31 @@ Klick here to open the device details.</source>
 <context>
     <name>qnut::CManagedAPModel</name>
     <message>
-        <location filename="managedapmodel.cpp" line="70"/>
-        <source>any</source>
-        <translation>jede</translation>
+        <location filename="managedapmodel.cpp" line="82"/>
+        <source>id: %1
+status: %2
+BSSID: %3</source>
+        <translation>ID: %1
+Status: %2
+BSSID: %3</translation>
     </message>
     <message>
-        <location filename="managedapmodel.cpp" line="104"/>
+        <location filename="managedapmodel.cpp" line="138"/>
         <source>ID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="managedapmodel.cpp" line="106"/>
+        <location filename="managedapmodel.cpp" line="140"/>
         <source>SSID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="managedapmodel.cpp" line="108"/>
+        <location filename="managedapmodel.cpp" line="142"/>
         <source>BSSID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="managedapmodel.cpp" line="77"/>
-        <source>selected</source>
-        <translation>ausgewählt</translation>
-    </message>
-    <message>
-        <location filename="managedapmodel.cpp" line="79"/>
-        <source>disabled</source>
-        <translation>deaktiviert</translation>
-    </message>
-    <message>
-        <location filename="managedapmodel.cpp" line="81"/>
-        <source>enabled</source>
-        <translation>auswählbar</translation>
-    </message>
-    <message>
-        <location filename="managedapmodel.cpp" line="110"/>
+        <location filename="managedapmodel.cpp" line="144"/>
         <source>status</source>
         <translation>Status</translation>
     </message>
@@ -1469,44 +1502,39 @@ Klick here to open the device details.</source>
 <context>
     <name>qnut::COverViewModel</name>
     <message>
-        <location filename="overviewmodel.cpp" line="128"/>
+        <location filename="overviewmodel.cpp" line="120"/>
         <source>none</source>
         <translation>keine</translation>
     </message>
     <message>
-        <location filename="overviewmodel.cpp" line="166"/>
+        <location filename="overviewmodel.cpp" line="148"/>
         <source>Device</source>
         <translation>Netzwerkgerät</translation>
     </message>
     <message>
-        <location filename="overviewmodel.cpp" line="168"/>
+        <location filename="overviewmodel.cpp" line="150"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="overviewmodel.cpp" line="170"/>
+        <location filename="overviewmodel.cpp" line="152"/>
         <source>Type</source>
         <translation>Typ</translation>
     </message>
     <message>
-        <location filename="overviewmodel.cpp" line="174"/>
+        <location filename="overviewmodel.cpp" line="156"/>
         <source>Environment</source>
         <translation>Umgebung</translation>
     </message>
     <message>
-        <location filename="overviewmodel.cpp" line="172"/>
+        <location filename="overviewmodel.cpp" line="154"/>
         <source>IP-Address</source>
         <translation>IP-Adresse</translation>
     </message>
     <message>
-        <location filename="overviewmodel.cpp" line="176"/>
+        <location filename="overviewmodel.cpp" line="158"/>
         <source>Network</source>
         <translation>Netzwerk</translation>
-    </message>
-    <message>
-        <location filename="overviewmodel.cpp" line="140"/>
-        <source>local</source>
-        <translation>lokal</translation>
     </message>
 </context>
 <context>
@@ -1530,117 +1558,126 @@ Klick here to open the device details.</source>
 <context>
     <name>qnut::CWirelessSettings</name>
     <message>
-        <location filename="wirelesssettings.cpp" line="28"/>
+        <location filename="wirelesssettings.cpp" line="43"/>
         <source>Wireless Settings for &quot;%1&quot;</source>
         <translation>Einstellungen der drahtlosen Verbindung für &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="268"/>
+        <location filename="wirelesssettings.cpp" line="303"/>
+        <source>This action is not reversible.</source>
+        <translation>Diese Aktion ist nicht umkehrbar.</translation>
+    </message>
+    <message>
+        <location filename="wirelesssettings.cpp" line="305"/>
         <source>Removing a managed network</source>
         <translation>Entferne ein verwaltetes Netzwerk</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="268"/>
+        <location filename="wirelesssettings.cpp" line="301"/>
         <source>Are you sure to remove &quot;%1&quot;?</source>
         <translation>Sind Sie sich sicher, dass sie &quot;%1&quot; entfernen möchten?</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="81"/>
+        <location filename="wirelesssettings.cpp" line="100"/>
         <source>&amp;Enable</source>
         <translation>&amp;Aktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="82"/>
+        <location filename="wirelesssettings.cpp" line="101"/>
         <source>Enable &amp;all</source>
         <translation>A&amp;lle Aktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="83"/>
+        <location filename="wirelesssettings.cpp" line="102"/>
         <source>&amp;Disable</source>
         <translation>&amp;Deaktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="84"/>
+        <location filename="wirelesssettings.cpp" line="103"/>
         <source>S&amp;witch</source>
         <translation>&amp;Wechseln</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="85"/>
+        <location filename="wirelesssettings.cpp" line="104"/>
         <source>&amp;Configure...</source>
         <translation>&amp;Konfigurieren...</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="90"/>
+        <location filename="wirelesssettings.cpp" line="109"/>
+        <source>&amp;Autosave configuration</source>
+        <translation>Konfiguration &amp;automatisch speichern</translation>
+    </message>
+    <message>
+        <location filename="wirelesssettings.cpp" line="110"/>
         <source>&amp;Remove</source>
         <translation>&amp;Entfernen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="86"/>
+        <location filename="wirelesssettings.cpp" line="105"/>
         <source>Add &amp;network</source>
         <translation>&amp;Netzwerk hinzufügen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="87"/>
+        <location filename="wirelesssettings.cpp" line="106"/>
         <source>Add ad-&amp;hoc</source>
         <translation>Ad-&amp;hoc Netz hinzufügen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="89"/>
+        <location filename="wirelesssettings.cpp" line="108"/>
         <source>&amp;Save configuration</source>
         <translation>Konfiguration &amp;speichern</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="88"/>
+        <location filename="wirelesssettings.cpp" line="107"/>
         <source>Re&amp;load configuration</source>
         <translation>Konfiguration akt&amp;ualisieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="91"/>
+        <location filename="wirelesssettings.cpp" line="111"/>
         <source>Detailed &amp;view</source>
         <translation>De&amp;tailierte Ansicht</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="92"/>
+        <location filename="wirelesssettings.cpp" line="112"/>
         <source>Scan ne&amp;tworks</source>
         <translation>Ne&amp;tzwerke suchen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="214"/>
+        <location filename="wirelesssettings.cpp" line="114"/>
+        <source>More...</source>
+        <translation>Mehr...</translation>
+    </message>
+    <message>
+        <location filename="wirelesssettings.cpp" line="211"/>
+        <location filename="wirelesssettings.cpp" line="241"/>
         <source>Quality</source>
         <translation>Qualität</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="216"/>
+        <location filename="wirelesssettings.cpp" line="218"/>
+        <location filename="wirelesssettings.cpp" line="243"/>
         <source>Level</source>
         <translation>Pegel</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="217"/>
+        <location filename="wirelesssettings.cpp" line="219"/>
+        <location filename="wirelesssettings.cpp" line="244"/>
         <source>Noise</source>
         <translation>Rauschen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="182"/>
+        <location filename="wirelesssettings.cpp" line="209"/>
         <source>Channel</source>
         <translation>Kanal</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="215"/>
+        <location filename="wirelesssettings.cpp" line="212"/>
+        <location filename="wirelesssettings.cpp" line="242"/>
         <source>Bitrate</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="94"/>
-        <source>Manage networks</source>
-        <translation>Netzwerke verwalten</translation>
-    </message>
-    <message>
-        <location filename="wirelesssettings.cpp" line="149"/>
-        <source>Manage all...</source>
-        <translation>Verwalten...</translation>
-    </message>
-    <message>
-        <location filename="wirelesssettings.cpp" line="212"/>
+        <location filename="wirelesssettings.cpp" line="239"/>
         <source>no signal info</source>
         <translation>keine Signalinformationen</translation>
     </message>
@@ -1648,9 +1685,49 @@ Klick here to open the device details.</source>
 <context>
     <name>qnut::QObject</name>
     <message>
-        <location filename="common.h" line="48"/>
+        <location filename="managedapmodel.cpp" line="62"/>
+        <source>selected</source>
+        <translation>ausgewählt</translation>
+    </message>
+    <message>
+        <location filename="managedapmodel.cpp" line="64"/>
+        <source>disabled</source>
+        <translation>deaktiviert</translation>
+    </message>
+    <message>
+        <location filename="managedapmodel.cpp" line="66"/>
+        <source>enabled</source>
+        <translation>auswählbar</translation>
+    </message>
+    <message>
+        <location filename="managedapmodel.cpp" line="72"/>
+        <source>any</source>
+        <translation>jede</translation>
+    </message>
+    <message>
+        <location filename="common.h" line="60"/>
         <source>none</source>
         <translation>keine</translation>
+    </message>
+    <message>
+        <location filename="common.cpp" line="72"/>
+        <source>Type: %1</source>
+        <translation>Typ: %1</translation>
+    </message>
+    <message>
+        <location filename="common.cpp" line="73"/>
+        <source>State: %1</source>
+        <translation>Status: %1</translation>
+    </message>
+    <message>
+        <location filename="common.cpp" line="79"/>
+        <source>Connected to: %1</source>
+        <translation>Verbunden mit: %1</translation>
+    </message>
+    <message>
+        <location filename="common.cpp" line="95"/>
+        <source>local</source>
+        <translation>lokal</translation>
     </message>
 </context>
 <context>
