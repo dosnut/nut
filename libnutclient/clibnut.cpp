@@ -1,3 +1,6 @@
+/*
+        TRANSLATOR libnutclient::CLibNut
+*/
 #include "clibnut.h"
 #include "libnutcommon/common.h"
 

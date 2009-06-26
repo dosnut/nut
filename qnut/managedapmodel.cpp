@@ -5,6 +5,9 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
+/*
+        TRANSLATOR qnut::QObject
+*/
 #ifndef QNUT_NO_WIRELESS
 #include <QIcon>
 #include <QFont>

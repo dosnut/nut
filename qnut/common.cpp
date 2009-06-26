@@ -5,6 +5,9 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
+/*
+        TRANSLATOR qnut::QObject
+*/
 #include <libnutclient/cdevice.h>
 #include <libnutclient/cenvironment.h>
 #include <libnutclient/cinterface.h>

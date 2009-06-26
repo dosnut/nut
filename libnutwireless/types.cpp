@@ -1,3 +1,6 @@
+/*
+        TRANSLATOR libnutwireless::QObject
+*/
 #include "types.h"
 #include <QDebug>
 
