@@ -36,6 +36,8 @@ namespace qnut {
 		
 		setWindowIcon(m_TrayIcon.icon());
 		
+		m_ToolBar = new QToolBar(tr("Main Toolbar"), this);
+		
 		createActions();
 		readSettings();
 		
@@ -74,7 +76,6 @@ namespace qnut {
 		
 		distributeActions();
 		
-		m_ToolBar = addToolBar(tr("Main Toolbar"));
 		m_ToolBar->addActions(m_EditMenu->actions());
 		
 		connect(&m_TabWidget, SIGNAL(currentChanged(int)), this, SLOT(handleTabChanged(int)));
@@ -183,26 +184,34 @@ namespace qnut {
 	}
 	
 	inline void CConnectionManager::readSettings() {
-		m_Settings.beginGroup("Main");
-		m_ShowBalloonTipsAction->setChecked(m_Settings.value("showBalloonTips", true).toBool());
-		m_ShowLogAction->setChecked(m_Settings.value("showLog", true).toBool());
+		m_Settings.beginGroup(UI_SETTINGS_MAIN);
+		m_ShowBalloonTipsAction->setChecked(m_Settings.value(UI_SETTINGS_SHOWBALLOONTIPS, true).toBool());
+		m_ShowLogAction->setChecked(m_Settings.value(UI_SETTINGS_SHOWLOG, true).toBool());
 		m_Settings.endGroup();
 		
-		m_Settings.beginGroup("ConnectionManager");
-		resize(m_Settings.value("size", QSize(646, 322)).toSize());
-		move(m_Settings.value("pos", QPoint(200, 200)).toPoint());
+		m_Settings.beginGroup(UI_SETTINGS_CONNECTIONMANAGER);
+		resize(m_Settings.value(UI_SETTINGS_SIZE, QSize(646, 322)).toSize());
+		move(m_Settings.value(UI_SETTINGS_POS, QPoint(200, 200)).toPoint());
+		Qt::ToolBarArea area = static_cast<Qt::ToolBarArea>(m_Settings.value(UI_SETTINGS_TOOLBARAREA, Qt::TopToolBarArea).toInt());
+		addToolBar(area, m_ToolBar);
+// 		if (area == Qt::NoToolBarArea)
+// 			m_ToolBar->move(m_Settings.value("toolBarFloatPos", QPoint(200, 200)).toPoint());
 		m_Settings.endGroup();
 	}
 	
 	inline void CConnectionManager::writeSettings() {
-		m_Settings.beginGroup("Main");
-		m_Settings.setValue("showBalloonTips", m_ShowBalloonTipsAction->isChecked());
-		m_Settings.setValue("showLog", m_ShowLogAction->isChecked());
+		m_Settings.beginGroup(UI_SETTINGS_MAIN);
+		m_Settings.setValue(UI_SETTINGS_SHOWBALLOONTIPS, m_ShowBalloonTipsAction->isChecked());
+		m_Settings.setValue(UI_SETTINGS_SHOWLOG, m_ShowLogAction->isChecked());
 		m_Settings.endGroup();
 		
-		m_Settings.beginGroup("ConnectionManager");
-		m_Settings.setValue("size", size());
-		m_Settings.setValue("pos", pos());
+		m_Settings.beginGroup(UI_SETTINGS_CONNECTIONMANAGER);
+		m_Settings.setValue(UI_SETTINGS_SIZE, size());
+		m_Settings.setValue(UI_SETTINGS_POS, pos());
+		Qt::ToolBarArea area = toolBarArea(m_ToolBar);
+		m_Settings.setValue(UI_SETTINGS_TOOLBARAREA, static_cast<int>(area));
+// 		if (area == Qt::NoToolBarArea)
+// 			m_Settings.setValue("toolBarFloatPos", m_ToolBar->pos());
 		m_Settings.endGroup();
 	}
 	

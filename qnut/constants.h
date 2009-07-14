@@ -89,4 +89,26 @@
 #define UI_ACTIONS_LOG                  0x01
 #define UI_ACTIONS_DEVICE               0x02
 
+#define UI_SETTINGS_MAIN                "Main"
+#define UI_SETTINGS_SHOWBALLOONTIPS     "showBalloonTips"
+#define UI_SETTINGS_SHOWLOG             "showLog"
+
+#define UI_SETTINGS_CONNECTIONMANAGER   "ConnectionManager"
+#define UI_SETTINGS_SIZE                "size"
+#define UI_SETTINGS_POS                 "pos"
+#define UI_SETTINGS_TOOLBARAREA         "toolBarArea"
+
+#define UI_SETIINGS_SCRIPTFLAGS         "scriptFlags"
+#define UI_SETTINGS_SHOWTRAYICON        "showTrayIcon"
+#define UI_SETTINGS_SHOWDETAILS         "showDetails"
+
+#define UI_SETTINGS_WIRELESSSETTINGS    "WirelessSettings"
+
+#define UI_SETTINGS_IPCONFIGURATIONS    "IPconfigurations"
+#define UI_SETTINGS_IP                  "ip"
+#define UI_SETTINGS_NETMASK             "netmask"
+#define UI_SETTINGS_GATEWAY             "gateway"
+#define UI_SETTINGS_DNSSERVERS          "dnsServers"
+#define UI_SETTINGS_ADDRESS             "address"
+
 #endif
