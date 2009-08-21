@@ -207,7 +207,7 @@ namespace nuts {
 	QList<QString> HardwareManager::get_ifNames() {
 		struct ifreq ifr;
 		QList<QString> ifNames;
-		for (int i=0; i<16;i++) {
+		for (int i=0; i<32;i++) { //using nuts on a pc with more than 32 interfaces is insane
 			ifreq_init(ifr);
 			ifr.ifr_ifindex = i;
 			if (ioctl(ethtool_fd, SIOCGIFNAME, &ifr) < 0) {
