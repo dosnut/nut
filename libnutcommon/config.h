@@ -95,6 +95,9 @@ namespace libnutcommon {
 			const QHash<QString, DeviceConfig*> &getDevices() {
 				return m_devices;
 			}
+
+			void insert(QString deviceName, DeviceConfig* deviceConfig) { m_devices.insert(deviceName, deviceConfig);}
+			bool contains(QString deviceName) { return m_devices.contains(deviceName);}
 	};
 	
 	/** @brief Each device has a list of \link EnvironmentConfig Environments\endlink and some additional config values.
@@ -132,6 +135,8 @@ namespace libnutcommon {
 			
 			QString wpaConfigFile() { return m_wpaConfigFile; }
 			QString wpaDriver() { return m_wpaDriver; }
+
+			DeviceConfig * createCopy() { return this;}
 	};
 	
 	/** @brief Result type of a select test.
