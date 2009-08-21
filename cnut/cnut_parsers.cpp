@@ -102,7 +102,10 @@ namespace cnut {
 				}
 				else {
 // 					qDebug() << QString("Parsed setEnvironment with: %1").arg(cmd.value);
-					if (cmd.value.contains("\"")) { //Check if index or name
+					if (cmd.value.isEmpty()) {
+						return RETVAL_ENVIRONMENT_NOT_FOUND;
+					}
+					else if (cmd.value.contains("\"")) { //Check if index or name
 						QString name = cmd.value;
 						name.chop(1);
 						name.remove(0,1);
