@@ -71,7 +71,7 @@ namespace nuts {
 
 	void DeviceManager::filterWildCardDevices() {
 		foreach(QString dev, m_config->getDevices().keys()) {
-			if (dev.contains("*") && !m_wildcardConfig.contains(dev)) {
+			if ((dev.contains("*") || dev.contains("?") || (dev.contains("[") && dev.contains("]"))) && !m_wildcardConfig.contains(dev)) {
 				m_wildcardConfig.insert(dev,m_config->getDevice(dev));
 			}
 		}
