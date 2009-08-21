@@ -58,6 +58,7 @@ namespace nuts {
 			bool controlOff(const QString &ifName);
 			
 			QString ifIndex2Name(int ifIndex);
+			QList<QString> get_ifNames();
 			int ifName2Index(const QString &ifName);
 			
 			struct nl_handle *getNLHandle();

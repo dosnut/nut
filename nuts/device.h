@@ -49,6 +49,7 @@ namespace nuts {
 			ConfigParser m_configParser;
 			Events m_events;
 			libnutcommon::Config *m_config;
+			QHash<QString, libnutcommon::DeviceConfig*> m_wildcardConfig;
 			QTimer m_carrier_timer;
 			/// Internal structure for delaying carrier events.
 			struct ca_evt {
@@ -66,6 +67,9 @@ namespace nuts {
 			friend class Interface_IPv4;
 			
 			HardwareManager m_hwman;
+			
+			void filterWildCardDevices();
+			void addWildCardDevicesToConfig();
 			
 		private slots:
 			void ca_timer();

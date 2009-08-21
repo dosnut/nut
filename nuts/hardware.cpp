@@ -191,7 +191,7 @@ namespace nuts {
 		if (ioctl(ethtool_fd, SIOCSIFFLAGS, &ifr) < 0) {
 			err << QString("Couldn't set flags for interface '%1'").arg(ifname) << endl;
 			return false;
-		}
+			}
 		return true;
 	}
 	QString HardwareManager::ifIndex2Name(int ifIndex) {
@@ -204,6 +204,20 @@ namespace nuts {
 		}
 		return QString::fromUtf8(ifr.ifr_name, qstrnlen(ifr.ifr_name, IFNAMSIZ));
 	}
+	QList<QString> HardwareManager::get_ifNames() {
+		struct ifreq ifr;
+		QList<QString> ifNames;
+		for (int i=0; i<16;i++) {
+			ifreq_init(ifr);
+			ifr.ifr_ifindex = i;
+			if (ioctl(ethtool_fd, SIOCGIFNAME, &ifr) < 0) {
+				continue;
+			}
+			ifNames.append(QString::fromUtf8(ifr.ifr_name, qstrnlen(ifr.ifr_name, IFNAMSIZ)));
+		}
+		return ifNames;
+	}
+
 	int HardwareManager::ifName2Index(const QString &ifName) {
 		struct ifreq ifr;
 		if (!ifreq_init(ifr, ifName)) {
