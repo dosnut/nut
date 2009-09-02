@@ -209,6 +209,8 @@ namespace qnut {
 	
 	CAvailableAPProxyModel::CAvailableAPProxyModel(QObject * parent) : QSortFilterProxyModel(parent) {
 		setDynamicSortFilter(true);
+		setFilterKeyColumn(0);
+		setFilterCaseSensitivity(Qt::CaseInsensitive);
 	}
 	
 	bool CAvailableAPProxyModel::lessThan(const QModelIndex & left, const QModelIndex & right) {

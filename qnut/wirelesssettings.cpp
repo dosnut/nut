@@ -78,6 +78,8 @@ namespace qnut {
 		connect(m_VisibleAPView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(switchToSelectedNetwork()));
 		connect(m_HiddenAPView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(switchToSelectedNetwork()));
 		
+		connect(ui.availableAPFilterEdit, SIGNAL(textChanged(const QString &)), m_AvailableAPProxyModel, SLOT(setFilterWildcard(const QString &)));
+		
 		if (m_Device->getWpaSupplicant()) {
 //			connect(m_Device->getWpaSupplicant(), SIGNAL(stateChanged(bool)), this, SLOT(setEnabled(bool)));
 			connect(m_SaveNetworksAction, SIGNAL(triggered()), m_Device->getWpaSupplicant(), SLOT(save_config()));
