@@ -189,8 +189,10 @@ namespace nuts {
 					if (rx.exactMatch(ifName)) {
 						m_config->insert(ifName, i.value());
 						dc = i.value();
+						break;
 					}
 				}
+				if (!dc) return;
 			}
 			else {
 				return;
