@@ -15,6 +15,8 @@
 #include <QString>
 #include <QHostAddress>
 
+#include <libnutclient/cenvironment.h>
+
 namespace libnutclient {
 	class CDevice;
 }
@@ -24,7 +26,7 @@ namespace qnut {
 	 * @brief Returns a QString of the filename for the given device according to its state.
 	 * @param device pointer to an existing instance of a CDevice
 	 */
-	QString iconFile(libnutclient::CDevice * device);
+	QString iconFile(libnutclient::CDevice * device, bool stateAware = true);
 	/**
 	 * @brief Returns the pointer to the instance of a new action separator.
 	 * @param parent parent object
@@ -60,6 +62,13 @@ namespace qnut {
 			return QObject::tr("none");
 		else
 			return address.toString();
+	}
+	
+	inline QString getNameDefault(libnutclient::CEnvironment * environment) {
+		if (environment->getName().isEmpty())
+			return QObject::tr("default");
+		else
+			return environment->getName();
 	}
 }
 

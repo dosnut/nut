@@ -20,10 +20,12 @@ namespace qnut {
 	using namespace libnutclient;
 	using namespace libnutwireless;
 	
-	QString iconFile(CDevice * device) {
+	QString iconFile(CDevice * device, bool stateAware) {
+		libnutcommon::DeviceState state = stateAware ? device->getState() : DS_ACTIVATED;
+		
 		switch (device->getType()) {
 		case DT_ETH:
-			switch (device->getState()) {
+			switch (state) {
 			case DS_UP:             return QString(UI_ICON_ETH_UP);
 			case DS_UNCONFIGURED:   return QString(UI_ICON_ETH_UNCONFIGURED);
 			case DS_CARRIER:        return QString(UI_ICON_ETH_CARRIER);
@@ -32,7 +34,7 @@ namespace qnut {
 			default:                break;
 			}
 		case DT_AIR:
-			switch (device->getState()) {
+			switch (state) {
 			case DS_UP:             return QString(UI_ICON_AIR_UP);
 			case DS_UNCONFIGURED:   return QString(UI_ICON_AIR_UNCONFIGURED);
 			case DS_CARRIER:        return QString(UI_ICON_AIR_CARRIER);
@@ -41,7 +43,7 @@ namespace qnut {
 			default:                break;
 			}
 		case DT_BRIDGE:
-			switch (device->getState()) {
+			switch (state) {
 			case DS_UP:             return QString(UI_ICON_BRIDGE_UP);
 			case DS_UNCONFIGURED:   return QString(UI_ICON_BRIDGE_UNCONFIGURED);
 			case DS_CARRIER:        return QString(UI_ICON_BRIDGE_CARRIER);

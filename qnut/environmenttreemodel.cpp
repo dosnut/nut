@@ -84,8 +84,9 @@ namespace qnut {
 		
 		switch (index.column()) {
 		case ENVTREE_MOD_ITEM:
-			if (currentData->parent() == m_Device)
-				return static_cast<CEnvironment *>(currentData)->getName();
+			if (currentData->parent() == m_Device) {
+				return getNameDefault(static_cast<CEnvironment *>(currentData));
+			}
 			else
 				return '#' + QString::number(static_cast<CInterface *>(currentData)->getIndex());
 		case ENVTREE_MOD_STATUS:

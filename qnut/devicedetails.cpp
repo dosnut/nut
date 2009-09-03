@@ -183,6 +183,7 @@ namespace qnut {
 	
 	inline void CDeviceDetails::createActions() {
 		m_DeviceMenu = new QMenu(m_Device->getName(), NULL);
+		m_DeviceMenu->setIcon(QIcon(iconFile(m_Device, false)));
 		
 		QAction * tempAction;
 		

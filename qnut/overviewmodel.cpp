@@ -115,7 +115,7 @@ namespace qnut {
 				}
 			case OV_MOD_ENV:
 				if (data->getState() >= DS_UNCONFIGURED)
-					return data->getActiveEnvironment()->getName();
+					return getNameDefault(data->getActiveEnvironment());
 				else
 					return tr("none");
 			case OV_MOD_NETWORK:
