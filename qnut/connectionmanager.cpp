@@ -106,6 +106,12 @@ namespace qnut {
 		
 		currentMenu = menuBar()->addMenu(tr("&View"));
 		
+		currentAction = m_ToolBar->toggleViewAction();
+		currentMenu->addAction(currentAction);
+		currentAction->setText(tr("Show %1").arg(currentAction->text()));
+		
+		currentMenu->addSeparator();
+		
 		m_ShowBalloonTipsAction = currentMenu->addAction(tr("Show &balloon tips"));
 		m_ShowBalloonTipsAction->setToolTip(tr("Show balloon tips on certain events like state changes"));
 		m_ShowBalloonTipsAction->setCheckable(true);
@@ -193,7 +199,9 @@ namespace qnut {
 		resize(m_Settings.value(UI_SETTINGS_SIZE, QSize(646, 322)).toSize());
 		move(m_Settings.value(UI_SETTINGS_POS, QPoint(200, 200)).toPoint());
 		Qt::ToolBarArea area = static_cast<Qt::ToolBarArea>(m_Settings.value(UI_SETTINGS_TOOLBARAREA, Qt::TopToolBarArea).toInt());
+		m_ToolBar->setVisible(m_Settings.value(UI_SETTINGS_SHOWTOOLBAR, true).toBool());
 		addToolBar(area, m_ToolBar);
+		
 // 		if (area == Qt::NoToolBarArea)
 // 			m_ToolBar->move(m_Settings.value("toolBarFloatPos", QPoint(200, 200)).toPoint());
 		m_Settings.endGroup();
@@ -210,6 +218,7 @@ namespace qnut {
 		m_Settings.setValue(UI_SETTINGS_POS, pos());
 		Qt::ToolBarArea area = toolBarArea(m_ToolBar);
 		m_Settings.setValue(UI_SETTINGS_TOOLBARAREA, static_cast<int>(area));
+		m_Settings.setValue(UI_SETTINGS_SHOWTOOLBAR, m_ToolBar->isVisible());
 // 		if (area == Qt::NoToolBarArea)
 // 			m_Settings.setValue("toolBarFloatPos", m_ToolBar->pos());
 		m_Settings.endGroup();

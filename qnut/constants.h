@@ -97,6 +97,7 @@
 #define UI_SETTINGS_SIZE                "size"
 #define UI_SETTINGS_POS                 "pos"
 #define UI_SETTINGS_TOOLBARAREA         "toolBarArea"
+#define UI_SETTINGS_SHOWTOOLBAR         "showToolBar"
 
 #define UI_SETIINGS_SCRIPTFLAGS         "scriptFlags"
 #define UI_SETTINGS_SHOWTRAYICON        "showTrayIcon"
