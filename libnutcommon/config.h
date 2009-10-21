@@ -82,22 +82,29 @@ namespace libnutcommon {
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const Config &data);
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, Config &data);
 			
-			QHash<QString, DeviceConfig*> m_devices;
+			QList<QString> m_devNames;
+			QList<DeviceConfig*> m_devConfigs;
 		
 		public:
 			Config();
 			virtual ~Config();
 			
 			DeviceConfig* getDevice(const QString &deviceName) {
-				return m_devices.value(deviceName, 0);
+				int id = m_devNames.indexOf(deviceName);
+				if (id >= 0) {
+					return m_devConfigs.at(id);
+				}
 			}
 			
-			const QHash<QString, DeviceConfig*> &getDevices() {
-				return m_devices;
+			const QList<QString> &getNames() {
+				return m_devNames;
 			}
 
-			void insert(QString deviceName, DeviceConfig* deviceConfig) { m_devices.insert(deviceName, deviceConfig);}
-			bool contains(QString deviceName) { return m_devices.contains(deviceName);}
+			const QList<DeviceConfig*> &getConfigs() {
+				return m_devConfigs;
+			}
+
+			bool contains(QString deviceName) { return m_devNames.contains(deviceName);}
 	};
 	
 	/** @brief Each device has a list of \link EnvironmentConfig Environments\endlink and some additional config values.
@@ -122,6 +129,7 @@ namespace libnutcommon {
 			bool m_noAutoStart;
 			QString m_wpaConfigFile;
 			QString m_wpaDriver;
+			bool m_isRegExp;
 		
 		public:
 			DeviceConfig();
@@ -135,6 +143,8 @@ namespace libnutcommon {
 			
 			QString wpaConfigFile() { return m_wpaConfigFile; }
 			QString wpaDriver() { return m_wpaDriver; }
+
+			bool isRegExp() { return m_isRegExp; }
 
 			DeviceConfig * createCopy() { return this;}
 	};

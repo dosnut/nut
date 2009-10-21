@@ -4,11 +4,11 @@ namespace libnutcommon {
 	QDBusArgument &operator<< (QDBusArgument &argument, const Config &data) {
 		argument.beginStructure();
 		argument.beginMap( QVariant::String, qMetaTypeId<DeviceConfig>() );
-		QHashIterator<QString, DeviceConfig*> i(data.m_devices);
-		while (i.hasNext()) {
-			i.next();
+		QListIterator<QString> name(data.m_devNames);
+		QListIterator<DeviceConfig*> config(data.m_devConfigs);
+		while (name.hasNext() && config.hasNext()) {
 			argument.beginMapEntry();
-			argument << i.key() << *i.value();
+			argument << name.next() << *config.next();
 			argument.endMapEntry();
 		}
 		argument.endMap();
@@ -24,7 +24,8 @@ namespace libnutcommon {
 			argument.beginMapEntry();
 			argument >> name >> *dc;
 			argument.endMapEntry();
-			data.m_devices.insert(name, dc);
+			data.m_devNames.append(name);
+			data.m_devConfigs.append(dc);
 		}
 		argument.endMap();
 		argument.endStructure();
@@ -172,9 +173,9 @@ namespace libnutcommon {
 	
 	Config::~Config() {
 		if (!m_isCopy) {
-			foreach(DeviceConfig* dc, m_devices)
+			foreach(DeviceConfig* dc, m_devConfigs)
 				delete dc;
-			m_devices.clear();
+			m_devConfigs.clear();
 		}
 	}
 	
