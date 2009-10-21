@@ -17,6 +17,7 @@
 %%
 
 device      return DEVICE;
+regexp      return REGEXP;
 environment return ENVIRONMENT;
 
 no-auto-start return NOAUTOSTART;

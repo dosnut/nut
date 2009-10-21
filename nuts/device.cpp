@@ -59,40 +59,22 @@ namespace nuts {
 		*/
 		m_carrier_timer.setInterval(400);
 		connect(&m_carrier_timer, SIGNAL(timeout()), SLOT(ca_timer()));
-		filterWildCardDevices();
-		addWildCardDevicesToConfig();
-		QHashIterator<QString, libnutcommon::DeviceConfig*> i(m_config->getDevices());
-		while (i.hasNext()) {
-			i.next();
-			if (m_hwman.ifExists(i.key()))
-				addDevice(i.key(), i.value());
-		}
+		addDevices();
 	}
 
-	void DeviceManager::filterWildCardDevices() {
-		foreach(QString dev, m_config->getDevices().keys()) {
-			if ((dev.contains("*") || dev.contains("?") || (dev.contains("[") && dev.contains("]"))) && !m_wildcardConfig.contains(dev)) {
-				m_wildcardConfig.insert(dev,m_config->getDevice(dev));
-			}
-		}
-	}
-
-	void DeviceManager::addWildCardDevicesToConfig() {
-		QHash<QString,QString> realDevs;
+	void DeviceManager::addDevices() {
 		foreach(QString real_dev, m_hwman.get_ifNames()) {
-			foreach(QString wcard_dev, m_wildcardConfig.keys()) {
-				QRegExp rx(wcard_dev);
-				rx.setPatternSyntax(QRegExp::Wildcard);
-				if (rx.exactMatch(real_dev)) {
-					realDevs.insert(real_dev,wcard_dev);
+			for (int i=0; i < m_config->getNames().size(); i++) {
+				QRegExp rx(m_config->getNames().at(i));
+				if (m_config->getConfigs().at(i)->isRegExp()) {
+					rx.setPatternSyntax(QRegExp::RegExp);
 				}
-			}
-		}
-		libnutcommon::DeviceConfig * realdev_config = NULL;
-		foreach(QString real_dev, realDevs.keys()) {
-			if (!m_config->contains(real_dev)) {
-				realdev_config = m_wildcardConfig.value(realDevs.value(real_dev))->createCopy();
-				m_config->insert(real_dev,realdev_config);
+				else {
+					rx.setPatternSyntax(QRegExp::Wildcard);
+				}
+				if (rx.exactMatch(real_dev)) {
+					addDevice(real_dev, m_config->getConfigs().at(i));
+				}
 			}
 		}
 	}
@@ -178,28 +160,18 @@ namespace nuts {
 	void DeviceManager::newDevice(const QString &ifName, int) {
 		Device *d = m_devices.value(ifName, 0);
 		if (d) return;
-		libnutcommon::DeviceConfig *dc = m_config->getDevices().value(ifName, 0);
-		if (!dc) {
-			if (m_wildcardConfig.size() > 0) {
-				QHashIterator<QString, libnutcommon::DeviceConfig*> i(m_wildcardConfig);
-				while (i.hasNext()) {
-					i.next();
-					QRegExp rx(i.key());
-					rx.setPatternSyntax(QRegExp::Wildcard);
-					if (rx.exactMatch(ifName)) {
-						m_config->insert(ifName, i.value());
-						dc = i.value();
-						break;
-					}
-				}
-				if (!dc) return;
+		for (int i=0; i < m_config->getNames().size(); i++) {
+			QRegExp rx(m_config->getNames().at(i));
+			if (m_config->getConfigs().at(i)->isRegExp()) {
+				rx.setPatternSyntax(QRegExp::RegExp);
 			}
 			else {
-				return;
+				rx.setPatternSyntax(QRegExp::Wildcard);
+			}
+			if (rx.exactMatch(ifName)) {
+				addDevice(ifName, m_config->getConfigs().at(i));
 			}
 		}
-		addDevice(ifName, dc);
-//		log << QString("newDevice(%1)").arg(ifName) << endl;
 	}
 	
 	void DeviceManager::delDevice(const QString &ifName) {

@@ -40,11 +40,13 @@ namespace nuts {
 		err << QString("%1:%2: %3").arg(m_configFile).arg(lineNum).arg(msg) << endl;
 	}
 	
-	bool ConfigParser::newDevice(const QString &name) {
+	bool ConfigParser::newDevice(const QString &name, bool regexp) {
 		m_def_env = 0; m_curdevconfig = 0;
-		if (!m_config->m_devices.contains(name)) {
+		if (( 0 == m_config->m_devNames.count(name)) || (( 1 == m_config->m_devNames.count(name)) && (m_config->m_devConfigs.at(m_config->m_devNames.indexOf(name))->isRegExp() != regexp))) {
 			m_curdevconfig = new libnutcommon::DeviceConfig();
-			m_config->m_devices.insert(name, m_curdevconfig);
+			m_curdevconfig->m_isRegExp = regexp;
+			m_config->m_devNames.append(name);
+			m_config->m_devConfigs.append(m_curdevconfig);
 			m_curdevconfig->m_environments.push_back(new libnutcommon::EnvironmentConfig(""));
 			m_def_env = new local_env_config();
 			return true;

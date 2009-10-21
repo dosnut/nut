@@ -45,7 +45,7 @@ namespace nuts {
 		// didn't get protected/friend working with extern "C"
 			void parseError(int lineNum, const QString &msg);
 			
-			bool newDevice(const QString &name);
+			bool newDevice(const QString &name, bool regexp=false);
 			bool finishDevice();
 			
 			bool devEnvironment(const QString &name);

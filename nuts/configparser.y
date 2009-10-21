@@ -22,6 +22,7 @@
 }
 
 %token DEVICE ENVIRONMENT
+%token REGEXP
 %token NOAUTOSTART
 %token DEFAULT
 %token DHCP NODHCP ZEROCONF NOZEROCONF STATIC 
@@ -51,7 +52,9 @@ input:
 	| input device
 ;
 
-device: DEVICE STRING { CHECK(newDevice(*$2)); delete $2; } deviceconfig { CHECK(finishDevice()); }
+device:
+	DEVICE STRING { CHECK(newDevice(*$2)); delete $2; } deviceconfig { CHECK(finishDevice()); }
+	| DEVICE REGEXP STRING { CHECK(newDevice(*$3,true)); delete $3; } deviceconfig { CHECK(finishDevice()); }
 ;
 
 deviceconfig: ';'
