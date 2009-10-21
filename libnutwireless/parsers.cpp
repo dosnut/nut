@@ -89,6 +89,288 @@ namespace libnutwireless {
 		}
 		return networks;
 	}
+	
+	
+	/* Scan results:
+	bssid / frequency / signal level / flags / ssid
+	00:09:5b:95:e0:4e	2412	208	[WPA-PSK-CCMP]	jkm private
+	02:55:24:33:77:a3	2462	187	[WPA-PSK-TKIP]	testing
+	00:09:5b:95:e0:4f	2412	209		jkm guest
+	*/
+	PairwiseCiphers CWpaSupplicantParsers::parseScanPairwiseCiphers(QString str) {
+		int cip = PCI_UNDEFINED;
+		if (str.contains("CCMP")) {
+			cip = (cip | PCI_CCMP);
+		}
+		if (str.contains("TKIP")) {
+			cip = (cip | PCI_TKIP);
+		}
+		return (PairwiseCiphers) cip;
+	}
+
+	KeyManagement CWpaSupplicantParsers::parseScanKeyMgmt(QString str) {
+		int keymgmt = KM_UNDEFINED;
+		if (str.contains("WPA-PSK")) {
+			keymgmt= (keymgmt| KM_WPA_PSK);
+		}
+		if (str.contains("WPA2-EAP")) {
+			keymgmt= (keymgmt| KM_WPA_EAP);
+		}
+		if (str.contains("WPA2-PSK")) {
+			keymgmt= (keymgmt| KM_WPA_PSK);
+		}
+		if (str.contains("WPA-EAP")) {
+			keymgmt= (keymgmt| KM_WPA_EAP);
+		}
+		if (str.contains("IEEE8021X")) {
+			keymgmt= (keymgmt| KM_IEEE8021X);
+		}
+		if (str.contains("WPA-NONE")) {
+			keymgmt= (keymgmt| KM_WPA_NONE);
+		}
+		if (str.contains("WPA2-NONE")) {
+			keymgmt= (keymgmt| KM_WPA_NONE);
+		}
+		if (str.contains("WEP")) {
+			keymgmt = (keymgmt | KM_NONE);
+		}
+		if (str.isEmpty()) {
+			keymgmt = KM_OFF;
+		}
+		return (KeyManagement) keymgmt;
+	}
+
+	Protocols CWpaSupplicantParsers::parseScanProtocols(QString str) {
+		int proto = PROTO_UNDEFINED;
+		if (str.contains("WPA")) {
+			proto = (proto | PROTO_WPA);
+		}
+		if (str.contains("WPA2")) {
+			proto = (proto | PROTO_RSN);
+		}
+		return (Protocols) proto;
+	}
+
+
+	QList<ScanResult> CWpaSupplicantParsers::parseScanResult(QStringList list) {
+		list.removeFirst();
+		QList<ScanResult> scanresults;
+		QStringList line;
+		ScanResult scanresult;
+		scanresult.signal.type = WSR_UNKNOWN;
+		scanresult.signal.quality.maximum = 0;
+		scanresult.signal.quality.value = 0;
+		scanresult.signal.noise.rcpi = 0.0;
+		scanresult.signal.level.rcpi = 0.0;
+		bool worked = true;
+		foreach(QString str, list) {
+			line = str.split('\t',QString::KeepEmptyParts);
+			scanresult.bssid = libnutcommon::MacAddress(line[0]);
+			scanresult.freq = line[1].toInt(&worked);
+			scanresult.signal.frequency = scanresult.freq;
+			if (!worked) {
+				worked = true;
+				continue;
+			}
+			//Quality will come directly from wext
+			scanresult.signal.level.nonrcpi.value = line[2].toInt(&worked);
+			if (!worked) {
+				worked = true;
+				continue;
+			}
+
+			scanresult.group = GCI_UNDEFINED; //Wpa_supplicant doesn't send any info about that
+			scanresult.pairwise = parseScanPairwiseCiphers(line[3]);
+			scanresult.protocols = parseScanProtocols(line[3]);
+			scanresult.keyManagement = parseScanKeyMgmt(line[3]);
+			scanresult.ssid = line[4];
+			scanresults.append(scanresult);
+		}
+		return scanresults;
+	}
+	
+
+	void CWpaSupplicantParsers::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * scan) {
+
+		int ielen = iebuf[1] + 2;
+		int offset = 2;	/* Skip the IE id, and the length. */
+		unsigned char wpa1_oui[3] = {0x00, 0x50, 0xf2};
+		unsigned char wpa2_oui[3] = {0x00, 0x0f, 0xac};
+		unsigned char * wpa_oui;
+		int i;
+		uint16_t ver = 0;
+		uint16_t cnt = 0;
+		
+		if (ielen > buflen) {
+			ielen = buflen;
+		}
+		
+		//set wpa_oui
+		switch (iebuf[0]) {
+			case 0x30:		/* WPA2 */
+				/* Check if we have enough data */
+				if(ielen < 4) { //Unknown data, return
+					return;
+				}
+				wpa_oui = wpa2_oui;
+				break;
+		
+			case 0xdd:		/* WPA or else */
+				wpa_oui = wpa1_oui;
+		
+				/* Not all IEs that start with 0xdd are WPA. 
+				* So check that the OUI is valid. Note : offset==2 */
+				if ((ielen < 8) || (memcmp(&iebuf[offset], wpa_oui, 3) != 0) || (iebuf[offset + 3] != 0x01)) {
+					return;
+				}
+
+				/* Skip the OUI type */
+				offset += 4;
+				break;
+			
+			default:
+				return;
+		}
+		
+		/* Pick version number (little endian) */
+		ver = iebuf[offset] | (iebuf[offset + 1] << 8);
+		offset += 2;
+		
+		//Set protocoltype
+		if (iebuf[0] == 0xdd) { //WPA1
+			scan->protocols = (Protocols) (scan->protocols | PROTO_WPA);
+		}
+		if (iebuf[0] == 0x30) { //WPA2 "IEEE 802.11i/WPA2 Version"
+			scan->protocols = (Protocols) (scan->protocols | PROTO_RSN);
+		}
+		/* From here, everything is technically optional. */
+		
+		/* Check if we are done */
+		if (ielen < (offset + 4)) {
+			/* We have a short IE.  So we should not assume TKIP/TKIP, just return */
+			return;
+		}
+		
+		/* Next we have our group cipher. */
+		if (memcmp(&iebuf[offset], wpa_oui, 3) != 0) {
+// 			printf("                        Group Cipher : Proprietary\n");
+		}
+		else {
+			//Set GroupCiphers
+			qDebug() << "GroupCiphers for " << scan->ssid << scan->bssid.toString() << iebuf[offset+3];
+			switch (iebuf[offset+3]) {
+				case 0:
+					scan->group = GCI_NONE;
+					break;
+				case 1:
+					scan->group = GCI_WEP40;
+					break;
+				case 2:
+					scan->group = GCI_TKIP;
+					break;
+				case 3:
+					scan->group = GCI_WRAP;
+					break;
+				case 4:
+					scan->group = GCI_CCMP;
+					break;
+				case 5:
+					scan->group = GCI_WEP104;
+					break;
+				default:
+					scan->group = GCI_UNDEFINED;
+					break;
+			}
+		}
+		offset += 4;
+		
+		/* Check if we are done */
+		if (ielen < (offset + 2)) {
+			/* We don't have a pairwise cipher, or auth method. DO NOT Assume TKIP. */
+			return;
+		}
+		
+		/* Otherwise, we have some number of pairwise ciphers. */
+		cnt = iebuf[offset] | (iebuf[offset + 1] << 8);
+		offset += 2;
+
+		if (ielen < (offset + 4*cnt)) {
+			return;
+		}
+		
+		for(i = 0; i < cnt; i++) {
+			if (memcmp(&iebuf[offset], wpa_oui, 3) != 0) {
+// 				printf(" Proprietary");
+			}
+			else { //Set PairwiseCiphers
+				qDebug() << "PairwiseCiphers for " << scan->ssid << scan->bssid.toString() << iebuf[offset+3];
+				switch (iebuf[offset+3]) {
+					case 0: scan->pairwise = PCI_NONE; break;
+					case 2: scan->pairwise = (PairwiseCiphers) (scan->pairwise | PCI_TKIP); break;
+					case 4: scan->pairwise = (PairwiseCiphers) (scan->pairwise | PCI_CCMP); break;
+					default: scan->pairwise = (PairwiseCiphers) (scan->pairwise | PCI_UNDEFINED); break;
+				}
+			}
+			offset+=4;
+		}
+		
+		/* Check if we are done */
+		if (ielen < (offset + 2)) {
+			return;
+		}
+		
+		/* Now, we have authentication suites. */
+		cnt = iebuf[offset] | (iebuf[offset + 1] << 8);
+		offset += 2;
+
+		
+		if (ielen < (offset + 4*cnt)) {
+			return;
+		}
+		
+		for(i = 0; i < cnt; i++) {
+			if(memcmp(&iebuf[offset], wpa_oui, 3) != 0) { //don't care about proprietary
+// 				printf(" Proprietary");
+			}
+			else { //Set the authsuites
+				qDebug() << "Setting AUTHSUITES of" << scan->ssid << scan->bssid.toString();
+				if (KM_NONE == scan->keyManagement) {
+					qDebug() << "Resetting keymanagement";
+					scan->keyManagement = KM_UNDEFINED;
+				}
+				switch (iebuf[offset+3]) {
+					case 0:
+						if ( OPM_ADHOC == scan->opmode) {
+							scan->keyManagement = (KeyManagement) (scan->keyManagement | KM_WPA_NONE);
+							qDebug() << "AUTHSUITE: WPA_NONE";
+						}
+						else {
+							scan->keyManagement = (KeyManagement) (scan->keyManagement | KM_NONE);
+							qDebug() << "AUTHSUITE: NONE";
+						}
+						break;
+					case 1:
+						scan->keyManagement = (KeyManagement) (scan->keyManagement | KM_WPA_EAP | KM_IEEE8021X);
+						qDebug() << "AUTHSUITE: WPA_EAP";
+						break;
+					case 2:
+						scan->keyManagement = (KeyManagement) (scan->keyManagement | KM_WPA_PSK);
+						qDebug() << "AUTHSUITE: WPA_PSK";
+						break;
+					default:
+						break;
+				}
+			}
+			offset+=4;
+		}
+		
+		/* Check if we are done */
+		if (ielen < (offset + 1)) {
+			return;
+		}
+	}
+
+
 
 	//parse config
 	Protocols CWpaSupplicantParsers::parseProtocols(QString str) {
