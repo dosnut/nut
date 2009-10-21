@@ -8,6 +8,7 @@ extern "C" {
 
 #include "exception.h"
 #include "log.h"
+#include <QRegExp>
 
 void configparserparse(nuts::ConfigParser *cp);
 extern FILE *configparserin;
@@ -42,7 +43,22 @@ namespace nuts {
 	
 	bool ConfigParser::newDevice(const QString &name, bool regexp) {
 		m_def_env = 0; m_curdevconfig = 0;
-		if (( 0 == m_config->m_devNames.count(name)) || (( 1 == m_config->m_devNames.count(name)) && (m_config->m_devConfigs.at(m_config->m_devNames.indexOf(name))->isRegExp() != regexp))) {
+		if ((!m_config->m_devNames.contains(name)) || (( 1 == m_config->m_devNames.count(name)) && (m_config->m_devConfigs.at(m_config->m_devNames.indexOf(name))->isRegExp() != regexp))) {
+			QRegExp rx(name);
+			if (regexp) {
+				rx.setPatternSyntax(QRegExp::RegExp);
+				if (!rx.isValid()) {
+					throw Exception(QString("Device name is not a valid RegExp: %1").arg(name));
+					return false;
+				}
+			}
+			else {
+				rx.setPatternSyntax(QRegExp::Wildcard);
+				if (!rx.isValid()) {
+					throw Exception(QString("Device Name is not valid: %1").arg(name));
+					return false;
+				}
+			}
 			m_curdevconfig = new libnutcommon::DeviceConfig();
 			m_curdevconfig->m_isRegExp = regexp;
 			m_config->m_devNames.append(name);

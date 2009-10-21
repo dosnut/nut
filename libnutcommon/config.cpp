@@ -37,6 +37,7 @@ namespace libnutcommon {
 		argument << data.m_noAutoStart;
 		argument << data.m_wpaConfigFile;
 		argument << data.m_wpaDriver;
+		argument << data.m_isRegExp;
 		argument.beginArray( qMetaTypeId<EnvironmentConfig>() );
 		foreach(EnvironmentConfig* ec, data.m_environments) {
 			argument << *ec;
@@ -50,6 +51,7 @@ namespace libnutcommon {
 		argument >> data.m_noAutoStart;
 		argument >> data.m_wpaConfigFile;
 		argument >> data.m_wpaDriver;
+		argument >> data.m_isRegExp;
 		argument.beginArray();
 		while (!argument.atEnd()) {
 			EnvironmentConfig *ec = new EnvironmentConfig();
@@ -180,7 +182,7 @@ namespace libnutcommon {
 	}
 	
 	DeviceConfig::DeviceConfig()
-	: m_noAutoStart(false) {
+	: m_noAutoStart(false), m_isRegExp(false) {
 	}
 	
 	DeviceConfig::~DeviceConfig() {

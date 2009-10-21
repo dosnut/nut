@@ -72,7 +72,7 @@ namespace nuts {
 				else {
 					rx.setPatternSyntax(QRegExp::Wildcard);
 				}
-				if (rx.exactMatch(real_dev)) {
+				if (rx.exactMatch(real_dev) && !m_devices.contains(real_dev)) {
 					addDevice(real_dev, m_config->getConfigs().at(i));
 				}
 			}
@@ -168,7 +168,7 @@ namespace nuts {
 			else {
 				rx.setPatternSyntax(QRegExp::Wildcard);
 			}
-			if (rx.exactMatch(ifName)) {
+			if (rx.exactMatch(ifName) && !m_devices.contains(ifName)) {
 				addDevice(ifName, m_config->getConfigs().at(i));
 			}
 		}
