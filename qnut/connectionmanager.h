@@ -9,15 +9,18 @@
 #define QNUT_CONNECTIONMANAGER_H
 
 #include <QMainWindow>
-#include <QTreeView>
-#include <QTextEdit>
+#include <QItemSelection>
 #include <QHash>
 #include <libnutclient/cdevicemanager.h>
 #include <libnutclient/clog.h>
-#include "trayicon.h"
+
+class QTextEdit;
+class QTreeView;
+class QSystemTrayIcon;
 
 namespace qnut {
 	class CDeviceDetails;
+	class CTrayIcon;
 	
 	/**
 	 * @brief CConnectionManager acts as the main class (and window) of the application
@@ -46,12 +49,11 @@ namespace qnut {
 		libnutclient::CLog m_LogFile;
 		
 		QHash<libnutclient::CDevice *, CDeviceDetails *> m_DeviceDetails;
-// 		QSettings m_Settings;
 		
-		CTrayIcon m_TrayIcon;
-		QTabWidget m_TabWidget;
-		QTreeView m_OverView;
-		QTextEdit m_LogEdit;
+		CTrayIcon * m_TrayIcon;
+		QTabWidget * m_TabWidget;
+		QTreeView * m_OverView;
+		QTextEdit * m_LogEdit;
 		
 		QMenu * m_EditMenu;
 		QToolBar * m_ToolBar;

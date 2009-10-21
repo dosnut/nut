@@ -11,6 +11,8 @@
 #include <QAction>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QTreeView>
+#include <QTextEdit>
 #include <libnutclient/cdevice.h>
 
 #include "connectionmanager.h"
@@ -19,6 +21,7 @@
 #include "constants.h"
 #include "overviewmodel.h"
 #include "devicedetails.h"
+#include "trayicon.h"
 
 namespace qnut {
 	using namespace libnutclient;
@@ -27,36 +30,42 @@ namespace qnut {
 	CConnectionManager::CConnectionManager(QWidget * parent) :
 		QMainWindow(parent),
 		m_DeviceManager(this),
-		m_LogFile(this, UI_FILE_LOG),
-		m_TrayIcon(this)
+		m_LogFile(this, UI_FILE_LOG)
 	{
+		m_TrayIcon = new CTrayIcon(this);
 		m_DeviceDetails.reserve(10);
 		
 		resize(600, 322);
-		setWindowIcon(m_TrayIcon.icon());
+		setWindowIcon(m_TrayIcon->icon());
 		
 		m_ToolBar = new QToolBar(tr("Main Toolbar"), this);
+		m_ToolBar->setObjectName("MainToolbar");
+		
+		m_LogEdit = new QTextEdit(this);
+		m_LogEdit->hide();
+		m_LogEdit->setReadOnly(true);
+		m_LogEdit->setAcceptRichText(false);
+		
+		m_OverView = new QTreeView(this);
+		
+		//m_OverView_>setSortingEnabled(true); //TODO sorting in overview
+		m_OverView->setModel(new COverViewModel(&(m_DeviceManager), this));
+		m_OverView->setContextMenuPolicy(Qt::ActionsContextMenu);
+		m_OverView->setRootIsDecorated(false);
+		m_OverView->setItemsExpandable(false);
+		m_OverView->setAllColumnsShowFocus(true);
+		m_OverView->setIconSize(QSize(32, 32));
+		
+		m_TabWidget = new QTabWidget(this);
+		m_TabWidget->addTab(m_OverView, tr("Overview"));
+		
+		setCentralWidget(m_TabWidget);
 		
 		createActions();
 		readSettings();
 		
-		m_LogEdit.setReadOnly(true);
-		m_LogEdit.setAcceptRichText(false);
-		
-		//m_OverView.setSortingEnabled(true);
-		m_OverView.setModel(new COverViewModel(&(m_DeviceManager), this));
-		m_OverView.setContextMenuPolicy(Qt::ActionsContextMenu);
-		m_OverView.setRootIsDecorated(false);
-		m_OverView.setItemsExpandable(false);
-		m_OverView.setAllColumnsShowFocus(true);
-		m_OverView.setIconSize(QSize(32, 32));
-		
-		m_TabWidget.addTab(&m_OverView, tr("Overview"));
-		
 		if (m_ShowLogAction->isChecked())
 			showLog(true);
-		
-		setCentralWidget(&m_TabWidget);
 		
 		connect(&m_DeviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(addUiDevice(libnutclient::CDevice *)));
 		connect(&m_DeviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
@@ -64,9 +73,9 @@ namespace qnut {
 		connect(&m_DeviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
 		
 		if (m_LogFile.error() != QFile::NoError)
-			m_LogEdit.append(tr("ERROR: %1").arg(tr("Cannot create/open log file.")));
+			m_LogEdit->append(tr("ERROR: %1").arg(tr("Cannot create/open log file.")));
 		
-		connect(&m_LogFile, SIGNAL(printed(const QString &)), &m_LogEdit, SLOT(append(const QString &)));
+		connect(&m_LogFile, SIGNAL(printed(const QString &)), m_LogEdit, SLOT(append(const QString &)));
 		
 		m_LogFile << tr("%1 (v%2) started").arg(UI_NAME, UI_VERSION);
 		m_LogFile << QDateTime::currentDateTime().toString();
@@ -77,13 +86,13 @@ namespace qnut {
 		
 		m_ToolBar->addActions(m_EditMenu->actions());
 		
-		connect(&m_TabWidget, SIGNAL(currentChanged(int)), this, SLOT(handleTabChanged(int)));
-		connect(&m_TrayIcon, SIGNAL(messageClicked()), this, SLOT(show()));
-		connect(m_OverView.selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+		connect(m_TabWidget, SIGNAL(currentChanged(int)), this, SLOT(handleTabChanged(int)));
+		connect(m_TrayIcon, SIGNAL(messageClicked()), this, SLOT(show()));
+		connect(m_OverView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(handleSelectionChanged(const QItemSelection &, const QItemSelection &)));
-		connect(&m_OverView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(showDeviceDetails(const QModelIndex &)));
+		connect(m_OverView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(showDeviceDetails(const QModelIndex &)));
 		
-		m_TrayIcon.show();
+		m_TrayIcon->show();
 		m_DeviceManager.init(&m_LogFile);
 	}
 	
@@ -144,18 +153,18 @@ namespace qnut {
 		m_WirelessSettingsAction->setEnabled(false);
 #endif
 		
-		m_OverView.addAction(m_RefreshDevicesAction);
-		m_OverView.addAction(getSeparator(this));
-		m_OverView.addAction(m_EnableDeviceAction);
-		m_OverView.addAction(m_DisableDeviceAction);
-		m_OverView.addAction(getSeparator(this));
-		m_OverView.addAction(m_DeviceSettingsAction);
+		m_OverView->addAction(m_RefreshDevicesAction);
+		m_OverView->addAction(getSeparator(this));
+		m_OverView->addAction(m_EnableDeviceAction);
+		m_OverView->addAction(m_DisableDeviceAction);
+		m_OverView->addAction(getSeparator(this));
+		m_OverView->addAction(m_DeviceSettingsAction);
 #ifndef QNUT_NO_WIRELESS
-		m_OverView.addAction(m_WirelessSettingsAction);
+		m_OverView->addAction(m_WirelessSettingsAction);
 #endif
 		
 		connect(m_RefreshDevicesAction, SIGNAL(triggered()), &m_DeviceManager, SLOT(refreshAll()));
-		connect(m_ClearLogAction, SIGNAL(triggered()), &m_LogEdit, SLOT(clear()));
+		connect(m_ClearLogAction, SIGNAL(triggered()), m_LogEdit, SLOT(clear()));
 		connect(m_ShowLogAction, SIGNAL(toggled(bool)), this, SLOT(showLog(bool)));
 		
 		addToolBar(m_ToolBar);
@@ -165,7 +174,7 @@ namespace qnut {
 		switch (mode) {
 		case UI_ACTIONS_OVERVIEW:
 			//general device actions
-			m_EditMenu->addActions(m_OverView.actions());
+			m_EditMenu->addActions(m_OverView->actions());
 			break;
 		case UI_ACTIONS_LOG:
 			m_EditMenu->addAction(m_RefreshDevicesAction);
@@ -177,7 +186,7 @@ namespace qnut {
 				m_EditMenu->addAction(m_RefreshDevicesAction);
 				m_EditMenu->addSeparator();
 				
-				CDeviceDetails * current = qobject_cast<CDeviceDetails *>(m_TabWidget.currentWidget());
+				CDeviceDetails * current = qobject_cast<CDeviceDetails *>(m_TabWidget->currentWidget());
 				
 				//current device actions
 				m_EditMenu->addActions(current->deviceActions());
@@ -231,10 +240,10 @@ namespace qnut {
 	void CConnectionManager::addUiDevice(CDevice * device) {
 		CDeviceDetails * newDeviceOptions = new CDeviceDetails(device);
 		
-		m_TabWidget.insertTab(m_DeviceManager.getDevices().indexOf(device)+1, newDeviceOptions, device->getName());
+		m_TabWidget->insertTab(m_DeviceManager.getDevices().indexOf(device)+1, newDeviceOptions, device->getName());
 		
 		m_DeviceDetails.insert(device, newDeviceOptions);
-		m_TrayIcon.addDeviceMenu(newDeviceOptions->trayMenu());
+		m_TrayIcon->addDeviceMenu(newDeviceOptions->trayMenu());
 		
 		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(updateTrayIconInfo()));
 		connect(newDeviceOptions, SIGNAL(showDetailsRequested(QWidget *)), this, SLOT(showDeviceDetails(QWidget *)));
@@ -243,12 +252,12 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::removeUiDevice(CDevice * device) {
-		m_OverView.clearSelection();
+		m_OverView->clearSelection();
 		CDeviceDetails * target = m_DeviceDetails[device];
 		m_DeviceDetails.remove(device);
 		
-		m_TabWidget.removeTab(m_TabWidget.indexOf(target));
-		m_TrayIcon.removeDeviceMenu(target->trayMenu());
+		m_TabWidget->removeTab(m_TabWidget->indexOf(target));
+		m_TrayIcon->removeDeviceMenu(target->trayMenu());
 		delete target;
 	}
 	
@@ -262,7 +271,7 @@ namespace qnut {
 				result << shortSummary(i);
 			}
 		
-		m_TrayIcon.setToolTip(result.join("\n"));
+		m_TrayIcon->setToolTip(result.join("\n"));
 	}
 	
 	void CConnectionManager::handleTabChanged(int index) {
@@ -270,7 +279,7 @@ namespace qnut {
 		
 		if (index == 0)
 			distributeActions(UI_ACTIONS_OVERVIEW);
-		else if ((m_ShowLogAction->isChecked()) && (index == m_TabWidget.count()-1))
+		else if ((m_ShowLogAction->isChecked()) && (index == m_TabWidget->count()-1))
 			distributeActions(UI_ACTIONS_LOG);
 		else
 			distributeActions(UI_ACTIONS_DEVICE);
@@ -331,7 +340,7 @@ namespace qnut {
 			if (trayIcon)
 				trayIcon->showMessage(title, message, QSystemTrayIcon::Information, 4000);
 			else
-				m_TrayIcon.showMessage(title, message, QSystemTrayIcon::Information, 4000);
+				m_TrayIcon->showMessage(title, message, QSystemTrayIcon::Information, 4000);
 		}
 	}
 	
@@ -353,15 +362,15 @@ namespace qnut {
 	
 	void CConnectionManager::showLog(bool doShow) {
 		if (doShow)
-			m_TabWidget.addTab(&m_LogEdit, tr("Log"));
+			m_TabWidget->addTab(m_LogEdit, tr("Log"));
 		else
-			m_TabWidget.removeTab(m_TabWidget.count()-1);
+			m_TabWidget->removeTab(m_TabWidget->count()-1);
 	}
 	
 	void CConnectionManager::showDeviceDetails(QWidget * widget) {
 		show();
 		activateWindow();
-		m_TabWidget.setCurrentWidget(widget);
+		m_TabWidget->setCurrentWidget(widget);
 	}
 	
 	void CConnectionManager::showDeviceDetails(const QModelIndex & index) {
