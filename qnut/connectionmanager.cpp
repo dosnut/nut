@@ -199,8 +199,8 @@ namespace qnut {
 		resize(m_Settings.value(UI_SETTINGS_SIZE, QSize(646, 322)).toSize());
 		move(m_Settings.value(UI_SETTINGS_POS, QPoint(200, 200)).toPoint());
 		Qt::ToolBarArea area = static_cast<Qt::ToolBarArea>(m_Settings.value(UI_SETTINGS_TOOLBARAREA, Qt::TopToolBarArea).toInt());
-		m_ToolBar->setVisible(m_Settings.value(UI_SETTINGS_SHOWTOOLBAR, true).toBool());
 		addToolBar(area, m_ToolBar);
+		m_ToolBar->setVisible(m_Settings.value(UI_SETTINGS_SHOWTOOLBAR, true).toBool());
 		
 // 		if (area == Qt::NoToolBarArea)
 // 			m_ToolBar->move(m_Settings.value("toolBarFloatPos", QPoint(200, 200)).toPoint());
