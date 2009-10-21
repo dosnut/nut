@@ -24,16 +24,6 @@ namespace libnutwireless {
 		//parse list network
 		QList<ShortNetworkInfo> parseListNetwork(QStringList list);
 		NetworkFlags parseNetworkFlags(QString str);
-	
-	
-		//parse scan results
-		PairwiseCiphers parseScanPairwiseCiphers(QString str);
-		KeyManagement parseScanKeyMgmt(QString str);
-		Protocols parseScanProtocols(QString str);
-		
-
-		QList<ScanResult> parseScanResult(QStringList list);
-		void parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * scan);
 
 
 		//parse config
