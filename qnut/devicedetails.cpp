@@ -35,12 +35,12 @@ namespace qnut {
 	CDeviceDetails::CDeviceDetails(CDevice * parentDevice, QWidget * parent) : QWidget(parent) {
 		m_Device = parentDevice;
 		
-		#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 		if (m_Device->getWpaSupplicant())
 			m_WirelessSettings = new CWirelessSettings(m_Device);
 		else
 			m_WirelessSettings = NULL;
-		#endif
+#endif
 		
 		createView();
 		createActions();
@@ -65,62 +65,78 @@ namespace qnut {
 		disconnect(m_Device, SIGNAL(stateChanged(libnutcommon::DeviceState)),
 			this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
 		writeSettings();
-		#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 		if (m_WirelessSettings) {
 			m_WirelessSettings->close();
 			delete m_WirelessSettings;
 		}
-		#endif
+#endif
 		delete m_DeviceMenu;
 	}
 	
 	inline void CDeviceDetails::readSettings() {
-		QSettings m_Settings(UI_PATH_DEV(parentDevice->getName()) + "dev.conf", QSettings::IniFormat, this);
+		QSettings * settings = new QSettings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME);
+#ifndef QNUT_SETTINGS_NOCOMPAT
+		QString configFile = UI_PATH_DEV(m_Device->getName()) + "dev.conf";
+		bool readOld = QFile::exists(m_Device->getName() + "dev.conf") && settings->childGroups().isEmpty();
 		
-		m_Settings.beginGroup(UI_SETTINGS_MAIN);
-		m_ScriptFlags = m_Settings.value(UI_SETIINGS_SCRIPTFLAGS, 0).toInt();
-		m_trayIcon->setVisible(m_Settings.value(UI_SETTINGS_SHOWTRAYICON, false).toBool());
-		ui.detailsButton->setChecked(m_Settings.value(UI_SETTINGS_SHOWDETAILS, false).toBool());
-		m_Settings.endGroup();
+		if (readOld) {
+			delete settings;
+			settings = new QSettings(configFile, QSettings::IniFormat);
+			settings->beginGroup(UI_SETTINGS_MAIN);
+		}
+		else
+			settings->beginGroup(m_Device->getName());
+#else
+		settings->beginGroup(m_Device->getName());
+#endif
+		m_ScriptFlags = settings->value(UI_SETIINGS_SCRIPTFLAGS, 0).toInt();
+		m_trayIcon->setVisible(settings->value(UI_SETTINGS_SHOWTRAYICON, false).toBool());
+		ui.detailsButton->setChecked(settings->value(UI_SETTINGS_SHOWDETAILS, false).toBool());
+		
+#ifndef QNUT_SETTINGS_NOCOMPAT
+		if (readOld)
+			settings->endGroup();
+#endif
+		
 		ui.showTrayCheck->setChecked(m_trayIcon->isVisible());
 		
-		#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 		if (m_WirelessSettings) {
-			m_Settings.beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
-			m_WirelessSettings->resize(m_Settings.value(UI_SETTINGS_SIZE, QSize(646, 322)).toSize());
-			m_WirelessSettings->move(m_Settings.value(UI_SETTINGS_POS, QPoint(200, 200)).toPoint());
-			m_WirelessSettings->setDetailsVisible(m_Settings.value(UI_SETTINGS_SHOWDETAILS, false).toBool());
-			m_Settings.endGroup();
+			settings->beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
+			m_WirelessSettings->restoreGeometry(settings->value(UI_SETTINGS_GEOMETRY).toByteArray());
+			m_WirelessSettings->setDetailsVisible(settings->value(UI_SETTINGS_SHOWDETAILS, false).toBool());
+			settings->endGroup();
 		}
-		#endif
+#endif
 		
-		if (m_Settings.childGroups().contains(UI_SETTINGS_IPCONFIGURATIONS)) {
-			m_Settings.beginGroup(UI_SETTINGS_IPCONFIGURATIONS);
+		if (settings->childGroups().contains(UI_SETTINGS_IPCONFIGURATIONS)) {
+			settings->beginGroup(UI_SETTINGS_IPCONFIGURATIONS);
 			
 			foreach (CEnvironment * i, m_Device->getEnvironments()) {
-				if (m_Settings.childGroups().contains(i->getName())) {
-					m_Settings.beginGroup(i->getName());
+				if (settings->childGroups().contains(i->getName())) {
+					settings->beginGroup(i->getName());
 					foreach (CInterface * j, i->getInterfaces()) {
-						if (j->getConfig().getFlags() & IPv4Config::DO_USERSTATIC && m_Settings.childGroups().contains(QString::number(j->getIndex()))) {
+						if (j->getConfig().getFlags() & IPv4Config::DO_USERSTATIC && settings->childGroups().contains(QString::number(j->getIndex()))) {
 							libnutcommon::IPv4UserConfig config;
 							
-							m_Settings.beginGroup(QString::number(j->getIndex()));
-							config.setIP(QHostAddress(m_Settings.value(UI_SETTINGS_IP).toString()));
-							config.setNetmask(QHostAddress(m_Settings.value(UI_SETTINGS_NETMASK).toString()));
-							config.setGateway(QHostAddress(m_Settings.value(UI_SETTINGS_GATEWAY).toString()));
+							settings->beginGroup(QString::number(j->getIndex()));
+							config.setIP(QHostAddress(settings->value(UI_SETTINGS_IP).toString()));
+							config.setNetmask(QHostAddress(settings->value(UI_SETTINGS_NETMASK).toString()));
+							config.setGateway(QHostAddress(settings->value(UI_SETTINGS_GATEWAY).toString()));
 							
 							QList<QHostAddress> dnsServers;
-							int size = m_Settings.beginReadArray(UI_SETTINGS_DNSSERVERS);
+							int size = settings->beginReadArray(UI_SETTINGS_DNSSERVERS);
 							for (int k = 0; k < size; ++k) {
-								m_Settings.setArrayIndex(k);
-								QHostAddress dnsServer(m_Settings.value(UI_SETTINGS_ADDRESS).toString());
+								settings->setArrayIndex(k);
+								QHostAddress dnsServer(settings->value(UI_SETTINGS_ADDRESS).toString());
 								if (!dnsServer.isNull())
 									dnsServers << dnsServer;
 							}
-							m_Settings.endArray();
+							settings->endArray();
 							
 							config.setDnsservers(dnsServers);
-							m_Settings.endGroup();
+							settings->endGroup();
 							
 							if (config.valid())
 								j->setUserConfig(config);
@@ -128,59 +144,67 @@ namespace qnut {
 							m_IPConfigsToRemember.insert(j);
 						}
 					}
-					m_Settings.endGroup();
+					settings->endGroup();
 				}
 			}
 			
-			m_Settings.endGroup();
+			settings->endGroup();
 		}
+#ifndef QNUT_SETTINGS_NOCOMPAT
+		if (!readOld)
+			settings->endGroup();
+#else
+		settings->endGroup();
+#endif
+		
+		delete settings;
 	}
 	
 	inline void CDeviceDetails::writeSettings() {
-		QSettings m_Settings(UI_PATH_DEV(parentDevice->getName()) + "dev.conf", QSettings::IniFormat, this);
+		QSettings settings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME);
 		
-		m_Settings.beginGroup(UI_SETTINGS_MAIN);
-		m_Settings.setValue(UI_SETIINGS_SCRIPTFLAGS, m_ScriptFlags);
-		m_Settings.setValue(UI_SETTINGS_SHOWTRAYICON, m_trayIcon->isVisible());
-		m_Settings.setValue(UI_SETTINGS_SHOWDETAILS, ui.detailsButton->isChecked());
-		m_Settings.endGroup();
+		settings.beginGroup(m_Device->getName());
+		settings.setValue(UI_SETIINGS_SCRIPTFLAGS, m_ScriptFlags);
+		settings.setValue(UI_SETTINGS_SHOWTRAYICON, m_trayIcon->isVisible());
+		settings.setValue(UI_SETTINGS_SHOWDETAILS, ui.detailsButton->isChecked());
 		
-		#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 		if (m_WirelessSettings) {
-			m_Settings.beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
-			m_Settings.setValue(UI_SETTINGS_SIZE, m_WirelessSettings->size());
-			m_Settings.setValue(UI_SETTINGS_POS, m_WirelessSettings->pos());
-			m_Settings.setValue(UI_SETTINGS_SHOWDETAILS, m_WirelessSettings->detailsVisible());
-			m_Settings.endGroup();
+			settings.beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
+			settings.setValue(UI_SETTINGS_GEOMETRY, m_WirelessSettings->saveGeometry());
+			settings.setValue(UI_SETTINGS_SHOWDETAILS, m_WirelessSettings->detailsVisible());
+			settings.endGroup();
 		}
-		#endif
+#endif
 		
-		if (m_Settings.childGroups().contains(UI_SETTINGS_IPCONFIGURATIONS))
-			m_Settings.remove(UI_SETTINGS_IPCONFIGURATIONS);
+		if (settings.childGroups().contains(UI_SETTINGS_IPCONFIGURATIONS))
+			settings.remove(UI_SETTINGS_IPCONFIGURATIONS);
 		
 		if (!m_IPConfigsToRemember.isEmpty()) {
-			m_Settings.beginGroup(UI_SETTINGS_IPCONFIGURATIONS);
+			settings.beginGroup(UI_SETTINGS_IPCONFIGURATIONS);
 			
 			foreach (CInterface * i, m_IPConfigsToRemember) {
-				m_Settings.beginGroup(qobject_cast<CEnvironment *>(i->parent())->getName());
-				m_Settings.beginGroup(QString::number(i->getIndex()));
+				settings.beginGroup(qobject_cast<CEnvironment *>(i->parent())->getName());
+				settings.beginGroup(QString::number(i->getIndex()));
 				
-				m_Settings.setValue(UI_SETTINGS_IP, i->getUserConfig().ip().toString());
-				m_Settings.setValue(UI_SETTINGS_NETMASK, i->getUserConfig().netmask().toString());
-				m_Settings.setValue(UI_SETTINGS_GATEWAY, i->getUserConfig().gateway().toString());
-				m_Settings.beginWriteArray(UI_SETTINGS_DNSSERVERS, i->getUserConfig().dnsservers().size());
+				settings.setValue(UI_SETTINGS_IP, i->getUserConfig().ip().toString());
+				settings.setValue(UI_SETTINGS_NETMASK, i->getUserConfig().netmask().toString());
+				settings.setValue(UI_SETTINGS_GATEWAY, i->getUserConfig().gateway().toString());
+				settings.beginWriteArray(UI_SETTINGS_DNSSERVERS, i->getUserConfig().dnsservers().size());
 				for (int k = 0; k < i->getUserConfig().dnsservers().size(); ++k) {
-					m_Settings.setArrayIndex(k);
-					m_Settings.setValue(UI_SETTINGS_ADDRESS, i->getUserConfig().dnsservers()[k].toString());
+					settings.setArrayIndex(k);
+					settings.setValue(UI_SETTINGS_ADDRESS, i->getUserConfig().dnsservers()[k].toString());
 				}
-				m_Settings.endArray();
+				settings.endArray();
 				
-				m_Settings.endGroup();
-				m_Settings.endGroup();
+				settings.endGroup();
+				settings.endGroup();
 			}
 			
-			m_Settings.endGroup();
+			settings.endGroup();
 		}
+		
+		settings.endGroup();
 	}
 	
 	inline void CDeviceDetails::createActions() {
@@ -200,11 +224,11 @@ namespace qnut {
 		m_DeviceMenu->addSeparator();
 		m_DeviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("&Scripting settings..."),
 			this, SLOT(openScriptingSettings()));
-		#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 		tempAction = m_DeviceMenu->addAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."),
 			this, SLOT(openWirelessSettings()));
 		tempAction->setEnabled(m_Device->getWpaSupplicant());
-		#endif
+#endif
 		
 		m_DeviceActions = m_DeviceMenu->actions();
 		
@@ -360,12 +384,12 @@ namespace qnut {
 		dialog.execute(this);
 	}
 	
-	#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 	void CDeviceDetails::openWirelessSettings() {
 		m_WirelessSettings->show();
 		m_WirelessSettings->activateWindow();
 	}
-	#endif
+#endif
 	
 	void CDeviceDetails::handleDeviceStateChange(DeviceState state) {
 		setHeadInfo();

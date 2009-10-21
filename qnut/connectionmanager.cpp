@@ -28,7 +28,6 @@ namespace qnut {
 		QMainWindow(parent),
 		m_DeviceManager(this),
 		m_LogFile(this, UI_FILE_LOG),
-// 		m_Settings(UI_FILE_CONFIG, QSettings::IniFormat, this),
 		m_TrayIcon(this)
 	{
 		m_DeviceDetails.reserve(10);
@@ -133,17 +132,17 @@ namespace qnut {
 		m_EnableDeviceAction     = new QAction(QIcon(UI_ICON_ENABLE), tr("&Enable"), this);
 		m_DisableDeviceAction    = new QAction(QIcon(UI_ICON_DISABLE), tr("&Disable"), this);
 		m_DeviceSettingsAction   = new QAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("&Scripting settings..."), this);
-		#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 		m_WirelessSettingsAction = new QAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."), this);
-		#endif
+#endif
 		m_ClearLogAction         = new QAction(QIcon(UI_ICON_CLEAR), tr("&Clear log"), this);
 		
 		m_EnableDeviceAction->setEnabled(false);
 		m_DisableDeviceAction->setEnabled(false);
 		m_DeviceSettingsAction->setEnabled(false);
-		#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 		m_WirelessSettingsAction->setEnabled(false);
-		#endif
+#endif
 		
 		m_OverView.addAction(m_RefreshDevicesAction);
 		m_OverView.addAction(getSeparator(this));
@@ -151,9 +150,9 @@ namespace qnut {
 		m_OverView.addAction(m_DisableDeviceAction);
 		m_OverView.addAction(getSeparator(this));
 		m_OverView.addAction(m_DeviceSettingsAction);
-		#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 		m_OverView.addAction(m_WirelessSettingsAction);
-		#endif
+#endif
 		
 		connect(m_RefreshDevicesAction, SIGNAL(triggered()), &m_DeviceManager, SLOT(refreshAll()));
 		connect(m_ClearLogAction, SIGNAL(triggered()), &m_LogEdit, SLOT(clear()));
@@ -192,21 +191,31 @@ namespace qnut {
 	}
 	
 	inline void CConnectionManager::readSettings() {
-		QSettings settings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME, this);
+		QSettings * settings = new QSettings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME);
 		
-		settings.beginGroup(UI_SETTINGS_MAIN);
-		m_ShowBalloonTipsAction->setChecked(settings.value(UI_SETTINGS_SHOWBALLOONTIPS, true).toBool());
-		m_ShowLogAction->setChecked(settings.value(UI_SETTINGS_SHOWLOG, true).toBool());
-		settings.endGroup();
+#ifndef QNUT_SETTINGS_NOCOMPAT
+		bool readOld = QFile::exists(UI_FILE_CONFIG) && settings->childGroups().isEmpty();
 		
-		settings.beginGroup(UI_SETTINGS_CONNECTIONMANAGER);
-		restoreGeometry(settings.value("geometry").toByteArray());
-		restoreState(settings.value("windowState").toByteArray());
-		settings.endGroup();
+		if (readOld) {
+			delete settings;
+			settings = new QSettings(UI_FILE_CONFIG, QSettings::IniFormat);
+		}
+#endif
+		settings->beginGroup(UI_SETTINGS_MAIN);
+		m_ShowBalloonTipsAction->setChecked(settings->value(UI_SETTINGS_SHOWBALLOONTIPS, true).toBool());
+		m_ShowLogAction->setChecked(settings->value(UI_SETTINGS_SHOWLOG, true).toBool());
+		settings->endGroup();
+		
+		settings->beginGroup(UI_SETTINGS_CONNECTIONMANAGER);
+		restoreGeometry(settings->value(UI_SETTINGS_GEOMETRY).toByteArray());
+		restoreState(settings->value(UI_SETTINGS_WINDOWSTATE).toByteArray());
+		settings->endGroup();
+		
+		delete settings;
 	}
 	
 	inline void CConnectionManager::writeSettings() {
-		QSettings settings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME, this);
+		QSettings settings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME);
 		
 		settings.beginGroup(UI_SETTINGS_MAIN);
 		settings.setValue(UI_SETTINGS_SHOWBALLOONTIPS, m_ShowBalloonTipsAction->isChecked());
@@ -214,8 +223,8 @@ namespace qnut {
 		settings.endGroup();
 		
 		settings.beginGroup(UI_SETTINGS_CONNECTIONMANAGER);
-		settings.setValue("geometry", saveGeometry());
-		settings.setValue("windowState", saveState());
+		settings.setValue(UI_SETTINGS_GEOMETRY, saveGeometry());
+		settings.setValue(UI_SETTINGS_WINDOWSTATE, saveState());
 		settings.endGroup();
 	}
 	
@@ -283,18 +292,18 @@ namespace qnut {
 			disconnect(m_EnableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(enable()));
 			disconnect(m_DisableDeviceAction, SIGNAL(triggered()), deselectedDevice, SLOT(disable()));
 			disconnect(m_DeviceSettingsAction, SIGNAL(triggered()), m_DeviceDetails[deselectedDevice], SLOT(openScriptingSettings()));
-			#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 			disconnect(m_WirelessSettingsAction, SIGNAL(triggered()), m_DeviceDetails[deselectedDevice], SLOT(openWirelessSettings()));
-			#endif
+#endif
 		}
 		
 		if (selectedIndexes.isEmpty()) {
 			m_EnableDeviceAction->setEnabled(false);
 			m_DisableDeviceAction->setEnabled(false);
 			m_DeviceSettingsAction->setEnabled(false);
-			#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 			m_WirelessSettingsAction->setEnabled(false);
-			#endif
+#endif
 		}
 		else {
 			CDevice * selectedDevice = static_cast<CDevice *>(selectedIndexes[0].internalPointer());
@@ -303,17 +312,17 @@ namespace qnut {
 			connect(m_EnableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(enable()));
 			connect(m_DisableDeviceAction, SIGNAL(triggered()), selectedDevice, SLOT(disable()));
 			connect(m_DeviceSettingsAction, SIGNAL(triggered()), m_DeviceDetails[selectedDevice], SLOT(openScriptingSettings()));
-			#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 			connect(m_WirelessSettingsAction, SIGNAL(triggered()), m_DeviceDetails[selectedDevice], SLOT(openWirelessSettings()));
-			#endif
+#endif
 			
 			m_EnableDeviceAction->setEnabled(selectedDevice->getState() == DS_DEACTIVATED);
 			m_DisableDeviceAction->setDisabled(selectedDevice->getState() == DS_DEACTIVATED);
 			m_DeviceSettingsAction->setEnabled(true);
 			
-			#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 			m_WirelessSettingsAction->setEnabled(selectedDevice->getWpaSupplicant());
-			#endif
+#endif
 		}
 	}
 	

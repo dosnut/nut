@@ -21,7 +21,10 @@
 #define UI_PATH_DEV(a)                  ((UI_PATH_WORK + a) + '/')
 
 #define UI_FILE_LOG                     (UI_PATH_WORK + "qnut.log")
+
+#ifndef QNUT_SETTINGS_NOCOMPAT
 #define UI_FILE_CONFIG                  (UI_PATH_WORK + "qnut.conf")
+#endif
 
 #define UI_ICON_QNUT                    UI_PATH_ICONS "qnut.svg"
 #define UI_ICON_QNUT_SMALL              UI_PATH_ICONS "qnut_small.svg"
@@ -99,6 +102,8 @@
 #define UI_SETTINGS_CONNECTIONMANAGER   "ConnectionManager"
 #define UI_SETTINGS_SIZE                "size"
 #define UI_SETTINGS_POS                 "pos"
+#define UI_SETTINGS_GEOMETRY            "geometry"
+#define UI_SETTINGS_WINDOWSTATE         "windowState"
 #define UI_SETTINGS_TOOLBARAREA         "toolBarArea"
 #define UI_SETTINGS_SHOWTOOLBAR         "showToolBar"
 

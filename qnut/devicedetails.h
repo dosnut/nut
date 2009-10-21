@@ -10,7 +10,6 @@
 
 #include <QWidget>
 #include <QSystemTrayIcon>
-#include <QSettings>
 #include <libnutcommon/device.h>
 #include "ui/ui_devdet.h"
 
@@ -20,9 +19,9 @@ namespace libnutclient {
 }
 
 namespace qnut {
-	#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 	class CWirelessSettings;
-	#endif
+#endif
 	
 	/**
 	 * @brief CDeviceDetails interacts directly with CDevice.
@@ -46,14 +45,13 @@ namespace qnut {
 		Q_OBJECT
 	private:
 		Ui::devdet ui;
-		QSettings m_Settings;
 		quint8 m_ScriptFlags;
 		
 		libnutclient::CDevice * m_Device;
 		
-		#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 		CWirelessSettings * m_WirelessSettings;
-		#endif
+#endif
 		
 		QMenu * m_DeviceMenu;
 		QList<QAction *> m_DeviceActions;
@@ -106,10 +104,10 @@ namespace qnut {
 	public slots:
 		/// @brief Opens the scripting settings dialog.
 		void openScriptingSettings();
-		#ifndef QNUT_NO_WIRELESS
+#ifndef QNUT_NO_WIRELESS
 		/// @brief Opens ths wireless settings window.
 		void openWirelessSettings();
-		#endif
+#endif
 	signals:
 		/**
 		 * @brief Emitted when showing a pop-up message is requested.
