@@ -4,6 +4,9 @@
 #define UI_VERSION                      "0.5.2"
 #define UI_NAME                         tr("QNUT - Qt client for Network UTility Server (NUTS)")
 
+#define UI_STRING_ORGANIZATION          "nut"
+#define UI_STRING_APPNAME               "qnut"
+
 #define UI_DIR_WORK                     ".qnut/"
 
 #define UI_DIR_SCRIPT_UP                "up/"

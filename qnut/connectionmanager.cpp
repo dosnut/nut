@@ -28,12 +28,12 @@ namespace qnut {
 		QMainWindow(parent),
 		m_DeviceManager(this),
 		m_LogFile(this, UI_FILE_LOG),
-		//TODO change this to "organization-application" parameters
-		m_Settings(UI_FILE_CONFIG, QSettings::IniFormat, this),
+// 		m_Settings(UI_FILE_CONFIG, QSettings::IniFormat, this),
 		m_TrayIcon(this)
 	{
 		m_DeviceDetails.reserve(10);
 		
+		resize(600, 322);
 		setWindowIcon(m_TrayIcon.icon());
 		
 		m_ToolBar = new QToolBar(tr("Main Toolbar"), this);
@@ -158,6 +158,8 @@ namespace qnut {
 		connect(m_RefreshDevicesAction, SIGNAL(triggered()), &m_DeviceManager, SLOT(refreshAll()));
 		connect(m_ClearLogAction, SIGNAL(triggered()), &m_LogEdit, SLOT(clear()));
 		connect(m_ShowLogAction, SIGNAL(toggled(bool)), this, SLOT(showLog(bool)));
+		
+		addToolBar(m_ToolBar);
 	}
 	
 	inline void CConnectionManager::distributeActions(int mode) {
@@ -190,38 +192,31 @@ namespace qnut {
 	}
 	
 	inline void CConnectionManager::readSettings() {
-		m_Settings.beginGroup(UI_SETTINGS_MAIN);
-		m_ShowBalloonTipsAction->setChecked(m_Settings.value(UI_SETTINGS_SHOWBALLOONTIPS, true).toBool());
-		m_ShowLogAction->setChecked(m_Settings.value(UI_SETTINGS_SHOWLOG, true).toBool());
-		m_Settings.endGroup();
+		QSettings settings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME, this);
 		
-		m_Settings.beginGroup(UI_SETTINGS_CONNECTIONMANAGER);
-		resize(m_Settings.value(UI_SETTINGS_SIZE, QSize(646, 322)).toSize());
-		move(m_Settings.value(UI_SETTINGS_POS, QPoint(200, 200)).toPoint());
-		Qt::ToolBarArea area = static_cast<Qt::ToolBarArea>(m_Settings.value(UI_SETTINGS_TOOLBARAREA, Qt::TopToolBarArea).toInt());
-		addToolBar(area, m_ToolBar);
-		m_ToolBar->setVisible(m_Settings.value(UI_SETTINGS_SHOWTOOLBAR, true).toBool());
+		settings.beginGroup(UI_SETTINGS_MAIN);
+		m_ShowBalloonTipsAction->setChecked(settings.value(UI_SETTINGS_SHOWBALLOONTIPS, true).toBool());
+		m_ShowLogAction->setChecked(settings.value(UI_SETTINGS_SHOWLOG, true).toBool());
+		settings.endGroup();
 		
-// 		if (area == Qt::NoToolBarArea)
-// 			m_ToolBar->move(m_Settings.value("toolBarFloatPos", QPoint(200, 200)).toPoint());
-		m_Settings.endGroup();
+		settings.beginGroup(UI_SETTINGS_CONNECTIONMANAGER);
+		restoreGeometry(settings.value("geometry").toByteArray());
+		restoreState(settings.value("windowState").toByteArray());
+		settings.endGroup();
 	}
 	
 	inline void CConnectionManager::writeSettings() {
-		m_Settings.beginGroup(UI_SETTINGS_MAIN);
-		m_Settings.setValue(UI_SETTINGS_SHOWBALLOONTIPS, m_ShowBalloonTipsAction->isChecked());
-		m_Settings.setValue(UI_SETTINGS_SHOWLOG, m_ShowLogAction->isChecked());
-		m_Settings.endGroup();
+		QSettings settings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME, this);
 		
-		m_Settings.beginGroup(UI_SETTINGS_CONNECTIONMANAGER);
-		m_Settings.setValue(UI_SETTINGS_SIZE, size());
-		m_Settings.setValue(UI_SETTINGS_POS, pos());
-		Qt::ToolBarArea area = toolBarArea(m_ToolBar);
-		m_Settings.setValue(UI_SETTINGS_TOOLBARAREA, static_cast<int>(area));
-		m_Settings.setValue(UI_SETTINGS_SHOWTOOLBAR, m_ToolBar->isVisible());
-// 		if (area == Qt::NoToolBarArea)
-// 			m_Settings.setValue("toolBarFloatPos", m_ToolBar->pos());
-		m_Settings.endGroup();
+		settings.beginGroup(UI_SETTINGS_MAIN);
+		settings.setValue(UI_SETTINGS_SHOWBALLOONTIPS, m_ShowBalloonTipsAction->isChecked());
+		settings.setValue(UI_SETTINGS_SHOWLOG, m_ShowLogAction->isChecked());
+		settings.endGroup();
+		
+		settings.beginGroup(UI_SETTINGS_CONNECTIONMANAGER);
+		settings.setValue("geometry", saveGeometry());
+		settings.setValue("windowState", saveState());
+		settings.endGroup();
 	}
 	
 	void CConnectionManager::addUiDevice(CDevice * device) {

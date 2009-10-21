@@ -46,7 +46,7 @@ namespace qnut {
 		libnutclient::CLog m_LogFile;
 		
 		QHash<libnutclient::CDevice *, CDeviceDetails *> m_DeviceDetails;
-		QSettings m_Settings;
+// 		QSettings m_Settings;
 		
 		CTrayIcon m_TrayIcon;
 		QTabWidget m_TabWidget;

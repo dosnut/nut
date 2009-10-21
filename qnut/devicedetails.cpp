@@ -32,9 +32,7 @@ namespace qnut {
 	using namespace libnutclient;
 	using namespace libnutcommon;
 	
-	CDeviceDetails::CDeviceDetails(CDevice * parentDevice, QWidget * parent) : QWidget(parent),
-		m_Settings(UI_PATH_DEV(parentDevice->getName()) + "dev.conf", QSettings::IniFormat, this)
-	{
+	CDeviceDetails::CDeviceDetails(CDevice * parentDevice, QWidget * parent) : QWidget(parent) {
 		m_Device = parentDevice;
 		
 		#ifndef QNUT_NO_WIRELESS
@@ -77,6 +75,8 @@ namespace qnut {
 	}
 	
 	inline void CDeviceDetails::readSettings() {
+		QSettings m_Settings(UI_PATH_DEV(parentDevice->getName()) + "dev.conf", QSettings::IniFormat, this);
+		
 		m_Settings.beginGroup(UI_SETTINGS_MAIN);
 		m_ScriptFlags = m_Settings.value(UI_SETIINGS_SCRIPTFLAGS, 0).toInt();
 		m_trayIcon->setVisible(m_Settings.value(UI_SETTINGS_SHOWTRAYICON, false).toBool());
@@ -137,6 +137,8 @@ namespace qnut {
 	}
 	
 	inline void CDeviceDetails::writeSettings() {
+		QSettings m_Settings(UI_PATH_DEV(parentDevice->getName()) + "dev.conf", QSettings::IniFormat, this);
+		
 		m_Settings.beginGroup(UI_SETTINGS_MAIN);
 		m_Settings.setValue(UI_SETIINGS_SCRIPTFLAGS, m_ScriptFlags);
 		m_Settings.setValue(UI_SETTINGS_SHOWTRAYICON, m_trayIcon->isVisible());
