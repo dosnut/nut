@@ -45,7 +45,7 @@ namespace qnut {
 		/// @brief Destroyes the object and writes the settings to "~/.qnut/qnut.conf".
 		~CConnectionManager();
 	private:
-		libnutclient::CDeviceManager m_DeviceManager;
+		libnutclient::CDeviceManager * m_DeviceManager;
 		libnutclient::CLog m_LogFile;
 		
 		QHash<libnutclient::CDevice *, CDeviceDetails *> m_DeviceDetails;

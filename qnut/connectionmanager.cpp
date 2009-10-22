@@ -29,9 +29,9 @@ namespace qnut {
 	
 	CConnectionManager::CConnectionManager(QWidget * parent) :
 		QMainWindow(parent),
-		m_DeviceManager(this),
 		m_LogFile(this, UI_FILE_LOG)
 	{
+		m_DeviceManager = new CDeviceManager(this);
 		m_TrayIcon = new CTrayIcon(this);
 		m_DeviceDetails.reserve(10);
 		
@@ -49,7 +49,7 @@ namespace qnut {
 		m_OverView = new QTreeView(this);
 		
 		//m_OverView_>setSortingEnabled(true); //TODO sorting in overview
-		m_OverView->setModel(new COverViewModel(&(m_DeviceManager), this));
+		m_OverView->setModel(new COverViewModel(m_DeviceManager, this));
 		m_OverView->setContextMenuPolicy(Qt::ActionsContextMenu);
 		m_OverView->setRootIsDecorated(false);
 		m_OverView->setItemsExpandable(false);
@@ -67,10 +67,10 @@ namespace qnut {
 		if (m_ShowLogAction->isChecked())
 			showLog(true);
 		
-		connect(&m_DeviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(addUiDevice(libnutclient::CDevice *)));
-		connect(&m_DeviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
-		connect(&m_DeviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(removeUiDevice(libnutclient::CDevice *)));
-		connect(&m_DeviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
+		connect(m_DeviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(addUiDevice(libnutclient::CDevice *)));
+		connect(m_DeviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
+		connect(m_DeviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(removeUiDevice(libnutclient::CDevice *)));
+		connect(m_DeviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
 		
 		if (m_LogFile.error() != QFile::NoError)
 			m_LogEdit->append(tr("ERROR: %1").arg(tr("Cannot create/open log file.")));
@@ -93,7 +93,7 @@ namespace qnut {
 		connect(m_OverView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(showDeviceDetails(const QModelIndex &)));
 		
 		m_TrayIcon->show();
-		m_DeviceManager.init(&m_LogFile);
+		m_DeviceManager->init(&m_LogFile);
 	}
 	
 	CConnectionManager::~CConnectionManager() {
@@ -163,7 +163,7 @@ namespace qnut {
 		m_OverView->addAction(m_WirelessSettingsAction);
 #endif
 		
-		connect(m_RefreshDevicesAction, SIGNAL(triggered()), &m_DeviceManager, SLOT(refreshAll()));
+		connect(m_RefreshDevicesAction, SIGNAL(triggered()), m_DeviceManager, SLOT(refreshAll()));
 		connect(m_ClearLogAction, SIGNAL(triggered()), m_LogEdit, SLOT(clear()));
 		connect(m_ShowLogAction, SIGNAL(toggled(bool)), this, SLOT(showLog(bool)));
 		
@@ -240,7 +240,7 @@ namespace qnut {
 	void CConnectionManager::addUiDevice(CDevice * device) {
 		CDeviceDetails * newDeviceOptions = new CDeviceDetails(device);
 		
-		m_TabWidget->insertTab(m_DeviceManager.getDevices().indexOf(device)+1, newDeviceOptions, device->getName());
+		m_TabWidget->insertTab(m_DeviceManager->getDevices().indexOf(device)+1, newDeviceOptions, device->getName());
 		
 		m_DeviceDetails.insert(device, newDeviceOptions);
 		m_TrayIcon->addDeviceMenu(newDeviceOptions->trayMenu());
@@ -264,10 +264,10 @@ namespace qnut {
 	void CConnectionManager::updateTrayIconInfo() {
 		QStringList result;
 		
-		if (m_DeviceManager.getDevices().isEmpty())
+		if (m_DeviceManager->getDevices().isEmpty())
 			result << tr("no devices present");
 		else
-			foreach (CDevice * i, m_DeviceManager.getDevices()) {
+			foreach (CDevice * i, m_DeviceManager->getDevices()) {
 				result << shortSummary(i);
 			}
 		

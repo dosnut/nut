@@ -62,8 +62,8 @@ namespace qnut {
 	}
 	
 	CDeviceDetails::~CDeviceDetails() {
-		disconnect(m_Device, SIGNAL(stateChanged(libnutcommon::DeviceState)),
-			this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
+//		disconnect(m_Device, SIGNAL(stateChanged(libnutcommon::DeviceState)),
+//			this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
 		writeSettings();
 #ifndef QNUT_NO_WIRELESS
 		if (m_WirelessSettings) {
@@ -78,9 +78,10 @@ namespace qnut {
 		QSettings * settings = new QSettings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME);
 #ifndef QNUT_SETTINGS_NOCOMPAT
 		QString configFile = UI_PATH_DEV(m_Device->getName()) + "dev.conf";
-		bool readOld = QFile::exists(m_Device->getName() + "dev.conf") && settings->childGroups().isEmpty();
+		bool readOld = QFile::exists(UI_PATH_DEV(m_Device->getName()) + "dev.conf") && settings->childGroups().isEmpty();
 		
 		if (readOld) {
+			qDebug("will read old config");
 			delete settings;
 			settings = new QSettings(configFile, QSettings::IniFormat);
 			settings->beginGroup(UI_SETTINGS_MAIN);
