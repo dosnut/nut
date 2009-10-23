@@ -12,6 +12,7 @@
 #include <QSystemTrayIcon>
 #include <libnutcommon/device.h>
 #include "ui/ui_devdet.h"
+#include "common.h"
 
 namespace libnutclient {
 	class CDevice;
@@ -52,6 +53,7 @@ namespace qnut {
 #ifndef QNUT_NO_WIRELESS
 		CWirelessSettings * m_WirelessSettings;
 #endif
+		QList<ToggleableCommand> m_CommandList[5];
 		
 		QMenu * m_DeviceMenu;
 		QList<QAction *> m_DeviceActions;
@@ -59,6 +61,7 @@ namespace qnut {
 		QAction * m_EnterEnvironmentAction;
 		QAction * m_IPConfigurationAction;
 		
+		// TODO rename to m_TrayIcon
 		QSystemTrayIcon * m_trayIcon;
 		
 		QSet<libnutclient::CInterface *> m_IPConfigsToRemember;
@@ -71,12 +74,13 @@ namespace qnut {
 	public:
 		/// @brief Returns the flags for script execution.
 		inline quint8 scriptFlags() const { return m_ScriptFlags; }
-		/// @brief Sets the flags for script execution.
-		inline void setScriptFlags(quint8 value) { m_ScriptFlags = value; }
+//		/// @brief Sets the flags for script execution.
+//		inline void setScriptFlags(quint8 value) { m_ScriptFlags = value; }
 		
 		/// @brief Returns a pointer to the managed device.
 		inline libnutclient::CDevice * device() const { return m_Device; }
 		
+		// TODO rename to deviceMenu
 		/// @brief Returns a pointer to the sub menu of the managed device.
 		inline QMenu * trayMenu() const { return m_DeviceMenu; }
 		
@@ -84,6 +88,17 @@ namespace qnut {
 		inline QList<QAction *> deviceActions() const { return m_DeviceActions; }
 		/// @brief Returns the list of Actions in the context menu of the environments/interfaces tree.
 		inline QList<QAction *> environmentTreeActions() const { return ui.environmentTree->actions(); }
+		
+		inline QList<ToggleableCommand> & commandList(int state) { return m_CommandList[state]; }
+		
+		inline QSystemTrayIcon * trayIcon() { return m_trayIcon; }
+		
+//		/// @brief Returns the path of the command for given state and index
+//		inline QString & commandAt(DeviceState state, int index) { return m_CommandList[state][index]->path; }
+//		/// @brief Returns the enabled state of the command for given state and index
+//		inline bool commandAtIsEnabled(DeviceState state, int index) { return m_CommandList[state][index]->enabled; }
+//		/// @brief Returns how many commands are present for a given state
+//		inline int commandCount(DeviceState state) { return m_CommandList[state].size(); }
 		
 		/**
 		 * @brief Creates the object, initializes the user interface and reads the settings to "~/.qnut/<device name>/dev.conf".
@@ -102,8 +117,8 @@ namespace qnut {
 		void openIPConfiguration();
 		void copySelectedProperty();
 	public slots:
-		/// @brief Opens the scripting settings dialog.
-		void openScriptingSettings();
+		/// @brief Opens the device settings dialog.
+		void openDeviceSettings();
 #ifndef QNUT_NO_WIRELESS
 		/// @brief Opens ths wireless settings window.
 		void openWirelessSettings();

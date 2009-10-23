@@ -22,7 +22,8 @@
 #include "interfacedetailsmodel.h"
 #include "environmentdetailsmodel.h"
 #include "ipconfiguration.h"
-#include "scriptsettings.h"
+//#include "scriptsettings.h"
+#include "cdevicesettings.h"
 
 #ifndef QNUT_NO_WIRELESS
 #include "wirelesssettings.h"
@@ -100,7 +101,7 @@ namespace qnut {
 			settings->endGroup();
 #endif
 		
-		ui.showTrayCheck->setChecked(m_trayIcon->isVisible());
+//		ui.showTrayCheck->setChecked(m_trayIcon->isVisible());
 		
 #ifndef QNUT_NO_WIRELESS
 		if (m_WirelessSettings) {
@@ -223,8 +224,8 @@ namespace qnut {
 		tempAction->setDisabled(m_Device->getState() == DS_DEACTIVATED);
 		
 		m_DeviceMenu->addSeparator();
-		m_DeviceMenu->addAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("&Scripting settings..."),
-			this, SLOT(openScriptingSettings()));
+		m_DeviceMenu->addAction(QIcon(UI_ICON_DEVICE_SETTINGS), tr("&Device settings..."),
+			this, SLOT(openDeviceSettings()));
 #ifndef QNUT_NO_WIRELESS
 		tempAction = m_DeviceMenu->addAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."),
 			this, SLOT(openWirelessSettings()));
@@ -261,7 +262,7 @@ namespace qnut {
 		
 		ui.detailsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 		
-		connect(ui.showTrayCheck, SIGNAL(toggled(bool)), m_trayIcon, SLOT(setVisible(bool)));
+//		connect(ui.showTrayCheck, SIGNAL(toggled(bool)), m_trayIcon, SLOT(setVisible(bool)));
 		
 		ui.environmentTree->setModel(new CEnvironmentTreeModel(m_Device));
 		ui.environmentTree->header()->setResizeMode(QHeaderView::ResizeToContents);
@@ -380,9 +381,14 @@ namespace qnut {
 		QApplication::clipboard()->setText(property);
 	}
 	
-	void CDeviceDetails::openScriptingSettings() {
-		CScriptSettings dialog(this);
-		dialog.execute(this);
+	void CDeviceDetails::openDeviceSettings() {
+		CDeviceSettings dialog(this);
+		if (dialog.execute(m_CommandList, m_trayIcon->isVisible(), true, true)) {
+			m_trayIcon->setVisible(dialog.trayIconVisibleResult());
+			for (int i = 0; i < 5; i++)
+				m_CommandList[i] = dialog.commandListsResult()[i];
+			
+		}
 	}
 	
 #ifndef QNUT_NO_WIRELESS

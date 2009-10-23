@@ -126,17 +126,7 @@
      </widget>
     </widget>
    </item>
-   <item>
-    <widget class="QCheckBox" name="showTrayCheck">
-     <property name="text">
-      <string>Show tray icon for this device</string>
-     </property>
-    </widget>
-   </item>
   </layout>
-  <zorder>splitter</zorder>
-  <zorder>showTrayCheck</zorder>
-  <zorder>networkLabel</zorder>
  </widget>
  <resources/>
  <connections>

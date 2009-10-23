@@ -22,6 +22,12 @@ namespace libnutclient {
 }
 
 namespace qnut {
+	/// @brief Simple structure for a command string and it's enabled state
+	struct ToggleableCommand {
+		bool enabled;
+		QString path;
+	};
+	
 	/**
 	 * @brief Returns a QString of the filename for the given device according to its state.
 	 * @param device pointer to an existing instance of a CDevice

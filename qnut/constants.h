@@ -36,6 +36,7 @@
 #define UI_ICON_SELECTED                UI_PATH_ICONS "selected.png"
 #define UI_ICON_UNSELECTED              UI_PATH_ICONS "unselected.png"
 
+#define UI_ICON_DEVICE_SETTINGS         UI_PATH_ICONS "device_settings.png"
 #define UI_ICON_SCRIPT_SETTINGS         UI_PATH_ICONS "script_settings.png"
 #define UI_ICON_CONFIGURE               UI_PATH_ICONS "configure.png"
 #define UI_ICON_EDIT                    UI_PATH_ICONS "edit.png"

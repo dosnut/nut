@@ -39,7 +39,7 @@ namespace qnut {
 		connect(ui.dnsList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(handleSelectionChanged(const QItemSelection &)));
 		
-		if (exec()) {
+		if (exec() == QDialog::Accepted) {
 			config.setIP(QHostAddress(ui.ipEdit->text()));
 			config.setNetmask(QHostAddress(ui.netmaskEdit->text()));
 			config.setGateway(QHostAddress(ui.gatewayEdit->text()));

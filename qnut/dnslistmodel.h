@@ -18,7 +18,7 @@ namespace qnut {
 	 * 
 	 * The class provides all functions for an editalbe model specified in the Qt 4 documentation.
 	 * 
-	 * The model supports the display and edit of the host addresses is the list.
+	 * The model supports displaying and editing of the listed host addresses.
 	 */
 	class CDNSListModel : public QAbstractListModel {
 		Q_OBJECT
