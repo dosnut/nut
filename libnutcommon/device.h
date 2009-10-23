@@ -11,7 +11,7 @@
 #include "macaddress.h"
 
 namespace libnutcommon {
-	enum DeviceState  { DS_DEACTIVATED, DS_ACTIVATED, DS_CARRIER, DS_UNCONFIGURED, DS_UP };
+	enum DeviceState  { DS_DEACTIVATED=0, DS_ACTIVATED=1, DS_CARRIER=2, DS_UNCONFIGURED=3, DS_UP=4 };
 	enum DeviceType { DT_ETH=0, DT_AIR=1, DT_PPP=2, DT_BRIDGE=4};
 	struct DeviceProperties {
 		QString name;
