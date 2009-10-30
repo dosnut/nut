@@ -9,7 +9,6 @@
 #define QNUT_TRAYICON_H
 
 #include <QSystemTrayIcon>
-#include <QMenu>
 
 namespace qnut {
 	/**
@@ -24,8 +23,7 @@ namespace qnut {
 	class CTrayIcon : public QSystemTrayIcon {
 		Q_OBJECT
 	private:
-		QMenu m_TrayMenu;
-		QMenu m_DevicesMenu;
+		QAction * m_InsertMarker;
 	public:
 		/**
 		 * @brief Adds a given sub menu to the "Network devices" sub menu.

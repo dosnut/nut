@@ -10,34 +10,27 @@
 #include "trayicon.h"
 #include "constants.h"
 
-using namespace std;
-
 namespace qnut {
 	CTrayIcon::CTrayIcon(QObject * parent) : QSystemTrayIcon(QIcon(UI_ICON_QNUT_SMALL), parent) {
-		m_DevicesMenu.setTitle(tr("Network &devices"));
-
-		m_TrayMenu.setTitle("QNUT");
-		m_TrayMenu.addAction(tr("Open Connection &Manager"), parent, SLOT(show()));
-
-		m_TrayMenu.addMenu(&m_DevicesMenu);
-		m_DevicesMenu.setEnabled(false);
-		m_TrayMenu.addSeparator();
-		m_TrayMenu.addAction(tr("&Quit"), qApp, SLOT(quit()));
-
-		setContextMenu(&m_TrayMenu);
-
+		QMenu * trayMenu = new QMenu("QNUT");
+		trayMenu->addAction(tr("Open Connection &Manager"), parent, SLOT(show()));
+		trayMenu->addSeparator();
+		m_InsertMarker = trayMenu->addSeparator();
+		trayMenu->addAction(tr("&Quit"), qApp, SLOT(quit()));
+		trayMenu->setSeparatorsCollapsible(true);
+		
+		setContextMenu(trayMenu);
+		
 		connect(this, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 			this, SLOT(handleClicks(QSystemTrayIcon::ActivationReason)));
 	}
 	
 	void CTrayIcon::addDeviceMenu(QMenu * deviceMenu) {
-		m_DevicesMenu.addMenu(deviceMenu);
-		m_DevicesMenu.setEnabled(true);
+		contextMenu()->insertMenu(m_InsertMarker, deviceMenu);
 	}
 	
 	void CTrayIcon::removeDeviceMenu(QMenu * deviceMenu) {
-		m_DevicesMenu.removeAction(deviceMenu->menuAction());
-		m_DevicesMenu.setDisabled(m_DevicesMenu.isEmpty());
+		contextMenu()->removeAction(deviceMenu->menuAction());
 	}
 	
 	void CTrayIcon::handleClicks(QSystemTrayIcon::ActivationReason reason) {
