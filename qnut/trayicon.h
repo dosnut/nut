@@ -10,6 +10,8 @@
 
 #include <QSystemTrayIcon>
 
+class QAction;
+
 namespace qnut {
 	/**
 	 * @brief CTrayIcon provides an icon in the system tray for the main user control interface of QNUT.

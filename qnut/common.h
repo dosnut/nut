@@ -26,6 +26,8 @@ namespace qnut {
 	struct ToggleableCommand {
 		bool enabled;
 		QString path;
+		
+		ToggleableCommand() : enabled(false) {}
 	};
 	
 	/**
