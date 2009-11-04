@@ -36,8 +36,6 @@
 #define UI_ICON_SELECTED                UI_PATH_ICONS "selected.png"
 #define UI_ICON_UNSELECTED              UI_PATH_ICONS "unselected.png"
 
-#define UI_ICON_DEVICE_SETTINGS         UI_PATH_ICONS "device_settings.png"
-#define UI_ICON_SCRIPT_SETTINGS         UI_PATH_ICONS "script_settings.png"
 #define UI_ICON_CONFIGURE               UI_PATH_ICONS "configure.png"
 #define UI_ICON_EDIT                    UI_PATH_ICONS "edit.png"
 #define UI_ICON_RELOAD                  UI_PATH_ICONS "reload.png"
@@ -85,12 +83,14 @@
 #define UI_ICON_INTERFACE               UI_PATH_ICONS "interface.png"
 #define UI_ICON_INTERFACE_ACTIVE        UI_PATH_ICONS "interface_active.png"
 
+#ifndef QNUT_SETTINGS_NOCOMPAT
 #define UI_FLAG_SCRIPT_NONE             0x00
 #define UI_FLAG_SCRIPT_UP               0x01
 #define UI_FLAG_SCRIPT_UNCONFIGURED     0x02
 #define UI_FLAG_SCRIPT_CARRIER          0x04
 #define UI_FLAG_SCRIPT_ACTIVATED        0x08
 #define UI_FLAG_SCRIPT_DEACTIVATED      0x10
+#endif
 
 #define UI_ACTIONS_OVERVIEW             0x00
 #define UI_ACTIONS_LOG                  0x01
@@ -108,9 +108,14 @@
 #define UI_SETTINGS_TOOLBARAREA         "toolBarArea"
 #define UI_SETTINGS_SHOWTOOLBAR         "showToolBar"
 
+#ifndef QNUT_SETTINGS_NOCOMPAT
 #define UI_SETIINGS_SCRIPTFLAGS         "scriptFlags"
+#endif
+#define UI_SETIINGS_COMMANDSENABLED     "commandsEnabled"
+
 #define UI_SETTINGS_SHOWTRAYICON        "showTrayIcon"
 #define UI_SETTINGS_SHOWDETAILS         "showDetails"
+#define UI_SETTINGS_HIDENOTIFICATIONS   "hideNotifications"
 
 #define UI_SETTINGS_WIRELESSSETTINGS    "WirelessSettings"
 
@@ -120,5 +125,9 @@
 #define UI_SETTINGS_GATEWAY             "gateway"
 #define UI_SETTINGS_DNSSERVERS          "dnsServers"
 #define UI_SETTINGS_ADDRESS             "address"
+
+#define UI_SETTINGS_COMMANDS            "Commands"
+#define UI_SETTINGS_COMMAND             "command"
+#define UI_SETTINGS_ENABLED             "enabled"
 
 #endif

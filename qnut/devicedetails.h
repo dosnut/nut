@@ -19,6 +19,8 @@ namespace libnutclient {
 	class CInterface;
 }
 
+class QSettings;
+
 namespace qnut {
 #ifndef QNUT_NO_WIRELESS
 	class CWirelessSettings;
@@ -47,6 +49,8 @@ namespace qnut {
 	private:
 		Ui::devdet ui;
 		quint8 m_ScriptFlags;
+		bool m_CommandsEnabled;
+		bool m_NotificationsEnabled;
 		
 		libnutclient::CDevice * m_Device;
 		
@@ -66,11 +70,21 @@ namespace qnut {
 		
 		QSet<libnutclient::CInterface *> m_IPConfigsToRemember;
 		
+		inline void readCommands(QSettings * settings);
+		inline void readIPConfigs(QSettings * settings);
+
+		inline void writeCommands(QSettings * settings);
+		inline void writeIPConfigs(QSettings * settings);
+		
 		inline void readSettings();
 		inline void writeSettings();
 		inline void createActions();
 		inline void createView();
 		inline void setHeadInfo();
+		
+		inline void executeCommand(QStringList & env, QString path);
+		
+		inline void showNotification(libnutcommon::DeviceState state);
 	public:
 		/// @brief Returns the flags for script execution.
 		inline quint8 scriptFlags() const { return m_ScriptFlags; }

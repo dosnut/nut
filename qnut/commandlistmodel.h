@@ -38,11 +38,17 @@ namespace qnut {
 		/// @brief returns the cached command list
 		QList<ToggleableCommand> & cachedList() { return m_Data; }
 		
+		/**
+		 * @brief sets enabled value for all commands in the cached list
+		 * @param list list of commands to cache
+		 */
+		void setAllEnabled(bool value);
+		
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		QVariant data(const QModelIndex & index, int role) const;
 		Qt::ItemFlags flags(const QModelIndex & index) const;
 		bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
-		QModelIndex appendRow(ToggleableCommand & command);
+		QModelIndex appendRow(ToggleableCommand command = ToggleableCommand());
 		bool removeRows(int position, int rows, const QModelIndex & parent = QModelIndex());
 	private:
 		QList<ToggleableCommand> m_Data;

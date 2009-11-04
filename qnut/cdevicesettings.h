@@ -28,17 +28,11 @@ namespace qnut {
 	 */
 	class CDeviceSettings : public QDialog {
 		Q_OBJECT
-	private:
-		Ui::devset ui;
-		QList<ToggleableCommand> m_CommandLists[5];
-//		bool m_TrayIconVisibile;
-//		bool m_NotificationEnabled;
-	private slots:
-		void updateCommandList(int state);
 	public:
-		const QList<ToggleableCommand> * commandListsResult() const { return m_CommandLists; }
-		bool trayIconVisibleResult() const { return ui.trayiconCheckBox->isChecked(); }
-		bool notificationEnabledResult() const { return !ui.disableNotificationsCheck->isChecked(); }
+		inline const QList<ToggleableCommand> * commandListsResult() const { return m_CommandLists; }
+		inline bool sctiptsEnabledResult() const { return ui.scriptBox->isChecked(); }
+		inline bool trayIconVisibleResult() const { return ui.trayiconCheckBox->isChecked(); }
+		inline bool notificationEnabledResult() const { return !ui.disableNotificationsCheck->isChecked(); }
 		/**
 		 * @brief Opens the dialog and returns true if changes are made.
 		 * @param commandLists
@@ -52,6 +46,16 @@ namespace qnut {
 		 * @param parent parent widget
 		 */
 		CDeviceSettings(QWidget * parent = 0);
+	private:
+		Ui::devset ui;
+		int m_LastList;
+		QList<ToggleableCommand> m_CommandLists[5];
+	private slots:
+		void updateCommandList(int state);
+		void enableAllCommands();
+		void disableAllCommands();
+		void addCommand();
+		void removeSelectedCommands();
 	};
 }
 

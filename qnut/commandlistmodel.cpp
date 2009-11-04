@@ -17,6 +17,13 @@ namespace qnut {
 //		endResetModel();
 	}
 	
+	void CCommandListModel::setAllEnabled(bool value) {
+		foreach (ToggleableCommand i, m_Data)
+			i.enabled = value;
+		
+		emit dataChanged(index(0), index(m_Data.size()-1));
+	}
+	
 	int CCommandListModel::rowCount(const QModelIndex & /*parent*/) const {
 //		if (parent.isValid())
 //			return 0;
@@ -30,11 +37,15 @@ namespace qnut {
 		
 		if (index.row() >= m_Data.size())
 			return QVariant();
-	
-		if (role == Qt::DisplayRole)
+		
+		switch (role) {
+		case Qt::CheckStateRole:
+			return m_Data.at(index.row()).enabled ? Qt::Checked : Qt::Unchecked;
+		case Qt::DisplayRole:
 			return m_Data.at(index.row()).path;
-		else
+		default:
 			return QVariant();
+		}
 	}
 	
 	Qt::ItemFlags CCommandListModel::flags(const QModelIndex & index) const {
@@ -68,7 +79,7 @@ namespace qnut {
 		return false;
 	}
 	
-	QModelIndex CCommandListModel::appendRow(ToggleableCommand & command) {
+	QModelIndex CCommandListModel::appendRow(ToggleableCommand command) {
 		beginInsertRows(QModelIndex(), m_Data.size(), m_Data.size());
 		
 		m_Data << command;
