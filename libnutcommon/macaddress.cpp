@@ -43,7 +43,7 @@ namespace libnutcommon {
 	}
 	
 	MacAddress::MacAddress(const QString &str) {
-		if (str == QLatin1String("any")) {
+		if (str == QLatin1String("any") || str.isEmpty()) {
 			memset(data, 0, sizeof(data));
 			return;
 		}
