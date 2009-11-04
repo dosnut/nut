@@ -3,7 +3,6 @@
 */
 #include "types.h"
 #include <QDebug>
-
 namespace libnutwireless {
 
 
@@ -188,7 +187,7 @@ QString toString(KeyManagement keym) {
 		}
 		return ret.join(" ");
 	}
-	return QObject::tr("UNDEFINED");
+	return QString();
 }
 
 QString toString(AuthenticationAlgs algs) {
@@ -206,7 +205,7 @@ QString toString(AuthenticationAlgs algs) {
 		}
 		return ret.join(" ");
 	}
-	return QObject::tr("UNDEFINED");
+	return QString();
 }
 
 QString toString(Protocols proto) {
@@ -218,7 +217,7 @@ QString toString(Protocols proto) {
 	else if (PROTO_RSN == proto)
 		return "RSN";
 	else
-		return QObject::tr("UNDEFINED");
+		return QString();
 }
 
 QString toString(EapolFlags flags) {
@@ -252,7 +251,7 @@ QString toString(EapMethod method) {
 		}
 		return ret.join(" ");
 	}
-	return QObject::tr("UNDEFINED");
+	return QString();
 }
 
 
@@ -287,6 +286,9 @@ bool toBool(QOOL b) {
 }
 QOOL toQOOL(bool b) {
 	return ( b ? QOOL_TRUE : QOOL_FALSE);
+}
+QOOL toQOOL(int i) {
+	return ( i < 0 ? QOOL_UNDEFINED : ( i == 0 ? QOOL_FALSE : QOOL_TRUE)); 
 }
 
 
@@ -517,6 +519,7 @@ NetworkConfig::NetworkConfig() {
 			wep_tx_keyidx = -1; //Default WEP key index (TX) (0..3)
 			peerkey = QOOL_UNDEFINED; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
 }
+
 NetworkConfig::NetworkConfig(ScanResult scan) {
 	NetworkConfig();
 	bssid = scan.bssid;
@@ -536,6 +539,101 @@ NetworkConfig::NetworkConfig(ScanResult scan) {
 
 NetworkConfig::~NetworkConfig() {
 }
+
+void NetworkConfig::writeToSettings(QSettings * /*settings*/) {
+// 	if (!ssid.isEmpty())
+// 		settings->setValue("ssid",ssid);
+// 	if (!bssid.isEmpty())
+// 		settings->setValue("bssid", bssid.toString());
+// 	if (QOOL_UNDEFINED != disabled)
+// 		settings->setValue("disabled", toString(disabled));
+// 	if (!id_str.isEmpty())
+// 		settings->setValue("id_str", id_str);
+// 	if (QOOL_UNDEFINED != scan_ssid)
+// 		settings->setValue("scan_ssid", toString(scan_ssid)); // (do not) scan with SSID-specific Probe Request frames
+// 	if (priority >= 0)
+// 		settings->setValue("priority", toString(priority));
+// 	if (!mode.isEmpty())
+// 		settings->setValue("mode", toString(mode)); //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
+// 	if (frequency != -1)
+// 		settings->setValue("frequency", frequency); //no default, but -1 is not a working value
+// 	if (PROTO_UNDEFINED != protocols)
+// 		settings->setValue("protocols", toString(protocols)); //list of accepted protocols
+// 	if (KM_UNDEFINED != keyManagement)
+// 		settings->setValue("keyManagement", toString(keyManagement));// list of accepted authenticated key management protocols
+// 	if (AUTHALG_UNDEFINED != auth_alg)
+// 		settings->setValue("auth_alg", toString(auth_alg)); //list of allowed IEEE 802.11 authentication algorithms
+// 	if (PCI_UNDEFINED != pairwise)
+// 		settings->setValue("pairwise", toString(pairwise)); //list of accepted pairwise (unicast) ciphers for WPA (CCMP,TKIP,NONE)
+// 	if (GCI_UNDEFINED != group)
+// 		settings->setValue("group", toString(group)); //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
+// 	if (!psk.isEmpty())
+// 		settings->setValue("psk", psk); //WPA preshared key; 256-bit pre-shared key
+// 	if (EAPF_UNDEFINED != eapol_flags)
+// 		settings->setValue("eapol_flags", toString(eapol_flags));
+// 	if (QOOL_UNDEFINED != mixed_cell)
+// 		settings->setValue("mixed_cell", toString(mixed_cell)); //This option can be used to configure whether so called mixed
+// 	if (QOOL_UNDEFINED != proactive_key_caching)
+// 		settings->setValue("proactive_key_caching", toString(proactive_key_caching)); //Enable/disable opportunistic PMKSA caching for WPA2.
+// 	if (!wep_key0.isEmpty())
+// 		settings->setValue("wep_key0", wep_key0); //Static WEP key (ASCII in double quotation, hex without)
+// 	if (!wep_key1.isEmpty())
+// 		settings->setValue("wep_key1", wep_key1);
+// 	if (!wep_key2.isEmpty())
+// 		settings->setValue("wep_key2", wep_key2);
+// 	if (!wep_key3.isEmpty())
+// 		settings->setValue("wep_key3", wep_key3);
+// 	if (-1 != wep_tx_keyidx)
+// 		settings->setValue("wep_tx_keyidx", (int)wep_tx_keyidx); //Default WEP key index (TX) (0..3)
+// 	if (QOOL_UNDEFINED != peerkey)
+// 		settings->setValue("peerkey",(int)peerkey);
+// 
+// 	settings->beginGroup("eapConfig");
+// 	eap_config->writeToSettings(settings);
+// 	settings->endGroup();
+}
+
+void fetchFromConfig(QSettings * /*settings*/) {
+// 	ssid = settings->value("ssid", QString());
+// 	bssid = libnutclient::MacAddress(settings->setValue("bssid", QString()));
+// 	disabled = toQOOL(settings->value("disabled",QOOL_UNDEFINED).toInt());
+// 	id_str = settings->value("id_str", QString());
+// 	scan_ssid = toQOOL(settings->value("scan_ssid", QOOL_UNDEFINED).toInt());
+// 	priority = settings->value("priority", -1);
+// 	mode = toQOOL(settings->value("mode", QOOL_UNDEFINED).toInt());
+// 	settings->value("frequency", -1);
+// 	protocols = toProtocols(settings->value("protocols", PROTO_UNDEFINED).toInt());
+// 	keyManagement = toKeyManagement(settings->value("keyManagement", KM_UNDEFINED).toInt());
+// 	aut_alg = toAuthAlg(settings->value("auth_alg", AUTHALG_UNDEFINED).toInt()); 
+// 	pairwise = toPairwsie(settings->value("pairwise", PCI_UNDEFINED).toInt());
+// 	if (GCI_UNDEFINED != group)
+// 		group = toGroup(settings->value("group", (int)group); //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
+// 	if (!psk.isEmpty())
+// 		settings->value("psk", psk); //WPA preshared key; 256-bit pre-shared key
+// 	if (EAPF_UNDEFINED != eapol_flags)
+// 		settings->value("eapol_flags", (int)eapol_flags);
+// 	if (QOOL_UNDEFINED != mixed_cell)
+// 		settings->value("mixed_cell", (int)mixed_cell); //This option can be used to configure whether so called mixed
+// 	if (QOOL_UNDEFINED != proactive_key_caching)
+// 		settings->value("proactive_key_caching", (int)proactive_key_caching); //Enable/disable opportunistic PMKSA caching for WPA2.
+// 	if (!wep_key0.isEmpty())
+// 		settings->value("wep_key0", wep_key0); //Static WEP key (ASCII in double quotation, hex without)
+// 	if (!wep_key1.isEmpty())
+// 		settings->value("wep_key1", wep_key1);
+// 	if (!wep_key2.isEmpty())
+// 		settings->value("wep_key2", wep_key2);
+// 	if (!wep_key3.isEmpty())
+// 		settings->value("wep_key3", wep_key3);
+// 	if (-1 != wep_tx_keyidx)
+// 		settings->value("wep_tx_keyidx", (int)wep_tx_keyidx); //Default WEP key index (TX) (0..3)
+// 	if (QOOL_UNDEFINED != peerkey)
+// 		settings->value("peerkey",(int)peerkey);
+// 
+// 	settings->beginGroup("eapConfig");
+// 	eap_config->writeToSettings(settings);
+// 	settings->endGroup();
+}
+
 EapNetworkConfig::EapNetworkConfig() {
 			eap = EAPM_UNDEFINED; //space-separated list of accepted EAP methods
 			fragment_size = -1; //Maximum EAP fragment size in bytes (default 1398);
@@ -543,4 +641,58 @@ EapNetworkConfig::EapNetworkConfig() {
 }
 EapNetworkConfig::~EapNetworkConfig() {}
 
+void EapNetworkConfig::writeToSettings(QSettings * /*settings*/) {
+// 	if (EAP_UNDEFINED != eap)
+// 		settings->setValue("eap", (int)eap); //space-separated list of accepted EAP methods
+// 	if (!identity.isEmpty())
+// 		settings->setValue("identity", identity); //Identity string for EAP
+// 	if (!anonymous_identity.isEmpty())
+// 		settings->setValue("anonymous_identity", anonymous_identity); //Anonymous identity string for EAP;
+// 	if (!password.isEmpty())
+// 		settings->setValue("password", password); //Password string for EAP.
+// 	if (!ca_cert.isEmpty())
+// 		settings->setValue("ca_cert",ca_cert); //File path to CA certificate file (PEM/DER).
+// 	if (!ca_path.isEmpty())
+// 		settings->setValue("ca_path", ca_path); //Directory path for CA certificate files (PEM).
+// 	if (!client_cert.isEmpty())
+// 		settings->setValue("client_cert", client_cert); //File path to client certificate file (PEM/DER)
+// 	if (!private_key.isEmpty())
+// 		settings->setValue("private_key", private_key); //File path to client private key file (PEM/DER/PFX)
+// 	if (!private_key_passwd.isEmpty())
+// 		settings->setValue("private_key_passwd", private_key_passwd); //Password for private key file
+// 	if (!dh_file.isEmpty())
+// 		settings->setValue("dh_file", dh_file); //File path to DH/DSA parameters file (in PEM format)
+// 	if (!subject_match.isEmpty())
+// 		settings->setValue("subject_match", subject_match); //Substring to be matched against the subject of the authentication server certificate.
+// 	if (!altsubject_match.isEmpty())
+// 		settings->setValue("altsubject_match", altsubject_match);
+// 	if (!phase1.isEmpty())
+// 		settings->setValue("phase1", phase1); //Phase1 (outer authentication, i.e., TLS tunnel) parameters (string with field-value pairs, e.g., "peapver=0" or	"peapver=1 peaplabel=1")
+// 	if (!phase2.isEmpty())
+// 		settings->setValue("phase2", phase2); //Phase2 (inner authentication with TLS tunnel) parameters
+// 	if (!ca_cert2.isEmpty())
+// 		settings->setValue("ca_cert2", ca_cert2); //File path to CA certificate file.
+// 	if (!ca_path2.isEmpty())
+// 		settings->setValue("ca_path2", ca_path2); //Directory path for CA certificate files (PEM)
+// 	if (!client_cert2.isEmpty())
+// 		settings->setValue("client_cert2", client_cert2); //File path to client certificate file
+// 	if (!private_key2.isEmpty())
+// 		settings->setValue("private_key2", private_key2); //File path to client private key file
+// 	if (!private_key2_passwd.isEmpty())
+// 		settings->setValue("private_key2_passwd", private_key2_passwd); //Password for private key file
+// 	if (!dh_file2.isEmpty())
+// 		settings->setValue("dh_file2", dh_file2); //File path to DH/DSA parameters file (in PEM format)
+// 	if (!subject_match2.isEmpty())
+// 		settings->setValue("subject_match2", subject_match2); //Substring to be matched against the subject of the authentication server certificate.
+// 	if (!altsubject_match2.isEmpty())
+// 		settings->setValue("altsubject_match2", altsubject_match2); //Substring to be matched against the alternative subject name of the authentication server certificate.
+// 	if (fragment_size.isEmpty() != -1)
+// 		settings->setValue("fragment_size", fragment_size); //Maximum EAP fragment size in bytes (default 1398);
+// 	if (!eappsk.isEmpty())
+// 		settings->setValue("eappsk", eappsk); //16-byte (128-bit, 32 hex digits) pre-shared key in hex format
+// 	if (!eappsk.isEmpty())
+// 		settings->setValue("nai", eappsk); //user NAI
+// 	if (!pac_file.isEmpty())
+// 		settings->setValue("pac_file", pac_file); //File path for the PAC entries.
+}
 }

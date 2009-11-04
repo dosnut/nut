@@ -4,6 +4,7 @@
 #include <QString>
 #include <QList>
 #include <QHostAddress>
+#include <QSettings>
 #include <libnutcommon/macaddress.h>
 #include <iwlib.h>
 extern "C" {
@@ -399,6 +400,8 @@ namespace libnutwireless {
 	bool toBool(QOOL b);
 	///Convert bool to QOOL (false=QOOL_FALSE, true=QOOL_TRUE)
 	QOOL toQOOL(bool b);
+	///Convert int to QOOL
+	QOOL toQOOL(int i);
 
 	/// Convert bool to number (false=0; true=1)
 	inline int toNumber(bool b) {
@@ -461,6 +464,7 @@ namespace libnutwireless {
 		public:
 			EapNetworkConfig();
 			~EapNetworkConfig();
+			void writeToSettings(QSettings * settings);
 			//Following fields are only used with internal EAP implementation.
 			EapMethod eap; //space-separated list of accepted EAP methods
 			QString identity; //Identity string for EAP
@@ -499,6 +503,7 @@ namespace libnutwireless {
 			NetworkConfig();
 			NetworkConfig(ScanResult scan);
 			~NetworkConfig();
+			void writeToSettings(QSettings * setting);
 			QString ssid;
 			libnutcommon::MacAddress bssid;
 			QOOL disabled;
