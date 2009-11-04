@@ -5,8 +5,8 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-#ifndef QNUT_CDEVICESETTINGS_H
-#define QNUT_CDEVICESETTINGS_H
+#ifndef QNUT_DEVICESETTINGS_H
+#define QNUT_DEVICESETTINGS_H
 
 #include <QDialog>
 #include "ui/ui_devset.h"
