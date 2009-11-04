@@ -49,6 +49,7 @@ namespace qnut {
 		m_OverView = new QTreeView(this);
 		
 		//m_OverView_>setSortingEnabled(true); //TODO sorting in overview
+		
 		m_OverView->setModel(new COverViewModel(m_DeviceManager, this));
 		m_OverView->setContextMenuPolicy(Qt::ActionsContextMenu);
 		m_OverView->setRootIsDecorated(false);
@@ -98,6 +99,13 @@ namespace qnut {
 	
 	CConnectionManager::~CConnectionManager() {
 		writeSettings();
+		
+		m_TabWidget->clear();
+		foreach (CDeviceDetails * i, m_DeviceDetails)
+			delete i;
+		m_DeviceDetails.clear();
+		
+		delete m_DeviceManager;
 	}
 	
 	inline void CConnectionManager::createActions() {
@@ -140,7 +148,7 @@ namespace qnut {
 		m_RefreshDevicesAction   = new QAction(QIcon(UI_ICON_RELOAD), tr("&Refresh devices"), this);
 		m_EnableDeviceAction     = new QAction(QIcon(UI_ICON_ENABLE), tr("&Enable"), this);
 		m_DisableDeviceAction    = new QAction(QIcon(UI_ICON_DISABLE), tr("&Disable"), this);
-		m_DeviceSettingsAction   = new QAction(QIcon(UI_ICON_SCRIPT_SETTINGS), tr("&Scripting settings..."), this);
+		m_DeviceSettingsAction   = new QAction(QIcon(UI_ICON_CONFIGURE), tr("&Device settings..."), this);
 #ifndef QNUT_NO_WIRELESS
 		m_WirelessSettingsAction = new QAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."), this);
 #endif
