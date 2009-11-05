@@ -34,7 +34,7 @@ HEADERS += connectionmanager.h \
     dnslistmodel.h \
     ipeditdelegate.h \
     adhocconfig.h \
-    cdevicesettings.h \
+    devicesettings.h \
     commandlistmodel.h
 SOURCES += main.cpp \
     connectionmanager.cpp \
@@ -53,7 +53,7 @@ SOURCES += main.cpp \
     dnslistmodel.cpp \
     ipeditdelegate.cpp \
     adhocconfig.cpp \
-    cdevicesettings.cpp \
+    devicesettings.cpp \
     commandlistmodel.cpp
 DESTDIR = .
 target.path = /usr/bin

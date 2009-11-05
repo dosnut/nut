@@ -5,7 +5,7 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-#include "cdevicesettings.h"
+#include "devicesettings.h"
 #include "devicedetails.h"
 #include "commandlistmodel.h"
 

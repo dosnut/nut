@@ -22,7 +22,7 @@
 #include "interfacedetailsmodel.h"
 #include "environmentdetailsmodel.h"
 #include "ipconfiguration.h"
-#include "cdevicesettings.h"
+#include "devicesettings.h"
 
 #ifndef QNUT_NO_WIRELESS
 #include "wirelesssettings.h"
