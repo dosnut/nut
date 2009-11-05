@@ -10,9 +10,6 @@
     <height>344</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Dialog</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QCheckBox" name="trayiconCheckBox">
@@ -31,7 +28,7 @@
    <item>
     <widget class="QGroupBox" name="scriptBox">
      <property name="title">
-      <string>Script Settings</string>
+      <string>Execute event-based commands</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -51,6 +48,9 @@
         </item>
         <item row="0" column="1">
          <widget class="QComboBox" name="stateCombo">
+          <property name="currentIndex">
+           <number>-1</number>
+          </property>
           <item>
            <property name="text">
             <string>deactivated</string>

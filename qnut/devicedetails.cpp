@@ -359,6 +359,7 @@ namespace qnut {
 	inline void CDeviceDetails::executeCommand(QStringList & env, QString path) {
 		QProcess * process = new QProcess(this);
 		process->setEnvironment(env);
+		qDebug("[QNUT] starting process: %s", path.toAscii().data());
 		process->start(path);
 		connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), process, SLOT(deleteLater()));
 		connect(process, SIGNAL(error(QProcess::ProcessError)), process, SLOT(deleteLater()));
@@ -434,6 +435,7 @@ namespace qnut {
 	
 	void CDeviceDetails::openIPConfiguration() {
 		CIPConfiguration dialog(this);
+		dialog.setWindowIcon(QIcon(UI_ICON_EDIT));
 		QModelIndex selectedIndex = (ui.environmentTree->selectionModel()->selection().indexes())[0];
 		
 		CInterface * interface = static_cast<CInterface *>(selectedIndex.internalPointer());
@@ -466,11 +468,14 @@ namespace qnut {
 	
 	void CDeviceDetails::openDeviceSettings() {
 		CDeviceSettings dialog(this);
-		if (dialog.execute(m_CommandList, m_trayIcon->isVisible(), true, true)) {
+		dialog.setWindowIcon(QIcon(UI_ICON_CONFIGURE));
+		dialog.setWindowTitle(tr("Device settings for %1").arg(m_Device->getName()));
+		if (dialog.execute(m_CommandList, m_CommandsEnabled, m_trayIcon->isVisible(), m_NotificationsEnabled, true)) {
 			m_trayIcon->setVisible(dialog.trayIconVisibleResult());
 			for (int i = 0; i < 5; i++)
 				m_CommandList[i] = dialog.commandListsResult()[i];
-			m_CommandsEnabled = dialog.sctiptsEnabledResult();
+			
+			m_CommandsEnabled = dialog.commandsEnabledResult();
 			m_NotificationsEnabled = dialog.notificationEnabledResult();
 		}
 	}
@@ -568,7 +573,7 @@ namespace qnut {
 					currentFile.setFile(i.path);
 					if (currentFile.isDir()) {
 						QDir workdir(i.path);
-						foreach(QString j, workdir.entryList())
+						foreach(QString j, workdir.entryList(QDir::Executable | QDir::Files))
 							executeCommand(env, workdir.filePath(j));
 					}
 					else

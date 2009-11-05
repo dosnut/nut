@@ -10,6 +10,8 @@
 #include "commandlistmodel.h"
 
 namespace qnut {
+	int CDeviceSettings::m_LastIndex = 0;
+	
 	CDeviceSettings::CDeviceSettings(QWidget * parent) : QDialog(parent), m_LastList(-1) {
 		ui.setupUi(this);
 		ui.commandList->setModel(new CCommandListModel(this));
@@ -20,16 +22,23 @@ namespace qnut {
 		connect(ui.disableAllButton, SIGNAL(clicked()), this, SLOT(disableAllCommands()));
 	}
 	
-	bool CDeviceSettings::execute(QList<ToggleableCommand> * commandLists, bool trayIconVisibility, bool notificationEnabled, bool globalNotifications) {
+	bool CDeviceSettings::execute(QList<ToggleableCommand> * commandLists, bool commandsEnabled, bool trayIconVisibility, bool notificationEnabled, bool globalNotifications) {
 		for (int i = 0; i < 5; i++)
 			m_CommandLists[i] = commandLists[i];
 		
-		updateCommandList(ui.stateCombo->currentIndex());
+		ui.stateCombo->setCurrentIndex(m_LastIndex);
 		ui.trayiconCheckBox->setChecked(trayIconVisibility);
 		ui.disableNotificationsCheck->setEnabled(globalNotifications);
 		ui.disableNotificationsCheck->setChecked(!notificationEnabled);
+		ui.scriptBox->setChecked(commandsEnabled);
 		
-		return exec() == QDialog::Accepted;
+		if (exec() == QDialog::Accepted) {
+			m_CommandLists[ui.stateCombo->currentIndex()] = qobject_cast<CCommandListModel *>(ui.commandList->model())->cachedList();
+			m_LastIndex = ui.stateCombo->currentIndex();
+			return true;
+		}
+		else
+			return false;
 	}
 	
 	void CDeviceSettings::updateCommandList(int state) {
@@ -50,7 +59,10 @@ namespace qnut {
 	}
 	
 	void CDeviceSettings::addCommand() {
-		ui.commandList->edit(qobject_cast<CCommandListModel *>(ui.commandList->model())->appendRow());
+		ToggleableCommand newCommand;
+		newCommand.path = tr("echo 'New Command'");
+//		ui.commandList->edit(
+		qobject_cast<CCommandListModel *>(ui.commandList->model())->appendRow(newCommand);//);
 	}
 	
 	void CDeviceSettings::removeSelectedCommands() {
