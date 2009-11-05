@@ -358,7 +358,7 @@ namespace qnut {
 	
 	inline void CDeviceDetails::executeCommand(QStringList & env, QString path) {
 		QProcess * process = new QProcess(this);
-		process->setEnvironment(env);
+		process->setEnvironment(env + QProcess::systemEnvironment());
 		qDebug("[QNUT] starting process: %s", path.toAscii().data());
 		process->start(path);
 		connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), process, SLOT(deleteLater()));
