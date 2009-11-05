@@ -41,6 +41,7 @@ namespace qnut {
 		switch (role) {
 		case Qt::CheckStateRole:
 			return m_Data.at(index.row()).enabled ? Qt::Checked : Qt::Unchecked;
+		case Qt::EditRole:
 		case Qt::DisplayRole:
 			return m_Data.at(index.row()).path;
 		default:
@@ -52,7 +53,7 @@ namespace qnut {
 		if (!index.isValid())
 			return Qt::ItemIsEnabled;
 		
-		return QAbstractItemModel::flags(index) | Qt::ItemIsEditable | Qt::ItemIsUserCheckable;
+		return QAbstractListModel::flags(index) | Qt::ItemIsEditable | Qt::ItemIsUserCheckable;
 	}
 	
 	bool CCommandListModel::setData(const QModelIndex & index, const QVariant & value, int role) {
@@ -65,16 +66,16 @@ namespace qnut {
 						return false;
 					m_Data[index.row()].path = newPath;
 					emit dataChanged(index, index);
+				return true;
 				}
-				break;
 			case Qt::CheckStateRole:
 //				m_Data[index.row()].enabled = value.toInt() == Qt::Checked;
 				m_Data[index.row()].enabled = value.toBool();
-				break;
+				emit dataChanged(index, index);
+				return true;
 			default:
 				return false;
 			}
-			return true;
 		}
 		return false;
 	}
