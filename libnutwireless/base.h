@@ -8,17 +8,11 @@
 #include "libnutcommon/common.h"
 
 #include "parsers.h"
-#include <iwlib.h>
-extern "C" {
-#include <linux/wireless.h>
-#include "wpa_ctrl/wpa_ctrl.h"
-#include <sys/time.h>
-#include <string.h>
-#include <stdlib.h>
-}
 
 #define CWPA_SCAN_TIMER_TIME 1000
 #define CWPA_SCAN_RETRY_TIMER_TIME 1000
+
+struct wpa_ctrl;
 
 namespace libnutwireless {
 

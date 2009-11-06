@@ -66,3 +66,36 @@ Description: Network UTility (substitute for ifupdown)
  which the clients use to control the server.
  .
  This package contains the debug symbols for the command line client.
+
+Package: libnutclient0
+Architecture: any
+Depends: ${shlibs:Depends}
+Recommends: nuts (= ${binary:Version})
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the client library.
+
+Package: libnutclient0-dbg
+Section: debug
+Architecture: any
+Depends: libnutclient0 (= ${binary:Version})
+Priority: extra
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the debug symbols for the client library.
+
+Package: libnutclient0-dev
+Section: libdevel
+Architecture: any
+Depends: libnutclient0 (= ${binary:Version})
+Priority: extra
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the development files for the client library.
+

@@ -1,8 +1,6 @@
 TEMPLATE = app
-CONFIG += qt \
-    qdbus
-CONFIG -= thread
-QT += network
+CONFIG = qt qdbus
+QT = core gui network
 CODECFORSRC = UTF-8
 CODECFORTR = ISO-8859-1
 OBJECTS_DIR = build/
@@ -72,10 +70,5 @@ INSTALLS += target \
 INCLUDEPATH += ..
 QMAKE_CXXFLAGS_DEBUG += -pedantic \
     -Wno-long-long
-LIBS += ../libnutclient/libnutclient.a \
-    ../libnutwireless/libnutwireless.a \
-    ../libnutcommon/libnutcommon.a
-LIBS += -liw
-TARGETDEPS += ../libnutcommon/libnutcommon.a \
-    ../libnutwireless/libnutwireless.a \
-    ../libnutclient/libnutclient.a
+LIBS += -lnutclient -L../libnutclient
+

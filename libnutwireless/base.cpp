@@ -1,6 +1,15 @@
 #include "base.h"
 #include <QDebug>
 
+#include <iwlib.h>
+extern "C" {
+#include <linux/wireless.h>
+#include "wpa_ctrl/wpa_ctrl.h"
+#include <sys/time.h>
+#include <string.h>
+#include <stdlib.h>
+}
+
 namespace libnutwireless {
 	
 	//CWpa_supplicant

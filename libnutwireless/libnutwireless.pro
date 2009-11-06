@@ -40,12 +40,7 @@ DESTDIR = .
 DEFINES += CONFIG_CTRL_IFACE \
  CONFIG_CTRL_IFACE_UNIX
 
-
-
-
-
-
-INCLUDEPATH += ../
+INCLUDEPATH += ..
 
 LIBS += ../libnutcommon/libnutcommon.a
 

@@ -1,11 +1,10 @@
-
+VERSION = 0.5.2
 TEMPLATE = lib
-CONFIG += static create_prl
+CONFIG += create_prl
 CONFIG -= thread
 TARGET = nutclient
 
-CONFIG += qt warn_on qdbus exceptions \
- staticlib
+CONFIG += qt warn_on qdbus exceptions dll
 QT -= gui
 QT += network
 
@@ -30,14 +29,22 @@ UI_DIR = build/
 MOC_DIR = build/
 
 target.path = /usr/lib/
-INSTALLS += target
+INSTALLS += target maindev commondev wirelessdev
 DESTDIR = .
 
 DEFINES += CONFIG_CTRL_IFACE \
  CONFIG_CTRL_IFACE_UNIX
 
+maindev.files = *.h
+maindev.path = /usr/include/libnutclient
 
-INCLUDEPATH += ../
+commondev.files = ../libnutcommon/*.h
+commondev.path = /usr/include/libnutcommon
+
+wirelessdev.files = ../libnutwireless/*.h
+wirelessdev.path = /usr/include/libnutwireless
+
+INCLUDEPATH += ..
 
 QMAKE_CXXFLAGS_DEBUG += -pedantic \
 -Wno-long-long
@@ -45,6 +52,7 @@ QMAKE_CXXFLAGS_DEBUG += -pedantic \
 TARGETDEPS += ../libnutwireless/libnutwireless.a \
   ../libnutcommon/libnutcommon.a
 
-LIBS += ../libnutcommon/libnutcommon.a \
+LIBS += -liw \
+  ../libnutcommon/libnutcommon.a \
   ../libnutwireless/libnutwireless.a
 
