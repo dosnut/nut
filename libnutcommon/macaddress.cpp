@@ -1,5 +1,9 @@
 #include "macaddress.h"
 
+extern "C" {
+#include <net/ethernet.h>
+}
+
 namespace libnutcommon {
 	QDBusArgument &operator<< (QDBusArgument &argument, const MacAddress &data) {
 		argument << data.toString();

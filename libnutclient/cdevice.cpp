@@ -12,7 +12,7 @@ using namespace libnutcommon;
 /////////
 //CDevice
 /////////
-CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) : 
+CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) :
 	CLibNut(parent),
 	/*parent(parent),*/
 	m_dbusPath(m_dbusPath),
@@ -50,7 +50,7 @@ void CDevice::init() {
 
 	//connect to dbus-object
 	m_dbusDevice = new DBusDeviceInterface(NUT_DBUS_URL, m_dbusPath.path(),*m_dbusConnection, this);
-	
+
 	//DBus interface is available: connect:
 	connect(m_dbusDevice, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusret_errorOccured(QDBusError)));
 
@@ -233,7 +233,7 @@ void CDevice::dbusretGetEssid(QString essid) {
 	m_essidFetched = true;
 	qDebug() << "essid fetched";
 	checkInitCompleted();
-	
+
 	emit gotEssid(essid);
 	emit newDataAvailable();
 }
@@ -258,7 +258,7 @@ void CDevice::dbusretGetEnvironments(QList<QDBusObjectPath> envs) {
 	else {
 		rebuild(envs);
 	}
-	
+
 	//Set active env (we can do this here, as we habe all envs in our hash and only set the pointer)
 	m_dbusDevice->getActiveEnvironment();
 
@@ -292,7 +292,7 @@ void CDevice::dbusretGetConfig(libnutcommon::DeviceConfig config) {
 	//Only use wpa_supplicant if we need one
 	if (m_needWpaSupplicant) {
 		*log << tr("(%2) wpa_supplicant config file at: %1").arg(m_config.wpaConfigFile(),m_name);
-	
+
 		m_wpaSupplicant = new libnutwireless::CWpaSupplicant(this,m_name);
 		connect(m_wpaSupplicant,SIGNAL(message(QString)),log,SLOT(log(QString)));
 		connect(m_dbusDevice,SIGNAL(newWirelssNetworkFound(void)),this,SIGNAL(newWirelessNetworkFound(void)));

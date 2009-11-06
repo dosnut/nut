@@ -4,9 +4,9 @@
 #include <QString>
 #include <QDBusArgument>
 #include <QHash>
-extern "C" {
-#include <net/ethernet.h>
-}
+
+struct ether_addr;
+
 namespace libnutcommon {
 	class MacAddress;
 

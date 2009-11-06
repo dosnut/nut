@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QHash>
 #include <QDBusMessage>
 
 #include "libnutcommon/dbusmonitor.h"
@@ -21,10 +22,10 @@ namespace libnutclient {
 
 namespace libnutclient {
 	/** @brief The DeviceManager keeps track of all devices
-		
+
 		The DeviceManager represents the server's device manager on the client side.
 		It handles the dbus connections, server disconnect/connect events and device adds/removes.
-		
+
 		Server disconnect/connects are published via the stateChanged signal.
 		Device adds/removes are published via deviceAdded/deviceRemoved
 
@@ -52,7 +53,7 @@ namespace libnutclient {
 		QDBusMessage devMessage;
 
 		libnutcommon::CDBusMonitor m_dbusMonitor;
-		
+
 		QDBusInterface * m_dbusInterface;
 		void rebuild(QList<QDBusObjectPath> paths);
 		void setInformation();
@@ -81,7 +82,7 @@ namespace libnutclient {
 		/** @brief List of devices managed by the DeviceManager
 		*/
 		inline const CDeviceList& getDevices() { return m_devices; } //TODO:change to const
-		
+
 		/** @brief Returns the pointer to the libnutcommon::CDBusMonitor object
 		*/
 		inline const libnutcommon::CDBusMonitor * getDBusMonitor() { return &m_dbusMonitor; }
@@ -90,10 +91,10 @@ namespace libnutclient {
 			It has to be called to start the device manager
 		*/
 		bool init(CLog * inlog);
-		
+
 		bool createBridge(QList<CDevice *> devices);
 		bool destroyBridge(CDevice * device);
-		
+
 		CDeviceManager(QObject * parent);
 		~CDeviceManager();
 	public slots:

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QHash>
 
 #include "clibnut.h"
 
@@ -25,7 +26,7 @@ namespace libnutclient {
 
 		The Devices provides information about the state of the hardware device.
 		It also manages its environments.
-		
+
 		Events are emitted on an environment change and a state change of the device
 	*/
 	class CDevice : public CLibNut {
@@ -41,10 +42,10 @@ namespace libnutclient {
 		CLog * log;
 		DBusDeviceInterface * m_dbusDevice;
 		libnutcommon::DeviceConfig m_config;
-		#ifndef LIBNUT_NO_WIRELESS
+#ifndef LIBNUT_NO_WIRELESS
 		bool m_needWpaSupplicant;
-		#endif
-		
+#endif
+
 		//Locking functions;
 		bool m_pendingRemoval;
 		int m_lockCount;
@@ -56,7 +57,7 @@ namespace libnutclient {
 		bool m_configFetched;
 		bool m_activeEnvFetched;
 		bool m_initCompleted;
-		
+
 		//Device information
 		CEnvironmentList m_environments;
 		QString m_name;
@@ -64,9 +65,9 @@ namespace libnutclient {
 		libnutcommon::DeviceState m_state;
 		libnutcommon::DeviceType m_type;
 		CEnvironment * m_activeEnvironment;
-		#ifndef LIBNUT_NO_WIRELESS
+#ifndef LIBNUT_NO_WIRELESS
 		libnutwireless::CWpaSupplicant * m_wpaSupplicant;
-		#endif
+#endif
 		int m_index;
 
 	//private  methods
@@ -86,7 +87,7 @@ namespace libnutclient {
 		void dbusretGetEnvironments(QList<QDBusObjectPath> envs);
 		void dbusretGetActiveEnvironment(QString activeEnv);
 		void dbusretGetConfig(libnutcommon::DeviceConfig config);
-		
+
 		void dbusret_errorOccured(QDBusError error, QString method = QString());
 
 		void environmentInitializationFailed(CEnvironment * environment);
@@ -108,7 +109,7 @@ namespace libnutclient {
 		inline libnutwireless::CWpaSupplicant * getWpaSupplicant() { return m_wpaSupplicant; }
 		#endif
 		inline int getIndex() { return m_index; }
-		
+
 		CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);
 		~CDevice();
 		libnutcommon::DeviceConfig& getConfig();
@@ -119,7 +120,7 @@ namespace libnutclient {
 		void enable();
 		void disable();
 		void setEnvironment(CEnvironment * environment);
-		
+
 	signals:
 
 		void initializationFailed(CDevice * device); //TODO:Implement this: has to be called if init fails
@@ -135,7 +136,7 @@ namespace libnutclient {
 		void gotActiveEnvironment(libnutclient::CEnvironment * activeEnv);
 		void gotConfig(libnutcommon::DeviceConfig config);
 		void gotEnvironments();
-		
+
 	};
 
 // #include "server_proxy.h"

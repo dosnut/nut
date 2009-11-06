@@ -1,8 +1,9 @@
 /*
-        TRANSLATOR libnutclient::CLibNut
+		TRANSLATOR libnutclient::CLibNut
 */
 #include "clibnut.h"
 #include "libnutcommon/common.h"
+#include <QList>
 
 namespace libnutclient {
 using namespace libnutcommon;

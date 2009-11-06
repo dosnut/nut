@@ -20,6 +20,10 @@
 
 #include <libnutcommon/macaddress.h>
 
+extern "C" {
+#include <net/ethernet.h>
+}
+
 namespace nuts {
 	class ARP;
 	class ARPWatch;

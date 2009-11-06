@@ -2,7 +2,6 @@
 #define LIBNUTCLIENT_CLIBNUT_H
 
 #include <QObject>
-#include <QList>
 
 #include "libnutcommon/common.h"
 
@@ -15,7 +14,7 @@ namespace libnutclient {
 	QString toString(QDBusError error);
 
 	/** @brief CLibNut is the base class for all libnutclient classes
-		
+
 		The class provides very basic functions and members that all derived classes have in common
 	*/
 	class CLibNut : public QObject {
@@ -31,7 +30,6 @@ namespace libnutclient {
 
 		signals:
 			void dbusErrorOccured(QDBusError error = QDBusError());
-
 	};
 
 }

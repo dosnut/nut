@@ -15,7 +15,6 @@ namespace libnutcommon {
 }
 
 namespace libnutcommon {
-
 	class CDBusMonitor: public QObject {
 		Q_OBJECT
 		private:
