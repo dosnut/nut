@@ -1,6 +1,7 @@
 TEMPLATE = app
-CONFIG = qt qdbus
-QT = core gui network
+CONFIG += qt qdbus
+CONFIG -= thread
+QT += network
 CODECFORSRC = UTF-8
 CODECFORTR = ISO-8859-1
 OBJECTS_DIR = build/
