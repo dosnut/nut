@@ -1,3 +1,22 @@
+network-utilities (0.5.3-1) unstable; urgency=low
+
+  * New release
+  * [nuts] added support for wildcard and regexp device names
+  * [libnut*] switch to dynamic linked client library
+    + added development lib
+  * [qnut] made settings more "standardized"
+    + added support for compile flag to be not compatible with old settings:
+      QNUT_SETTINGS_NOCOMPAT
+  * [qnut] changed scripting settings to more general device settings
+    + device details cleanup
+    + Former scripts witch were executed on device state change are substituted
+      by command lists. In each list the user can now specify witch commands
+      will be executed and each entry can either be a specific command or a
+      directory with executables.
+  * some gerenal polishing, cleanup and as always: bugfixes
+
+ -- Oliver Groß <neokensuke@freenet.de>  Mon, 09 Nov 2009 11:05:40 +0100
+
 network-utilities (0.5.2-1) unstable; urgency=low
 
   * Fixed some crashes with dbus restart/crashes
