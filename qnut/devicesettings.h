@@ -29,16 +29,22 @@ namespace qnut {
 	class CDeviceSettings : public QDialog {
 		Q_OBJECT
 	public:
+		/// @brief returns the edited command lists
 		inline QList<ToggleableCommand> * commandListsResult() { return m_CommandLists; }
+		/// @brief returns the resulting enabled setting for commands in general
 		inline bool commandsEnabledResult() const { return ui.scriptBox->isChecked(); }
+		/// @brief returns the resulting visibility setting for the tray icon
 		inline bool trayIconVisibleResult() const { return ui.trayiconCheckBox->isChecked(); }
+		/// @brief returns the resulting enabled state for notifications
 		inline bool notificationEnabledResult() const { return !ui.disableNotificationsCheck->isChecked(); }
+		
 		/**
 		 * @brief Opens the dialog and returns true if changes are made.
-		 * @param commandLists
-		 * @param trayIconVisible
-		 * @param notificationEnabled
-		 * @param globalNotifications
+		 * @param commandLists initial command lists
+		 * @param commandsEnabled initial enabled state of commands in gerenal
+		 * @param trayIconVisible initial state of tray icon visibility
+		 * @param notificationEnabled initial enabled state of notifications
+		 * @param globalNotifications enabled state of notifications in gerenal
 		 */
 		bool execute(QList<ToggleableCommand> * commandLists, bool commandsEnabled, bool trayIconVisibility, bool notificationEnabled, bool globalNotifications);
 		/**

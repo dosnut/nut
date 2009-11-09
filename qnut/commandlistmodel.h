@@ -13,7 +13,7 @@
 
 namespace qnut {
 	/**
-	 * @brief CCommandListModel provides an item model for an overview of a given the command list.
+	 * @brief CCommandListModel provides a simple item list model for a given the command list.
 	 * @author Oliver Groß <z.o.gross@gmx.de>
 	 * 
 	 * The class provides all functions for an editalbe model specified in the Qt 4 documentation.
@@ -35,6 +35,7 @@ namespace qnut {
 		 * @param list list of commands to cache
 		 */
 		void setList(QList<ToggleableCommand> & list);
+		
 		/// @brief returns the cached command list
 		QList<ToggleableCommand> & cachedList() { return m_Data; }
 		

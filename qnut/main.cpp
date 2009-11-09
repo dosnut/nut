@@ -16,6 +16,7 @@ int main(int argc, char * argv[])
 	app.installTranslator(&translator);
 	app.setQuitOnLastWindowClosed(false);
 	
+#ifndef QNUT_SETTINGS_NOCOMPAT
 	{
 		QDir workdir(UI_PATH_WORK);
 		if (!workdir.exists()) {
@@ -23,6 +24,7 @@ int main(int argc, char * argv[])
 			workdir.mkdir(UI_DIR_WORK);
 		}
 	}
+#endif
 	
 	QDir::setCurrent(QDir::homePath());
 	

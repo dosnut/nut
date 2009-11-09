@@ -36,10 +36,10 @@ namespace qnut {
 	}
 	
 	Qt::ItemFlags CDNSListModel::flags(const QModelIndex & index) const {
-		if (!index.isValid())
+		if (index.isValid())
+			return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+		else
 			return Qt::ItemIsEnabled;
-		
-		return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 	}
 	
 	bool CDNSListModel::setData(const QModelIndex & index, const QVariant & value, int role) {

@@ -11,31 +11,32 @@ namespace qnut {
 	CCommandListModel::CCommandListModel(QObject * parent) : QAbstractListModel(parent) {}
 	
 	void CCommandListModel::setList(QList<ToggleableCommand> & list) {
-//		beginResetModel();
+#if QT_VERSION >= 0x040600
+		beginResetModel();
+		m_Data = list;
+		endResetModel();
+#else
 		m_Data = list;
 		reset();
-//		endResetModel();
+#endif
 	}
 	
 	void CCommandListModel::setAllEnabled(bool value) {
-		foreach (ToggleableCommand i, m_Data)
-			i.enabled = value;
+		for (int i = 0; i < m_Data.size(); ++i)
+			m_Data[i].enabled = value;
 		
 		emit dataChanged(index(0), index(m_Data.size()-1));
 	}
 	
-	int CCommandListModel::rowCount(const QModelIndex & /*parent*/) const {
-//		if (parent.isValid())
-//			return 0;
-//		else
-		return m_Data.size();
+	int CCommandListModel::rowCount(const QModelIndex & parent) const {
+		if (parent.isValid())
+			return 0;
+		else
+			return m_Data.size();
 	}
 	
 	QVariant CCommandListModel::data(const QModelIndex & index, int role) const {
-		if (!index.isValid())
-			return QVariant();
-		
-		if (index.row() >= m_Data.size())
+		if (!index.isValid() || index.row() >= m_Data.size())
 			return QVariant();
 		
 		switch (role) {
@@ -50,14 +51,14 @@ namespace qnut {
 	}
 	
 	Qt::ItemFlags CCommandListModel::flags(const QModelIndex & index) const {
-		if (!index.isValid())
+		if (index.isValid())
+			return QAbstractListModel::flags(index) | Qt::ItemIsEditable | Qt::ItemIsUserCheckable;
+		else
 			return Qt::ItemIsEnabled;
 		
-		return QAbstractListModel::flags(index) | Qt::ItemIsEditable | Qt::ItemIsUserCheckable;
 	}
 	
 	bool CCommandListModel::setData(const QModelIndex & index, const QVariant & value, int role) {
-		
 		if (index.isValid()) {
 			switch(role) {
 			case Qt::EditRole: {
@@ -69,8 +70,8 @@ namespace qnut {
 				return true;
 				}
 			case Qt::CheckStateRole:
-//				m_Data[index.row()].enabled = value.toInt() == Qt::Checked;
-				m_Data[index.row()].enabled = value.toBool();
+				m_Data[index.row()].enabled = value.toInt() == Qt::Checked;
+//				m_Data[index.row()].enabled = value.toBool();
 				emit dataChanged(index, index);
 				return true;
 			default:
