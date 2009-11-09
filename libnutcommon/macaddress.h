@@ -4,6 +4,7 @@
 #include <QString>
 #include <QDBusArgument>
 #include <QHash>
+#include <cstdio>
 
 struct ether_addr;
 
