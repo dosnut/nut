@@ -126,7 +126,7 @@ void CDevice::rebuild(QList<QDBusObjectPath> paths) {
 void CDevice::checkInitCompleted() {
 	if ( m_propertiesFetched && m_environmentsFetched && m_essidFetched && m_configFetched && m_activeEnvFetched && !m_initCompleted) {
 		m_initCompleted = true;
-		qDebug() << "Device init completed:" << m_name;
+		qDebug("Device init completed: %s", m_name.toAscii().data());
 		emit initializationCompleted(this);
 	}
 }
@@ -215,11 +215,11 @@ void CDevice::dbusretGetProperties(libnutcommon::DeviceProperties props) {
 	}
 	else {
 		m_essidFetched = true;
-		qDebug() << "essid feteched";
+		qDebug("essid feteched");
 	}
 
 	m_propertiesFetched = true;
-	qDebug() << "Properties feteched";
+	qDebug("Properties feteched");
 	checkInitCompleted();
 
 	emit gotProperties(props);
@@ -231,7 +231,7 @@ void CDevice::dbusretGetEssid(QString essid) {
 	m_essid = essid;
 
 	m_essidFetched = true;
-	qDebug() << "essid fetched";
+	qDebug("essid fetched");
 	checkInitCompleted();
 
 	emit gotEssid(essid);
@@ -276,7 +276,7 @@ void CDevice::dbusretGetActiveEnvironment(QString activeEnv) {
 		*log << tr("Active Environement: %1").arg(activeEnv);
 
 		m_activeEnvFetched = true;
-		qDebug() << "activeenv fetched";
+		qDebug("activeenv fetched");
 		checkInitCompleted();
 
 		emit gotActiveEnvironment(m_activeEnvironment);
@@ -307,7 +307,7 @@ void CDevice::dbusretGetConfig(libnutcommon::DeviceConfig config) {
 	#endif
 
 	m_configFetched = true;
-	qDebug() << "config feteched";
+	qDebug("config feteched");
 	checkInitCompleted();
 
 	emit gotConfig(m_config);
@@ -316,7 +316,7 @@ void CDevice::dbusretGetConfig(libnutcommon::DeviceConfig config) {
 
 
 void CDevice::dbusret_errorOccured(QDBusError error, QString method) {
-	qDebug() << "Error occured in dbus: " << QDBusError::errorString(error.type()) << "at" << method;
+	qDebug("Error occured in dbus: %s at %s", QDBusError::errorString(error.type()).toAscii().data(), method.toAscii().data());
 	if (!m_initCompleted) { //error during init
 		emit initializationFailed(this);
 	}

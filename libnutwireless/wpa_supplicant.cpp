@@ -1,6 +1,5 @@
 #ifndef LIBNUT_NO_WIRELESS
 #include "wpa_supplicant.h"
-#include <QDebug>
 
 namespace libnutwireless {
 

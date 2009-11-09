@@ -27,9 +27,9 @@ CDeviceManager::CDeviceManager(QObject * parent) :
 	connect(&m_dbusMonitor,SIGNAL(started(void)),this,SLOT(dbusStarted(void)));
 	m_dbusMonitor.setPidFileDir(DBUS_PID_FILE_DIR);
 	m_dbusMonitor.setPidFileName(DBUS_PID_FILE_NAME);
-	qDebug() << "Enabling DBusMonitor";
+	qDebug("Enabling DBusMonitor");
 	m_dbusMonitor.setEnabled(true);
-	qDebug() << "Enabled DBusMonitor";
+	qDebug("Enabled DBusMonitor");
 
 	//Init Hashtable
 	m_dbusDevices.reserve(10);
@@ -184,8 +184,8 @@ void CDeviceManager::rebuild(QList<QDBusObjectPath> paths) {
 
 void CDeviceManager::setInformation() {
 	//get devicelist etc.
-	qDebug() << "setInformation()";
-	qDebug() << "Placing getDeviceList Call";
+	qDebug("setInformation()");
+	qDebug("Placing getDeviceList Call");
 	m_dbusDevmgr->getDeviceList();
 }
 
@@ -267,7 +267,7 @@ void CDeviceManager::dbusretGetDeviceList(QList<QDBusObjectPath> devices) {
 }
 
 void CDeviceManager::dbusretErrorOccured(QDBusError error, QString method) {
-	qDebug() << "Error occured in dbus: " << QDBusError::errorString(error.type());
+	qDebug("Error occured in dbus: %s at %s", QDBusError::errorString(error.type()).toAscii().data(), method.toAscii().data());
 
 	if (QDBusError::AccessDenied == error.type()) {
 		*log << tr("You are not allowed to connect to nuts.");
