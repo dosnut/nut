@@ -728,7 +728,7 @@ namespace nuts {
 		//stop fallback
 		fallback_set_timeout(-1);
 		if (renewing) {
-			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
+			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, 0xffffffffu));
 		} else {
 			ip = ack->getYourIP();
 			netmask = ack->getOptionAddress(DHCP_SUBNET);
@@ -737,7 +737,7 @@ namespace nuts {
 			localdomain = ack->getOptionString(DHCP_DOMAIN_NAME);
 			m_dhcp_server_identifier = ack->getOption(DHCP_SERVER_ID);
 			m_dhcp_server_ip = QHostAddress(ntohl(ack->headers.ip.saddr));
-			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, -1));
+			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, 0xffffffffu));
 				// T1: 0.5 * dhcp_lease_time
 				// T2: 0.875 * dhcp_lease_time ( 7/8 )
 			m_ifstate = libnutcommon::IFS_DHCP;

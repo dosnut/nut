@@ -181,7 +181,7 @@ namespace nuts {
 				setOptionData(DHCP_MESSAGE_TYPE, (quint8) msgt);
 			}
 			inline enum dhcp_message_type getMessageType() {
-				return (enum dhcp_message_type) getOptionData<quint8>(DHCP_MESSAGE_TYPE, -1);
+				return (enum dhcp_message_type) getOptionData<quint8>(DHCP_MESSAGE_TYPE, 0xffu);
 			}
 			
 			// id is htonl(IPv4)
@@ -189,7 +189,7 @@ namespace nuts {
 				setOptionData(DHCP_SERVER_ID, id);
 			}
 			inline quint32 getDHCPServerID() {
-				return getOptionData<quint32>(DHCP_SERVER_ID, -1);
+				return getOptionData<quint32>(DHCP_SERVER_ID, 0xffffffffu);
 			}
 			
 			// This is the client ip address returned from the server
