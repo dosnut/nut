@@ -280,7 +280,6 @@ namespace qnut {
 		}
 #endif
 		
-		writeCommands(&settings);
 		writeIPConfigs(&settings);
 		
 		settings.endGroup();
@@ -477,6 +476,12 @@ namespace qnut {
 			
 			m_CommandsEnabled = dialog.commandsEnabledResult();
 			m_NotificationsEnabled = dialog.notificationEnabledResult();
+			
+			QSettings settings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME);
+			
+			settings.beginGroup(m_Device->getName());
+			writeCommands(&settings);
+			settings.endGroup();
 		}
 	}
 	
