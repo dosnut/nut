@@ -14,6 +14,7 @@
 #include <libnutclient/cdevicemanager.h>
 #include <libnutclient/clog.h>
 
+class QTabWidget;
 class QTextEdit;
 class QTreeView;
 class QSystemTrayIcon;
