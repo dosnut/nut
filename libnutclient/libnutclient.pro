@@ -52,7 +52,7 @@ QMAKE_CXXFLAGS_DEBUG += -pedantic \
 TARGETDEPS += ../libnutwireless/libnutwireless.a \
   ../libnutcommon/libnutcommon.a
 
-LIBS += -liw \
-  ../libnutcommon/libnutcommon.a \
-  ../libnutwireless/libnutwireless.a
+LIBS += ../libnutcommon/libnutcommon.a \
+  ../libnutwireless/libnutwireless.a \
+  -liw
 
