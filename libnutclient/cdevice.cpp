@@ -21,8 +21,6 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) :
 #ifndef LIBNUT_NO_WIRELESS
 	m_needWpaSupplicant(false),
 #endif
-	m_pendingRemoval(false),
-	m_lockCount(0),
 	m_propertiesFetched(false),
 	m_environmentsFetched(false),
 	m_essidFetched(false),
@@ -128,31 +126,6 @@ void CDevice::checkInitCompleted() {
 		m_initCompleted = true;
 		qDebug("Device init completed: %s", m_name.toAscii().data());
 		emit initializationCompleted(this);
-	}
-}
-
-//Locking functions
-bool CDevice::incrementLock() {
-	if (m_pendingRemoval) {
-		if (0 == m_lockCount) {
-			static_cast<CDeviceManager* >(parent())->dbusDeviceRemoved(m_dbusPath);
-		}
-		return false;
-	}
-	else {
-		m_lockCount++;
-		return true;
-	}
-}
-void CDevice::decrementLock() {
-	if (m_lockCount > 0) {
-		m_lockCount--;
-	}
-	else {
-		*log << "ERROR: LOCK-COUNT<0";
-	}
-	if ( (m_pendingRemoval) && (0 == m_lockCount) ){
-		static_cast<CDeviceManager* >(parent())->dbusDeviceRemoved(m_dbusPath);
 	}
 }
 
@@ -325,7 +298,7 @@ void CDevice::dbusret_errorOccured(QDBusError error, QString method) {
 	}
 }
 
-void CDevice::environmentInitializationFailed(CEnvironment * environment) {
+void CDevice::environmentInitializationFailed(CEnvironment * /* environment */) {
 	if (!m_initCompleted) { //failure in init phase
 		emit initializationFailed(this);
 	}

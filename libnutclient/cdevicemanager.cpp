@@ -301,7 +301,7 @@ void CDeviceManager::dbusDeviceAdded(const QDBusObjectPath &objectpath) {
 
 void CDeviceManager::dbusDeviceRemoved(const QDBusObjectPath &objectpath) {
 	//remove m_devices from devicelist
-	if (m_dbusDevices.value(objectpath)->m_lockCount == 0) {
+	if ( m_dbusDevices.contains(objectpath) ) {
 		CDevice * device = m_dbusDevices.take(objectpath);
 		m_devices.removeAll(device);
 		//Rebuild device->index for qnut
@@ -310,9 +310,6 @@ void CDeviceManager::dbusDeviceRemoved(const QDBusObjectPath &objectpath) {
 		}
 		emit(deviceRemoved(device));
 		device->deleteLater();
-	}
-	else {
-		m_dbusDevices.value(objectpath)->m_pendingRemoval = true;
 	}
 }
 
@@ -331,11 +328,11 @@ void CDeviceManager::dbusStarted() {
 	init(log);
 }
 
-bool CDeviceManager::createBridge(QList<CDevice *> devices) {
+bool CDeviceManager::createBridge(QList<CDevice *> /* devices */) {
 	return false;
 }
 
-bool CDeviceManager::destroyBridge(CDevice * device) {
+bool CDeviceManager::destroyBridge(CDevice * /* device */) {
 	return false;
 }
 

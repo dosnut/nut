@@ -46,10 +46,6 @@ namespace libnutclient {
 		bool m_needWpaSupplicant;
 #endif
 
-		//Locking functions;
-		bool m_pendingRemoval;
-		int m_lockCount;
-
 		//device init variables
 		bool m_propertiesFetched;
 		bool m_environmentsFetched;
@@ -113,8 +109,6 @@ namespace libnutclient {
 		CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);
 		~CDevice();
 		libnutcommon::DeviceConfig& getConfig();
-		bool incrementLock();
-		void decrementLock();
 
 	public slots:
 		void enable();

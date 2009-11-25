@@ -171,7 +171,7 @@ void CEnvironment::dbusret_errorOccured(QDBusError error, QString method) {
 }
 
 
-void CEnvironment::interfaceInitializationFailed(CInterface * interface) {
+void CEnvironment::interfaceInitializationFailed(CInterface * /* interface */) {
 	if (!m_initCompleted) { //failure in init phase
 		emit initializationFailed(this);
 	}
