@@ -119,6 +119,7 @@ namespace nuts {
 		if (!m_dbusDevices.contains(devName)) {
 			dbus_device = new DBusDevice(dev, &m_dbusConnection, m_dbusDevicesPath);
 			m_dbusDevices.insert(devName, dbus_device);
+			dbus_device->registerAll();
 		}
 		else {
 			dbus_device = m_dbusDevices.value(devName);
