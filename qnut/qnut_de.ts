@@ -4,87 +4,9 @@
 <context>
     <name></name>
     <message>
-        <location filename="constants.h" line="5"/>
+        <location filename="constants.h" line="7"/>
         <source>QNUT - Qt client for Network UTility Server (NUTS)</source>
         <translation>QNUT - Qt Client für den Network UTility Server (NUTS)</translation>
-    </message>
-</context>
-<context>
-    <name>CLibNut</name>
-    <message>
-        <source>up</source>
-        <translation type="obsolete">verbunden</translation>
-    </message>
-    <message>
-        <source>unconfigured</source>
-        <translation type="obsolete">unkonfiguriert</translation>
-    </message>
-    <message>
-        <source>got carrier</source>
-        <translation type="obsolete">physikalisch verbunden</translation>
-    </message>
-    <message>
-        <source>activated</source>
-        <translation type="obsolete">aktiviert</translation>
-    </message>
-    <message>
-        <source>deactivated</source>
-        <translation type="obsolete">deaktiviert</translation>
-    </message>
-    <message>
-        <source>Wireless</source>
-        <translation type="obsolete">Drahtlos</translation>
-    </message>
-    <message>
-        <source>off</source>
-        <translation type="obsolete">aus</translation>
-    </message>
-    <message>
-        <source>static</source>
-        <translation type="obsolete">statisch</translation>
-    </message>
-    <message>
-        <source>zeroconf</source>
-        <translation type="obsolete">zerconf</translation>
-    </message>
-    <message>
-        <source>wait for config</source>
-        <translation type="obsolete">unkonfiguriert</translation>
-    </message>
-</context>
-<context>
-    <name>QObject</name>
-    <message>
-        <source>selected</source>
-        <translation type="obsolete">ausgewählt</translation>
-    </message>
-    <message>
-        <source>disabled</source>
-        <translation type="obsolete">deaktiviert</translation>
-    </message>
-    <message>
-        <source>enabled</source>
-        <translation type="obsolete">auswählbar</translation>
-    </message>
-    <message>
-        <source>any</source>
-        <translation type="obsolete">jede</translation>
-    </message>
-    <message>
-        <source>Type: %1</source>
-        <translation type="obsolete">Typ: %1</translation>
-    </message>
-    <message>
-        <source>State: %1</source>
-        <translation type="obsolete">Status: %1</translation>
-    </message>
-    <message>
-        <source>Connected to: %1</source>
-        <translation type="obsolete">Verbunden mit: %1</translation>
-    </message>
-    <message>
-        <source>local</source>
-        <translation type="obsolete">lokal</translation>
     </message>
 </context>
 <context>
@@ -148,54 +70,64 @@
 <context>
     <name>airset</name>
     <message>
-        <location filename="airset.ui" line="60"/>
+        <location filename="airset.ui" line="63"/>
         <source>no device</source>
         <translation>kein Netzwerkgerät</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="73"/>
+        <location filename="airset.ui" line="76"/>
         <source>unknown state</source>
         <translation>unbekannter Status</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="426"/>
+        <location filename="airset.ui" line="417"/>
         <source>Managed networks</source>
         <translation>Verwaltete Netzwerke</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="498"/>
+        <location filename="airset.ui" line="455"/>
         <source>Available networks</source>
         <translation>Netzwerke in Reichweite</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="113"/>
+        <location filename="airset.ui" line="116"/>
         <source>Level: 0</source>
         <translation>Pegel: 0</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="120"/>
+        <location filename="airset.ui" line="123"/>
         <source>Noise: 0</source>
         <translation>Rauschen: 0</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="133"/>
+        <location filename="airset.ui" line="136"/>
         <source>no signal info</source>
         <translation>keine Signalinformationen</translation>
     </message>
     <message>
-        <location filename="airset.ui" line="140"/>
+        <location filename="airset.ui" line="143"/>
         <source>Rate: 0Mb/s</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="airset.ui" line="147"/>
+        <location filename="airset.ui" line="150"/>
         <source>00:00:00:00:00:00</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="airset.ui" line="154"/>
+        <location filename="airset.ui" line="157"/>
         <source>Quality: 0/0</source>
         <translation>Qualität: 0/0</translation>
+    </message>
+    <message>
+        <location filename="airset.ui" line="479"/>
+        <source>SSID Filter</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="airset.ui" line="492"/>
+        <source>clear</source>
+        <translation>leeren</translation>
     </message>
 </context>
 <context>
@@ -474,10 +406,73 @@
         <source>Show Details</source>
         <translation>Zeige Details</translation>
     </message>
+</context>
+<context>
+    <name>devset</name>
     <message>
-        <location filename="devdet.ui" line="132"/>
+        <location filename="devset.ui" line="17"/>
         <source>Show tray icon for this device</source>
         <translation>Zeige Symbol im Systembereich für dieses Gerät</translation>
+    </message>
+    <message>
+        <location filename="devset.ui" line="24"/>
+        <source>Disable notifications for this device</source>
+        <translation>Deaktiviere Benachrichtigungen für dieses Gerät</translation>
+    </message>
+    <message>
+        <location filename="devset.ui" line="31"/>
+        <source>Execute event-based commands</source>
+        <translation>Ereignisbasierte Kommandos ausführen</translation>
+    </message>
+    <message>
+        <location filename="devset.ui" line="45"/>
+        <source>for State</source>
+        <translation>für Zustand</translation>
+    </message>
+    <message>
+        <location filename="devset.ui" line="56"/>
+        <source>deactivated</source>
+        <translation>deaktiviert</translation>
+    </message>
+    <message>
+        <location filename="devset.ui" line="61"/>
+        <source>activated</source>
+        <translation>aktiviert</translation>
+    </message>
+    <message>
+        <location filename="devset.ui" line="66"/>
+        <source>got carrier</source>
+        <translation>physikalisch verbunden</translation>
+    </message>
+    <message>
+        <location filename="devset.ui" line="71"/>
+        <source>got carrier but not fully configured</source>
+        <translation>unvollständig konfiguriert</translation>
+    </message>
+    <message>
+        <location filename="devset.ui" line="76"/>
+        <source>up</source>
+        <translation>verbunden</translation>
+    </message>
+    <message>
+        <location filename="devset.ui" line="91"/>
+        <source>Enable all</source>
+        <translation>Aktiviere alle</translation>
+    </message>
+    <message>
+        <location filename="devset.ui" line="98"/>
+        <source>Disable all</source>
+        <translation>Deaktiviere alle</translation>
+    </message>
+    <message>
+        <location filename="devset.ui" line="121"/>
+        <source>Add</source>
+        <translation>Hinzufügen</translation>
+    </message>
+    <message>
+        <location filename="devset.ui" line="128"/>
+        <source>Remove</source>
+        <translation>Entfernen</translation>
     </message>
 </context>
 <context>
@@ -521,22 +516,22 @@
         <translation>Hinzufügen</translation>
     </message>
     <message>
-        <location filename="ipconf.ui" line="156"/>
+        <location filename="ipconf.ui" line="159"/>
         <source>Remove</source>
         <translation>Entfernen</translation>
     </message>
     <message>
-        <location filename="ipconf.ui" line="168"/>
+        <location filename="ipconf.ui" line="171"/>
         <source>Remember settings for this interface</source>
         <translation>Einstellungen für dieses Interface speichern</translation>
     </message>
     <message>
-        <location filename="ipconf.ui" line="177"/>
+        <location filename="ipconf.ui" line="180"/>
         <source>Import...</source>
         <translation>Importieren...</translation>
     </message>
     <message>
-        <location filename="ipconf.ui" line="184"/>
+        <location filename="ipconf.ui" line="187"/>
         <source>Export...</source>
         <translation>Exportieren...</translation>
     </message>
@@ -551,22 +546,22 @@
     <message>
         <location filename="../libnutclient/cdevice.cpp" line="208"/>
         <source>Name : %1</source>
-        <translation>Name: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../libnutclient/cdevice.cpp" line="209"/>
         <source>Type: %1</source>
-        <translation>Typ: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../libnutclient/cdevice.cpp" line="210"/>
         <source>State: %1</source>
-        <translation>Status: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../libnutclient/cdevice.cpp" line="276"/>
         <source>Active Environement: %1</source>
-        <translation>Aktive Umgebung: %1</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../libnutclient/cdevice.cpp" line="294"/>
@@ -648,80 +643,72 @@
 <context>
     <name>libnutclient::CLibNut</name>
     <message>
-        <source>Please start NUTS</source>
-        <translation type="obsolete">Bitte starten sie NUTS</translation>
-    </message>
-    <message>
-        <source>(%1)Error while setting-up dbusconnection</source>
-        <translation type="obsolete">(%1) Fehler beim Erstellen der DBus-Verbindung</translation>
-    </message>
-    <message>
-        <location filename="../libnutclient/clibnut.cpp" line="11"/>
+        <location filename="../libnutclient/clibnut.cpp" line="12"/>
         <source>up</source>
         <translation>verbunden</translation>
     </message>
     <message>
-        <location filename="../libnutclient/clibnut.cpp" line="12"/>
+        <location filename="../libnutclient/clibnut.cpp" line="13"/>
         <source>unconfigured</source>
         <translation>unkonfiguriert</translation>
     </message>
     <message>
-        <location filename="../libnutclient/clibnut.cpp" line="13"/>
+        <location filename="../libnutclient/clibnut.cpp" line="14"/>
         <source>got carrier</source>
         <translation>physikalisch verbunden</translation>
     </message>
     <message>
-        <location filename="../libnutclient/clibnut.cpp" line="14"/>
+        <location filename="../libnutclient/clibnut.cpp" line="15"/>
         <source>activated</source>
         <translation>aktiviert</translation>
     </message>
     <message>
-        <location filename="../libnutclient/clibnut.cpp" line="15"/>
+        <location filename="../libnutclient/clibnut.cpp" line="16"/>
         <source>deactivated</source>
         <translation>deaktiviert</translation>
     </message>
     <message>
-        <location filename="../libnutclient/clibnut.cpp" line="21"/>
+        <location filename="../libnutclient/clibnut.cpp" line="22"/>
         <source>Ethernet</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../libnutclient/clibnut.cpp" line="22"/>
+        <location filename="../libnutclient/clibnut.cpp" line="23"/>
         <source>Wireless</source>
         <translation>Drahtlos</translation>
     </message>
     <message>
-        <location filename="../libnutclient/clibnut.cpp" line="23"/>
+        <location filename="../libnutclient/clibnut.cpp" line="24"/>
         <source>PPP</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../libnutclient/clibnut.cpp" line="24"/>
+        <location filename="../libnutclient/clibnut.cpp" line="25"/>
         <source>Bridge</source>
         <translation>Brücke</translation>
     </message>
     <message>
-        <location filename="../libnutclient/clibnut.cpp" line="30"/>
+        <location filename="../libnutclient/clibnut.cpp" line="31"/>
         <source>off</source>
         <translation>aus</translation>
     </message>
     <message>
-        <location filename="../libnutclient/clibnut.cpp" line="31"/>
+        <location filename="../libnutclient/clibnut.cpp" line="32"/>
         <source>static</source>
         <translation>statisch</translation>
     </message>
     <message>
-        <location filename="../libnutclient/clibnut.cpp" line="32"/>
+        <location filename="../libnutclient/clibnut.cpp" line="33"/>
         <source>dynamic</source>
         <translation>dynamisch</translation>
     </message>
     <message>
-        <location filename="../libnutclient/clibnut.cpp" line="33"/>
+        <location filename="../libnutclient/clibnut.cpp" line="34"/>
         <source>zeroconf</source>
         <translation>zerconf</translation>
     </message>
     <message>
-        <location filename="../libnutclient/clibnut.cpp" line="34"/>
+        <location filename="../libnutclient/clibnut.cpp" line="35"/>
         <source>wait for config</source>
         <translation>unkonfiguriert</translation>
     </message>
@@ -729,17 +716,17 @@
 <context>
     <name>libnutwireless::CWpaSupplicant</name>
     <message>
-        <location filename="../libnutwireless/wpa_supplicant.cpp" line="61"/>
+        <location filename="../libnutwireless/wpa_supplicant.cpp" line="60"/>
         <source>auto-setting ap_scan=2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/wpa_supplicant.cpp" line="69"/>
+        <location filename="../libnutwireless/wpa_supplicant.cpp" line="68"/>
         <source>Using your last ap_scan settings for auto-setting: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/wpa_supplicant.cpp" line="72"/>
+        <location filename="../libnutwireless/wpa_supplicant.cpp" line="71"/>
         <source>You must set ap_scan to your needs!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -747,95 +734,95 @@
 <context>
     <name>libnutwireless::CWpaSupplicantBase</name>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="90"/>
+        <location filename="../libnutwireless/base.cpp" line="99"/>
         <source>Error while trying to receive messages from wpa_supplicant</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="175"/>
+        <location filename="../libnutwireless/base.cpp" line="184"/>
         <source>Could not open wpa_supplicant socket: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="183"/>
-        <location filename="../libnutwireless/base.cpp" line="191"/>
-        <location filename="../libnutwireless/base.cpp" line="199"/>
+        <location filename="../libnutwireless/base.cpp" line="192"/>
+        <location filename="../libnutwireless/base.cpp" line="200"/>
+        <location filename="../libnutwireless/base.cpp" line="208"/>
         <source>Could not open wpa_supplicant control interface</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="213"/>
+        <location filename="../libnutwireless/base.cpp" line="222"/>
         <source>Could not attach to wpa_supplicant</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="232"/>
+        <location filename="../libnutwireless/base.cpp" line="241"/>
         <source>ERROR: Could not open socket to net kernel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="246"/>
+        <location filename="../libnutwireless/base.cpp" line="255"/>
         <source>wpa_supplicant connection established</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="280"/>
+        <location filename="../libnutwireless/base.cpp" line="289"/>
         <source>(%1)[%2] wpa_supplicant disconnected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="483"/>
+        <location filename="../libnutwireless/base.cpp" line="492"/>
         <source>Warning, no timer present while trying to get scan results</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="514"/>
-        <location filename="../libnutwireless/base.cpp" line="839"/>
+        <location filename="../libnutwireless/base.cpp" line="523"/>
+        <location filename="../libnutwireless/base.cpp" line="848"/>
         <source>(Wireless Extension) No device present</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="516"/>
+        <location filename="../libnutwireless/base.cpp" line="525"/>
         <source>(Wireless Extension) Device not supported</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="575"/>
+        <location filename="../libnutwireless/base.cpp" line="584"/>
         <source>Range information are not available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="625"/>
+        <location filename="../libnutwireless/base.cpp" line="634"/>
         <source>(%1) Failed to read scan data : %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="808"/>
+        <location filename="../libnutwireless/base.cpp" line="817"/>
         <source>No Scanresults available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="841"/>
+        <location filename="../libnutwireless/base.cpp" line="850"/>
         <source>(Wireless Extension) device not supported</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="984"/>
+        <location filename="../libnutwireless/base.cpp" line="993"/>
         <source>Error occured while fetching wireless info: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="997"/>
+        <location filename="../libnutwireless/base.cpp" line="1006"/>
         <source>Auto-resetting timer to 10 seconds</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="1003"/>
+        <location filename="../libnutwireless/base.cpp" line="1012"/>
         <source>Cannot fetch wireless information as your wireless extension is too old</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../libnutwireless/base.cpp" line="1004"/>
+        <location filename="../libnutwireless/base.cpp" line="1013"/>
         <source>Think about updating your kernel (it&apos;s way too old)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -843,12 +830,8 @@
 <context>
     <name>libnutwireless::QObject</name>
     <message>
-        <location filename="../libnutwireless/types.cpp" line="146"/>
-        <location filename="../libnutwireless/types.cpp" line="164"/>
-        <location filename="../libnutwireless/types.cpp" line="191"/>
-        <location filename="../libnutwireless/types.cpp" line="209"/>
-        <location filename="../libnutwireless/types.cpp" line="221"/>
-        <location filename="../libnutwireless/types.cpp" line="255"/>
+        <location filename="../libnutwireless/types.cpp" line="145"/>
+        <location filename="../libnutwireless/types.cpp" line="163"/>
         <source>UNDEFINED</source>
         <translation>UNDEFINIERT</translation>
     </message>
@@ -995,147 +978,152 @@
 <context>
     <name>qnut::CConnectionManager</name>
     <message>
-        <location filename="connectionmanager.cpp" line="53"/>
+        <location filename="connectionmanager.cpp" line="61"/>
         <source>Overview</source>
         <translation>Übersicht</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="66"/>
+        <location filename="connectionmanager.cpp" line="77"/>
         <source>Cannot create/open log file.</source>
         <translation>Konnte Protokolldatei nicht öffnen/anlegen.</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="70"/>
+        <location filename="connectionmanager.cpp" line="81"/>
         <source>%1 (v%2) started</source>
         <translation>%1 (v%2) gestartet</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="73"/>
+        <location filename="connectionmanager.cpp" line="84"/>
         <source>QNUT - Connection Manager</source>
         <translation>QNUT - Verbindungsmanager</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="77"/>
+        <location filename="connectionmanager.cpp" line="41"/>
         <source>Main Toolbar</source>
         <translation>Hauptwerkzeugleiste</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="98"/>
+        <location filename="connectionmanager.cpp" line="115"/>
         <source>&amp;File</source>
         <translation>&amp;Datei</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="100"/>
+        <location filename="connectionmanager.cpp" line="117"/>
         <source>&amp;Close</source>
         <translation>&amp;Schließen</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="102"/>
+        <location filename="connectionmanager.cpp" line="119"/>
         <source>&amp;Quit</source>
         <translation>&amp;Beenden</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="104"/>
+        <location filename="connectionmanager.cpp" line="121"/>
         <source>&amp;Edit</source>
         <translation>&amp;Bearbeiten</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="106"/>
+        <location filename="connectionmanager.cpp" line="123"/>
         <source>&amp;View</source>
         <translation>&amp;Ansicht</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="108"/>
+        <location filename="connectionmanager.cpp" line="127"/>
+        <source>Show %1</source>
+        <translation>Zeige %1</translation>
+    </message>
+    <message>
+        <location filename="connectionmanager.cpp" line="131"/>
         <source>Show &amp;balloon tips</source>
         <translation>Zeige Sprech&amp;blasen</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="109"/>
+        <location filename="connectionmanager.cpp" line="132"/>
         <source>Show balloon tips on certain events like state changes</source>
         <translation>Zeige Sprechblasen bei bestimmten Ereignissen (z.b. Verbindungsänderungen)</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="112"/>
+        <location filename="connectionmanager.cpp" line="135"/>
         <source>Show &amp;log</source>
         <translation>Zeige &amp;Protokoll</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="113"/>
+        <location filename="connectionmanager.cpp" line="136"/>
         <source>Show log tab</source>
         <translation>Zeige Protokollkartei</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="116"/>
+        <location filename="connectionmanager.cpp" line="139"/>
         <source>&amp;Help</source>
         <translation>&amp;Hilfe</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="118"/>
+        <location filename="connectionmanager.cpp" line="141"/>
         <source>&amp;About QNUT</source>
         <translation>Über Q&amp;NUT</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="119"/>
+        <location filename="connectionmanager.cpp" line="142"/>
         <source>Show about dialog of QNUT</source>
         <translation>Zeige Informationsdialog von QNUT</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="121"/>
+        <location filename="connectionmanager.cpp" line="144"/>
         <source>About &amp;Qt</source>
         <translation>Über &amp;Qt</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="122"/>
+        <location filename="connectionmanager.cpp" line="145"/>
         <source>Show about dialog of Qt</source>
         <translation>Zeige Informationsdialog von Qt</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="125"/>
+        <location filename="connectionmanager.cpp" line="148"/>
         <source>&amp;Refresh devices</source>
         <translation>&amp;Geräte aktualisieren</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="126"/>
+        <location filename="connectionmanager.cpp" line="149"/>
         <source>&amp;Enable</source>
         <translation>&amp;Aktivieren</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="127"/>
+        <location filename="connectionmanager.cpp" line="150"/>
         <source>&amp;Disable</source>
         <translation>&amp;Deaktivieren</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="128"/>
-        <source>&amp;Scripting settings...</source>
-        <translation>&amp;Skripteinstellungen...</translation>
+        <location filename="connectionmanager.cpp" line="151"/>
+        <source>&amp;Device settings...</source>
+        <translation>&amp;Geräteeinstellungen...</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="130"/>
+        <location filename="connectionmanager.cpp" line="153"/>
         <source>&amp;Wireless settings...</source>
         <translation>Drahtlose &amp;Kommunikations-Einstellungen...</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="132"/>
+        <location filename="connectionmanager.cpp" line="155"/>
         <source>&amp;Clear log</source>
         <translation>Protokoll &amp;leeren</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="237"/>
+        <location filename="connectionmanager.cpp" line="276"/>
         <source>no devices present</source>
         <translation>keine Geräte vorhanden</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="320"/>
+        <location filename="connectionmanager.cpp" line="359"/>
         <source>About QNUT</source>
         <translation>Über QNUT</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="334"/>
+        <location filename="connectionmanager.cpp" line="373"/>
         <source>Log</source>
         <translation>Protokoll</translation>
     </message>
     <message>
-        <location filename="connectionmanager.cpp" line="66"/>
+        <location filename="connectionmanager.cpp" line="77"/>
         <source>ERROR: %1</source>
         <translation>Fehler: %1</translation>
     </message>
@@ -1143,100 +1131,105 @@
 <context>
     <name>qnut::CDeviceDetails</name>
     <message>
-        <location filename="devicedetails.cpp" line="189"/>
+        <location filename="devicedetails.cpp" line="294"/>
         <source>&amp;Enable device</source>
         <translation>Gerät &amp;aktivieren</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="193"/>
+        <location filename="devicedetails.cpp" line="298"/>
         <source>&amp;Disable device</source>
         <translation>Gerät &amp;deaktivieren</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="209"/>
+        <location filename="devicedetails.cpp" line="303"/>
+        <source>&amp;Device settings...</source>
+        <translation>&amp;Geräteeinstellungen...</translation>
+    </message>
+    <message>
+        <location filename="devicedetails.cpp" line="314"/>
         <source>En&amp;vironments...</source>
         <translation>&amp;Umgebungen...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="198"/>
-        <source>&amp;Scripting settings...</source>
-        <translation>&amp;Skripteinstellungen...</translation>
-    </message>
-    <message>
-        <location filename="devicedetails.cpp" line="201"/>
+        <location filename="devicedetails.cpp" line="306"/>
         <source>&amp;Wireless settings...</source>
         <translation>Einstellungen der drahtlosen &amp;Kommunikation...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="212"/>
+        <location filename="devicedetails.cpp" line="317"/>
         <source>E&amp;nter environment</source>
         <translation>&amp;Betrete Umgebung</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="216"/>
+        <location filename="devicedetails.cpp" line="321"/>
         <source>Set &amp;IP configuration...</source>
         <translation>Setzte &amp;IP-Konfiguration...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="224"/>
+        <location filename="devicedetails.cpp" line="329"/>
         <source>&amp;Copy property</source>
         <translation>Eigenschaft in Zwischenablage &amp;kopieren</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="250"/>
+        <location filename="devicedetails.cpp" line="353"/>
         <source>connected to: %1</source>
         <translation>verbunden mit: %1</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="381"/>
-        <location filename="devicedetails.cpp" line="385"/>
-        <location filename="devicedetails.cpp" line="389"/>
-        <location filename="devicedetails.cpp" line="393"/>
+        <location filename="devicedetails.cpp" line="471"/>
+        <source>Device settings for %1</source>
+        <translation>Geräteeinstellungen für %1</translation>
+    </message>
+    <message>
+        <location filename="devicedetails.cpp" line="499"/>
+        <location filename="devicedetails.cpp" line="503"/>
+        <location filename="devicedetails.cpp" line="507"/>
+        <location filename="devicedetails.cpp" line="511"/>
         <source>QNUT - %1 ...</source>
         <translation>QNUT - %1 ...</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="382"/>
+        <location filename="devicedetails.cpp" line="500"/>
         <source>... is now up and running.</source>
         <translation>... ist jetzt verbunden.</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="390"/>
+        <location filename="devicedetails.cpp" line="508"/>
         <source>... is now activated an waits for carrier.</source>
         <translation>... ist jetzt aktiviert und wartet
 auf eine physikalische Verbindung.</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="394"/>
+        <location filename="devicedetails.cpp" line="512"/>
         <source>... is now deactivated</source>
         <translation>... ist jetzt deaktiviert</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="403"/>
-        <location filename="devicedetails.cpp" line="407"/>
-        <location filename="devicedetails.cpp" line="411"/>
-        <location filename="devicedetails.cpp" line="415"/>
+        <location filename="devicedetails.cpp" line="521"/>
+        <location filename="devicedetails.cpp" line="525"/>
+        <location filename="devicedetails.cpp" line="529"/>
+        <location filename="devicedetails.cpp" line="533"/>
         <source>QNUT</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="404"/>
+        <location filename="devicedetails.cpp" line="522"/>
         <source>%1 is now up and running.</source>
         <translation>%1 ist jetzt verbunden.</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="412"/>
+        <location filename="devicedetails.cpp" line="530"/>
         <source>%1 is now activated an waits for carrier.</source>
         <translation>%1 ist jetzt aktiviert und wartet
 auf eine physikalische Verbindung.</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="416"/>
+        <location filename="devicedetails.cpp" line="534"/>
         <source>%1 is now deactivated</source>
         <translation>%1 ist jetzt deaktiviert</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="386"/>
+        <location filename="devicedetails.cpp" line="504"/>
         <source>... got carrier but needs configuration.
 
 Klick here to open the device details.</source>
@@ -1247,11 +1240,19 @@ Klicken sie hier, um die Details
 dieses Gerätes anzuzeigen.</translation>
     </message>
     <message>
-        <location filename="devicedetails.cpp" line="408"/>
+        <location filename="devicedetails.cpp" line="526"/>
         <source>%1 got carrier but needs configuration.
 
 Klick here to open the device details.</source>
         <translation>%1 ist zwar physikalisch verbundenhat aber unkonfigurierte Schnittellen.Klicken sie hier, um die Detailsdieses Gerätes anzuzeigen.</translation>
+    </message>
+</context>
+<context>
+    <name>qnut::CDeviceSettings</name>
+    <message>
+        <location filename="devicesettings.cpp" line="63"/>
+        <source>echo &apos;New Command&apos;</source>
+        <translation>echo &apos;Neues Kommando&apos;</translation>
     </message>
 </context>
 <context>
@@ -1320,27 +1321,27 @@ Klick here to open the device details.</source>
 <context>
     <name>qnut::CEnvironmentTreeModel</name>
     <message>
-        <location filename="environmenttreemodel.cpp" line="93"/>
+        <location filename="environmenttreemodel.cpp" line="94"/>
         <source>active</source>
         <translation>aktiv</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="111"/>
+        <location filename="environmenttreemodel.cpp" line="112"/>
         <source>none</source>
         <translation>keine</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="143"/>
+        <location filename="environmenttreemodel.cpp" line="144"/>
         <source>Item</source>
         <translation>Objekt</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="145"/>
+        <location filename="environmenttreemodel.cpp" line="146"/>
         <source>Status</source>
         <translation>Status</translation>
     </message>
     <message>
-        <location filename="environmenttreemodel.cpp" line="147"/>
+        <location filename="environmenttreemodel.cpp" line="148"/>
         <source>IP-Address</source>
         <translation>IP-Adresse</translation>
     </message>
@@ -1540,19 +1541,14 @@ BSSID: %3</translation>
 <context>
     <name>qnut::CTrayIcon</name>
     <message>
-        <location filename="trayicon.cpp" line="20"/>
+        <location filename="trayicon.cpp" line="16"/>
         <source>Open Connection &amp;Manager</source>
         <translation>Öffne &amp;Verbindungsmanager</translation>
     </message>
     <message>
-        <location filename="trayicon.cpp" line="25"/>
+        <location filename="trayicon.cpp" line="19"/>
         <source>&amp;Quit</source>
         <translation>&amp;Beenden</translation>
-    </message>
-    <message>
-        <location filename="trayicon.cpp" line="17"/>
-        <source>Network &amp;devices</source>
-        <translation>Netzwerk &amp;Geräte</translation>
     </message>
 </context>
 <context>
@@ -1563,121 +1559,121 @@ BSSID: %3</translation>
         <translation>Einstellungen der drahtlosen Verbindung für &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="303"/>
+        <location filename="wirelesssettings.cpp" line="305"/>
         <source>This action is not reversible.</source>
         <translation>Diese Aktion ist nicht umkehrbar.</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="305"/>
+        <location filename="wirelesssettings.cpp" line="307"/>
         <source>Removing a managed network</source>
         <translation>Entferne ein verwaltetes Netzwerk</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="301"/>
+        <location filename="wirelesssettings.cpp" line="303"/>
         <source>Are you sure to remove &quot;%1&quot;?</source>
         <translation>Sind Sie sich sicher, dass sie &quot;%1&quot; entfernen möchten?</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="100"/>
+        <location filename="wirelesssettings.cpp" line="102"/>
         <source>&amp;Enable</source>
         <translation>&amp;Aktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="101"/>
+        <location filename="wirelesssettings.cpp" line="103"/>
         <source>Enable &amp;all</source>
         <translation>A&amp;lle Aktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="102"/>
+        <location filename="wirelesssettings.cpp" line="104"/>
         <source>&amp;Disable</source>
         <translation>&amp;Deaktivieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="103"/>
+        <location filename="wirelesssettings.cpp" line="105"/>
         <source>S&amp;witch</source>
         <translation>&amp;Wechseln</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="104"/>
+        <location filename="wirelesssettings.cpp" line="106"/>
         <source>&amp;Configure...</source>
         <translation>&amp;Konfigurieren...</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="109"/>
+        <location filename="wirelesssettings.cpp" line="111"/>
         <source>&amp;Autosave configuration</source>
         <translation>Konfiguration &amp;automatisch speichern</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="110"/>
+        <location filename="wirelesssettings.cpp" line="112"/>
         <source>&amp;Remove</source>
         <translation>&amp;Entfernen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="105"/>
+        <location filename="wirelesssettings.cpp" line="107"/>
         <source>Add &amp;network</source>
         <translation>&amp;Netzwerk hinzufügen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="106"/>
+        <location filename="wirelesssettings.cpp" line="108"/>
         <source>Add ad-&amp;hoc</source>
         <translation>Ad-&amp;hoc Netz hinzufügen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="108"/>
+        <location filename="wirelesssettings.cpp" line="110"/>
         <source>&amp;Save configuration</source>
         <translation>Konfiguration &amp;speichern</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="107"/>
+        <location filename="wirelesssettings.cpp" line="109"/>
         <source>Re&amp;load configuration</source>
         <translation>Konfiguration akt&amp;ualisieren</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="111"/>
+        <location filename="wirelesssettings.cpp" line="113"/>
         <source>Detailed &amp;view</source>
         <translation>De&amp;tailierte Ansicht</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="112"/>
+        <location filename="wirelesssettings.cpp" line="114"/>
         <source>Scan ne&amp;tworks</source>
         <translation>Ne&amp;tzwerke suchen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="114"/>
+        <location filename="wirelesssettings.cpp" line="116"/>
         <source>More...</source>
         <translation>Mehr...</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="211"/>
-        <location filename="wirelesssettings.cpp" line="241"/>
+        <location filename="wirelesssettings.cpp" line="213"/>
+        <location filename="wirelesssettings.cpp" line="243"/>
         <source>Quality</source>
         <translation>Qualität</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="218"/>
-        <location filename="wirelesssettings.cpp" line="243"/>
+        <location filename="wirelesssettings.cpp" line="220"/>
+        <location filename="wirelesssettings.cpp" line="245"/>
         <source>Level</source>
         <translation>Pegel</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="219"/>
-        <location filename="wirelesssettings.cpp" line="244"/>
+        <location filename="wirelesssettings.cpp" line="221"/>
+        <location filename="wirelesssettings.cpp" line="246"/>
         <source>Noise</source>
         <translation>Rauschen</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="209"/>
+        <location filename="wirelesssettings.cpp" line="211"/>
         <source>Channel</source>
         <translation>Kanal</translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="212"/>
-        <location filename="wirelesssettings.cpp" line="242"/>
+        <location filename="wirelesssettings.cpp" line="214"/>
+        <location filename="wirelesssettings.cpp" line="244"/>
         <source>Bitrate</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="wirelesssettings.cpp" line="239"/>
+        <location filename="wirelesssettings.cpp" line="241"/>
         <source>no signal info</source>
         <translation>keine Signalinformationen</translation>
     </message>
@@ -1705,67 +1701,34 @@ BSSID: %3</translation>
         <translation>jede</translation>
     </message>
     <message>
-        <location filename="common.h" line="60"/>
+        <location filename="common.h" line="70"/>
         <source>none</source>
         <translation>keine</translation>
     </message>
     <message>
-        <location filename="common.cpp" line="72"/>
+        <location filename="common.h" line="77"/>
+        <source>default</source>
+        <translation>Standard</translation>
+    </message>
+    <message>
+        <location filename="common.cpp" line="74"/>
         <source>Type: %1</source>
         <translation>Typ: %1</translation>
     </message>
     <message>
-        <location filename="common.cpp" line="73"/>
+        <location filename="common.cpp" line="75"/>
         <source>State: %1</source>
         <translation>Status: %1</translation>
     </message>
     <message>
-        <location filename="common.cpp" line="79"/>
+        <location filename="common.cpp" line="81"/>
         <source>Connected to: %1</source>
         <translation>Verbunden mit: %1</translation>
     </message>
     <message>
-        <location filename="common.cpp" line="95"/>
+        <location filename="common.cpp" line="97"/>
         <source>local</source>
         <translation>lokal</translation>
-    </message>
-</context>
-<context>
-    <name>scrset</name>
-    <message>
-        <location filename="scrset.ui" line="14"/>
-        <source>Scripting Settings</source>
-        <translation>Skripteinstellungen</translation>
-    </message>
-    <message>
-        <location filename="scrset.ui" line="20"/>
-        <source>Execute scripts when device gets...</source>
-        <translation>Führe Skiprte aus, wenn Geräte wechselt den Zustand nach ...</translation>
-    </message>
-    <message>
-        <location filename="scrset.ui" line="26"/>
-        <source>...deactivated</source>
-        <translation>...deaktiviert</translation>
-    </message>
-    <message>
-        <location filename="scrset.ui" line="33"/>
-        <source>...activated</source>
-        <translation>...aktiviert</translation>
-    </message>
-    <message>
-        <location filename="scrset.ui" line="40"/>
-        <source>...carrier</source>
-        <translation>...physikalische Verbindung</translation>
-    </message>
-    <message>
-        <location filename="scrset.ui" line="47"/>
-        <source>...carrier and stays unconfigured</source>
-        <translation>...physikalische Verbindung, bleibt aber konfigurationslos</translation>
-    </message>
-    <message>
-        <location filename="scrset.ui" line="54"/>
-        <source>...up</source>
-        <translation>...verbunden</translation>
     </message>
 </context>
 </TS>
