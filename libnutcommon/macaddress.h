@@ -25,37 +25,29 @@ namespace libnutcommon {
 			MacAddress(const QString &str);
 			MacAddress(const quint8 *d);
 			MacAddress(const ether_addr * eth);
-			quint8 data[6];
+			union {
+				quint64 ui64;
+				quint8 bytes[6];
+			} data;
 			
 			inline bool operator==(const MacAddress &ma) const {
-				for (int i = 0; i < 6; i++)
-					if (data[i] != ma.data[i])
-						return false;
-				return true;
+				return data.ui64 == ma.data.ui64;
 			}
 			inline bool operator!=(const MacAddress &ma) const {
 				return !(*this == ma);
 			}
 			inline bool operator<(const MacAddress &b) {
-				if ( *((quint32*)data) < *((quint32*)b.data) ) {
-					return true;
-				}
-				else if ( *((quint32*)data) == *((quint32*)b.data) ) { //First is equal
-					return ( (*((quint16*)(data+4))) < *((quint16*)((b.data)+4)) );
-				}
-				else {
-					return false;
-				}
+				return data.ui64 < b.data.ui64;
 			}
 			inline QString toString() const {
 				char buf[sizeof("00:00:00:00:00:00")];
 				sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
-					data[0],data[1],data[2],data[3],data[4],data[5]);
+					data.bytes[0],data.bytes[1],data.bytes[2],data.bytes[3],data.bytes[4],data.bytes[5]);
 				return QString(buf);
 			}
 			
 			inline bool zero() const {
-				return *((quint32*)data) == 0 && *((quint16*)(data+4)) == 0;
+				return data.ui64 == 0;
 			}
 			
 			inline bool valid() const {
@@ -63,15 +55,13 @@ namespace libnutcommon {
 			}
 			
 			inline void clear() {
-				*((quint32*)data) = 0;
-				*((quint16*)(data+4)) = 0;
+				data.ui64 = 0;
 			}
 	};
 }
 
 static inline uint qHash(const libnutcommon::MacAddress &key) {
-	quint8 data[8] = { key.data[0], key.data[2], key.data[3], key.data[4], key.data[5], key.data[6], 0, 0};
-	return qHash(*((quint64*)data));
+	return qHash(key.data.ui64);
 }
 
 Q_DECLARE_METATYPE(libnutcommon::MacAddress)

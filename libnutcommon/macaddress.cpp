@@ -43,8 +43,8 @@ namespace libnutcommon {
 	}
 	
 	MacAddress::MacAddress(const QString &str) {
+		data.ui64 = 0;
 		if (str == QLatin1String("any") || str.isEmpty()) {
-			memset(data, 0, sizeof(data));
 			return;
 		}
 		QByteArray buf = str.toUtf8();
@@ -66,7 +66,7 @@ namespace libnutcommon {
 //				qDebug() << QString("Unexpected char in mac: '%1'").arg(*s);
 				return;
 			}
-			data[i] = val;
+			data.bytes[i] = val;
 		}
 //		qDebug() << QString("-> %1").arg(toString());
 	}
@@ -75,16 +75,18 @@ namespace libnutcommon {
 		if (d == 0) {
 			MacAddress();
 		} else {
+			data.ui64 = 0;
 			for (int i = 0; i < 6; i++)
-				data[i] = d[i];
+				data.bytes[i] = d[i];
 		}
 	}
 	MacAddress::MacAddress(const ether_addr * eth) {
-		data[0] = (quint8) eth->ether_addr_octet[0];
-		data[1] = (quint8) eth->ether_addr_octet[1];
-		data[2] = (quint8) eth->ether_addr_octet[2];
-		data[3] = (quint8) eth->ether_addr_octet[3];
-		data[4] = (quint8) eth->ether_addr_octet[4];
-		data[5] = (quint8) eth->ether_addr_octet[5];
+		data.ui64 = 0;
+		data.bytes[0] = (quint8) eth->ether_addr_octet[0];
+		data.bytes[1] = (quint8) eth->ether_addr_octet[1];
+		data.bytes[2] = (quint8) eth->ether_addr_octet[2];
+		data.bytes[3] = (quint8) eth->ether_addr_octet[3];
+		data.bytes[4] = (quint8) eth->ether_addr_octet[4];
+		data.bytes[5] = (quint8) eth->ether_addr_octet[5];
 	}
 }
