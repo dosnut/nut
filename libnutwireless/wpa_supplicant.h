@@ -9,6 +9,7 @@
 
 #ifndef LIBNUT_NO_WIRELESS
 #include "base.h"
+#include "cnetworkconfig.h"
 #include <QDebug>
 
 
@@ -34,15 +35,11 @@ namespace libnutwireless {
 	class CWpaSupplicant: public CWpaSupplicantBase {
 			Q_OBJECT
 		private:
-			QList<quint8> m_supportedChannels;
-
-			//Edit/get network helper functions
-			EapNetworkConfig getEapNetworkConfig(int id);
-			EapNetconfigFailures editEapNetwork(int netid, EapNetworkConfig config);
+			
 			/** This function is used to check if an adhoc network is configured properly.
 				It checks for plaintext,wep and wpa networks.
 			**/
-			NetconfigStatus checkAdHocNetwork(NetworkConfig &config);
+			NetconfigStatus checkAdHocNetwork(CNetworkConfig &config);
 			
 			//Set ap_scan defaults
 			void setApScanDefault();
@@ -63,7 +60,6 @@ namespace libnutwireless {
 				
 			}
 			~CWpaSupplicant() {}
-			QList<quint8>& getSupportedChannels();
 			
 		public slots:
 			/**
@@ -103,14 +99,14 @@ namespace libnutwireless {
 				EAP-Networks are automatically detected.
 				Undefined values in Networkconfig will not be set.
 			*/
-			NetconfigStatus addNetwork(NetworkConfig config);
+			NetconfigStatus addNetwork(CNetworkConfig config);
 			/**
 				Function to edit a Network. Errors will be written in NetconfigStatus
 				EAP-Networks are automatically detected.
 				Undefined values in Networkconfig will not be set.
 			*/
-			NetconfigStatus editNetwork(int netid, NetworkConfig config);
-			NetworkConfig getNetworkConfig(int id);
+			NetconfigStatus editNetwork(int netid, CNetworkConfig config);
+			CNetworkConfig getNetworkConfig(int id);
 			
 			void removeNetwork(int id);
 			bool setBssid(int id, libnutcommon::MacAddress bssid);

@@ -11,7 +11,7 @@
 #ifndef QNUT_NO_WIRELESS
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
-#include <libnutwireless/types.h>
+#include <libnutwireless/hwtypes.h>
 
 #define UI_AVLAP_SSID    0
 #define UI_AVLAP_KEYMGMT 1
@@ -22,7 +22,7 @@
 #define UI_AVLAP_LEVEL   6
 
 namespace libnutwireless {
-	class CWpaSupplicant;
+	class CWirelessHW;
 }
 
 namespace qnut {
@@ -53,7 +53,7 @@ namespace qnut {
 		 * @param wpaSupplicant pointer to a wpa_supplicant (if NULL nothing is displayed)
 		 * @param parent parent object
 		 */
-		CAvailableAPModel(libnutwireless::CWpaSupplicant * data = NULL, QObject * parent = 0);
+		CAvailableAPModel(libnutwireless::CWirelessHW * data = NULL, QObject * parent = 0);
 		/// @brief Destroyes the object.
 		~CAvailableAPModel();
 		
@@ -68,8 +68,8 @@ namespace qnut {
 	private slots:
 		void updateScans();
 	private:
-		void setWpaSupplicant(libnutwireless::CWpaSupplicant * wpaSupplicant);
-		libnutwireless::CWpaSupplicant * m_Supplicant;
+		void setWpaSupplicant(libnutwireless::CWirelessHW * m_WirelessAcces);
+		libnutwireless::CWirelessHW * m_WirelessAcces;
 		QList<libnutwireless::ScanResult> m_Scans;
 	};
 	

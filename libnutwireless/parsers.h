@@ -2,7 +2,7 @@
 #define LIBNUTWIRELESS_PARSERS
 
 #include <QStringList>
-#include "types.h"
+#include "wstypes.h"
 
 
 namespace libnutwireless {
@@ -24,28 +24,6 @@ namespace libnutwireless {
 		//parse list network
 		QList<ShortNetworkInfo> parseListNetwork(QStringList list);
 		NetworkFlags parseNetworkFlags(QString str);
-	
-	
-		//parse scan results
-		PairwiseCiphers parseScanPairwiseCiphers(QString str);
-		KeyManagement parseScanKeyMgmt(QString str);
-		Protocols parseScanProtocols(QString str);
-		
-
-		QList<ScanResult> parseScanResult(QStringList list);
-		void parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * scan);
-
-
-		//parse config
-		Protocols parseProtocols(QString str);
-		KeyManagement parseKeyMgmt(QString str);
-		AuthenticationAlgs parseAuthAlg(QString str);
-		PairwiseCiphers parsePairwiseCiphers(QString str);
-		GroupCiphers parseGroupCiphers(QString str);
-		EapolFlags parseEapolFlags(QString str);
-		EapMethod parseEapMethod(QString str);
-		
-		
 	
 		//parse Status with helper functionss
 		Status parseStatus(QStringList list);

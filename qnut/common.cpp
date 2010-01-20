@@ -14,6 +14,7 @@
 #include <libnutwireless/wpa_supplicant.h>
 #include "common.h"
 #include "constants.h"
+#include <libnutwireless/cwireless.h>
 
 namespace qnut {
 	using namespace libnutcommon;
@@ -86,8 +87,8 @@ namespace qnut {
 	
 	QString currentNetwork(CDevice * device, bool appendQuality) {
 #ifndef QNUT_NO_WIRELESS
-		if (appendQuality && device->getWpaSupplicant()) {
-			WextSignal signal = device->getWpaSupplicant()->getSignalQuality();
+		if (appendQuality && device->getWireless()) {
+			SignalQuality signal = device->getWireless()->getHardware()->getSignalQuality();
 			return device->getEssid() + " (" +
 				QString::number(signal.quality.value) + '/'+
 				QString::number(signal.quality.maximum) + ')';

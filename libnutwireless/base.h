@@ -26,22 +26,15 @@ namespace libnutwireless {
 		protected:
 			struct wpa_ctrl *cmd_ctrl, *event_ctrl;
 			QString m_wpaSupplicantPath;
-			int m_wpaFd, m_wextFd;
+			int m_wpaFd;
 			QSocketNotifier *m_eventSn;
 			bool m_logEnabled;
 			bool m_wpaConnected;
 			int m_connectTimerId; ///Timer id for connection timer
-			int m_wextTimerId;
-			int m_scanTimerId;
-			int m_wextTimerRate;
 			int m_timerCount;
 			bool m_inConnectionPhase;
 			QString m_ifname;
-			QList<ScanResult> m_wpaScanResults;
-			WextSignal m_signalQuality;
-			int m_scanTimeoutCount;
-			int m_wextPollTimeoutCount;
-			QList<quint32> m_supportedFrequencies;
+
 			
 			//Workaround as Constructor of subclass is not beeing called
 			int m_apScanDefault;
@@ -95,10 +88,6 @@ namespace libnutwireless {
 			*/
 			void eventDispatcher(QString event);
 
-			//Functions to get actual signal strength and/or signal strength for scan results:
-			//And set scanresults
-			void setScanResults(QList<WextRawScan> wextScanResults);
-			void tryScanResults();
 
 			//Need to do it that way, as inline fails otherwise
 			inline void printMessage(QString msg) { if (m_logEnabled) emit(message(msg));}
@@ -128,22 +117,13 @@ namespace libnutwireless {
 			/** close connection to wpa_supplicant */
 			inline bool close() {return closeWpa("libnutclient",false); }
 			bool connected();
-			/** This function reads the signal quality from wireless extension.
-				On success signalQualityUpdated(libnutwireless::WextSignal signal) will be emitted.
-			*/
-			void readWirelessInfo();
 			
-		public slots:
-			void setLog(bool enabled);
-			
-			/** Initiate a scan; See scanCompleted() */
 			void scan();
 			
-			void setSignalQualityPollRate(int msec);
-			int getSignalQualityPollRate();
-			WextSignal getSignalQuality();
-
-			QList<ScanResult> scanResults();
+		public slots:
+			
+			
+			void setLog(bool enabled);
 			
 		signals:
 			/** Signal which is emitted if wpa_supplicant connects or disconnects
@@ -166,11 +146,11 @@ namespace libnutwireless {
 				First the scanresults from wpa_supplicant are set imediately.
 				Then we're trying to retrieve further information via wirelessExtension.
 			*/
-			void scanCompleted();
+
 			/** Emits messages from wpa_supplicant like rekying */
 			void message(QString msg);
 			void eventMessage(libnutwireless::EventType type);
-			void signalQualityUpdated(libnutwireless::WextSignal signal);
+
 			/** This signal is emitted whenever the network list from listNetworks() has changed. */
 			void networkListUpdated();
 	};

@@ -10,11 +10,13 @@
 
 #ifndef QNUT_NO_WIRELESS
 #include <QDialog>
-#include <libnutwireless/types.h>
+#include <libnutwireless/hwtypes.h>
 #include "ui/ui_adhoc.h"
 
 namespace libnutwireless {
 	class CWpaSupplicant;
+	class CWireless;
+	class CWirelessHW;
 }
 
 namespace qnut {
@@ -34,6 +36,7 @@ namespace qnut {
 		QRegExpValidator * m_HexValidator;
 		int m_CurrentID;
 		libnutwireless::CWpaSupplicant * m_Supplicant;
+		libnutwireless::CWirelessHW * m_WirelessHW;
 	public:
 		/**
 		 * @brief Opens the dialog for adding the given scanned network.
@@ -52,7 +55,7 @@ namespace qnut {
 		 * @brief Creates the object and initializes the basic user interface.
 		 * @param parent parent widget
 		 */
-		CAdhocConfig(libnutwireless::CWpaSupplicant * wpa_supplicant, QWidget * parent = 0);
+		CAdhocConfig(libnutwireless::CWireless * wpa_supplicant, QWidget * parent = 0);
 		/// @brief Destroyes the object.
 		~CAdhocConfig();
 	private slots:

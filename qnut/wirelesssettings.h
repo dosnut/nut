@@ -10,7 +10,7 @@
 
 #ifndef QNUT_NO_WIRELESS
 #include <QDialog>
-#include <libnutwireless/types.h>
+#include <libnutwireless/hwtypes.h>
 #include <libnutcommon/device.h>
 #include "ui/ui_airset.h"
 
@@ -79,7 +79,7 @@ namespace qnut {
 	private slots:
 		void handleManagedAPSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 		void updateUi(libnutcommon::DeviceState state);
-		void updateSignalInfo(libnutwireless::WextSignal signal);
+		void updateSignalInfo(libnutwireless::SignalQuality signal);
 		void switchToSelectedNetwork();
 		void addNetwork();
 		void addAdhoc();

@@ -7,7 +7,8 @@
 //
 #ifndef QNUT_NO_WIRELESS
 #include <QIcon>
-#include <libnutwireless/wpa_supplicant.h>
+#include <libnutwireless/cwireless.h>
+#include <libnutwireless/conversion.h>
 #include "availableapmodel.h"
 #include "common.h"
 #include "constants.h"
@@ -16,28 +17,28 @@ namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutwireless;
 	
-	CAvailableAPModel::CAvailableAPModel(CWpaSupplicant * wpaSupplicant, QObject * parent) : QAbstractItemModel(parent) {
-		setWpaSupplicant(wpaSupplicant);
+	CAvailableAPModel::CAvailableAPModel(CWirelessHW * WirelessAcces, QObject * parent) : QAbstractItemModel(parent) {
+		setWpaSupplicant(WirelessAcces);
 	}
 	
 	CAvailableAPModel::~CAvailableAPModel() {
-		m_Supplicant = NULL;
+		m_WirelessAcces = NULL;
 	}
 	
-	void CAvailableAPModel::setWpaSupplicant(CWpaSupplicant * wpaSupplicant) {
-		if (m_Supplicant == wpaSupplicant)
+	void CAvailableAPModel::setWpaSupplicant(CWirelessHW * wpaSupplicant) {
+		if (m_WirelessAcces == wpaSupplicant)
 			return;
 		
-		m_Supplicant = wpaSupplicant;
-		if (m_Supplicant) {
+		m_WirelessAcces = wpaSupplicant;
+		if (m_WirelessAcces) {
 			updateScans();
-			connect(m_Supplicant, SIGNAL(scanCompleted()), this, SLOT(updateScans()));
+			connect(m_WirelessAcces, SIGNAL(scanCompleted()), this, SLOT(updateScans()));
 		}
 	}
 	
 	void CAvailableAPModel::updateScans() {
 		emit layoutAboutToBeChanged();
-		m_Scans = m_Supplicant->scanResults();
+		m_Scans = m_WirelessAcces->getScanResults();
 		emit layoutChanged();
 	}
 	
@@ -108,12 +109,12 @@ namespace qnut {
 		case UI_AVLAP_BSSID:
 			return m_Scans[index.row()].bssid.toString();
 		case UI_AVLAP_QUALITY: {
-				WextSignal signal = m_Scans[index.row()].signal;
+				SignalQuality signal = m_Scans[index.row()].signal;
 				return QString::number(signal.quality.value) + '/'+
 					QString::number(signal.quality.maximum);
 			}
 		case UI_AVLAP_LEVEL: {
-				WextSignal signal = m_Scans[index.row()].signal;
+				SignalQuality signal = m_Scans[index.row()].signal;
 				switch (signal.type) {
 				case WSR_RCPI:
 					return QString::number(signal.level.rcpi) + "dBm";

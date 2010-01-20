@@ -148,65 +148,65 @@ namespace qnut {
 	}
 	
 	bool CAccessPointConfig::execute(int id) {
-		NetworkConfig config = m_Supplicant->getNetworkConfig(id);
+		CNetworkConfig config = m_Supplicant->getNetworkConfig(id);
 		
-		m_OldConfig.pairwise = config.pairwise;
-		m_OldConfig.group = config.group;
-		m_OldConfig.protocols = config.protocols;
+		m_OldConfig.pairwise = config.get_pairwise();
+		m_OldConfig.group = config.get_group();
+		m_OldConfig.protocols = config.get_protocols();
 		
-		if (config.ssid[0] == '\"') {
+		if (config.get_ssid()[0] == '\"') {
 			ui.ssidHexCheck->setChecked(false);
-			ui.ssidEdit->setText(config.ssid.mid(1, config.ssid.length()-2));
+			ui.ssidEdit->setText(config.get_ssid().mid(1, config.get_ssid().length()-2));
 		}
 		else {
 			ui.ssidHexCheck->setChecked(true);
-			ui.ssidEdit->setText(config.ssid);
+			ui.ssidEdit->setText(config.get_ssid());
 		}
 		
-		ui.anyBSSIDCheck->setChecked(config.bssid.zero());
-		ui.bssidEdit->setText(config.bssid.toString());
+		ui.anyBSSIDCheck->setChecked(config.get_bssid().zero());
+		ui.bssidEdit->setText(config.get_bssid().toString());
 		
-		if ((config.keyManagement & KM_WPA_EAP) || (config.keyManagement & KM_IEEE8021X)) {
+		if ((config.get_key_mgmt() & KM_WPA_EAP) || (config.get_key_mgmt() & KM_IEEE8021X)) {
 			ui.keyManagementCombo->setCurrentIndex(2);
-			readEAPConfig(config.eap_config);
+			readEAPConfig(config);
 			ui.passwordLeaveButton->setVisible(true);
 			ui.passwordLeaveButton->setChecked(true);
-			ui.rsnCheck->setChecked(config.protocols & PROTO_RSN);
+			ui.rsnCheck->setChecked(config.get_protocols() & PROTO_RSN);
 		}
-		else if (config.keyManagement & KM_WPA_PSK) {
+		else if (config.get_key_mgmt() & KM_WPA_PSK) {
 			ui.keyManagementCombo->setCurrentIndex(1);
 			ui.pskLeaveButton->setVisible(true);
 			ui.pskLeaveButton->setChecked(true);
-			ui.rsnCheck->setChecked(config.protocols & PROTO_RSN);
+			ui.rsnCheck->setChecked(config.get_protocols() & PROTO_RSN);
 		}
 		else
 			ui.keyManagementCombo->setCurrentIndex(0);
 		
 //		ui.rsnCheck->setChecked(config.protocols & PROTO_RSN);
 		
-		if (config.pairwise & PCI_CCMP)
+		if (config.get_pairwise() & PCI_CCMP)
 			ui.prwCipCombo->setCurrentIndex(2);
-		else if (config.pairwise & PCI_TKIP)
+		else if (config.get_pairwise() & PCI_TKIP)
 			ui.prwCipCombo->setCurrentIndex(1);
 		else
 			ui.prwCipCombo->setCurrentIndex(0);
 		
 		if (m_WEPEnabled) {
 			if (ui.keyManagementCombo->currentIndex()) {
-				if (config.group & GCI_CCMP)
+				if (config.get_group() & GCI_CCMP)
 					ui.grpCipCombo->setCurrentIndex(3);
-				else if (config.group & GCI_TKIP)
+				else if (config.get_group() & GCI_TKIP)
 					ui.grpCipCombo->setCurrentIndex(2);
 			}
-			else if (!(config.keyManagement & KM_OFF) && ((config.group & GCI_WEP104) || (config.group & GCI_WEP40)))
+			else if (!(config.get_key_mgmt() & KM_OFF) && ((config.get_group() & GCI_WEP104) || (config.get_group() & GCI_WEP40)))
 				ui.grpCipCombo->setCurrentIndex(1);
 			else
 				ui.grpCipCombo->setCurrentIndex(0);
 		}
 		else {
-			if (config.group & GCI_CCMP)
+			if (config.get_group() & GCI_CCMP)
 				ui.grpCipCombo->setCurrentIndex(2);
-			else if (config.group & GCI_TKIP)
+			else if (config.get_group() & GCI_TKIP)
 				ui.grpCipCombo->setCurrentIndex(1);
 			else
 				ui.grpCipCombo->setCurrentIndex(0);
@@ -222,7 +222,7 @@ namespace qnut {
 			ui.wep2LeaveButton->setChecked(true);
 			ui.wep3LeaveButton->setChecked(true);
 			
-			switch (config.wep_tx_keyidx) {
+			switch (config.get_wep_tx_keyidx()) {
 			default: ui.wep0Radio->setChecked(true); break;
 			case 1:  ui.wep1Radio->setChecked(true); break;
 			case 2:  ui.wep2Radio->setChecked(true); break;
@@ -230,8 +230,8 @@ namespace qnut {
 			}
 		}
 		
-		ui.scanCheck->setChecked(config.scan_ssid);
-		ui.autoEnableCheck->setChecked(config.disabled);
+		ui.scanCheck->setChecked(config.get_scan_ssid());
+		ui.autoEnableCheck->setChecked(config.get_disabled());
 		
 		m_CurrentID = id;
 		
@@ -240,111 +240,111 @@ namespace qnut {
 	
 	void CAccessPointConfig::verifyConfiguration() {
 		NetconfigStatus status;
-		NetworkConfig config;
+		CNetworkConfig config;
 		
 		if (!ui.ssidEdit->text().isEmpty())
-			config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
+			config.set_ssid(ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"');
 		
-		config.scan_ssid = toQOOL(ui.scanCheck->isChecked());
-		config.disabled = toQOOL(!ui.autoEnableCheck->isChecked());
+		config.set_scan_ssid(toQOOL(ui.scanCheck->isChecked()));
+		config.set_disabled(toQOOL(!ui.autoEnableCheck->isChecked()));
 		
 		if (ui.anyBSSIDCheck->isChecked())
-			config.bssid.clear();
+			config.set_bssid(MacAddress());
 		else
-			config.bssid = MacAddress(ui.bssidEdit->text());
+			config.set_bssid(MacAddress(ui.bssidEdit->text()));
 		
 		if (ui.confTabs->isTabEnabled(3)) {
 			if (!(ui.wep0LeaveButton->isChecked() || ui.wep0Edit->text().isEmpty()))
-				config.wep_key0 = ui.wep0HexCheck->isChecked() ?
+				config.set_wep_key0(ui.wep0HexCheck->isChecked() ?
 					ui.wep0Edit->text() :
-					'\"' + ui.wep0Edit->text() + '\"';
+					'\"' + ui.wep0Edit->text() + '\"');
 			if (!(ui.wep1LeaveButton->isChecked() || ui.wep1Edit->text().isEmpty()))
-				config.wep_key1 = ui.wep1HexCheck->isChecked() ?
+				config.set_wep_key1(ui.wep1HexCheck->isChecked() ?
 					ui.wep1Edit->text() :
-					'\"' + ui.wep1Edit->text() + '\"';
+					'\"' + ui.wep1Edit->text() + '\"');
 			if (!(ui.wep2LeaveButton->isChecked() || ui.wep2Edit->text().isEmpty()))
-				config.wep_key2 = ui.wep2HexCheck->isChecked() ?
+				config.set_wep_key2(ui.wep2HexCheck->isChecked() ?
 					ui.wep2Edit->text() :
-					'\"' + ui.wep2Edit->text() + '\"';
+					'\"' + ui.wep2Edit->text() + '\"');
 			if (!(ui.wep3LeaveButton->isChecked() || ui.wep3Edit->text().isEmpty()))
-				config.wep_key3 = ui.wep3HexCheck->isChecked() ?
+				config.set_wep_key3(ui.wep3HexCheck->isChecked() ?
 					ui.wep3Edit->text() :
-					'\"' + ui.wep3Edit->text() + '\"';
+					'\"' + ui.wep3Edit->text() + '\"');
 			
 			if (ui.wep0Radio->isChecked())
-				config.wep_tx_keyidx = 0;
+				config.set_wep_tx_keyidx(0);
 			else if (ui.wep1Radio->isChecked())
-				config.wep_tx_keyidx = 1;
+				config.set_wep_tx_keyidx(1);
 			else if (ui.wep2Radio->isChecked())
-				config.wep_tx_keyidx = 2;
+				config.set_wep_tx_keyidx(2);
 			else if (ui.wep3Radio->isChecked())
-				config.wep_tx_keyidx = 3;
+				config.set_wep_tx_keyidx(3);
 		}
 		
 		if (ui.grpCipCombo->currentText() == "TKIP")
-			config.group = GCI_TKIP;
+			config.set_group(GCI_TKIP);
 		else if (ui.grpCipCombo->currentText() == "CCMP")
-			config.group = GCI_CCMP;
+			config.set_group(GCI_CCMP);
 		else if (ui.grpCipCombo->currentText() == "WEP")
-			config.group = (GroupCiphers)(GCI_WEP104 | GCI_WEP40);
+			config.set_group((GroupCiphers)(GCI_WEP104 | GCI_WEP40));
 		
-		if (config.group & m_OldConfig.group) {
-			config.group = m_OldConfig.group;
+		if (config.get_group() & m_OldConfig.group) {
+			config.set_group(m_OldConfig.group);
 		}
 		
 		if (ui.prwCipCombo->isEnabled()) {
 			switch (ui.prwCipCombo->currentIndex()) {
 			case 0:
-				config.pairwise = PCI_NONE; break;
+				config.set_pairwise(PCI_NONE); break;
 			case 1:
-				config.pairwise = PCI_TKIP; break;
+				config.set_pairwise(PCI_TKIP); break;
 			case 2:
-				config.pairwise = PCI_CCMP; break;
+				config.set_pairwise(PCI_CCMP); break;
 			default:
 				break;
 			}
 			
-			if (config.pairwise & m_OldConfig.pairwise) {
-				config.pairwise = m_OldConfig.pairwise;
+			if (config.get_pairwise() & m_OldConfig.pairwise) {
+				config.set_pairwise(m_OldConfig.pairwise);
 			}
 		}
 		
 		switch (ui.keyManagementCombo->currentIndex()) {
 		case 0:
-			config.keyManagement = KM_NONE;
+			config.set_key_mgmt(KM_NONE);
 			break;
 		case 1:
-			config.keyManagement = KM_WPA_PSK;
+			config.set_key_mgmt(KM_WPA_PSK);
 			
 			if (ui.rsnCheck->isChecked())
-				config.protocols = PROTO_RSN;
+				config.set_proto(PROTO_RSN);
 			else
-				config.protocols = PROTO_WPA;
+				config.set_proto(PROTO_WPA);
 			
-			if (config.protocols & m_OldConfig.protocols) {
-				config.protocols = m_OldConfig.protocols;
+			if (config.get_protocols() & m_OldConfig.protocols) {
+				config.set_proto(m_OldConfig.protocols);
 			}
 			
 			if (!(ui.pskLeaveButton->isChecked() || ui.pskEdit->text().isEmpty()))
-				config.psk = '\"' + ui.pskEdit->text() + '\"';
+				config.set_psk('\"' + ui.pskEdit->text() + '\"');
 			
 			break;
 		case 2:
 			if (ui.grpCipCombo->currentText() == "WEP")
-				config.keyManagement = KM_IEEE8021X;
+				config.set_key_mgmt(KM_IEEE8021X);
 			else
-				config.keyManagement = KM_WPA_EAP;
+				config.set_key_mgmt(KM_WPA_EAP);
 			
 			if (ui.rsnCheck->isChecked())
-				config.protocols = PROTO_RSN;
+				config.set_proto(PROTO_RSN);
 			else
-				config.protocols = PROTO_WPA;
+				config.set_proto(PROTO_WPA);
 			
-			if (config.protocols & m_OldConfig.protocols) {
-				config.protocols = m_OldConfig.protocols;
+			if (config.get_protocols() & m_OldConfig.protocols) {
+				config.set_proto(m_OldConfig.protocols);
 			}
 			
-			writeEAPConfig(config.eap_config);
+			writeEAPConfig(config);
 			break;
 		default:
 			break;
@@ -425,25 +425,25 @@ namespace qnut {
 		accept();
 	}
 	
-	inline void CAccessPointConfig::writeEAPConfig(EapNetworkConfig &eap_config) {
+	inline void CAccessPointConfig::writeEAPConfig(CNetworkConfig &eap_config) {
 		switch (ui.eapCombo->currentIndex()) {
-		case 0: eap_config.eap = EAPM_MD5; break;
-		case 1: eap_config.eap = EAPM_TLS; break;
-		case 2: eap_config.eap = EAPM_MSCHAPV2; break;
-		case 3: eap_config.eap = EAPM_PEAP; break;
-		case 4: eap_config.eap = EAPM_TTLS; break;
-		case 5: eap_config.eap = EAPM_GTC; break;
-		case 6: eap_config.eap = EAPM_OTP; break;
-		case 7: eap_config.eap = EAPM_LEAP; break;
+		case 0: eap_config.set_eap(EAPM_MD5); break;
+		case 1: eap_config.set_eap(EAPM_TLS); break;
+		case 2: eap_config.set_eap(EAPM_MSCHAPV2); break;
+		case 3: eap_config.set_eap(EAPM_PEAP); break;
+		case 4: eap_config.set_eap(EAPM_TTLS); break;
+		case 5: eap_config.set_eap(EAPM_GTC); break;
+		case 6: eap_config.set_eap(EAPM_OTP); break;
+		case 7: eap_config.set_eap(EAPM_LEAP); break;
 		default: break;
 		}
-		eap_config.identity = '\"' + ui.identificationEdit->text() + '\"';
-		eap_config.ca_cert = '\"' + ui.caEdit->text() + '\"';
-		eap_config.client_cert = '\"' + ui.clientEdit->text() + '\"';
-		eap_config.private_key = '\"' + ui.keyFileEdit->text() + '\"';
+		eap_config.set_identity('\"' + ui.identificationEdit->text() + '\"');
+		eap_config.set_ca_cert('\"' + ui.caEdit->text() + '\"');
+		eap_config.set_client_cert('\"' + ui.clientEdit->text() + '\"');
+		eap_config.set_private_key('\"' + ui.keyFileEdit->text() + '\"');
 		
 		if (!ui.passwordLeaveButton->isChecked())
-			eap_config.private_key_passwd = '\"' + ui.passwordEdit->text() + '\"';
+			eap_config.set_private_key_passwd('\"' + ui.passwordEdit->text() + '\"');
 	}
 	
 	inline QString CAccessPointConfig::convertQuoted(QString text) {
@@ -453,28 +453,28 @@ namespace qnut {
 			return text;
 	}
 	
-	inline void CAccessPointConfig::readEAPConfig(EapNetworkConfig &eap_config) {
-		if (eap_config.eap & EAPM_LEAP)
+	inline void CAccessPointConfig::readEAPConfig(CNetworkConfig &eap_config) {
+		if (eap_config.get_eap() & EAPM_LEAP)
 			ui.eapCombo->setCurrentIndex(7);
-		else if (eap_config.eap & EAPM_OTP)
+		else if (eap_config.get_eap() & EAPM_OTP)
 			ui.eapCombo->setCurrentIndex(6);
-		else if (eap_config.eap & EAPM_GTC)
+		else if (eap_config.get_eap() & EAPM_GTC)
 			ui.eapCombo->setCurrentIndex(5);
-		else if (eap_config.eap & EAPM_TTLS)
+		else if (eap_config.get_eap() & EAPM_TTLS)
 			ui.eapCombo->setCurrentIndex(4);
-		else if (eap_config.eap & EAPM_PEAP)
+		else if (eap_config.get_eap() & EAPM_PEAP)
 			ui.eapCombo->setCurrentIndex(3);
-		else if (eap_config.eap & EAPM_MSCHAPV2)
+		else if (eap_config.get_eap() & EAPM_MSCHAPV2)
 			ui.eapCombo->setCurrentIndex(2);
-		else if (eap_config.eap & EAPM_TLS)
+		else if (eap_config.get_eap() & EAPM_TLS)
 			ui.eapCombo->setCurrentIndex(1);
 		else
 			ui.eapCombo->setCurrentIndex(0);
 		
-		ui.identificationEdit->setText(convertQuoted(eap_config.identity));
-		ui.caEdit->setText(convertQuoted(eap_config.ca_cert));
-		ui.clientEdit->setText(convertQuoted(eap_config.client_cert));
-		ui.keyFileEdit->setText(convertQuoted(eap_config.private_key));
+		ui.identificationEdit->setText(convertQuoted(eap_config.get_identity()));
+		ui.caEdit->setText(convertQuoted(eap_config.get_ca_cert()));
+		ui.clientEdit->setText(convertQuoted(eap_config.get_client_cert()));
+		ui.keyFileEdit->setText(convertQuoted(eap_config.get_private_key()));
 		ui.passwordEdit->setText("");
 	}
 	

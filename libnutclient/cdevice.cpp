@@ -4,7 +4,7 @@
 #include "clog.h"
 #include "server_proxy.h"
 #include "cenvironment.h"
-#include "libnutwireless/wpa_supplicant.h"
+#include "libnutwireless/cwireless.h"
 
 namespace libnutclient {
 using namespace libnutcommon;
@@ -19,7 +19,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) :
 	log(parent->log),
 	m_dbusDevice(0),
 #ifndef LIBNUT_NO_WIRELESS
-	m_needWpaSupplicant(false),
+	m_needWireless(false),
 #endif
 	m_propertiesFetched(false),
 	m_environmentsFetched(false),
@@ -30,7 +30,7 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) :
 	m_state(libnutcommon::DS_UNCONFIGURED),
 	m_type(libnutcommon::DT_ETH),
 	m_activeEnvironment(0),
-	m_wpaSupplicant(0),
+	m_wlAccess(0),
 	m_index(-1)
 {} //TODO:Init all! pointers to 0
 
@@ -145,13 +145,13 @@ void CDevice::dbusStateChanged(int newState, int oldState) {
 	#ifndef LIBNUT_NO_WIRELESS
 	//If switching from DS_DEACTIVATED to any other state then connect wpa_supplicant
 	if (DS_DEACTIVATED == oldState && !(DS_DEACTIVATED == newState) ) {
-		if (m_needWpaSupplicant) {
-			m_wpaSupplicant->open();
+		if (m_needWireless) {
+			m_wlAccess->open();
 		}
 	}
 	else if (DS_DEACTIVATED == newState) {
-		if (m_needWpaSupplicant) {
-			m_wpaSupplicant->close();
+		if (m_needWireless) {
+			m_wlAccess->close();
 		}
 	}
 	#endif
@@ -165,8 +165,8 @@ void CDevice::dbusStateChanged(int newState, int oldState) {
 		m_essid = QString();
 	}
 	#ifndef LIBNUT_NO_WIRELESS
-	if (DT_AIR == m_type && DS_CARRIER <= m_state && m_wpaSupplicant != NULL) {
-		m_wpaSupplicant->setSignalQualityPollRate(500);
+	if (DT_AIR == m_type && DS_CARRIER <= m_state && m_wlAccess != NULL && m_wlAccess->getHardware() != NULL) {
+		m_wlAccess->getHardware()->setSignalQualityPollRate(500);
 	}
 	#endif
 	emit(stateChanged(m_state));
@@ -260,21 +260,21 @@ void CDevice::dbusretGetConfig(libnutcommon::DeviceConfig config) {
 
 	m_config = config;
 	#ifndef LIBNUT_NO_WIRELESS
-	m_needWpaSupplicant = !(m_config.wpaConfigFile().isEmpty());
+	m_needWireless = !(m_config.wpaConfigFile().isEmpty());
 
 	//Only use wpa_supplicant if we need one
-	if (m_needWpaSupplicant) {
+	if (m_needWireless) {
 		*log << tr("(%2) wpa_supplicant config file at: %1").arg(m_config.wpaConfigFile(),m_name);
 
-		m_wpaSupplicant = new libnutwireless::CWpaSupplicant(this,m_name);
-		connect(m_wpaSupplicant,SIGNAL(message(QString)),log,SLOT(log(QString)));
+		m_wlAccess = new libnutwireless::CWireless(this,m_name);
+		connect(m_wlAccess,SIGNAL(message(QString)),log,SLOT(log(QString)));
 		connect(m_dbusDevice,SIGNAL(newWirelssNetworkFound(void)),this,SIGNAL(newWirelessNetworkFound(void)));
 		//Connect to wpa_supplicant only if device is not deactivated
 		if (! (DS_DEACTIVATED == m_state) ) {
-			m_wpaSupplicant->open();
+			m_wlAccess->open();
 		}
-		if (DT_AIR == m_type && DS_CARRIER <= m_state && m_wpaSupplicant != NULL) {
-			m_wpaSupplicant->setSignalQualityPollRate(500);
+		if (DT_AIR == m_type && DS_CARRIER <= m_state && m_wlAccess != NULL && m_wlAccess->getHardware() != NULL) {
+			m_wlAccess->getHardware()->setSignalQualityPollRate(500);
 		}
 	}
 	#endif

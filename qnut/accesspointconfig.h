@@ -10,7 +10,7 @@
 
 #ifndef QNUT_NO_WIRELESS
 #include <QDialog>
-#include <libnutwireless/types.h>
+#include <libnutwireless/cnetworkconfig.h>
 #include "ui/ui_apconf.h"
 
 namespace libnutwireless {
@@ -46,8 +46,8 @@ namespace qnut {
 		
 		inline void convertLineEditText(QLineEdit * lineEdit, bool hex);
 		inline QString convertQuoted(QString text);
-		inline void writeEAPConfig(libnutwireless::EapNetworkConfig &eap_config);
-		inline void readEAPConfig(libnutwireless::EapNetworkConfig &eap_config);
+		inline void writeEAPConfig(libnutwireless::CNetworkConfig &eap_config);
+		inline void readEAPConfig(libnutwireless::CNetworkConfig &eap_config);
 	public:
 		/**
 		 * @brief Opens the dialog for adding the given scanned network.

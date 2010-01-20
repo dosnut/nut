@@ -18,7 +18,7 @@ namespace libnutclient {
 }
 
 namespace libnutwireless {
-	class CWpaSupplicant;
+	class CWireless;
 }
 
 namespace libnutclient {
@@ -43,7 +43,7 @@ namespace libnutclient {
 		DBusDeviceInterface * m_dbusDevice;
 		libnutcommon::DeviceConfig m_config;
 #ifndef LIBNUT_NO_WIRELESS
-		bool m_needWpaSupplicant;
+		bool m_needWireless;
 #endif
 
 		//device init variables
@@ -62,7 +62,7 @@ namespace libnutclient {
 		libnutcommon::DeviceType m_type;
 		CEnvironment * m_activeEnvironment;
 #ifndef LIBNUT_NO_WIRELESS
-		libnutwireless::CWpaSupplicant * m_wpaSupplicant;
+		libnutwireless::CWireless * m_wlAccess;
 #endif
 		int m_index;
 
@@ -102,7 +102,7 @@ namespace libnutclient {
 			If no config file is present, the pointer will be null.
 		*/
 		#ifndef LIBNUT_NO_WIRELESS
-		inline libnutwireless::CWpaSupplicant * getWpaSupplicant() { return m_wpaSupplicant; }
+		inline libnutwireless::CWireless * getWireless() { return m_wlAccess; }
 		#endif
 		inline int getIndex() { return m_index; }
 

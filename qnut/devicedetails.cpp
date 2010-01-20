@@ -26,6 +26,7 @@
 
 #ifndef QNUT_NO_WIRELESS
 #include "wirelesssettings.h"
+#include <libnutwireless/cwireless.h>
 #endif
 
 namespace qnut {
@@ -36,7 +37,7 @@ namespace qnut {
 		m_Device = parentDevice;
 		
 #ifndef QNUT_NO_WIRELESS
-		if (m_Device->getWpaSupplicant())
+		if (m_Device->getWireless())
 			m_WirelessSettings = new CWirelessSettings(m_Device);
 		else
 			m_WirelessSettings = NULL;
@@ -305,7 +306,7 @@ namespace qnut {
 #ifndef QNUT_NO_WIRELESS
 		tempAction = m_DeviceMenu->addAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."),
 			this, SLOT(openWirelessSettings()));
-		tempAction->setEnabled(m_Device->getWpaSupplicant());
+		tempAction->setEnabled(m_Device->getWireless());
 #endif
 		
 		m_DeviceActions = m_DeviceMenu->actions();

@@ -14,6 +14,7 @@
 #include <QTreeView>
 #include <QTextEdit>
 #include <libnutclient/cdevice.h>
+#include <libnutwireless/cwireless.h>
 
 #include "connectionmanager.h"
 
@@ -338,7 +339,7 @@ namespace qnut {
 			m_DeviceSettingsAction->setEnabled(true);
 			
 #ifndef QNUT_NO_WIRELESS
-			m_WirelessSettingsAction->setEnabled(selectedDevice->getWpaSupplicant());
+			m_WirelessSettingsAction->setEnabled(selectedDevice->getWireless()->getWpaSupplicant());
 #endif
 		}
 	}

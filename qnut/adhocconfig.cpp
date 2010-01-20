@@ -7,7 +7,8 @@
 //
 #ifndef QNUT_NO_WIRELESS
 #include <QMessageBox>
-#include <libnutwireless/wpa_supplicant.h>
+#include <libnutwireless/cwireless.h>
+#include <libnutwireless/conversion.h>
 #include "adhocconfig.h"
 
 #define FLAG_PREPARE_OUTPUT(a, b, c) if(a & c) b << #c;
@@ -15,12 +16,13 @@
 namespace qnut {
 	using namespace libnutwireless;
 
-	CAdhocConfig::CAdhocConfig(CWpaSupplicant * wpa_supplicant, QWidget * parent) : QDialog(parent) {
-		m_Supplicant = wpa_supplicant;
+	CAdhocConfig::CAdhocConfig(CWireless * wireless, QWidget * parent) : QDialog(parent) {
+		m_Supplicant = wireless->getWpaSupplicant();
+		m_WirelessHW = wireless->getHardware();
 		
 		ui.setupUi(this);
 		
-		foreach (quint8 i, m_Supplicant->getSupportedChannels()) {
+		foreach (quint8 i, m_WirelessHW->getSupportedChannels()) {
 			ui.channelCombo->addItem(QString::number(i));
 		}
 		
@@ -37,36 +39,36 @@ namespace qnut {
 	
 	void CAdhocConfig::verifyConfiguration() {
 		NetconfigStatus status;
-		NetworkConfig config;
+		CNetworkConfig config;
 		
 		if (!ui.ssidEdit->text().isEmpty())
-			config.ssid = ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"';
-		config.frequency = channelToFrequency(ui.channelCombo->currentText().toInt());
-		config.mode = QOOL_TRUE;
+			config.set_ssid( ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"');
+		config.set_frequency(channelToFrequency(ui.channelCombo->currentText().toInt()));
+		config.set_mode(QOOL_TRUE);
 		
 		switch (ui.encCombo->currentIndex()) {
 		case 0:
-			config.keyManagement = KM_OFF;
+			config.set_key_mgmt(KM_OFF);
 			break;
 		case 1:
-			config.wep_tx_keyidx = 0;
-			config.keyManagement = KM_NONE;
+			config.set_wep_tx_keyidx(0);
+			config.set_key_mgmt(KM_NONE);
 			
 			if (!(ui.pskLeaveButton->isChecked() || ui.pskEdit->text().isEmpty()))
-				config.wep_key0 = '\"' + ui.pskEdit->text() + '\"';
+				config.set_wep_key0('\"' + ui.pskEdit->text() + '\"');
 			break;
 		default:
 			if (ui.encCombo->currentText() == "CCMP")
-				config.group = GCI_CCMP;
+				config.set_group(GCI_CCMP);
 			else if (ui.encCombo->currentText() == "TKIP")
-				config.group = GCI_TKIP;
+				config.set_group(GCI_TKIP);
 			
-			config.protocols = PROTO_WPA;
-			config.pairwise = PCI_NONE;
-			config.keyManagement = KM_WPA_NONE;
+			config.set_proto(PROTO_WPA);
+			config.set_pairwise(PCI_NONE);
+			config.set_key_mgmt(KM_WPA_NONE);
 			
 			if (!(ui.pskLeaveButton->isChecked() || (ui.pskEdit->text().isEmpty())))
-				config.psk = '\"' + ui.pskEdit->text() + '\"';
+				config.set_psk('\"' + ui.pskEdit->text() + '\"');
 			break;
 		}
 		
@@ -156,40 +158,40 @@ namespace qnut {
 	}
 	
 	bool CAdhocConfig::execute(int id) {
-		NetworkConfig config = m_Supplicant->getNetworkConfig(id);
+		CNetworkConfig config = m_Supplicant->getNetworkConfig(id);
 		
-		if (config.ssid[0] == '\"') {
+		if (config.get_ssid()[0] == '\"') {
 			ui.ssidHexCheck->setChecked(false);
-			ui.ssidEdit->setText(config.ssid.mid(1, config.ssid.length()-2));
+			ui.ssidEdit->setText(config.get_ssid().mid(1, config.get_ssid().length()-2));
 		}
 		else {
 			ui.ssidHexCheck->setChecked(true);
-			ui.ssidEdit->setText(config.ssid);
+			ui.ssidEdit->setText(config.get_ssid());
 		}
 		
-		if (config.keyManagement & KM_NONE)
+		if (config.get_key_mgmt() & KM_NONE)
 			ui.encCombo->setCurrentIndex(1);
-		else if (config.keyManagement & KM_OFF)
+		else if (config.get_key_mgmt() & KM_OFF)
 			ui.encCombo->setCurrentIndex(0);
-		else if (config.keyManagement & KM_WPA_NONE) {
-			if (config.group & GCI_CCMP)
+		else if (config.get_key_mgmt() & KM_WPA_NONE) {
+			if (config.get_group() & GCI_CCMP)
 				ui.encCombo->setCurrentIndex(3);
-			else if (config.group & GCI_TKIP)
+			else if (config.get_group() & GCI_TKIP)
 				ui.encCombo->setCurrentIndex(2);
 			else {
 				QMessageBox::critical(this, tr("Error reading ap config"),
-					tr("Unsupported group cipers retrieved: %1").arg((quint32)(config.group)));
+					tr("Unsupported group cipers retrieved: %1").arg((quint32)(config.get_group())));
 				return 0;
 			}
 		}
 		else {
 			QMessageBox::critical(this, tr("Error reading ap config"),
-				tr("Unsupported key management retrieved: %1").arg((quint32)(config.keyManagement)));
+				tr("Unsupported key management retrieved: %1").arg((quint32)(config.get_key_mgmt())));
 			return 0;
 		}
 		
-		int channel = frequencyToChannel(config.frequency);
-		int channelIndex = m_Supplicant->getSupportedChannels().indexOf(channel);
+		int channel = frequencyToChannel(config.get_frequency());
+		int channelIndex = m_WirelessHW->getSupportedChannels().indexOf(channel);
 		ui.channelCombo->setCurrentIndex(channelIndex);
 		
 		ui.pskLeaveButton->setVisible(true);
@@ -225,7 +227,7 @@ namespace qnut {
 		}
 		
 		int channel = frequencyToChannel(scanResult.freq);
-		int channelIndex = m_Supplicant->getSupportedChannels().indexOf(channel);
+		int channelIndex = m_WirelessHW->getSupportedChannels().indexOf(channel);
 		ui.channelCombo->setCurrentIndex(channelIndex);
 		
 		ui.pskLeaveButton->setVisible(false);
