@@ -28,6 +28,7 @@ namespace libnutcommon {
 			union {
 				quint64 ui64;
 				quint8 bytes[6];
+				quint16 words[3];
 			} data;
 			
 			inline bool operator==(const MacAddress &ma) const {

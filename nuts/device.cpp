@@ -772,8 +772,7 @@ namespace nuts {
 	}
 	
 	quint16 hashMac(const libnutcommon::MacAddress &addr) {
-		quint16 *ptr = (quint16*) addr.data;
-		return (quint16) (ptr[0] ^ ptr[1] ^ ptr[2]);
+		return (quint16) (addr.data.words[0] ^ addr.data.words[1] ^ addr.data.words[2]);
 	}
 	
 	void Interface_IPv4::zeroconfProbe() {   // select new ip and start probe it

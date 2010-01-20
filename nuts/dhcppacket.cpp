@@ -214,9 +214,9 @@ namespace nuts {
 	}
 	
 	void DHCPPacket::setClientMac(const libnutcommon::MacAddress &chaddr) {
-		memcpy(msg.chaddr, chaddr.data, 6);
+		memcpy(msg.chaddr, chaddr.data.bytes, 6);
 		quint8 clid[7];
-		memcpy(&clid[1], chaddr.data, 6);
+		memcpy(&clid[1], chaddr.data.bytes, 6);
 		clid[0] = ARPHRD_ETHER;
 		setOption(DHCP_CLIENT_ID, clid, sizeof(clid));
 	}
