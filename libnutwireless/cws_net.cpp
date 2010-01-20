@@ -86,6 +86,16 @@ NetconfigStatus CWpaSupplicant::checkAdHocNetwork(CNetworkConfig &config) {
 	
 NetconfigStatus CWpaSupplicant::editNetwork(int netid, CNetworkConfig config) {
 	NetconfigStatus failStatus;
+	
+	//Check if the network we edit is managed by us and if the NetworkIds are the same
+	QString response = wpaCtrlCmd_GET_NETWORK(netid,"id_str");
+	if ("FAIL\n" != response) {
+		CNetworkConfig::NetworkId i = CNetworkConfig::toNetworkId(response);
+		if (m_managedNetworks.contains(i)) { //managed by us, update our copy
+			m_managedNetworks[i] = config;
+		}
+	} //else, not managed by (at least not yet)
+
 	//Check if we're adding an ad-hoc network:
 	if (QOOL_TRUE == config.get_mode()) {
 		failStatus = checkAdHocNetwork(config);
@@ -364,6 +374,17 @@ NetconfigStatus CWpaSupplicant::editNetwork(int netid, CNetworkConfig config) {
 CNetworkConfig CWpaSupplicant::getNetworkConfig(int id) {
 	CNetworkConfig config;
 	QString response;
+	
+	//Check if this network is manged by us
+	response = wpaCtrlCmd_GET_NETWORK(id,"id_str");
+	if ("FAIL\n" != response) {
+		CNetworkConfig::NetworkId netId = CNetworkConfig::toNetworkId(response);
+		if (m_managedNetworks.contains(netId)) {
+			config = m_managedNetworks.find(netId).value();
+			return config;
+		}
+		config.set_id_str(response);
+	}
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"ssid");
 	if ("FAIL\n" != response) {
@@ -378,11 +399,6 @@ CNetworkConfig CWpaSupplicant::getNetworkConfig(int id) {
 	response = wpaCtrlCmd_GET_NETWORK(id,"disabled");
 	if ("FAIL\n" != response) {
 		config.set_disabled(toQOOL(response));
-	}
-
-	response = wpaCtrlCmd_GET_NETWORK(id,"id_str");
-	if ("FAIL\n" != response) {
-		config.set_id_str(response);
 	}
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"scan_ssid");

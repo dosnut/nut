@@ -35,6 +35,8 @@ namespace libnutwireless {
 	class CWpaSupplicant: public CWpaSupplicantBase {
 			Q_OBJECT
 		private:
+			QHash<CNetworkConfig::NetworkId,CNetworkConfig> m_managedNetworks;
+		private:
 			
 			/** This function is used to check if an adhoc network is configured properly.
 				It checks for plaintext,wep and wpa networks.
@@ -44,6 +46,7 @@ namespace libnutwireless {
 			//Set ap_scan defaults
 			void setApScanDefault();
 			
+		
 		public:
 			//TODO: Check why constructor is not beeing called
 			
@@ -60,6 +63,8 @@ namespace libnutwireless {
 				
 			}
 			~CWpaSupplicant() {}
+			
+			inline QHash<CNetworkConfig::NetworkId,CNetworkConfig> & getManagedConfigs() { return m_managedNetworks; }
 			
 		public slots:
 			/**
@@ -100,10 +105,16 @@ namespace libnutwireless {
 				Undefined values in Networkconfig will not be set.
 			*/
 			NetconfigStatus addNetwork(CNetworkConfig config);
+			
+			/** Function to add multiple networks. Same as above 
+			*/
+			QList<NetconfigStatus> addNetworks(QList<CNetworkConfig> configs);
 			/**
 				Function to edit a Network. Errors will be written in NetconfigStatus
 				EAP-Networks are automatically detected.
 				Undefined values in Networkconfig will not be set.
+				If you edit a managed network, the managed copy will be updated automatically.
+				Just don't touch the id_str
 			*/
 			NetconfigStatus editNetwork(int netid, CNetworkConfig config);
 			CNetworkConfig getNetworkConfig(int id);

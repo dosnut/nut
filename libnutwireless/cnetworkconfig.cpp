@@ -1,35 +1,89 @@
 #include "cnetworkconfig.h"
 namespace libnutwireless {
 
+
 CNetworkConfig::CNetworkConfig() {
-			//Set default values
-			ssid = QString();
-			bssid = libnutcommon::MacAddress();
-			disabled = QOOL_UNDEFINED;
-			id_str = QString();
-			scan_ssid = QOOL_UNDEFINED; // (do not) scan with SSID-specific Probe Request frames
-			priority = -1;
-			mode = QOOL_UNDEFINED; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
-			frequency = -1; //no default, but -1 is not a working value
-			protocols = PROTO_UNDEFINED; //list of accepted protocols
-			key_mgmt = KM_UNDEFINED; // list of accepted authenticated key management protocols
-			auth_alg = AUTHALG_UNDEFINED; //list of allowed IEEE 802.11 authentication algorithms
-			pairwise = PCI_UNDEFINED; //list of accepted pairwise (unicast) ciphers for WPA (CCMP,TKIP,NONE)
-			group = GCI_UNDEFINED; //list of accepted group (broadcast/multicast) ciphers for WPA (CCMP;TKIP;WEP104/40)
-			QString psk = QString(); //WPA preshared key; 256-bit pre-shared key
-			eapol_flags = EAPF_UNDEFINED;
-			mixed_cell = QOOL_UNDEFINED; //This option can be used to configure whether so called mixed
-			proactive_key_caching = QOOL_UNDEFINED; //Enable/disable opportunistic PMKSA caching for WPA2.
-			wep_key0 = QString(); //Static WEP key (ASCII in double quotation, hex without)
-			wep_key1 = QString();
-			wep_key2 = QString();
-			wep_key3 = QString();
-			wep_tx_keyidx = -1; //Default WEP key index (TX) (0..3)
-			peerkey = QOOL_UNDEFINED; //Whether PeerKey negotiation for direct links (IEEE 802.11e DLS) is allowed.
-			eap = EAPM_UNDEFINED; //space-separated list of accepted EAP methods
-			fragment_size = -1; //Maximum EAP fragment size in bytes (default 1398);
-			nai = QString(); //user NAI
+	//Set default values
+	ssid = QString();
+	bssid = libnutcommon::MacAddress();
+	disabled = QOOL_UNDEFINED;
+	id_str = QString();
+	scan_ssid = QOOL_UNDEFINED; 
+	priority = -1;
+	mode = QOOL_UNDEFINED; 
+	frequency = -1; 
+	protocols = PROTO_UNDEFINED; 
+	key_mgmt = KM_UNDEFINED; 
+	auth_alg = AUTHALG_UNDEFINED; 
+	pairwise = PCI_UNDEFINED; 
+	group = GCI_UNDEFINED; 
+	QString psk = QString(); 
+	eapol_flags = EAPF_UNDEFINED;
+	mixed_cell = QOOL_UNDEFINED; 
+	proactive_key_caching = QOOL_UNDEFINED; 
+	wep_key0 = QString(); 
+	wep_key1 = QString();
+	wep_key2 = QString();
+	wep_key3 = QString();
+	wep_tx_keyidx = -1; 
+	peerkey = QOOL_UNDEFINED; 
+	eap = EAPM_UNDEFINED; 
+	fragment_size = -1; 
+	nai = QString(); 
 }
+
+CNetworkConfig::CNetworkConfig(const CNetworkConfig &c) :
+	ssid(c.ssid),
+	bssid(c.bssid),
+	disabled(c.disabled),
+	id_str(c.id_str), 
+	scan_ssid(c.scan_ssid), 
+	priority(c.priority),
+	mode(c.mode), 
+	frequency(c.frequency),
+	protocols(c.protocols), 
+	key_mgmt(c.key_mgmt), 
+	auth_alg(c.auth_alg), 
+	pairwise(c.pairwise), 
+	group(c.group), 
+	psk(c.psk), 
+	eapol_flags(c.eapol_flags), 
+	mixed_cell(c.mixed_cell), 
+	proactive_key_caching(c.proactive_key_caching), 
+	wep_key0(c.wep_key0), 
+	wep_key1(c.wep_key1),
+	wep_key2(c.wep_key2),
+	wep_key3(c.wep_key3),
+	wep_tx_keyidx(c.wep_tx_keyidx), 
+	peerkey(c.peerkey), 
+	eap(c.eap), 
+	identity(c.identity), 
+	anonymous_identity(c.anonymous_identity), 
+	password(c.password), 
+	ca_cert(c.ca_cert), 
+	ca_path(c.ca_path), 
+	client_cert(c.client_cert), 
+	private_key(c.private_key), 
+	private_key_passwd(c.private_key_passwd), 
+	dh_file(c.dh_file), 
+	subject_match(c.subject_match), 
+	altsubject_match(c.altsubject_match), 
+	phase1(c.phase1), 
+	phase2(c.phase2), 
+	ca_cert2(c.ca_cert2), 
+	ca_path2(c.ca_path2), 
+	client_cert2(c.client_cert2), 
+	private_key2(c.private_key2), 
+	private_key2_passwd(c.private_key2_passwd), 
+	dh_file2(c.dh_file2), 
+	subject_match2(c.subject_match2), 
+	altsubject_match2(c.altsubject_match2), 
+	fragment_size(c.fragment_size), 
+	eappsk(c.eappsk), 
+	nai(c.nai), 
+	pac_file(c.pac_file)
+{}
+
 
 CNetworkConfig::CNetworkConfig(ScanResult scan) {
 	CNetworkConfig();
@@ -49,6 +103,34 @@ CNetworkConfig::CNetworkConfig(ScanResult scan) {
 }
 
 CNetworkConfig::~CNetworkConfig() {
+}
+
+
+CNetworkConfig::NetworkId CNetworkConfig::toNetworkId(QString str) {
+	CNetworkConfig::NetworkId netid;
+	netid.id = -1;
+	netid.pid = -1;
+	if (0 != str.indexOf("nut:"))
+		return netid;
+	else {
+		QStringList list = str.split(":");
+		if (list.size() != 3)
+			return netid;
+		else {
+			bool ok;
+			netid.id = list[2].toInt(&ok);
+			if (!ok) {
+				netid.id = -1;
+				return netid;
+			}
+			netid.pid = list[1].toInt(&ok);
+			if (!ok) {
+				netid.pid = -1;
+				return netid;
+			}
+			return netid;
+		}
+	}
 }
 
 //TODO:check if \" is need, guess not, since wpa_supplicant needs them
@@ -172,6 +254,7 @@ bool CNetworkConfig::set_disabled(bool d) {
 }
 bool CNetworkConfig::set_id_str(QString str) {
 	id_str = str;
+	netId = toNetworkId(str);
 	return true;
 }
 bool CNetworkConfig::set_scan_ssid(bool enabled) {

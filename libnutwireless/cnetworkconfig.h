@@ -64,10 +64,17 @@ namespace libnutwireless {
 			QString pac_file; //File path for the PAC entries.
 
 		public:
+			struct NetworkId {
+				qint64 pid;
+				qint32 id;
+			} netId;
+			static CNetworkConfig::NetworkId toNetworkId(QString str);
+			
+		public:
 			CNetworkConfig();
+			CNetworkConfig(const CNetworkConfig &config);
 			CNetworkConfig(ScanResult scan);
 			~CNetworkConfig();
-			void readFrom(QDataStream &stream);
 			void writeTo(QDataStream &stream);
 
 			//Access functions
@@ -121,6 +128,9 @@ namespace libnutwireless {
 			inline QString get_nai() { return nai; } 
 			inline QString get_pac_file() { return pac_file; } 
 			
+			//non config related
+			inline NetworkId getNetworkId() { return netId; }
+			
 			//Set functions:
 			inline void set_proto(Protocols proto) { protocols = proto; };
 			inline void set_key_mgmt(KeyManagement k) { key_mgmt = k; }
@@ -128,6 +138,8 @@ namespace libnutwireless {
 			inline void set_pairwise(PairwiseCiphers p) { pairwise = p; };
 			inline void set_group(GroupCiphers g) { group = g; };
 			inline void set_eap(EapMethod e) { eap = e; }
+			
+			inline void setNetworkId(NetworkId id) { netId = id; id_str = QString("nut:%1:%2").arg(id.pid,id.id); };
 			
 			//Set Parse functions:
 			bool set_ssid(QString str);
@@ -180,5 +192,13 @@ namespace libnutwireless {
 			bool set_nai(QString str); 
 			bool set_pac_file(QString str); 
 	};
+	
+	inline bool operator==(const libnutwireless::CNetworkConfig::NetworkId &a, const libnutwireless::CNetworkConfig::NetworkId &b) {
+		return ((a.id == b.id) && (a.pid == b.pid));
+	}
+
+	inline uint qHash(const libnutwireless::CNetworkConfig::NetworkId &key) {
+		return qHash(QPair<qint64,qint32>::QPair(key.pid,key.id));
+	}
 }
 #endif

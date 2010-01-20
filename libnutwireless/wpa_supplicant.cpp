@@ -150,6 +150,17 @@ NetconfigStatus CWpaSupplicant::addNetwork(CNetworkConfig config) {
 	NetconfigStatus status;
 	status.failures = NCF_NONE;
 	status.eap_failures = ENCF_NONE;
+
+	//set unique id for the network
+	CNetworkConfig::NetworkId netId;
+	netId.pid = getpid();
+	netId.id = QDateTime::currentDateTime().toTime_t();
+	while (m_managedNetworks.contains(netId)) {
+		netId.id += 1;
+	}
+	config.setNetworkId(netId);
+	m_managedNetworks.insert(netId,config);
+
 	int netid = addNetwork();
 	if (-1 == netid) {
 		status.failures = NCF_ALL;
@@ -161,6 +172,7 @@ NetconfigStatus CWpaSupplicant::addNetwork(CNetworkConfig config) {
 		status = editNetwork(netid,config);
 		if ( (status.eap_failures != ENCF_NONE) || (NCF_NONE != status.failures) ) {
 			removeNetwork(netid);
+			m_managedNetworks.remove(netId);
 			status.id = -1;
 		}
 		else {
@@ -169,6 +181,16 @@ NetconfigStatus CWpaSupplicant::addNetwork(CNetworkConfig config) {
 		return status;
 	}
 }
+QList<NetconfigStatus> CWpaSupplicant::addNetworks(QList<CNetworkConfig> configs) {
+	QList<NetconfigStatus> failStatusList;
+	NetconfigStatus failStatus;
+	foreach(CNetworkConfig cfg, configs) {
+		failStatus = addNetwork(cfg);
+		failStatusList.append(failStatus);
+	}
+	return failStatusList;
+}
+
 
 void CWpaSupplicant::removeNetwork(int id) {
 	wpaCtrlCmd_REMOVE_NETWORK(id);
