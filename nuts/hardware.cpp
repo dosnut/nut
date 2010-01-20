@@ -39,6 +39,7 @@ extern struct nla_policy ifa_ipv4_policy[IFA_MAX+1];
 };
 
 #include <QSocketNotifier>
+#include <QFile>
 
 namespace nuts {
 	HardwareManager::HardwareManager()
@@ -205,15 +206,29 @@ namespace nuts {
 		return QString::fromUtf8(ifr.ifr_name, qstrnlen(ifr.ifr_name, IFNAMSIZ));
 	}
 	QList<QString> HardwareManager::get_ifNames() {
-		struct ifreq ifr;
 		QList<QString> ifNames;
-		for (int i=0; i<32;i++) { //using nuts on a pc with more than 32 interfaces is insane
-			ifreq_init(ifr);
-			ifr.ifr_ifindex = i;
-			if (ioctl(ethtool_fd, SIOCGIFNAME, &ifr) < 0) {
-				continue;
+		QFile file("/proc/net/dev");
+		if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+			QTextStream in(&file);
+			QString ifs = in.readLine();
+			ifs = in.readLine();
+			ifs = in.readLine();
+			while (!ifs.isEmpty())  {
+				ifs.truncate(ifs.indexOf(":"));
+				ifNames.append(ifs.mid(ifs.lastIndexOf(" ")+1,ifs.size()));
+				ifs = in.readLine();
 			}
-			ifNames.append(QString::fromUtf8(ifr.ifr_name, qstrnlen(ifr.ifr_name, IFNAMSIZ)));
+		}
+		else {
+			struct ifreq ifr;
+			for (int i=0; i<32;i++) { //using nuts on a pc with more than 32 interfaces is insane
+				ifreq_init(ifr);
+				ifr.ifr_ifindex = i;
+				if (ioctl(ethtool_fd, SIOCGIFNAME, &ifr) < 0) {
+					continue;
+				}
+				ifNames.append(QString::fromUtf8(ifr.ifr_name, qstrnlen(ifr.ifr_name, IFNAMSIZ)));
+			}
 		}
 		return ifNames;
 	}
