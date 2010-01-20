@@ -320,9 +320,7 @@ void CWextHW::readSignalQuality() {
 	/* Get AP address */
 	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWAP, &wrq) >= 0) {
 		//Add mac address of current ap;
-		char buffer[128];
-		iw_saether_ntop(&(wrq.u.ap_addr), buffer);
-		res.bssid = libnutcommon::MacAddress(QString::fromAscii(buffer,128));
+		res.bssid = libnutcommon::MacAddress((ether_addr*)wrq.u.ap_addr.sa_data);
 		qDebug() << "Got AP: " << res.bssid.toString();
 	}
 	
