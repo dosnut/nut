@@ -1,4 +1,4 @@
-#include "parsers.h"
+#include "wpa_supplicant.h"
 
 #include <QDebug>
 
@@ -6,7 +6,7 @@ namespace libnutwireless {
 	
 	
 	//parser Functions:
-	QStringList CWpaSupplicantParsers::sliceMessage(QString str) {
+	QStringList CWpaSupplicant::sliceMessage(QString str) {
 		return str.split('\n',QString::SkipEmptyParts);
 	}
 	
@@ -14,7 +14,7 @@ namespace libnutwireless {
 	//(dot11|dot1x)VARIABLENAME=<value>
 	//<value> = (TRUE|FALSE) | <Integer> | <String> | <other?>
 	//so far we do not care about <other> => <other> <-> <string>
-	MIBVariables CWpaSupplicantParsers::parseMIB(QStringList list) {
+	MIBVariables CWpaSupplicant::parseMIB(QStringList list) {
 		//First strip dot11 or dot1x
 		//create new MIBVariable
 		//append to MIBVariables
@@ -43,7 +43,7 @@ namespace libnutwireless {
 		}
 		return ((MIBVariables) mibVariable);
 	}
-	MIBVariable::MIBVariable_type CWpaSupplicantParsers::parseMIBType(QString str) {
+	MIBVariable::MIBVariable_type CWpaSupplicant::parseMIBType(QString str) {
 		bool ok;
 		str.toInt(&ok);
 		if (ok) {
@@ -58,7 +58,7 @@ namespace libnutwireless {
 		return MIBVariable::STRING;
 	}
 	
-	NetworkFlags CWpaSupplicantParsers::parseNetworkFlags(QString str) {
+	NetworkFlags CWpaSupplicant::parseNetworkFlags(QString str) {
 		if (str.contains("CURRENT",Qt::CaseInsensitive)) {
 			return NF_CURRENT;
 		}
@@ -69,7 +69,7 @@ namespace libnutwireless {
 	}
 	//network id / ssid / bssid / flags
 	//0 example network	any	[CURRENT]
-	QList<ShortNetworkInfo> CWpaSupplicantParsers::parseListNetwork(QStringList list) {
+	QList<ShortNetworkInfo> CWpaSupplicant::parseListNetwork(QStringList list) {
 		list.removeFirst();
 		QList<ShortNetworkInfo> networks;
 		QStringList line;
@@ -119,7 +119,7 @@ namespace libnutwireless {
 	ClientTimeout=60
 	*/
 	//Always parse as if status verbose
-	Status CWpaSupplicantParsers::parseStatus(QStringList list) {
+	Status CWpaSupplicant::parseStatus(QStringList list) {
 		Status status;
 		bool ok = true;
 		foreach(QString str, list) {
@@ -240,40 +240,40 @@ namespace libnutwireless {
 	}
 	//parseStatus helper parsers (that's crazy)
 	//So far they dont really parse
-	Status::WPA_STATE CWpaSupplicantParsers::parseWpaState(QString str) {
+	Status::WPA_STATE CWpaSupplicant::parseWpaState(QString str) {
 		Status::WPA_STATE dummy = str;
 		return dummy;
 	}
-	Status::PAE_STATE CWpaSupplicantParsers::parsePaeState(QString str) {
+	Status::PAE_STATE CWpaSupplicant::parsePaeState(QString str) {
 		Status::PAE_STATE dummy = str;
 		return dummy;
 	}
-	Status::PORT_STATUS CWpaSupplicantParsers::parsePortStatus(QString str) {
+	Status::PORT_STATUS CWpaSupplicant::parsePortStatus(QString str) {
 		Status::PORT_STATUS dummy = str;
 		return dummy;
 	}
-	Status::PORT_CONTROL CWpaSupplicantParsers::parsePortControl(QString str) {
+	Status::PORT_CONTROL CWpaSupplicant::parsePortControl(QString str) {
 		Status::PORT_CONTROL dummy = str;
 		return dummy;
 	}
-	Status::BACKEND_STATE CWpaSupplicantParsers::parseBackendState(QString str) {
+	Status::BACKEND_STATE CWpaSupplicant::parseBackendState(QString str) {
 		Status::BACKEND_STATE dummy = str;
 		return dummy;
 	}
-	Status::EAP_STATE CWpaSupplicantParsers::parseEapState(QString str) {
+	Status::EAP_STATE CWpaSupplicant::parseEapState(QString str) {
 		Status::EAP_STATE dummy = str;
 		return dummy;
 	}
-	Status::METHOD_STATE CWpaSupplicantParsers::parseMethodState(QString str) {
+	Status::METHOD_STATE CWpaSupplicant::parseMethodState(QString str) {
 		Status::METHOD_STATE dummy = str;
 		return dummy;
 	}
-	Status::DECISION CWpaSupplicantParsers::parseDecision(QString str) {
+	Status::DECISION CWpaSupplicant::parseDecision(QString str) {
 		Status::DECISION dummy = str;
 		return dummy;
 	}
 	//
-	InteractiveType CWpaSupplicantParsers::parseInteract(QString str) {
+	InteractiveType CWpaSupplicant::parseInteract(QString str) {
 		if (str.contains("CTRL-EVENT")) {
 			return INTERACT_EVENT;
 		}
@@ -284,7 +284,7 @@ namespace libnutwireless {
 			return INTERACT_MSG;
 		}
 	}
-	int CWpaSupplicantParsers::parseEventNetworkId(QString str) {
+	int CWpaSupplicant::parseEventNetworkId(QString str) {
 		//CTRL-EVENT-CONNECTED - Connection to 00:00:00:00:00:00 completed (reauth) [id=-1 id_str=]
 		int id;
 		bool worked;
@@ -309,7 +309,7 @@ namespace libnutwireless {
 	PASSPHRASE (passphrase for a private key file)
 	//CTRL-REQ-<field name>-<network id>-<human readable text>
 	*/
-	RequestType CWpaSupplicantParsers::parseReqType(QString str) {
+	RequestType CWpaSupplicant::parseReqType(QString str) {
 		if (str.contains("IDENTITY")) {
 			return REQ_IDENTITY;
 		}
@@ -330,7 +330,7 @@ namespace libnutwireless {
 		}
 		return REQ_FAIL;
 	}
-	Request CWpaSupplicantParsers::parseReq(QString str) {
+	Request CWpaSupplicant::parseReq(QString str) {
 		bool ok = true;
 		Request req;
 		//Check request type:
@@ -343,7 +343,7 @@ namespace libnutwireless {
 		return req;
 	}
 	
-	EventType CWpaSupplicantParsers::parseEvent(QString str) {
+	EventType CWpaSupplicant::parseEvent(QString str) {
 		if (str.contains("CONNECTED") ) {
 			return EVENT_CONNECTED;
 		}

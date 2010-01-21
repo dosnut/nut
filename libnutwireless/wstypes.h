@@ -119,16 +119,16 @@ namespace libnutwireless {
 		} value;
 	};
 	
-	/** One wpa_suplicant network variable. Reserved for future purpose. */
-	struct NetworkVariable {
-		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} Type;
-		QString name;
-		union {
-			int * num;
-			QString * str;
-			bool * logic;
-		} value;
-	};
+//	/** One wpa_suplicant network variable. Reserved for future purpose. */
+// 	struct NetworkVariable {
+// 		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} Type;
+// 		QString name;
+// 		union {
+// 			int * num;
+// 			QString * str;
+// 			bool * logic;
+// 		} value;
+// 	};
 
 	/** Request made by wpa_supplicant */
 	struct Request {

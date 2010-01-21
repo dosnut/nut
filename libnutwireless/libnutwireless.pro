@@ -11,8 +11,6 @@ QT += network
 CODECFORSRC = UTF-8
 
 HEADERS += wpa_supplicant.h \
- parsers.h \
- base.h \
  types.h \
  wstypes.h \
  hwtypes.h \

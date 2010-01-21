@@ -1,7 +1,30 @@
 #ifndef LIBNUT_NO_WIRELESS
 #include "wpa_supplicant.h"
 
+
 namespace libnutwireless {
+
+CWpaSupplicant::CWpaSupplicant(QObject * parent, QString m_ifname) : QObject(parent), cmd_ctrl(0), event_ctrl(0), m_wpaSupplicantPath("/var/run/wpa_supplicant/"+m_ifname), m_wpaFd(-1), m_eventSn(0), m_connectTimerId(-1), m_ifname(m_ifname) {
+	m_wpaConnected = false;
+	m_timerCount = 0;
+	m_logEnabled = true;
+
+	//Workaround as constructor of subclass is not beeing called
+	m_apScanDefault = -1;
+	qDebug() << (QString("Constructor set ap_scan=%1").arg(QString::number(m_apScanDefault)));
+	m_lastWasAdHoc = false;
+	qDebug() << (QString("Constructor set m_lastWasAdHoc=%1").arg((m_lastWasAdHoc) ? "true" : "false"));
+	//
+
+	connect(QCoreApplication::instance(),SIGNAL(aboutToQuit ()),this,SLOT(detachWpa()));
+	m_apScanDefault = -1;
+	qDebug() << (QString("Constructor set ap_scan=%1").arg(QString::number(m_apScanDefault)));
+	m_lastWasAdHoc = false;
+	qDebug() << (QString("Constructor set m_lastWasAdHoc=%1").arg((m_lastWasAdHoc) ? "true" : "false"));
+}
+CWpaSupplicant::~CWpaSupplicant() {
+	closeWpa("destructor");
+}
 
 void CWpaSupplicant::setApScanDefault() {
 	if (-1 != m_apScanDefault) {
