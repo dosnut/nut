@@ -9,9 +9,11 @@
 %{
 	#include "cconfigparser.h"
 	int line_num = 1;
-	
+	libnutwireless::CConfigParser * libnutcconfigparser;
 	#include "configparser_yacc.h"
 	#define yylval configparserlval
+// 	#define YY_INPUT(buf,result,max_size) { result = reinterpret_cast<libnutwireless::CConfigParser*>(yyin)->readFromStream(buf,max_size); }
+	#define YY_INPUT(buf,result,max_size) { result = libnutcconfigparser->readFromStream(buf,max_size); }
 %}
 
 %%
@@ -23,7 +25,7 @@ disabled     return DISABLED;
 id_str       return ID_STR;
 scan_ssid    return SCAN_SSID;
 priority     return PRIORITY;
-mode         return mode;
+mode         return MODE;
 frequency    return FREQUENCY;
 proto        return PROTO;
 key_mgmt     return KEY_MGMT;
@@ -49,7 +51,7 @@ ca_path      return CA_PATH;
 client_cert  return CLIENT_CERT;
 private_key  return PRIVATE_KEY;
 private_key_passwd return PRIVATE_KEY_PASSWD;
-DH_FILE      return DH_FILE;
+dh_file      return DH_FILE;
 subject_match return SUBJECT_MATCH;
 altsubject_match return ALTSUBJECT_MATCH;
 phase1       return PHASE1;
@@ -73,9 +75,6 @@ pac_file     return PAC_FILE;
 
 (0|false|FALSE|False) {
 			yylval.b = false; return BOOL; }
-
-([[:digit:]]{1,3}\.){3}[[:digit:]]{1,3} {
-            yylval.addr = new QHostAddress(QString(yytext)); return IPv4_VAL; }
 
 ([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2} {
             yylval.macAddr = new libnutcommon::MacAddress(QString(yytext)); return MACADDR; }

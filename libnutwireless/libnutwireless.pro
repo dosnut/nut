@@ -58,7 +58,7 @@ LIBS += ../libnutcommon/libnutcommon.a
 
 TARGETDEPS += ../libnutcommon/libnutcommon.a
 
-#LEXSOURCES += configparser.l
+LEXSOURCES += configparser.l
 
-#YACCSOURCES += configparser.y
+YACCSOURCES += configparser.y
 

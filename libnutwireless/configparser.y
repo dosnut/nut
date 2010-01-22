@@ -7,10 +7,10 @@
 	
 	using namespace libnutwireless;
 	
-	static void configparsererror (ConfigParser *cp, const char* s);
+	void configparsererror (CConfigParser *cp, const char* s);
 	
 	//Check if invoked action worked (e.g. newDevice -> device creation worked)
-	#define CHECK(action) do { if (!cp->currentNetwork || !(cp->currentNetwork->action)) YYERROR; } while (0)
+	#define CHECK(action) do { if (!cp->getCurrentNetwork() || !(cp->getCurrentNetwork()->action)) YYERROR; } while (0)
 %}
 
 %union {
@@ -22,6 +22,55 @@
 }
 
 %token NETWORK
+%token SSID
+%token BSSID
+%token DISABLED
+%token ID_STR
+%token SCAN_SSID
+%token PRIORITY
+%token MODE
+%token FREQUENCY
+%token PROTO
+%token KEY_MGMT
+%token AUTH_ALG
+%token PAIRWISE
+%token GROUP
+%token PSK
+%token EAPOL_FLAGS
+%token MIXED_CELL
+%token PROACTIVE_KEY_CACHING
+%token WEP_KEY0
+%token WEP_KEY1
+%token WEP_KEY2
+%token WEP_KEY3
+%token WEP_TX_KEYIDX
+%token PEERKEY
+%token EAP
+%token IDENTITY
+%token ANONYMOUS_IDENTITY
+%token PASSWORD
+%token CA_CERT
+%token CA_PATH
+%token CLIENT_CERT
+%token PRIVATE_KEY
+%token PRIVATE_KEY_PASSWD
+%token DH_FILE
+%token SUBJECT_MATCH
+%token ALTSUBJECT_MATCH
+%token PHASE1
+%token PHASE2
+%token CA_CERT2
+%token CA_PATH2
+%token CLIENT_CERT2
+%token PRIVATE_KEY2
+%token PRIVATE_KEY2_PASSWD
+%token DH_FILE2
+%token SUBJECT_MATCH2
+%token ALTSUBJECT_MATCH2
+%token FRAGMENT_SIZE
+%token EAPPSK
+%token NAI
+%token PAC_FILE
 
 
 %token <str> STRING
@@ -37,7 +86,7 @@
 %%
 
 input:
-	| input NETWORK {if (!newNetwork()) YYERROR;} networkconfig {if (!finishNetwork()) YYERROR;}
+	| input NETWORK {if (!cp->newNetwork()) YYERROR;} networkconfig {if (!cp->finishNetwork()) YYERROR;}
 ;
 
 networkconfig:
@@ -46,10 +95,10 @@ networkconfig:
 ;
 
 network:
-	| networkoptions networkoption
+	| network networkoption 
 ;
 networkoption:
-	| SSID '=' STRING {CHECK(set_ssid(*$3)); delete $3;}
+	  SSID '=' STRING {CHECK(set_ssid(*$3)); delete $3;}
 	| BSSID '=' MACADDR {CHECK(set_bssid(*$3)); delete $3;}
 	| DISABLED '=' BOOL {CHECK(set_disabled($3));}
 	| ID_STR '=' STRING {CHECK(set_id_str(*$3)); delete $3;}
@@ -66,10 +115,10 @@ networkoption:
 	| EAPOL_FLAGS '=' STRING {CHECK(set_eapol_flags(*$3)); delete $3;}
 	| MIXED_CELL '=' BOOL {CHECK(set_mixed_cell($3));}
 	| PROACTIVE_KEY_CACHING '=' BOOL {CHECK(set_proactive_key_caching($3));}
-	| WEP_KEY0 '=' STRING {CHECK(set_wep_key0(*$3, false); delete $3; }
-	| WEP_KEY1 '=' STRING {CHECK(set_wep_key1(*$3, false); delete $3; }
-	| WEP_KEY2 '=' STRING {CHECK(set_wep_key2(*$3, false); delete $3; }
-	| WEP_KEY3 '=' STRING {CHECK(set_wep_key3(*$3, false); delete $3; }
+	| WEP_KEY0 '=' STRING {CHECK(set_wep_key0(*$3)); delete $3; }
+	| WEP_KEY1 '=' STRING {CHECK(set_wep_key1(*$3)); delete $3; }
+	| WEP_KEY2 '=' STRING {CHECK(set_wep_key2(*$3)); delete $3; }
+	| WEP_KEY3 '=' STRING {CHECK(set_wep_key3(*$3)); delete $3; }
 	| WEP_TX_KEYIDX '=' INTEGER {CHECK(set_wep_tx_keyidx($3));}
 	| PEERKEY '=' BOOL {CHECK(set_peerkey($3));}
 	| EAP '=' STRING {CHECK(set_eap(*$3)); delete $3;}
@@ -102,6 +151,6 @@ networkoption:
 
 %%
 
-void configparsererror (ConfigParser *cp, const char* msg) {
+void configparsererror (CConfigParser *cp, const char* msg) {
 	cp->parseError(line_num, QString::fromUtf8(msg));
 }

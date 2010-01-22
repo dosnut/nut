@@ -1,5 +1,6 @@
 #ifndef LIBNUT_NO_WIRELESS
 #include "wpa_supplicant.h"
+#include "cconfigparser.h"
 
 
 namespace libnutwireless {
@@ -212,6 +213,13 @@ QList<NetconfigStatus> CWpaSupplicant::addNetworks(QList<CNetworkConfig> configs
 		failStatusList.append(failStatus);
 	}
 	return failStatusList;
+}
+
+QList<NetconfigStatus> CWpaSupplicant::addNetworks(QTextStream * stream) {
+	CConfigParser parser(stream);
+	parser.parse();
+	QList<CNetworkConfig> list = parser.getConfigs();
+	return addNetworks(list);
 }
 
 

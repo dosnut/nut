@@ -221,6 +221,9 @@ namespace libnutwireless {
 			/** Function to add multiple networks. Same as above 
 			*/
 			QList<NetconfigStatus> addNetworks(QList<CNetworkConfig> configs);
+			
+			/** Function to add networks read from a stream */
+			QList<NetconfigStatus> addNetworks(QTextStream * stream);
 			/**
 				Function to edit a Network. Errors will be written in NetconfigStatus
 				EAP-Networks are automatically detected.
