@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QTreeView>
 #include <QTextEdit>
+#include <QSortFilterProxyModel>
 #include <libnutclient/cdevice.h>
 #include <libnutwireless/cwireless.h>
 
@@ -55,9 +56,12 @@ namespace qnut {
 		
 		m_OverView = new QTreeView(this);
 		
-		//m_OverView_>setSortingEnabled(true); //TODO sorting in overview
+		m_OverView->setSortingEnabled(true);
 		
-		m_OverView->setModel(m_UIDeviceModel);
+		m_UIDeviceProxyModel = new QSortFilterProxyModel(this);
+		m_UIDeviceProxyModel->setSourceModel(m_UIDeviceModel);
+		
+		m_OverView->setModel(m_UIDeviceProxyModel);
 		m_OverView->setContextMenuPolicy(Qt::ActionsContextMenu);
 		m_OverView->setRootIsDecorated(false);
 		m_OverView->setItemsExpandable(false);
@@ -312,7 +316,7 @@ namespace qnut {
 		QModelIndexList deselectedIndexes = deselected.indexes();
 		
 		if (!deselectedIndexes.isEmpty()) {
-			CUIDevice * deselectedUIDevice = static_cast<CUIDevice *>(deselectedIndexes[0].internalPointer());
+			CUIDevice * deselectedUIDevice = static_cast<CUIDevice *>(m_UIDeviceProxyModel->mapToSource(deselectedIndexes[0]).internalPointer());
 			
 			disconnect(deselectedUIDevice->device(), SIGNAL(stateChanged(libnutcommon::DeviceState)),
 				this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
@@ -337,7 +341,7 @@ namespace qnut {
 #endif
 		}
 		else {
-			CUIDevice * selectedUIDevice = static_cast<CUIDevice *>(selectedIndexes[0].internalPointer());
+			CUIDevice * selectedUIDevice = static_cast<CUIDevice *>(m_UIDeviceProxyModel->mapToSource(selectedIndexes[0]).internalPointer());
 			
 			connect(selectedUIDevice->device(), SIGNAL(stateChanged(libnutcommon::DeviceState)),
 				this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));

@@ -17,7 +17,7 @@
 class QTabWidget;
 class QTextEdit;
 class QTreeView;
-class QSystemTrayIcon;
+class QSortFilterProxyModel;
 
 namespace qnut {
 	class CUIDeviceModel;
@@ -52,6 +52,7 @@ namespace qnut {
 		libnutclient::CLog m_LogFile;
 		
 		CNotificationManager * m_NotificationManager;
+		QSortFilterProxyModel * m_UIDeviceProxyModel;
 		CUIDeviceModel * m_UIDeviceModel;
 		
 		QTabWidget * m_TabWidget;
