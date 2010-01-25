@@ -24,7 +24,8 @@ HEADERS += wpa_supplicant.h \
  wpa_ctrl/os.h \
  wpa_ctrl/wpa_debug.h \
  cnetworkconfig.h \
- conversion.h
+ conversion.h \
+ cconfigparser.h
 SOURCES += wpa_supplicant.cpp \
  cws_net.cpp \
  parsers.cpp \
@@ -39,7 +40,8 @@ SOURCES += wpa_supplicant.cpp \
  wpa_ctrl/wpa_debug.c \
  wpa_ctrl/os_unix.c \
  cnetworkconfig.cpp \
- conversion.cpp
+ conversion.cpp \
+ cconfigparser.cpp
 
 OBJECTS_DIR = build/
 UI_DIR = build/
