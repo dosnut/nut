@@ -14,7 +14,6 @@ int main(int argc, char * argv[])
 	QTranslator translator;
 	translator.load(QString(UI_PATH_TRANSLATIONS "qnut_") + locale);
 	app.installTranslator(&translator);
-	app.setQuitOnLastWindowClosed(false);
 	
 #ifndef QNUT_SETTINGS_NOCOMPAT
 	{

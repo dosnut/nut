@@ -52,9 +52,11 @@ namespace qnut {
 		createView();
 		createActions();
 		
-		m_NotificationManager->registerUIDevice(this);
-		m_NotificationManager->setToolTip(shortSummary(m_Device), this);
-		m_NotificationManager->setIcon(QIcon(iconFile(m_Device)), this);
+		if (m_NotificationManager) {
+			m_NotificationManager->registerUIDevice(this);
+			m_NotificationManager->setToolTip(shortSummary(m_Device), this);
+			m_NotificationManager->setIcon(QIcon(iconFile(m_Device)), this);
+		}
 		
 		readSettings();
 		
@@ -71,7 +73,8 @@ namespace qnut {
 		if (m_WirelessSettings)
 			delete m_WirelessSettings;
 #endif
-		m_NotificationManager->unregisterUIDevice(this);
+		if (m_NotificationManager)
+			m_NotificationManager->unregisterUIDevice(this);
 		
 		delete m_DeviceMenu;
 	}
@@ -155,7 +158,8 @@ namespace qnut {
 #else
 		settings->beginGroup(m_Device->getName());
 #endif
-		m_NotificationManager->setIconVisible(settings->value(UI_SETTINGS_SHOWTRAYICON, false).toBool(), this);
+		if (m_NotificationManager)
+			m_NotificationManager->setIconVisible(settings->value(UI_SETTINGS_SHOWTRAYICON, false).toBool(), this);
 		ui.detailsButton->setChecked(settings->value(UI_SETTINGS_SHOWDETAILS, false).toBool());
 		m_NotificationsEnabled = !settings->value(UI_SETTINGS_HIDENOTIFICATIONS, false).toBool();
 		
@@ -270,7 +274,8 @@ namespace qnut {
 		QSettings settings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME);
 		
 		settings.beginGroup(m_Device->getName());
-		settings.setValue(UI_SETTINGS_SHOWTRAYICON, m_NotificationManager->isIconVisible(this));
+		if (m_NotificationManager)
+			settings.setValue(UI_SETTINGS_SHOWTRAYICON, m_NotificationManager->isIconVisible(this));
 		settings.setValue(UI_SETTINGS_SHOWDETAILS, ui.detailsButton->isChecked());
 		settings.setValue(UI_SETTINGS_HIDENOTIFICATIONS, !m_NotificationsEnabled);
 		
@@ -464,8 +469,9 @@ namespace qnut {
 		CDeviceSettings dialog(this);
 		dialog.setWindowIcon(QIcon(UI_ICON_CONFIGURE));
 		dialog.setWindowTitle(tr("Device settings for %1").arg(m_Device->getName()));
-		if (dialog.execute(m_CommandList, m_CommandsEnabled, m_NotificationManager->isIconVisible(this), m_NotificationsEnabled, true)) {
-			m_NotificationManager->setIconVisible(dialog.trayIconVisibleResult(), this);
+		if (dialog.execute(m_CommandList, m_CommandsEnabled, m_NotificationManager ? m_NotificationManager->isIconVisible(this) : false, m_NotificationsEnabled, m_NotificationManager)) {
+			if (m_NotificationManager)
+				m_NotificationManager->setIconVisible(dialog.trayIconVisibleResult(), this);
 			for (int i = 0; i < 5; i++)
 				m_CommandList[i] = dialog.commandListsResult()[i];
 			
@@ -496,8 +502,10 @@ namespace qnut {
 		m_DeviceActions[0]->setEnabled(state == DS_DEACTIVATED);
 		m_DeviceActions[1]->setDisabled(state == DS_DEACTIVATED);
 		
-		m_NotificationManager->setToolTip(shortSummary(m_Device), this);
-		m_NotificationManager->setIcon(QIcon(iconFile(m_Device)), this);
+		if (m_NotificationManager) {
+			m_NotificationManager->setToolTip(shortSummary(m_Device), this);
+			m_NotificationManager->setIcon(QIcon(iconFile(m_Device)), this);
+		}
 		
 		if (m_NotificationsEnabled)
 			emit showNotificationRequested(state);

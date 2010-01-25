@@ -33,8 +33,12 @@ namespace qnut {
 		m_LogFile(this, UI_FILE_LOG)
 	{
 		m_DeviceManager = new CDeviceManager(this);
-		m_NotificationManager = new CNotificationManager(this);
-		CUIDevice::setNotificationManager(m_NotificationManager);
+		if (CNotificationManager::trayIconsAvailable()) {
+			m_NotificationManager = new CNotificationManager(this);
+			CUIDevice::setNotificationManager(m_NotificationManager);
+		}
+		else
+			m_NotificationManager = NULL;
 		
 		resize(600, 322);
 		setWindowIcon(QIcon(UI_ICON_QNUT_SMALL));
@@ -95,8 +99,11 @@ namespace qnut {
 			this, SLOT(handleSelectionChanged(const QItemSelection &, const QItemSelection &)));
 		connect(m_OverView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(showDeviceDetails(const QModelIndex &)));
 		
-		m_NotificationManager->setIconVisible(true);
 		m_DeviceManager->init(&m_LogFile);
+		if (m_NotificationManager)
+			m_NotificationManager->setIconVisible(true);
+		else
+			show();
 	}
 	
 	CConnectionManager::~CConnectionManager() {
@@ -128,9 +135,12 @@ namespace qnut {
 		
 		currentMenu->addSeparator();
 		
-		m_ShowBalloonTipsAction = currentMenu->addAction(tr("Show &balloon tips"));
-		m_ShowBalloonTipsAction->setToolTip(tr("Show balloon tips on certain events like state changes"));
-		m_ShowBalloonTipsAction->setCheckable(true);
+		if (m_NotificationManager) {
+			m_ShowBalloonTipsAction = currentMenu->addAction(tr("Show &balloon tips"));
+			m_ShowBalloonTipsAction->setToolTip(tr("Show balloon tips on certain events like state changes"));
+			m_ShowBalloonTipsAction->setCheckable(true);
+			connect(m_ShowBalloonTipsAction, SIGNAL(toggled(bool)), m_NotificationManager, SLOT(setNotificationsEnabled(bool)));
+		}
 		
 		m_ShowLogAction = currentMenu->addAction(tr("Show &log"));
 		m_ShowLogAction->setToolTip(tr("Show log tab"));
@@ -173,7 +183,6 @@ namespace qnut {
 		
 		connect(m_RefreshDevicesAction, SIGNAL(triggered()), m_DeviceManager, SLOT(refreshAll()));
 		connect(m_ClearLogAction, SIGNAL(triggered()), m_LogEdit, SLOT(clear()));
-		connect(m_ShowBalloonTipsAction, SIGNAL(toggled(bool)), m_NotificationManager, SLOT(setNotificationsEnabled(bool)));
 		connect(m_ShowLogAction, SIGNAL(toggled(bool)), this, SLOT(showLog(bool)));
 		
 		addToolBar(m_ToolBar);
@@ -220,7 +229,8 @@ namespace qnut {
 		}
 #endif
 		settings->beginGroup(UI_SETTINGS_MAIN);
-		m_ShowBalloonTipsAction->setChecked(settings->value(UI_SETTINGS_SHOWBALLOONTIPS, true).toBool());
+		if (m_NotificationManager)
+			m_ShowBalloonTipsAction->setChecked(settings->value(UI_SETTINGS_SHOWBALLOONTIPS, true).toBool());
 		m_ShowLogAction->setChecked(settings->value(UI_SETTINGS_SHOWLOG, true).toBool());
 		settings->endGroup();
 		
@@ -236,7 +246,8 @@ namespace qnut {
 		QSettings settings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME);
 		
 		settings.beginGroup(UI_SETTINGS_MAIN);
-		settings.setValue(UI_SETTINGS_SHOWBALLOONTIPS, m_ShowBalloonTipsAction->isChecked());
+		if (m_NotificationManager)
+			settings.setValue(UI_SETTINGS_SHOWBALLOONTIPS, m_ShowBalloonTipsAction->isChecked());
 		settings.setValue(UI_SETTINGS_SHOWLOG, m_ShowLogAction->isChecked());
 		settings.endGroup();
 		
@@ -265,6 +276,9 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::updateTrayIconInfo() {
+		if (!m_NotificationManager)
+			return;
+		
 		QStringList result;
 		
 		if (m_DeviceManager->getDevices().isEmpty())

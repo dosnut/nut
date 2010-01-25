@@ -27,8 +27,10 @@ namespace qnut {
 		connect(m_MainIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 			this, SLOT(handleMainIconClicks(QSystemTrayIcon::ActivationReason)));
 		
-		if (parent)
+		if (parent) {
 			connect(m_MainIcon, SIGNAL(messageClicked()), parent, SLOT(show()));
+			qApp->setQuitOnLastWindowClosed(false);
+		}
 	}
 	
 	CNotificationManager::~CNotificationManager() {}
