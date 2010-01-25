@@ -1,5 +1,5 @@
 //
-// C++ Implementation: deviceoptions
+// C++ Implementation: cuidevice
 //
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
@@ -15,7 +15,7 @@
 #include <libnutclient/cenvironment.h>
 #include <libnutclient/cinterface.h>
 
-#include "devicedetails.h"
+#include "cuidevice.h"
 #include "common.h"
 #include "constants.h"
 #include "environmenttreemodel.h"
@@ -23,17 +23,23 @@
 #include "environmentdetailsmodel.h"
 #include "ipconfiguration.h"
 #include "devicesettings.h"
+#include "cnotificationmanager.h"
 
 #ifndef QNUT_NO_WIRELESS
 #include "wirelesssettings.h"
-#include <libnutwireless/cwireless.h>
 #endif
 
 namespace qnut {
 	using namespace libnutclient;
 	using namespace libnutcommon;
 	
-	CDeviceDetails::CDeviceDetails(CDevice * parentDevice, QWidget * parent) : QWidget(parent) {
+	CNotificationManager * CUIDevice::m_NotificationManager = NULL;
+	
+	void CUIDevice::setNotificationManager(CNotificationManager * value) {
+		m_NotificationManager = value;
+	}
+	
+	CUIDevice::CUIDevice(CDevice * parentDevice, QWidget * parent) : QWidget(parent) {
 		m_Device = parentDevice;
 		
 #ifndef QNUT_NO_WIRELESS
@@ -46,12 +52,9 @@ namespace qnut {
 		createView();
 		createActions();
 		
-		m_trayIcon->setToolTip(shortSummary(m_Device));
-		m_trayIcon->setContextMenu(m_DeviceMenu);
-		
-		connect(m_trayIcon, SIGNAL(messageClicked()), this, SLOT(showTheeseDetails()));
-		connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-			this, SLOT(handleTrayActivated(QSystemTrayIcon::ActivationReason)));
+		m_NotificationManager->registerUIDevice(this);
+		m_NotificationManager->setToolTip(shortSummary(m_Device), this);
+		m_NotificationManager->setIcon(QIcon(iconFile(m_Device)), this);
 		
 		readSettings();
 		
@@ -62,19 +65,18 @@ namespace qnut {
 			ui.environmentTree->expand(ui.environmentTree->model()->index(m_Device->getEnvironments().indexOf(m_Device->getActiveEnvironment()), 0));
 	}
 	
-	CDeviceDetails::~CDeviceDetails() {
+	CUIDevice::~CUIDevice() {
 		writeSettings();
 #ifndef QNUT_NO_WIRELESS
-		if (m_WirelessSettings) {
-			m_WirelessSettings->close();
+		if (m_WirelessSettings)
 			delete m_WirelessSettings;
-		}
 #endif
+		m_NotificationManager->unregisterUIDevice(this);
+		
 		delete m_DeviceMenu;
-		delete m_trayIcon;
 	}
 	
-	inline void CDeviceDetails::readCommands(QSettings * settings) {
+	inline void CUIDevice::readCommands(QSettings * settings) {
 		settings->beginGroup(UI_SETTINGS_COMMANDS);
 		m_CommandsEnabled = settings->value(UI_SETTINGS_ENABLED, false).toBool();
 		
@@ -95,7 +97,7 @@ namespace qnut {
 		settings->endGroup();
 	}
 	
-	inline void CDeviceDetails::readIPConfigs(QSettings * settings) {
+	inline void CUIDevice::readIPConfigs(QSettings * settings) {
 		settings->beginGroup(UI_SETTINGS_IPCONFIGURATIONS);
 		
 		foreach (CEnvironment * i, m_Device->getEnvironments()) {
@@ -136,7 +138,7 @@ namespace qnut {
 		settings->endGroup();
 	}
 	
-	inline void CDeviceDetails::readSettings() {
+	inline void CUIDevice::readSettings() {
 		QSettings * settings = new QSettings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME);
 #ifndef QNUT_SETTINGS_NOCOMPAT
 		QString configFile = UI_PATH_DEV(m_Device->getName()) + "dev.conf";
@@ -153,7 +155,7 @@ namespace qnut {
 #else
 		settings->beginGroup(m_Device->getName());
 #endif
-		m_trayIcon->setVisible(settings->value(UI_SETTINGS_SHOWTRAYICON, false).toBool());
+		m_NotificationManager->setIconVisible(settings->value(UI_SETTINGS_SHOWTRAYICON, false).toBool(), this);
 		ui.detailsButton->setChecked(settings->value(UI_SETTINGS_SHOWDETAILS, false).toBool());
 		m_NotificationsEnabled = !settings->value(UI_SETTINGS_HIDENOTIFICATIONS, false).toBool();
 		
@@ -215,7 +217,7 @@ namespace qnut {
 		delete settings;
 	}
 	
-	inline void CDeviceDetails::writeCommands(QSettings * settings) {
+	inline void CUIDevice::writeCommands(QSettings * settings) {
 		if (settings->childGroups().contains(UI_SETTINGS_COMMANDS))
 			settings->remove(UI_SETTINGS_COMMANDS);
 		
@@ -235,7 +237,7 @@ namespace qnut {
 		settings->endGroup();
 	}
 	
-	inline void CDeviceDetails::writeIPConfigs(QSettings * settings) {
+	inline void CUIDevice::writeIPConfigs(QSettings * settings) {
 		if (settings->childGroups().contains(UI_SETTINGS_IPCONFIGURATIONS))
 			settings->remove(UI_SETTINGS_IPCONFIGURATIONS);
 		
@@ -264,11 +266,11 @@ namespace qnut {
 		}
 	}
 	
-	inline void CDeviceDetails::writeSettings() {
+	inline void CUIDevice::writeSettings() {
 		QSettings settings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME);
 		
 		settings.beginGroup(m_Device->getName());
-		settings.setValue(UI_SETTINGS_SHOWTRAYICON, m_trayIcon->isVisible());
+		settings.setValue(UI_SETTINGS_SHOWTRAYICON, m_NotificationManager->isIconVisible(this));
 		settings.setValue(UI_SETTINGS_SHOWDETAILS, ui.detailsButton->isChecked());
 		settings.setValue(UI_SETTINGS_HIDENOTIFICATIONS, !m_NotificationsEnabled);
 		
@@ -286,7 +288,7 @@ namespace qnut {
 		settings.endGroup();
 	}
 	
-	inline void CDeviceDetails::createActions() {
+	inline void CUIDevice::createActions() {
 		m_DeviceMenu = new QMenu(m_Device->getName() + " - " + toStringTr(m_Device->getType()), NULL);
 		m_DeviceMenu->setIcon(QIcon(iconFile(m_Device, false)));
 		
@@ -332,9 +334,7 @@ namespace qnut {
 		ui.detailsView->addAction(tempAction);
 	}
 	
-	inline void CDeviceDetails::createView() {
-		m_trayIcon = new QSystemTrayIcon(QIcon(iconFile(m_Device)), this);
-		
+	inline void CUIDevice::createView() {
 		ui.setupUi(this);
 		
 		ui.detailsView->setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -347,7 +347,7 @@ namespace qnut {
 		setHeadInfo();
 	}
 	
-	inline void CDeviceDetails::setHeadInfo() {
+	inline void CUIDevice::setHeadInfo() {
 		ui.iconLabel->setPixmap(QPixmap(iconFile(m_Device)));
 		
 		ui.statusLabel->setText(toStringTr(m_Device->getState()));
@@ -356,7 +356,7 @@ namespace qnut {
 		ui.networkLabel->setVisible(m_Device->getState() > DS_CARRIER);
 	}
 	
-	inline void CDeviceDetails::executeCommand(QStringList & env, QString path) {
+	inline void CUIDevice::executeCommand(QStringList & env, QString path) {
 		QProcess * process = new QProcess(this);
 		process->setEnvironment(env + QProcess::systemEnvironment());
 		qDebug("[QNUT] starting process: %s", path.toAscii().data());
@@ -365,17 +365,11 @@ namespace qnut {
 		connect(process, SIGNAL(error(QProcess::ProcessError)), process, SLOT(deleteLater()));
 	}
 	
-	void CDeviceDetails::handleTrayActivated(QSystemTrayIcon::ActivationReason reason) {
-		if (reason == QSystemTrayIcon::Trigger) {
-			showTheeseDetails();
-		}
-	}
-	
-	void CDeviceDetails::showTheeseDetails() {
+	void CUIDevice::showTheeseDetails() {
 		emit showDetailsRequested(this);
 	}
 	
-	void CDeviceDetails::handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
+	void CUIDevice::handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
 		QModelIndexList deselectedIndexes = deselected.indexes();
 		QModelIndexList selectedIndexes = selected.indexes();
 		
@@ -433,7 +427,7 @@ namespace qnut {
 		}
 	}
 	
-	void CDeviceDetails::openIPConfiguration() {
+	void CUIDevice::openIPConfiguration() {
 		CIPConfiguration dialog(this);
 		dialog.setWindowIcon(QIcon(UI_ICON_EDIT));
 		QModelIndex selectedIndex = (ui.environmentTree->selectionModel()->selection().indexes())[0];
@@ -451,7 +445,7 @@ namespace qnut {
 		}
 	}
 	
-	void CDeviceDetails::copySelectedProperty() {
+	void CUIDevice::copySelectedProperty() {
 		QModelIndex target = ui.detailsView->selectionModel()->selectedRows(1)[0];
 		QString property = target.data().toString();
 		
@@ -466,12 +460,12 @@ namespace qnut {
 		QApplication::clipboard()->setText(property);
 	}
 	
-	void CDeviceDetails::openDeviceSettings() {
+	void CUIDevice::openDeviceSettings() {
 		CDeviceSettings dialog(this);
 		dialog.setWindowIcon(QIcon(UI_ICON_CONFIGURE));
 		dialog.setWindowTitle(tr("Device settings for %1").arg(m_Device->getName()));
-		if (dialog.execute(m_CommandList, m_CommandsEnabled, m_trayIcon->isVisible(), m_NotificationsEnabled, true)) {
-			m_trayIcon->setVisible(dialog.trayIconVisibleResult());
+		if (dialog.execute(m_CommandList, m_CommandsEnabled, m_NotificationManager->isIconVisible(this), m_NotificationsEnabled, true)) {
+			m_NotificationManager->setIconVisible(dialog.trayIconVisibleResult(), this);
 			for (int i = 0; i < 5; i++)
 				m_CommandList[i] = dialog.commandListsResult()[i];
 			
@@ -487,60 +481,13 @@ namespace qnut {
 	}
 	
 #ifndef QNUT_NO_WIRELESS
-	void CDeviceDetails::openWirelessSettings() {
+	void CUIDevice::openWirelessSettings() {
 		m_WirelessSettings->show();
 		m_WirelessSettings->activateWindow();
 	}
 #endif
 	
-	inline void CDeviceDetails::showNotification(DeviceState state) {
-		if (m_trayIcon->isVisible()) {
-			switch (state) {
-			case DS_UP:
-				emit showMessageRequested(tr("QNUT - %1 ...").arg(m_Device->getName()),
-					tr("... is now up and running."), m_trayIcon);
-				break;
-			case DS_UNCONFIGURED:
-				emit showMessageRequested(tr("QNUT - %1 ...").arg(m_Device->getName()),
-					tr("... got carrier but needs configuration.\n\nKlick here to open the device details."), m_trayIcon);
-				break;
-			case DS_ACTIVATED:
-				emit showMessageRequested(tr("QNUT - %1 ...").arg(m_Device->getName()),
-					tr("... is now activated an waits for carrier."), m_trayIcon);
-				break;
-			case DS_DEACTIVATED: 
-				emit showMessageRequested(tr("QNUT - %1 ...").arg(m_Device->getName()),
-					tr("... is now deactivated"), m_trayIcon);
-				break;
-			default:
-				break;
-			}
-		}
-		else {
-			switch (state) {
-			case DS_UP:
-				emit showMessageRequested(tr("QNUT"),
-					tr("%1 is now up and running.").arg(m_Device->getName()));
-				break;
-			case DS_UNCONFIGURED:
-				emit showMessageRequested(tr("QNUT"),
-					tr("%1 got carrier but needs configuration.\n\nKlick here to open the device details.").arg(m_Device->getName()));
-				break;
-			case DS_ACTIVATED:
-				emit showMessageRequested(tr("QNUT"),
-					tr("%1 is now activated an waits for carrier.").arg(m_Device->getName()));
-				break;
-			case DS_DEACTIVATED:
-				emit showMessageRequested(tr("QNUT"),
-					tr("%1 is now deactivated").arg(m_Device->getName()));
-				break;
-			default:
-				break;
-			}
-		}
-	}
-	
-	void CDeviceDetails::handleDeviceStateChange(DeviceState state) {
+	void CUIDevice::handleDeviceStateChange(DeviceState state) {
 		setHeadInfo();
 		ui.environmentTree->collapseAll();
 		if (state >= DS_UNCONFIGURED)
@@ -549,11 +496,11 @@ namespace qnut {
 		m_DeviceActions[0]->setEnabled(state == DS_DEACTIVATED);
 		m_DeviceActions[1]->setDisabled(state == DS_DEACTIVATED);
 		
-		m_trayIcon->setToolTip(shortSummary(m_Device));
-		m_trayIcon->setIcon(QIcon(iconFile(m_Device)));
+		m_NotificationManager->setToolTip(shortSummary(m_Device), this);
+		m_NotificationManager->setIcon(QIcon(iconFile(m_Device)), this);
 		
 		if (m_NotificationsEnabled)
-			showNotification(state);
+			emit showNotificationRequested(state);
 		
 		if (m_CommandsEnabled && !(m_CommandList[state].isEmpty())) {
 			QFileInfo currentFile;
@@ -589,3 +536,4 @@ namespace qnut {
 		}
 	}
 }
+

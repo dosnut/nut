@@ -1,5 +1,6 @@
 TEMPLATE = app
-CONFIG += qt qdbus
+CONFIG += qt \
+    qdbus
 CONFIG -= thread
 QT += network
 CODECFORSRC = UTF-8
@@ -17,10 +18,7 @@ FORMS = ipconf.ui \
 TRANSLATIONS = qnut_de.ts \
     qnut_pt_BR.ts
 HEADERS += connectionmanager.h \
-    trayicon.h \
     constants.h \
-    overviewmodel.h \
-    devicedetails.h \
     ipconfiguration.h \
     common.h \
     interfacedetailsmodel.h \
@@ -34,12 +32,12 @@ HEADERS += connectionmanager.h \
     ipeditdelegate.h \
     adhocconfig.h \
     devicesettings.h \
-    commandlistmodel.h
+    commandlistmodel.h \
+    cuidevicemodel.h \
+    cuidevice.h \
+    cnotificationmanager.h
 SOURCES += main.cpp \
     connectionmanager.cpp \
-    trayicon.cpp \
-    overviewmodel.cpp \
-    devicedetails.cpp \
     ipconfiguration.cpp \
     common.cpp \
     interfacedetailsmodel.cpp \
@@ -53,7 +51,10 @@ SOURCES += main.cpp \
     ipeditdelegate.cpp \
     adhocconfig.cpp \
     devicesettings.cpp \
-    commandlistmodel.cpp
+    commandlistmodel.cpp \
+    cuidevicemodel.cpp \
+    cuidevice.cpp \
+    cnotificationmanager.cpp
 DESTDIR = .
 target.path = /usr/bin
 iconstarget.path = /usr/share/qnut/icons
@@ -71,5 +72,5 @@ INSTALLS += target \
 INCLUDEPATH += ..
 QMAKE_CXXFLAGS_DEBUG += -pedantic \
     -Wno-long-long
-LIBS += -lnutclient -L../libnutclient
-
+LIBS += -lnutclient \
+    -L../libnutclient

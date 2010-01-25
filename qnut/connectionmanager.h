@@ -20,8 +20,8 @@ class QTreeView;
 class QSystemTrayIcon;
 
 namespace qnut {
-	class CDeviceDetails;
-	class CTrayIcon;
+	class CUIDeviceModel;
+	class CNotificationManager;
 	
 	/**
 	 * @brief CConnectionManager acts as the main class (and window) of the application
@@ -45,13 +45,15 @@ namespace qnut {
 		
 		/// @brief Destroyes the object and writes the settings to "~/.qnut/qnut.conf".
 		~CConnectionManager();
+		
+		static CNotificationManager * notificationManager();
 	private:
 		libnutclient::CDeviceManager * m_DeviceManager;
 		libnutclient::CLog m_LogFile;
 		
-		QHash<libnutclient::CDevice *, CDeviceDetails *> m_DeviceDetails;
+		CNotificationManager * m_NotificationManager;
+		CUIDeviceModel * m_UIDeviceModel;
 		
-		CTrayIcon * m_TrayIcon;
 		QTabWidget * m_TabWidget;
 		QTreeView * m_OverView;
 		QTextEdit * m_LogEdit;
@@ -83,7 +85,6 @@ namespace qnut {
 		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 		void showLog(bool doShow);
 		void updateTrayIconInfo();
-		void showMessage(QString title, QString message, QSystemTrayIcon * trayIcon = NULL);
 		void addUiDevice(libnutclient::CDevice * device);
 		void removeUiDevice(libnutclient::CDevice * device);
 		void handleDeviceStateChange(libnutcommon::DeviceState state);

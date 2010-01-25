@@ -1,0 +1,144 @@
+//
+// C++ Interface: cuidevice
+//
+// Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
+//
+// Copyright: See COPYING file that comes with this distribution
+//
+#ifndef QNUT_UIDEVICE_H
+#define QNUT_UIDEVICE_H
+
+#include <QWidget>
+#include <libnutcommon/device.h>
+#include "ui/ui_devdet.h"
+#include "common.h"
+
+namespace libnutclient {
+	class CDevice;
+	class CInterface;
+}
+
+class QSettings;
+
+namespace qnut {
+#ifndef QNUT_NO_WIRELESS
+	class CWirelessSettings;
+#endif
+	class CNotificationManager;
+	
+	/**
+	 * @brief CUIDevice interacts directly with CDevice.
+	 * @author Oliver Groß <z.o.gross@gmx.de>
+	 * 
+	 * On creation, the CUIDevice sets up the user interface for a detailed view
+	 * of the environments/interfaces tree.
+	 * 
+	 * The main tasks of CUIDevice are:
+	 *  - interact directly with CDevice
+	 *  - provide detailed information for environments and interfaces
+	 *  - delegate scripting/wireless settings and user specifiable interface configuration
+	 *  - execute scripts for each status change of the given device (if enabled in scripting settings)
+	 *  - provide a tray icon for the given device witch reflects the current status (tool tip and pop-up messages)
+	 *  - save the configurations made for the given device (in "~/.qnut/<device name>/dev.conf")
+	 * 
+	 * The devices details provides functions to open the windows for scritping and
+	 * wireless settings (if the device has wireless extensions).
+	 */
+	class CUIDevice : public QWidget {
+		Q_OBJECT
+		friend class CNotificationManager;
+	public:
+		/**
+		 * @brief Creates the object, initializes the user interface and reads the settings to "~/.qnut/<device name>/dev.conf".
+		 * @param parentDevice pointer to the device to be managed
+		 * @param parent pointer to the parent widget
+		 */
+		CUIDevice(libnutclient::CDevice * parentDevice, QWidget * parent = 0);
+		
+		/// @brief Destroyes the object and writes the settings to "~/.qnut/<device name>/dev.conf".
+		~CUIDevice();
+		
+		/// @brief Returns a pointer to the managed device.
+		inline libnutclient::CDevice * device() const { return m_Device; }
+		
+		/// @brief Returns a pointer to the sub menu of the managed device.
+		inline QMenu * deviceMenu() const { return m_DeviceMenu; }
+		
+		/// @brief Returns the list of Actions of the managed device.
+		inline QList<QAction *> deviceActions() const { return m_DeviceActions; }
+		/// @brief Returns the list of Actions in the context menu of the environments/interfaces tree.
+		inline QList<QAction *> environmentTreeActions() const { return ui.environmentTree->actions(); }
+		/**
+		 * @brief Returns the list of commands for a given state
+		 * @param state device state
+		 */
+		inline QList<ToggleableCommand> & commandList(int state) { return m_CommandList[state]; }
+		
+		static void setNotificationManager(CNotificationManager * value);
+	public slots:
+		/// @brief Opens the device settings dialog.
+		void openDeviceSettings();
+#ifndef QNUT_NO_WIRELESS
+		/// @brief Opens ths wireless settings window.
+		void openWirelessSettings();
+#endif
+	signals:
+//		/**
+//		 * @brief Emitted when showing a pop-up message is requested.
+//		 * @param title title for the requested message
+//		 * @param message the message itself
+//		 * @param trayIcon pointer to the tray icon for showing the message (NULL is for the default tray icon)
+//		 */
+//		void showMessageRequested(QString title, QString message, QSystemTrayIcon * trayIcon = NULL);
+		void showNotificationRequested(libnutcommon::DeviceState state);
+		/**
+		 * @brief Emitted when showing this widget is requested.
+		 * @param widget pointer to this instance
+		 */
+		void showDetailsRequested(QWidget * widget);
+	private:
+		Ui::devdet ui;
+#ifndef QNUT_NO_WIRELESS
+		CWirelessSettings * m_WirelessSettings;
+#endif
+		
+		static CNotificationManager * m_NotificationManager;
+		
+		QMenu * m_DeviceMenu;
+		QList<QAction *> m_DeviceActions;
+		
+		QAction * m_EnterEnvironmentAction;
+		QAction * m_IPConfigurationAction;
+		
+		bool m_CommandsEnabled;
+		bool m_NotificationsEnabled;
+		
+		QList<ToggleableCommand> m_CommandList[5];
+		
+		QSet<libnutclient::CInterface *> m_IPConfigsToRemember;
+		
+		libnutclient::CDevice * m_Device;
+		
+		inline void readCommands(QSettings * settings);
+		inline void readIPConfigs(QSettings * settings);
+
+		inline void writeCommands(QSettings * settings);
+		inline void writeIPConfigs(QSettings * settings);
+		
+		inline void readSettings();
+		inline void writeSettings();
+		inline void createActions();
+		inline void createView();
+		inline void setHeadInfo();
+		
+		inline void executeCommand(QStringList & env, QString path);
+	private slots:
+		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+		void handleDeviceStateChange(libnutcommon::DeviceState state);
+		void showTheeseDetails();
+		void openIPConfiguration();
+		void copySelectedProperty();
+	};
+}
+
+#endif

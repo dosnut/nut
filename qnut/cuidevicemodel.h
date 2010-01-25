@@ -1,24 +1,18 @@
-//
-// C++ Interface: overviewlistmodel
-//
-// Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-#ifndef QNUT_OVERVIEWMODEL_H
-#define QNUT_OVERVIEWMODEL_H
+#ifndef QNUT_CUIDEVICEMODEL_H
+#define QNUT_CUIDEVICEMODEL_H
 
 #include <QAbstractItemModel>
 #include <QList>
 
 namespace libnutclient {
-	class CDeviceManager;
 	class CDevice;
 }
 
 namespace qnut {
+	class CUIDevice;
+	
 	/**
-	 * @brief COverViewModel provides an item model for an overview of the devices from a device manager.
+	 * @brief CUIDeviceModel provides an item model to manage the ui representation of devicess.
 	 * @author Oliver Groß <z.o.gross@gmx.de>
 	 * 
 	 * The class provides all functions for a read-only model specified in the Qt 4 documentation.
@@ -31,17 +25,24 @@ namespace qnut {
 	 *  - current IP address
 	 *  - current network ("Local" for ethernet)
 	 */
-	class COverViewModel : public QAbstractItemModel {
+	class CUIDeviceModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
 		/**
-		 * @brief Creates the object and initializes the model according to the given device manager.
-		 * @param deviceManager pointer to a device manager (if NULL nothing is displayed)
+		 * @brief Creates the object and initializes the model.
 		 * @param parent parent object
 		 */
-		COverViewModel(libnutclient::CDeviceManager * deviceManager, QObject * parent = 0);
+		CUIDeviceModel(QObject * parent = 0);
 		/// @brief Destroyes the object.
-		~COverViewModel();
+		~CUIDeviceModel();
+		
+		CUIDevice * addUIDevice(libnutclient::CDevice * device);
+		void removeUIDevice(CUIDevice * target);
+		void removeUIDevice(int index);
+		
+		int findUIDevice(libnutclient::CDevice * device);
+		
+		const QList<CUIDevice *> & uiDevices() const { return m_UIDevices; }
 		
 		QVariant data(const QModelIndex & index, int role) const;
 		Qt::ItemFlags flags(const QModelIndex & index) const;
@@ -52,12 +53,10 @@ namespace qnut {
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
 	private:
-		const QList<libnutclient::CDevice *> * m_Devices;
+		QList<CUIDevice *> m_UIDevices;
 	private slots:
-		void deviceAdded(libnutclient::CDevice * device);
-		void deviceRemoved(libnutclient::CDevice * device);
+		void updateDeviceState();
+		void updateSignalQuality();
 	};
-
 }
-
-#endif
+#endif // QNUT_CUIDEVICEMODEL_H
