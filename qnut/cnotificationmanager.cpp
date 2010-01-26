@@ -8,6 +8,7 @@
 
 #include "cuidevice.h"
 #include "constants.h"
+#include "common.h"
 #include <libnutclient/cdevice.h>
 
 namespace qnut {
@@ -35,18 +36,15 @@ namespace qnut {
 	
 	CNotificationManager::~CNotificationManager() {}
 	
-	bool CNotificationManager::notificationsEnabled(CUIDevice * uiDevice) const {
-		if (uiDevice)
-			return uiDevice->m_NotificationsEnabled;
-		else
-			return m_NotificationsEnabled;
-	}
-	
 	bool CNotificationManager::isIconVisible(CUIDevice * uiDevice) {
 		if (uiDevice && m_UIDeviceIcons.contains(uiDevice))
 			return m_UIDeviceIcons[uiDevice]->isVisible();
 		else
 			return m_MainIcon->isVisible();
+	}
+	
+	void CNotificationManager::setIconVisible(bool value) {
+		setIconVisible(value, qobject_cast<CUIDevice *>(sender()));
 	}
 	
 	void CNotificationManager::setIconVisible(bool value, CUIDevice * uiDevice) {
@@ -70,10 +68,17 @@ namespace qnut {
 		newTrayIcon->setContextMenu(uiDevice->deviceMenu());
 		m_MainIcon->contextMenu()->insertMenu(m_InsertMarker, uiDevice->deviceMenu());
 		
+		updateDeviceIcon(uiDevice);
+		setIconVisible(uiDevice->m_ShowTrayIcon, uiDevice);
+		
 		connect(uiDevice, SIGNAL(showNotificationRequested(libnutcommon::DeviceState)),
 			this, SLOT(showNotification(libnutcommon::DeviceState)));
+		connect(uiDevice, SIGNAL(updateTrayIconRequested(libnutcommon::DeviceState)),
+			this, SLOT(updateDeviceIcon()));
+		connect(uiDevice, SIGNAL(showTrayIconRequested(bool)),
+			this, SLOT(setIconVisible(bool)));
 		
-		connect(newTrayIcon, SIGNAL(messageClicked()), uiDevice, SLOT(showTheeseDetails()));
+		connect(newTrayIcon, SIGNAL(messageClicked()), uiDevice->m_ShowEnvironmentsAction, SIGNAL(triggered()));
 		connect(newTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 			this, SLOT(handleDeviceIconActivated(QSystemTrayIcon::ActivationReason)));
 	}
@@ -87,25 +92,33 @@ namespace qnut {
 	}
 	
 	void CNotificationManager::setNotificationsEnabled(bool value) {
-		setNotificationsEnabled(value, NULL);
+		m_NotificationsEnabled = value;
 	}
 	
-	void CNotificationManager::setNotificationsEnabled(bool value, CUIDevice * uiDevice) {
-		if (uiDevice && m_UIDeviceIcons.contains(uiDevice))
-			uiDevice->m_NotificationsEnabled = value;
-		else
-			m_NotificationsEnabled = value;
-	}
-	
-	void CNotificationManager::showMessage(QString title, QString message) {
-		CUIDevice * uiDevice = qobject_cast<CUIDevice *>(sender());
+	void CNotificationManager::showMessage(QString title, QString message, CUIDevice * uiDevice) {
+		if (!m_NotificationsEnabled)
+			return;
+		
 		if (uiDevice && m_UIDeviceIcons.contains(uiDevice) && m_UIDeviceIcons[uiDevice]->isVisible())
 			m_UIDeviceIcons[uiDevice]->showMessage(title, message, QSystemTrayIcon::Information, 4000);
 		else
 			m_MainIcon->showMessage(title, message, QSystemTrayIcon::Information, 4000);
 	}
 	
+	inline void CNotificationManager::updateDeviceIcon(CUIDevice * uiDevice) {
+		QSystemTrayIcon * trayIcon = m_UIDeviceIcons[uiDevice];
+		trayIcon->setToolTip(shortSummary(uiDevice->device()));
+		trayIcon->setIcon(QIcon(iconFile(uiDevice->device())));
+	}
+	
+	void CNotificationManager::updateDeviceIcon() {
+		updateDeviceIcon(qobject_cast<CUIDevice *>(sender()));
+	}
+	
 	void CNotificationManager::showNotification(libnutcommon::DeviceState state) {
+		if (!m_NotificationsEnabled)
+			return;
+		
 		CUIDevice * uiDevice = qobject_cast<CUIDevice *>(sender());
 		if (!uiDevice)
 			return;
@@ -169,7 +182,7 @@ namespace qnut {
 		if (reason == QSystemTrayIcon::Trigger) {
 			CUIDevice * target = m_UIDeviceIcons.key(qobject_cast<QSystemTrayIcon *>(sender()), NULL);
 			if (target)
-				target->showTheeseDetails();
+				target->m_ShowEnvironmentsAction->trigger();
 		}
 	}
 	

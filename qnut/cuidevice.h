@@ -18,6 +18,7 @@ namespace libnutclient {
 	class CInterface;
 }
 
+class QSignalMapper;
 class QSettings;
 
 namespace qnut {
@@ -74,7 +75,9 @@ namespace qnut {
 		 */
 		inline QList<ToggleableCommand> & commandList(int state) { return m_CommandList[state]; }
 		
-		static void setNotificationManager(CNotificationManager * value);
+		static void init();
+		static void cleanup();
+		static const QSignalMapper * showRequestMapper() { return m_ShowRequestMapper; }
 	public slots:
 		/// @brief Opens the device settings dialog.
 		void openDeviceSettings();
@@ -83,36 +86,34 @@ namespace qnut {
 		void openWirelessSettings();
 #endif
 	signals:
-//		/**
-//		 * @brief Emitted when showing a pop-up message is requested.
-//		 * @param title title for the requested message
-//		 * @param message the message itself
-//		 * @param trayIcon pointer to the tray icon for showing the message (NULL is for the default tray icon)
-//		 */
-//		void showMessageRequested(QString title, QString message, QSystemTrayIcon * trayIcon = NULL);
-		void showNotificationRequested(libnutcommon::DeviceState state);
 		/**
-		 * @brief Emitted when showing this widget is requested.
-		 * @param widget pointer to this instance
+		 * @brief Emitted when showing a pop-up message is requested.
+		 * @param title title for the requested message
+		 * @param message the message itself
 		 */
-		void showDetailsRequested(QWidget * widget);
+		void showMessageRequested(QString title, QString message);
+		
+		void showNotificationRequested(libnutcommon::DeviceState state);
+		void updateTrayIconRequested(libnutcommon::DeviceState state);
+		void showTrayIconRequested(bool value);
 	private:
 		Ui::devdet ui;
 #ifndef QNUT_NO_WIRELESS
 		CWirelessSettings * m_WirelessSettings;
 #endif
 		
-		static CNotificationManager * m_NotificationManager;
+		static QSignalMapper * m_ShowRequestMapper;
 		
 		QMenu * m_DeviceMenu;
 		QList<QAction *> m_DeviceActions;
-		
+		QAction * m_ShowEnvironmentsAction;
 		QAction * m_EnterEnvironmentAction;
 		QAction * m_IPConfigurationAction;
 		
+		bool m_ShowTrayIcon;
 		bool m_CommandsEnabled;
 		bool m_NotificationsEnabled;
-		
+		//TODO create device settings struct/class
 		QList<ToggleableCommand> m_CommandList[5];
 		
 		QSet<libnutclient::CInterface *> m_IPConfigsToRemember;
@@ -135,7 +136,6 @@ namespace qnut {
 	private slots:
 		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 		void handleDeviceStateChange(libnutcommon::DeviceState state);
-		void showTheeseDetails();
 		void openIPConfiguration();
 		void copySelectedProperty();
 	};

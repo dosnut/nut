@@ -18,10 +18,9 @@ namespace qnut {
 		CNotificationManager(QWidget * parent = NULL);
 		~CNotificationManager();
 		
-		bool notificationsEnabled(CUIDevice * uiDevice = NULL) const;
+		bool notificationsEnabled() const { return m_NotificationsEnabled; }
 		
 		bool isIconVisible(CUIDevice * uiDevice);
-		void setIconVisible(bool value, CUIDevice * uiDevice = NULL);
 		
 		void setIcon(QIcon icon, CUIDevice * uiDevice = NULL);
 		
@@ -30,11 +29,11 @@ namespace qnut {
 		
 		static bool trayIconsAvailable() { return QSystemTrayIcon::isSystemTrayAvailable(); }
 	public slots:
-		void setNotificationsEnabled(bool value);
-		void setNotificationsEnabled(bool value, CUIDevice * uiDevice);
+		void setIconVisible(bool value, CUIDevice * uiDevice);
 		
-		void showMessage(QString title, QString message);
-		void showNotification(libnutcommon::DeviceState state);
+		void setNotificationsEnabled(bool value);
+		
+		void showMessage(QString title, QString message, CUIDevice * uiDevice = NULL);
 		void setToolTip(QString tooltip, CUIDevice * uiDevice = NULL);
 	private:
 		QSystemTrayIcon * m_MainIcon;
@@ -42,7 +41,13 @@ namespace qnut {
 		
 		bool m_NotificationsEnabled;
 		QAction * m_InsertMarker;
+		inline void updateDeviceIcon(CUIDevice * uiDevice);
 	private slots:
+		void setIconVisible(bool value);
+		
+		void updateDeviceIcon();
+		void showNotification(libnutcommon::DeviceState state);
+		
 		void handleDeviceIconActivated(QSystemTrayIcon::ActivationReason reason);
 		void handleMainIconClicks(QSystemTrayIcon::ActivationReason reason);
 	};
