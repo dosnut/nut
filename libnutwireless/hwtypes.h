@@ -12,6 +12,12 @@ namespace libnutwireless {
 	
 	/** signal information in human readable format */
 	struct SignalQuality {
+		SignalQuality() : frequency(-1), type(WSR_UNKNOWN) {
+			quality.value = 0;
+			quality.maximum = -1;
+			noise.rcpi = 0.0;
+			level.rcpi = 0.0;
+		}
 		int frequency;
 		SignalQualityType type;
 		QList<qint32> bitrates; //Current bitrate
@@ -39,6 +45,14 @@ namespace libnutwireless {
 	
 	/** One scan result (network) in human readable format */
 	struct ScanResult {
+		ScanResult() {
+			freq = -1;
+			group = GCI_UNDEFINED;
+			pairwise = PCI_UNDEFINED;
+			keyManagement = KM_UNDEFINED;
+			protocols = PROTO_UNDEFINED;
+			opmode = OPM_AUTO;
+		}
 		libnutcommon::MacAddress bssid;
 		QString ssid;
 		int freq;
