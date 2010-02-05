@@ -44,7 +44,9 @@ target_link_libraries(${PROJECT_NAME}
 	${nutwireless_BINARY_DIR}/libnutwireless.a
 	${nutcommon_BINARY_DIR}/libnutcommon.a
 	${LIB_IW}
-	${QT_LIBRARIES}
+	${QT_QTCORE_LIBRARY}
+	${QT_QTNETWORK_LIBRARY}
+	${QT_QTDBUS_LIBRARY}
 )
 
 file(GLOB NUTCOMMON_H RELATIVE ${nutcommon_SOURCE_DIR} *.h)

@@ -78,7 +78,9 @@ add_target_properties(${PROJECT_NAME} LINK_FLAGS -lnutclient)
 add_target_properties(${PROJECT_NAME} LINK_FLAGS -L${nutclient_BINARY_DIR})
 
 target_link_libraries(${PROJECT_NAME}
-	${QT_LIBRARIES}
+	${QT_QTCORE_LIBRARY}
+	${QT_QTGUI_LIBRARY}
+	${QT_QTNETWORK_LIBRARY}
 )
 
 file(GLOB RES_ICONS res/*.png res/qnut.svg res/qnut_small.svg)
