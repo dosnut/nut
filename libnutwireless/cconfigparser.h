@@ -33,7 +33,7 @@ class CConfigParser {
 		bool finishNetwork();
 		
 		inline QList<CNetworkConfig> getConfigs() { return m_configs; };
-		inline QStringList getErrors() { return m_errors; }
+		inline QStringList& getErrors() { return m_errors; }
 		inline void setMaxRead(qint64 v) { m_maxRead = v; }
 		int readFromStream(char * buf,int max_size);
 		inline CNetworkConfig * getCurrentNetwork() { return currentNetwork; }

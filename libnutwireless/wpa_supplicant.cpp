@@ -205,6 +205,23 @@ NetconfigStatus CWpaSupplicant::addNetwork(CNetworkConfig config) {
 		return status;
 	}
 }
+
+NetconfigStatus CWpaSupplicant::addOnlyNewNetwork(CNetworkConfig config) {
+	QList<ShortNetworkInfo> nets = listNetworks();
+	QList<libnutwireless::CNetworkConfig::NetworkId> netids;
+	QString response;
+	foreach(ShortNetworkInfo netinfo, nets) {
+		response = wpaCtrlCmd_GET_NETWORK(netinfo.id,"id_str");
+		if ("FAIL\n" != response) {
+			CNetworkConfig::NetworkId i = CNetworkConfig::toNetworkId(response);
+			if (i == config.getNetworkId()) { //managed by us, update our copy
+				return NetconfigStatus(netinfo.id);
+			}
+		}
+	}
+	return addNetwork(config);
+}
+
 QList<NetconfigStatus> CWpaSupplicant::addNetworks(QList<CNetworkConfig> configs) {
 	QList<NetconfigStatus> failStatusList;
 	NetconfigStatus failStatus;
@@ -215,11 +232,30 @@ QList<NetconfigStatus> CWpaSupplicant::addNetworks(QList<CNetworkConfig> configs
 	return failStatusList;
 }
 
+QList<NetconfigStatus> CWpaSupplicant::addOnlyNewNetworks(QList<CNetworkConfig> configs) {
+	QList<NetconfigStatus> failStatusList;
+	NetconfigStatus failStatus;
+	foreach(CNetworkConfig cfg, configs) {
+		failStatus = addOnlyNewNetwork(cfg);
+		failStatusList.append(failStatus);
+	}
+	return failStatusList;
+}
+
 QList<NetconfigStatus> CWpaSupplicant::addNetworks(QTextStream * stream) {
 	CConfigParser parser(stream);
 	parser.parse();
+	foreach(QString str, parser.getErrors()) printMessage(str);
 	QList<CNetworkConfig> list = parser.getConfigs();
 	return addNetworks(list);
+}
+
+QList<NetconfigStatus> CWpaSupplicant::addOnlyNewNetworks(QTextStream * stream) {
+	CConfigParser parser(stream);
+	parser.parse();
+	foreach(QString str, parser.getErrors()) printMessage(str);
+	QList<CNetworkConfig> list = parser.getConfigs();
+	return addOnlyNewNetworks(list);
 }
 
 

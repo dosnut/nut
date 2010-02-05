@@ -217,10 +217,17 @@ namespace libnutwireless {
 				Undefined values in Networkconfig will not be set.
 			*/
 			NetconfigStatus addNetwork(CNetworkConfig config);
+
+			/** Same as above, but check if network is already managed (checks id_str) **/
+			NetconfigStatus addOnlyNewNetwork(CNetworkConfig config);
 			
 			/** Function to add multiple networks. Same as above 
 			*/
 			QList<NetconfigStatus> addNetworks(QList<CNetworkConfig> configs);
+
+			/** Same as above, but check if network is already managed (checks id_str) **/
+			QList<NetconfigStatus> addOnlyNewNetworks(QList<CNetworkConfig> configs);
+
 			
 			/** Function to add networks read from a stream */
 			QList<NetconfigStatus> addNetworks(QTextStream * stream);
@@ -231,6 +238,10 @@ namespace libnutwireless {
 				If you edit a managed network, the managed copy will be updated automatically.
 				Just don't touch the id_str
 			*/
+
+			/** Same as above, but check if network is already managed (checks id_str) **/
+			QList<NetconfigStatus> addOnlyNewNetworks(QTextStream * stream);
+
 			NetconfigStatus editNetwork(int netid, CNetworkConfig config);
 			CNetworkConfig getNetworkConfig(int id);
 			
