@@ -110,6 +110,10 @@ CNetworkConfig::NetworkId CNetworkConfig::toNetworkId(QString str) {
 	CNetworkConfig::NetworkId netid;
 	netid.id = -1;
 	netid.pid = -1;
+	if (0 == str.indexOf("\"")) { //String is in "", remove them
+		str.remove(0,1);
+		str.chop(1);
+	}
 	if (0 != str.indexOf("nut:"))
 		return netid;
 	else {
@@ -138,13 +142,13 @@ CNetworkConfig::NetworkId CNetworkConfig::toNetworkId(QString str) {
 void CNetworkConfig::writeTo(QDataStream &stream) {
 	stream << QString("network {\n");
 	if (!ssid.isEmpty())
-		stream << QString("ssid=\"%1\"\n").arg(ssid);
+		stream << QString("ssid=%1\n").arg(ssid);
 	if (!bssid.valid())
 		stream << QString("bssid=%1\n").arg( bssid.toString());
 	if (QOOL_UNDEFINED != disabled)
 		stream << QString("disabled=%1\n").arg( toString(disabled));
 	if (!id_str.isEmpty())
-		stream << QString("id_str=\"%1\"\n").arg( id_str);
+		stream << QString("id_str=%1\n").arg( id_str);
 	if (QOOL_UNDEFINED != scan_ssid)
 		stream << QString("scan_ssid=%1\n").arg( toString(scan_ssid)); 
 	if (priority >= 0)
@@ -154,88 +158,88 @@ void CNetworkConfig::writeTo(QDataStream &stream) {
 	if (frequency != -1)
 		stream << QString("frequency=%1\n").arg( frequency); 
 	if (PROTO_UNDEFINED != protocols)
-		stream << QString("protocols=\"%1\"\n").arg( toString(protocols)); 
+		stream << QString("protocols=%1\n").arg( toString(protocols)); 
 	if (KM_UNDEFINED != key_mgmt)
 		stream << QString("key_mgmt=%1\n").arg( toString(key_mgmt));
 	if (AUTHALG_UNDEFINED != auth_alg)
-		stream << QString("auth_alg=\"%1\"\n").arg( toString(auth_alg)); 
+		stream << QString("auth_alg=%1\n").arg( toString(auth_alg)); 
 	if (PCI_UNDEFINED != pairwise)
-		stream << QString("pairwise=\"%1\"\n").arg( toString(pairwise)); 
+		stream << QString("pairwise=%1\n").arg( toString(pairwise)); 
 	if (GCI_UNDEFINED != group)
-		stream << QString("group=\"%1\"\n").arg( toString(group)); 
+		stream << QString("group=%1\n").arg( toString(group)); 
 	if (!psk.isEmpty())
-		stream << QString("psk=\"%1\"\n").arg( psk); 
+		stream << QString("psk=%1\n").arg( psk); 
 	if (EAPF_UNDEFINED != eapol_flags)
-		stream << QString("eapol_flags=\"%1\"\n").arg( toString(eapol_flags));
+		stream << QString("eapol_flags=%1\n").arg( toString(eapol_flags));
 	if (QOOL_UNDEFINED != mixed_cell)
-		stream << QString("mixed_cell=\"%1\"\n").arg( toString(mixed_cell)); 
+		stream << QString("mixed_cell=%1\n").arg( toString(mixed_cell)); 
 	if (QOOL_UNDEFINED != proactive_key_caching)
 		stream << QString("proactive_key_caching=%1\n").arg( toString(proactive_key_caching)); 
 	if (!wep_key0.isEmpty())
-		stream << QString("wep_key0=\"%1\"\n").arg( wep_key0); 
+		stream << QString("wep_key0=%1\n").arg( wep_key0); 
 	if (!wep_key1.isEmpty())
-		stream << QString("wep_key1=\"%1\"\n").arg( wep_key1);
+		stream << QString("wep_key1=%1\n").arg( wep_key1);
 	if (!wep_key2.isEmpty())
-		stream << QString("wep_key2=\"%1\"\n").arg( wep_key2);
+		stream << QString("wep_key2=%1\n").arg( wep_key2);
 	if (!wep_key3.isEmpty())
-		stream << QString("wep_key3=\"%1\"\n").arg( wep_key3);
+		stream << QString("wep_key3=%1\n").arg( wep_key3);
 	if (-1 != wep_tx_keyidx)
 		stream << QString("wep_tx_keyidx=%1\n").arg( (int)wep_tx_keyidx); 
 	if (QOOL_UNDEFINED != peerkey)
 		stream << QString("peerkey=%1\n").arg((int)peerkey);
 
 	if (EAPM_UNDEFINED != eap)
-		stream << QString("eap=\"%1\"\n").arg( toString(eap)); 
+		stream << QString("eap=%1\n").arg( toString(eap)); 
 	if (!identity.isEmpty())
-		stream << QString("identity=\"%1\"\n").arg( identity); 
+		stream << QString("identity=%1\n").arg( identity); 
 	if (!anonymous_identity.isEmpty())
-		stream << QString("anonymous_identity=\"%1\"\n").arg( anonymous_identity); 
+		stream << QString("anonymous_identity=%1\n").arg( anonymous_identity); 
 	if (!password.isEmpty())
-		stream << QString("password=\"%1\"\n").arg( password); 
+		stream << QString("password=%1\n").arg( password); 
 	if (!ca_cert.isEmpty())
-		stream << QString("ca_cert=\"%1\"\n").arg(ca_cert); 
+		stream << QString("ca_cert=%1\n").arg(ca_cert); 
 	if (!ca_path.isEmpty())
-		stream << QString("ca_path=\"%1\"\n").arg( ca_path); 
+		stream << QString("ca_path=%1\n").arg( ca_path); 
 	if (!client_cert.isEmpty())
-		stream << QString("client_cert=\"%1\"\n").arg( client_cert); 
+		stream << QString("client_cert=%1\n").arg( client_cert); 
 	if (!private_key.isEmpty())
-		stream << QString("private_key=\"%1\"\n").arg( private_key); 
+		stream << QString("private_key=%1\n").arg( private_key); 
 	if (!private_key_passwd.isEmpty())
-		stream << QString("private_key_passwd=\"%1\"\n").arg( private_key_passwd); 
+		stream << QString("private_key_passwd=%1\n").arg( private_key_passwd); 
 	if (!dh_file.isEmpty())
-		stream << QString("dh_file=\"%1\"\n").arg( dh_file); 
+		stream << QString("dh_file=%1\n").arg( dh_file); 
 	if (!subject_match.isEmpty())
-		stream << QString("subject_match=\"%1\"\n").arg( subject_match); 
+		stream << QString("subject_match=%1\n").arg( subject_match); 
 	if (!altsubject_match.isEmpty())
-		stream << QString("altsubject_match=\"%1\"\n").arg( altsubject_match);
+		stream << QString("altsubject_match=%1\n").arg( altsubject_match);
 	if (!phase1.isEmpty())
-		stream << QString("phase1=\"%1\"\n").arg( phase1); 
+		stream << QString("phase1=%1\n").arg( phase1); 
 	if (!phase2.isEmpty())
-		stream << QString("phase2=\"%1\"\n").arg( phase2); 
+		stream << QString("phase2=%1\n").arg( phase2); 
 	if (!ca_cert2.isEmpty())
-		stream << QString("ca_cert2=\"%1\"\n").arg( ca_cert2); 
+		stream << QString("ca_cert2=%1\n").arg( ca_cert2); 
 	if (!ca_path2.isEmpty())
-		stream << QString("ca_path2=\"%1\"\n").arg( ca_path2); 
+		stream << QString("ca_path2=%1\n").arg( ca_path2); 
 	if (!client_cert2.isEmpty())
-		stream << QString("client_cert2=\"%1\"\n").arg( client_cert2); 
+		stream << QString("client_cert2=%1\n").arg( client_cert2); 
 	if (!private_key2.isEmpty())
-		stream << QString("private_key2=\"%1\"\n").arg( private_key2); 
+		stream << QString("private_key2=%1\n").arg( private_key2); 
 	if (!private_key2_passwd.isEmpty())
-		stream << QString("private_key2_passwd=\"%1\"\n").arg( private_key2_passwd); 
+		stream << QString("private_key2_passwd=%1\n").arg( private_key2_passwd); 
 	if (!dh_file2.isEmpty())
-		stream << QString("dh_file2=\"%1\"\n").arg( dh_file2); 
+		stream << QString("dh_file2=%1\n").arg( dh_file2); 
 	if (!subject_match2.isEmpty())
-		stream << QString("subject_match2=\"%1\"\n").arg( subject_match2); 
+		stream << QString("subject_match2=%1\n").arg( subject_match2); 
 	if (!altsubject_match2.isEmpty())
-		stream << QString("altsubject_match2=\"%1\"\n").arg( altsubject_match2); 
+		stream << QString("altsubject_match2=%1\n").arg( altsubject_match2); 
 	if (fragment_size != -1)
 		stream << QString("fragment_size=%1\n").arg( fragment_size); 
 	if (!eappsk.isEmpty())
-		stream << QString("eappsk=\"%1\"\n").arg( eappsk); 
+		stream << QString("eappsk=%1\n").arg( eappsk); 
 	if (!eappsk.isEmpty())
-		stream << QString("nai=\"%1\"\n").arg( nai); 
+		stream << QString("nai=%1\n").arg( nai); 
 	if (!pac_file.isEmpty())
-		stream << QString("pac_file=\"%1\"\n").arg( pac_file); 
+		stream << QString("pac_file=%1\n").arg( pac_file); 
 	stream << QString("}\n");
 }
 

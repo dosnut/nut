@@ -139,7 +139,7 @@ namespace libnutwireless {
 			inline void set_group(GroupCiphers g) { group = g; };
 			inline void set_eap(EapMethod e) { eap = e; }
 			
-			inline void setNetworkId(NetworkId id) { netId = id; id_str = QString("nut:%1:%2").arg(id.pid,id.id); };
+			inline void setNetworkId(NetworkId id) { netId = id; id_str = QString("\"nut:%1:%2\"").arg(id.pid,id.id); };
 			
 			//Set Parse functions:
 			bool set_ssid(QString str);
