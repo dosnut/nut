@@ -45,6 +45,8 @@ namespace libnutwireless {
 		@param id on failures, id is -1, else it's the network id which was configured
 	*/
 	struct NetconfigStatus {
+		NetconfigStatus(int id=-1) : failures(NCF_NONE), eap_failures(ENCF_NONE), id(id) {}
+		NetconfigStatus(NetconfigFailures failures, EapNetconfigFailures eap_failures, int id=-1) : failures(failures), eap_failures(eap_failures), id(id) {}
 		NetconfigFailures failures;
 		EapNetconfigFailures eap_failures;
 		int id;
