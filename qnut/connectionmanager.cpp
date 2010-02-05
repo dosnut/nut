@@ -290,6 +290,7 @@ namespace qnut {
 			m_NotificationManager->unregisterUIDevice(target);
 			disconnect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(updateTrayIconInfo()));
 		}
+		m_UIDeviceModel->removeUIDevice(targetPos);
 	}
 	
 	void CConnectionManager::updateTrayIconInfo() {
