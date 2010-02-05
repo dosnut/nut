@@ -9,8 +9,12 @@
 %{
 	#include "config.h"
 	int line_num = 1;
-	
+
+	#ifdef USED_CMAKE	
+	#include "configparser_yacc.hpp"
+	#else
 	#include "configparser_yacc.h"
+	#endif
 	#define yylval configparserlval
 %}
 

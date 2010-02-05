@@ -9,7 +9,7 @@
 #define QNUT_DEVICESETTINGS_H
 
 #include <QDialog>
-#include "ui/ui_devset.h"
+#include "ui_devset.h"
 #include "common.h"
 
 namespace qnut {

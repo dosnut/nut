@@ -10,7 +10,11 @@
 	#include "cconfigparser.h"
 	int line_num = 1;
 	libnutwireless::CConfigParser * libnutcconfigparser;
+	#ifdef USED_CMAKE
+	#include "configparser_yacc.hpp"
+	#else
 	#include "configparser_yacc.h"
+	#endif
 	#define yylval configparserlval
 // 	#define YY_INPUT(buf,result,max_size) { result = reinterpret_cast<libnutwireless::CConfigParser*>(yyin)->readFromStream(buf,max_size); }
 	#define YY_INPUT(buf,result,max_size) { result = libnutcconfigparser->readFromStream(buf,max_size); }

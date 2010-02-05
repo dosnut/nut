@@ -1,6 +1,10 @@
 
 #include "config.h"
+#ifdef USED_CMAKE
+#include "configparser_yacc.hpp"
+#else
 #include "configparser_yacc.h"
+#endif
 
 extern "C" {
 #include <stdio.h>

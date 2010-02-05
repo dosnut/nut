@@ -2,12 +2,12 @@
   
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/rules/dpatch.mk
-include /usr/share/cdbs/1/class/qmake.mk
+include /usr/share/cdbs/1/class/cmake.mk
 
 $(patsubst %,binary-install/%,$(DEB_PACKAGES)) :: binary-install/%:
 	$(if $(wildcard debian/$(cdbs_curpkg)/usr/share/applications/*), dh_desktop -p$(cdbs_curpkg) $(DEB_DH_DESKTOP_ARGS))
 
-QMAKE=qmake-qt4 'CONFIG+=release' 'DEFINES+=QT_NO_DEBUG_OUTPUT' 'QMAKE_STRIP ='
+#QMAKE=qmake-qt4 'CONFIG+=release' 'DEFINES+=QT_NO_DEBUG_OUTPUT' 'QMAKE_STRIP ='
 
 DEB_INSTALL_MANPAGES_nuts=resources/nuts.1
 DEB_INSTALL_MANPAGES_qnut=resources/qnut.1

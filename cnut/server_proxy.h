@@ -10,7 +10,7 @@
 #include <QtCore/QVariant>
 #include <QtDBus/QtDBus>
 #include <QMetaType>
-#include "libnutcommon/common.h"
+#include <libnutcommon/common.h>
 
 namespace cnut {
 /*

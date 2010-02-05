@@ -7,7 +7,7 @@ CODECFORSRC = UTF-8
 CODECFORTR = ISO-8859-1
 OBJECTS_DIR = build/
 MOC_DIR = build/
-UI_DIR = ui/
+UI_DIR = build/
 TARGET = qnut
 FORMS = ipconf.ui \
     devset.ui \

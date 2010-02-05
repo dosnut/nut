@@ -10,7 +10,7 @@
 
 #include <QDialog>
 #include <libnutcommon/config.h>
-#include "ui/ui_ipconf.h"
+#include "ui_ipconf.h"
 
 namespace qnut {
 	/**

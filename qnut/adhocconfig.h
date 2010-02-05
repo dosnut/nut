@@ -11,7 +11,7 @@
 #ifndef QNUT_NO_WIRELESS
 #include <QDialog>
 #include <libnutwireless/hwtypes.h>
-#include "ui/ui_adhoc.h"
+#include "ui_adhoc.h"
 
 namespace libnutwireless {
 	class CWpaSupplicant;

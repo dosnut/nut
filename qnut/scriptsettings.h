@@ -9,7 +9,7 @@
 #define QNUT_SCRIPTSETTINGS_H
 
 #include <QDialog>
-#include "ui/ui_scrset.h"
+#include "ui_scrset.h"
 
 namespace qnut {
 	class CDeviceDetails;

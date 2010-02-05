@@ -10,7 +10,7 @@
 
 #include <QWidget>
 #include <libnutcommon/device.h>
-#include "ui/ui_devdet.h"
+#include "ui_devdet.h"
 #include "common.h"
 
 namespace libnutclient {

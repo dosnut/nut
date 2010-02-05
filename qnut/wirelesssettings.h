@@ -12,7 +12,7 @@
 #include <QDialog>
 #include <libnutwireless/hwtypes.h>
 #include <libnutcommon/device.h>
-#include "ui/ui_airset.h"
+#include "ui_airset.h"
 
 namespace libnutclient {
 	class CDevice;
