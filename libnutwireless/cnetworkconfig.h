@@ -75,7 +75,7 @@ namespace libnutwireless {
 			CNetworkConfig(const CNetworkConfig &config);
 			CNetworkConfig(ScanResult scan);
 			~CNetworkConfig();
-			void writeTo(QDataStream &stream);
+			void writeTo(QTextStream &stream);
 
 			//Access functions
 			inline QString get_ssid() { return ssid;}

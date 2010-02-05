@@ -139,7 +139,7 @@ CNetworkConfig::NetworkId CNetworkConfig::toNetworkId(QString str) {
 
 //TODO:check if \" is need, guess not, since wpa_supplicant needs them
 
-void CNetworkConfig::writeTo(QDataStream &stream) {
+void CNetworkConfig::writeTo(QTextStream &stream) {
 	stream << QString("network {\n");
 	if (!ssid.isEmpty())
 		stream << QString("ssid=%1\n").arg(ssid);

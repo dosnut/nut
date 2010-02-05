@@ -17,13 +17,14 @@ namespace libnutwireless {
 		configparserin = 0;
 		libnutcconfigparser = this;
 		configparserparse(this);
+		return true;
 	}
 	
 	void CConfigParser::parseError(int line_num, QString msg) {
 		m_errors.append(QString("Error occured: %1 in Line %2").arg(msg,line_num));
 	}
 	
-	int CConfigParser::readFromStream(char * buf,int max_size) {
+	int CConfigParser::readFromStream(char * buf, int /*max_size*/) {
 		QString str = stream->read(m_maxRead);
 		int size = str.size();
 		memccpy(buf,str.toAscii().constData(),size,sizeof(char));
@@ -35,6 +36,7 @@ namespace libnutwireless {
 		if (currentNetwork)
 			return false;
 		currentNetwork = new CNetworkConfig();
+		return true;
 	}
 
 	bool CConfigParser::finishNetwork() {
@@ -43,6 +45,7 @@ namespace libnutwireless {
 		m_configs.push_back(*currentNetwork);
 		delete currentNetwork;
 		currentNetwork = 0;
+		return true;
 	}
 
 }

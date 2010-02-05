@@ -10,7 +10,6 @@
 #include "cnetworkconfig.h"
 #include "wstypes.h"
 #include <QHostAddress>
-#include <QFile>
 #include <QSocketNotifier>
 #include <QTimerEvent>
 #include <QCoreApplication>
