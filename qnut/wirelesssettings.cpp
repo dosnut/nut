@@ -6,20 +6,30 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 #ifndef QNUT_NO_WIRELESS
+#include "wirelesssettings.h"
+
+#include <libnutclient/client.h>
+
+#include <libnutwireless/cwireless.h>
+#include <libnutwireless/conversion.h>
+
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QMenu>
 #include <QListView>
-#include <libnutclient/client.h>
-#include "wirelesssettings.h"
-#include "managedapmodel.h"
+#include <QFileDialog>
+#include <QFile>
+#include <QTextStream>
+#include <QSettings>
+
 #include "common.h"
 #include "constants.h"
-#include "availableapmodel.h"
+
 #include "accesspointconfig.h"
 #include "adhocconfig.h"
-#include <libnutwireless/cwireless.h>
-#include <libnutwireless/conversion.h>
+
+#include "managedapmodel.h"
+#include "availableapmodel.h"
 
 namespace qnut {
 	//TODO make only theese functions available that are supported by the wpa_supplicant
@@ -29,7 +39,6 @@ namespace qnut {
 	
 	CWirelessSettings::CWirelessSettings(CDevice * wireless, QWidget * parent) : QWidget(parent), m_Device(wireless) {
 		ui.setupUi(this);
-		
 		
 		QListView * hiddenListView = new QListView(this);
 		hiddenListView->hide();
@@ -83,7 +92,6 @@ namespace qnut {
 		connect(ui.availableAPFilterEdit, SIGNAL(textChanged(const QString &)), m_AvailableAPProxyModel, SLOT(setFilterWildcard(const QString &)));
 		
 		if (m_Device->getWireless()) {
-//			connect(m_Device->getWpaSupplicant(), SIGNAL(stateChanged(bool)), this, SLOT(setEnabled(bool)));
 			connect(m_SaveNetworksAction, SIGNAL(triggered()), m_Device->getWireless()->getWpaSupplicant(), SLOT(save_config()));
 			connect(m_RescanNetworksAction, SIGNAL(triggered()), m_Device->getWireless(), SLOT(scan()));
 			connect(m_Device->getWireless()->getHardware(), SIGNAL(signalQualityUpdated(libnutwireless::SignalQuality)),
@@ -99,6 +107,10 @@ namespace qnut {
 		
 		QAction * reloadNetworksAction;
 		
+		QAction * importNetworksAction;
+		QAction * exportNetworkAction;
+		QAction * exportMultipleNetworksAction;
+		
 		QMenu * manageNetworksMenu;
 		
 		m_EnableNetworkAction    = new QAction(QIcon(UI_ICON_ENABLE), tr("&Enable"), this);
@@ -109,11 +121,15 @@ namespace qnut {
 		addNetworkAction         = new QAction(QIcon(UI_ICON_ADD), tr("Add &network"), this);
 		addAdhocAction           = new QAction(QIcon(UI_ICON_ADD_ADHOC), tr("Add ad-&hoc"), this);
 		reloadNetworksAction     = new QAction(QIcon(UI_ICON_RELOAD), tr("Re&load configuration"), this);
-		m_SaveNetworksAction     = new QAction(QIcon(UI_ICON_SAVE), tr("&Save configuration"), this);
-		m_AutoSaveNetworksAction = new QAction(/*QIcon(UI_ICON_AUTOSAVE), */tr("&Autosave configuration"), this);
+		m_SaveNetworksAction     = new QAction(QIcon(UI_ICON_SAVE), tr("&Save in global config"), this);
+		m_AutoSaveNetworksAction = new QAction(/*QIcon(UI_ICON_AUTOSAVE), */tr("&Autosave global config"), this);
 		m_RemoveNetworkAction    = new QAction(QIcon(UI_ICON_REMOVE), tr("&Remove"), this);
 		m_ToggleDetailsAction    = new QAction(QIcon(UI_ICON_DETAILED), tr("Detailed &view"), this);
-		m_RescanNetworksAction   = new QAction(QIcon(UI_ICON_SEARCH), tr("Scan ne&tworks"), this);
+		m_RescanNetworksAction   = new QAction(QIcon(UI_ICON_SEARCH), tr("Scan for ne&tworks"), this);
+		
+		importNetworksAction         = new QAction(/*QIcon(UI_ICON_IMPORT), */tr("&Import networks..."), this);
+		exportNetworkAction          = new QAction(/*QIcon(UI_ICON_EXPORT), */tr("&Export selected network..."), this);
+		exportMultipleNetworksAction = new QAction(/*QIcon(UI_ICON_MULTIEXPORT), */tr("Export &multiple networks..."), this);
 		
 		manageNetworksMenu       = new QMenu(tr("More..."));
 		manageNetworksMenu->setIcon(QIcon(UI_ICON_EDIT));
@@ -143,12 +159,20 @@ namespace qnut {
 		connect(m_ToggleDetailsAction, SIGNAL(toggled(bool)), this, SLOT(toggleDetails(bool)));
 		connect(reloadNetworksAction, SIGNAL(triggered()), m_ManagedAPModel, SLOT(updateNetworks()));
 		
+		connect(importNetworksAction, SIGNAL(triggered()), this, SLOT(importNetworks()));
+		connect(exportNetworkAction, SIGNAL(triggered()), this, SLOT(exportSelectedNetwork()));
+		connect(exportMultipleNetworksAction, SIGNAL(triggered()), this, SLOT(exportMultipleNetworks()));
+		
 		manageNetworksMenu->addAction(enableNetworksAction);
 		manageNetworksMenu->addSeparator();
 		manageNetworksMenu->addAction(m_SaveNetworksAction);
 		manageNetworksMenu->addAction(reloadNetworksAction);
 		manageNetworksMenu->addSeparator();
 		manageNetworksMenu->addAction(m_AutoSaveNetworksAction);
+		manageNetworksMenu->addSeparator();
+		manageNetworksMenu->addAction(importNetworksAction);
+		manageNetworksMenu->addAction(exportNetworkAction);
+		manageNetworksMenu->addAction(exportMultipleNetworksAction);
 		
 		m_VisibleAPView->addAction(m_EnableNetworkAction);
 		m_VisibleAPView->addAction(m_DisableNetworkAction);
@@ -386,6 +410,66 @@ namespace qnut {
 		}
 /*		ui.managedView->header()->resizeSections(QHeaderView::ResizeToContents);
 		ui.availableView->header()->resizeSections(QHeaderView::ResizeToContents);*/
+	}
+	
+	void CWirelessSettings::importNetworks() {
+		QString fileName = QFileDialog::getOpenFileName(this, tr("Import network configuration"), QDir::currentPath(), tr("Configuration files (*.apconf *.conf)"));
+		if (!fileName.isEmpty()) {
+			QFile file(fileName);
+			file.open(QFile::ReadOnly);
+			QTextStream inStream(&file);
+			
+			m_Device->getWireless()->getWpaSupplicant()->addNetworks(&inStream);
+			inStream.seek(0);
+			qDebug("[qnut] imported networks:\n%s", qPrintable(inStream.readAll()));
+		}
+	}
+	
+	void CWirelessSettings::exportSelectedNetwork() {
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Export network configuration"), QDir::currentPath(), tr("Configuration files (*.apconf *.conf)"));
+		if (!fileName.isEmpty()) {
+			QFile file(fileName);
+			file.open(QFile::WriteOnly);
+			QTextStream outStream(&file);
+			
+			int id = m_ManagedAPModel->cachedNetworks()[selectedIndex(m_VisibleAPView).internalId()].id;
+			m_Device->getWireless()->getWpaSupplicant()->getNetworkConfig(id).writeTo(outStream);
+		}
+	}
+	
+	void CWirelessSettings::exportMultipleNetworks() {
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Export network configuration"), QDir::currentPath(), tr("Configuration files (*.apconf *.conf)"));
+		if (!fileName.isEmpty()) {
+			QFile file(fileName);
+			file.open(QFile::WriteOnly);
+			QTextStream outStream(&file);
+			
+			foreach (libnutwireless::ShortNetworkInfo i, m_ManagedAPModel->cachedNetworks())
+				m_Device->getWireless()->getWpaSupplicant()->getNetworkConfig(i.id).writeTo(outStream);
+		}
+	}
+	
+	void CWirelessSettings::loadManagedNetworks(QSettings * settings) {
+		if (!settings)
+			return;
+		
+		QByteArray buffer = settings->value(UI_SETTINGS_NETWORKS).toByteArray();
+		QTextStream inStream(buffer, QIODevice::ReadOnly);
+		
+		m_Device->getWireless()->getWpaSupplicant()->addOnlyNewNetworks(&inStream);
+	}
+	
+	void CWirelessSettings::writeManagedNetworks(QSettings * settings) {
+		if (!settings)
+			return;
+		
+		QByteArray buffer;
+		QTextStream outStream(buffer, QIODevice::WriteOnly);
+		
+		foreach (libnutwireless::CNetworkConfig i, m_Device->getWireless()->getWpaSupplicant()->getManagedConfigs())
+			i.writeTo(outStream);
+		
+		settings->setValue(UI_SETTINGS_NETWORKS, buffer);
 	}
 }
 #endif

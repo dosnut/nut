@@ -281,15 +281,12 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="manageNetworksButton">
+       <widget class="QToolButton" name="toggleDetailsButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
-        </property>
-        <property name="popupMode">
-         <enum>QToolButton::InstantPopup</enum>
         </property>
         <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -300,12 +297,15 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toggleDetailsButton">
+       <widget class="QToolButton" name="manageNetworksButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="popupMode">
+         <enum>QToolButton::InstantPopup</enum>
         </property>
         <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>

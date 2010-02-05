@@ -36,7 +36,7 @@ namespace qnut {
 		Q_OBJECT
 	public:
 		/// @brief Returns the cached list of managed networks.
-		QList<libnutwireless::ShortNetworkInfo> cachedNetworks() const { return m_Networks; };
+		QList<libnutwireless::ShortNetworkInfo> cachedNetworks() const { return m_Networks; }
 		
 		/**
 		 * @brief Creates the object and initializes the model according to the given wpa_supplicant object.

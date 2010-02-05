@@ -101,6 +101,8 @@
 
 #define UI_SETTINGS_WIRELESSSETTINGS    "WirelessSettings"
 
+#define UI_SETTINGS_NETWORKS            "networks"
+
 #define UI_SETTINGS_IPCONFIGURATIONS    "IPconfigurations"
 #define UI_SETTINGS_IP                  "ip"
 #define UI_SETTINGS_NETMASK             "netmask"

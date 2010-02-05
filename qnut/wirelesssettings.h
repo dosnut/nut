@@ -18,6 +18,8 @@ namespace libnutclient {
 	class CDevice;
 }
 
+class QSettings;
+
 namespace qnut {
 	class CManagedAPModel;
 	class CAvailableAPModel;
@@ -76,6 +78,9 @@ namespace qnut {
 		 * @param parent parent widget
 		 */
 		CWirelessSettings(libnutclient::CDevice * wireless, QWidget * parent = 0);
+		
+		void loadManagedNetworks(QSettings * settings);
+		void writeManagedNetworks(QSettings * settings);
 	private slots:
 		void handleManagedAPSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 		void updateUi(libnutcommon::DeviceState state);
@@ -89,6 +94,9 @@ namespace qnut {
 		void enableNetworks();
 		void disableSelectedNetwork();
 		void toggleDetails(bool value);
+		void importNetworks();
+		void exportSelectedNetwork();
+		void exportMultipleNetworks();
 	};
 }
 #endif

@@ -277,9 +277,16 @@ namespace qnut {
 		
 #ifndef QNUT_NO_WIRELESS
 		if (m_WirelessSettings) {
+			QByteArray networksConfig;
+			{
+				QTextStream stream(networksConfig, QIODevice::WriteOnly);
+				
+			}
+			
 			settings.beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
 			settings.setValue(UI_SETTINGS_GEOMETRY, m_WirelessSettings->saveGeometry());
 			settings.setValue(UI_SETTINGS_SHOWDETAILS, m_WirelessSettings->detailsVisible());
+			settings.setValue(UI_SETTINGS_NETWORKS, networksConfig);
 			settings.endGroup();
 		}
 #endif
