@@ -94,7 +94,7 @@ NetconfigStatus CWpaSupplicant::editNetwork(int netid, CNetworkConfig config) {
 		if (m_managedNetworks.contains(i)) { //managed by us, update our copy
 			m_managedNetworks[i] = config;
 		}
-	} //else, not managed by (at least not yet)
+	} //else, not managed by us (at least not yet)
 
 	//Check if we're adding an ad-hoc network:
 	if (QOOL_TRUE == config.get_mode()) {
@@ -113,7 +113,7 @@ NetconfigStatus CWpaSupplicant::editNetwork(int netid, CNetworkConfig config) {
 	if (!setNetworkVariable(netid,"ssid",config.get_ssid()) ) {
 		failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_SSID);
 	}
-	if (! setBssid(netid,config.get_bssid().toString()) ) { //Always set bssid, otherwise wpa_supplicant doesn't care about "any" bssid
+	if (!setBssid(netid,config.get_bssid().toString()) ) { //Always set bssid, otherwise wpa_supplicant doesn't care about "any" bssid
 			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_BSSID);
 	}
 	if (config.get_disabled() != QOOL_UNDEFINED) {
@@ -122,7 +122,7 @@ NetconfigStatus CWpaSupplicant::editNetwork(int netid, CNetworkConfig config) {
 		}
 	}
 	if (!config.get_id_str().isEmpty()) {
-		if ( setNetworkVariable(netid,"id_str",config.get_id_str()) ) {
+		if (!setNetworkVariable(netid,"id_str",config.get_id_str()) ) {
 			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_ID_STR);
 		}
 	}

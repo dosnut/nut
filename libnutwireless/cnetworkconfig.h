@@ -139,7 +139,7 @@ namespace libnutwireless {
 			inline void set_group(GroupCiphers g) { group = g; };
 			inline void set_eap(EapMethod e) { eap = e; }
 			
-			inline void setNetworkId(NetworkId id) { netId = id; id_str = QString("\"nut:%1:%2\"").arg(id.pid,id.id); };
+			inline void setNetworkId(NetworkId id) { netId = id; id_str = QString("\"nut:%1:%2\"").arg(id.pid).arg(id.id); };
 			
 			//Set Parse functions:
 			bool set_ssid(QString str, bool addQuotes = false);
@@ -155,8 +155,9 @@ namespace libnutwireless {
 			bool set_auth_alg(QString auth_alg);
 			bool set_pairwise(QString pairwise);
 			bool set_group(QString group);
-			bool set_psk(QString str, bool addQuotes = false);
-			bool set_eapol_flags(QString eapol_flags);
+			bool set_psk(QString psk, bool addQuotes = false);
+			bool set_eapol_flags(int flags);
+			bool set_eapol_flags(QString flags);
 			bool set_mixed_cell(bool enabled);
 			bool set_proactive_key_caching(bool enabled);
 			bool set_wep_key0(QString key, bool addQuotes = false);

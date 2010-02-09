@@ -5,10 +5,12 @@
 extern "C" {
 #include <stdio.h>
 }
+#include <iostream>
 
 void configparserparse(libnutwireless::CConfigParser * cp);
 extern FILE *configparserin;
 extern libnutwireless::CConfigParser * libnutcconfigparser;
+int configparserlex_destroy(void);
 
 namespace libnutwireless {
 
@@ -17,6 +19,7 @@ namespace libnutwireless {
 		configparserin = 0;
 		libnutcconfigparser = this;
 		configparserparse(this);
+		configparserlex_destroy();
 		return true;
 	}
 	
@@ -24,22 +27,24 @@ namespace libnutwireless {
 		m_errors.append(QString("Error occured: %1 in Line %2").arg(msg,line_num));
 	}
 	
-	int CConfigParser::readFromStream(char * buf, int /*max_size*/) {
-		QString str = stream->read(m_maxRead);
+	int CConfigParser::readFromStream(char * buf, int max_size) {
+		QString str = stream->read(max_size-1);
 		int size = str.size();
-		memccpy(buf,str.toAscii().constData(),size,sizeof(char));
+		memcpy(buf,str.toAscii().constData(),(size+1)*sizeof(char));
+		std::cout << buf << std::endl;
 		return size;
 	}
 
 
 	bool CConfigParser::newNetwork() {
-		if (currentNetwork)
-			return false;
+		if (currentNetwork) return false;
 		currentNetwork = new CNetworkConfig();
+		std::cout << "NEW NETWORK CREATED" << std::endl;
 		return true;
 	}
 
 	bool CConfigParser::finishNetwork() {
+		std::cout << "FINISHED THE NETWORK" << std::endl;
 		if (!currentNetwork)
 			return false;
 		m_configs.push_back(*currentNetwork);

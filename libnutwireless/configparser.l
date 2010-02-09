@@ -1,5 +1,6 @@
 
-%x String
+%x Value
+%x StrVal
 %x Comment
 %option stack
 %option noyywrap
@@ -9,6 +10,7 @@
 %{
 	#include "cconfigparser.h"
 	int line_num = 1;
+	unsigned char char_buff = 0;
 	libnutwireless::CConfigParser * libnutcconfigparser;
 	#ifdef USED_CMAKE
 	#include "configparser_yacc.hpp"
@@ -16,7 +18,6 @@
 	#include "configparser_yacc.h"
 	#endif
 	#define yylval configparserlval
-// 	#define YY_INPUT(buf,result,max_size) { result = reinterpret_cast<libnutwireless::CConfigParser*>(yyin)->readFromStream(buf,max_size); }
 	#define YY_INPUT(buf,result,max_size) { result = libnutcconfigparser->readFromStream(buf,max_size); }
 %}
 
@@ -74,33 +75,51 @@ nai          return NAI;
 pac_file     return PAC_FILE;
 
 
-(1|true|TRUE|True) {
+=\ *(true|TRUE|True)\ *\n {
 			yylval.b = true; return BOOL; }
 
-(0|false|FALSE|False) {
+=\ *(false|FALSE|False)\ *\n {
 			yylval.b = false; return BOOL; }
 
-([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2} {
+=\ *([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}\ *\n {
             yylval.macAddr = new libnutcommon::MacAddress(QString(yytext)); return MACADDR; }
 
-(-[[:blank:]]*)?[[:digit:]]+ {
-            yylval.i = atoi(yytext); return INTEGER; }
+=\ *(-[[:blank:]]*)?[[:digit:]]+\ *\n {
+            yylval.i = atoi(&yytext[1]); return INTEGER; }
 
-\"         yylval.str = new QString(); BEGIN(String);
+=\ *        yylval.str = new QString(); BEGIN(Value);
+=\ *\"      yylval.str = new QString("\""); BEGIN(StrVal);
+#.*\n       printf("found a comment in #");
 "/*"       yy_push_state(Comment);
 
-\n         ++line_num;
-"//".*\n   ++line_num;
-[a-zA-Z0-9]+  printf("Unexpected keyword, ignoring\n");
+\n         ++line_num; return yytext[0];
+"//".*\n   ++line_num; return yytext[0];
+[a-zA-Z0-9]+ {
+	char_buff = yytext[yyleng];
+	printf("Unexpected keyword(%i):\n",line_num);
+	printf("%s\n",yytext);
+	yytext[yyleng] = char_buff;
+}
 [!{};/]     return yytext[0];
-.          /* ignore. TODO: only ignore whitespaces*/
+.       {
+	char_buff = yytext[yyleng];
+	printf("Unexpected keyword(%i):\n",line_num);
+	printf("%s\n",yytext);
+	yytext[yyleng] = char_buff;
+}
 
-<String>{
-	\"          { BEGIN(INITIAL); return STRING; }	
+<Value>{
+	\ *\n       { BEGIN(INITIAL); return VALUE; }
+	[^\n]*      { yylval.str->append(yytext); }
+	\\.         { yylval.str->append(yytext[1]); }
+}
+
+<StrVal>{
+	\"          { BEGIN(INITIAL); yylval.str->append("\""); return STRVAL; }	
 	[^\\\"\n]*  { yylval.str->append(yytext); }
 	\n          { printf("Unexpected newline in string, ending string\n");
 	              ++line_num;
-	              BEGIN(INITIAL); return STRING;
+	              BEGIN(INITIAL); yylval.str->append("\""); return STRVAL;
 	            }
 	\\n         { yylval.str->append("\n"); }
 	\\\"        { yylval.str->append("\""); }

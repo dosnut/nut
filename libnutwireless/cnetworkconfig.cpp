@@ -1,4 +1,5 @@
 #include "cnetworkconfig.h"
+#include <iostream>
 namespace libnutwireless {
 
 
@@ -143,7 +144,7 @@ void CNetworkConfig::writeTo(QTextStream &stream) {
 	stream << QString("network {\n");
 	if (!ssid.isEmpty())
 		stream << QString("ssid=%1\n").arg(ssid);
-	if (!bssid.valid())
+	if (!bssid.valid() && !bssid.zero())
 		stream << QString("bssid=%1\n").arg( bssid.toString());
 	if (QOOL_UNDEFINED != disabled)
 		stream << QString("disabled=%1\n").arg( toString(disabled));
@@ -158,7 +159,7 @@ void CNetworkConfig::writeTo(QTextStream &stream) {
 	if (frequency != -1)
 		stream << QString("frequency=%1\n").arg( frequency); 
 	if (PROTO_UNDEFINED != protocols)
-		stream << QString("protocols=%1\n").arg( toString(protocols)); 
+		stream << QString("proto=%1\n").arg( toString(protocols)); 
 	if (KM_UNDEFINED != key_mgmt)
 		stream << QString("key_mgmt=%1\n").arg( toString(key_mgmt));
 	if (AUTHALG_UNDEFINED != auth_alg)
@@ -183,10 +184,16 @@ void CNetworkConfig::writeTo(QTextStream &stream) {
 		stream << QString("wep_key2=%1\n").arg( wep_key2);
 	if (!wep_key3.isEmpty())
 		stream << QString("wep_key3=%1\n").arg( wep_key3);
-	if (-1 != wep_tx_keyidx)
-		stream << QString("wep_tx_keyidx=%1\n").arg( (int)wep_tx_keyidx); 
+	if (-1 != wep_tx_keyidx) {
+		bool ok=false;
+		if (0 == wep_tx_keyidx && !wep_key0.isEmpty()) ok=true;
+		else if (1 == wep_tx_keyidx && !wep_key1.isEmpty()) ok=true;
+		else if (2 == wep_tx_keyidx && !wep_key2.isEmpty()) ok=true;
+		else if (3 == wep_tx_keyidx && !wep_key3.isEmpty()) ok=true;
+		if (ok) stream << QString("wep_tx_keyidx=%1\n").arg( (int)wep_tx_keyidx);
+	}
 	if (QOOL_UNDEFINED != peerkey)
-		stream << QString("peerkey=%1\n").arg((int)peerkey);
+		stream << QString("peerkey=%1\n").arg(toString(peerkey));
 
 	if (EAPM_UNDEFINED != eap)
 		stream << QString("eap=%1\n").arg( toString(eap)); 
@@ -279,7 +286,7 @@ bool CNetworkConfig::set_mode(bool mode) {
 	return true;
 }
 bool CNetworkConfig::set_frequency(int freq) {
-	if (freq >= 0) {
+	if (freq > 0) {
 		frequency = freq;
 		return true;
 	}
@@ -306,12 +313,22 @@ bool CNetworkConfig::set_group(QString g) {
 	return true;
 }
 bool CNetworkConfig::set_psk(QString str, bool addQuotes) {
-	psk = addQuotes ? QUOTED(str) : str;
-	return true;
+	if (str != "*") {
+		psk = addQuotes ? QUOTED(str) : str;
+		return true;
+	}
+	return false;
 }
 bool CNetworkConfig::set_eapol_flags(QString e) {
 	eapol_flags = toEapolFlags(e);
 	return true;
+}
+bool CNetworkConfig::set_eapol_flags(int e) {
+	if (e >= 0 && e <= 3) {
+		eapol_flags = (EapolFlags)e;
+		return true;
+	}
+	return false;
 }
 bool CNetworkConfig::set_mixed_cell(bool enabled) {
 	mixed_cell = toQOOL(enabled);
@@ -322,20 +339,32 @@ bool CNetworkConfig::set_proactive_key_caching(bool enabled) {
 	return true;
 }
 bool CNetworkConfig::set_wep_key0(QString str, bool addQuotes) {
-	wep_key0 = addQuotes ? QUOTED(str) : str;
-	return true;
+	if (str != "*") {
+		wep_key0 = addQuotes ? QUOTED(str) : str;
+		return true;
+	}
+	return false;
 }
 bool CNetworkConfig::set_wep_key1(QString str, bool addQuotes) {
-	wep_key1 = addQuotes ? QUOTED(str) : str;
-	return true;
+	if (str != "*") {
+		wep_key1 = addQuotes ? QUOTED(str) : str;
+		return true;
+	}
+	return false;
 }
 bool CNetworkConfig::set_wep_key2(QString str, bool addQuotes) {
-	wep_key2 = addQuotes ? QUOTED(str) : str;
-	return true;
+	if (str != "*") {
+		wep_key2 = addQuotes ? QUOTED(str) : str;
+		return true;
+	}
+	return false;
 }
 bool CNetworkConfig::set_wep_key3(QString str, bool addQuotes) {
-	wep_key3 = addQuotes ? QUOTED(str) : str;
-	return true;
+	if (str != "*") {
+		wep_key3 = addQuotes ? QUOTED(str) : str;
+		return true;
+	}
+	return false;
 }
 bool CNetworkConfig::set_wep_tx_keyidx(int idx) {
 	if (idx >= 0 && idx <= 3) {

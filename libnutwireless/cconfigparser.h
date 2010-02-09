@@ -25,7 +25,7 @@ class CConfigParser {
 	public:
 		/** Stream has to be valid when calling parse() */
 		CConfigParser(QTextStream * stream) : currentNetwork(0), stream(stream), m_maxRead(128*1024*1024)  {}
-		CConfigParser(const QString fileName) : currentNetwork(0), stream(0), fileName(fileName), m_maxRead(128*1024*1024) {}
+		CConfigParser(const QString fileName) : currentNetwork(0), stream(0), fileName(fileName), m_maxRead(128*1024*1024) {if (currentNetwork) delete currentNetwork;}
 		
 		
 		bool parse();

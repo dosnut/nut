@@ -10,7 +10,7 @@
 	void configparsererror (CConfigParser *cp, const char* s);
 	
 	//Check if invoked action worked (e.g. newDevice -> device creation worked)
-	#define CHECK(action) do { if (!cp->getCurrentNetwork() || !(cp->getCurrentNetwork()->action)) YYERROR; } while (0)
+	#define CHECK(action) do { if (!cp->getCurrentNetwork() || !(cp->getCurrentNetwork()->action)) { printf("error\n"); YYERROR;} } while (0)
 %}
 
 %union {
@@ -73,7 +73,8 @@
 %token PAC_FILE
 
 
-%token <str> STRING
+%token <str> VALUE
+%token <str> STRVAL
 %token <macAddr> MACADDR
 %token <i> INTEGER
 %token <b> BOOL
@@ -86,67 +87,75 @@
 %%
 
 input:
-	| input NETWORK {if (!cp->newNetwork()) YYERROR;} networkconfig {if (!cp->finishNetwork()) YYERROR;}
+	| input '\n'
+	| input NETWORK '{' {if (!cp->newNetwork()) YYERROR;} network '}' {if (!cp->finishNetwork()) YYERROR;}
 ;
 
+/*
 networkconfig:
-	| '{' network '}'
-	| '{' network '}' ';'
+	'{' {printf("hdjihsdkfhsdlfah");} network '}'
+	| '{' network '}' ';' 
+;*/
+
+network: networkoption
+	| network networkoption
 ;
 
-network:
-	| network networkoption 
-;
-networkoption:
-	  SSID '=' STRING {CHECK(set_ssid(*$3)); delete $3;}
-	| BSSID '=' MACADDR {CHECK(set_bssid(*$3)); delete $3;}
-	| DISABLED '=' BOOL {CHECK(set_disabled($3));}
-	| ID_STR '=' STRING {CHECK(set_id_str(*$3)); delete $3;}
-	| SCAN_SSID '=' BOOL {CHECK(set_scan_ssid($3));}
-	| PRIORITY '=' INTEGER {CHECK(set_priority($3));}
-	| MODE '=' BOOL {CHECK(set_mode($3));}
-	| FREQUENCY '=' INTEGER {CHECK(set_frequency($3));}
-	| PROTO '=' STRING {CHECK(set_proto(*$3)); delete $3;}
-	| KEY_MGMT '=' STRING {CHECK(set_key_mgmt(*$3)); delete $3;}
-	| AUTH_ALG '=' STRING {CHECK(set_auth_alg(*$3)); delete $3;}
-	| PAIRWISE '=' STRING {CHECK(set_pairwise(*$3)); delete $3;}
-	| GROUP '=' STRING {CHECK(set_group(*$3)); delete $3;}
-	| PSK '=' STRING {CHECK(set_psk(*$3)); delete $3;}
-	| EAPOL_FLAGS '=' STRING {CHECK(set_eapol_flags(*$3)); delete $3;}
-	| MIXED_CELL '=' BOOL {CHECK(set_mixed_cell($3));}
-	| PROACTIVE_KEY_CACHING '=' BOOL {CHECK(set_proactive_key_caching($3));}
-	| WEP_KEY0 '=' STRING {CHECK(set_wep_key0(*$3)); delete $3; }
-	| WEP_KEY1 '=' STRING {CHECK(set_wep_key1(*$3)); delete $3; }
-	| WEP_KEY2 '=' STRING {CHECK(set_wep_key2(*$3)); delete $3; }
-	| WEP_KEY3 '=' STRING {CHECK(set_wep_key3(*$3)); delete $3; }
-	| WEP_TX_KEYIDX '=' INTEGER {CHECK(set_wep_tx_keyidx($3));}
-	| PEERKEY '=' BOOL {CHECK(set_peerkey($3));}
-	| EAP '=' STRING {CHECK(set_eap(*$3)); delete $3;}
-	| IDENTITY '=' STRING {CHECK(set_identity(*$3)); delete $3;}
-	| ANONYMOUS_IDENTITY '=' STRING {CHECK(set_anonymous_identity(*$3)); delete $3;}
-	| PASSWORD '=' STRING {CHECK(set_password(*$3)); delete $3;}
-	| CA_CERT '=' STRING {CHECK(set_ca_cert(*$3)); delete $3;}
-	| CA_PATH '=' STRING {CHECK(set_ca_path(*$3)); delete $3;}
-	| CLIENT_CERT '=' STRING {CHECK(set_client_cert(*$3)); delete $3;}
-	| PRIVATE_KEY '=' STRING {CHECK(set_private_key(*$3)); delete $3;}
-	| PRIVATE_KEY_PASSWD '=' STRING {CHECK(set_private_key_passwd(*$3)); delete $3;}
-	| DH_FILE '=' STRING {CHECK(set_dh_file(*$3)); delete $3;}
-	| SUBJECT_MATCH '=' STRING {CHECK(set_subject_match(*$3)); delete $3;}
-	| ALTSUBJECT_MATCH '=' STRING {CHECK(set_altsubject_match(*$3)); delete $3;}
-	| PHASE1 '=' STRING {CHECK(set_phase1(*$3)); delete $3;}
-	| PHASE2 '=' STRING {CHECK(set_phase2(*$3)); delete $3;}
-	| CA_CERT2 '=' STRING {CHECK(set_ca_cert2(*$3)); delete $3;}
-	| CA_PATH2 '=' STRING {CHECK(set_ca_path2(*$3)); delete $3;}
-	| CLIENT_CERT2 '=' STRING {CHECK(set_client_cert2(*$3)); delete $3;}
-	| PRIVATE_KEY2 '=' STRING {CHECK(set_private_key2(*$3)); delete $3;}
-	| PRIVATE_KEY2_PASSWD '=' STRING {CHECK(set_private_key2(*$3)); delete $3;}
-	| DH_FILE2 '=' STRING {CHECK(set_dh_file2(*$3)); delete $3;}
-	| SUBJECT_MATCH2 '=' STRING {CHECK(set_subject_match2(*$3)); delete $3;}
-	| ALTSUBJECT_MATCH2 '=' STRING {CHECK(set_altsubject_match2(*$3)); delete $3;}
-	| FRAGMENT_SIZE '=' INTEGER {CHECK(set_fragment_size($3));}
-	| EAPPSK '=' STRING {CHECK(set_eappsk(*$3)); delete $3;}
-	| NAI '=' STRING {CHECK(set_nai(*$3)); delete $3;}
-	| PAC_FILE '=' STRING {CHECK(set_pac_file(*$3)); delete $3;}
+networkoption: '\n'
+	| SSID STRVAL {CHECK(set_ssid(*$2)); delete $2;}
+	| SSID VALUE {CHECK(set_ssid(*$2)); delete $2;}
+	| BSSID MACADDR {CHECK(set_bssid(*$2)); delete $2;}
+	| DISABLED  BOOL {CHECK(set_disabled($2));}
+	| ID_STR STRVAL {CHECK(set_id_str(*$2)); delete $2;}
+	| SCAN_SSID BOOL {CHECK(set_scan_ssid($2));}
+	| PRIORITY INTEGER {CHECK(set_priority($2));}
+	| MODE BOOL {CHECK(set_mode($2));}
+	| FREQUENCY INTEGER {CHECK(set_frequency($2));}
+	| PROTO VALUE {CHECK(set_proto(*$2)); delete $2;}
+	| KEY_MGMT VALUE {CHECK(set_key_mgmt(*$2)); delete $2;}
+	| AUTH_ALG VALUE {CHECK(set_auth_alg(*$2)); delete $2;}
+	| PAIRWISE VALUE {CHECK(set_pairwise(*$2)); delete $2;}
+	| GROUP VALUE {CHECK(set_group(*$2)); delete $2;}
+	| PSK VALUE {CHECK(set_psk(*$2)); delete $2;}
+	| EAPOL_FLAGS INTEGER {CHECK(set_eapol_flags($2));}
+	| MIXED_CELL BOOL {CHECK(set_mixed_cell($2));}
+	| PROACTIVE_KEY_CACHING BOOL {CHECK(set_proactive_key_caching($2));}
+	| WEP_KEY0 STRVAL {CHECK(set_wep_key0(*$2)); delete $2; }
+	| WEP_KEY1 STRVAL {CHECK(set_wep_key1(*$2)); delete $2; }
+	| WEP_KEY2 STRVAL {CHECK(set_wep_key2(*$2)); delete $2; }
+	| WEP_KEY3 STRVAL {CHECK(set_wep_key3(*$2)); delete $2; }
+	| WEP_KEY0 VALUE {CHECK(set_wep_key0(*$2)); delete $2; }
+	| WEP_KEY1 VALUE {CHECK(set_wep_key1(*$2)); delete $2; }
+	| WEP_KEY2 VALUE {CHECK(set_wep_key2(*$2)); delete $2; }
+	| WEP_KEY3 VALUE {CHECK(set_wep_key3(*$2)); delete $2; }
+	| WEP_TX_KEYIDX INTEGER {CHECK(set_wep_tx_keyidx($2));}
+	| PEERKEY BOOL {CHECK(set_peerkey($2));}
+	| EAP VALUE {CHECK(set_eap(*$2)); delete $2;}
+	| IDENTITY STRVAL {CHECK(set_identity(*$2)); delete $2;}
+	| ANONYMOUS_IDENTITY STRVAL {CHECK(set_anonymous_identity(*$2)); delete $2;}
+	| PASSWORD STRVAL {CHECK(set_password(*$2)); delete $2;}
+	| CA_CERT STRVAL {CHECK(set_ca_cert(*$2)); delete $2;}
+	| CA_PATH STRVAL {CHECK(set_ca_path(*$2)); delete $2;}
+	| CLIENT_CERT STRVAL {CHECK(set_client_cert(*$2)); delete $2;}
+	| PRIVATE_KEY STRVAL {CHECK(set_private_key(*$2)); delete $2;}
+	| PRIVATE_KEY_PASSWD STRVAL {CHECK(set_private_key_passwd(*$2)); delete $2;}
+	| DH_FILE STRVAL {CHECK(set_dh_file(*$2)); delete $2;}
+	| SUBJECT_MATCH STRVAL {CHECK(set_subject_match(*$2)); delete $2;}
+	| ALTSUBJECT_MATCH STRVAL {CHECK(set_altsubject_match(*$2)); delete $2;}
+	| PHASE1 STRVAL {CHECK(set_phase1(*$2)); delete $2;}
+	| PHASE2 STRVAL {CHECK(set_phase2(*$2)); delete $2;}
+	| CA_CERT2 STRVAL {CHECK(set_ca_cert2(*$2)); delete $2;}
+	| CA_PATH2 STRVAL {CHECK(set_ca_path2(*$2)); delete $2;}
+	| CLIENT_CERT2 STRVAL {CHECK(set_client_cert2(*$2)); delete $2;}
+	| PRIVATE_KEY2 STRVAL {CHECK(set_private_key2(*$2)); delete $2;}
+	| PRIVATE_KEY2_PASSWD STRVAL {CHECK(set_private_key2(*$2)); delete $2;}
+	| DH_FILE2 STRVAL {CHECK(set_dh_file2(*$2)); delete $2;}
+	| SUBJECT_MATCH2 STRVAL {CHECK(set_subject_match2(*$2)); delete $2;}
+	| ALTSUBJECT_MATCH2 STRVAL {CHECK(set_altsubject_match2(*$2)); delete $2;}
+	| FRAGMENT_SIZE INTEGER {CHECK(set_fragment_size($2));}
+	| EAPPSK VALUE {CHECK(set_eappsk(*$2)); delete $2;}
+	| NAI STRVAL {CHECK(set_nai(*$2)); delete $2;}
+	| PAC_FILE STRVAL {CHECK(set_pac_file(*$2)); delete $2;}
 ;
 
 %%
