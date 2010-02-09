@@ -17,7 +17,7 @@ CNetworkConfig::CNetworkConfig() {
 	auth_alg = AUTHALG_UNDEFINED; 
 	pairwise = PCI_UNDEFINED; 
 	group = GCI_UNDEFINED; 
-	QString psk = QString(); 
+	psk = QString(); 
 	eapol_flags = EAPF_UNDEFINED;
 	mixed_cell = QOOL_UNDEFINED; 
 	proactive_key_caching = QOOL_UNDEFINED; 
@@ -243,9 +243,11 @@ void CNetworkConfig::writeTo(QTextStream &stream) {
 	stream << QString("}\n");
 }
 
+#define QUOTED(a) '\"' + a + '\"'
+
 //parser stuff
-bool CNetworkConfig::set_ssid(QString str) {
-	ssid = str;
+bool CNetworkConfig::set_ssid(QString str, bool addQuotes) {
+	ssid = addQuotes ? QUOTED(str) : str;
 	return true;
 }
 bool CNetworkConfig::set_bssid(libnutcommon::MacAddress addrr) {
@@ -303,8 +305,8 @@ bool CNetworkConfig::set_group(QString g) {
 	group = toGroupCiphers(g);
 	return true;
 }
-bool CNetworkConfig::set_psk(QString p) {
-	psk = p;
+bool CNetworkConfig::set_psk(QString str, bool addQuotes) {
+	psk = addQuotes ? QUOTED(str) : str;
 	return true;
 }
 bool CNetworkConfig::set_eapol_flags(QString e) {
@@ -319,20 +321,20 @@ bool CNetworkConfig::set_proactive_key_caching(bool enabled) {
 	proactive_key_caching = toQOOL(enabled);
 	return true;
 }
-bool CNetworkConfig::set_wep_key0(QString key) {
-	wep_key0 = key;
+bool CNetworkConfig::set_wep_key0(QString str, bool addQuotes) {
+	wep_key0 = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_wep_key1(QString key) {
-	wep_key1 = key;
+bool CNetworkConfig::set_wep_key1(QString str, bool addQuotes) {
+	wep_key1 = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_wep_key2(QString key) {
-	wep_key2 = key;
+bool CNetworkConfig::set_wep_key2(QString str, bool addQuotes) {
+	wep_key2 = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_wep_key3(QString key) {
-	wep_key3 = key;
+bool CNetworkConfig::set_wep_key3(QString str, bool addQuotes) {
+	wep_key3 = addQuotes ? QUOTED(str) : str;
 	return true;
 }
 bool CNetworkConfig::set_wep_tx_keyidx(int idx) {
@@ -350,88 +352,88 @@ bool CNetworkConfig::set_eap(QString str) {
 	eap = toEapMethod(str);
 	return true;
 }
-bool CNetworkConfig::set_identity(QString str) {
-	identity = str;
+bool CNetworkConfig::set_identity(QString str, bool addQuotes) {
+	identity = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_anonymous_identity(QString str) {
-	anonymous_identity = str;
+bool CNetworkConfig::set_anonymous_identity(QString str, bool addQuotes) {
+	anonymous_identity = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_password(QString str) {
-	password = str;
+bool CNetworkConfig::set_password(QString str, bool addQuotes) {
+	password = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_ca_cert(QString str) {
-	ca_cert = str;
+bool CNetworkConfig::set_ca_cert(QString str, bool addQuotes) {
+	ca_cert = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_ca_path(QString str) {
-	ca_path = str;
+bool CNetworkConfig::set_ca_path(QString str, bool addQuotes) {
+	ca_path = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_client_cert(QString str) {
-	client_cert = str;
+bool CNetworkConfig::set_client_cert(QString str, bool addQuotes) {
+	client_cert = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_private_key(QString str) {
-	private_key = str;
+bool CNetworkConfig::set_private_key(QString str, bool addQuotes) {
+	private_key = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_private_key_passwd(QString str) {
-	private_key_passwd = str;
+bool CNetworkConfig::set_private_key_passwd(QString str, bool addQuotes) {
+	private_key_passwd = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_dh_file(QString str) {
-	dh_file = str;
+bool CNetworkConfig::set_dh_file(QString str, bool addQuotes) {
+	dh_file = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_subject_match(QString str) {
-	subject_match = str;
+bool CNetworkConfig::set_subject_match(QString str, bool addQuotes) {
+	subject_match = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_altsubject_match(QString str) {
-	altsubject_match = str;
+bool CNetworkConfig::set_altsubject_match(QString str, bool addQuotes) {
+	altsubject_match = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_phase1(QString str) {
-	phase1 = str;
+bool CNetworkConfig::set_phase1(QString str, bool addQuotes) {
+	phase1 = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_phase2(QString str) {
-	phase2 = str;
+bool CNetworkConfig::set_phase2(QString str, bool addQuotes) {
+	phase2 = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_ca_cert2(QString str) {
-	ca_cert2 = str;
+bool CNetworkConfig::set_ca_cert2(QString str, bool addQuotes) {
+	ca_cert2 = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_ca_path2(QString str) {
-	ca_path2 = str;
+bool CNetworkConfig::set_ca_path2(QString str, bool addQuotes) {
+	ca_path2 = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_client_cert2(QString str) {
-	client_cert2 = str;
+bool CNetworkConfig::set_client_cert2(QString str, bool addQuotes) {
+	client_cert2 = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_private_key2(QString str) {
-	private_key2 = str;
+bool CNetworkConfig::set_private_key2(QString str, bool addQuotes) {
+	private_key2 = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_private_key2_passwd(QString str) {
-	private_key2_passwd = str;
+bool CNetworkConfig::set_private_key2_passwd(QString str, bool addQuotes) {
+	private_key2_passwd = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_dh_file2(QString str) {
-	dh_file2 = str;
+bool CNetworkConfig::set_dh_file2(QString str, bool addQuotes) {
+	dh_file2 = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_subject_match2(QString str) {
-	subject_match2 = str;
+bool CNetworkConfig::set_subject_match2(QString str, bool addQuotes) {
+	subject_match2 = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_altsubject_match2(QString str) {
-	altsubject_match2 = str;
+bool CNetworkConfig::set_altsubject_match2(QString str, bool addQuotes) {
+	altsubject_match2 = addQuotes ? QUOTED(str) : str;
 	return true;
 }
 bool CNetworkConfig::set_fragment_size(int size) {
@@ -442,12 +444,12 @@ bool CNetworkConfig::set_eappsk(QString str) {
 	eappsk = str;
 	return true;
 }
-bool CNetworkConfig::set_nai(QString str) {
-	nai = str;
+bool CNetworkConfig::set_nai(QString str, bool addQuotes) {
+	nai = addQuotes ? QUOTED(str) : str;
 	return true;
 }
-bool CNetworkConfig::set_pac_file(QString str) {
-	pac_file = str;
+bool CNetworkConfig::set_pac_file(QString str, bool addQuotes) {
+	pac_file = addQuotes ? QUOTED(str) : str;
 	return true;
 }
 

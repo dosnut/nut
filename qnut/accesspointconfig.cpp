@@ -11,12 +11,24 @@
 #include <QMessageBox>
 #include <libnutwireless/wpa_supplicant.h>
 #include "accesspointconfig.h"
-
+#include <QDebug>
 #define FLAG_PREPARE_OUTPUT(a, b, c) if(a & c) b << #c;
 
 namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutwireless;
+	
+	//todo Implement widget for lineedits with hexadecimal digit inputs instead of this ugly implementation
+	inline bool setTextAutoHex(QLineEdit * target, QString text) {
+		if (text[0] == '\"') {
+			target->setText(text.mid(1, text.length()-2));
+			return false;
+		}
+		else {
+			target->setText(text);
+			return true;
+		}
+	}
 	
 	CAccessPointConfig::CAccessPointConfig(CWpaSupplicant * wpa_supplicant, QWidget * parent) : QDialog(parent) {
 		m_Supplicant = wpa_supplicant;
@@ -28,7 +40,9 @@ namespace qnut {
 		m_OldConfig.protocols = PROTO_UNDEFINED;
 		
 		ui.pskLeaveButton->setVisible(false);
-		ui.passwordLeaveButton->setVisible(false);
+		ui.eapPasswordLeaveButton->setVisible(false);
+		ui.keyPasswordLeaveButton->setVisible(false);
+		ui.eapPSKLeaveButton->setVisible(false);
 		ui.wep0LeaveButton->setVisible(false);
 		ui.wep1LeaveButton->setVisible(false);
 		ui.wep2LeaveButton->setVisible(false);
@@ -37,21 +51,63 @@ namespace qnut {
 		QRegExp regexp("[0123456789abcdefABCDEF]*");
 		m_HexValidator = new QRegExpValidator(regexp, this);
 		
-		connect(ui.ssidHexCheck, SIGNAL(toggled(bool)), this, SLOT(convertSSID(bool)));
-		connect(ui.wep0HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertWEPKey0(bool)));
-		connect(ui.wep1HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertWEPKey1(bool)));
-		connect(ui.wep2HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertWEPKey2(bool)));
-		connect(ui.wep3HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertWEPKey3(bool)));
+		m_EAPPhaseButtons = new QButtonGroup(this);
+		m_EAPPhaseButtons->addButton(ui.phase1Radio, 1);
+		m_EAPPhaseButtons->addButton(ui.phase2Radio, 2);
+		connect(m_EAPPhaseButtons, SIGNAL(buttonPressed(int)), this, SLOT(setUiEAPPhase(int)));
+		
+		//prepare maps
+		m_FileEditMapper = new QSignalMapper(this);
+		FileEditStrings newFileEditStrings;
+		connect(m_FileEditMapper, SIGNAL(mapped(QWidget*)), this, SLOT(selectFile(QWidget*)));
+		
+		newFileEditStrings.title = tr("Select Proxy Access Control (PAC) file");
+		newFileEditStrings.filter = tr("Proxy Access Control (PAC) files (%1)").arg("*.pac");
+		m_FileSelectStringMap.insert(ui.pacBrowse, newFileEditStrings);
+		m_FileEditMapper->setMapping(ui.pacBrowse, ui.pacEdit);
+		connect(ui.pacBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
+		
+		newFileEditStrings.title = tr("Select CA certificate file");
+		newFileEditStrings.filter = tr("Certificate files (%1)").arg("*.pem");
+		m_FileSelectStringMap.insert(ui.caFileBrowse, newFileEditStrings);
+		m_FileEditMapper->setMapping(ui.caFileBrowse, ui.caFileEdit);
+		connect(ui.caFileBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
+		
+		newFileEditStrings.title = tr("Select client certificate file");
+		newFileEditStrings.filter = tr("Certificate files (%1)").arg("*.pem");
+		m_FileSelectStringMap.insert(ui.clientFileBrowse, newFileEditStrings);
+		m_FileEditMapper->setMapping(ui.clientFileBrowse, ui.clientFileEdit);
+		connect(ui.clientFileBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
+		
+		newFileEditStrings.title = tr("Select key file");
+		newFileEditStrings.filter = tr("Key files (%1)").arg("*.pem");
+		m_FileSelectStringMap.insert(ui.keyFileBrowse, newFileEditStrings);
+		m_FileEditMapper->setMapping(ui.keyFileBrowse, ui.keyFileEdit);
+		connect(ui.keyFileBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
+		
+		newFileEditStrings.title = tr("Select DH/DSA file");
+		newFileEditStrings.filter = tr("DH/DSA files (%1)").arg("*.pem");
+		m_FileSelectStringMap.insert(ui.dhFileBrowse, newFileEditStrings);
+		m_FileEditMapper->setMapping(ui.dhFileBrowse, ui.dhFileEdit);
+		connect(ui.dhFileBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
+		
+		m_HexEditMap.insert(ui.ssidHexCheck, ui.ssidEdit);
+		m_HexEditMap.insert(ui.wep0HexCheck, ui.wep0Edit);
+		m_HexEditMap.insert(ui.wep1HexCheck, ui.wep1Edit);
+		m_HexEditMap.insert(ui.wep2HexCheck, ui.wep2Edit);
+		m_HexEditMap.insert(ui.wep3HexCheck, ui.wep3Edit);
+		connect(ui.ssidHexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
+		connect(ui.wep0HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
+		connect(ui.wep1HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
+		connect(ui.wep2HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
+		connect(ui.wep3HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
+		
 		connect(ui.pskEdit, SIGNAL(textChanged(QString)), this, SLOT(countPskChars(QString)));
 		connect(ui.showPlainPSKCheck, SIGNAL(toggled(bool)), this, SLOT(togglePlainPSK(bool)));
 		connect(ui.keyManagementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setAuthConfig(int)));
 		connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(verifyConfiguration()));
-		connect(ui.caBrowse, SIGNAL(clicked()), this, SLOT(selectCAFile()));
-		connect(ui.clientBrowse, SIGNAL(clicked()), this, SLOT(selectClientFile()));
-		connect(ui.keyBrowse, SIGNAL(clicked()), this, SLOT(selectKeyFile()));
 		
 		connect(ui.rsnCheck, SIGNAL(toggled(bool)), this, SLOT(setWEPDisabled(bool)));
-		connect(ui.grpCipCombo, SIGNAL(currentIndexChanged(QString)), this, SLOT(setEncConfig(QString)));
 		setAuthConfig(0);
 	}
 	
@@ -60,38 +116,28 @@ namespace qnut {
 	}
 	
 	void CAccessPointConfig::setAuthConfig(int type) {
-		ui.grpCipCombo->clear();
-		ui.grpCipCombo->addItem("none");
+		ui.confTabs->setTabEnabled(4, type == 2);
+		ui.confTabs->setTabEnabled(3, type == 2);
+		ui.confTabs->setTabEnabled(2, type == 1);
 		
-		ui.confTabs->setTabEnabled(2, type == 2);
-		ui.confTabs->setTabEnabled(1, type == 1);
-		
-		ui.prwCipCombo->setEnabled(type > 0);
+		ui.prwCipGroup->setEnabled(type > 0);
 		ui.rsnCheck->setEnabled(type > 0);
 		
-		if (type > 0) {
-			m_WEPEnabled = !ui.rsnCheck->isChecked();
-			if (m_WEPEnabled)
-				ui.grpCipCombo->addItem("WEP");
-			ui.grpCipCombo->addItem("TKIP");
-			ui.grpCipCombo->addItem("CCMP");
-		}
-		else {
-			m_WEPEnabled = true;
-			ui.grpCipCombo->addItem("WEP");
-		}
-	}
-	
-	void CAccessPointConfig::setEncConfig(QString value) {
-		ui.confTabs->setTabEnabled(3, value == "WEP");
+		m_WEPEnabled = (type == 0) || (!ui.rsnCheck->isChecked());
+		
+		ui.grpCipTKIPCheck->setEnabled(type > 0);
+		ui.grpCipCCMPCheck->setEnabled(type > 0);
+		ui.grpCipWEP40Check->setEnabled(m_WEPEnabled);
+		ui.grpCipWEP104Check->setEnabled(m_WEPEnabled);
+		
+		ui.confTabs->setTabEnabled(1, m_WEPEnabled);
 	}
 	
 	void CAccessPointConfig::setWEPDisabled(bool value) {
 		m_WEPEnabled = not value;
-		if (value)
-			ui.grpCipCombo->removeItem(1);
-		else
-			ui.grpCipCombo->insertItem(1, "WEP");
+		ui.grpCipWEP40Check->setEnabled(m_WEPEnabled);
+		ui.grpCipWEP104Check->setEnabled(m_WEPEnabled);
+		ui.confTabs->setTabEnabled(1, m_WEPEnabled);
 	}
 	
 	bool CAccessPointConfig::execute() {
@@ -114,33 +160,13 @@ namespace qnut {
 		if (ui.rsnCheck->isEnabled())
 			ui.rsnCheck->setChecked(scanResult.protocols & PROTO_RSN);
 		
-		if (scanResult.pairwise & PCI_CCMP)
-			ui.prwCipCombo->setCurrentIndex(2);
-		else if (scanResult.pairwise & PCI_TKIP)
-			ui.prwCipCombo->setCurrentIndex(1);
-		else
-			ui.prwCipCombo->setCurrentIndex(0);
+		ui.prwCipCCMPCheck->setChecked(scanResult.pairwise & PCI_CCMP);
+		ui.prwCipTKIPCheck->setChecked(scanResult.pairwise & PCI_TKIP);
 		
-		if (m_WEPEnabled) {
-			if (ui.keyManagementCombo->currentIndex())  {
-				if (scanResult.group & GCI_CCMP)
-					ui.grpCipCombo->setCurrentIndex(3);
-				else if (scanResult.group & GCI_TKIP)
-					ui.grpCipCombo->setCurrentIndex(2);
-			}
-			else if (!(scanResult.keyManagement & KM_OFF) && ((scanResult.group & GCI_WEP104) || (scanResult.group & GCI_WEP40)))
-				ui.grpCipCombo->setCurrentIndex(1);
-			else
-				ui.grpCipCombo->setCurrentIndex(0);
-		}
-		else {
-			if (scanResult.group & GCI_CCMP)
-				ui.grpCipCombo->setCurrentIndex(2);
-			else if (scanResult.group & GCI_TKIP)
-				ui.grpCipCombo->setCurrentIndex(1);
-			else
-				ui.grpCipCombo->setCurrentIndex(0);
-		}
+		ui.grpCipWEP40Check->setChecked(scanResult.group & GCI_WEP40);
+		ui.grpCipWEP104Check->setChecked(scanResult.group & GCI_WEP104);
+		ui.grpCipTKIPCheck->setChecked(scanResult.group & GCI_TKIP);
+		ui.grpCipCCMPCheck->setChecked(scanResult.group & GCI_CCMP);
 		
 		m_CurrentID = -1;
 		
@@ -148,90 +174,62 @@ namespace qnut {
 	}
 	
 	bool CAccessPointConfig::execute(int id) {
-		CNetworkConfig config = m_Supplicant->getNetworkConfig(id);
+		m_Config = m_Supplicant->getNetworkConfig(id);
 		
-		m_OldConfig.pairwise = config.get_pairwise();
-		m_OldConfig.group = config.get_group();
-		m_OldConfig.protocols = config.get_protocols();
+		m_OldConfig.pairwise = m_Config.get_pairwise();
+		m_OldConfig.group = m_Config.get_group();
+		m_OldConfig.protocols = m_Config.get_protocols();
 		
-		if (config.get_ssid()[0] == '\"') {
-			ui.ssidHexCheck->setChecked(false);
-			ui.ssidEdit->setText(config.get_ssid().mid(1, config.get_ssid().length()-2));
-		}
-		else {
-			ui.ssidHexCheck->setChecked(true);
-			ui.ssidEdit->setText(config.get_ssid());
-		}
+		ui.ssidHexCheck->setChecked(setTextAutoHex(ui.ssidEdit, m_Config.get_ssid()));
 		
-		ui.anyBSSIDCheck->setChecked(config.get_bssid().zero());
-		ui.bssidEdit->setText(config.get_bssid().toString());
+		ui.anyBSSIDCheck->setChecked(m_Config.get_bssid().zero());
+		if (!m_Config.get_bssid().zero())
+			ui.bssidEdit->setText(m_Config.get_bssid().toString());
 		
-		if ((config.get_key_mgmt() & KM_WPA_EAP) || (config.get_key_mgmt() & KM_IEEE8021X)) {
+		if ((m_Config.get_key_mgmt() & KM_WPA_EAP) || (m_Config.get_key_mgmt() & KM_IEEE8021X)) {
 			ui.keyManagementCombo->setCurrentIndex(2);
-			readEAPConfig(config);
-			ui.passwordLeaveButton->setVisible(true);
-			ui.passwordLeaveButton->setChecked(true);
-			ui.rsnCheck->setChecked(config.get_protocols() & PROTO_RSN);
+			readEAPConfig(m_Config);
+			ui.rsnCheck->setChecked(m_Config.get_protocols() & PROTO_RSN);
 		}
-		else if (config.get_key_mgmt() & KM_WPA_PSK) {
+		else if (m_Config.get_key_mgmt() & KM_WPA_PSK) {
 			ui.keyManagementCombo->setCurrentIndex(1);
 			ui.pskLeaveButton->setVisible(true);
 			ui.pskLeaveButton->setChecked(true);
-			ui.rsnCheck->setChecked(config.get_protocols() & PROTO_RSN);
+			ui.rsnCheck->setChecked(m_Config.get_protocols() & PROTO_RSN);
 		}
 		else
 			ui.keyManagementCombo->setCurrentIndex(0);
 		
-//		ui.rsnCheck->setChecked(config.protocols & PROTO_RSN);
+		ui.prwCipGroup->setChecked(!(m_Config.get_pairwise() & PCI_NONE));
+		ui.prwCipCCMPCheck->setChecked(m_Config.get_pairwise() & PCI_CCMP);
+		ui.prwCipTKIPCheck->setChecked(m_Config.get_pairwise() & PCI_TKIP);
 		
-		if (config.get_pairwise() & PCI_CCMP)
-			ui.prwCipCombo->setCurrentIndex(2);
-		else if (config.get_pairwise() & PCI_TKIP)
-			ui.prwCipCombo->setCurrentIndex(1);
-		else
-			ui.prwCipCombo->setCurrentIndex(0);
+		ui.grpCipGroup->setChecked(!(m_Config.get_group() & GCI_NONE));
+		ui.grpCipWEP40Check->setChecked(m_Config.get_group() & GCI_WEP40);
+		ui.grpCipWEP104Check->setChecked(m_Config.get_group() & GCI_WEP104);
+		ui.grpCipTKIPCheck->setChecked(m_Config.get_group() & GCI_TKIP);
+		ui.grpCipCCMPCheck->setChecked(m_Config.get_group() & GCI_CCMP);
 		
-		if (m_WEPEnabled) {
-			if (ui.keyManagementCombo->currentIndex()) {
-				if (config.get_group() & GCI_CCMP)
-					ui.grpCipCombo->setCurrentIndex(3);
-				else if (config.get_group() & GCI_TKIP)
-					ui.grpCipCombo->setCurrentIndex(2);
-			}
-			else if (!(config.get_key_mgmt() & KM_OFF) && ((config.get_group() & GCI_WEP104) || (config.get_group() & GCI_WEP40)))
-				ui.grpCipCombo->setCurrentIndex(1);
-			else
-				ui.grpCipCombo->setCurrentIndex(0);
-		}
-		else {
-			if (config.get_group() & GCI_CCMP)
-				ui.grpCipCombo->setCurrentIndex(2);
-			else if (config.get_group() & GCI_TKIP)
-				ui.grpCipCombo->setCurrentIndex(1);
-			else
-				ui.grpCipCombo->setCurrentIndex(0);
+		ui.proativeCheck->setChecked(toBool(m_Config.get_proactive_key_caching()));
+		
+		ui.wep0LeaveButton->setVisible(true);
+		ui.wep1LeaveButton->setVisible(true);
+		ui.wep2LeaveButton->setVisible(true);
+		ui.wep3LeaveButton->setVisible(true);
+		ui.wep0LeaveButton->setChecked(true);
+		ui.wep1LeaveButton->setChecked(true);
+		ui.wep2LeaveButton->setChecked(true);
+		ui.wep3LeaveButton->setChecked(true);
+		
+		switch (m_Config.get_wep_tx_keyidx()) {
+		default: ui.wep0Radio->setChecked(true); break;
+		case 1:  ui.wep1Radio->setChecked(true); break;
+		case 2:  ui.wep2Radio->setChecked(true); break;
+		case 3:  ui.wep3Radio->setChecked(true); break;
 		}
 		
-		if (ui.confTabs->isTabEnabled(3)) {
-			ui.wep0LeaveButton->setVisible(true);
-			ui.wep1LeaveButton->setVisible(true);
-			ui.wep2LeaveButton->setVisible(true);
-			ui.wep3LeaveButton->setVisible(true);
-			ui.wep0LeaveButton->setChecked(true);
-			ui.wep1LeaveButton->setChecked(true);
-			ui.wep2LeaveButton->setChecked(true);
-			ui.wep3LeaveButton->setChecked(true);
-			
-			switch (config.get_wep_tx_keyidx()) {
-			default: ui.wep0Radio->setChecked(true); break;
-			case 1:  ui.wep1Radio->setChecked(true); break;
-			case 2:  ui.wep2Radio->setChecked(true); break;
-			case 3:  ui.wep3Radio->setChecked(true); break;
-			}
-		}
-		
-		ui.scanCheck->setChecked(config.get_scan_ssid());
-		ui.autoEnableCheck->setChecked(config.get_disabled());
+		ui.scanCheck->setChecked(m_Config.get_scan_ssid());
+		ui.autoEnableCheck->setChecked(m_Config.get_disabled());
 		
 		m_CurrentID = id;
 		
@@ -240,120 +238,117 @@ namespace qnut {
 	
 	void CAccessPointConfig::verifyConfiguration() {
 		NetconfigStatus status;
-		CNetworkConfig config;
+// 		CNetworkConfig config;
 		
 		if (!ui.ssidEdit->text().isEmpty())
-			config.set_ssid(ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"');
+			m_Config.set_ssid(ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"');
 		
-		config.set_scan_ssid(toQOOL(ui.scanCheck->isChecked()));
-		config.set_disabled(toQOOL(!ui.autoEnableCheck->isChecked()));
+		m_Config.set_scan_ssid(toQOOL(ui.scanCheck->isChecked()));
+		m_Config.set_disabled(toQOOL(!ui.autoEnableCheck->isChecked()));
 		
 		if (ui.anyBSSIDCheck->isChecked())
-			config.set_bssid(MacAddress());
+			m_Config.set_bssid(MacAddress());
 		else
-			config.set_bssid(MacAddress(ui.bssidEdit->text()));
+			m_Config.set_bssid(MacAddress(ui.bssidEdit->text()));
 		
 		if (ui.confTabs->isTabEnabled(3)) {
 			if (!(ui.wep0LeaveButton->isChecked() || ui.wep0Edit->text().isEmpty()))
-				config.set_wep_key0(ui.wep0HexCheck->isChecked() ?
-					ui.wep0Edit->text() :
-					'\"' + ui.wep0Edit->text() + '\"');
+				m_Config.set_wep_key0(ui.wep0Edit->text(), !ui.wep0HexCheck->isChecked());
 			if (!(ui.wep1LeaveButton->isChecked() || ui.wep1Edit->text().isEmpty()))
-				config.set_wep_key1(ui.wep1HexCheck->isChecked() ?
-					ui.wep1Edit->text() :
-					'\"' + ui.wep1Edit->text() + '\"');
+				m_Config.set_wep_key1(ui.wep1Edit->text(), !ui.wep1HexCheck->isChecked());
 			if (!(ui.wep2LeaveButton->isChecked() || ui.wep2Edit->text().isEmpty()))
-				config.set_wep_key2(ui.wep2HexCheck->isChecked() ?
-					ui.wep2Edit->text() :
-					'\"' + ui.wep2Edit->text() + '\"');
+				m_Config.set_wep_key2(ui.wep2Edit->text(), !ui.wep2HexCheck->isChecked());
 			if (!(ui.wep3LeaveButton->isChecked() || ui.wep3Edit->text().isEmpty()))
-				config.set_wep_key3(ui.wep3HexCheck->isChecked() ?
-					ui.wep3Edit->text() :
-					'\"' + ui.wep3Edit->text() + '\"');
+				m_Config.set_wep_key3(ui.wep3Edit->text(), !ui.wep3HexCheck->isChecked());
 			
 			if (ui.wep0Radio->isChecked())
-				config.set_wep_tx_keyidx(0);
+				m_Config.set_wep_tx_keyidx(0);
 			else if (ui.wep1Radio->isChecked())
-				config.set_wep_tx_keyidx(1);
+				m_Config.set_wep_tx_keyidx(1);
 			else if (ui.wep2Radio->isChecked())
-				config.set_wep_tx_keyidx(2);
+				m_Config.set_wep_tx_keyidx(2);
 			else if (ui.wep3Radio->isChecked())
-				config.set_wep_tx_keyidx(3);
+				m_Config.set_wep_tx_keyidx(3);
 		}
 		
-		if (ui.grpCipCombo->currentText() == "TKIP")
-			config.set_group(GCI_TKIP);
-		else if (ui.grpCipCombo->currentText() == "CCMP")
-			config.set_group(GCI_CCMP);
-		else if (ui.grpCipCombo->currentText() == "WEP")
-			config.set_group((GroupCiphers)(GCI_WEP104 | GCI_WEP40));
+		// group ciphers
+		if (ui.grpCipGroup->isChecked()) {
+			m_Config.set_group(GroupCiphers(
+				(ui.grpCipWEP40Check->isChecked() ? GCI_WEP40 : 0) |
+				(ui.grpCipWEP104Check->isChecked() ? GCI_WEP104 : 0) |
+				(ui.grpCipCCMPCheck->isChecked() ? GCI_CCMP : 0) |
+				(ui.grpCipTKIPCheck->isChecked() ? GCI_TKIP : 0))
+			);
+		}
+		else
+			m_Config.set_group(GCI_NONE);
 		
-		if (config.get_group() & m_OldConfig.group) {
-			config.set_group(m_OldConfig.group);
+		if (m_Config.get_group() & m_OldConfig.group) {
+			m_Config.set_group(m_OldConfig.group);
 		}
 		
-		if (ui.prwCipCombo->isEnabled()) {
-			switch (ui.prwCipCombo->currentIndex()) {
-			case 0:
-				config.set_pairwise(PCI_NONE); break;
-			case 1:
-				config.set_pairwise(PCI_TKIP); break;
-			case 2:
-				config.set_pairwise(PCI_CCMP); break;
-			default:
-				break;
-			}
-			
-			if (config.get_pairwise() & m_OldConfig.pairwise) {
-				config.set_pairwise(m_OldConfig.pairwise);
-			}
+		// pairwise ciphers
+		if (ui.prwCipGroup->isChecked()) {
+			m_Config.set_pairwise(PairwiseCiphers(
+				(ui.prwCipCCMPCheck->isChecked() ? PCI_CCMP : 0) |
+				(ui.prwCipTKIPCheck->isChecked() ? PCI_TKIP : 0))
+			);
 		}
+		else
+			m_Config.set_pairwise(PCI_NONE);
+		
+		if (m_Config.get_pairwise() & m_OldConfig.pairwise) {
+			m_Config.set_pairwise(m_OldConfig.pairwise);
+		}
+		
 		
 		switch (ui.keyManagementCombo->currentIndex()) {
 		case 0:
-			config.set_key_mgmt(KM_NONE);
+			m_Config.set_key_mgmt(KM_NONE);
 			break;
 		case 1:
-			config.set_key_mgmt(KM_WPA_PSK);
+			m_Config.set_key_mgmt(KM_WPA_PSK);
 			
 			if (ui.rsnCheck->isChecked())
-				config.set_proto(PROTO_RSN);
+				m_Config.set_proto(PROTO_RSN);
 			else
-				config.set_proto(PROTO_WPA);
+				m_Config.set_proto(PROTO_WPA);
 			
-			if (config.get_protocols() & m_OldConfig.protocols) {
-				config.set_proto(m_OldConfig.protocols);
+			if (m_Config.get_protocols() & m_OldConfig.protocols) {
+				m_Config.set_proto(m_OldConfig.protocols);
 			}
 			
 			if (!(ui.pskLeaveButton->isChecked() || ui.pskEdit->text().isEmpty()))
-				config.set_psk('\"' + ui.pskEdit->text() + '\"');
+				m_Config.set_psk('\"' + ui.pskEdit->text() + '\"');
 			
 			break;
 		case 2:
-			if (ui.grpCipCombo->currentText() == "WEP")
-				config.set_key_mgmt(KM_IEEE8021X);
+			if (m_Config.get_group() & (GCI_WEP40 | GCI_WEP104))
+				m_Config.set_key_mgmt(KM_IEEE8021X);
 			else
-				config.set_key_mgmt(KM_WPA_EAP);
+				m_Config.set_key_mgmt(KM_WPA_EAP);
 			
 			if (ui.rsnCheck->isChecked())
-				config.set_proto(PROTO_RSN);
+				m_Config.set_proto(PROTO_RSN);
 			else
-				config.set_proto(PROTO_WPA);
+				m_Config.set_proto(PROTO_WPA);
 			
-			if (config.get_protocols() & m_OldConfig.protocols) {
-				config.set_proto(m_OldConfig.protocols);
+			if (m_Config.get_protocols() & m_OldConfig.protocols) {
+				m_Config.set_proto(m_OldConfig.protocols);
 			}
 			
-			writeEAPConfig(config);
+			writeEAPConfig(m_Config);
 			break;
 		default:
 			break;
 		}
 		
-		if (m_CurrentID > -1)
-			status = m_Supplicant->editNetwork(m_CurrentID, config);
+		m_Config.set_proactive_key_caching(ui.proativeCheck->isChecked());
+		
+		if (m_CurrentID == -1)
+			status = m_Supplicant->addNetwork(m_Config);
 		else
-			status = m_Supplicant->addNetwork(config);
+			status = m_Supplicant->editNetwork(m_CurrentID, m_Config);
 		
 		QStringList errormsg;
 		
@@ -425,57 +420,147 @@ namespace qnut {
 		accept();
 	}
 	
-	inline void CAccessPointConfig::writeEAPConfig(CNetworkConfig &eap_config) {
-		switch (ui.eapCombo->currentIndex()) {
-		case 0: eap_config.set_eap(EAPM_MD5); break;
-		case 1: eap_config.set_eap(EAPM_TLS); break;
-		case 2: eap_config.set_eap(EAPM_MSCHAPV2); break;
-		case 3: eap_config.set_eap(EAPM_PEAP); break;
-		case 4: eap_config.set_eap(EAPM_TTLS); break;
-		case 5: eap_config.set_eap(EAPM_GTC); break;
-		case 6: eap_config.set_eap(EAPM_OTP); break;
-		case 7: eap_config.set_eap(EAPM_LEAP); break;
-		default: break;
+	inline void CAccessPointConfig::writeEAPPhaseConfig(CNetworkConfig & eap_config, int phase) {
+		if (phase == 2) {
+			eap_config.set_phase2           (ui.phaseParamEdit->text(), true);
+			eap_config.set_dh_file2         (ui.dhFileEdit->text(), true);
+			eap_config.set_ca_cert2         (ui.caFileEdit->text(), true);
+			eap_config.set_client_cert2     (ui.clientFileEdit->text(), true);
+			eap_config.set_private_key2     (ui.keyFileEdit->text(), true);
+			eap_config.set_subject_match2   (ui.subjectMatchEdit->text(), true);
+			eap_config.set_altsubject_match2(ui.altSubjectMatchEdit->text(), true);
+			
+			if (!ui.keyPasswordLeaveButton->isChecked())
+				eap_config.set_private_key2_passwd(ui.keyPasswordEdit->text(), true);
 		}
-		eap_config.set_identity('\"' + ui.identificationEdit->text() + '\"');
-		eap_config.set_ca_cert('\"' + ui.caEdit->text() + '\"');
-		eap_config.set_client_cert('\"' + ui.clientEdit->text() + '\"');
-		eap_config.set_private_key('\"' + ui.keyFileEdit->text() + '\"');
-		
-		if (!ui.passwordLeaveButton->isChecked())
-			eap_config.set_private_key_passwd('\"' + ui.passwordEdit->text() + '\"');
+		else {
+			eap_config.set_phase1          (ui.phaseParamEdit->text(), true);
+			eap_config.set_dh_file         (ui.dhFileEdit->text(), true);
+			eap_config.set_ca_cert         (ui.caFileEdit->text(), true);
+			eap_config.set_client_cert     (ui.clientFileEdit->text(), true);
+			eap_config.set_private_key     (ui.keyFileEdit->text(), true);
+			eap_config.set_subject_match   (ui.subjectMatchEdit->text(), true);
+			eap_config.set_altsubject_match(ui.altSubjectMatchEdit->text(), true);
+			
+			if (!ui.keyPasswordLeaveButton->isChecked())
+				eap_config.set_private_key_passwd(ui.keyPasswordEdit->text(), true);
+		}
 	}
 	
-	inline QString CAccessPointConfig::convertQuoted(QString text) {
-		if (text[0] == '\"')
-			return text.mid(1, text.length()-2);
-		else
-			return text;
+	inline void CAccessPointConfig::writeEAPConfig(CNetworkConfig & eap_config) {
+		ui.eapMethodAKACheck->setChecked     (eap_config.get_eap() & EAPM_AKA);
+		ui.eapMethodFASTCheck->setChecked    (eap_config.get_eap() & EAPM_FAST);
+		ui.eapMethodGPSKCheck->setChecked    (eap_config.get_eap() & EAPM_GPSK);
+		ui.eapMethodGTCCheck->setChecked     (eap_config.get_eap() & EAPM_GTC);
+		
+		ui.eapMethodLEAPCheck->setChecked    (eap_config.get_eap() & EAPM_LEAP);
+		ui.eapMethodMD5Check->setChecked     (eap_config.get_eap() & EAPM_MD5);
+		ui.eapMethodMSCHAPV2Check->setChecked(eap_config.get_eap() & EAPM_MSCHAPV2);
+		ui.eapMethodOTPCheck->setChecked     (eap_config.get_eap() & EAPM_OTP);
+		
+		ui.eapMethodPAXCheck->setChecked     (eap_config.get_eap() & EAPM_PAX);
+		ui.eapMethodPEAPCheck->setChecked    (eap_config.get_eap() & EAPM_PEAP);
+		ui.eapMethodPSKCheck->setChecked     (eap_config.get_eap() & EAPM_PSK);
+		ui.eapMethodSAKECheck->setChecked    (eap_config.get_eap() & EAPM_SAKE);
+		
+		ui.eapMethodTLSCheck->setChecked     (eap_config.get_eap() & EAPM_TLS);
+		ui.eapMethodTTLSCheck->setChecked    (eap_config.get_eap() & EAPM_TTLS);
+		
+		eap_config.set_eap(EapMethod(
+			(ui.eapMethodAKACheck->isChecked() ? EAPM_AKA : 0) |
+			(ui.eapMethodFASTCheck->isChecked() ? EAPM_FAST : 0) |
+			(ui.eapMethodGPSKCheck->isChecked() ? EAPM_GPSK : 0) |
+			(ui.eapMethodGTCCheck->isChecked() ? EAPM_GTC : 0) |
+			
+			(ui.eapMethodLEAPCheck->isChecked() ? EAPM_LEAP : 0) |
+			(ui.eapMethodMD5Check->isChecked() ? EAPM_MD5 : 0) |
+			(ui.eapMethodMSCHAPV2Check->isChecked() ? EAPM_MSCHAPV2 : 0) |
+			(ui.eapMethodOTPCheck->isChecked() ? EAPM_OTP : 0) |
+			
+			(ui.eapMethodPAXCheck->isChecked() ? EAPM_PAX : 0) |
+			(ui.eapMethodPEAPCheck->isChecked() ? EAPM_PEAP : 0) |
+			(ui.eapMethodPSKCheck->isChecked() ? EAPM_PSK : 0) |
+			(ui.eapMethodSAKECheck->isChecked() ? EAPM_SAKE : 0) |
+			
+			(ui.eapMethodTLSCheck->isChecked() ? EAPM_TLS : 0) |
+			(ui.eapMethodTTLSCheck->isChecked() ? EAPM_TTLS : 0)
+		));
+		
+		eap_config.set_identity(ui.identiyEdit->text(), true);
+		eap_config.set_anonymous_identity(ui.anonymousIdentityEdit->text(), true);
+		if (!ui.eapPasswordLeaveButton->isChecked())
+			eap_config.set_password(ui.eapPasswordEdit->text(), true);
+		
+		eap_config.set_fragment_size(ui.fragmentSpin->value());
+		
+		eap_config.set_nai(ui.naiEdit->text(), false);
+		eap_config.set_pac_file(ui.pacEdit->text(), false);
+		
+		writeEAPPhaseConfig(eap_config, ui.phase1Radio->isChecked() ? 1 : 2);
 	}
 	
-	inline void CAccessPointConfig::readEAPConfig(CNetworkConfig &eap_config) {
-		if (eap_config.get_eap() & EAPM_LEAP)
-			ui.eapCombo->setCurrentIndex(7);
-		else if (eap_config.get_eap() & EAPM_OTP)
-			ui.eapCombo->setCurrentIndex(6);
-		else if (eap_config.get_eap() & EAPM_GTC)
-			ui.eapCombo->setCurrentIndex(5);
-		else if (eap_config.get_eap() & EAPM_TTLS)
-			ui.eapCombo->setCurrentIndex(4);
-		else if (eap_config.get_eap() & EAPM_PEAP)
-			ui.eapCombo->setCurrentIndex(3);
-		else if (eap_config.get_eap() & EAPM_MSCHAPV2)
-			ui.eapCombo->setCurrentIndex(2);
-		else if (eap_config.get_eap() & EAPM_TLS)
-			ui.eapCombo->setCurrentIndex(1);
-		else
-			ui.eapCombo->setCurrentIndex(0);
+	inline void CAccessPointConfig::readEAPPhaseConfig(CNetworkConfig & eap_config, int phase) {
+		if (phase == 2) {
+			setTextAutoHex(ui.phaseParamEdit,      eap_config.get_phase2());
+			setTextAutoHex(ui.dhFileEdit,          eap_config.get_dh_file2());
+			setTextAutoHex(ui.caFileEdit,          eap_config.get_ca_cert2());
+			setTextAutoHex(ui.clientFileEdit,      eap_config.get_client_cert2());
+			setTextAutoHex(ui.keyFileEdit,         eap_config.get_private_key2());
+			setTextAutoHex(ui.subjectMatchEdit,    eap_config.get_subject_match2());
+			setTextAutoHex(ui.altSubjectMatchEdit, eap_config.get_altsubject_match2());
+			
+			ui.keyPasswordLeaveButton->setVisible(eap_config.get_private_key2_passwd().isEmpty());
+			ui.keyPasswordLeaveButton->setChecked(ui.keyPasswordLeaveButton->isVisible());
+			setTextAutoHex(ui.keyPasswordEdit, eap_config.get_private_key2_passwd());
+		}
+		else {
+			setTextAutoHex(ui.phaseParamEdit,      eap_config.get_phase1());
+			setTextAutoHex(ui.dhFileEdit,          eap_config.get_dh_file());
+			setTextAutoHex(ui.caFileEdit,          eap_config.get_ca_cert());
+			setTextAutoHex(ui.clientFileEdit,      eap_config.get_client_cert());
+			setTextAutoHex(ui.keyFileEdit,         eap_config.get_private_key());
+			setTextAutoHex(ui.subjectMatchEdit,    eap_config.get_subject_match());
+			setTextAutoHex(ui.altSubjectMatchEdit, eap_config.get_altsubject_match());
+			
+			ui.keyPasswordLeaveButton->setVisible(eap_config.get_private_key_passwd().isEmpty());
+			ui.keyPasswordLeaveButton->setChecked(ui.keyPasswordLeaveButton->isVisible());
+			setTextAutoHex(ui.keyPasswordEdit, eap_config.get_private_key_passwd());
+		}
+	}
+	
+	inline void CAccessPointConfig::readEAPConfig(CNetworkConfig & eap_config) {
+		ui.eapMethodAKACheck->setChecked     (eap_config.get_eap() & EAPM_AKA);
+		ui.eapMethodFASTCheck->setChecked    (eap_config.get_eap() & EAPM_FAST);
+		ui.eapMethodGPSKCheck->setChecked    (eap_config.get_eap() & EAPM_GPSK);
+		ui.eapMethodGTCCheck->setChecked     (eap_config.get_eap() & EAPM_GTC);
+		ui.eapMethodLEAPCheck->setChecked    (eap_config.get_eap() & EAPM_LEAP);
+		ui.eapMethodMD5Check->setChecked     (eap_config.get_eap() & EAPM_MD5);
+		ui.eapMethodMSCHAPV2Check->setChecked(eap_config.get_eap() & EAPM_MSCHAPV2);
+		ui.eapMethodOTPCheck->setChecked     (eap_config.get_eap() & EAPM_OTP);
+		ui.eapMethodPAXCheck->setChecked     (eap_config.get_eap() & EAPM_PAX);
+		ui.eapMethodPEAPCheck->setChecked    (eap_config.get_eap() & EAPM_PEAP);
+		ui.eapMethodPSKCheck->setChecked     (eap_config.get_eap() & EAPM_PSK);
+		ui.eapMethodSAKECheck->setChecked    (eap_config.get_eap() & EAPM_SAKE);
+		ui.eapMethodTLSCheck->setChecked     (eap_config.get_eap() & EAPM_TLS);
+		ui.eapMethodTTLSCheck->setChecked    (eap_config.get_eap() & EAPM_TTLS);
 		
-		ui.identificationEdit->setText(convertQuoted(eap_config.get_identity()));
-		ui.caEdit->setText(convertQuoted(eap_config.get_ca_cert()));
-		ui.clientEdit->setText(convertQuoted(eap_config.get_client_cert()));
-		ui.keyFileEdit->setText(convertQuoted(eap_config.get_private_key()));
-		ui.passwordEdit->setText("");
+		setTextAutoHex(ui.identiyEdit, eap_config.get_identity());
+		setTextAutoHex(ui.anonymousIdentityEdit, eap_config.get_anonymous_identity());
+		
+		ui.eapPasswordLeaveButton->setVisible(eap_config.get_password().isEmpty());
+		ui.eapPasswordLeaveButton->setChecked(ui.eapPasswordLeaveButton->isVisible());
+		setTextAutoHex(ui.eapPasswordEdit, eap_config.get_password());
+		
+		ui.eapPSKLeaveButton->setVisible(eap_config.get_eappsk().isEmpty());
+		ui.eapPSKLeaveButton->setChecked(ui.eapPSKLeaveButton->isVisible());
+		setTextAutoHex(ui.eapPSKEdit, eap_config.get_eappsk());
+		
+		ui.fragmentSpin->setValue(eap_config.get_fragment_size());
+		
+		setTextAutoHex(ui.naiEdit, eap_config.get_nai());
+		setTextAutoHex(ui.pacEdit, eap_config.get_pac_file());
+		
+		readEAPPhaseConfig(eap_config, ui.phase1Radio->isChecked() ? 1 : 2);
 	}
 	
 	inline void CAccessPointConfig::convertLineEditText(QLineEdit * lineEdit, bool hex) {
@@ -485,7 +570,7 @@ namespace qnut {
 		}
 		else {
 			lineEdit->setText(QByteArray::fromHex(lineEdit->text().toAscii()));
-			lineEdit->setValidator(0);
+			lineEdit->setValidator(NULL);
 		}
 	}
 	
@@ -500,41 +585,36 @@ namespace qnut {
 			ui.pskEdit->setEchoMode(QLineEdit::Password);
 	}
 	
-	void CAccessPointConfig::convertSSID(bool hex) {
-		convertLineEditText(ui.ssidEdit, hex);
+	void CAccessPointConfig::convertLineEditText(bool hex) {
+		QCheckBox * hexCheck = qobject_cast<QCheckBox *>(sender());
+		if (hexCheck/* && m_HexEditMap.contains(hexCheck)*/)
+			convertLineEditText(m_HexEditMap[hexCheck], hex);
 	}
 	
-	void CAccessPointConfig::convertWEPKey0(bool hex) {
-		convertLineEditText(ui.wep0Edit, hex);
+	void CAccessPointConfig::selectFile(QWidget * reciever) {
+		QLineEdit * lineEdit = qobject_cast<QLineEdit *>(reciever);
+		FileEditStrings strings = m_FileSelectStringMap[reciever];
+		lineEdit->setText(QFileDialog::getOpenFileName(this, strings.title, "/", strings.filter));
 	}
 	
-	void CAccessPointConfig::convertWEPKey1(bool hex) {
-		convertLineEditText(ui.wep1Edit, hex);
+	void CAccessPointConfig::setUiEAPPhase(int phase) {
+		writeEAPPhaseConfig(m_Config, phase == 1 ? 2 : 1);
+		readEAPPhaseConfig(m_Config, phase);
 	}
-	
-	void CAccessPointConfig::convertWEPKey2(bool hex) {
-		convertLineEditText(ui.wep2Edit, hex);
-	}
-	
-	void CAccessPointConfig::convertWEPKey3(bool hex) {
-		convertLineEditText(ui.wep3Edit, hex);
-	}
-	
-	void CAccessPointConfig::selectCAFile() {
-/*		QFileDialog dialog(this);
-		dialog.setFileMode(QFileDialog::ExistingFile);*/
-		ui.caEdit->setText(QFileDialog::getOpenFileName(this,
-			tr("Select CA certificate file"), "/", tr("Certificate files (%1)").arg("*.pem")));
-	}
-	
-	void CAccessPointConfig::selectClientFile() {
-		ui.clientEdit->setText(QFileDialog::getOpenFileName(this,
-			tr("Select client certificate file"), "/", tr("Certificate files (%1)").arg("*.pem")));
-	}
-	
-	void CAccessPointConfig::selectKeyFile() {
-		ui.keyFileEdit->setText(QFileDialog::getOpenFileName(this,
-			tr("Select key file"), "/", tr("Key files (%1)").arg("*.pem")));
-	}
+// 	
+// 	void CAccessPointConfig::selectCAFile() {
+// 		ui.caEdit->setText(QFileDialog::getOpenFileName(this,
+// 			tr("Select CA certificate file"), "/", tr("Certificate files (%1)").arg("*.pem")));
+// 	}
+// 	
+// 	void CAccessPointConfig::selectClientFile() {
+// 		ui.clientEdit->setText(QFileDialog::getOpenFileName(this,
+// 			tr("Select client certificate file"), "/", tr("Certificate files (%1)").arg("*.pem")));
+// 	}
+// 	
+// 	void CAccessPointConfig::selectKeyFile() {
+// 		ui.keyFileEdit->setText(QFileDialog::getOpenFileName(this,
+// 			tr("Select key file"), "/", tr("Key files (%1)").arg("*.pem")));
+// 	}
 }
 #endif

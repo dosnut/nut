@@ -11,7 +11,8 @@
 #ifndef QNUT_NO_WIRELESS
 #include <QDialog>
 #include <libnutwireless/cnetworkconfig.h>
-#include "ui_apconf.h"
+#include <QSignalMapper>
+#include "ui_apconfexp.h"
 
 namespace libnutwireless {
 	class CWpaSupplicant;
@@ -38,16 +39,29 @@ namespace qnut {
 		int m_CurrentID;
 		bool m_WEPEnabled;
 		
+		libnutwireless::CNetworkConfig m_Config;
+		
 		struct {
 			libnutwireless::GroupCiphers group;
 			libnutwireless::PairwiseCiphers pairwise;
 			libnutwireless::Protocols protocols;
 		} m_OldConfig;
 		
+		struct FileEditStrings {
+			QString title;
+			QString filter;
+		};
+		
+		QButtonGroup * m_EAPPhaseButtons;
+		QSignalMapper * m_FileEditMapper;
+		QMap<QWidget *, FileEditStrings> m_FileSelectStringMap;
+		QMap<QCheckBox *, QLineEdit *> m_HexEditMap;
+		
 		inline void convertLineEditText(QLineEdit * lineEdit, bool hex);
-		inline QString convertQuoted(QString text);
-		inline void writeEAPConfig(libnutwireless::CNetworkConfig &eap_config);
-		inline void readEAPConfig(libnutwireless::CNetworkConfig &eap_config);
+		inline void writeEAPPhaseConfig(libnutwireless::CNetworkConfig & eap_config, int phase);
+		inline void writeEAPConfig(libnutwireless::CNetworkConfig & eap_config);
+		inline void readEAPPhaseConfig(libnutwireless::CNetworkConfig & eap_config, int phase);
+		inline void readEAPConfig(libnutwireless::CNetworkConfig & eap_config);
 	public:
 		/**
 		 * @brief Opens the dialog for adding the given scanned network.
@@ -71,21 +85,19 @@ namespace qnut {
 		~CAccessPointConfig();
 	private slots:
 		void setAuthConfig(int type);
-		void setEncConfig(QString value);
 		void setWEPDisabled(bool value);
 		void verifyConfiguration();
 		void countPskChars(QString psk);
 		void togglePlainPSK(bool show);
 		
-		void convertSSID(bool hex);
-		void convertWEPKey0(bool hex);
-		void convertWEPKey1(bool hex);
-		void convertWEPKey2(bool hex);
-		void convertWEPKey3(bool hex);
+		void convertLineEditText(bool hex);
+		void selectFile(QWidget * reciever);
 		
+		void setUiEAPPhase(int phase);
+/*		
 		void selectCAFile();
 		void selectClientFile();
-		void selectKeyFile();
+		void selectKeyFile();*/
 	};
 }
 #endif

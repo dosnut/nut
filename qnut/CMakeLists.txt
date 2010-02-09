@@ -12,7 +12,7 @@ set(FORMS
 	ipconf.ui
 	devset.ui
 	airset.ui
-	apconf.ui
+	apconfexp.ui
 	devdet.ui
 	adhoc.ui
 )
