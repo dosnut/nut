@@ -15,6 +15,7 @@
 #include <libnutclient/cdevice.h>
 #include <libnutclient/cenvironment.h>
 #include <libnutclient/cinterface.h>
+#include <libnutwireless/cwireless.h>
 
 #include "cuidevice.h"
 #include "common.h"
@@ -48,8 +49,11 @@ namespace qnut {
 		m_Device = parentDevice;
 		
 #ifndef QNUT_NO_WIRELESS
-		if (m_Device->getWireless())
+		if (m_Device->getWireless()) {
 			m_WirelessSettings = new CWirelessSettings(m_Device);
+			connect(m_Device->getWireless()->getHardware(), SIGNAL(signalQualityUpdated(libnutwireless::SignalQuality)),
+				this, SIGNAL(wirelessInformationUpdated()));
+		}
 		else
 			m_WirelessSettings = NULL;
 #endif
@@ -156,7 +160,6 @@ namespace qnut {
 		settings->beginGroup(m_Device->getName());
 #endif
 		m_ShowTrayIcon = settings->value(UI_SETTINGS_SHOWTRAYICON, false).toBool();
-//		emit showTrayIconRequested(m_ShowTrayIcon);
 		ui.detailsButton->setChecked(settings->value(UI_SETTINGS_SHOWDETAILS, false).toBool());
 		m_NotificationsEnabled = !settings->value(UI_SETTINGS_HIDENOTIFICATIONS, false).toBool();
 		
@@ -201,6 +204,7 @@ namespace qnut {
 			settings->beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
 			m_WirelessSettings->restoreGeometry(settings->value(UI_SETTINGS_GEOMETRY).toByteArray());
 			m_WirelessSettings->setDetailsVisible(settings->value(UI_SETTINGS_SHOWDETAILS, false).toBool());
+			m_WirelessSettings->loadManagedNetworks(settings);
 			settings->endGroup();
 		}
 #endif
@@ -277,16 +281,10 @@ namespace qnut {
 		
 #ifndef QNUT_NO_WIRELESS
 		if (m_WirelessSettings) {
-			QByteArray networksConfig;
-			{
-				QTextStream stream(networksConfig, QIODevice::WriteOnly);
-				
-			}
-			
 			settings.beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
 			settings.setValue(UI_SETTINGS_GEOMETRY, m_WirelessSettings->saveGeometry());
 			settings.setValue(UI_SETTINGS_SHOWDETAILS, m_WirelessSettings->detailsVisible());
-			settings.setValue(UI_SETTINGS_NETWORKS, networksConfig);
+			m_WirelessSettings->writeManagedNetworks(&settings);
 			settings.endGroup();
 		}
 #endif
@@ -314,7 +312,7 @@ namespace qnut {
 		m_DeviceMenu->addAction(QIcon(UI_ICON_CONFIGURE), tr("&Device settings..."),
 			this, SLOT(openDeviceSettings()));
 #ifndef QNUT_NO_WIRELESS
-		tempAction = m_DeviceMenu->addAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."),
+		tempAction = m_DeviceMenu->addAction(QIcon(UI_ICON_AP), tr("&Wireless settings..."),
 			this, SLOT(openWirelessSettings()));
 		tempAction->setEnabled(m_Device->getWireless());
 #endif
@@ -350,6 +348,7 @@ namespace qnut {
 		
 		ui.environmentTree->setModel(new CEnvironmentTreeModel(m_Device));
 		ui.environmentTree->header()->setResizeMode(QHeaderView::ResizeToContents);
+		ui.environmentTree->setIconSize(QSize(20,20));
 		
 		connect(ui.environmentTree->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
 			this, SLOT(handleSelectionChanged(const QItemSelection &, const QItemSelection &)));

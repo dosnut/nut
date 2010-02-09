@@ -88,11 +88,11 @@ namespace qnut {
 		if ((role == Qt::DecorationRole) && (index.column() == 0)) {
 			switch (m_Networks[index.row()].flags) {
 			case NF_CURRENT:
-				return QIcon(m_Networks[index.row()].adhoc ? UI_ICON_ADHOC_ACTIVATED : UI_ICON_AIR_ACTIVATED);
+				return QIcon(m_Networks[index.row()].adhoc ? UI_ICON_ADHOC_ACTIVATED : UI_ICON_AP_ACTIVATED);
 			case NF_DISABLED:
-				return QIcon(m_Networks[index.row()].adhoc ? UI_ICON_ADHOC_DOWN : UI_ICON_AIR_DOWN);
+				return QIcon(m_Networks[index.row()].adhoc ? UI_ICON_ADHOC_DOWN : UI_ICON_AP_DOWN);
 			default:
-				return QIcon(m_Networks[index.row()].adhoc ? UI_ICON_ADHOC : UI_ICON_AIR);
+				return QIcon(m_Networks[index.row()].adhoc ? UI_ICON_ADHOC : UI_ICON_AP);
 			}
 		}
 		

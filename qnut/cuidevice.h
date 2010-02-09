@@ -95,6 +95,9 @@ namespace qnut {
 		
 		void showNotificationRequested(libnutcommon::DeviceState state);
 		void updateTrayIconRequested(libnutcommon::DeviceState state);
+#ifndef QNUT_NO_WIRELESS
+		void wirelessInformationUpdated();
+#endif
 		void showTrayIconRequested(bool value);
 	private:
 		Ui::devdet ui;

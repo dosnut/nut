@@ -67,7 +67,7 @@ namespace qnut {
 		
 		if ((role == Qt::DecorationRole) && (index.column() == ENVTREE_MOD_ITEM)) {
 			if (currentData->parent() == m_Device)
-				return QIcon(UI_ICON_ENVIRONMENT);
+				return QIcon(static_cast<CEnvironment *>(currentData) == m_Device->getActiveEnvironment() ? UI_ICON_ENVIRONMENT_ACTIVE : UI_ICON_ENVIRONMENT);
 			else
 				switch (static_cast<CInterface *>(currentData)->getState()) {
 				case IFS_OFF:

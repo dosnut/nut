@@ -62,7 +62,7 @@ namespace qnut {
 			return QVariant();
 		
 		if ((role == Qt::DecorationRole) && (index.column() == 0))
-			return QIcon(UI_ICON_AIR);
+			return QIcon(UI_ICON_AP);
 		
 		if (role != Qt::DisplayRole)
 			return QVariant();

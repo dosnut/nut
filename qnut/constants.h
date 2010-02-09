@@ -15,7 +15,8 @@
 #define UI_DIR_SCRIPT_DEACTIVATED       "deactivated/"
 
 #define UI_PATH_TRANSLATIONS            "/usr/share/qnut/lang/"
-#define UI_PATH_ICONS                   "/usr/share/qnut/icons/"
+#define UI_PATH_ICONS                   "/home/oliver/src/nut/qnut/res/"
+//"/usr/share/qnut/icons/"
 
 #define UI_FILE_LOG                     (QDir::toNativeSeparators(QDir::homePath()) + "/" + ".qnut.log")
 
@@ -44,10 +45,10 @@
 #define UI_ICON_WARNING                 UI_PATH_ICONS "warning.png"
 #define UI_ICON_SEARCH                  UI_PATH_ICONS "search.png"
 
-#define UI_ICON_AIR                     UI_PATH_ICONS "air.png"
+#define UI_ICON_AP                      UI_PATH_ICONS "ap.png"
+#define UI_ICON_AP_DOWN                 UI_PATH_ICONS "ap_down.png"
+#define UI_ICON_AP_ACTIVATED            UI_PATH_ICONS "ap_activated.png"
 #define UI_ICON_ADHOC                   UI_PATH_ICONS "adhoc.png"
-
-#define UI_ICON_AIR_DOWN                UI_PATH_ICONS "air_down.png"
 #define UI_ICON_ADHOC_DOWN              UI_PATH_ICONS "adhoc_down.png"
 #define UI_ICON_ADHOC_ACTIVATED         UI_PATH_ICONS "adhoc_activated.png"
 
@@ -72,6 +73,7 @@
 #define UI_ICON_BRIDGE_DEACTIVATED      UI_PATH_ICONS "bridge_deactivated.png"
 
 #define UI_ICON_ENVIRONMENT             UI_PATH_ICONS "environment.png"
+#define UI_ICON_ENVIRONMENT_ACTIVE      UI_PATH_ICONS "environment_active.png"
 
 #define UI_ICON_INTERFACE               UI_PATH_ICONS "interface.png"
 #define UI_ICON_INTERFACE_ACTIVE        UI_PATH_ICONS "interface_active.png"

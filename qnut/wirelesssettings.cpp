@@ -52,7 +52,7 @@ namespace qnut {
 		ui.managedAPLayout->addWidget(m_HiddenAPView);
 		
 		setWindowTitle(tr("Wireless Settings for \"%1\"").arg(m_Device->getName()));
-		setWindowIcon(QIcon(UI_ICON_AIR));
+		setWindowIcon(QIcon(UI_ICON_AP));
 		
 		ui.nameLabel->setText(m_Device->getName());
 		
@@ -121,7 +121,7 @@ namespace qnut {
 		addNetworkAction         = new QAction(QIcon(UI_ICON_ADD), tr("Add &network"), this);
 		addAdhocAction           = new QAction(QIcon(UI_ICON_ADD_ADHOC), tr("Add ad-&hoc"), this);
 		reloadNetworksAction     = new QAction(QIcon(UI_ICON_RELOAD), tr("Re&load configuration"), this);
-		m_SaveNetworksAction     = new QAction(QIcon(UI_ICON_SAVE), tr("&Save in global config"), this);
+		m_SaveNetworksAction     = new QAction(QIcon(UI_ICON_SAVE), tr("&Save all in global config"), this);
 		m_AutoSaveNetworksAction = new QAction(/*QIcon(UI_ICON_AUTOSAVE), */tr("&Autosave global config"), this);
 		m_RemoveNetworkAction    = new QAction(QIcon(UI_ICON_REMOVE), tr("&Remove"), this);
 		m_ToggleDetailsAction    = new QAction(QIcon(UI_ICON_DETAILED), tr("Detailed &view"), this);
@@ -185,6 +185,7 @@ namespace qnut {
 		m_VisibleAPView->addAction(getSeparator(this));
 		m_VisibleAPView->addAction(manageNetworksMenu->menuAction());
 		m_VisibleAPView->setContextMenuPolicy(Qt::ActionsContextMenu);
+		
 		m_HiddenAPView->addActions(m_VisibleAPView->actions());
 		m_HiddenAPView->setContextMenuPolicy(Qt::ActionsContextMenu);
 		
@@ -454,6 +455,9 @@ namespace qnut {
 			return;
 		
 		QByteArray buffer = settings->value(UI_SETTINGS_NETWORKS).toByteArray();
+		if (buffer.isEmpty())
+			return;
+		
 		QTextStream inStream(buffer, QIODevice::ReadOnly);
 		
 		m_Device->getWireless()->getWpaSupplicant()->addOnlyNewNetworks(&inStream);
@@ -469,7 +473,10 @@ namespace qnut {
 		foreach (libnutwireless::CNetworkConfig i, m_Device->getWireless()->getWpaSupplicant()->getManagedConfigs())
 			i.writeTo(outStream);
 		
-		settings->setValue(UI_SETTINGS_NETWORKS, buffer);
+		if (buffer.isEmpty())
+			settings->remove(UI_SETTINGS_NETWORKS);
+		else
+			settings->setValue(UI_SETTINGS_NETWORKS, buffer);
 	}
 }
 #endif

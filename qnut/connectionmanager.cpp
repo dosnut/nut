@@ -170,7 +170,7 @@ namespace qnut {
 		m_DisableDeviceAction    = new QAction(QIcon(UI_ICON_DISABLE), tr("&Disable"), this);
 		m_DeviceSettingsAction   = new QAction(QIcon(UI_ICON_CONFIGURE), tr("&Device settings..."), this);
 #ifndef QNUT_NO_WIRELESS
-		m_WirelessSettingsAction = new QAction(QIcon(UI_ICON_AIR), tr("&Wireless settings..."), this);
+		m_WirelessSettingsAction = new QAction(QIcon(UI_ICON_AP), tr("&Wireless settings..."), this);
 #endif
 		m_ClearLogAction         = new QAction(QIcon(UI_ICON_CLEAR), tr("&Clear log"), this);
 		

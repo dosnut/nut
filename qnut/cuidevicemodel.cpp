@@ -9,8 +9,6 @@
 #include <libnutclient/cdevicemanager.h>
 #include <libnutclient/cdevice.h>
 #include <libnutclient/cenvironment.h>
-#include <libnutwireless/wpa_supplicant.h>
-#include <libnutwireless/cwireless.h>
 #include "cuidevicemodel.h"
 #include "cuidevice.h"
 #include "common.h"
@@ -44,7 +42,7 @@ namespace qnut {
 			this, SLOT(updateDeviceState()));
 #ifndef QNUT_NO_WIRELESS
 		if (device->getWireless())
-			connect(device->getWireless()->getHardware(), SIGNAL(signalQualityUpdated(libnutwireless::SignalQuality)),
+			connect(newDevice, SIGNAL(wirelessInformationUpdated()),
 				this, SLOT(updateSignalQuality()));
 #endif
 		endInsertRows();
@@ -66,7 +64,7 @@ namespace qnut {
 			this, SLOT(updateDeviceState()));
 #ifndef QNUT_NO_WIRELESS
 		if (target->device()->getWireless())
-			disconnect(target->device()->getWireless()->getHardware(), SIGNAL(signalQualityUpdated(libnutwireless::SignalQuality)),
+			connect(target, SIGNAL(wirelessInformationUpdated()),
 				this, SLOT(updateSignalQuality()));
 #endif
 		delete target;
@@ -94,7 +92,7 @@ namespace qnut {
 	}
 	
 	void CUIDeviceModel::updateSignalQuality() {
-		int targetPos = findUIDevice(qobject_cast<CDevice *>(sender()));
+		int targetPos = m_UIDevices.indexOf(qobject_cast<CUIDevice *>(sender()));
 		
 		if (targetPos == -1)
 			return;
