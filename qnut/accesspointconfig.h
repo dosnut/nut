@@ -30,6 +30,30 @@ namespace qnut {
 	 */
 	class CAccessPointConfig : public QDialog {
 		Q_OBJECT
+	public:
+		/**
+		 * @brief Opens the dialog for adding the given scanned network.
+		 * @param scanResult scan result with network configuration to use
+		 */
+		bool execute(libnutwireless::ScanResult scanResult);
+		/**
+		 * @brief Opens the dialog for configuring the given managed network
+		 * @param id managed network id
+		 */
+		bool execute(int id);
+		/// @brief Opens the dialog for adding a new annonymous network
+		bool execute();
+		
+		static QString lastFileOpenDir() { return m_LastFileOpenDir; }
+		static void setLastFileOpenDir(QString value) { m_LastFileOpenDir = value; }
+		
+		/**
+		 * @brief Creates the object and initializes the basic user interface.
+		 * @param parent parent widget
+		 */
+		CAccessPointConfig(libnutwireless::CWpaSupplicant * wpa_supplicant, QWidget * parent = 0);
+		/// @brief Destroyes the object.
+		~CAccessPointConfig();
 	private:
 		Ui::apconf ui;
 		QRegExpValidator * m_HexValidator;
@@ -52,6 +76,8 @@ namespace qnut {
 			QString filter;
 		};
 		
+		static QString m_LastFileOpenDir;
+		
 		QButtonGroup * m_EAPPhaseButtons;
 		QSignalMapper * m_FileEditMapper;
 		QMap<QWidget *, FileEditStrings> m_FileSelectStringMap;
@@ -62,27 +88,6 @@ namespace qnut {
 		inline void writeEAPConfig(libnutwireless::CNetworkConfig & eap_config);
 		inline void readEAPPhaseConfig(libnutwireless::CNetworkConfig & eap_config, int phase);
 		inline void readEAPConfig(libnutwireless::CNetworkConfig & eap_config);
-	public:
-		/**
-		 * @brief Opens the dialog for adding the given scanned network.
-		 * @param scanResult scan result with network configuration to use
-		 */
-		bool execute(libnutwireless::ScanResult scanResult);
-		/**
-		 * @brief Opens the dialog for configuring the given managed network
-		 * @param id managed network id
-		 */
-		bool execute(int id);
-		/// @brief Opens the dialog for adding a new annonymous network
-		bool execute();
-		
-		/**
-		 * @brief Creates the object and initializes the basic user interface.
-		 * @param parent parent widget
-		 */
-		CAccessPointConfig(libnutwireless::CWpaSupplicant * wpa_supplicant, QWidget * parent = 0);
-		/// @brief Destroyes the object.
-		~CAccessPointConfig();
 	private slots:
 		void setAuthConfig(int type);
 		void setWEPDisabled(bool value);
@@ -94,10 +99,6 @@ namespace qnut {
 		void selectFile(QWidget * reciever);
 		
 		void setUiEAPPhase(int phase);
-/*		
-		void selectCAFile();
-		void selectClientFile();
-		void selectKeyFile();*/
 	};
 }
 #endif

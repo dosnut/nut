@@ -1,0 +1,1397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <author>Oliver Groß</author>
+ <class>apconf</class>
+ <widget class="QDialog" name="apconf">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>592</width>
+    <height>631</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Configure Access Point (Expert View)</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QFormLayout" name="mainSettingsLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="ssidLabel">
+       <property name="text">
+        <string>SSID</string>
+       </property>
+       <property name="buddy">
+        <cstring>ssidEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <layout class="QHBoxLayout" name="ssidLayout">
+       <item>
+        <widget class="QLineEdit" name="ssidEdit"/>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="ssidHexCheck">
+         <property name="text">
+          <string>hex. chars</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="bssidLabel">
+       <property name="text">
+        <string>BSSID</string>
+       </property>
+       <property name="buddy">
+        <cstring>bssidEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <layout class="QHBoxLayout" name="bssidLayout">
+       <item>
+        <widget class="QLineEdit" name="bssidEdit">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="inputMask">
+          <string>HH:HH:HH:HH:HH:HH; </string>
+         </property>
+         <property name="text">
+          <string>00:00:00:00:00:00</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="anyBSSIDCheck">
+         <property name="text">
+          <string>any</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="keyManagementLabel">
+       <property name="text">
+        <string>Key management</string>
+       </property>
+       <property name="buddy">
+        <cstring>keyManagementCombo</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <layout class="QHBoxLayout" name="keyManagementLayout">
+       <item>
+        <widget class="QComboBox" name="keyManagementCombo">
+         <item>
+          <property name="text">
+           <string>plain or WEP</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>WPA-Personal (PSK)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>WPA-Enterprise (IEEE802.1X/EAP)</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="rsnCheck">
+         <property name="text">
+          <string>WPA2 (RSN)</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTabWidget" name="confTabs">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="encTab">
+      <attribute name="title">
+       <string>Encryption</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QGroupBox" name="grpCipGroup">
+         <property name="title">
+          <string>General algorithm (group cipher)</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QCheckBox" name="grpCipWEP40Check">
+            <property name="text">
+             <string>WEP 40</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="grpCipWEP104Check">
+            <property name="text">
+             <string>WEP 104</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="grpCipTKIPCheck">
+            <property name="text">
+             <string>TKIP</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="grpCipCCMPCheck">
+            <property name="text">
+             <string>CCMP</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="grpCipSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="prwCipGroup">
+         <property name="title">
+          <string>Pairwise algorithm (pairwise cipher)</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QCheckBox" name="prwCipTKIPCheck">
+            <property name="text">
+             <string>TKIP</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="prwCipCCMPCheck">
+            <property name="text">
+             <string>CCMP</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="prwCipSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="proativeCheck">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Proactive Key Caching (for PMKSA)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="wepTab">
+      <attribute name="title">
+       <string>WEP Keys</string>
+      </attribute>
+      <layout class="QVBoxLayout">
+       <item>
+        <layout class="QGridLayout" name="wepGrid">
+         <item row="0" column="0">
+          <widget class="QRadioButton" name="wep0Radio">
+           <property name="text">
+            <string>WEP Key 0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="wep0Edit"/>
+         </item>
+         <item row="0" column="2">
+          <widget class="QCheckBox" name="wep0HexCheck">
+           <property name="text">
+            <string>hex. chars</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QPushButton" name="wep0LeaveButton">
+           <property name="text">
+            <string>leave unchanged</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QRadioButton" name="wep1Radio">
+           <property name="text">
+            <string>WEP Key 1</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="wep1Edit"/>
+         </item>
+         <item row="2" column="2">
+          <widget class="QCheckBox" name="wep1HexCheck">
+           <property name="text">
+            <string>hex. chars</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3">
+          <widget class="QPushButton" name="wep1LeaveButton">
+           <property name="text">
+            <string>leave unchanged</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QRadioButton" name="wep2Radio">
+           <property name="text">
+            <string>WEP Key 2</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QLineEdit" name="wep2Edit"/>
+         </item>
+         <item row="4" column="2">
+          <widget class="QCheckBox" name="wep2HexCheck">
+           <property name="text">
+            <string>hex. chars</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="3">
+          <widget class="QPushButton" name="wep2LeaveButton">
+           <property name="text">
+            <string>leave unchanged</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QRadioButton" name="wep3Radio">
+           <property name="text">
+            <string>WEP Key 3</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QLineEdit" name="wep3Edit"/>
+         </item>
+         <item row="6" column="2">
+          <widget class="QCheckBox" name="wep3HexCheck">
+           <property name="text">
+            <string>hex. chars</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="3">
+          <widget class="QPushButton" name="wep3LeaveButton">
+           <property name="text">
+            <string>leave unchanged</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="4">
+          <widget class="Line" name="wepLine0">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0" colspan="4">
+          <widget class="Line" name="wepLine1">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0" colspan="4">
+          <widget class="Line" name="wepLine2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="wepSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="pskTab">
+      <attribute name="title">
+       <string>Pre Shared Key</string>
+      </attribute>
+      <layout class="QVBoxLayout">
+       <item>
+        <layout class="QHBoxLayout" name="pskLayout">
+         <item>
+          <widget class="QLabel" name="keyLabel">
+           <property name="text">
+            <string>Key</string>
+           </property>
+           <property name="margin">
+            <number>-1</number>
+           </property>
+           <property name="buddy">
+            <cstring>pskEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="pskEdit">
+           <property name="maxLength">
+            <number>63</number>
+           </property>
+           <property name="echoMode">
+            <enum>QLineEdit::Password</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="charCountLabel">
+           <property name="text">
+            <string>0 chars</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pskLeaveButton">
+           <property name="text">
+            <string>leave unchanged</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="pskHexCheck">
+         <property name="text">
+          <string>hex. chars</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="showPlainPSKCheck">
+         <property name="text">
+          <string>Show key as plain text</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="pskSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="eapMainTab">
+      <attribute name="title">
+       <string>EAP General</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QGroupBox" name="eapMethodGroup">
+         <property name="title">
+          <string>EAP method</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="eapMethodMD5Check">
+            <property name="text">
+             <string>MD5</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="eapMethodGTCCheck">
+            <property name="text">
+             <string>GTC</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QCheckBox" name="eapMethodTTLSCheck">
+            <property name="text">
+             <string>TTLS</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QCheckBox" name="eapMethodLEAPCheck">
+            <property name="text">
+             <string>LEAP</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QCheckBox" name="eapMethodSAKECheck">
+            <property name="text">
+             <string>SAKE</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QCheckBox" name="eapMethodGPSKCheck">
+            <property name="text">
+             <string>GPSK</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QCheckBox" name="eapMethodPSKCheck">
+            <property name="text">
+             <string>PSK</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QCheckBox" name="eapMethodAKACheck">
+            <property name="text">
+             <string>AKA</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="eapMethodTLSCheck">
+            <property name="text">
+             <string>TLS</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="eapMethodMSCHAPV2Check">
+            <property name="text">
+             <string>MSCHAPV2</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="eapMethodOTPCheck">
+            <property name="text">
+             <string>OTP</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="eapMethodPEAPCheck">
+            <property name="text">
+             <string>PEAP</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QCheckBox" name="eapMethodFASTCheck">
+            <property name="text">
+             <string>FAST</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QCheckBox" name="eapMethodPAXCheck">
+            <property name="text">
+             <string>PAX</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QFormLayout" name="formLayout_2">
+         <property name="fieldGrowthPolicy">
+          <enum>QFormLayout::ExpandingFieldsGrow</enum>
+         </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="identyLabel">
+           <property name="text">
+            <string>Identity</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="buddy">
+            <cstring>identiyEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="identiyEdit"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="anonymousIdentityLabel">
+           <property name="text">
+            <string>Anonymous Identity</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="buddy">
+            <cstring>anonymousIdentityEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="anonymousIdentityEdit"/>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="eapPasswordLabel">
+           <property name="text">
+            <string>Password</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="buddy">
+            <cstring>eapPasswordEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <layout class="QHBoxLayout" name="eapPasswordLayout">
+           <item>
+            <widget class="QLineEdit" name="eapPasswordEdit">
+             <property name="echoMode">
+              <enum>QLineEdit::Password</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="eapPasswordLeaveButton">
+             <property name="text">
+              <string>leave unchanged</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="eapPSKLabel">
+           <property name="text">
+            <string>EAP Pre Shared Key (hex.)</string>
+           </property>
+           <property name="buddy">
+            <cstring>eapPSKEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <layout class="QHBoxLayout" name="eapPSKLayout">
+           <item>
+            <widget class="QLineEdit" name="eapPSKEdit">
+             <property name="toolTip">
+              <string>32 digits, 128-Bit Pre Shared Key</string>
+             </property>
+             <property name="maxLength">
+              <number>32</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="eapPSKLeaveButton">
+             <property name="text">
+              <string>leave unchanged</string>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="naiLabel">
+           <property name="text">
+            <string>Network Access Identifier (NAI)</string>
+           </property>
+           <property name="buddy">
+            <cstring>naiEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <widget class="QLineEdit" name="naiEdit"/>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="pacLabel">
+           <property name="text">
+            <string>Proxy Access Control (PAC) file</string>
+           </property>
+           <property name="buddy">
+            <cstring>pacEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <layout class="QHBoxLayout" name="pacLayout">
+           <item>
+            <widget class="QLineEdit" name="pacEdit"/>
+           </item>
+           <item>
+            <widget class="QToolButton" name="pacBrowse">
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="7" column="0">
+          <widget class="QLabel" name="fragmentLabel">
+           <property name="text">
+            <string>Fragment size</string>
+           </property>
+           <property name="buddy">
+            <cstring>fragmentSpin</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="1">
+          <widget class="QSpinBox" name="fragmentSpin">
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::UpDownArrows</enum>
+           </property>
+           <property name="specialValueText">
+            <string>Undefined</string>
+           </property>
+           <property name="minimum">
+            <number>-1</number>
+           </property>
+           <property name="maximum">
+            <number>65535</number>
+           </property>
+           <property name="value">
+            <number>-1</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0" colspan="2">
+          <widget class="Line" name="line_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="eapAuthTab">
+      <attribute name="title">
+       <string>EAP Authentification</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QHBoxLayout" name="phaseShowLayout">
+         <item>
+          <widget class="QLabel" name="phaseShowLabel">
+           <property name="text">
+            <string>Show settings for</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="phase1Radio">
+           <property name="text">
+            <string>Phase 1</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="phase2Radio">
+           <property name="text">
+            <string>Phase 2</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="eapCertGroup">
+         <property name="title">
+          <string>Certificates</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout">
+          <property name="fieldGrowthPolicy">
+           <enum>QFormLayout::ExpandingFieldsGrow</enum>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="caLabel">
+            <property name="text">
+             <string>CA file</string>
+            </property>
+            <property name="buddy">
+             <cstring>caFileEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <layout class="QHBoxLayout" name="caFileLayout">
+            <item>
+             <widget class="QLineEdit" name="caFileEdit"/>
+            </item>
+            <item>
+             <widget class="QToolButton" name="caFileBrowse">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="clientLabel">
+            <property name="text">
+             <string>Client file</string>
+            </property>
+            <property name="buddy">
+             <cstring>clientFileEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <layout class="QHBoxLayout" name="clientFileLayout">
+            <item>
+             <widget class="QLineEdit" name="clientFileEdit"/>
+            </item>
+            <item>
+             <widget class="QToolButton" name="clientFileBrowse">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="eapKeyGroup">
+         <property name="title">
+          <string>Private Key</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout_3">
+          <item row="0" column="0">
+           <widget class="QLabel" name="keyFileLabel">
+            <property name="text">
+             <string>Key file</string>
+            </property>
+            <property name="buddy">
+             <cstring>keyFileEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <layout class="QHBoxLayout" name="keyFileLayout">
+            <item>
+             <widget class="QLineEdit" name="keyFileEdit"/>
+            </item>
+            <item>
+             <widget class="QToolButton" name="keyFileBrowse">
+              <property name="text">
+               <string>...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="keyPasswordLabel">
+            <property name="text">
+             <string>Password</string>
+            </property>
+            <property name="buddy">
+             <cstring>keyPasswordEdit</cstring>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <layout class="QHBoxLayout" name="keyPasswordLayout">
+            <item>
+             <widget class="QLineEdit" name="keyPasswordEdit">
+              <property name="echoMode">
+               <enum>QLineEdit::Password</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="keyPasswordLeaveButton">
+              <property name="text">
+               <string>leave unchanged</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QFormLayout" name="phaseSettingsLayout">
+         <property name="fieldGrowthPolicy">
+          <enum>QFormLayout::ExpandingFieldsGrow</enum>
+         </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="phaseParamLabel">
+           <property name="text">
+            <string>Phase parameters</string>
+           </property>
+           <property name="buddy">
+            <cstring>phaseParamEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="phaseParamEdit"/>
+         </item>
+         <item row="1" column="0" colspan="2">
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="subjectMatchLabel">
+           <property name="text">
+            <string>Subject Match</string>
+           </property>
+           <property name="buddy">
+            <cstring>subjectMatchEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="subjectMatchEdit"/>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="altSubjectMatchLabel">
+           <property name="text">
+            <string>Alt. Subject Match</string>
+           </property>
+           <property name="buddy">
+            <cstring>altSubjectMatchEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="altSubjectMatchEdit"/>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="dhFileLabel">
+           <property name="text">
+            <string>DH/DSA file</string>
+           </property>
+           <property name="buddy">
+            <cstring>dhFileEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
+          <layout class="QHBoxLayout" name="dhFileLayout">
+           <item>
+            <widget class="QLineEdit" name="dhFileEdit"/>
+           </item>
+           <item>
+            <widget class="QToolButton" name="dhFileBrowse">
+             <property name="text">
+              <string>...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="4" column="0" colspan="2">
+          <widget class="Line" name="line_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="scanCheck">
+     <property name="text">
+      <string>Enable SSID scanning (slower but needed if SSID is hidden)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="autoEnableCheck">
+     <property name="text">
+      <string>Enable automatic selection</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="apconfSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>ssidEdit</tabstop>
+  <tabstop>ssidHexCheck</tabstop>
+  <tabstop>bssidEdit</tabstop>
+  <tabstop>anyBSSIDCheck</tabstop>
+  <tabstop>keyManagementCombo</tabstop>
+  <tabstop>rsnCheck</tabstop>
+  <tabstop>confTabs</tabstop>
+  <tabstop>grpCipWEP40Check</tabstop>
+  <tabstop>grpCipTKIPCheck</tabstop>
+  <tabstop>grpCipCCMPCheck</tabstop>
+  <tabstop>prwCipTKIPCheck</tabstop>
+  <tabstop>prwCipCCMPCheck</tabstop>
+  <tabstop>proativeCheck</tabstop>
+  <tabstop>wep0Radio</tabstop>
+  <tabstop>wep0Edit</tabstop>
+  <tabstop>wep0HexCheck</tabstop>
+  <tabstop>wep0LeaveButton</tabstop>
+  <tabstop>wep1Radio</tabstop>
+  <tabstop>wep1Edit</tabstop>
+  <tabstop>wep1HexCheck</tabstop>
+  <tabstop>wep1LeaveButton</tabstop>
+  <tabstop>wep2Radio</tabstop>
+  <tabstop>wep2Edit</tabstop>
+  <tabstop>wep2HexCheck</tabstop>
+  <tabstop>wep2LeaveButton</tabstop>
+  <tabstop>wep3Radio</tabstop>
+  <tabstop>wep3Edit</tabstop>
+  <tabstop>wep3HexCheck</tabstop>
+  <tabstop>wep3LeaveButton</tabstop>
+  <tabstop>pskEdit</tabstop>
+  <tabstop>pskLeaveButton</tabstop>
+  <tabstop>identiyEdit</tabstop>
+  <tabstop>anonymousIdentityEdit</tabstop>
+  <tabstop>eapPasswordEdit</tabstop>
+  <tabstop>eapPasswordLeaveButton</tabstop>
+  <tabstop>eapPSKEdit</tabstop>
+  <tabstop>eapPSKLeaveButton</tabstop>
+  <tabstop>naiEdit</tabstop>
+  <tabstop>pacEdit</tabstop>
+  <tabstop>pacBrowse</tabstop>
+  <tabstop>phase1Radio</tabstop>
+  <tabstop>phase2Radio</tabstop>
+  <tabstop>caFileEdit</tabstop>
+  <tabstop>caFileBrowse</tabstop>
+  <tabstop>clientFileEdit</tabstop>
+  <tabstop>clientFileBrowse</tabstop>
+  <tabstop>keyFileEdit</tabstop>
+  <tabstop>keyFileBrowse</tabstop>
+  <tabstop>keyPasswordEdit</tabstop>
+  <tabstop>keyPasswordLeaveButton</tabstop>
+  <tabstop>phaseParamEdit</tabstop>
+  <tabstop>subjectMatchEdit</tabstop>
+  <tabstop>altSubjectMatchEdit</tabstop>
+  <tabstop>dhFileEdit</tabstop>
+  <tabstop>dhFileBrowse</tabstop>
+  <tabstop>scanCheck</tabstop>
+  <tabstop>autoEnableCheck</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>apconf</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>315</x>
+     <y>626</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>189</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>anyBSSIDCheck</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>bssidEdit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>585</x>
+     <y>64</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>363</x>
+     <y>59</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pskLeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pskEdit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>578</x>
+     <y>166</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>246</x>
+     <y>167</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep0LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep0HexCheck</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>578</x>
+     <y>166</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>433</x>
+     <y>164</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep0LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep0Edit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>508</x>
+     <y>153</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>237</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep1LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep1HexCheck</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>578</x>
+     <y>205</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>342</x>
+     <y>201</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep1LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep1Edit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>461</x>
+     <y>204</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>332</x>
+     <y>206</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep2LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep2HexCheck</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>578</x>
+     <y>244</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>433</x>
+     <y>242</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep2LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep2Edit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>508</x>
+     <y>231</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>221</x>
+     <y>231</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep3LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep3HexCheck</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>578</x>
+     <y>283</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>387</x>
+     <y>270</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>wep3LeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>wep3Edit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>508</x>
+     <y>270</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>221</x>
+     <y>270</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rsnCheck</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>proativeCheck</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>385</x>
+     <y>87</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>182</x>
+     <y>290</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>keyPasswordLeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>keyPasswordEdit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>460</x>
+     <y>369</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>387</x>
+     <y>367</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>eapPasswordLeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>eapPasswordEdit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>474</x>
+     <y>346</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>395</x>
+     <y>345</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>eapPSKLeaveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>eapPSKEdit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>469</x>
+     <y>381</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>427</x>
+     <y>380</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -11,14 +11,17 @@
 #include <QMessageBox>
 #include <libnutwireless/wpa_supplicant.h>
 #include "accesspointconfig.h"
-#include <QDebug>
+
 #define FLAG_PREPARE_OUTPUT(a, b, c) if(a & c) b << #c;
+#define WRITE_BACK_AUTOQUOTE(f, t) f(t, !(t.isEmpty()))
 
 namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutwireless;
 	
-	//todo Implement widget for lineedits with hexadecimal digit inputs instead of this ugly implementation
+	QString CAccessPointConfig::m_LastFileOpenDir = "/";
+	
+	//todo: Implement widget for lineedits with hexadecimal digit inputs instead of this ugly implementation
 	inline bool setTextAutoHex(QLineEdit * target, QString text) {
 		if (text[0] == '\"') {
 			target->setText(text.mid(1, text.length()-2));
@@ -39,17 +42,10 @@ namespace qnut {
 		m_OldConfig.pairwise = PCI_UNDEFINED;
 		m_OldConfig.protocols = PROTO_UNDEFINED;
 		
-		ui.pskLeaveButton->setVisible(false);
-		ui.eapPasswordLeaveButton->setVisible(false);
-		ui.keyPasswordLeaveButton->setVisible(false);
-		ui.eapPSKLeaveButton->setVisible(false);
-		ui.wep0LeaveButton->setVisible(false);
-		ui.wep1LeaveButton->setVisible(false);
-		ui.wep2LeaveButton->setVisible(false);
-		ui.wep3LeaveButton->setVisible(false);
-		
 		QRegExp regexp("[0123456789abcdefABCDEF]*");
 		m_HexValidator = new QRegExpValidator(regexp, this);
+		
+		ui.eapPSKEdit->setValidator(m_HexValidator);
 		
 		m_EAPPhaseButtons = new QButtonGroup(this);
 		m_EAPPhaseButtons->addButton(ui.phase1Radio, 1);
@@ -63,32 +59,32 @@ namespace qnut {
 		
 		newFileEditStrings.title = tr("Select Proxy Access Control (PAC) file");
 		newFileEditStrings.filter = tr("Proxy Access Control (PAC) files (%1)").arg("*.pac");
-		m_FileSelectStringMap.insert(ui.pacBrowse, newFileEditStrings);
 		m_FileEditMapper->setMapping(ui.pacBrowse, ui.pacEdit);
+		m_FileSelectStringMap.insert(ui.pacEdit, newFileEditStrings);
 		connect(ui.pacBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
 		
 		newFileEditStrings.title = tr("Select CA certificate file");
 		newFileEditStrings.filter = tr("Certificate files (%1)").arg("*.pem");
-		m_FileSelectStringMap.insert(ui.caFileBrowse, newFileEditStrings);
 		m_FileEditMapper->setMapping(ui.caFileBrowse, ui.caFileEdit);
+		m_FileSelectStringMap.insert(ui.caFileEdit, newFileEditStrings);
 		connect(ui.caFileBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
 		
 		newFileEditStrings.title = tr("Select client certificate file");
 		newFileEditStrings.filter = tr("Certificate files (%1)").arg("*.pem");
-		m_FileSelectStringMap.insert(ui.clientFileBrowse, newFileEditStrings);
 		m_FileEditMapper->setMapping(ui.clientFileBrowse, ui.clientFileEdit);
+		m_FileSelectStringMap.insert(ui.clientFileEdit, newFileEditStrings);
 		connect(ui.clientFileBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
 		
 		newFileEditStrings.title = tr("Select key file");
 		newFileEditStrings.filter = tr("Key files (%1)").arg("*.pem");
-		m_FileSelectStringMap.insert(ui.keyFileBrowse, newFileEditStrings);
 		m_FileEditMapper->setMapping(ui.keyFileBrowse, ui.keyFileEdit);
+		m_FileSelectStringMap.insert(ui.keyFileEdit, newFileEditStrings);
 		connect(ui.keyFileBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
 		
 		newFileEditStrings.title = tr("Select DH/DSA file");
 		newFileEditStrings.filter = tr("DH/DSA files (%1)").arg("*.pem");
-		m_FileSelectStringMap.insert(ui.dhFileBrowse, newFileEditStrings);
 		m_FileEditMapper->setMapping(ui.dhFileBrowse, ui.dhFileEdit);
+		m_FileSelectStringMap.insert(ui.dhFileEdit, newFileEditStrings);
 		connect(ui.dhFileBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
 		
 		m_HexEditMap.insert(ui.ssidHexCheck, ui.ssidEdit);
@@ -168,6 +164,26 @@ namespace qnut {
 		ui.grpCipTKIPCheck->setChecked(scanResult.group & GCI_TKIP);
 		ui.grpCipCCMPCheck->setChecked(scanResult.group & GCI_CCMP);
 		
+		ui.pskLeaveButton->setVisible(false);
+		ui.eapPasswordLeaveButton->setVisible(false);
+		ui.keyPasswordLeaveButton->setVisible(false);
+		ui.eapPSKLeaveButton->setVisible(false);
+		
+		ui.wep0LeaveButton->setVisible(false);
+		ui.wep1LeaveButton->setVisible(false);
+		ui.wep2LeaveButton->setVisible(false);
+		ui.wep3LeaveButton->setVisible(false);
+		
+		ui.pskLeaveButton->setChecked(false);
+		ui.eapPasswordLeaveButton->setChecked(false);
+		ui.keyPasswordLeaveButton->setChecked(false);
+		ui.eapPSKLeaveButton->setChecked(false);
+		
+		ui.wep0LeaveButton->setChecked(false);
+		ui.wep1LeaveButton->setChecked(false);
+		ui.wep2LeaveButton->setChecked(false);
+		ui.wep3LeaveButton->setChecked(false);
+		
 		m_CurrentID = -1;
 		
 		return exec();
@@ -193,8 +209,6 @@ namespace qnut {
 		}
 		else if (m_Config.get_key_mgmt() & KM_WPA_PSK) {
 			ui.keyManagementCombo->setCurrentIndex(1);
-			ui.pskLeaveButton->setVisible(true);
-			ui.pskLeaveButton->setChecked(true);
 			ui.rsnCheck->setChecked(m_Config.get_protocols() & PROTO_RSN);
 		}
 		else
@@ -212,20 +226,34 @@ namespace qnut {
 		
 		ui.proativeCheck->setChecked(toBool(m_Config.get_proactive_key_caching()));
 		
-		ui.wep0LeaveButton->setVisible(true);
-		ui.wep1LeaveButton->setVisible(true);
-		ui.wep2LeaveButton->setVisible(true);
-		ui.wep3LeaveButton->setVisible(true);
-		ui.wep0LeaveButton->setChecked(true);
-		ui.wep1LeaveButton->setChecked(true);
-		ui.wep2LeaveButton->setChecked(true);
-		ui.wep3LeaveButton->setChecked(true);
+		bool isGlobalConfigured = true;
+		
+		ui.pskLeaveButton->setVisible(isGlobalConfigured);
+		ui.eapPasswordLeaveButton->setVisible(isGlobalConfigured);
+		ui.keyPasswordLeaveButton->setVisible(isGlobalConfigured);
+		ui.eapPSKLeaveButton->setVisible(isGlobalConfigured);
+		
+		ui.wep0LeaveButton->setVisible(isGlobalConfigured);
+		ui.wep1LeaveButton->setVisible(isGlobalConfigured);
+		ui.wep2LeaveButton->setVisible(isGlobalConfigured);
+		ui.wep3LeaveButton->setVisible(isGlobalConfigured);
+		
+		ui.pskLeaveButton->setChecked(isGlobalConfigured);
+		ui.eapPasswordLeaveButton->setChecked(isGlobalConfigured);
+		ui.keyPasswordLeaveButton->setChecked(isGlobalConfigured);
+		ui.eapPSKLeaveButton->setChecked(isGlobalConfigured);
+		
+		ui.wep0LeaveButton->setChecked(isGlobalConfigured);
+		ui.wep1LeaveButton->setChecked(isGlobalConfigured);
+		ui.wep2LeaveButton->setChecked(isGlobalConfigured);
+		ui.wep3LeaveButton->setChecked(isGlobalConfigured);
 		
 		switch (m_Config.get_wep_tx_keyidx()) {
-		default: ui.wep0Radio->setChecked(true); break;
-		case 1:  ui.wep1Radio->setChecked(true); break;
-		case 2:  ui.wep2Radio->setChecked(true); break;
-		case 3:  ui.wep3Radio->setChecked(true); break;
+		case 0: ui.wep0Radio->setChecked(true); break;
+		case 1: ui.wep1Radio->setChecked(true); break;
+		case 2: ui.wep2Radio->setChecked(true); break;
+		case 3: ui.wep3Radio->setChecked(true); break;
+		default: break;
 		}
 		
 		ui.scanCheck->setChecked(m_Config.get_scan_ssid());
@@ -238,7 +266,6 @@ namespace qnut {
 	
 	void CAccessPointConfig::verifyConfiguration() {
 		NetconfigStatus status;
-// 		CNetworkConfig config;
 		
 		if (!ui.ssidEdit->text().isEmpty())
 			m_Config.set_ssid(ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"');
@@ -422,28 +449,24 @@ namespace qnut {
 	
 	inline void CAccessPointConfig::writeEAPPhaseConfig(CNetworkConfig & eap_config, int phase) {
 		if (phase == 2) {
-			eap_config.set_phase2           (ui.phaseParamEdit->text(), true);
-			eap_config.set_dh_file2         (ui.dhFileEdit->text(), true);
-			eap_config.set_ca_cert2         (ui.caFileEdit->text(), true);
-			eap_config.set_client_cert2     (ui.clientFileEdit->text(), true);
-			eap_config.set_private_key2     (ui.keyFileEdit->text(), true);
-			eap_config.set_subject_match2   (ui.subjectMatchEdit->text(), true);
-			eap_config.set_altsubject_match2(ui.altSubjectMatchEdit->text(), true);
-			
-			if (!ui.keyPasswordLeaveButton->isChecked())
-				eap_config.set_private_key2_passwd(ui.keyPasswordEdit->text(), true);
+			WRITE_BACK_AUTOQUOTE(eap_config.set_phase2,              ui.phaseParamEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_dh_file2,            ui.dhFileEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_ca_cert2,            ui.caFileEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_client_cert2,        ui.clientFileEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_private_key2,        ui.keyFileEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_subject_match2,      ui.subjectMatchEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_altsubject_match2,   ui.altSubjectMatchEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_private_key2_passwd, ui.keyPasswordEdit->text());
 		}
 		else {
-			eap_config.set_phase1          (ui.phaseParamEdit->text(), true);
-			eap_config.set_dh_file         (ui.dhFileEdit->text(), true);
-			eap_config.set_ca_cert         (ui.caFileEdit->text(), true);
-			eap_config.set_client_cert     (ui.clientFileEdit->text(), true);
-			eap_config.set_private_key     (ui.keyFileEdit->text(), true);
-			eap_config.set_subject_match   (ui.subjectMatchEdit->text(), true);
-			eap_config.set_altsubject_match(ui.altSubjectMatchEdit->text(), true);
-			
-			if (!ui.keyPasswordLeaveButton->isChecked())
-				eap_config.set_private_key_passwd(ui.keyPasswordEdit->text(), true);
+			WRITE_BACK_AUTOQUOTE(eap_config.set_phase1,             ui.phaseParamEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_dh_file,            ui.dhFileEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_ca_cert,            ui.caFileEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_client_cert,        ui.clientFileEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_private_key,        ui.keyFileEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_subject_match,      ui.subjectMatchEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_altsubject_match,   ui.altSubjectMatchEdit->text());
+			WRITE_BACK_AUTOQUOTE(eap_config.set_private_key_passwd, ui.keyPasswordEdit->text());
 		}
 	}
 	
@@ -486,15 +509,14 @@ namespace qnut {
 			(ui.eapMethodTTLSCheck->isChecked() ? EAPM_TTLS : 0)
 		));
 		
-		eap_config.set_identity(ui.identiyEdit->text(), true);
-		eap_config.set_anonymous_identity(ui.anonymousIdentityEdit->text(), true);
-		if (!ui.eapPasswordLeaveButton->isChecked())
-			eap_config.set_password(ui.eapPasswordEdit->text(), true);
+		WRITE_BACK_AUTOQUOTE(eap_config.set_identity, ui.identiyEdit->text());
+		WRITE_BACK_AUTOQUOTE(eap_config.set_anonymous_identity, ui.anonymousIdentityEdit->text());
+		WRITE_BACK_AUTOQUOTE(eap_config.set_password, ui.eapPasswordEdit->text());
 		
 		eap_config.set_fragment_size(ui.fragmentSpin->value());
 		
-		eap_config.set_nai(ui.naiEdit->text(), false);
-		eap_config.set_pac_file(ui.pacEdit->text(), false);
+		WRITE_BACK_AUTOQUOTE(eap_config.set_nai, ui.naiEdit->text());
+		WRITE_BACK_AUTOQUOTE(eap_config.set_pac_file, ui.pacEdit->text());
 		
 		writeEAPPhaseConfig(eap_config, ui.phase1Radio->isChecked() ? 1 : 2);
 	}
@@ -509,8 +531,6 @@ namespace qnut {
 			setTextAutoHex(ui.subjectMatchEdit,    eap_config.get_subject_match2());
 			setTextAutoHex(ui.altSubjectMatchEdit, eap_config.get_altsubject_match2());
 			
-			ui.keyPasswordLeaveButton->setVisible(eap_config.get_private_key2_passwd().isEmpty());
-			ui.keyPasswordLeaveButton->setChecked(ui.keyPasswordLeaveButton->isVisible());
 			setTextAutoHex(ui.keyPasswordEdit, eap_config.get_private_key2_passwd());
 		}
 		else {
@@ -522,8 +542,6 @@ namespace qnut {
 			setTextAutoHex(ui.subjectMatchEdit,    eap_config.get_subject_match());
 			setTextAutoHex(ui.altSubjectMatchEdit, eap_config.get_altsubject_match());
 			
-			ui.keyPasswordLeaveButton->setVisible(eap_config.get_private_key_passwd().isEmpty());
-			ui.keyPasswordLeaveButton->setChecked(ui.keyPasswordLeaveButton->isVisible());
 			setTextAutoHex(ui.keyPasswordEdit, eap_config.get_private_key_passwd());
 		}
 	}
@@ -547,12 +565,8 @@ namespace qnut {
 		setTextAutoHex(ui.identiyEdit, eap_config.get_identity());
 		setTextAutoHex(ui.anonymousIdentityEdit, eap_config.get_anonymous_identity());
 		
-		ui.eapPasswordLeaveButton->setVisible(eap_config.get_password().isEmpty());
-		ui.eapPasswordLeaveButton->setChecked(ui.eapPasswordLeaveButton->isVisible());
 		setTextAutoHex(ui.eapPasswordEdit, eap_config.get_password());
 		
-		ui.eapPSKLeaveButton->setVisible(eap_config.get_eappsk().isEmpty());
-		ui.eapPSKLeaveButton->setChecked(ui.eapPSKLeaveButton->isVisible());
 		setTextAutoHex(ui.eapPSKEdit, eap_config.get_eappsk());
 		
 		ui.fragmentSpin->setValue(eap_config.get_fragment_size());
@@ -594,27 +608,16 @@ namespace qnut {
 	void CAccessPointConfig::selectFile(QWidget * reciever) {
 		QLineEdit * lineEdit = qobject_cast<QLineEdit *>(reciever);
 		FileEditStrings strings = m_FileSelectStringMap[reciever];
-		lineEdit->setText(QFileDialog::getOpenFileName(this, strings.title, "/", strings.filter));
+		QFileDialog openDialog(this, strings.title, m_LastFileOpenDir, strings.filter);
+		if (openDialog.exec()) {
+			m_LastFileOpenDir = openDialog.directory().absolutePath();
+			lineEdit->setText(openDialog.selectedFiles()[0]);
+		}
 	}
 	
 	void CAccessPointConfig::setUiEAPPhase(int phase) {
 		writeEAPPhaseConfig(m_Config, phase == 1 ? 2 : 1);
 		readEAPPhaseConfig(m_Config, phase);
 	}
-// 	
-// 	void CAccessPointConfig::selectCAFile() {
-// 		ui.caEdit->setText(QFileDialog::getOpenFileName(this,
-// 			tr("Select CA certificate file"), "/", tr("Certificate files (%1)").arg("*.pem")));
-// 	}
-// 	
-// 	void CAccessPointConfig::selectClientFile() {
-// 		ui.clientEdit->setText(QFileDialog::getOpenFileName(this,
-// 			tr("Select client certificate file"), "/", tr("Certificate files (%1)").arg("*.pem")));
-// 	}
-// 	
-// 	void CAccessPointConfig::selectKeyFile() {
-// 		ui.keyFileEdit->setText(QFileDialog::getOpenFileName(this,
-// 			tr("Select key file"), "/", tr("Key files (%1)").arg("*.pem")));
-// 	}
 }
 #endif
