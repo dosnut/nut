@@ -12,7 +12,7 @@ TARGET = qnut
 FORMS = ipconf.ui \
     devset.ui \
     airset.ui \
-    apconf.ui \
+    apconfexp.ui \
     devdet.ui \
     adhoc.ui
 TRANSLATIONS = qnut_de.ts \
