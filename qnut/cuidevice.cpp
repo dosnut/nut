@@ -200,13 +200,8 @@ namespace qnut {
 #endif
 		
 #ifndef QNUT_NO_WIRELESS
-		if (m_WirelessSettings) {
-			settings->beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
-			m_WirelessSettings->restoreGeometry(settings->value(UI_SETTINGS_GEOMETRY).toByteArray());
-			m_WirelessSettings->setDetailsVisible(settings->value(UI_SETTINGS_SHOWDETAILS, false).toBool());
-			m_WirelessSettings->loadManagedNetworks(settings);
-			settings->endGroup();
-		}
+		if (m_WirelessSettings)
+			m_WirelessSettings->readSettings(settings);
 #endif
 		
 		if (settings->childGroups().contains(UI_SETTINGS_IPCONFIGURATIONS))
@@ -280,13 +275,8 @@ namespace qnut {
 		settings.setValue(UI_SETTINGS_HIDENOTIFICATIONS, !m_NotificationsEnabled);
 		
 #ifndef QNUT_NO_WIRELESS
-		if (m_WirelessSettings) {
-			settings.beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
-			settings.setValue(UI_SETTINGS_GEOMETRY, m_WirelessSettings->saveGeometry());
-			settings.setValue(UI_SETTINGS_SHOWDETAILS, m_WirelessSettings->detailsVisible());
-			m_WirelessSettings->writeManagedNetworks(&settings);
-			settings.endGroup();
-		}
+		if (m_WirelessSettings)
+			m_WirelessSettings->writeSettings(&settings);
 #endif
 		
 		writeIPConfigs(&settings);

@@ -116,6 +116,8 @@
 #define UI_SETTINGS_COMMAND             "command"
 #define UI_SETTINGS_ENABLED             "enabled"
 
+#define UI_SETTINGS_LASTFILEOPENDIR     "lastFileOpenDir"
+
 #ifndef QNUT_SETTINGS_NOCOMPAT
 #define UI_DIR_WORK                     ".qnut/"
 #define UI_PATH_WORK                    (QDir::toNativeSeparators(QDir::homePath()) + "/" UI_DIR_WORK)

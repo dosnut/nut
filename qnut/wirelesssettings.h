@@ -79,8 +79,8 @@ namespace qnut {
 		 */
 		CWirelessSettings(libnutclient::CDevice * wireless, QWidget * parent = 0);
 		
-		void loadManagedNetworks(QSettings * settings);
-		void writeManagedNetworks(QSettings * settings);
+		void readSettings(QSettings * settings);
+		void writeSettings(QSettings * settings);
 	private slots:
 		void handleManagedAPSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 		void updateUi(libnutcommon::DeviceState state);

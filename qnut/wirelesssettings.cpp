@@ -450,22 +450,25 @@ namespace qnut {
 		}
 	}
 	
-	void CWirelessSettings::loadManagedNetworks(QSettings * settings) {
-		if (!settings)
-			return;
+	void CWirelessSettings::readSettings(QSettings * settings) {
+		settings->beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
+		restoreGeometry(settings->value(UI_SETTINGS_GEOMETRY).toByteArray());
+		setDetailsVisible(settings->value(UI_SETTINGS_SHOWDETAILS, false).toBool());
+		CAccessPointConfig::setLastFileOpenDir(settings->value(UI_SETTINGS_LASTFILEOPENDIR, "/").toString());
 		
 		QByteArray buffer = settings->value(UI_SETTINGS_NETWORKS).toByteArray();
-		if (buffer.isEmpty())
-			return;
-		
-		QTextStream inStream(buffer, QIODevice::ReadOnly);
-		
-		m_Device->getWireless()->getWpaSupplicant()->addOnlyNewNetworks(&inStream);
+		if (!buffer.isEmpty()) {
+			QTextStream inStream(buffer, QIODevice::ReadOnly);
+			m_Device->getWireless()->getWpaSupplicant()->addOnlyNewNetworks(&inStream);
+		}
+		settings->endGroup();
 	}
 	
-	void CWirelessSettings::writeManagedNetworks(QSettings * settings) {
-		if (!settings)
-			return;
+	void CWirelessSettings::writeSettings(QSettings * settings) {
+		settings->beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
+		settings->setValue(UI_SETTINGS_GEOMETRY, saveGeometry());
+		settings->setValue(UI_SETTINGS_SHOWDETAILS, detailsVisible());
+		settings->setValue(UI_SETTINGS_LASTFILEOPENDIR, CAccessPointConfig::lastFileOpenDir());
 		
 		QByteArray buffer;
 		QTextStream outStream(buffer, QIODevice::WriteOnly);
@@ -477,6 +480,8 @@ namespace qnut {
 			settings->remove(UI_SETTINGS_NETWORKS);
 		else
 			settings->setValue(UI_SETTINGS_NETWORKS, buffer);
+		
+		settings->endGroup();
 	}
 }
 #endif
