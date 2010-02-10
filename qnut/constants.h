@@ -15,8 +15,7 @@
 #define UI_DIR_SCRIPT_DEACTIVATED       "deactivated/"
 
 #define UI_PATH_TRANSLATIONS            "/usr/share/qnut/lang/"
-#define UI_PATH_ICONS                   "/home/oliver/src/nut/qnut/res/"
-//"/usr/share/qnut/icons/"
+#define UI_PATH_ICONS                   "/usr/share/qnut/icons/"
 
 #define UI_FILE_LOG                     (QDir::toNativeSeparators(QDir::homePath()) + "/" + ".qnut.log")
 
