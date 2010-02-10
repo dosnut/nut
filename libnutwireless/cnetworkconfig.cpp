@@ -390,8 +390,11 @@ bool CNetworkConfig::set_anonymous_identity(QString str, bool addQuotes) {
 	return true;
 }
 bool CNetworkConfig::set_password(QString str, bool addQuotes) {
-	password = addQuotes ? QUOTED(str) : str;
-	return true;
+	if (str != "*") {
+		password = addQuotes ? QUOTED(str) : str;
+		return true;
+	}
+	return false;
 }
 bool CNetworkConfig::set_ca_cert(QString str, bool addQuotes) {
 	ca_cert = addQuotes ? QUOTED(str) : str;
@@ -410,8 +413,11 @@ bool CNetworkConfig::set_private_key(QString str, bool addQuotes) {
 	return true;
 }
 bool CNetworkConfig::set_private_key_passwd(QString str, bool addQuotes) {
-	private_key_passwd = addQuotes ? QUOTED(str) : str;
-	return true;
+	if (str != "*") {
+		private_key_passwd = addQuotes ? QUOTED(str) : str;
+		return true;
+	}
+	return false;
 }
 bool CNetworkConfig::set_dh_file(QString str, bool addQuotes) {
 	dh_file = addQuotes ? QUOTED(str) : str;
@@ -450,8 +456,11 @@ bool CNetworkConfig::set_private_key2(QString str, bool addQuotes) {
 	return true;
 }
 bool CNetworkConfig::set_private_key2_passwd(QString str, bool addQuotes) {
-	private_key2_passwd = addQuotes ? QUOTED(str) : str;
-	return true;
+	if (str != "*") {
+		private_key2_passwd = addQuotes ? QUOTED(str) : str;
+		return true;
+	}
+	return false;
 }
 bool CNetworkConfig::set_dh_file2(QString str, bool addQuotes) {
 	dh_file2 = addQuotes ? QUOTED(str) : str;
@@ -470,8 +479,11 @@ bool CNetworkConfig::set_fragment_size(int size) {
 	return true;
 }
 bool CNetworkConfig::set_eappsk(QString str) {
-	eappsk = str;
-	return true;
+	if (str != "*") {
+		eappsk = str;
+		return true;
+	}
+	return false;
 }
 bool CNetworkConfig::set_nai(QString str, bool addQuotes) {
 	nai = addQuotes ? QUOTED(str) : str;

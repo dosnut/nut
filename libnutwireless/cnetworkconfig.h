@@ -130,6 +130,7 @@ namespace libnutwireless {
 			
 			//non config related
 			inline NetworkId getNetworkId() { return netId; }
+			inline bool hasValidNetworkId() { return (netId.id != -1 && netId.pid != -1); }
 			
 			//Set functions:
 			inline void set_proto(Protocols proto) { protocols = proto; };
