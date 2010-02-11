@@ -440,7 +440,7 @@ namespace qnut {
 			QString errors = errormsg.join(", ");
 			QMessageBox::critical(this, tr("Error on applying settings"),
 				tr("WPA supplicant reported the following errors:") + '\n' + errors);
-			qDebug(errors.toAscii().data());
+			qDebug(qPrintable(errors));
 			return;
 		}
 		
