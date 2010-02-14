@@ -226,7 +226,7 @@ namespace qnut {
 		
 		ui.proativeCheck->setChecked(toBool(m_Config.get_proactive_key_caching()));
 		
-		bool isGlobalConfigured = true;
+		bool isGlobalConfigured = !m_Config.hasValidNetworkId();
 		
 		ui.pskLeaveButton->setVisible(isGlobalConfigured);
 		ui.eapPasswordLeaveButton->setVisible(isGlobalConfigured);
