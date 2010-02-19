@@ -1,5 +1,5 @@
 project(nut)
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 
 MACRO(ADD_TARGET_PROPERTIES _target _name)
 	SET(_properties)

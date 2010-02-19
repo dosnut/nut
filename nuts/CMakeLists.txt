@@ -1,5 +1,5 @@
 project(nuts)
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 
 find_package(Qt4 COMPONENTS QtCore QtNetwork QtDBus REQUIRED)
 include(${QT_USE_FILE})
@@ -60,13 +60,15 @@ add_executable(${PROJECT_NAME}
 	${BISON_CONFIGPARSER_Y_OUTPUTS}
 )
 
-add_target_properties(${PROJECT_NAME} LINK_FLAGS -lnl)
+find_library(LIBNL nl)
 
 target_link_libraries(${PROJECT_NAME}
 	${QT_QTCORE_LIBRARY}
 	${QT_QTNETWORK_LIBRARY}
 	${QT_QTDBUS_LIBRARY}
+	${LIBNL}
 	${CMAKE_BINARY_DIR}/libnutcommon/libnutcommon.a
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/sbin)
+

@@ -1,5 +1,5 @@
 project(cnut)
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 
 find_package(Qt4 COMPONENTS QtCore QtNetwork QtDBus REQUIRED)
 include(${QT_USE_FILE})
@@ -32,3 +32,4 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+
