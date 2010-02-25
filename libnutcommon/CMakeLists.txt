@@ -24,4 +24,3 @@ add_library(${PROJECT_NAME} STATIC ${SOURCES_CPP} ${SOURCES_MOC_CPP})
 target_link_libraries(${PROJECT_NAME}
 	${QT_LIBRARIES}
 )
-

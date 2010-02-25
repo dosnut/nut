@@ -60,15 +60,14 @@ add_executable(${PROJECT_NAME}
 	${BISON_CONFIGPARSER_Y_OUTPUTS}
 )
 
-find_library(LIBNL nl)
+find_library(LIB_NL nl)
 
 target_link_libraries(${PROJECT_NAME}
 	${QT_QTCORE_LIBRARY}
 	${QT_QTNETWORK_LIBRARY}
 	${QT_QTDBUS_LIBRARY}
-	${LIBNL}
+	${LIB_NL}
 	${CMAKE_BINARY_DIR}/libnutcommon/libnutcommon.a
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/sbin)
-

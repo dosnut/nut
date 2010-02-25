@@ -74,8 +74,8 @@ add_executable(${PROJECT_NAME}
 	${TRANSLATIONS_QM}
 )
 
-add_target_properties(${PROJECT_NAME} LINK_FLAGS -lnutclient)
 add_target_properties(${PROJECT_NAME} LINK_FLAGS -L${nutclient_BINARY_DIR})
+add_target_properties(${PROJECT_NAME} LINK_FLAGS -lnutclient)
 
 target_link_libraries(${PROJECT_NAME}
 	${QT_QTCORE_LIBRARY}
