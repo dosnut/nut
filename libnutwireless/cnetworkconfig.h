@@ -2,6 +2,7 @@
 #define LIBNUTWIRELESS_CNETWORKCONFIG_H
 
 #include "hwtypes.h"
+#include <QTextStream>
 
 namespace libnutwireless {
 
