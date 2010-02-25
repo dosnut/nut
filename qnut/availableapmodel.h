@@ -45,9 +45,6 @@ namespace qnut {
 	class CAvailableAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		/// @brief Returns the cached list of scan results.
-		QList<libnutwireless::ScanResult> cachedScans() const { return m_Scans; };
-		
 		/**
 		 * @brief Creates the object and initializes the model according to the given wpa_supplicant object.
 		 * @param wpaSupplicant pointer to a wpa_supplicant (if NULL nothing is displayed)
@@ -56,6 +53,12 @@ namespace qnut {
 		CAvailableAPModel(libnutwireless::CWirelessHW * data = NULL, QObject * parent = 0);
 		/// @brief Destroyes the object.
 		~CAvailableAPModel();
+		
+		/// @brief Returns the cached list of scan results.
+		const QList<libnutwireless::ScanResult> & cachedScans() const { return m_Scans; }
+		
+		/// @brief Returns a cached scan result by a given model index
+		int scanResultIdByModelIndex(const QModelIndex & index) const;
 		
 		QVariant data(const QModelIndex & index, int role) const;
 		Qt::ItemFlags flags(const QModelIndex & index) const;
@@ -70,6 +73,12 @@ namespace qnut {
 	private:
 		void setWpaSupplicant(libnutwireless::CWirelessHW * m_WirelessAcces);
 		libnutwireless::CWirelessHW * m_WirelessAcces;
+		
+		typedef QList<int> IndexList;
+		
+		QHash<QString, IndexList *> m_GroupedScans;
+		
+		QList<QString> m_SSIDs;
 		QList<libnutwireless::ScanResult> m_Scans;
 	};
 	

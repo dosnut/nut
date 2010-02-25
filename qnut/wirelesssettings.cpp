@@ -292,7 +292,7 @@ namespace qnut {
 		
 		bool accepted = false;
 		if (index.isValid()) {
-			ScanResult scan = m_AvailableAPModel->cachedScans()[index.internalId()];
+			ScanResult scan = m_AvailableAPModel->cachedScans()[m_AvailableAPModel->scanResultIdByModelIndex(index)];
 			if (scan.opmode == OPM_ADHOC) {
 				CAdhocConfig dialog(m_Device->getWireless(), this);
 				accepted = dialog.execute(scan);

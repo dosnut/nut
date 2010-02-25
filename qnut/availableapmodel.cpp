@@ -25,6 +25,13 @@ namespace qnut {
 		m_WirelessAcces = NULL;
 	}
 	
+	int CAvailableAPModel::scanResultIdByModelIndex(const QModelIndex & index) const {
+		if (index.internalId() == -1)
+			return m_GroupedScans[m_SSIDs[index.row()]]->at(0);
+		else
+			return index.internalId();
+	}
+	
 	void CAvailableAPModel::setWpaSupplicant(CWirelessHW * wpaSupplicant) {
 		if (m_WirelessAcces == wpaSupplicant)
 			return;
@@ -38,16 +45,44 @@ namespace qnut {
 	
 	void CAvailableAPModel::updateScans() {
 		emit layoutAboutToBeChanged();
+		
 		m_Scans = m_WirelessAcces->getScanResults();
+		
+		qDeleteAll(m_GroupedScans);
+		
+		IndexList * target;
+		for (int i = 0; i < m_Scans.count(); i++) {
+			target = m_GroupedScans.value(m_Scans[i].ssid, NULL);
+			if (!target) {
+				target = new IndexList();
+				m_GroupedScans.insert(m_Scans[i].ssid, target);
+			}
+			
+			target->append(i);
+		}
+		
+		m_SSIDs = m_GroupedScans.keys();
+		
 		emit layoutChanged();
 	}
 	
 	bool CAvailableAPModel::hasChildren(const QModelIndex & parent) const {
-		return !parent.isValid();
+		return !parent.isValid() || parent.internalId() == -1;
 	}
 	
 	int CAvailableAPModel::rowCount(const QModelIndex & parent) const {
-		return parent.isValid() ? 0 : m_Scans.count();
+		if (m_SSIDs.isEmpty())
+			return 0;
+		
+		if (parent.isValid() && parent.internalId() == -1) {
+			IndexList * scans = m_GroupedScans[m_SSIDs[parent.row()]];
+			return scans->size();
+		}
+		
+		if (!parent.isValid())
+			return m_SSIDs.size();
+		
+		return 0;
 	}
 	
 	int CAvailableAPModel::columnCount(const QModelIndex &) const {
@@ -55,7 +90,7 @@ namespace qnut {
 	}
 	
 	QVariant CAvailableAPModel::data(const QModelIndex & index, int role) const {
-		if (m_Scans.isEmpty())
+		if (m_SSIDs.isEmpty())
 			return QVariant();
 		
 		if (!index.isValid())
@@ -67,13 +102,18 @@ namespace qnut {
 		if (role != Qt::DisplayRole)
 			return QVariant();
 		
+		if (index.internalId() == -1 && index.column() == UI_AVLAP_BSSID)
+			return tr("multiple");
+		
+		int scanId = scanResultIdByModelIndex(index);
+		
 		switch (index.column()) {
 		case UI_AVLAP_SSID:
-			return m_Scans[index.row()].ssid;
+			return index.parent().isValid() ? '#' + QString::number(index.row()) : m_Scans[scanId].ssid;
 		case UI_AVLAP_CHANNEL:
 			return QString::number(frequencyToChannel(m_Scans[index.row()].freq));
 		case UI_AVLAP_KEYMGMT: {
-				int keyFlags = m_Scans[index.row()].keyManagement;
+				int keyFlags = m_Scans[scanId].keyManagement;
 				
 				if (keyFlags == KM_UNDEFINED)
 					return tr("undefined");
@@ -87,7 +127,7 @@ namespace qnut {
 				if (keyFlags == KM_WPA_NONE)
 					return tr("WPA PSK (ad-hoc)");
 				
-				int protocolFlags = m_Scans[index.row()].protocols;
+				int protocolFlags = m_Scans[scanId].protocols;
 				
 				QStringList results;
 				QStringList wpaPrefixes;
@@ -107,14 +147,14 @@ namespace qnut {
 				return results.join(", ");
 			}
 		case UI_AVLAP_BSSID:
-			return m_Scans[index.row()].bssid.toString();
+			return m_Scans[scanId].bssid.toString();
 		case UI_AVLAP_QUALITY: {
-				SignalQuality signal = m_Scans[index.row()].signal;
+				SignalQuality signal = m_Scans[scanId].signal;
 				return QString::number(signal.quality.value) + '/'+
 					QString::number(signal.quality.maximum);
 			}
 		case UI_AVLAP_LEVEL: {
-				SignalQuality signal = m_Scans[index.row()].signal;
+				SignalQuality signal = m_Scans[scanId].signal;
 				switch (signal.type) {
 				case WSR_RCPI:
 					return QString::number(signal.level.rcpi) + "dBm";
@@ -128,7 +168,7 @@ namespace qnut {
 				}
 			}
 		case UI_AVLAP_ENC: {
-				int flags = m_Scans[index.row()].pairwise;
+				int flags = m_Scans[scanId].pairwise;
 				QStringList results;
 				
 				if (flags == PCI_UNDEFINED)
@@ -142,7 +182,7 @@ namespace qnut {
 						results << "TKIP";
 				}
 				
-				switch (m_Scans[index.row()].group) {
+				switch (m_Scans[scanId].group) {
 				case GCI_NONE:
 					return tr("none") + "; " + results.join(", ");
 				case GCI_WEP104:
@@ -198,13 +238,31 @@ namespace qnut {
 	}
 	
 	QModelIndex CAvailableAPModel::index(int row, int column, const QModelIndex & parent) const {
-		if (!m_Scans.isEmpty() || parent.isValid() || row >= m_Scans.count())
-			return createIndex(row, column, row);
-		else
+		if (m_SSIDs.isEmpty())
 			return QModelIndex();
+		
+		if (parent.isValid() && parent.internalId() == -1)
+			return createIndex(row, column, m_GroupedScans[m_SSIDs[parent.row()]]->at(row));
+		
+		if (!parent.isValid()) {
+			IndexList * scans = m_GroupedScans[m_SSIDs[row]];
+			return createIndex(row, column, scans->size() > 1 ? -1 : scans->at(0));
+		}
+		
+		return QModelIndex();
 	}
 	
-	QModelIndex CAvailableAPModel::parent(const QModelIndex &) const {
+	QModelIndex CAvailableAPModel::parent(const QModelIndex & index) const {
+		if (m_Scans.isEmpty() || !index.isValid())
+			return QModelIndex();
+		
+		if (index.internalId() == -1)
+			return QModelIndex();
+		
+		IndexList * scans = m_GroupedScans[m_Scans[index.internalId()].ssid];
+		if (scans->size() > 1)
+			return createIndex(m_SSIDs.indexOf(m_Scans[index.internalId()].ssid), 0, -1);
+		
 		return QModelIndex();
 	}
 	
@@ -219,8 +277,8 @@ namespace qnut {
 		if (!source)
 			return true;
 		
-		int leftIndex  = left.internalId();
-		int rightIndex = right.internalId();
+		int leftIndex  = source->scanResultIdByModelIndex(left);
+		int rightIndex = source->scanResultIdByModelIndex(right);
 		
 		switch (left.column()) {
 		case UI_AVLAP_SSID:
