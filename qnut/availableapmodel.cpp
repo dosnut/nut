@@ -48,7 +48,10 @@ namespace qnut {
 		
 		m_Scans = m_WirelessAcces->getScanResults();
 		
-		qDeleteAll(m_GroupedScans);
+		foreach (IndexList * i, m_GroupedScans)
+			delete i;
+		
+		m_GroupedScans.clear();
 		
 		IndexList * target;
 		for (int i = 0; i < m_Scans.count(); i++) {
