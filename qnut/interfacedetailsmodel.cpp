@@ -77,7 +77,7 @@ namespace qnut {
 			case 3:
 				return tr("Gateway");
 			default:
-				return tr("DNS sever #%1").arg(index.row()-4);
+				return tr("DNS server #%1").arg(index.row()-4);
 			}
 			break;
 		case IFDET_MOD_VALUE:
