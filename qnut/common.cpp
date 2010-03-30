@@ -65,10 +65,15 @@ namespace qnut {
 	}
 
 	QString shortSummary(CDevice * device) {
-		if (device->getState() < DS_UNCONFIGURED)
-			return device->getName() + ": " + toStringTr(device->getState());
-		else
-			return device->getName() + ": " + toStringTr(device->getState()) + ", " + activeIP(device);
+		QString result = device->getName() + ": " + toStringTr(device->getState());
+		
+		if (device->getState() > DS_ACTIVATED)
+			result += ' ' + ('(' + currentNetwork(device)) + ')';
+		
+		if (device->getState() > DS_CARRIER)
+			result += ", " + activeIP(device);
+		
+		return result;
 	}
 
 	QString detailsSummary(CDevice * device) {
