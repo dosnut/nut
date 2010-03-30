@@ -26,11 +26,13 @@ CNetworkConfig::CNetworkConfig() {
 	wep_key1 = QString();
 	wep_key2 = QString();
 	wep_key3 = QString();
-	wep_tx_keyidx = -1; 
-	peerkey = QOOL_UNDEFINED; 
-	eap = EAPM_UNDEFINED; 
-	fragment_size = -1; 
-	nai = QString(); 
+	wep_tx_keyidx = -1;
+	peerkey = QOOL_UNDEFINED;
+	eap = EAPM_UNDEFINED;
+	fragment_size = -1;
+	nai = QString();
+	netId.id = -1;
+	netId.pid = -1;
 }
 
 CNetworkConfig::CNetworkConfig(const CNetworkConfig &c) :
@@ -82,7 +84,8 @@ CNetworkConfig::CNetworkConfig(const CNetworkConfig &c) :
 	fragment_size(c.fragment_size), 
 	eappsk(c.eappsk), 
 	nai(c.nai), 
-	pac_file(c.pac_file)
+	pac_file(c.pac_file),
+	netId(c.netId)
 {}
 
 
