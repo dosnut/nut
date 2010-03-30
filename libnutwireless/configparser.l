@@ -12,6 +12,7 @@
 	int line_num = 1;
 	unsigned char char_buff = 0;
 	libnutwireless::CConfigParser * libnutcconfigparser;
+	void configparsererror (libnutwireless::CConfigParser *cp, const char* s);
 	#ifdef USED_CMAKE
 	#include "configparser_yacc.hpp"
 	#else
@@ -117,7 +118,7 @@ pac_file     return PAC_FILE;
 <StrVal>{
 	\"          { BEGIN(INITIAL); yylval.str->append("\""); return STRVAL; }	
 	[^\\\"\n]*  { yylval.str->append(yytext); }
-	\n          { printf("Unexpected newline in string, ending string\n");
+	\n          { configparsererror(libnutcconfigparser, "Unexpected newline in string, ending string\n");
 	              ++line_num;
 	              BEGIN(INITIAL); yylval.str->append("\""); return STRVAL;
 	            }

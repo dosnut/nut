@@ -7,7 +7,7 @@
 	
 	using namespace libnutwireless;
 	
-	void configparsererror (CConfigParser *cp, const char* s);
+	void configparsererror (libnutwireless::CConfigParser *cp, const char* s);
 	
 	//Check if invoked action worked (e.g. newDevice -> device creation worked)
 	#define CHECK(action) do { if (!cp->getCurrentNetwork() || !(cp->getCurrentNetwork()->action)) { printf("error\n"); YYERROR;} } while (0)
@@ -160,6 +160,6 @@ networkoption: '\n'
 
 %%
 
-void configparsererror (CConfigParser *cp, const char* msg) {
+void configparsererror (libnutwireless::CConfigParser *cp, const char* msg) {
 	cp->parseError(line_num, QString::fromUtf8(msg));
 }
