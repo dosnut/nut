@@ -474,7 +474,7 @@ namespace nuts {
 			arguments << "-i" << m_name;
 			arguments << "-D" << m_config->wpaDriver();
 			arguments << "-c" << m_config->wpaConfigFile();
-			m_wpa_supplicant->start("/sbin/wpa_supplicant", arguments);
+			m_wpa_supplicant->start("wpa_supplicant", arguments);
 			if (m_wpa_supplicant->waitForStarted(-1)) return true;
 			log << "Couldn't start wpa_supplicant" << endl;
 			delete m_wpa_supplicant;
