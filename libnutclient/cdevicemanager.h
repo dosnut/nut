@@ -41,6 +41,7 @@ namespace libnutclient {
 // 		friend class QDBusConnection; //neseccary for qdbuscalls?
 	private:
 		QDBusConnection m_dbusGlobalConnection;
+		QDBusServiceWatcher * m_dbusServiceWatcher;
 		DBusDeviceManagerInterface * m_dbusDevmgr;
 		QHash<QDBusObjectPath, CDevice* > m_dbusDevices;
 		CLog * log;

@@ -69,8 +69,10 @@ bool CDeviceManager::init(CLog * inlog) {
 	}
 	//Attach to DbusDevicemanager
 	m_dbusDevmgr = new DBusDeviceManagerInterface(NUT_DBUS_URL, m_dbusPath,*m_dbusConnection, this);
+	m_dbusServiceWatcher = new QDBusServiceWatcher(NUT_DBUS_URL, *m_dbusConnection, QDBusServiceWatcher::WatchForOwnerChange, this);
 
-	connect(m_dbusConnectionInterface, SIGNAL(serviceOwnerChanged(const QString &, const QString &, const QString &)), this, SLOT(dbusServiceOwnerChanged(const QString &, const QString &, const QString &)));
+
+	connect(m_dbusServiceWatcher, SIGNAL(serviceOwnerChanged(const QString &, const QString &, const QString &)), this, SLOT(dbusServiceOwnerChanged(const QString &, const QString &, const QString &)));
 	//Connect dbus-signals to own slots:
 	connect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 	connect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
@@ -145,6 +147,10 @@ void CDeviceManager::dbusKilled(bool doinit) {
 	if (m_dbusDevmgr) {
 		delete m_dbusDevmgr;
 		m_dbusDevmgr = NULL;
+	}
+	if (m_dbusServiceWatcher) {
+		delete m_dbusServiceWatcher;
+		m_dbusServiceWatcher = NULL;
 	}
 	if (doinit) { //kill came from error on accessing dbus
 		//init will start polling
