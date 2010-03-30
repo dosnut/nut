@@ -66,17 +66,11 @@ namespace qnut {
 	 * @param address the host address to convert
 	 */
 	inline QString toStringDefault(QHostAddress address) {
-		if (address.isNull())
-			return QObject::tr("none");
-		else
-			return address.toString();
+		return address.isNull() ? QObject::tr("none") : address.toString();
 	}
 	
 	inline QString getNameDefault(libnutclient::CEnvironment * environment) {
-		if (environment->getName().isEmpty())
-			return QObject::tr("default");
-		else
-			return environment->getName();
+		return environment->getName().isEmpty() ? QObject::tr("default") : environment->getName();
 	}
 }
 
