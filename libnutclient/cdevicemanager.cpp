@@ -13,6 +13,7 @@ using namespace libnutcommon;
 CDeviceManager::CDeviceManager(QObject * parent) :
 	CLibNut(parent),
 	m_dbusGlobalConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("libnut_system_bus"))),
+	m_dbusServiceWatcher(0),
 	m_dbusDevmgr(0),
 	log(0),
 	m_nutsstate(false),
