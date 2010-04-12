@@ -136,7 +136,7 @@ namespace qnut {
 				message = tr("... got carrier but needs configuration.\n\nKlick here to open the device details.");
 				break;
 			case libnutcommon::DS_ACTIVATED:
-				message = tr("... is now activated an waits for carrier.");
+				message = tr("... is now activated and waits for carrier.");
 				break;
 			case libnutcommon::DS_DEACTIVATED: 
 				message = tr("... is now deactivated");
@@ -155,7 +155,7 @@ namespace qnut {
 				message = tr("%1 got carrier but needs configuration.\n\nClick here to open the device details.");
 				break;
 			case libnutcommon::DS_ACTIVATED:
-				message = tr("%1 is now activated an waits for carrier.");
+				message = tr("%1 is now activated and waits for carrier.");
 				break;
 			case libnutcommon::DS_DEACTIVATED:
 				message = tr("%1 is now deactivated");
