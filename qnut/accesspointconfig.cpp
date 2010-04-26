@@ -138,6 +138,29 @@ namespace qnut {
 	
 	bool CAccessPointConfig::execute() {
 		setAuthConfig(0);
+		
+		ui.pskLeaveButton->setVisible(false);
+		ui.eapPasswordLeaveButton->setVisible(false);
+		ui.keyPasswordLeaveButton->setVisible(false);
+		ui.eapPSKLeaveButton->setVisible(false);
+		
+		ui.wep0LeaveButton->setVisible(false);
+		ui.wep1LeaveButton->setVisible(false);
+		ui.wep2LeaveButton->setVisible(false);
+		ui.wep3LeaveButton->setVisible(false);
+		
+		ui.pskLeaveButton->setChecked(false);
+		ui.eapPasswordLeaveButton->setChecked(false);
+		ui.keyPasswordLeaveButton->setChecked(false);
+		ui.eapPSKLeaveButton->setChecked(false);
+		
+		ui.wep0LeaveButton->setChecked(false);
+		ui.wep1LeaveButton->setChecked(false);
+		ui.wep2LeaveButton->setChecked(false);
+		ui.wep3LeaveButton->setChecked(false);
+		
+		ui.autoEnableCheck->setChecked(true);
+		
 		m_CurrentID = -1;
 		return exec();
 	}
@@ -146,7 +169,7 @@ namespace qnut {
 		ui.ssidEdit->setText(scanResult.ssid);
 		ui.bssidEdit->setText(scanResult.bssid.toString());
 		
-		if ((scanResult.keyManagement & KM_WPA_EAP) || (scanResult.keyManagement & KM_IEEE8021X))
+		if ((scanResult.keyManagement & (KM_WPA_EAP | KM_IEEE8021X)))
 			ui.keyManagementCombo->setCurrentIndex(2);
 		else if (scanResult.keyManagement & KM_WPA_PSK)
 			ui.keyManagementCombo->setCurrentIndex(1);
@@ -183,6 +206,8 @@ namespace qnut {
 		ui.wep1LeaveButton->setChecked(false);
 		ui.wep2LeaveButton->setChecked(false);
 		ui.wep3LeaveButton->setChecked(false);
+		
+		ui.autoEnableCheck->setChecked(true);
 		
 		m_CurrentID = -1;
 		
@@ -227,6 +252,7 @@ namespace qnut {
 		ui.proativeCheck->setChecked(toBool(m_Config.get_proactive_key_caching()));
 		
 		bool isGlobalConfigured = !m_Config.hasValidNetworkId();
+		qDebug("ID %i | PID %i", m_Config.netId.id, m_Config.netId.pid);
 		
 		ui.pskLeaveButton->setVisible(isGlobalConfigured);
 		ui.eapPasswordLeaveButton->setVisible(isGlobalConfigured);
@@ -257,7 +283,7 @@ namespace qnut {
 		}
 		
 		ui.scanCheck->setChecked(m_Config.get_scan_ssid());
-		ui.autoEnableCheck->setChecked(m_Config.get_disabled());
+		ui.autoEnableCheck->setChecked(!m_Config.get_disabled());
 		
 		m_CurrentID = id;
 		
