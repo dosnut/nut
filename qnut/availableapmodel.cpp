@@ -109,13 +109,17 @@ namespace qnut {
 		if (index.internalId() == -1 && index.column() == UI_AVLAP_BSSID)
 			return tr("multiple");
 		
+		if (index.internalId() == -1 && index.column() == UI_AVLAP_CHANNEL)
+			return QString('-');
+		
+		
 		int scanId = scanResultIdByModelIndex(index);
 		
 		switch (index.column()) {
 		case UI_AVLAP_SSID:
 			return index.parent().isValid() ? '#' + QString::number(index.row()) : m_Scans[scanId].ssid;
 		case UI_AVLAP_CHANNEL:
-			return QString::number(frequencyToChannel(m_Scans[index.row()].freq));
+			return QString::number(frequencyToChannel(m_Scans[scanId].freq));
 		case UI_AVLAP_KEYMGMT: {
 				int keyFlags = m_Scans[scanId].keyManagement;
 				
