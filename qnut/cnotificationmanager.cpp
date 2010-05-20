@@ -123,50 +123,36 @@ namespace qnut {
 		if (!uiDevice)
 			return;
 		
-		QString title;
+		QString title = tr("QNUT");
 		QString message;
 		QSystemTrayIcon * trayIcon = m_UIDeviceIcons[uiDevice];
-		if (trayIcon->isVisible()) {
-			title = tr("QNUT - %1 ...").arg(uiDevice->device()->getName());
-			switch (state) {
-			case libnutcommon::DS_UP:
-				message = tr("... is now up and running.");
-				break;
-			case libnutcommon::DS_UNCONFIGURED:
-				message = tr("... got carrier but needs configuration.\n\nKlick here to open the device details.");
-				break;
-			case libnutcommon::DS_ACTIVATED:
-				message = tr("... is now activated and waits for carrier.");
-				break;
-			case libnutcommon::DS_DEACTIVATED: 
-				message = tr("... is now deactivated");
-				break;
-			default:
-				return;
-			}
+		
+		switch (state) {
+		case libnutcommon::DS_UP:
+			message = tr("%2 is now up and running on network: %1")
+				.arg(currentNetwork(uiDevice->device()));
+			break;
+		case libnutcommon::DS_UNCONFIGURED:
+			message = tr("%2 got carrier (to network: %1) but needs configuration.\n\nClick here to open the device details.")
+				.arg(currentNetwork(uiDevice->device()));
+			break;
+		case libnutcommon::DS_ACTIVATED:
+			message = tr("%1 is now activated and waits for carrier.");
+			break;
+		case libnutcommon::DS_DEACTIVATED:
+			message = tr("%1 is now deactivated");
+			break;
+		default:
+			return;
 		}
-		else {
-			title = tr("QNUT");
-			switch (state) {
-			case libnutcommon::DS_UP:
-				message = tr("%1 is now up and running.");
-				break;
-			case libnutcommon::DS_UNCONFIGURED:
-				message = tr("%1 got carrier but needs configuration.\n\nClick here to open the device details.");
-				break;
-			case libnutcommon::DS_ACTIVATED:
-				message = tr("%1 is now activated and waits for carrier.");
-				break;
-			case libnutcommon::DS_DEACTIVATED:
-				message = tr("%1 is now deactivated");
-				break;
-			default:
-				return;
-			}
-			
-			message = message.arg(uiDevice->device()->getName());
+		
+		if (trayIcon->isVisible())
+			title += " - " + uiDevice->device()->getName();
+		
+		message = message.arg(trayIcon->isVisible() ? tr("Device") : uiDevice->device()->getName());
+		
+		if (!trayIcon->isVisible())
 			trayIcon = m_MainIcon;
-		}
 		
 		trayIcon->showMessage(title, message, QSystemTrayIcon::Information, 4000);
 	}
