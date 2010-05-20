@@ -5,6 +5,8 @@
 #include <netlink/genl/ctrl.h>
 #include <linux/nl80211.h>
 #include <QSocketNotifier>
+#include <QTimerEvent>
+#include "conversion.h"
 
 
 namespace libnutwireless {
@@ -60,7 +62,7 @@ void CNL80211::timerEvent(QTimerEvent *event) {
 
 bool CNL80211::open() {
 	if (m_connected)
-		return;
+		return true;
 	m_nlSocket = nl_socket_alloc();
 	if(!m_nlSocket) {
 		emit message("Could not create netlink socket");
@@ -120,21 +122,17 @@ void CNL80211::readNlMessage() {
 int CNL80211::parseNlScanResult(nl_msg * msg) {
 	struct nlattr * attr_buffer[NL80211_ATTR_MAX + 1];
 	struct nlmsghdr * msg_hdr = nlmsg_hdr(msg);
-	struct genlmsghdr * msg_header = nlmsg_data(msg_hdr);
+	struct genlmsghdr * msg_header = (struct genlmsghdr *) nlmsg_data(msg_hdr);
 	struct nlattr * bss_buffer[NL80211_BSS_MAX + 1]; //bss = basic service set
 	ScanResult scanresult;
 	//This is the struct to check the validity of the attributes. See enum nl80211_bss
-	struct nla_policy bss_policy[NL80211_BSS_MAX + 1] = {
-		[NL80211_BSS_TSF] = { .type = NLA_U64 },
-		[NL80211_BSS_FREQUENCY] = { .type = NLA_U32 },
-		[NL80211_BSS_BSSID] = { },
-		[NL80211_BSS_BEACON_INTERVAL] = { .type = NLA_U16 },
-		[NL80211_BSS_CAPABILITY] = { .type = NLA_U16 },
-		[NL80211_BSS_INFORMATION_ELEMENTS] = { },
-		[NL80211_BSS_SIGNAL_MBM] = { .type = NLA_U32 },
-		[NL80211_BSS_SIGNAL_UNSPEC] = { .type = NLA_U8 },
-		[NL80211_BSS_STATUS] = { .type = NLA_U32 },
-	};
+	struct nla_policy bss_policy[NL80211_BSS_MAX + 1];
+	bss_policy[NL80211_BSS_TSF].type = NLA_U64;
+	bss_policy[NL80211_BSS_FREQUENCY].type = NLA_U32;
+	bss_policy[NL80211_BSS_BEACON_INTERVAL].type = NLA_U16;
+	bss_policy[NL80211_BSS_SIGNAL_MBM].type = NLA_U32;
+	bss_policy[NL80211_BSS_SIGNAL_UNSPEC].type = NLA_U8;
+
 	if (msg_hdr->nlmsg_flags & NLM_F_MULTI)
 		qDebug() << "netlink: Mutlipart message";
 
@@ -166,19 +164,19 @@ int CNL80211::parseNlScanResult(nl_msg * msg) {
 		scanresult.signal.type = WSR_UNKNOWN;
 		scanresult.signal.quality.value = nla_get_u8(bss_buffer[NL80211_BSS_SIGNAL_UNSPEC]);
 	}
-	if (bss_buffer[NL80211_BSS_INFORMATION_ELEMENTS])
-		print_ies(nla_data(bss[NL80211_BSS_INFORMATION_ELEMENTS]),
-			  nla_len(bss[NL80211_BSS_INFORMATION_ELEMENTS]),
-			  params->unknown, params->type);
+// 	if (bss_buffer[NL80211_BSS_INFORMATION_ELEMENTS])
+// 		print_ies(nla_data(bss_buffer[NL80211_BSS_INFORMATION_ELEMENTS]),
+// 			  nla_len(bss_buffer[NL80211_BSS_INFORMATION_ELEMENTS]),
+// 			  params->unknown, params->type);
 
 	return NL_SKIP;
 }
 
-static int cbForScanResults(struct nl_msg *msg, void *arg) {
-	libnutwireless::CNL80211 * obj = dynamic_cast<libnutwireless::CNL80211>(arg);
+static int cbForScanResults(struct nl_msg *msg, void * arg) {
+	libnutwireless::CNL80211 * obj = static_cast<libnutwireless::CNL80211*>(arg);
 	if (!obj)
 		return NL_SKIP;
-	return obj->parseNlScanResult(nl_msg * msg);
+	return obj->parseNlScanResult(msg);
 }
 
 void CNL80211::scan() {
@@ -253,6 +251,4 @@ QList<quint32> CNL80211::getSupportedChannels() {
 QList<quint32> CNL80211::getSupportedFrequencies() {
 	return m_supportedFrequencies;
 }
-	
-	
 }

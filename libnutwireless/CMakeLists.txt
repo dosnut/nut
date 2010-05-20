@@ -17,6 +17,7 @@ set(SOURCES_MOC_H
 	cwireless.h
 	cwirelesshw.h
 	cwexthw.h
+	cnl80211.h
 # 	cnetworkconfig.h
 # 	conversion.h
 # 	cconfigparser.h
@@ -31,6 +32,7 @@ set(SOURCES_CPP
 	cwireless.cpp
 	cwexthw.cpp
 	cwexthw_parse.cpp
+	cnl80211.cpp
 	cnetworkconfig.cpp
 	conversion.cpp
 	cconfigparser.cpp

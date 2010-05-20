@@ -43,12 +43,12 @@ class CNL80211: public CWirelessHW {
 		
 	protected:
 		virtual void timerEvent(QTimerEvent *event);
-		void readSignalQuality();
+		void readSignalQuality() {};
 	protected slots:
 		void readNlMessage();
 	
 	public:
-		CNL80211(QObject* parent);
+		CNL80211(QObject* parent, QString ifname);
 		~CNL80211();
 		virtual bool open();
 		virtual void close();
