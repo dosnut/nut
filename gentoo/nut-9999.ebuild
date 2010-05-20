@@ -1,95 +1,71 @@
+# Copyright 1999-2009 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
 
-EGIT_REPO_URI="git://repo.or.cz/nut.git"
+EGIT_REPO_URI="git://stbuehler.de/nut.git"
 
-inherit bash-completion eutils flag-o-matic git
+inherit git bash-completion cmake-utils
 
 DESCRIPTION="An advanced network manager with event based script execution"
-HOMEPAGE="http://repo.or.cz/nut.git"
+HOMEPAGE="http://redmine.stbuehler.de/projects/show/nut"
 SRC_URI=""
 
-LICENSE="GPL-2.0"
+LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~x86 ~amd64"
 IUSE="debug wifi X"
 
 RDEPEND="
-		X? ( >=x11-libs/qt-gui-4.4.0 )
-		X? ( >=x11-libs/qt-svg-4.4.0 )
-		>=x11-libs/qt-dbus-4.4.0
-		>=x11-libs/qt-core-4.4.0
-		sys-apps/dbus
-		wifi? ( >=net-wireless/wpa_supplicant-0.6.0 )
-		wifi? ( >=net-wireless/wireless-tools-29 )
-		bash-completion? ( app-shells/bash-completion )"
+	X? ( >=x11-libs/qt-gui-4.4.0 )
+	X? ( >=x11-libs/qt-svg-4.4.0 )
+	>=x11-libs/qt-dbus-4.4.0
+	>=x11-libs/qt-core-4.4.0
+	sys-apps/dbus
+	wifi? ( >=net-wireless/wpa_supplicant-0.6.0 )
+	wifi? ( >=net-wireless/wireless-tools-29 )
+	bash-completion? ( app-shells/bash-completion )"
 DEPEND="${RDEPEND}
 	sys-kernel/linux-headers
-	>=dev-libs/libnl-1.0_pre6-r1
+	>=dev-libs/libnl-1.1-r1
 	sys-devel/bison
-	sys-devel/flex"
+	sys-devel/flex
+	>=dev-util/cmake-2.8.1"
 
 S=${WORKDIR}/${EGIT_PROJECT}
 
-
 pkg_setup() {
-	if ! qmake --version | grep -i qt4 ; then
-		eerror "qmake does not point to qmake-qt4"
-		die "Install qmake-qt4 and set symlinks correctly"
-	fi
 	enewgroup netdev
 }
 
-
 src_unpack() {
-	#check version:
+	# check version:
 	if [ "$PV" != 9999 ]; then
 		EGIT_TREE="v${PV}"
 	fi
 	git_src_unpack
-
-	#Since version 0.4.4 we're using a newer libnl version
-	#check which version of libnl is installed, if version is older than pre8,
-	#use old interface for pre6
-	if ! has_version \>=dev-libs/libnl-1.0\_pre8 ; then
-		epatch "$S"/gentoo/files/gentoo_libnl8to6.diff || die
-	fi
-
-	epatch "$S"/gentoo/files/gentoo_linux_headers.diff || die
 }
 
-src_compile() {
-	cd "${S}"
-	config_defines=""
-	config_release=""
-	if use debug; then 
-		config_release="debug"
-	else
-		config_release="release"
-		config_defines="$config_defines QT_NO_DEBUG_OUTPUT"
+src_configure() {
+	if ! use debug; then
+		append-cppflags -DQT_NO_DEBUG_OUTPUT
 	fi
 
 	if ! use wifi; then
-		config_defines="$config_defines LIBNUT_NO_WIRELESS QNUT_NO_WIRELESS"
+		append-cppflags -DLIBNUT_NO_WIRELESS
+		append-cppflags -DQNUT_NO_WIRELESS
 	fi
-	
-	if ! use X; then
-		#Patch nut.pro: we don't need libnutclient,libnutwireless and qnut
-		sed --in-place -e :a -e "s/libnutwireless\|libnutclient\|qnut//;ta" nut.pro
-	fi
-	
-	qmake -recursive -Wall "CONFIG+=$config_release" "DEFINES+=$config_defines"
-	emake -j1 || die
+
+	cmake-utils_src_configure
 }
 
 src_install() {
-	
-	make INSTALL_ROOT="${D}" install || die
-
+	cmake-utils_src_install
 	exeinto /etc/init.d/
 	newexe "${S}"/gentoo/nuts.init nuts
 	dodir /etc/nuts
 	insinto /etc/nuts/
 	newins "${S}"/docs/config.example nuts.config.example
-	
+
 	exeinto /etc/nuts/
 	newexe "${S}"/nuts/dispatch dispatch
 	dodir /etc/nuts/events
@@ -109,6 +85,8 @@ src_install() {
 }
 
 pkg_postinst() {
+	bash-completion_pkg_postinst
+
 	elog "Nuts' config file is located at /etc/nuts/nuts.config."
 	elog "Edit this file to your needs."
 	elog "An example config file can be found at /etc/nuts.config.example."
@@ -124,6 +102,4 @@ pkg_postinst() {
 	elog "nuts as well as qnut support event based script execution"
 	elog "Have look at /etc/nuts/dispatch to see how to write your own (server) scripts and where to put them."
 	elog "For qnut, please have a look at the man page"
-	echo
-	bash-completion_pkg_postinst
 }
