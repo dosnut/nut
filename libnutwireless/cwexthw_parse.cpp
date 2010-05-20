@@ -804,6 +804,7 @@ void CWextHW::readScanResults() {
 	}
 	else {
 		qWarning() << tr("No Scanresults available");
+		setScanResults(QList<WextRawScan>());
 	}
 	if (buffer) {
 		free(buffer);
