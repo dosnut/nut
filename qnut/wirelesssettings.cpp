@@ -120,7 +120,7 @@ namespace qnut {
 		m_AutoSaveNetworksAction     = new QAction(/*QIcon(UI_ICON_AUTOSAVE), */tr("&Autosave global config"), this);
 		importNetworksAction         = new QAction(/*QIcon(UI_ICON_IMPORT), */tr("&Import networks..."), this);
 		exportNetworkAction          = new QAction(/*QIcon(UI_ICON_EXPORT), */tr("E&xport selected network..."), this);
-		exportMultipleNetworksAction = new QAction(/*QIcon(UI_ICON_MULTIEXPORT), */tr("Export &multiple networks..."), this);
+		exportMultipleNetworksAction = new QAction(/*QIcon(UI_ICON_MULTIEXPORT), */tr("Export &all networks..."), this);
 		
 		addNetworkAction      = new QAction(QIcon(UI_ICON_ADD), tr("Add &network"), this);
 		addAdhocAction        = new QAction(QIcon(UI_ICON_ADD_ADHOC), tr("Add ad-&hoc"), this);
@@ -191,6 +191,7 @@ namespace qnut {
 		ui.managedView->addAction(m_SwitchNetworkAction);
 		ui.managedView->addAction(m_ConfigureNetworkAction);
 		ui.managedView->addAction(getSeparator(this));
+		ui.managedView->addAction(addNetworkAction);
 		ui.managedView->addAction(addAdhocAction);
 		ui.managedView->addAction(m_RemoveNetworkAction);
 		ui.managedView->addAction(getSeparator(this));
