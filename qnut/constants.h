@@ -101,6 +101,7 @@
 #define UI_SETTINGS_HIDENOTIFICATIONS   "hideNotifications"
 
 #define UI_SETTINGS_WIRELESSSETTINGS    "WirelessSettings"
+#define UI_SETTINGS_SHOWSCANRESULTS     "showScanResults"
 
 #define UI_SETTINGS_NETWORKS            "networks"
 

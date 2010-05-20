@@ -35,12 +35,17 @@ namespace qnut {
 		if (m_Supplicant) {
 			updateNetworks();
 			connect(m_Supplicant, SIGNAL(networkListUpdated()), this, SLOT(updateNetworks()));
+			connect(m_Supplicant, SIGNAL(stateChanged(bool)), this, SLOT(updateNetworks()));
 		}
 	}
 	
 	void CManagedAPModel::updateNetworks() {
 		emit layoutAboutToBeChanged();
 		m_Networks = m_Supplicant->listNetworks();
+		m_CurrentID = -1;
+		foreach (libnutwireless::ShortNetworkInfo i, m_Networks)
+			if (i.flags == NF_CURRENT)
+				m_CurrentID = i.id;
 		emit layoutChanged();
 	}
 	

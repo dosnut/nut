@@ -19,9 +19,7 @@ set(FORMS
 
 set(SOURCES_MOC_H
 	connectionmanager.h
-# 	constants.h
 	ipconfiguration.h
-# 	common.h
 	interfacedetailsmodel.h
 	wirelesssettings.h
 	managedapmodel.h

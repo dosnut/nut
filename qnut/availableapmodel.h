@@ -45,6 +45,9 @@ namespace qnut {
 	class CAvailableAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
+		/// @brief Type definition for a list of ids
+		typedef QList<int> IndexList;
+		
 		/**
 		 * @brief Creates the object and initializes the model according to the given wpa_supplicant object.
 		 * @param wpaSupplicant pointer to a wpa_supplicant (if NULL nothing is displayed)
@@ -57,8 +60,11 @@ namespace qnut {
 		/// @brief Returns the cached list of scan results.
 		const QList<libnutwireless::ScanResult> & cachedScans() const { return m_Scans; }
 		
-		/// @brief Returns a cached scan result by a given model index
+		/// @brief Returns a cached scan result id by a given model index
 		int scanResultIdByModelIndex(const QModelIndex & index) const;
+		
+		/// @brief Returns a pointer to a list of scan result ids that match the provided SSID
+		IndexList * scanResultIdListBySSID(QString ssid) const { return m_GroupedScans.value(ssid, NULL); }
 		
 		QVariant data(const QModelIndex & index, int role) const;
 		Qt::ItemFlags flags(const QModelIndex & index) const;
@@ -68,13 +74,13 @@ namespace qnut {
 		bool hasChildren(const QModelIndex & parent = QModelIndex()) const;
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
+	signals:
+		void cachedScansUpdated();
 	private slots:
 		void updateScans();
 	private:
 		void setWpaSupplicant(libnutwireless::CWirelessHW * m_WirelessAcces);
 		libnutwireless::CWirelessHW * m_WirelessAcces;
-		
-		typedef QList<int> IndexList;
 		
 		QHash<QString, IndexList *> m_GroupedScans;
 		

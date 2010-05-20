@@ -67,6 +67,7 @@ namespace qnut {
 		m_SSIDs = m_GroupedScans.keys();
 		
 		emit layoutChanged();
+		emit cachedScansUpdated();
 	}
 	
 	bool CAvailableAPModel::hasChildren(const QModelIndex & parent) const {

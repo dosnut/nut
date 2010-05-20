@@ -38,6 +38,8 @@ namespace qnut {
 		/// @brief Returns the cached list of managed networks.
 		QList<libnutwireless::ShortNetworkInfo> cachedNetworks() const { return m_Networks; }
 		
+		int currentID() const { return m_CurrentID; }
+		
 		/**
 		 * @brief Creates the object and initializes the model according to the given wpa_supplicant object.
 		 * @param wpaSupplicant pointer to a wpa_supplicant (if NULL nothing is displayed)
@@ -62,6 +64,7 @@ namespace qnut {
 		void setWpaSupplicant(libnutwireless::CWpaSupplicant * wpaSupplicant);
 		QList<libnutwireless::ShortNetworkInfo> m_Networks;
 		libnutwireless::CWpaSupplicant * m_Supplicant;
+		int m_CurrentID;
 	};
 	
 	class CManagedAPProxyModel : public QSortFilterProxyModel {

@@ -19,12 +19,14 @@ namespace libnutclient {
 }
 
 class QSettings;
+class QSignalMapper;
 
 namespace qnut {
 	class CManagedAPModel;
 	class CAvailableAPModel;
 	class CManagedAPProxyModel;
 	class CAvailableAPProxyModel;
+	class CAccessPointModel;
 	
 	/**
 	 * @brief CWirelessSettings provides an UI to configure the wireless Connection for a given CDevice.
@@ -41,13 +43,12 @@ namespace qnut {
 		Ui::airset ui;
 		libnutclient::CDevice * m_Device;
 		
-		QAbstractItemView * m_VisibleAPView;
-		QAbstractItemView * m_HiddenAPView;
-		
 		CManagedAPModel * m_ManagedAPModel;
 		CManagedAPProxyModel * m_ManagedAPProxyModel;
 		CAvailableAPModel * m_AvailableAPModel;
 		CAvailableAPProxyModel * m_AvailableAPProxyModel;
+		
+		CAccessPointModel * m_AccessPointModel;
 		
 		QAction * m_EnableNetworkAction;
 		QAction * m_DisableNetworkAction;
@@ -55,22 +56,26 @@ namespace qnut {
 		QAction * m_ConfigureNetworkAction;
 		QAction * m_RemoveNetworkAction;
 		
-		QAction * m_ToggleDetailsAction;
+		QAction * m_ToggleScanResultsAction;
 		QAction * m_SaveNetworksAction;
 		QAction * m_RescanNetworksAction;
 		QAction * m_AutoSaveNetworksAction;
 		
+		QSignalMapper * m_SetBSSIDMapper;
+		
+		QMenu * m_SetBSSIDMenu;
+		
 		inline void createActions();
 		QModelIndex selectedIndex(QAbstractItemView * view);
 	public:
-		/// @brief returnes the visibility state of the details
-		inline bool detailsVisible() const { return m_ToggleDetailsAction->isChecked(); }
+		/// @brief returnes the visibility state of the scan results panel
+		inline bool scansVisible() const { return m_ToggleScanResultsAction->isChecked(); }
 		
 		/**
-		 * @brief sets the visibility state of the details
+		 * @brief sets the visibility state of the scan results panel
 		 * @param value visibilty state
 		 */
-		inline void setDetailsVisible(bool value) { m_ToggleDetailsAction->setChecked(value); }
+		inline void setScansVisible(bool value) { m_ToggleScanResultsAction->setChecked(value); }
 		
 		/**
 		 * @brief Creates the object and initializes the basic user interface.
@@ -93,10 +98,12 @@ namespace qnut {
 		void enableSelectedNetwork();
 		void enableNetworks();
 		void disableSelectedNetwork();
-		void toggleDetails(bool value);
+		void handleRescanRequest();
 		void importNetworks();
 		void exportSelectedNetwork();
 		void exportMultipleNetworks();
+		void handleBSSIDSwitchRequest(const QString & data);
+		void updateBSSIDMenu();
 	};
 }
 #endif
