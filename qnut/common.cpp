@@ -68,7 +68,7 @@ namespace qnut {
 		QString result = device->getName() + ": " + toStringTr(device->getState());
 		
 		if (device->getState() > DS_ACTIVATED)
-			result += ' ' + ('(' + currentNetwork(device)) + ')';
+			result += ' ' + ('(' + currentNetwork(device, false)) + ')';
 		
 		if (device->getState() > DS_CARRIER)
 			result += ", " + activeIP(device);
