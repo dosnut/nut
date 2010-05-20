@@ -153,6 +153,7 @@ void CWpaSupplicant::debug_level(int level) {
 }
 void CWpaSupplicant::reconfigure() {
 	wpaCtrlCmd_RECONFIGURE();
+	emit networkListUpdated();
 }
 void CWpaSupplicant::terminate() {
 	wpaCtrlCmd_TERMINATE();
