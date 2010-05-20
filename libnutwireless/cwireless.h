@@ -4,7 +4,7 @@
 #ifndef LIBNUT_NO_WIRELESS
 #include "wpa_supplicant.h"
 #include "cwexthw.h"
-// #include "80211nl.h"
+#include "cnl80211.h"
 #include <QDebug>
 
 

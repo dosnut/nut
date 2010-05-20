@@ -28,7 +28,8 @@ void CWireless::open() {
 	m_wpa_supplicant->open();
 	if (!m_wireless_hw) {
 		//TODO:Add code to switch between wext and new wlan stack as soon as new wlan stack is implemented
-		m_wireless_hw = new libnutwireless::CWextHW(this, m_ifname);
+// 		m_wireless_hw = new libnutwireless::CWextHW(this, m_ifname);
+		m_wireless_hw = new libnutwireless::CNL80211(this, m_ifname);
 	}
 	m_wireless_hw->open();
 }
