@@ -168,7 +168,7 @@ int CNL80211::parseNlScanResult(nl_msg * msg) {
 // 		print_ies(nla_data(bss_buffer[NL80211_BSS_INFORMATION_ELEMENTS]),
 // 			  nla_len(bss_buffer[NL80211_BSS_INFORMATION_ELEMENTS]),
 // 			  params->unknown, params->type);
-
+	m_scanResults.push_back(scanresult);
 	return NL_SKIP;
 }
 

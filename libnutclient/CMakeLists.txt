@@ -39,11 +39,13 @@ add_target_properties(nutwireless COMPILE_FLAGS -fPIC)
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION 0.5.3 SOVERSION 0)
 
 find_library(LIB_IW iw)
+find_library(LIB_NL nl)
 
 target_link_libraries(${PROJECT_NAME}
 	${nutwireless_BINARY_DIR}/libnutwireless.a
 	${nutcommon_BINARY_DIR}/libnutcommon.a
 	${LIB_IW}
+	${LIB_NL}
 	${QT_QTCORE_LIBRARY}
 	${QT_QTNETWORK_LIBRARY}
 	${QT_QTDBUS_LIBRARY}
