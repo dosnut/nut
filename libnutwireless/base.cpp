@@ -218,6 +218,10 @@ namespace libnutwireless {
 		//Continue of old features:
 		emit(stateChanged(true));
 		printMessage(tr("wpa_supplicant connection established"));
+		if (m_managedNetworks.size() > 0) {
+			addOnlyNewNetworks(m_managedNetworks.values());
+			
+		}
 		return;
 	}
 	
