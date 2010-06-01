@@ -41,6 +41,7 @@ namespace qnut {
 		m_OldConfig.group = GCI_UNDEFINED;
 		m_OldConfig.pairwise = PCI_UNDEFINED;
 		m_OldConfig.protocols = PROTO_UNDEFINED;
+		m_OldConfig.keymgmt = KM_UNDEFINED;
 		
 		QRegExp regexp("[0123456789abcdefABCDEF]*");
 		m_HexValidator = new QRegExpValidator(regexp, this);
@@ -112,14 +113,14 @@ namespace qnut {
 	}
 	
 	void CAccessPointConfig::setAuthConfig(int type) {
-		ui.confTabs->setTabEnabled(4, type == 2);
-		ui.confTabs->setTabEnabled(3, type == 2);
+		ui.confTabs->setTabEnabled(4, type >= 2);
+		ui.confTabs->setTabEnabled(3, type >= 2);
 		ui.confTabs->setTabEnabled(2, type == 1);
 		
 		ui.prwCipGroup->setEnabled(type > 0);
-		ui.rsnCheck->setEnabled(type > 0);
+		ui.rsnCheck->setEnabled(type > 0 && type < 3);
 		
-		m_WEPEnabled = (type == 0) || (!ui.rsnCheck->isChecked());
+		m_WEPEnabled = (type == 0) || (!ui.rsnCheck->isChecked()) || (!ui.rsnCheck->isEnabled());
 		
 		ui.grpCipTKIPCheck->setEnabled(type > 0);
 		ui.grpCipCCMPCheck->setEnabled(type > 0);
@@ -127,13 +128,17 @@ namespace qnut {
 		ui.grpCipWEP104Check->setEnabled(m_WEPEnabled);
 		
 		ui.confTabs->setTabEnabled(1, m_WEPEnabled);
+		
+		ui.proativeCheck->setEnabled(!m_WEPEnabled);
 	}
 	
 	void CAccessPointConfig::setWEPDisabled(bool value) {
-		m_WEPEnabled = not value;
+		m_WEPEnabled = !value;
 		ui.grpCipWEP40Check->setEnabled(m_WEPEnabled);
 		ui.grpCipWEP104Check->setEnabled(m_WEPEnabled);
 		ui.confTabs->setTabEnabled(1, m_WEPEnabled);
+		
+		ui.proativeCheck->setEnabled(!m_WEPEnabled);
 	}
 	
 	bool CAccessPointConfig::execute() {
@@ -169,7 +174,14 @@ namespace qnut {
 		ui.ssidEdit->setText(scanResult.ssid);
 		ui.bssidEdit->setText(scanResult.bssid.toString());
 		
-		if ((scanResult.keyManagement & (KM_WPA_EAP | KM_IEEE8021X)))
+		m_OldConfig.group = scanResult.group;
+		m_OldConfig.pairwise = scanResult.pairwise;
+		m_OldConfig.protocols = scanResult.protocols;
+		m_OldConfig.keymgmt = scanResult.keyManagement;
+		
+		if (scanResult.keyManagement & KM_IEEE8021X)
+			ui.keyManagementCombo->setCurrentIndex(3);
+		else if (scanResult.keyManagement & KM_WPA_EAP)
 			ui.keyManagementCombo->setCurrentIndex(2);
 		else if (scanResult.keyManagement & KM_WPA_PSK)
 			ui.keyManagementCombo->setCurrentIndex(1);
@@ -220,6 +232,7 @@ namespace qnut {
 		m_OldConfig.pairwise = m_Config.get_pairwise();
 		m_OldConfig.group = m_Config.get_group();
 		m_OldConfig.protocols = m_Config.get_protocols();
+		m_OldConfig.keymgmt = m_Config.get_key_mgmt();
 		
 		ui.ssidHexCheck->setChecked(setTextAutoHex(ui.ssidEdit, m_Config.get_ssid()));
 		
@@ -228,7 +241,7 @@ namespace qnut {
 			ui.bssidEdit->setText(m_Config.get_bssid().toString());
 		
 		if ((m_Config.get_key_mgmt() & KM_WPA_EAP) || (m_Config.get_key_mgmt() & KM_IEEE8021X)) {
-			ui.keyManagementCombo->setCurrentIndex(2);
+			ui.keyManagementCombo->setCurrentIndex((m_Config.get_key_mgmt() & KM_IEEE8021X) ? 3 : 2);
 			readEAPConfig(m_Config);
 			ui.rsnCheck->setChecked(m_Config.get_protocols() & PROTO_RSN);
 		}
@@ -252,7 +265,6 @@ namespace qnut {
 		ui.proativeCheck->setChecked(toBool(m_Config.get_proactive_key_caching()));
 		
 		bool isGlobalConfigured = !m_Config.hasValidNetworkId();
-		qDebug("ID %i | PID %i", m_Config.netId.id, m_Config.netId.pid);
 		
 		ui.pskLeaveButton->setVisible(isGlobalConfigured);
 		ui.eapPasswordLeaveButton->setVisible(isGlobalConfigured);
@@ -289,6 +301,8 @@ namespace qnut {
 		
 		return exec();
 	}
+	
+	#define CHECK_FLAG(a, b) (((a) & (b)) ? (a) : (b))
 	
 	void CAccessPointConfig::verifyConfiguration() {
 		NetconfigStatus status;
@@ -355,40 +369,36 @@ namespace qnut {
 		}
 		
 		
+		
 		switch (ui.keyManagementCombo->currentIndex()) {
 		case 0:
-			m_Config.set_key_mgmt(KM_NONE);
+			m_Config.set_key_mgmt(CHECK_FLAG(m_OldConfig.keymgmt, KM_NONE));
 			break;
 		case 1:
-			m_Config.set_key_mgmt(KM_WPA_PSK);
+			m_Config.set_key_mgmt(CHECK_FLAG(m_OldConfig.keymgmt, KM_WPA_PSK));
 			
 			if (ui.rsnCheck->isChecked())
-				m_Config.set_proto(PROTO_RSN);
+				m_Config.set_proto(CHECK_FLAG(m_OldConfig.protocols, PROTO_RSN));
 			else
-				m_Config.set_proto(PROTO_WPA);
-			
-			if (m_Config.get_protocols() & m_OldConfig.protocols) {
-				m_Config.set_proto(m_OldConfig.protocols);
-			}
+				m_Config.set_proto(CHECK_FLAG(m_OldConfig.protocols, PROTO_WPA));
 			
 			if (!(ui.pskLeaveButton->isChecked() || ui.pskEdit->text().isEmpty()))
 				m_Config.set_psk('\"' + ui.pskEdit->text() + '\"');
-			
 			break;
 		case 2:
-			if (m_Config.get_group() & (GCI_WEP40 | GCI_WEP104))
-				m_Config.set_key_mgmt(KM_IEEE8021X);
-			else
-				m_Config.set_key_mgmt(KM_WPA_EAP);
+			m_Config.set_key_mgmt(CHECK_FLAG(m_OldConfig.keymgmt, KM_WPA_EAP));
 			
 			if (ui.rsnCheck->isChecked())
-				m_Config.set_proto(PROTO_RSN);
+				m_Config.set_proto(CHECK_FLAG(m_OldConfig.protocols, PROTO_RSN));
 			else
-				m_Config.set_proto(PROTO_WPA);
+				m_Config.set_proto(CHECK_FLAG(m_OldConfig.protocols, PROTO_WPA));
 			
-			if (m_Config.get_protocols() & m_OldConfig.protocols) {
-				m_Config.set_proto(m_OldConfig.protocols);
-			}
+			writeEAPConfig(m_Config);
+			break;
+		case 3:
+			m_Config.set_key_mgmt(CHECK_FLAG(m_OldConfig.keymgmt, KM_IEEE8021X));
+			
+			m_Config.set_proto(m_OldConfig.protocols);
 			
 			writeEAPConfig(m_Config);
 			break;

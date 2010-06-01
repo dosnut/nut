@@ -104,7 +104,12 @@
          </item>
          <item>
           <property name="text">
-           <string>WPA-Enterprise (IEEE802.1X/EAP)</string>
+           <string>WPA-Enterprise (with EAP)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>IEEE802.1X with EAP</string>
           </property>
          </item>
         </widget>
@@ -1177,7 +1182,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>585</x>
-     <y>64</y>
+     <y>60</y>
     </hint>
     <hint type="destinationlabel">
      <x>363</x>
@@ -1193,11 +1198,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>578</x>
-     <y>166</y>
+     <y>153</y>
     </hint>
     <hint type="destinationlabel">
-     <x>246</x>
-     <y>167</y>
+     <x>281</x>
+     <y>154</y>
     </hint>
    </hints>
   </connection>
@@ -1209,11 +1214,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>578</x>
-     <y>166</y>
+     <y>153</y>
     </hint>
     <hint type="destinationlabel">
      <x>433</x>
-     <y>164</y>
+     <y>153</y>
     </hint>
    </hints>
   </connection>
@@ -1241,11 +1246,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>578</x>
-     <y>205</y>
+     <y>189</y>
     </hint>
     <hint type="destinationlabel">
-     <x>342</x>
-     <y>201</y>
+     <x>433</x>
+     <y>189</y>
     </hint>
    </hints>
   </connection>
@@ -1256,12 +1261,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>461</x>
-     <y>204</y>
+     <x>578</x>
+     <y>189</y>
     </hint>
     <hint type="destinationlabel">
-     <x>332</x>
-     <y>206</y>
+     <x>335</x>
+     <y>190</y>
     </hint>
    </hints>
   </connection>
@@ -1273,11 +1278,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>578</x>
-     <y>244</y>
+     <y>225</y>
     </hint>
     <hint type="destinationlabel">
      <x>433</x>
-     <y>242</y>
+     <y>225</y>
     </hint>
    </hints>
   </connection>
@@ -1288,12 +1293,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>508</x>
-     <y>231</y>
+     <x>578</x>
+     <y>225</y>
     </hint>
     <hint type="destinationlabel">
-     <x>221</x>
-     <y>231</y>
+     <x>325</x>
+     <y>226</y>
     </hint>
    </hints>
   </connection>
@@ -1305,11 +1310,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>578</x>
-     <y>283</y>
+     <y>261</y>
     </hint>
     <hint type="destinationlabel">
-     <x>387</x>
-     <y>270</y>
+     <x>433</x>
+     <y>261</y>
     </hint>
    </hints>
   </connection>
@@ -1320,28 +1325,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>508</x>
-     <y>270</y>
+     <x>578</x>
+     <y>261</y>
     </hint>
     <hint type="destinationlabel">
-     <x>221</x>
-     <y>270</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>rsnCheck</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>proativeCheck</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>385</x>
-     <y>87</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>182</x>
-     <y>290</y>
+     <x>325</x>
+     <y>262</y>
     </hint>
    </hints>
   </connection>
@@ -1352,8 +1341,8 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>460</x>
-     <y>369</y>
+     <x>569</x>
+     <y>366</y>
     </hint>
     <hint type="destinationlabel">
      <x>387</x>
@@ -1368,12 +1357,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>474</x>
-     <y>346</y>
+     <x>577</x>
+     <y>334</y>
     </hint>
     <hint type="destinationlabel">
-     <x>395</x>
-     <y>345</y>
+     <x>432</x>
+     <y>335</y>
     </hint>
    </hints>
   </connection>
@@ -1384,12 +1373,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>469</x>
-     <y>381</y>
+     <x>577</x>
+     <y>372</y>
     </hint>
     <hint type="destinationlabel">
-     <x>427</x>
-     <y>380</y>
+     <x>432</x>
+     <y>373</y>
     </hint>
    </hints>
   </connection>

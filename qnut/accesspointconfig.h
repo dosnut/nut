@@ -69,6 +69,7 @@ namespace qnut {
 			libnutwireless::GroupCiphers group;
 			libnutwireless::PairwiseCiphers pairwise;
 			libnutwireless::Protocols protocols;
+			libnutwireless::KeyManagement keymgmt;
 		} m_OldConfig;
 		
 		struct FileEditStrings {
