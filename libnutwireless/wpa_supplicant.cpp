@@ -216,7 +216,7 @@ NetconfigStatus CWpaSupplicant::addOnlyNewNetwork(CNetworkConfig config) {
 		if ("FAIL\n" != response) {
 			CNetworkConfig::NetworkId i = CNetworkConfig::toNetworkId(response);
 			if (i == config.getNetworkId()) { //managed by us, update our copy
-				return NetconfigStatus(netinfo.id);
+				return editNetwork(netinfo.id,config);
 			}
 		}
 	}
