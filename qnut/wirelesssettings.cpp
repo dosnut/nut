@@ -159,7 +159,7 @@ namespace qnut {
 		
 		connect(enableNetworksAction, SIGNAL(triggered()), this, SLOT(enableNetworks()));
 		connect(m_SaveNetworksAction, SIGNAL(triggered()), m_Device->getWireless()->getWpaSupplicant(), SLOT(save_config()));
-		connect(reloadNetworksAction, SIGNAL(triggered()), m_ManagedAPModel, SLOT(updateNetworks()));
+		connect(reloadNetworksAction, SIGNAL(triggered()), m_Device->getWireless()->getWpaSupplicant(), SLOT(reconfigure()));
 		connect(importNetworksAction, SIGNAL(triggered()), this, SLOT(importNetworks()));
 		connect(exportNetworkAction, SIGNAL(triggered()), this, SLOT(exportSelectedNetwork()));
 		connect(exportMultipleNetworksAction, SIGNAL(triggered()), this, SLOT(exportMultipleNetworks()));
