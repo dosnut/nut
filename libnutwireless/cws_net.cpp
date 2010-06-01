@@ -343,7 +343,7 @@ NetconfigStatus CWpaSupplicant::editNetwork(int netid, CNetworkConfig config) {
 			}
 		}
 		if (-1 != config.get_fragment_size()) {
-			if (!setNetworkVariable(netid,"altsubject_match2",QString::number(config.get_fragment_size())) ) {
+			if (!setNetworkVariable(netid,"fragment_size",QString::number(config.get_fragment_size())) ) {
 				failStatus.eap_failures = (EapNetconfigFailures) (failStatus.eap_failures | ENCF_FRAGMENT_SIZE);
 			}
 		}
