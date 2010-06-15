@@ -36,7 +36,7 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES_CPP} ${SOURCES_MOC_CPP})
 
 add_target_properties(nutcommon COMPILE_FLAGS -fPIC)
 add_target_properties(nutwireless COMPILE_FLAGS -fPIC)
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION 0.5.3 SOVERSION 0)
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION 0.5.4 SOVERSION 0)
 
 find_library(LIB_IW iw)
 find_library(LIB_NL nl)

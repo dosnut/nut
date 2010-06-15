@@ -1,3 +1,13 @@
+network-utilities (0.5.4-1) unstable; urgency=low
+
+  * New release
+  * Many fixes
+  * [qnut] simple accesspoint selection
+  * [nuts] added device option "metric" for priority of default routes:
+    example: metric 10 for eth0, metric 20 for wlan0
+
+ -- Stefan Bühler <stbuehler@web.de>  Tue, 15 Jun 2010 11:33:11 +0200
+
 network-utilities (0.5.3-1) unstable; urgency=low
 
   * New release
