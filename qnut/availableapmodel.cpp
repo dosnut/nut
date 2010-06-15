@@ -100,27 +100,35 @@ namespace qnut {
 		if (!index.isValid())
 			return QVariant();
 		
+		int scanId = scanResultIdByModelIndex(index);
+		
 		if ((role == Qt::DecorationRole) && (index.column() == 0))
-			return QIcon(UI_ICON_AP);
+			return (m_Scans[scanId].opmode == OPM_ADHOC) ? QIcon(UI_ICON_ADHOC) : QIcon(UI_ICON_AP);
 		
 		if (role != Qt::DisplayRole)
 			return QVariant();
 		
-		if (index.internalId() == -1 && index.column() == UI_AVLAP_BSSID)
-			return tr("multiple");
-		
-		if (index.internalId() == -1 && index.column() == UI_AVLAP_CHANNEL)
-			return QString('-');
-		
-		
-		int scanId = scanResultIdByModelIndex(index);
+		if (index.internalId() == -1) {
+			if (index.column() == UI_AVLAP_BSSID)
+				return tr("multiple");
+			
+			if (index.column() == UI_AVLAP_CHANNEL)
+				return QString('-');
+		}
 		
 		switch (index.column()) {
 		case UI_AVLAP_SSID:
-			return index.parent().isValid() ? '#' + QString::number(index.row()) : m_Scans[scanId].ssid;
+			{
+				QString result = index.parent().isValid() ? '#' + QString::number(index.row() + 1) : m_Scans[scanId].ssid;
+				if (m_Scans[scanId].opmode == OPM_ADHOC)
+					return result + " <" + tr("ad-hoc") + '>';
+				else
+					return result;
+			}
 		case UI_AVLAP_CHANNEL:
 			return QString::number(frequencyToChannel(m_Scans[scanId].freq));
-		case UI_AVLAP_KEYMGMT: {
+		case UI_AVLAP_KEYMGMT:
+			{
 				int keyFlags = m_Scans[scanId].keyManagement;
 				
 				if (keyFlags == KM_UNDEFINED)
@@ -156,12 +164,14 @@ namespace qnut {
 			}
 		case UI_AVLAP_BSSID:
 			return m_Scans[scanId].bssid.toString();
-		case UI_AVLAP_QUALITY: {
+		case UI_AVLAP_QUALITY:
+			{
 				SignalQuality signal = m_Scans[scanId].signal;
 				return QString::number(signal.quality.value) + '/'+
 					QString::number(signal.quality.maximum);
 			}
-		case UI_AVLAP_LEVEL: {
+		case UI_AVLAP_LEVEL:
+			{
 				SignalQuality signal = m_Scans[scanId].signal;
 				switch (signal.type) {
 				case WSR_RCPI:
@@ -175,7 +185,8 @@ namespace qnut {
 					return QString('-');
 				}
 			}
-		case UI_AVLAP_ENC: {
+		case UI_AVLAP_ENC:
+			{
 				int flags = m_Scans[scanId].pairwise;
 				QStringList results;
 				

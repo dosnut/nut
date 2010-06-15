@@ -115,18 +115,19 @@ namespace qnut {
 		m_DisableNetworkAction   = new QAction(QIcon(UI_ICON_DISABLE), tr("&Disable"), this);
 		
 		enableNetworksAction         = new QAction(QIcon(UI_ICON_ENABLE_ALL), tr("Enable &all"), this);
-		m_SaveNetworksAction         = new QAction(QIcon(UI_ICON_SAVE), tr("&Save all in global config"), this);
-		reloadNetworksAction         = new QAction(QIcon(UI_ICON_RELOAD), tr("Re&load configuration"), this);
-		m_AutoSaveNetworksAction     = new QAction(/*QIcon(UI_ICON_AUTOSAVE), */tr("&Autosave global config"), this);
 		importNetworksAction         = new QAction(/*QIcon(UI_ICON_IMPORT), */tr("&Import networks..."), this);
 		exportNetworkAction          = new QAction(/*QIcon(UI_ICON_EXPORT), */tr("E&xport selected network..."), this);
-		exportMultipleNetworksAction = new QAction(/*QIcon(UI_ICON_MULTIEXPORT), */tr("Export &all networks..."), this);
+		exportMultipleNetworksAction = new QAction(/*QIcon(UI_ICON_MULTIEXPORT), */tr("Export all &networks..."), this);
 		
 		addNetworkAction      = new QAction(QIcon(UI_ICON_ADD), tr("Add &network"), this);
 		addAdhocAction        = new QAction(QIcon(UI_ICON_ADD_ADHOC), tr("Add ad-&hoc"), this);
 		m_RemoveNetworkAction = new QAction(QIcon(UI_ICON_REMOVE), tr("&Remove"), this);
 		
-		reassociateAction     = new QAction(QIcon(UI_ICON_RELOAD), tr("&Reassociate"), this);
+		m_SaveNetworksAction     = new QAction(QIcon(UI_ICON_SAVE), tr("&Write managed to global config"), this);
+		reloadNetworksAction     = new QAction(/*QIcon(UI_ICON_RELOAD), */ tr("Re&load global config"), this);
+		m_AutoSaveNetworksAction = new QAction(/*QIcon(UI_ICON_AUTOSAVE), */tr("&Autowrite global config"), this);
+		m_KeepScanResultsAction  = new QAction(/*QIcon(UI_ICON_DETAILED), */tr("&Keep scan results visible"), this);
+		reassociateAction        = new QAction(QIcon(UI_ICON_RELOAD), tr("&Reassociate"), this);
 		
 		manageNetworksMenu = new QMenu(tr("More..."));
 		manageNetworksMenu->setIcon(QIcon(UI_ICON_EDIT));
@@ -138,10 +139,10 @@ namespace qnut {
 		m_SetBSSIDMenu->setEnabled(false);
 		
 		m_AutoSaveNetworksAction->setCheckable(true);
-		m_AutoSaveNetworksAction->setChecked(false);
 		
 		m_ToggleScanResultsAction->setCheckable(true);
-		m_ToggleScanResultsAction->setChecked(true);
+		
+		m_KeepScanResultsAction->setCheckable(true);
 		
 		m_EnableNetworkAction->setEnabled(false);
 		m_DisableNetworkAction->setEnabled(false);
@@ -158,8 +159,6 @@ namespace qnut {
 		connect(m_DisableNetworkAction, SIGNAL(triggered()), this, SLOT(disableSelectedNetwork()));
 		
 		connect(enableNetworksAction, SIGNAL(triggered()), this, SLOT(enableNetworks()));
-		connect(m_SaveNetworksAction, SIGNAL(triggered()), m_Device->getWireless()->getWpaSupplicant(), SLOT(save_config()));
-		connect(reloadNetworksAction, SIGNAL(triggered()), m_Device->getWireless()->getWpaSupplicant(), SLOT(reconfigure()));
 		connect(importNetworksAction, SIGNAL(triggered()), this, SLOT(importNetworks()));
 		connect(exportNetworkAction, SIGNAL(triggered()), this, SLOT(exportSelectedNetwork()));
 		connect(exportMultipleNetworksAction, SIGNAL(triggered()), this, SLOT(exportMultipleNetworks()));
@@ -168,19 +167,26 @@ namespace qnut {
 		connect(addAdhocAction, SIGNAL(triggered()), this, SLOT(addAdhoc()));
 		connect(m_RemoveNetworkAction, SIGNAL(triggered()), this, SLOT(removeSelectedNetwork()));
 		
+		connect(m_SaveNetworksAction, SIGNAL(triggered()), m_Device->getWireless()->getWpaSupplicant(), SLOT(save_config()));
+		connect(reloadNetworksAction, SIGNAL(triggered()), m_Device->getWireless()->getWpaSupplicant(), SLOT(reconfigure()));
+		connect(m_KeepScanResultsAction, SIGNAL(toggled(bool)), this, SLOT(keepScanResultsVisible(bool)));
 		connect(reassociateAction, SIGNAL(triggered()), m_Device->getWireless()->getWpaSupplicant(), SLOT(reassociate()));
 		
+		m_ToggleScanResultsAction->setChecked(false);
+		
 		manageNetworksMenu->addAction(enableNetworksAction);
-		manageNetworksMenu->addSeparator();
-		manageNetworksMenu->addAction(m_SaveNetworksAction);
-		manageNetworksMenu->addAction(reloadNetworksAction);
-		manageNetworksMenu->addSeparator();
-		manageNetworksMenu->addAction(m_AutoSaveNetworksAction);
 		manageNetworksMenu->addSeparator();
 		manageNetworksMenu->addAction(importNetworksAction);
 		manageNetworksMenu->addAction(exportNetworkAction);
 		manageNetworksMenu->addAction(exportMultipleNetworksAction);
 		
+		advancedFuntionsMenu->addAction(m_SaveNetworksAction);
+		advancedFuntionsMenu->addAction(reloadNetworksAction);
+		advancedFuntionsMenu->addSeparator();
+		advancedFuntionsMenu->addAction(m_AutoSaveNetworksAction);
+		advancedFuntionsMenu->addSeparator();
+		advancedFuntionsMenu->addAction(m_KeepScanResultsAction);
+		advancedFuntionsMenu->addSeparator();
 		advancedFuntionsMenu->addAction(reassociateAction);
 		advancedFuntionsMenu->addSeparator();
 		advancedFuntionsMenu->addMenu(m_SetBSSIDMenu);
@@ -450,7 +456,10 @@ namespace qnut {
 		if (bssid.valid()) {
 			m_Device->getWireless()->getWpaSupplicant()->setBssid(m_ManagedAPModel->currentID(), bssid);
 			m_ManagedAPModel->updateNetworks();
-			m_Device->getWireless()->getWpaSupplicant()->reassociate();
+			
+			m_Device->getWireless()->getWpaSupplicant()->selectNetwork(m_ManagedAPModel->currentID());
+			
+// 			m_Device->getWireless()->getWpaSupplicant()->reassociate();
 		}
 	}
 	
@@ -484,10 +493,16 @@ namespace qnut {
 		m_SetBSSIDMenu->setEnabled(!m_SetBSSIDMenu->actions().isEmpty());
 	}
 	
+	void CWirelessSettings::keepScanResultsVisible(bool value) {
+		ui.toggleScanResultsButton->setVisible(!value);
+		ui.availableAPGroupBox->setVisible(value || ui.toggleScanResultsButton->isChecked());
+	}
+	
 	void CWirelessSettings::readSettings(QSettings * settings) {
 		settings->beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
 		restoreGeometry(settings->value(UI_SETTINGS_GEOMETRY).toByteArray());
-		setScansVisible(settings->value(UI_SETTINGS_SHOWSCANRESULTS, false).toBool());
+		m_KeepScanResultsAction->setChecked(settings->value(UI_SETTINGS_SHOWSCANRESULTS, false).toBool());
+		m_AutoSaveNetworksAction->setChecked(settings->value(UI_SETTINGS_AUTOWRITECONFIG, false).toBool());
 		CAccessPointConfig::setLastFileOpenDir(settings->value(UI_SETTINGS_LASTFILEOPENDIR, "/").toString());
 		
 		QByteArray buffer = settings->value(UI_SETTINGS_NETWORKS).toByteArray();
@@ -501,7 +516,8 @@ namespace qnut {
 	void CWirelessSettings::writeSettings(QSettings * settings) {
 		settings->beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
 		settings->setValue(UI_SETTINGS_GEOMETRY, saveGeometry());
-		settings->setValue(UI_SETTINGS_SHOWSCANRESULTS, scansVisible());
+		settings->setValue(UI_SETTINGS_SHOWSCANRESULTS, m_ToggleScanResultsAction->isChecked());
+		settings->setValue(UI_SETTINGS_AUTOWRITECONFIG, m_AutoSaveNetworksAction->isChecked());
 		settings->setValue(UI_SETTINGS_LASTFILEOPENDIR, CAccessPointConfig::lastFileOpenDir());
 		
 		QByteArray buffer;

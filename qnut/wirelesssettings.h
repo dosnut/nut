@@ -57,9 +57,11 @@ namespace qnut {
 		QAction * m_RemoveNetworkAction;
 		
 		QAction * m_ToggleScanResultsAction;
+		
 		QAction * m_SaveNetworksAction;
 		QAction * m_RescanNetworksAction;
 		QAction * m_AutoSaveNetworksAction;
+		QAction * m_KeepScanResultsAction;
 		
 		QSignalMapper * m_SetBSSIDMapper;
 		
@@ -69,13 +71,13 @@ namespace qnut {
 		QModelIndex selectedIndex(QAbstractItemView * view);
 	public:
 		/// @brief returnes the visibility state of the scan results panel
-		inline bool scansVisible() const { return m_ToggleScanResultsAction->isChecked(); }
+// 		inline bool scansVisible() const { return m_ToggleScanResultsAction->isChecked(); }
 		
 		/**
 		 * @brief sets the visibility state of the scan results panel
 		 * @param value visibilty state
 		 */
-		inline void setScansVisible(bool value) { m_ToggleScanResultsAction->setChecked(value); }
+// 		inline void setScansVisible(bool value) { m_ToggleScanResultsAction->setChecked(value); }
 		
 		/**
 		 * @brief Creates the object and initializes the basic user interface.
@@ -104,6 +106,7 @@ namespace qnut {
 		void exportMultipleNetworks();
 		void handleBSSIDSwitchRequest(const QString & data);
 		void updateBSSIDMenu();
+		void keepScanResultsVisible(bool value);
 	};
 }
 #endif
