@@ -386,4 +386,4 @@ namespace nuts {
 		selectAdd(libnutcommon::SelectRule(essid));
 		return true;
 	}
-};
+}

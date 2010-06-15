@@ -16,7 +16,7 @@
 
 namespace nuts {
 	class Log;
-};
+}
 
 #include <QObject>
 #include <QTextStream>
@@ -30,6 +30,6 @@ namespace nuts {
 
 	void LogInit();
 	void LogDestroy();
-};
+}
 
 #endif

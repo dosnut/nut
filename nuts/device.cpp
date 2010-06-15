@@ -30,7 +30,7 @@ extern "C" {
 #include <linux/sysctl.h>
 #include <linux/route.h>
 void perror(const char *s); 
-};
+}
 
 static inline void setSockaddrIPv4(struct sockaddr &s, quint32 host = 0, quint16 port = 0) {
 	struct sockaddr_in *sin = (struct sockaddr_in *) &s;

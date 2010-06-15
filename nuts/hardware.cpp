@@ -36,7 +36,7 @@ extern "C" {
 // hardware_ext.c
 extern struct nla_policy ifla_policy[IFLA_MAX+1];
 extern struct nla_policy ifa_ipv4_policy[IFA_MAX+1];
-};
+}
 
 #include <QSocketNotifier>
 #include <QFile>
@@ -394,4 +394,4 @@ namespace nuts {
 		essid = QString::fromUtf8(buf, qstrnlen(buf, iwr.u.essid.length));
 		return true;
 	}
-};
+}

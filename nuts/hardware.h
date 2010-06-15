@@ -13,11 +13,11 @@ extern "C" {
 	struct nl_handle;
 	struct nl_cache;
 	struct ifreq;
-};
+}
 
 namespace nuts {
 	class HardwareManager;
-};
+}
 
 namespace nuts {
 	class HardwareManager : public QObject {
@@ -76,6 +76,6 @@ namespace nuts {
 			void newDevice(const QString &ifName, int ifIndex);
 			void delDevice(const QString &ifName);
 	};
-};
+}
 
 #endif

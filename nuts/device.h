@@ -26,7 +26,7 @@ namespace nuts {
 	class ARP;
 	class DHCPPacket;
 	class DHCPClientPacket;
-};
+}
 
 #include "config.h"
 #include "hardware.h"
@@ -344,7 +344,7 @@ namespace nuts {
 				ZCS_ANNOUNCING,    // Announced Address
 				ZCS_BIND,          // Announce was successful, bind address.
 				ZCS_BOUND,         // Listen for conflicting ARP Packets.
-				ZCS_CONFLICT,      // Conflict detected, select new address and restart Probing.
+				ZCS_CONFLICT       // Conflict detected, select new address and restart Probing.
 			};
 			
 			DeviceManager *m_dm;
@@ -438,6 +438,6 @@ namespace nuts {
 		signals:
 			void statusChanged(libnutcommon::InterfaceState state, Interface_IPv4* iface);
 	};
-};
+}
 
 #endif

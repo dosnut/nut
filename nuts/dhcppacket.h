@@ -17,7 +17,7 @@
 
 namespace nuts {
 	class DHCPPacket;
-};
+}
 
 enum bootp_op {
 	BOOT_REQUEST = 1,

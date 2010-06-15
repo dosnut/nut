@@ -52,4 +52,4 @@ namespace nuts {
 		delete loginit;
 		loginit = 0;
 	}
-};
+}

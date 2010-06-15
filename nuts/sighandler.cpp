@@ -19,7 +19,7 @@ extern "C" {
 #include <signal.h>
 // fcntl
 #include <fcntl.h>
-};
+}
 
 #include <iostream>
 
@@ -68,4 +68,4 @@ namespace nuts {
 		}
 	}
 
-};
+}

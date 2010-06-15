@@ -17,7 +17,7 @@
 
 namespace nuts {
 	class Exception;
-};
+}
 
 #include <exception>
 
@@ -49,7 +49,7 @@ namespace nuts {
 		public:
 			EthtoolInitException(const QString &msg) : EthtoolException(msg) { }
 	};
-};
+}
 
 
 #endif

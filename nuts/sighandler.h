@@ -34,6 +34,6 @@ namespace nuts {
 			void gotSignal(int signum);
 			void appQuit();
 	};
-};
+}
 
 #endif

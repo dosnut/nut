@@ -108,7 +108,7 @@ namespace nuts {
 	// same values as in protocol itself
 	typedef enum ArpOperation {
 		ARP_REQUEST = 1,
-		ARP_REPLY = 2,
+		ARP_REPLY = 2
 	} ArpOperation;
 	
 	namespace ARPConst {
@@ -123,7 +123,7 @@ namespace nuts {
 		const int MAX_CONFLICTS = 10;
 		const int RATE_LIMIT_INTERVAL = 60;
 		const int DEFEND_INTERVAL = 10;
-	};
+	}
 	
 	/**
 		@author Stefan Bühler <stbuehler@web.de>
