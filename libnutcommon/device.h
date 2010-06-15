@@ -39,6 +39,7 @@ namespace libnutcommon {
 		QHostAddress netmask;
 		QHostAddress gateway;
 		QList<QHostAddress> dns;
+		int gateway_metric;
 	};
 	
 	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop);

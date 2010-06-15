@@ -111,7 +111,8 @@ pac_file     return PAC_FILE;
 
 <Value>{
 	\ *\n       { BEGIN(INITIAL); return VALUE; }
-	[^\n]*      { yylval.str->append(yytext); }
+	[^\n\\]*    { yylval.str->append(yytext); }
+	\\.         { yylval.str->append(yytext[1]); }
 }
 
 <StrVal>{

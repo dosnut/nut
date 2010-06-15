@@ -27,7 +27,7 @@
 %token DEFAULT
 %token DHCP NODHCP ZEROCONF NOZEROCONF STATIC 
 %token FALLBACK TIMEOUT CONTINUEDHCP
-%token IP NETMASK GATEWAY DNSSERVER
+%token IP NETMASK GATEWAY DNSSERVER METRIC
 %token LABELINDEX
 %token SELECT USER ARP ESSID
 %token AND OR
@@ -71,6 +71,7 @@ deviceoption: { CHECK(devDefaultEnvironment()); } environmentoption
 	| environment
 	| wpasupplicant
 	| NOAUTOSTART { CHECK(devNoAutoStart()); } ';'
+	| METRIC INTEGER { CHECK(devMetric($2)); } ';'
 ;
 
 wpasupplicant: WPASUPPLICANT DRIVER STRING CONFIG STRING ';' { CHECK(devWPASuppConfig(*$3, *$5)); delete $3; delete $5; }

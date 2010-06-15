@@ -132,6 +132,12 @@ namespace nuts {
 		return true;
 	}
 	
+	bool ConfigParser::devMetric(int metric) {
+		if (!m_curdevconfig) return false;
+		m_curdevconfig->m_gateway_metric = metric;
+		return true;
+	}
+
 	bool ConfigParser::envNoDHCP() {
 		if (!m_curenvconfig) return false;
 		m_cur_env->no_def_dhcp = true;

@@ -1194,11 +1194,18 @@ namespace nuts {
 		if (!gateway.isNull()) {
 //			log << "Try setting gateway" << endl;
 			struct rtentry rt;
+			int m;
 			memset(&rt, 0, sizeof(rt));
 			rt.rt_flags = RTF_UP | RTF_GATEWAY;
 			setSockaddrIPv4(rt.rt_dst);
 			setSockaddrIPv4(rt.rt_gateway, gateway.toIPv4Address());
 			setSockaddrIPv4(rt.rt_genmask);
+			if (-1 != (m = m_config->getGatewayMetric())) {
+				rt.rt_metric = m + 1;
+			} else if (-1 != (m = m_env->getDevice()->getConfig().gatewayMetric())) {
+				rt.rt_metric = m + 1;
+			}
+
 			QByteArray buf = m_env->m_device->m_name.toUtf8();
 			rt.rt_dev = buf.data();
 			int skfd = socket(AF_INET, SOCK_DGRAM, 0);

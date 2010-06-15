@@ -54,6 +54,7 @@ namespace nuts {
 			bool devDefaultEnvironment();
 			bool devNoAutoStart();
 			bool devWPASuppConfig(const QString &driver, const QString &config);
+			bool devMetric(int metric);
 			
 			bool envNoDHCP();
 			

@@ -41,6 +41,7 @@ ip          return IP;
 netmask     return NETMASK;
 gateway     return GATEWAY;
 dns-server  return DNSSERVER;
+metric      return METRIC;
 
 label-index return LABELINDEX;
 

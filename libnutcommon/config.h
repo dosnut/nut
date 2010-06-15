@@ -130,6 +130,7 @@ namespace libnutcommon {
 			QString m_wpaConfigFile;
 			QString m_wpaDriver;
 			bool m_isRegExp;
+			int m_gateway_metric;
 		
 		public:
 			DeviceConfig();
@@ -139,12 +140,14 @@ namespace libnutcommon {
 				return m_environments;
 			}
 			
-			bool noAutoStart() { return m_noAutoStart; }
+			bool noAutoStart() const { return m_noAutoStart; }
 			
-			QString wpaConfigFile() { return m_wpaConfigFile; }
-			QString wpaDriver() { return m_wpaDriver; }
+			QString wpaConfigFile() const { return m_wpaConfigFile; }
+			QString wpaDriver() const { return m_wpaDriver; }
 
-			bool isRegExp() { return m_isRegExp; }
+			bool isRegExp() const { return m_isRegExp; }
+
+			int gatewayMetric() const { return m_gateway_metric; }
 
 			DeviceConfig * createCopy() { return this;}
 	};
@@ -330,7 +333,9 @@ namespace libnutcommon {
 			
 			QHostAddress m_static_ip, m_static_netmask, m_static_gateway;
 			QList<QHostAddress> m_static_dnsservers;
-			
+
+			int m_gateway_metric;
+
 			int m_flags;
 			int m_overwriteFlags;
 			int m_timeout;
@@ -343,7 +348,9 @@ namespace libnutcommon {
 			const QHostAddress& getStaticNetmask() const { return m_static_netmask; }
 			const QHostAddress& getStaticGateway() const { return m_static_gateway; }
 			const QList<QHostAddress>& getStaticDNS() const { return m_static_dnsservers; }
-			
+
+			int getGatewayMetric() const { return m_gateway_metric; }
+
 			Flags getFlags() const { return (Flags) m_flags; }
 			OverwriteFlags getOverwriteFlags() const { return (OverwriteFlags) m_overwriteFlags; }
 			int getTimeOut() const { return m_timeout; }
@@ -360,11 +367,11 @@ namespace libnutcommon {
 			
 			QHostAddress m_ip, m_netmask, m_gateway;
 			QList<QHostAddress> m_dnsservers;
-		
+
 		public:
 			const QHostAddress& ip() const { return m_ip; }
 			bool setIP(const QHostAddress &ip) { m_ip = ip; return true; }
-		
+
 			const QHostAddress& netmask() const { return m_netmask; }
 			bool setNetmask(const QHostAddress &netmask) { m_netmask = netmask; return true; }
 		
@@ -373,7 +380,7 @@ namespace libnutcommon {
 		
 			const QList<QHostAddress>& dnsservers() const { return m_dnsservers; }
 			bool setDnsservers(const QList<QHostAddress>& dnsservers) { m_dnsservers = dnsservers; return true; }
-			
+
 			/** @brief A very basic check if the configuration is valid.
 			 */
 			bool valid() {

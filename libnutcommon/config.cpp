@@ -38,6 +38,7 @@ namespace libnutcommon {
 		argument << data.m_wpaConfigFile;
 		argument << data.m_wpaDriver;
 		argument << data.m_isRegExp;
+		argument << data.m_gateway_metric;
 		argument.beginArray( qMetaTypeId<EnvironmentConfig>() );
 		foreach(EnvironmentConfig* ec, data.m_environments) {
 			argument << *ec;
@@ -52,6 +53,7 @@ namespace libnutcommon {
 		argument >> data.m_wpaConfigFile;
 		argument >> data.m_wpaDriver;
 		argument >> data.m_isRegExp;
+		argument >> data.m_gateway_metric;
 		argument.beginArray();
 		while (!argument.atEnd()) {
 			EnvironmentConfig *ec = new EnvironmentConfig();
@@ -137,7 +139,8 @@ namespace libnutcommon {
 			<< data.m_static_ip
 			<< data.m_static_netmask
 			<< data.m_static_gateway
-			<< data.m_static_dnsservers;
+			<< data.m_static_dnsservers
+			<< data.m_gateway_metric;
 		
 		argument.endStructure();
 		return argument;
@@ -152,7 +155,8 @@ namespace libnutcommon {
 			>> data.m_static_ip
 			>> data.m_static_netmask
 			>> data.m_static_gateway
-			>> data.m_static_dnsservers;
+			>> data.m_static_dnsservers
+			>> data.m_gateway_metric;
 		argument.endStructure();
 		return argument;
 	}
@@ -182,7 +186,7 @@ namespace libnutcommon {
 	}
 	
 	DeviceConfig::DeviceConfig()
-	: m_noAutoStart(false), m_isRegExp(false) {
+	: m_noAutoStart(false), m_isRegExp(false), m_gateway_metric(-1) {
 	}
 	
 	DeviceConfig::~DeviceConfig() {
@@ -205,7 +209,7 @@ namespace libnutcommon {
 	}
 	
 	IPv4Config::IPv4Config(int flags, int overwriteFlags)
-	: m_flags(flags), m_overwriteFlags(overwriteFlags), m_timeout(0), m_continue_dhcp(false) {
+	: m_gateway_metric(-1), m_flags(flags), m_overwriteFlags(overwriteFlags), m_timeout(0), m_continue_dhcp(false) {
 	}
 
 	// called by common.cpp: init()
