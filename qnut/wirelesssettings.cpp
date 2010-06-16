@@ -141,6 +141,8 @@ namespace qnut {
 		m_AutoSaveNetworksAction->setCheckable(true);
 		
 		m_ToggleScanResultsAction->setCheckable(true);
+		m_ToggleScanResultsAction->setChecked(false);
+		ui.availableAPGroupBox->setVisible(false);
 		
 		m_KeepScanResultsAction->setCheckable(true);
 		
@@ -171,8 +173,6 @@ namespace qnut {
 		connect(reloadNetworksAction, SIGNAL(triggered()), m_Device->getWireless()->getWpaSupplicant(), SLOT(reconfigure()));
 		connect(m_KeepScanResultsAction, SIGNAL(toggled(bool)), this, SLOT(keepScanResultsVisible(bool)));
 		connect(reassociateAction, SIGNAL(triggered()), m_Device->getWireless()->getWpaSupplicant(), SLOT(reassociate()));
-		
-		m_ToggleScanResultsAction->setChecked(false);
 		
 		manageNetworksMenu->addAction(enableNetworksAction);
 		manageNetworksMenu->addSeparator();
@@ -516,7 +516,7 @@ namespace qnut {
 	void CWirelessSettings::writeSettings(QSettings * settings) {
 		settings->beginGroup(UI_SETTINGS_WIRELESSSETTINGS);
 		settings->setValue(UI_SETTINGS_GEOMETRY, saveGeometry());
-		settings->setValue(UI_SETTINGS_SHOWSCANRESULTS, m_ToggleScanResultsAction->isChecked());
+		settings->setValue(UI_SETTINGS_SHOWSCANRESULTS, m_KeepScanResultsAction->isChecked());
 		settings->setValue(UI_SETTINGS_AUTOWRITECONFIG, m_AutoSaveNetworksAction->isChecked());
 		settings->setValue(UI_SETTINGS_LASTFILEOPENDIR, CAccessPointConfig::lastFileOpenDir());
 		
