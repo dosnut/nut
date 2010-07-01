@@ -491,8 +491,7 @@ namespace qnut {
 		m_DeviceActions[0]->setEnabled(state == DS_DEACTIVATED);
 		m_DeviceActions[1]->setDisabled(state == DS_DEACTIVATED);
 		
-		if (m_ShowTrayIcon)
-			emit updateTrayIconRequested(state);
+		emit updateTrayIconRequested(state);
 		
 		if (m_NotificationsEnabled)
 			emit showNotificationRequested(state);
