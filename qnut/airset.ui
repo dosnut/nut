@@ -94,7 +94,7 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="signalFrameLayout">
-      <item row="0" column="7" rowspan="3">
+      <item row="0" column="9" rowspan="2">
        <spacer name="signalFrameSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -114,7 +114,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="6">
+      <item row="1" column="6">
        <widget class="QLabel" name="noiseLabel">
         <property name="text">
          <string>Noise: 0</string>
@@ -134,14 +134,14 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="4">
+      <item row="1" column="4">
        <widget class="QLabel" name="rateLabel">
         <property name="text">
          <string>Rate: 0Mb/s</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="3">
+      <item row="1" column="0" colspan="3">
        <widget class="QLabel" name="bssidLabel">
         <property name="text">
          <string>00:00:00:00:00:00</string>
@@ -155,17 +155,34 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="3" rowspan="3">
+      <item row="0" column="3" rowspan="2">
        <widget class="Line" name="signalQualityline">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
        </widget>
       </item>
-      <item row="0" column="5" rowspan="3">
+      <item row="0" column="5" rowspan="2">
        <widget class="Line" name="qualityLevelLine">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="7" rowspan="2">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="8" rowspan="2">
+       <widget class="QToolButton" name="reassociateButton">
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextBesideIcon</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -390,6 +407,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="popupMode">
+         <enum>QToolButton::InstantPopup</enum>
         </property>
         <property name="toolButtonStyle">
          <enum>Qt::ToolButtonTextBesideIcon</enum>

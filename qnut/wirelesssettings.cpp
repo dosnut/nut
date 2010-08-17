@@ -124,7 +124,7 @@ namespace qnut {
 		m_RemoveNetworkAction = new QAction(QIcon(UI_ICON_REMOVE), tr("&Remove"), this);
 		
 		m_SaveNetworksAction     = new QAction(QIcon(UI_ICON_SAVE), tr("&Write managed to global config"), this);
-		reloadNetworksAction     = new QAction(/*QIcon(UI_ICON_RELOAD), */ tr("Re&load global config"), this);
+		reloadNetworksAction     = new QAction(/*QIcon(UI_ICON_RELOAD), */tr("Re&load global config"), this);
 		m_AutoSaveNetworksAction = new QAction(/*QIcon(UI_ICON_AUTOSAVE), */tr("&Autowrite global config"), this);
 		m_KeepScanResultsAction  = new QAction(/*QIcon(UI_ICON_DETAILED), */tr("&Keep scan results visible"), this);
 		reassociateAction        = new QAction(QIcon(UI_ICON_RELOAD), tr("&Reassociate"), this);
@@ -136,7 +136,8 @@ namespace qnut {
 // 		advancedFuntionsMenu->setIcon(QIcon(UI_ICON_ADVANCED));
 		
 		m_SetBSSIDMenu = new QMenu(tr("Switch to alternate BSSID"));
-		m_SetBSSIDMenu->setEnabled(false);
+		m_SetBSSIDMenu->setIcon(QIcon(UI_ICON_AP));
+		updateBSSIDMenu();
 		
 		m_AutoSaveNetworksAction->setCheckable(true);
 		
@@ -184,10 +185,7 @@ namespace qnut {
 		advancedFuntionsMenu->addAction(reloadNetworksAction);
 		advancedFuntionsMenu->addSeparator();
 		advancedFuntionsMenu->addAction(m_AutoSaveNetworksAction);
-		advancedFuntionsMenu->addSeparator();
 		advancedFuntionsMenu->addAction(m_KeepScanResultsAction);
-		advancedFuntionsMenu->addSeparator();
-		advancedFuntionsMenu->addAction(reassociateAction);
 		advancedFuntionsMenu->addSeparator();
 		advancedFuntionsMenu->addMenu(m_SetBSSIDMenu);
 		
@@ -229,6 +227,8 @@ namespace qnut {
 		ui.advancedFunctionsButton->setText(advancedFuntionsMenu->title());
 		ui.advancedFunctionsButton->setIcon(QIcon(UI_ICON_SELECTED));
 		ui.advancedFunctionsButton->setPopupMode(QToolButton::InstantPopup);
+		
+		ui.reassociateButton->setDefaultAction(reassociateAction);
 		
 		m_SetBSSIDMapper = new QSignalMapper(this);
 		connect(m_SetBSSIDMapper, SIGNAL(mapped(const QString &)), this, SLOT(handleBSSIDSwitchRequest(const QString &)));
@@ -284,6 +284,7 @@ namespace qnut {
 	void CWirelessSettings::updateUi(DeviceState state) {
 		ui.managedAvailableAPSplitter->setEnabled(state >= DS_ACTIVATED && m_Device->getWireless());
 		ui.actionsWidget->setEnabled(state >= DS_ACTIVATED && m_Device->getWireless());
+		ui.signalFrame->setEnabled(state > DS_ACTIVATED && m_Device->getWireless());
 		
 		ui.iconLabel->setPixmap(QPixmap(iconFile(m_Device)));
 		ui.stateLabel->setText(toStringTr(state));
@@ -490,7 +491,11 @@ namespace qnut {
 			}
 		}
 		
-		m_SetBSSIDMenu->setEnabled(!m_SetBSSIDMenu->actions().isEmpty());
+		if (m_SetBSSIDMenu->actions().isEmpty()) {
+			currentAction = m_SetBSSIDMenu->addAction(tr("< no matching scan results >"));
+			currentAction->setEnabled(false);
+		}
+		
 	}
 	
 	void CWirelessSettings::keepScanResultsVisible(bool value) {
