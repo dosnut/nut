@@ -6,6 +6,8 @@
 #include <QMenu>
 #include <QAction>
 
+#include <QApplication>
+
 #include "cuidevice.h"
 #include "constants.h"
 #include "common.h"
