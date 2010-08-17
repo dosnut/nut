@@ -10,7 +10,7 @@ m_wextFd(-1),
 m_sqPollrate(10000),
 m_sqTimeOutCount(0),
 m_sqTimerId(-1),
-m_scPollrate(5000),
+m_scPollrate(1000),
 m_scTimeOutCount(10),
 m_scTimerId(-1) {
 }
