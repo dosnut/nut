@@ -72,13 +72,12 @@ add_executable(${PROJECT_NAME}
 	${TRANSLATIONS_QM}
 )
 
-add_target_properties(${PROJECT_NAME} LINK_FLAGS -L${nutclient_BINARY_DIR})
-add_target_properties(${PROJECT_NAME} LINK_FLAGS -lnutclient)
-
 target_link_libraries(${PROJECT_NAME}
 	${QT_QTCORE_LIBRARY}
 	${QT_QTGUI_LIBRARY}
 	${QT_QTNETWORK_LIBRARY}
+	-L${nutclient_BINARY_DIR}
+	-lnutclient
 )
 
 file(GLOB RES_ICONS res/*.png res/qnut.svg res/qnut_small.svg)
