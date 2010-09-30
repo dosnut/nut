@@ -12,6 +12,7 @@
 #include <QDialog>
 #include <libnutwireless/cnetworkconfig.h>
 #include <QSignalMapper>
+#include "cabstractwifinetconfigdialog.h"
 #include "ui_apconfexp.h"
 
 namespace libnutwireless {
@@ -28,21 +29,21 @@ namespace qnut {
 	 *
 	 * By accepting the settings made in the UI they are verified (on error the dialog stays open).
 	 */
-	class CAccessPointConfig : public QDialog {
+	class CAccessPointConfig : public CAbstractWifiNetConfigDialog {
 		Q_OBJECT
 	public:
 		/**
 		 * @brief Opens the dialog for adding the given scanned network.
 		 * @param scanResult scan result with network configuration to use
 		 */
-		bool execute(libnutwireless::ScanResult scanResult);
+		virtual bool execute(libnutwireless::ScanResult scanResult);
 		/**
 		 * @brief Opens the dialog for configuring the given managed network
 		 * @param id managed network id
 		 */
-		bool execute(int id);
+		virtual bool execute(int id);
 		/// @brief Opens the dialog for adding a new annonymous network
-		bool execute();
+		virtual bool execute();
 		
 		static QString lastFileOpenDir() { return m_LastFileOpenDir; }
 		static void setLastFileOpenDir(QString value) { m_LastFileOpenDir = value; }
@@ -52,15 +53,8 @@ namespace qnut {
 		 * @param parent parent widget
 		 */
 		CAccessPointConfig(libnutwireless::CWpaSupplicant * wpa_supplicant, QWidget * parent = 0);
-		/// @brief Destroyes the object.
-		~CAccessPointConfig();
-	private:
+	protected:
 		Ui::apconf ui;
-		QRegExpValidator * m_HexValidator;
-		
-		libnutwireless::CWpaSupplicant * m_Supplicant;
-		
-		int m_CurrentID;
 		bool m_WEPEnabled;
 		
 		libnutwireless::CNetworkConfig m_Config;
@@ -84,12 +78,11 @@ namespace qnut {
 		QMap<QWidget *, FileEditStrings> m_FileSelectStringMap;
 		QMap<QCheckBox *, QLineEdit *> m_HexEditMap;
 		
-		inline void convertLineEditText(QLineEdit * lineEdit, bool hex);
 		inline void writeEAPPhaseConfig(libnutwireless::CNetworkConfig & eap_config, int phase);
 		inline void writeEAPConfig(libnutwireless::CNetworkConfig & eap_config);
 		inline void readEAPPhaseConfig(libnutwireless::CNetworkConfig & eap_config, int phase);
 		inline void readEAPConfig(libnutwireless::CNetworkConfig & eap_config);
-	private slots:
+	protected slots:
 		void setAuthConfig(int type);
 		void setWEPDisabled(bool value);
 		void verifyConfiguration();

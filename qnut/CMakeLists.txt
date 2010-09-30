@@ -25,11 +25,12 @@ set(SOURCES_MOC_H
 	managedapmodel.h
 	environmenttreemodel.h
 	availableapmodel.h
+	cabstractwifinetconfigdialog.h
 	accesspointconfig.h
+	adhocconfig.h
 	environmentdetailsmodel.h
 	dnslistmodel.h
 	ipeditdelegate.h
-	adhocconfig.h
 	devicesettings.h
 	commandlistmodel.h
 	cuidevicemodel.h
@@ -46,11 +47,12 @@ set(SOURCES_CPP main.cpp
 	managedapmodel.cpp
 	environmenttreemodel.cpp
 	availableapmodel.cpp
+	cabstractwifinetconfigdialog.cpp
 	accesspointconfig.cpp
+	adhocconfig.cpp
 	environmentdetailsmodel.cpp
 	dnslistmodel.cpp
 	ipeditdelegate.cpp
-	adhocconfig.cpp
 	devicesettings.cpp
 	commandlistmodel.cpp
 	cuidevicemodel.cpp

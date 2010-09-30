@@ -12,7 +12,6 @@
 #include <libnutwireless/wpa_supplicant.h>
 #include "accesspointconfig.h"
 
-#define FLAG_PREPARE_OUTPUT(a, b, c) if(a & c) b << #c;
 #define WRITE_BACK_AUTOQUOTE(f, t) f(t, !(t.isEmpty()))
 
 namespace qnut {
@@ -33,18 +32,13 @@ namespace qnut {
 		}
 	}
 	
-	CAccessPointConfig::CAccessPointConfig(CWpaSupplicant * wpa_supplicant, QWidget * parent) : QDialog(parent) {
-		m_Supplicant = wpa_supplicant;
-		
+	CAccessPointConfig::CAccessPointConfig(CWpaSupplicant * wpa_supplicant, QWidget * parent) : CAbstractWifiNetConfigDialog(wpa_supplicant, parent) {
 		ui.setupUi(this);
 		
 		m_OldConfig.group = GCI_UNDEFINED;
 		m_OldConfig.pairwise = PCI_UNDEFINED;
 		m_OldConfig.protocols = PROTO_UNDEFINED;
 		m_OldConfig.keymgmt = KM_UNDEFINED;
-		
-		QRegExp regexp("[0123456789abcdefABCDEF]*");
-		m_HexValidator = new QRegExpValidator(regexp, this);
 		
 		ui.eapPSKEdit->setValidator(m_HexValidator);
 		
@@ -106,10 +100,6 @@ namespace qnut {
 		
 		connect(ui.rsnCheck, SIGNAL(toggled(bool)), this, SLOT(setWEPDisabled(bool)));
 		setAuthConfig(0);
-	}
-	
-	CAccessPointConfig::~CAccessPointConfig() {
-		delete m_HexValidator;
 	}
 	
 	void CAccessPointConfig::setAuthConfig(int type) {
@@ -415,62 +405,7 @@ namespace qnut {
 		
 		QStringList errormsg;
 		
-		if (status.failures != NCF_NONE) {
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_ALL)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_SSID)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_BSSID)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_DISABLED)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_ID_STR)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_SCAN_SSID)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_PRIORITY)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_MODE)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_FREQ)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_PROTO)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_KEYMGMT)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_AUTH_ALG)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_PAIRWISE)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_GROUP)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_PSK)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_EAPOL_FLAGS)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_MIXED_CELL)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_PROA_KEY_CACHING)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_WEP_KEY0)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_WEP_KEY1)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_WEP_KEY2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_WEP_KEY3)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_WEP_KEY_IDX)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_PEERKEY)
-		}
-		
-		if (status.eap_failures != ENCF_NONE) {
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_ALL)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_EAP)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_IDENTITY)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_ANON_IDENTITY)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PASSWD)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_CA_CERT)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_CA_PATH)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_CLIENT_CERT)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PRIVATE_KEY)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PRIVATE_KEY_PASSWD)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_DH_FILE)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_SUBJECT_MATCH)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_ALTSUBJECT_MATCH)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PHASE1)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PHASE2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_CA_CERT2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_CA_PATH2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_CLIENT_CERT2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PRIVATE_KEY2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PRIVATE_KEY2_PASSWD)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_DH_FILE2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_SUBJECT_MATCH2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_ALTSUBJECT_MATCH2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_FRAGMENT_SIZE)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_EAPPSK)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_NAI)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PAC_FILE)
-		}
+		getConfigErrors(&status, errormsg);
 		
 		if (!errormsg.isEmpty()) {
 			QString errors = errormsg.join(", ");
@@ -613,17 +548,6 @@ namespace qnut {
 		readEAPPhaseConfig(eap_config, ui.phase1Radio->isChecked() ? 1 : 2);
 	}
 	
-	inline void CAccessPointConfig::convertLineEditText(QLineEdit * lineEdit, bool hex) {
-		if (hex) {
-			lineEdit->setText(lineEdit->text().toAscii().toHex());
-			lineEdit->setValidator(m_HexValidator);
-		}
-		else {
-			lineEdit->setText(QByteArray::fromHex(lineEdit->text().toAscii()));
-			lineEdit->setValidator(NULL);
-		}
-	}
-	
 	void CAccessPointConfig::countPskChars(QString psk) {
 		ui.charCountLabel->setText(tr("%1 chars").arg(psk.length()));
 	}
@@ -638,7 +562,7 @@ namespace qnut {
 	void CAccessPointConfig::convertLineEditText(bool hex) {
 		QCheckBox * hexCheck = qobject_cast<QCheckBox *>(sender());
 		if (hexCheck/* && m_HexEditMap.contains(hexCheck)*/)
-			convertLineEditText(m_HexEditMap[hexCheck], hex);
+			CAbstractWifiNetConfigDialog::convertLineEditText(m_HexEditMap[hexCheck], hex);
 	}
 	
 	void CAccessPointConfig::selectFile(QWidget * reciever) {
