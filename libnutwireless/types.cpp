@@ -213,7 +213,7 @@ QString toString(AuthenticationAlgs algs) {
 
 QString toString(Protocols proto) {
 //{WKI_UNDEFINED=0, WKI_WPA=1, WKI_RSN=2} Protocols;
-	if (PROTO_RSN & PROTO_WPA)
+	if ((PROTO_RSN | PROTO_WPA) == proto)
 		return "WPA RSN";
 	else if (PROTO_WPA == proto)
 		return "WPA";
