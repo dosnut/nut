@@ -107,15 +107,9 @@ namespace qnut {
 		ui.confTabs->setTabEnabled(3, type >= 2);
 		ui.confTabs->setTabEnabled(2, type == 1);
 		
-		ui.prwCipGroup->setEnabled(type > 0);
 		ui.rsnCombo->setEnabled(type > 0 && type < 3);
 		
 		m_WEPEnabled = (type == 0) || (!ui.rsnCombo->currentIndex()) || (!ui.rsnCombo->isEnabled());
-		
-		ui.grpCipTKIPCheck->setEnabled(type > 0);
-		ui.grpCipCCMPCheck->setEnabled(type > 0);
-		ui.grpCipWEP40Check->setEnabled(m_WEPEnabled);
-		ui.grpCipWEP104Check->setEnabled(m_WEPEnabled);
 		
 		ui.confTabs->setTabEnabled(1, m_WEPEnabled);
 		
@@ -128,8 +122,6 @@ namespace qnut {
 	
 	void CAccessPointConfig::setWEPDisabled(bool value) {
 		m_WEPEnabled = !value;
-		ui.grpCipWEP40Check->setEnabled(m_WEPEnabled);
-		ui.grpCipWEP104Check->setEnabled(m_WEPEnabled);
 		ui.confTabs->setTabEnabled(1, m_WEPEnabled);
 		
 		ui.proativeCheck->setEnabled(!m_WEPEnabled);
