@@ -23,7 +23,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="ssidLabel">
        <property name="text">
-        <string>SSID</string>
+        <string>SSID:</string>
        </property>
        <property name="buddy">
         <cstring>ssidEdit</cstring>
@@ -47,7 +47,7 @@
      <item row="1" column="0">
       <widget class="QLabel" name="bssidLabel">
        <property name="text">
-        <string>BSSID</string>
+        <string>BSSID:</string>
        </property>
        <property name="buddy">
         <cstring>bssidEdit</cstring>
@@ -84,7 +84,7 @@
      <item row="2" column="0">
       <widget class="QLabel" name="keyManagementLabel">
        <property name="text">
-        <string>Key management</string>
+        <string>Key management:</string>
        </property>
        <property name="buddy">
         <cstring>keyManagementCombo</cstring>
@@ -136,7 +136,7 @@
        <item>
         <widget class="QLabel" name="rsnLabel">
          <property name="text">
-          <string>WPA2 (RSN) mode</string>
+          <string>WPA2 (RSN) mode:</string>
          </property>
          <property name="buddy">
           <cstring>rsnCombo</cstring>
@@ -309,7 +309,7 @@
          <item row="0" column="0">
           <widget class="QRadioButton" name="wep0Radio">
            <property name="text">
-            <string>WEP Key 0</string>
+            <string>WEP Key 0:</string>
            </property>
           </widget>
          </item>
@@ -336,7 +336,7 @@
          <item row="2" column="0">
           <widget class="QRadioButton" name="wep1Radio">
            <property name="text">
-            <string>WEP Key 1</string>
+            <string>WEP Key 1:</string>
            </property>
           </widget>
          </item>
@@ -363,7 +363,7 @@
          <item row="4" column="0">
           <widget class="QRadioButton" name="wep2Radio">
            <property name="text">
-            <string>WEP Key 2</string>
+            <string>WEP Key 2:</string>
            </property>
           </widget>
          </item>
@@ -390,7 +390,7 @@
          <item row="6" column="0">
           <widget class="QRadioButton" name="wep3Radio">
            <property name="text">
-            <string>WEP Key 3</string>
+            <string>WEP Key 3:</string>
            </property>
           </widget>
          </item>
@@ -462,7 +462,7 @@
          <item>
           <widget class="QLabel" name="keyLabel">
            <property name="text">
-            <string>Key</string>
+            <string>Key:</string>
            </property>
            <property name="margin">
             <number>-1</number>
@@ -650,7 +650,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="identyLabel">
            <property name="text">
-            <string>Identity</string>
+            <string>Identity:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -666,7 +666,7 @@
          <item row="1" column="0">
           <widget class="QLabel" name="anonymousIdentityLabel">
            <property name="text">
-            <string>Anonymous Identity</string>
+            <string>Anonymous Identity:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -682,7 +682,7 @@
          <item row="2" column="0">
           <widget class="QLabel" name="eapPasswordLabel">
            <property name="text">
-            <string>Password</string>
+            <string>Password:</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -716,7 +716,7 @@
          <item row="4" column="0">
           <widget class="QLabel" name="eapPSKLabel">
            <property name="text">
-            <string>EAP Pre Shared Key (hex.)</string>
+            <string>EAP Pre Shared Key (hex.):</string>
            </property>
            <property name="buddy">
             <cstring>eapPSKEdit</cstring>
@@ -750,7 +750,7 @@
          <item row="5" column="0">
           <widget class="QLabel" name="naiLabel">
            <property name="text">
-            <string>Network Access Identifier (NAI)</string>
+            <string>Network Access Identifier (NAI):</string>
            </property>
            <property name="buddy">
             <cstring>naiEdit</cstring>
@@ -763,7 +763,7 @@
          <item row="6" column="0">
           <widget class="QLabel" name="pacLabel">
            <property name="text">
-            <string>Proxy Access Control (PAC) file</string>
+            <string>Proxy Access Control (PAC) file:</string>
            </property>
            <property name="buddy">
             <cstring>pacEdit</cstring>
@@ -787,7 +787,7 @@
          <item row="7" column="0">
           <widget class="QLabel" name="fragmentLabel">
            <property name="text">
-            <string>Fragment size</string>
+            <string>Fragment size:</string>
            </property>
            <property name="buddy">
             <cstring>fragmentSpin</cstring>
@@ -847,7 +847,7 @@
          <item>
           <widget class="QLabel" name="phaseShowLabel">
            <property name="text">
-            <string>Show settings for</string>
+            <string>Show settings for:</string>
            </property>
            <property name="buddy">
             <cstring>phase1Radio</cstring>
@@ -898,7 +898,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="caLabel">
             <property name="text">
-             <string>CA file</string>
+             <string>CA file:</string>
             </property>
             <property name="buddy">
              <cstring>caFileEdit</cstring>
@@ -922,7 +922,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="clientLabel">
             <property name="text">
-             <string>Client file</string>
+             <string>Client file:</string>
             </property>
             <property name="buddy">
              <cstring>clientFileEdit</cstring>
@@ -955,7 +955,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="keyFileLabel">
             <property name="text">
-             <string>Key file</string>
+             <string>Key file:</string>
             </property>
             <property name="buddy">
              <cstring>keyFileEdit</cstring>
@@ -979,7 +979,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="keyPasswordLabel">
             <property name="text">
-             <string>Password</string>
+             <string>Password:</string>
             </property>
             <property name="buddy">
              <cstring>keyPasswordEdit</cstring>
@@ -1018,7 +1018,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="phaseParamLabel">
            <property name="text">
-            <string>Phase parameters</string>
+            <string>Phase parameters:</string>
            </property>
            <property name="buddy">
             <cstring>phaseParamEdit</cstring>
@@ -1038,7 +1038,7 @@
          <item row="2" column="0">
           <widget class="QLabel" name="subjectMatchLabel">
            <property name="text">
-            <string>Subject Match</string>
+            <string>Subject Match:</string>
            </property>
            <property name="buddy">
             <cstring>subjectMatchEdit</cstring>
@@ -1051,7 +1051,7 @@
          <item row="3" column="0">
           <widget class="QLabel" name="altSubjectMatchLabel">
            <property name="text">
-            <string>Alt. Subject Match</string>
+            <string>Alt. Subject Match:</string>
            </property>
            <property name="buddy">
             <cstring>altSubjectMatchEdit</cstring>
@@ -1064,7 +1064,7 @@
          <item row="5" column="0">
           <widget class="QLabel" name="dhFileLabel">
            <property name="text">
-            <string>DH/DSA file</string>
+            <string>DH/DSA file:</string>
            </property>
            <property name="buddy">
             <cstring>dhFileEdit</cstring>
