@@ -7,7 +7,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>592</width>
+    <width>609</width>
     <height>631</height>
    </rect>
   </property>
@@ -17,6 +17,9 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QFormLayout" name="mainSettingsLayout">
+     <property name="fieldGrowthPolicy">
+      <enum>QFormLayout::ExpandingFieldsGrow</enum>
+     </property>
      <item row="0" column="0">
       <widget class="QLabel" name="ssidLabel">
        <property name="text">
@@ -115,10 +118,48 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="rsnCheck">
-         <property name="text">
-          <string>WPA2 (RSN)</string>
+        <spacer name="protoSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="rsnLabel">
+         <property name="text">
+          <string>WPA2 (RSN) mode</string>
+         </property>
+         <property name="buddy">
+          <cstring>rsnCombo</cstring>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="rsnCombo">
+         <item>
+          <property name="text">
+           <string>don't use</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>try</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>use only</string>
+          </property>
+         </item>
         </widget>
        </item>
       </layout>
@@ -808,6 +849,9 @@
            <property name="text">
             <string>Show settings for</string>
            </property>
+           <property name="buddy">
+            <cstring>phase1Radio</cstring>
+           </property>
           </widget>
          </item>
          <item>
@@ -1102,11 +1146,14 @@
   <tabstop>bssidEdit</tabstop>
   <tabstop>anyBSSIDCheck</tabstop>
   <tabstop>keyManagementCombo</tabstop>
-  <tabstop>rsnCheck</tabstop>
+  <tabstop>rsnCombo</tabstop>
   <tabstop>confTabs</tabstop>
+  <tabstop>grpCipGroup</tabstop>
   <tabstop>grpCipWEP40Check</tabstop>
+  <tabstop>grpCipWEP104Check</tabstop>
   <tabstop>grpCipTKIPCheck</tabstop>
   <tabstop>grpCipCCMPCheck</tabstop>
+  <tabstop>prwCipGroup</tabstop>
   <tabstop>prwCipTKIPCheck</tabstop>
   <tabstop>prwCipCCMPCheck</tabstop>
   <tabstop>proativeCheck</tabstop>
@@ -1128,6 +1175,22 @@
   <tabstop>wep3LeaveButton</tabstop>
   <tabstop>pskEdit</tabstop>
   <tabstop>pskLeaveButton</tabstop>
+  <tabstop>pskHexCheck</tabstop>
+  <tabstop>showPlainPSKCheck</tabstop>
+  <tabstop>eapMethodMD5Check</tabstop>
+  <tabstop>eapMethodGTCCheck</tabstop>
+  <tabstop>eapMethodTTLSCheck</tabstop>
+  <tabstop>eapMethodLEAPCheck</tabstop>
+  <tabstop>eapMethodSAKECheck</tabstop>
+  <tabstop>eapMethodMSCHAPV2Check</tabstop>
+  <tabstop>eapMethodTLSCheck</tabstop>
+  <tabstop>eapMethodAKACheck</tabstop>
+  <tabstop>eapMethodPSKCheck</tabstop>
+  <tabstop>eapMethodGPSKCheck</tabstop>
+  <tabstop>eapMethodOTPCheck</tabstop>
+  <tabstop>eapMethodPEAPCheck</tabstop>
+  <tabstop>eapMethodFASTCheck</tabstop>
+  <tabstop>eapMethodPAXCheck</tabstop>
   <tabstop>identiyEdit</tabstop>
   <tabstop>anonymousIdentityEdit</tabstop>
   <tabstop>eapPasswordEdit</tabstop>
@@ -1137,6 +1200,7 @@
   <tabstop>naiEdit</tabstop>
   <tabstop>pacEdit</tabstop>
   <tabstop>pacBrowse</tabstop>
+  <tabstop>fragmentSpin</tabstop>
   <tabstop>phase1Radio</tabstop>
   <tabstop>phase2Radio</tabstop>
   <tabstop>caFileEdit</tabstop>
@@ -1165,8 +1229,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>315</x>
-     <y>626</y>
+     <x>321</x>
+     <y>624</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -1181,8 +1245,8 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>585</x>
-     <y>60</y>
+     <x>600</x>
+     <y>59</y>
     </hint>
     <hint type="destinationlabel">
      <x>363</x>
@@ -1341,12 +1405,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>569</x>
-     <y>366</y>
+     <x>585</x>
+     <y>358</y>
     </hint>
     <hint type="destinationlabel">
-     <x>387</x>
-     <y>367</y>
+     <x>452</x>
+     <y>357</y>
     </hint>
    </hints>
   </connection>
@@ -1357,12 +1421,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>577</x>
-     <y>334</y>
+     <x>592</x>
+     <y>325</y>
     </hint>
     <hint type="destinationlabel">
-     <x>432</x>
-     <y>335</y>
+     <x>459</x>
+     <y>324</y>
     </hint>
    </hints>
   </connection>
@@ -1373,12 +1437,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>577</x>
-     <y>372</y>
+     <x>592</x>
+     <y>367</y>
     </hint>
     <hint type="destinationlabel">
-     <x>432</x>
-     <y>373</y>
+     <x>459</x>
+     <y>366</y>
     </hint>
    </hints>
   </connection>

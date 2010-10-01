@@ -98,7 +98,7 @@ namespace qnut {
 		connect(ui.keyManagementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setAuthConfig(int)));
 		connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(verifyConfiguration()));
 		
-		connect(ui.rsnCheck, SIGNAL(toggled(bool)), this, SLOT(setWEPDisabled(bool)));
+		connect(ui.rsnCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(handleRSNModeChanged(int)));
 		setAuthConfig(0);
 	}
 	
@@ -108,9 +108,9 @@ namespace qnut {
 		ui.confTabs->setTabEnabled(2, type == 1);
 		
 		ui.prwCipGroup->setEnabled(type > 0);
-		ui.rsnCheck->setEnabled(type > 0 && type < 3);
+		ui.rsnCombo->setEnabled(type > 0 && type < 3);
 		
-		m_WEPEnabled = (type == 0) || (!ui.rsnCheck->isChecked()) || (!ui.rsnCheck->isEnabled());
+		m_WEPEnabled = (type == 0) || (!ui.rsnCombo->currentIndex()) || (!ui.rsnCombo->isEnabled());
 		
 		ui.grpCipTKIPCheck->setEnabled(type > 0);
 		ui.grpCipCCMPCheck->setEnabled(type > 0);
@@ -120,6 +120,10 @@ namespace qnut {
 		ui.confTabs->setTabEnabled(1, m_WEPEnabled);
 		
 		ui.proativeCheck->setEnabled(!m_WEPEnabled);
+	}
+	
+	void CAccessPointConfig::handleRSNModeChanged(int value) {
+		setWEPDisabled(value);
 	}
 	
 	void CAccessPointConfig::setWEPDisabled(bool value) {
@@ -178,8 +182,8 @@ namespace qnut {
 		else
 			ui.keyManagementCombo->setCurrentIndex(0);
 		
-		if (ui.rsnCheck->isEnabled())
-			ui.rsnCheck->setChecked(scanResult.protocols & PROTO_RSN);
+		if (ui.rsnCombo->isEnabled())
+			ui.rsnCombo->setCurrentIndex(2);
 		
 		ui.prwCipCCMPCheck->setChecked(scanResult.pairwise & PCI_CCMP);
 		ui.prwCipTKIPCheck->setChecked(scanResult.pairwise & PCI_TKIP);
@@ -233,11 +237,23 @@ namespace qnut {
 		if ((m_Config.get_key_mgmt() & KM_WPA_EAP) || (m_Config.get_key_mgmt() & KM_IEEE8021X)) {
 			ui.keyManagementCombo->setCurrentIndex((m_Config.get_key_mgmt() & KM_IEEE8021X) ? 3 : 2);
 			readEAPConfig(m_Config);
-			ui.rsnCheck->setChecked(m_Config.get_protocols() & PROTO_RSN);
+			
+			if (m_Config.get_protocols() == PROTO_RSN)
+				ui.rsnCombo->setCurrentIndex(2);
+			else if (m_Config.get_protocols() & PROTO_RSN)
+				ui.rsnCombo->setCurrentIndex(1);
+			else
+				ui.rsnCombo->setCurrentIndex(0);
 		}
 		else if (m_Config.get_key_mgmt() & KM_WPA_PSK) {
 			ui.keyManagementCombo->setCurrentIndex(1);
-			ui.rsnCheck->setChecked(m_Config.get_protocols() & PROTO_RSN);
+			
+			if (m_Config.get_protocols() == PROTO_RSN)
+				ui.rsnCombo->setCurrentIndex(2);
+			else if (m_Config.get_protocols() & PROTO_RSN)
+				ui.rsnCombo->setCurrentIndex(1);
+			else
+				ui.rsnCombo->setCurrentIndex(0);
 		}
 		else
 			ui.keyManagementCombo->setCurrentIndex(0);
@@ -358,8 +374,6 @@ namespace qnut {
 			m_Config.set_pairwise(m_OldConfig.pairwise);
 		}
 		
-		
-		
 		switch (ui.keyManagementCombo->currentIndex()) {
 		case 0:
 			m_Config.set_key_mgmt(CHECK_FLAG(m_OldConfig.keymgmt, KM_NONE));
@@ -367,10 +381,19 @@ namespace qnut {
 		case 1:
 			m_Config.set_key_mgmt(CHECK_FLAG(m_OldConfig.keymgmt, KM_WPA_PSK));
 			
-			if (ui.rsnCheck->isChecked())
-				m_Config.set_proto(CHECK_FLAG(m_OldConfig.protocols, PROTO_RSN));
-			else
+			switch (ui.rsnCombo->currentIndex()) {
+			case 0:
 				m_Config.set_proto(CHECK_FLAG(m_OldConfig.protocols, PROTO_WPA));
+				break;
+			case 1:
+				m_Config.set_proto(CHECK_FLAG(m_OldConfig.protocols, PROTO_RSN));
+				break;
+			case 2:
+				m_Config.set_proto(PROTO_RSN);
+				break;
+			default:
+				break;
+			}
 			
 			if (!(ui.pskLeaveButton->isChecked() || ui.pskEdit->text().isEmpty()))
 				m_Config.set_psk('\"' + ui.pskEdit->text() + '\"');
@@ -378,10 +401,19 @@ namespace qnut {
 		case 2:
 			m_Config.set_key_mgmt(CHECK_FLAG(m_OldConfig.keymgmt, KM_WPA_EAP));
 			
-			if (ui.rsnCheck->isChecked())
-				m_Config.set_proto(CHECK_FLAG(m_OldConfig.protocols, PROTO_RSN));
-			else
+			switch (ui.rsnCombo->currentIndex()) {
+			case 0:
 				m_Config.set_proto(CHECK_FLAG(m_OldConfig.protocols, PROTO_WPA));
+				break;
+			case 1:
+				m_Config.set_proto(CHECK_FLAG(m_OldConfig.protocols, PROTO_RSN));
+				break;
+			case 2:
+				m_Config.set_proto(PROTO_RSN);
+				break;
+			default:
+				break;
+			}
 			
 			writeEAPConfig(m_Config);
 			break;

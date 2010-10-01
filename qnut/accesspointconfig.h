@@ -84,6 +84,7 @@ namespace qnut {
 		inline void readEAPConfig(libnutwireless::CNetworkConfig & eap_config);
 	protected slots:
 		void setAuthConfig(int type);
+		void handleRSNModeChanged(int value);
 		void setWEPDisabled(bool value);
 		void verifyConfiguration();
 		void countPskChars(QString psk);
