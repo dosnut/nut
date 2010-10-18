@@ -64,7 +64,7 @@ bool CNL80211::open() {
 	if (m_connected)
 		return true;
 	m_nlCallback = nl_cb_alloc(NL_CB_DEFAULT);
-	m_nlSocket = nl_socket_alloc_cb(m_nlCallback);
+	m_nlSocket = nl_socket_alloc();
 	if(!m_nlSocket) {
 		emit message("Could not create netlink socket");
 		return false;
