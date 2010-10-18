@@ -325,12 +325,12 @@ namespace qnut {
 				accepted = dialog.execute(scan);
 			}
 			else {
-				CAccessPointConfig dialog(m_Device->getWireless()->getWpaSupplicant(), this);
+				CAccessPointConfig dialog(m_Device->getWireless(), this);
 				accepted = dialog.execute(scan);
 			}
 		}
 		else {
-			CAccessPointConfig dialog(m_Device->getWireless()->getWpaSupplicant(), this);
+			CAccessPointConfig dialog(m_Device->getWireless(), this);
 			accepted = dialog.execute();
 		}
 		if (accepted && m_AutoSaveNetworksAction->isChecked())
@@ -368,18 +368,17 @@ namespace qnut {
 	void CWirelessSettings::configureSelectedNetwork() {
 		ShortNetworkInfo network = m_ManagedAPModel->cachedNetworks()[selectedIndex(ui.managedView).internalId()];
 		
-		bool accepted = false;
-		if (network.adhoc) {
-			CAdhocConfig dialog(m_Device->getWireless(), this);
-			accepted = dialog.execute(network.id);
-		}
-		else {
-			CAccessPointConfig dialog(m_Device->getWireless()->getWpaSupplicant(), this);
-			accepted = dialog.execute(network.id);
-		}
+		CAbstractWifiNetConfigDialog * dialog;
 		
-		if (accepted && m_AutoSaveNetworksAction->isChecked())
+		if (network.adhoc)
+			dialog = new CAdhocConfig(m_Device->getWireless(), this);
+		else
+			dialog = new CAccessPointConfig(m_Device->getWireless(), this);
+		
+		if (dialog->execute(network.id) && m_AutoSaveNetworksAction->isChecked())
 			m_SaveNetworksAction->trigger();
+		
+		delete dialog;
 	}
 	
 	void CWirelessSettings::enableSelectedNetwork() {
