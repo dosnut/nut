@@ -63,7 +63,8 @@ void CNL80211::timerEvent(QTimerEvent *event) {
 bool CNL80211::open() {
 	if (m_connected)
 		return true;
-	m_nlSocket = nl_socket_alloc();
+	m_nlCallback = nl_cb_alloc(NL_CB_DEFAULT);
+	m_nlSocket = nl_socket_alloc_cb(m_nlCallback);
 	if(!m_nlSocket) {
 		emit message("Could not create netlink socket");
 		return false;
@@ -202,7 +203,7 @@ void CNL80211::scan() {
 // 		return;
 // 	}
 
-	nl_socket_modify_cb(m_nlSocket, NL_CB_VALID, NL_CB_CUSTOM, cbForScanResults, this);
+	nl_socket_modify_cb(m_nlSocket, NL_CB_VALID, NL_CB_CUSTOM, &cbForScanResults, this);
 	
 	genlmsg_put(msg, 0, 0, genl_family_get_id(m_nlFamily), 0, (NLM_F_REQUEST | NLM_F_DUMP), NL80211_CMD_GET_SCAN, 0);
 	//Set the interface we want to operate on

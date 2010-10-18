@@ -9,6 +9,7 @@
 #endif
 
 
+struct nl_cb;
 struct nl_sock;
 struct nl_cache;
 struct genl_family;
@@ -23,6 +24,7 @@ class CNL80211: public CWirelessHW {
 		QString m_ifname;
 		
 		//Netlink connection stuff
+		nl_cb * m_nlCallback;
 		nl_sock * m_nlSocket;
 		nl_cache * m_nlCache;
 		genl_family * m_nlFamily;
