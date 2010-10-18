@@ -60,7 +60,7 @@ namespace qnut {
 		void handleRSNModeChanged(int value);
 		void setWEPDisabled(bool value);
 		
-		void verifyConfiguration();
+		virtual bool applyConfiguration();
 		
 		void countPskChars(QString psk);
 		void togglePlainPSK(bool show);

@@ -94,7 +94,8 @@ namespace qnut {
 		connect(ui.keyManagementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setAuthConfig(int)));
 		connect(ui.rsnCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(handleRSNModeChanged(int)));
 		
-		connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(verifyConfiguration()));
+		connect(ui.buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked(bool)), this, SLOT(applyConfiguration()));
+		connect(ui.buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked(bool)), this, SLOT(resetUi()));
 		setAuthConfig(0);
 	}
 	
@@ -125,7 +126,7 @@ namespace qnut {
 	
 	#define CHECK_FLAG(a, b) (((a) & (b)) ? (a) : (b))
 	
-	void CAccessPointConfig::verifyConfiguration() {
+	bool CAccessPointConfig::applyConfiguration() {
 		NetconfigStatus status;
 		
 		if (!ui.ssidEdit->text().isEmpty())
@@ -259,10 +260,11 @@ namespace qnut {
 			QMessageBox::critical(this, tr("Error on applying settings"),
 				tr("WPA supplicant reported the following errors:") + '\n' + errors);
 			qDebug(qPrintable(errors));
-			return;
+			return false;
 		}
 		
-		accept();
+		m_CurrentID = status.id;
+		return true;
 	}
 	
 	inline void CAccessPointConfig::writeEAPPhaseConfig(CNetworkConfig & eap_config, int phase) {

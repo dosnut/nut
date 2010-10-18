@@ -39,7 +39,8 @@ namespace qnut {
 		connect(ui.showPlainPSKCheck, SIGNAL(toggled(bool)), this, SLOT(togglePlainPSK(bool)));
 		connect(ui.keyManagementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setAuthConfig(int)));
 		
-		connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(verifyConfiguration()));
+		connect(ui.buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked(bool)), this, SLOT(applyConfiguration()));
+		connect(ui.buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked(bool)), this, SLOT(resetUi()));
 		setAuthConfig(0);
 	}
 	
@@ -50,7 +51,7 @@ namespace qnut {
 	
 	#define CHECK_FLAG(a, b) (((a) & (b)) ? (a) : (b))
 	
-	void CAdhocConfig::verifyConfiguration() {
+	bool CAdhocConfig::applyConfiguration() {
 		NetconfigStatus status;
 		
 		if (!ui.ssidEdit->text().isEmpty())
@@ -127,10 +128,11 @@ namespace qnut {
 			QMessageBox::critical(this, tr("Error on applying settings"),
 				tr("WPA supplicant reported the following errors:") + '\n' + errors);
 			qDebug(errors.toAscii().data());
-			return;
+			return false;
 		}
 		
-		accept();
+		m_CurrentID = status.id;
+		return true;
 	}
 	
 /*	bool CAdhocConfig::execute(ScanResult scanResult) {
@@ -206,16 +208,19 @@ namespace qnut {
 	void CAdhocConfig::populateUi() {
 		ui.ssidHexCheck->setChecked(setTextAutoHex(ui.ssidEdit, m_Config.get_ssid()));
 		
-		if (m_Config.get_key_mgmt() & KM_NONE)
+/*		if (m_Config.get_key_mgmt() & KM_NONE)
 			ui.keyManagementCombo->setCurrentIndex(0);
-		else if (m_Config.get_key_mgmt() & KM_WPA_NONE)
+		else */
+		if (m_Config.get_key_mgmt() & KM_WPA_NONE)
 			ui.keyManagementCombo->setCurrentIndex(1);
+		else
+			ui.keyManagementCombo->setCurrentIndex(0);
 // 		else if (m_Config.get_key_mgmt() & KM_WPA_NONE)
 // 			ui.keyManagementCombo->setCurrentIndex(2);
-		else {
-			QMessageBox::critical(this, tr("Error reading ap config"),
-				tr("Unsupported key management retrieved: %1").arg((quint32)(m_Config.get_key_mgmt())));
-		}
+// 		else {
+// 			QMessageBox::critical(this, tr("Error reading ap config"),
+// 				tr("Unsupported key management retrieved: %1").arg((quint32)(m_Config.get_key_mgmt())));
+// 		}
 		
 		ui.grpCipGroup->setChecked(!(m_Config.get_group() & GCI_NONE));
 		ui.grpCipWEP40Check->setChecked(m_Config.get_group() & GCI_WEP40);

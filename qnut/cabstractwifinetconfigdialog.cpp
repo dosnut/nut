@@ -82,6 +82,16 @@ namespace qnut {
 		return exec();
 	}
 	
+	void CAbstractWifiNetConfigDialog::accept() {
+		if (applyConfiguration())
+			QDialog::accept();
+	}
+	
+	void CAbstractWifiNetConfigDialog::resetUi() {
+		m_Config = m_OldConfig;
+		populateUi();
+	}
+	
 	#define FLAG_PREPARE_OUTPUT(a, b, c) if(a & c) b << #c;
 	
 	void CAbstractWifiNetConfigDialog::getConfigErrors(libnutwireless::NetconfigStatus * status, QStringList & errormsg) {

@@ -36,7 +36,7 @@ namespace qnut {
 	protected slots:
 		void setAuthConfig(int type);
 		
-		virtual void verifyConfiguration();
+		virtual bool applyConfiguration();
 		
 		void countPskChars(QString psk);
 		void togglePlainPSK(bool show);

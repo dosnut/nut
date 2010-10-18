@@ -62,6 +62,9 @@ namespace qnut {
 		CAbstractWifiNetConfigDialog(libnutwireless::CWireless * interface, QWidget * parent = 0);
 		/// @brief Destroyes the object.
 		~CAbstractWifiNetConfigDialog();
+	public slots:
+		virtual void accept();
+		virtual void resetUi();
 	protected:
 		static QRegExpValidator * m_HexValidator;
 		static int m_HexValidatorRefs;
@@ -78,7 +81,7 @@ namespace qnut {
 		
 		static void convertLineEditText(QLineEdit * lineEdit, bool hex);
 	protected slots:
-		virtual void verifyConfiguration() = 0;
+		virtual bool applyConfiguration() = 0;
 		virtual void convertLineEditText(bool hex);
 		virtual void populateUi() = 0;
 	};

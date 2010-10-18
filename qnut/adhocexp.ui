@@ -607,5 +607,21 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>ahconf</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>320</x>
+     <y>336</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>320</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>
