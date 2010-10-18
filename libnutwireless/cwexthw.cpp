@@ -41,6 +41,8 @@ bool CWextHW::open() {
 	else { //Socket is set up, now set SocketNotifier
 		qDebug() << QString("File Descriptor for Wext is: %1").arg(QString::number(m_wextFd));
 		//Start timer for reading wireless info (like in /proc/net/wireless)
+		if (m_wextFd != -1)
+			readSignalQuality();
 		m_sqTimerId = startTimer(m_sqPollrate);
 		return true;
 	}
