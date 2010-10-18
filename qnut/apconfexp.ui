@@ -12,7 +12,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Configure Access Point (Expert View)</string>
+   <string>Configure Access Point</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

@@ -9,15 +9,11 @@
 #define QNUT_ACCESSPOINTCONFIG_H
 
 #ifndef QNUT_NO_WIRELESS
-#include <QDialog>
+#include "cabstractwifinetconfigdialog.h"
+
 #include <libnutwireless/cnetworkconfig.h>
 #include <QSignalMapper>
-#include "cabstractwifinetconfigdialog.h"
 #include "ui_apconfexp.h"
-
-namespace libnutwireless {
-	class CWpaSupplicant;
-}
 
 namespace qnut {
 	/**
@@ -32,19 +28,6 @@ namespace qnut {
 	class CAccessPointConfig : public CAbstractWifiNetConfigDialog {
 		Q_OBJECT
 	public:
-		/**
-		 * @brief Opens the dialog for adding the given scanned network.
-		 * @param scanResult scan result with network configuration to use
-		 */
-		virtual bool execute(libnutwireless::ScanResult scanResult);
-		/**
-		 * @brief Opens the dialog for configuring the given managed network
-		 * @param id managed network id
-		 */
-		virtual bool execute(int id);
-		/// @brief Opens the dialog for adding a new annonymous network
-		virtual bool execute();
-		
 		static QString lastFileOpenDir() { return m_LastFileOpenDir; }
 		static void setLastFileOpenDir(QString value) { m_LastFileOpenDir = value; }
 		
@@ -52,19 +35,10 @@ namespace qnut {
 		 * @brief Creates the object and initializes the basic user interface.
 		 * @param parent parent widget
 		 */
-		CAccessPointConfig(libnutwireless::CWpaSupplicant * wpa_supplicant, QWidget * parent = 0);
+		CAccessPointConfig(libnutwireless::CWireless * interface, QWidget * parent = 0);
 	protected:
 		Ui::apconf ui;
 		bool m_WEPEnabled;
-		
-		libnutwireless::CNetworkConfig m_Config;
-		
-		struct {
-			libnutwireless::GroupCiphers group;
-			libnutwireless::PairwiseCiphers pairwise;
-			libnutwireless::Protocols protocols;
-			libnutwireless::KeyManagement keymgmt;
-		} m_OldConfig;
 		
 		struct FileEditStrings {
 			QString title;
@@ -76,7 +50,6 @@ namespace qnut {
 		QButtonGroup * m_EAPPhaseButtons;
 		QSignalMapper * m_FileEditMapper;
 		QMap<QWidget *, FileEditStrings> m_FileSelectStringMap;
-		QMap<QCheckBox *, QLineEdit *> m_HexEditMap;
 		
 		inline void writeEAPPhaseConfig(libnutwireless::CNetworkConfig & eap_config, int phase);
 		inline void writeEAPConfig(libnutwireless::CNetworkConfig & eap_config);
@@ -86,14 +59,17 @@ namespace qnut {
 		void setAuthConfig(int type);
 		void handleRSNModeChanged(int value);
 		void setWEPDisabled(bool value);
+		
 		void verifyConfiguration();
+		
 		void countPskChars(QString psk);
 		void togglePlainPSK(bool show);
 		
-		void convertLineEditText(bool hex);
 		void selectFile(QWidget * reciever);
 		
 		void setUiEAPPhase(int phase);
+		
+		virtual void populateUi();
 	};
 }
 #endif
