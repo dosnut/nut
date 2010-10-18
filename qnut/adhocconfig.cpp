@@ -11,132 +11,116 @@
 #include <libnutwireless/conversion.h>
 #include "adhocconfig.h"
 
-#define FLAG_PREPARE_OUTPUT(a, b, c) if(a & c) b << #c;
-
 namespace qnut {
 	using namespace libnutwireless;
 
-	CAdhocConfig::CAdhocConfig(CWireless * wireless, QWidget * parent) : QDialog(parent) {
-		m_Supplicant = wireless->getWpaSupplicant();
-		m_WirelessHW = wireless->getHardware();
-		
+	CAdhocConfig::CAdhocConfig(CWireless * supplicant, QWidget * parent) : CAbstractWifiNetConfigDialog(supplicant, parent) {
 		ui.setupUi(this);
 		
-		foreach (quint8 i, m_WirelessHW->getSupportedChannels()) {
-			ui.channelCombo->addItem(QString::number(i));
+		quint32 chan = 0;
+		ui.channelCombo->addItem(tr("auto"), -1);
+		foreach (quint32 i, m_WifiInterface->getHardware()->getSupportedFrequencies()) {
+			chan = frequencyToChannel(i);
+			ui.channelCombo->addItem(QString::number(chan), chan);
 		}
 		
-		QRegExp regexp("[0123456789abcdefABCDEF]*");
-		m_HexValidator = new QRegExpValidator(regexp, this);
+		m_HexEditMap.insert(ui.ssidHexCheck, ui.ssidEdit);
+		m_HexEditMap.insert(ui.wep0HexCheck, ui.wep0Edit);
+		m_HexEditMap.insert(ui.wep1HexCheck, ui.wep1Edit);
+		m_HexEditMap.insert(ui.wep2HexCheck, ui.wep2Edit);
+		m_HexEditMap.insert(ui.wep3HexCheck, ui.wep3Edit);
+		connect(ui.ssidHexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
+		connect(ui.wep0HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
+		connect(ui.wep1HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
+		connect(ui.wep2HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
+		connect(ui.wep3HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
 		
-		connect(ui.ssidHexCheck, SIGNAL(toggled(bool)), this, SLOT(convertSSID(bool)));
+		connect(ui.pskEdit, SIGNAL(textChanged(QString)), this, SLOT(countPskChars(QString)));
+		connect(ui.showPlainPSKCheck, SIGNAL(toggled(bool)), this, SLOT(togglePlainPSK(bool)));
+		connect(ui.keyManagementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setAuthConfig(int)));
+		
 		connect(ui.buttonBox, SIGNAL(accepted()), this, SLOT(verifyConfiguration()));
+		setAuthConfig(0);
 	}
 	
-	CAdhocConfig::~CAdhocConfig() {
-		delete m_HexValidator;
+	void CAdhocConfig::setAuthConfig(int type) {
+		ui.confTabs->setTabEnabled(2, type == 1);
+		ui.confTabs->setTabEnabled(1, type == 0);
 	}
+	
+	#define CHECK_FLAG(a, b) (((a) & (b)) ? (a) : (b))
 	
 	void CAdhocConfig::verifyConfiguration() {
 		NetconfigStatus status;
-		CNetworkConfig config;
 		
 		if (!ui.ssidEdit->text().isEmpty())
-			config.set_ssid( ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"');
-		config.set_frequency(channelToFrequency(ui.channelCombo->currentText().toInt()));
-		config.set_mode(QOOL_TRUE);
+			m_Config.set_ssid(ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"');
 		
-		switch (ui.encCombo->currentIndex()) {
+		int selectedChan = ui.channelCombo->itemData(ui.channelCombo->currentIndex(), Qt::UserRole).toInt();
+		m_Config.set_frequency(channelToFrequency(selectedChan));
+		
+		m_Config.set_mode(QOOL_TRUE);
+		
+		if (ui.confTabs->isTabEnabled(3)) {
+			if (!(ui.wep0LeaveButton->isChecked() || ui.wep0Edit->text().isEmpty()))
+				m_Config.set_wep_key0(ui.wep0Edit->text(), !ui.wep0HexCheck->isChecked());
+			if (!(ui.wep1LeaveButton->isChecked() || ui.wep1Edit->text().isEmpty()))
+				m_Config.set_wep_key1(ui.wep1Edit->text(), !ui.wep1HexCheck->isChecked());
+			if (!(ui.wep2LeaveButton->isChecked() || ui.wep2Edit->text().isEmpty()))
+				m_Config.set_wep_key2(ui.wep2Edit->text(), !ui.wep2HexCheck->isChecked());
+			if (!(ui.wep3LeaveButton->isChecked() || ui.wep3Edit->text().isEmpty()))
+				m_Config.set_wep_key3(ui.wep3Edit->text(), !ui.wep3HexCheck->isChecked());
+			
+			if (ui.wep0Radio->isChecked())
+				m_Config.set_wep_tx_keyidx(0);
+			else if (ui.wep1Radio->isChecked())
+				m_Config.set_wep_tx_keyidx(1);
+			else if (ui.wep2Radio->isChecked())
+				m_Config.set_wep_tx_keyidx(2);
+			else if (ui.wep3Radio->isChecked())
+				m_Config.set_wep_tx_keyidx(3);
+		}
+		
+		// group ciphers
+		if (ui.grpCipGroup->isChecked()) {
+			m_Config.set_group(GroupCiphers(
+				(ui.grpCipWEP40Check->isChecked() ? GCI_WEP40 : 0) |
+				(ui.grpCipWEP104Check->isChecked() ? GCI_WEP104 : 0) |
+				(ui.grpCipCCMPCheck->isChecked() ? GCI_CCMP : 0) |
+				(ui.grpCipTKIPCheck->isChecked() ? GCI_TKIP : 0))
+			);
+		}
+		else
+			m_Config.set_group(GCI_NONE);
+		
+		if (m_Config.get_group() & m_OldConfig.get_group()) {
+			m_Config.set_group(m_OldConfig.get_group());
+		}
+		
+		switch (ui.keyManagementCombo->currentIndex()) {
+/*		case 0:
+			m_Config.set_key_mgmt(CHECK_FLAG(m_OldConfig.get_key_mgmt(), KM_OFF));
+			break;*/
 		case 0:
-			config.set_key_mgmt(KM_OFF);
+			m_Config.set_key_mgmt(CHECK_FLAG(m_OldConfig.get_key_mgmt(), KM_NONE));
 			break;
 		case 1:
-			config.set_wep_tx_keyidx(0);
-			config.set_key_mgmt(KM_NONE);
+			m_Config.set_key_mgmt(CHECK_FLAG(m_OldConfig.get_key_mgmt(), KM_WPA_NONE));
+			m_Config.set_proto(PROTO_WPA);
 			
-			if (!(ui.pskLeaveButton->isChecked() || ui.pskEdit->text().isEmpty()))
-				config.set_wep_key0('\"' + ui.pskEdit->text() + '\"');
-			break;
+			m_Config.set_pairwise(PCI_NONE);
 		default:
-			if (ui.encCombo->currentText() == "CCMP")
-				config.set_group(GCI_CCMP);
-			else if (ui.encCombo->currentText() == "TKIP")
-				config.set_group(GCI_TKIP);
-			
-			config.set_proto(PROTO_WPA);
-			config.set_pairwise(PCI_NONE);
-			config.set_key_mgmt(KM_WPA_NONE);
-			
-			if (!(ui.pskLeaveButton->isChecked() || (ui.pskEdit->text().isEmpty())))
-				config.set_psk('\"' + ui.pskEdit->text() + '\"');
 			break;
 		}
 		
-		if (m_CurrentID > -1) {
-			status = m_Supplicant->editNetwork(m_CurrentID, config);
-		}
-		else {
-			status = m_Supplicant->addNetwork(config);
-		}
+		if (m_CurrentID == -1)
+			status = m_WifiInterface->getWpaSupplicant()->addNetwork(m_Config);
+		else
+			status = m_WifiInterface->getWpaSupplicant()->editNetwork(m_CurrentID, m_Config);
 		
 		QStringList errormsg;
 		
-		if (status.failures != NCF_NONE) {
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_ALL)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_SSID)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_BSSID)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_DISABLED)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_ID_STR)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_SCAN_SSID)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_PRIORITY)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_MODE)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_FREQ)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_PROTO)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_KEYMGMT)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_AUTH_ALG)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_PAIRWISE)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_GROUP)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_PSK)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_EAPOL_FLAGS)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_MIXED_CELL)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_PROA_KEY_CACHING)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_WEP_KEY0)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_WEP_KEY1)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_WEP_KEY2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_WEP_KEY3)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_WEP_KEY_IDX)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, NCF_PEERKEY)
-		}
-		
-		if (status.eap_failures != ENCF_NONE) {
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_ALL)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_EAP)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_IDENTITY)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_ANON_IDENTITY)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PASSWD)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_CA_CERT)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_CA_PATH)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_CLIENT_CERT)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PRIVATE_KEY)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PRIVATE_KEY_PASSWD)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_DH_FILE)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_SUBJECT_MATCH)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_ALTSUBJECT_MATCH)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PHASE1)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PHASE2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_CA_CERT2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_CA_PATH2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_CLIENT_CERT2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PRIVATE_KEY2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PRIVATE_KEY2_PASSWD)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_DH_FILE2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_SUBJECT_MATCH2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_ALTSUBJECT_MATCH2)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_FRAGMENT_SIZE)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_EAPPSK)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_NAI)
-			FLAG_PREPARE_OUTPUT(status.failures, errormsg, ENCF_PAC_FILE)
-		}
+		getConfigErrors(&status, errormsg);
 		
 		if (!errormsg.isEmpty()) {
 			QString errors = errormsg.join(", ");
@@ -149,60 +133,7 @@ namespace qnut {
 		accept();
 	}
 	
-	bool CAdhocConfig::execute() {
-		ui.pskLeaveButton->setVisible(false);
-		ui.pskLeaveButton->setChecked(false);
-		
-		m_CurrentID = -1;
-		return exec();
-	}
-	
-	bool CAdhocConfig::execute(int id) {
-		CNetworkConfig config = m_Supplicant->getNetworkConfig(id);
-		
-		if (config.get_ssid()[0] == '\"') {
-			ui.ssidHexCheck->setChecked(false);
-			ui.ssidEdit->setText(config.get_ssid().mid(1, config.get_ssid().length()-2));
-		}
-		else {
-			ui.ssidHexCheck->setChecked(true);
-			ui.ssidEdit->setText(config.get_ssid());
-		}
-		
-		if (config.get_key_mgmt() & KM_NONE)
-			ui.encCombo->setCurrentIndex(1);
-		else if (config.get_key_mgmt() & KM_OFF)
-			ui.encCombo->setCurrentIndex(0);
-		else if (config.get_key_mgmt() & KM_WPA_NONE) {
-			if (config.get_group() & GCI_CCMP)
-				ui.encCombo->setCurrentIndex(3);
-			else if (config.get_group() & GCI_TKIP)
-				ui.encCombo->setCurrentIndex(2);
-			else {
-				QMessageBox::critical(this, tr("Error reading ap config"),
-					tr("Unsupported group cipers retrieved: %1").arg((quint32)(config.get_group())));
-				return 0;
-			}
-		}
-		else {
-			QMessageBox::critical(this, tr("Error reading ap config"),
-				tr("Unsupported key management retrieved: %1").arg((quint32)(config.get_key_mgmt())));
-			return 0;
-		}
-		
-		int channel = frequencyToChannel(config.get_frequency());
-		int channelIndex = m_WirelessHW->getSupportedChannels().indexOf(channel);
-		ui.channelCombo->setCurrentIndex(channelIndex);
-		
-		ui.pskLeaveButton->setVisible(true);
-		ui.pskLeaveButton->setChecked(true);
-		
-		m_CurrentID = id;
-		
-		return exec();
-	}
-	
-	bool CAdhocConfig::execute(ScanResult scanResult) {
+/*	bool CAdhocConfig::execute(ScanResult scanResult) {
 		ui.ssidEdit->setText(scanResult.ssid);
 		
 		if (scanResult.keyManagement & KM_NONE)
@@ -236,9 +167,9 @@ namespace qnut {
 		m_CurrentID = -1;
 		
 		return exec();
-	}
+	}*/
 	
-	void CAdhocConfig::convertSSID(bool hex) {
+/*	void CAdhocConfig::convertSSID(bool hex) {
 		if (hex) {
 			ui.ssidEdit->setText(ui.ssidEdit->text().toAscii().toHex());
 			ui.ssidEdit->setValidator(m_HexValidator);
@@ -247,6 +178,84 @@ namespace qnut {
 			ui.ssidEdit->setText(QByteArray::fromHex(ui.ssidEdit->text().toAscii()));
 			ui.ssidEdit->setValidator(0);
 		}
+	}*/
+	
+	//todo: Implement widget for lineedits with hexadecimal digit inputs instead of this ugly implementation
+	inline bool setTextAutoHex(QLineEdit * target, QString text) {
+		if (text[0] == '\"') {
+			target->setText(text.mid(1, text.length()-2));
+			return false;
+		}
+		else {
+			target->setText(text);
+			return true;
+		}
+	}
+	
+	void CAdhocConfig::countPskChars(QString psk) {
+		ui.charCountLabel->setText(tr("%1 chars").arg(psk.length()));
+	}
+	
+	void CAdhocConfig::togglePlainPSK(bool show) {
+		if (show)
+			ui.pskEdit->setEchoMode(QLineEdit::Normal);
+		else
+			ui.pskEdit->setEchoMode(QLineEdit::Password);
+	}
+	
+	void CAdhocConfig::populateUi() {
+		ui.ssidHexCheck->setChecked(setTextAutoHex(ui.ssidEdit, m_Config.get_ssid()));
+		
+		if (m_Config.get_key_mgmt() & KM_NONE)
+			ui.keyManagementCombo->setCurrentIndex(0);
+		else if (m_Config.get_key_mgmt() & KM_WPA_NONE)
+			ui.keyManagementCombo->setCurrentIndex(1);
+// 		else if (m_Config.get_key_mgmt() & KM_WPA_NONE)
+// 			ui.keyManagementCombo->setCurrentIndex(2);
+		else {
+			QMessageBox::critical(this, tr("Error reading ap config"),
+				tr("Unsupported key management retrieved: %1").arg((quint32)(m_Config.get_key_mgmt())));
+		}
+		
+		ui.grpCipGroup->setChecked(!(m_Config.get_group() & GCI_NONE));
+		ui.grpCipWEP40Check->setChecked(m_Config.get_group() & GCI_WEP40);
+		ui.grpCipWEP104Check->setChecked(m_Config.get_group() & GCI_WEP104);
+		ui.grpCipTKIPCheck->setChecked(m_Config.get_group() & GCI_TKIP);
+		ui.grpCipCCMPCheck->setChecked(m_Config.get_group() & GCI_CCMP);
+		
+		int channel = frequencyToChannel(m_Config.get_frequency());
+		int channelIndex = m_WifiInterface->getHardware()->getSupportedChannels().indexOf(channel);
+		ui.channelCombo->setCurrentIndex(channelIndex + 1);
+		
+		ui.pskLeaveButton->setVisible(true);
+		ui.pskLeaveButton->setChecked(true);
+		
+		bool isGlobalConfigured = !m_Config.hasValidNetworkId();
+		
+		ui.pskLeaveButton->setVisible(isGlobalConfigured);
+		
+		ui.wep0HexCheck->setChecked(setTextAutoHex(ui.wep0Edit, m_Config.get_wep_key0()));
+		ui.wep1HexCheck->setChecked(setTextAutoHex(ui.wep1Edit, m_Config.get_wep_key1()));
+		ui.wep2HexCheck->setChecked(setTextAutoHex(ui.wep2Edit, m_Config.get_wep_key2()));
+		ui.wep3HexCheck->setChecked(setTextAutoHex(ui.wep3Edit, m_Config.get_wep_key3()));
+		
+		ui.wep0LeaveButton->setVisible(isGlobalConfigured);
+		ui.wep1LeaveButton->setVisible(isGlobalConfigured);
+		ui.wep2LeaveButton->setVisible(isGlobalConfigured);
+		ui.wep3LeaveButton->setVisible(isGlobalConfigured);
+		
+		switch (m_Config.get_wep_tx_keyidx()) {
+		case 0: ui.wep0Radio->setChecked(true); break;
+		case 1: ui.wep1Radio->setChecked(true); break;
+		case 2: ui.wep2Radio->setChecked(true); break;
+		case 3: ui.wep3Radio->setChecked(true); break;
+		default: break;
+		}
+		
+		ui.wep0LeaveButton->setChecked(isGlobalConfigured);
+		ui.wep1LeaveButton->setChecked(isGlobalConfigured);
+		ui.wep2LeaveButton->setChecked(isGlobalConfigured);
+		ui.wep3LeaveButton->setChecked(isGlobalConfigured);
 	}
 }
 #endif

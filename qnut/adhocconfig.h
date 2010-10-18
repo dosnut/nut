@@ -9,15 +9,9 @@
 #define QNUT_ADHOCCONFIG_H
 
 #ifndef QNUT_NO_WIRELESS
-#include <QDialog>
-#include <libnutwireless/hwtypes.h>
-#include "ui_adhoc.h"
+#include "cabstractwifinetconfigdialog.h"
 
-namespace libnutwireless {
-	class CWpaSupplicant;
-	class CWireless;
-	class CWirelessHW;
-}
+#include "ui_adhocexp.h"
 
 namespace qnut {
 	/**
@@ -29,38 +23,25 @@ namespace qnut {
 	 *
 	 * By accepting the settings made in the UI they are verified (on error the dialog stays open).
 	 */
-	class CAdhocConfig : public QDialog {
+	class CAdhocConfig : public CAbstractWifiNetConfigDialog {
 		Q_OBJECT
-	private:
-		Ui::adhoc ui;
-		QRegExpValidator * m_HexValidator;
-		int m_CurrentID;
-		libnutwireless::CWpaSupplicant * m_Supplicant;
-		libnutwireless::CWirelessHW * m_WirelessHW;
 	public:
-		/**
-		 * @brief Opens the dialog for adding the given scanned network.
-		 * @param scanResult scan result with network configuration to use
-		 */
-		bool execute(libnutwireless::ScanResult scanResult);
-		/**
-		 * @brief Opens the dialog for configuring the given managed network
-		 * @param id managed network id
-		 */
-		bool execute(int id);
-		/// @brief Opens the dialog for adding a new annonymous network
-		bool execute();
-		
 		/**
 		 * @brief Creates the object and initializes the basic user interface.
 		 * @param parent parent widget
 		 */
-		CAdhocConfig(libnutwireless::CWireless * wpa_supplicant, QWidget * parent = 0);
-		/// @brief Destroyes the object.
-		~CAdhocConfig();
-	private slots:
-		void verifyConfiguration();
-		void convertSSID(bool hex);
+		CAdhocConfig(libnutwireless::CWireless * interface, QWidget * parent = 0);
+	protected:
+		Ui::ahconf ui;
+	protected slots:
+		void setAuthConfig(int type);
+		
+		virtual void verifyConfiguration();
+		
+		void countPskChars(QString psk);
+		void togglePlainPSK(bool show);
+		
+		virtual void populateUi();
 	};
 }
 #endif

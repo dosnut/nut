@@ -14,7 +14,7 @@ set(FORMS
 	airset.ui
 	apconfexp.ui
 	devdet.ui
-	adhoc.ui
+	adhocexp.ui
 )
 
 set(SOURCES_MOC_H
