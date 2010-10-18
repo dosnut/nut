@@ -28,9 +28,7 @@ CDeviceManager::CDeviceManager(QObject * parent) :
 	connect(&m_dbusMonitor,SIGNAL(started(void)),this,SLOT(dbusStarted(void)));
 	m_dbusMonitor.setPidFileDir(DBUS_PID_FILE_DIR);
 	m_dbusMonitor.setPidFileName(DBUS_PID_FILE_NAME);
-	qDebug("Enabling DBusMonitor");
 	m_dbusMonitor.setEnabled(true);
-	qDebug("Enabled DBusMonitor");
 
 	//Init Hashtable
 	m_dbusDevices.reserve(10);
@@ -209,7 +207,6 @@ void CDeviceManager::clearInformation() {
 
 //CDeviceManager private slots:
 void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner) {
-	qDebug() << "ServiceOwnerChange:" << name << oldOwner << newOwner;
 	if (NUT_DBUS_URL == name) { //nuts starts
 		if (oldOwner.isEmpty()) {
 			nutsStarted();
@@ -282,7 +279,7 @@ void CDeviceManager::dbusretGetDeviceList(QList<QDBusObjectPath> devices) {
 }
 
 void CDeviceManager::dbusretErrorOccured(QDBusError error, QString method) {
-	qDebug("Error occured in dbus: %s at %s", QDBusError::errorString(error.type()).toAscii().data(), method.toAscii().data());
+	*log << QString("Error occured in dbus: %s at %s").arg(QDBusError::errorString(error.type()).toAscii().data(), method.toAscii().data());
 
 	if (QDBusError::AccessDenied == error.type()) {
 		*log << tr("You are not allowed to connect to nuts.");

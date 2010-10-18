@@ -89,7 +89,6 @@ CEnvironment::~CEnvironment() {
 void CEnvironment::checkInitCompleted() {
 	if ( m_propertiesFetched && m_interfacesFetched && m_configFetched && m_selectResultFetched && 	m_selectResultsFetched && !m_initCompleted) {
 		m_initCompleted = true;
-		qDebug("EnvironmentInit completed: %s", m_name.toAscii().data());
 		emit initializationCompleted(this);
 	}
 }
@@ -124,7 +123,6 @@ void CEnvironment::dbusretGetInterfaces(QList<QDBusObjectPath> interfaces) {
 void CEnvironment::dbusretGetProperties(libnutcommon::EnvironmentProperties properties) {
 	m_name = properties.name;
 
-	qDebug("Environmentname: %s", m_name.toAscii().data());
 	m_state = properties.active;
 
 	m_propertiesFetched = true;
@@ -161,7 +159,7 @@ void CEnvironment::dbusretGetSelectResults(QVector<libnutcommon::SelectResult> s
 }
 
 void CEnvironment::dbusret_errorOccured(QDBusError error, QString method) {
-	qDebug("Error occured in dbus: %s at %s", QDBusError::errorString(error.type()).toAscii().data(), method.toAscii().data());
+	*log << QString("Error occured in dbus: %s at %s").arg(QDBusError::errorString(error.type()).toAscii().data(), method.toAscii().data());
 	if (!m_initCompleted) { //error during init
 		emit initializationFailed(this);
 	}
@@ -182,7 +180,6 @@ void CEnvironment::interfaceInitializationCompleted(CInterface * interface) {
 	interface->m_index = m_interfaces.indexOf(interface);
 
 	if (m_interfaces.size() == m_dbusInterfaces.size()) { //check if all interfaces are ready
-		qDebug("Feteched all Interfaces");
 		m_interfacesFetched = true;
 		checkInitCompleted();
 	}

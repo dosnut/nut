@@ -74,7 +74,6 @@ CInterface::~CInterface() {
 void CInterface::checkInitCompleted() {
 	if ( m_propertiesFetched && m_configFetched && m_userConfigFetched && m_needUserSetupFeteched && !m_initCompleted) {
 		m_initCompleted = true;
-		qDebug("InterfaceInit completed");
 		emit initializationCompleted(this);
 	}
 }
@@ -127,7 +126,7 @@ void CInterface::dbusretGetUserConfig(libnutcommon::IPv4UserConfig config) {
 }
 
 void CInterface::dbusret_errorOccured(QDBusError error, QString method) {
-	qDebug("Error occured in dbus: %s at %s", QDBusError::errorString(error.type()).toAscii().data(), method.toAscii().data());
+	*log << QString("Error occured in dbus: %s at %s").arg(QDBusError::errorString(error.type()).toAscii().data(), method.toAscii().data());
 	if (!m_initCompleted) { //error during init
 		emit initializationFailed(this);
 	}
