@@ -27,6 +27,9 @@ namespace nuts {
 	ConfigParser::ConfigParser(const QString &configFile)
 	: m_configFile(configFile), m_config(new libnutcommon::Config()), m_curisfallback(false) {
 		failed = false;
+		m_exact_dev_names_idx = 0;
+		m_regexp_dev_names_idx = 0;
+		m_wildcard_dev_names_idx = 0;
 		configparserin = fopen(m_configFile.toUtf8().constData(), "r");
 		if (!configparserin)
 			throw Exception(QString("Couldn't open config file '%1'").arg(m_configFile));
@@ -47,6 +50,7 @@ namespace nuts {
 	
 	bool ConfigParser::newDevice(const QString &name, bool regexp) {
 		m_def_env = 0; m_curdevconfig = 0;
+		bool wildcard = (!regexp && (name.contains("?") || name.contains("[") || name.contains("]") || name.contains("*")) );
 		if ((!m_config->m_devNames.contains(name)) || (( 1 == m_config->m_devNames.count(name)) && (m_config->m_devConfigs.at(m_config->m_devNames.indexOf(name))->isRegExp() != regexp))) {
 			QRegExp rx(name);
 			if (regexp) {
@@ -65,8 +69,24 @@ namespace nuts {
 			}
 			m_curdevconfig = new libnutcommon::DeviceConfig();
 			m_curdevconfig->m_isRegExp = regexp;
-			m_config->m_devNames.append(name);
-			m_config->m_devConfigs.append(m_curdevconfig);
+			if (!regexp && !wildcard) {
+				m_config->m_devNames.insert(m_exact_dev_names_idx,name);
+				m_config->m_devConfigs.insert(m_exact_dev_names_idx,m_curdevconfig);
+				m_exact_dev_names_idx++;
+				m_regexp_dev_names_idx++;
+				m_wildcard_dev_names_idx++;
+			}
+			else if (regexp) {
+				m_config->m_devNames.insert(m_regexp_dev_names_idx,name);
+				m_config->m_devConfigs.insert(m_regexp_dev_names_idx,m_curdevconfig);
+				m_regexp_dev_names_idx++;
+				m_wildcard_dev_names_idx++;
+			}
+			else {
+				m_config->m_devNames.insert(m_wildcard_dev_names_idx,name);
+				m_config->m_devConfigs.insert(m_wildcard_dev_names_idx,m_curdevconfig);
+				m_wildcard_dev_names_idx++;
+			}
 			m_curdevconfig->m_environments.push_back(new libnutcommon::EnvironmentConfig(""));
 			m_def_env = new local_env_config();
 			return true;

@@ -28,6 +28,10 @@ namespace nuts {
 			libnutcommon::IPv4Config *m_curipv4config;
 			bool m_curisfallback;
 			
+			qint32 m_exact_dev_names_idx;
+			qint32 m_regexp_dev_names_idx;
+			qint32 m_wildcard_dev_names_idx;
+
 			QStack<quint32> m_selBlocks;
 			
 			local_env_config *m_cur_env, *m_def_env; //TODO:Whats that?
