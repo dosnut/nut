@@ -209,42 +209,50 @@ void CDeviceManager::clearInformation() {
 
 //CDeviceManager private slots:
 void CDeviceManager::dbusServiceOwnerChanged(const QString &name, const QString &oldOwner, const QString &newOwner) {
+	qDebug() << "ServiceOwnerChange:" << name << oldOwner << newOwner;
 	if (NUT_DBUS_URL == name) { //nuts starts
 		if (oldOwner.isEmpty()) {
-			*log << tr("NUTS has been started");
-			if (m_nutsstate) {
-				clearInformation();
-				setInformation();
-			}
-			else {
-				m_nutsstate = true;
-				setInformation();
-				emit(stateChanged(true));
-			}
-			connect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
-			connect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
-			connect(m_dbusDevmgr, SIGNAL(gotDeviceList(QList<QDBusObjectPath>)), this, SLOT(dbusretGetDeviceList(QList<QDBusObjectPath>)));
-			connect(m_dbusDevmgr, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusretErrorOccured(QDBusError)));
+			nutsStarted();
 		}
 		else if (newOwner.isEmpty()) { //nuts stops
-			*log<< tr("NUTS has been stopped");
-			if (m_nutsstate) {
-				m_nutsstate = false;
-				clearInformation();
-				emit(stateChanged(false));
-			}
-			disconnect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
-			disconnect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
-			disconnect(m_dbusDevmgr, SIGNAL(gotDeviceList(QList<QDBusObjectPath>)), this, SLOT(dbusretGetDeviceList(QList<QDBusObjectPath>)));
-			disconnect(m_dbusDevmgr, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusretErrorOccured(QDBusError)));
-			//start the dbus was killed timer TODO:replace with inotify
-			if (-1 == m_dbusTimerId) {
-				m_dbusTimerId = startTimer(5000);
-			}
+			nutsStopped();
  		}
 	}
 }
 
+void CDeviceManager::nutsStarted() {
+	*log << tr("NUTS has been started");
+	if (m_nutsstate) {
+		clearInformation();
+		setInformation();
+	}
+	else {
+		m_nutsstate = true;
+		setInformation();
+		emit(stateChanged(true));
+	}
+	connect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
+	connect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+	connect(m_dbusDevmgr, SIGNAL(gotDeviceList(QList<QDBusObjectPath>)), this, SLOT(dbusretGetDeviceList(QList<QDBusObjectPath>)));
+	connect(m_dbusDevmgr, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusretErrorOccured(QDBusError)));
+}
+
+void CDeviceManager::nutsStopped() {
+	*log<< tr("NUTS has been stopped");
+	if (m_nutsstate) {
+		m_nutsstate = false;
+		clearInformation();
+		emit(stateChanged(false));
+	}
+	disconnect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
+	disconnect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+	disconnect(m_dbusDevmgr, SIGNAL(gotDeviceList(QList<QDBusObjectPath>)), this, SLOT(dbusretGetDeviceList(QList<QDBusObjectPath>)));
+	disconnect(m_dbusDevmgr, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusretErrorOccured(QDBusError)));
+	//start the dbus was killed timer TODO:replace with inotify
+	if (-1 == m_dbusTimerId) {
+		m_dbusTimerId = startTimer(5000);
+	}
+}
 //DBUS CALL AND ERROR FUNCTIONS
 void CDeviceManager::dbusretGetDeviceList(QList<QDBusObjectPath> devices) {
 		//If a device is missing or there are too many m_devices in our Hash
@@ -285,7 +293,12 @@ void CDeviceManager::dbusretErrorOccured(QDBusError error, QString method) {
 		*log << tr("Maybe you don't have sufficient rights");
 	}
 	if (!serviceCheck()) {
-		globalDBusErrorOccured(error);
+		if (dbusConnected()) {
+			nutsStopped();
+		}
+		else {
+			globalDBusErrorOccured(error);
+		}
 	}
 }
 
@@ -347,6 +360,9 @@ bool CDeviceManager::destroyBridge(CDevice * /* device */) {
 void CDeviceManager::refreshAll() {
 	//Only refresh when nuts is available
 	if (!m_nutsstate) {
+		if (serviceCheck()) {
+			nutsStarted();
+		}
 		return;
 	}
 	//Get our current DeviceList
