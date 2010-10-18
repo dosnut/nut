@@ -21,8 +21,11 @@
 #include "cabstractwifinetconfigdialog.h"
 
 #include <QLineEdit>
+#include <QCheckBox>
 #include <QRegExpValidator>
+#include <libnutwireless/wpa_supplicant.h>
 #include <libnutwireless/wstypes.h>
+#include <libnutwireless/cwireless.h>
 
 namespace qnut {
 	using namespace libnutwireless;
@@ -30,8 +33,8 @@ namespace qnut {
 	QRegExpValidator * CAbstractWifiNetConfigDialog::m_HexValidator = NULL;
 	int CAbstractWifiNetConfigDialog::m_HexValidatorRefs = 0;
 	
-	CAbstractWifiNetConfigDialog::CAbstractWifiNetConfigDialog(libnutwireless::CWpaSupplicant * wpa_supplicant, QWidget * parent) : QDialog(parent),
-		m_Supplicant(wpa_supplicant),
+	CAbstractWifiNetConfigDialog::CAbstractWifiNetConfigDialog(libnutwireless::CWireless * interface, QWidget * parent) : QDialog(parent),
+		m_WifiInterface(interface),
 		m_CurrentID(0)
 	{
 		m_HexValidatorRefs++;
@@ -47,6 +50,36 @@ namespace qnut {
 			delete m_HexValidator;
 			m_HexValidator = NULL;
 		}
+	}
+	
+	bool CAbstractWifiNetConfigDialog::execute() {
+		m_Config = libnutwireless::CNetworkConfig();
+		m_OldConfig = m_Config;
+		
+		m_CurrentID = -1;
+		
+		populateUi();
+		return exec();
+	}
+	
+	bool CAbstractWifiNetConfigDialog::execute(ScanResult scanResult) {
+		m_Config = libnutwireless::CNetworkConfig(scanResult);
+		m_OldConfig = m_Config;
+		
+		m_CurrentID = -1;
+		
+		populateUi();
+		return exec();
+	}
+	
+	bool CAbstractWifiNetConfigDialog::execute(int id) {
+		m_Config = m_WifiInterface->getWpaSupplicant()->getNetworkConfig(id);
+		m_OldConfig = m_Config;
+		
+		m_CurrentID = id;
+		
+		populateUi();
+		return exec();
 	}
 	
 	#define FLAG_PREPARE_OUTPUT(a, b, c) if(a & c) b << #c;
@@ -120,4 +153,11 @@ namespace qnut {
 			lineEdit->setValidator(NULL);
 		}
 	}
+	
+	void CAbstractWifiNetConfigDialog::convertLineEditText(bool hex) {
+		QCheckBox * hexCheck = qobject_cast<QCheckBox *>(sender());
+		if (hexCheck/* && m_HexEditMap.contains(hexCheck)*/)
+			convertLineEditText(m_HexEditMap[hexCheck], hex);
+	}
+	
 }

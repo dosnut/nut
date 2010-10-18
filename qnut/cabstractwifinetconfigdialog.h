@@ -24,15 +24,19 @@
 #ifndef QNUT_NO_WIRELESS
 
 #include <QDialog>
+#include <QMap>
 #include <libnutwireless/cnetworkconfig.h>
 
 class QLineEdit;
+class QCheckBox;
 class QRegExpValidator;
 
 namespace libnutwireless {
-	class CWpaSupplicant;
+	class CWireless;
 	class NetconfigStatus;
 }
+
+#define WRITE_BACK_AUTOQUOTE(f, t) f(t, !(t.isEmpty()))
 
 namespace qnut {
 	class CAbstractWifiNetConfigDialog : public QDialog {
@@ -42,28 +46,32 @@ namespace qnut {
 			* @brief Opens the dialog for adding the given scanned network.
 			* @param scanResult scan result with network configuration to use
 			*/
-		virtual bool execute(libnutwireless::ScanResult scanResult) = 0;
+		virtual bool execute(libnutwireless::ScanResult scanResult);
 		/**
 			* @brief Opens the dialog for configuring the given managed network
 			* @param id managed network id
 			*/
-		virtual bool execute(int id) = 0;
+		virtual bool execute(int id);
 		/// @brief Opens the dialog for adding a new annonymous network
-		virtual bool execute() = 0;
+		virtual bool execute();
 		
 		/**
 		 * @brief Creates the object and initializes some variables.
 		 * @param parent parent widget
 		 */
-		CAbstractWifiNetConfigDialog(libnutwireless::CWpaSupplicant * wpa_supplicant, QWidget * parent = 0);
+		CAbstractWifiNetConfigDialog(libnutwireless::CWireless * interface, QWidget * parent = 0);
 		/// @brief Destroyes the object.
 		~CAbstractWifiNetConfigDialog();
 	protected:
 		static QRegExpValidator * m_HexValidator;
 		static int m_HexValidatorRefs;
 		
-		libnutwireless::CWpaSupplicant * m_Supplicant;
+		QMap<QCheckBox *, QLineEdit *> m_HexEditMap;
 		
+		libnutwireless::CWireless * m_WifiInterface;
+		
+		libnutwireless::CNetworkConfig m_Config;
+		libnutwireless::CNetworkConfig m_OldConfig;
 		int m_CurrentID;
 		
 		static void getConfigErrors(libnutwireless::NetconfigStatus * status, QStringList & errormsg);
@@ -71,6 +79,8 @@ namespace qnut {
 		static void convertLineEditText(QLineEdit * lineEdit, bool hex);
 	protected slots:
 		virtual void verifyConfiguration() = 0;
+		virtual void convertLineEditText(bool hex);
+		virtual void populateUi() = 0;
 	};
 }
 #endif // QNUT_NO_WIRELESS
