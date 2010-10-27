@@ -4,7 +4,7 @@ Priority: important
 Maintainer: Stefan Bühler <source@stbuehler.de>
 Uploaders: Oliver Groß <neokensuke@freenet.de>, Stefan Bühler <stbuehler@web.de>
 Build-Depends: cdbs, debhelper (>= 5), qt4-dev-tools, libqt4-dev, bison,
- flex, libnl-dev (>= 1.0~pre8), libiw-dev, dpatch, cmake
+ flex, libnl-dev (>= 1.0~pre8), libiw-dev, cmake
 Standards-Version: 3.9.1
 
 Package: nuts
