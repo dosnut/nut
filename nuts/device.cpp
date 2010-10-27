@@ -33,10 +33,11 @@ void perror(const char *s);
 }
 
 static inline void setSockaddrIPv4(struct sockaddr &s, quint32 host = 0, quint16 port = 0) {
-	struct sockaddr_in *sin = (struct sockaddr_in *) &s;
-	sin->sin_family = AF_INET;
-	sin->sin_port = htons(port);
-	sin->sin_addr.s_addr = htonl(host);
+	struct sockaddr_in sa;
+	sa.sin_family = AF_INET;
+	sa.sin_port = htons(port);
+	sa.sin_addr.s_addr = htonl(host);
+	memcpy(&s, &sa, sizeof(struct sockaddr_in));
 }
 
 namespace nuts {
