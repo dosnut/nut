@@ -2,10 +2,10 @@
 
 ### BEGIN INIT INFO
 # Provides:          nuts
-# Required-Start:    $syslog dbus
-# Required-Stop:     $syslog dbus
-# Should-Start:      $local_fs
-# Should-Stop:       $local_fs
+# Required-Start:    $remote_fs $syslog dbus
+# Required-Stop:     $remote_fs $syslog dbus
+# Should-Start:
+# Should-Stop:
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Network UTility Server
