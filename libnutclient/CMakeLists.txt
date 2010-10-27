@@ -1,5 +1,4 @@
 project(nutclient)
-cmake_minimum_required(VERSION 2.8)
 
 find_package(Qt4 COMPONENTS QtCore QtNetwork QtDBus REQUIRED)
 include(${QT_USE_FILE})
@@ -36,7 +35,7 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES_CPP} ${SOURCES_MOC_CPP})
 
 add_target_properties(nutcommon COMPILE_FLAGS -fPIC)
 add_target_properties(nutwireless COMPILE_FLAGS -fPIC)
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION 0.5.5 SOVERSION 0)
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PACKAGE_VERSION} SOVERSION 0)
 
 find_library(LIB_IW iw)
 find_library(LIB_NL nl)

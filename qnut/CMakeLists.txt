@@ -1,5 +1,5 @@
 project(qnut)
-cmake_minimum_required(VERSION 2.8)
+
 find_package(Qt4 COMPONENTS QtCore QtGui QtDbus QtNetwork REQUIRED)
 
 include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR})
@@ -73,6 +73,8 @@ add_executable(${PROJECT_NAME}
 	${FORMS_H}
 	${TRANSLATIONS_QM}
 )
+
+add_target_properties(${PROJECT_NAME} COMPILE_FLAGS "-DUI_VERSION='\"${PACKAGE_VERSION}\"'")
 
 target_link_libraries(${PROJECT_NAME}
 	${QT_QTCORE_LIBRARY}

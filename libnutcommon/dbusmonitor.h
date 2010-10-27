@@ -7,8 +7,12 @@
 #include <QString>
 
 //Hardcoded pidfile/pidfiledir
-#define DBUS_PID_FILE_DIR "/var/run"
-#define DBUS_PID_FILE_NAME "dbus.pid"
+#ifndef DBUS_PID_FILE_DIR
+# define DBUS_PID_FILE_DIR "/var/run"
+#endif
+#ifndef DBUS_PID_FILE_NAME
+# define DBUS_PID_FILE_NAME "dbus.pid"
+#endif
 
 namespace libnutcommon {
 	class CDBusMonitor;
