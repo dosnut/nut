@@ -39,12 +39,12 @@ static inline int __genl_ctrl_alloc_cache(struct nl_sock *h, struct nl_cache **c
 CNL80211::CNL80211(QObject* parent, QString ifname) :
 CWirelessHW(parent),
 m_ifname(ifname),
-m_connected(false),
-m_nlFd(-1),
-m_nlSn(0),
 m_nlSocket(0),
 m_nlCache(0),
 m_nlFamily(0),
+m_connected(false),
+m_nlFd(-1),
+m_nlSn(0),
 m_sqPollrate(10000),
 m_sqTimeOutCount(0),
 m_sqTimerId(-1)

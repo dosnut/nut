@@ -14,6 +14,7 @@ HEADERS += wpa_supplicant.h \
  types.h \
  wstypes.h \
  hwtypes.h \
+ cnl80211.h \
  cwireless.h \
  cwirelesshw.h \
  cwexthw.h \
@@ -27,6 +28,7 @@ HEADERS += wpa_supplicant.h \
  conversion.h \
  cconfigparser.h
 SOURCES += wpa_supplicant.cpp \
+ cnl80211.cpp \
  cws_net.cpp \
  parsers.cpp \
  base.cpp \
