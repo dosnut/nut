@@ -23,6 +23,11 @@ namespace qnut {
 	
 	//todo: Implement widget for lineedits with hexadecimal digit inputs instead of this ugly implementation
 	inline bool setTextAutoHex(QLineEdit * target, QString text) {
+		if (text.isEmpty()) {
+			target->clear();
+			return false;
+		}
+		
 		if (text[0] == '\"') {
 			target->setText(text.mid(1, text.length()-2));
 			return false;
@@ -106,28 +111,26 @@ namespace qnut {
 		
 		ui.rsnCombo->setEnabled(type > 0 && type < 3);
 		
-		m_WEPEnabled = (type == 0) || (!ui.rsnCombo->currentIndex()) || (!ui.rsnCombo->isEnabled());
-		
-		ui.confTabs->setTabEnabled(1, m_WEPEnabled);
-		
-		ui.proativeCheck->setEnabled(!m_WEPEnabled);
+		updateWEPState(type, ui.rsnCombo->currentIndex());
 	}
 	
 	void CAccessPointConfig::handleRSNModeChanged(int value) {
-		setWEPDisabled(value);
+		updateWEPState(ui.keyManagementCombo->currentIndex(), value);
 	}
 	
-	void CAccessPointConfig::setWEPDisabled(bool value) {
-		m_WEPEnabled = !value;
-		ui.confTabs->setTabEnabled(1, m_WEPEnabled);
+	inline void CAccessPointConfig::updateWEPState(int keyMode, int rsnMode) {
+		bool wepDisabled = (keyMode == 1) || ((keyMode > 0) && (keyMode < 3) && (rsnMode > 0));
 		
-		ui.proativeCheck->setEnabled(!m_WEPEnabled);
+		ui.confTabs->setTabEnabled(1, !wepDisabled);
+		ui.proativeCheck->setEnabled(wepDisabled );
 	}
 	
 	#define CHECK_FLAG(a, b) (((a) & (b)) ? (a) : (b))
 	
 	bool CAccessPointConfig::applyConfiguration() {
 		NetconfigStatus status;
+		
+		m_Config.set_mode(false);
 		
 		if (!ui.ssidEdit->text().isEmpty())
 			m_Config.set_ssid(ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"');
@@ -466,7 +469,7 @@ namespace qnut {
 		
 		ui.proativeCheck->setChecked(toBool(m_Config.get_proactive_key_caching()));
 		
-		bool isGlobalConfigured = !m_Config.hasValidNetworkId();
+		bool isGlobalConfigured = (m_CurrentID != -1) && (!m_Config.hasValidNetworkId());
 		
 		ui.pskLeaveButton->setVisible(isGlobalConfigured);
 		ui.eapPasswordLeaveButton->setVisible(isGlobalConfigured);

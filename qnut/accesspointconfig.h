@@ -38,7 +38,6 @@ namespace qnut {
 		CAccessPointConfig(libnutwireless::CWireless * interface, QWidget * parent = 0);
 	protected:
 		Ui::apconf ui;
-		bool m_WEPEnabled;
 		
 		struct FileEditStrings {
 			QString title;
@@ -55,10 +54,10 @@ namespace qnut {
 		inline void writeEAPConfig(libnutwireless::CNetworkConfig & eap_config);
 		inline void readEAPPhaseConfig(libnutwireless::CNetworkConfig & eap_config, int phase);
 		inline void readEAPConfig(libnutwireless::CNetworkConfig & eap_config);
+		inline void updateWEPState(int keyMode, int rsnMode);
 	protected slots:
 		void setAuthConfig(int type);
 		void handleRSNModeChanged(int value);
-		void setWEPDisabled(bool value);
 		
 		virtual bool applyConfiguration();
 		
