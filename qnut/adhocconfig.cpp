@@ -60,7 +60,7 @@ namespace qnut {
 		int selectedChan = ui.channelCombo->itemData(ui.channelCombo->currentIndex(), Qt::UserRole).toInt();
 		m_Config.set_frequency(channelToFrequency(selectedChan));
 		
-		m_Config.set_mode(QOOL_TRUE);
+		m_Config.set_mode(true);
 		
 		if (ui.confTabs->isTabEnabled(3)) {
 			if (!(ui.wep0LeaveButton->isChecked() || ui.wep0Edit->text().isEmpty()))
@@ -135,55 +135,13 @@ namespace qnut {
 		return true;
 	}
 	
-/*	bool CAdhocConfig::execute(ScanResult scanResult) {
-		ui.ssidEdit->setText(scanResult.ssid);
-		
-		if (scanResult.keyManagement & KM_NONE)
-			ui.encCombo->setCurrentIndex(1);
-		else if (scanResult.keyManagement & KM_OFF)
-			ui.encCombo->setCurrentIndex(0);
-		else if (scanResult.keyManagement & KM_WPA_NONE) {
-			if (scanResult.group & GCI_CCMP)
-				ui.encCombo->setCurrentIndex(3);
-			else if (scanResult.group & GCI_TKIP)
-				ui.encCombo->setCurrentIndex(2);
-			else {
-				QMessageBox::critical(this, tr("Error reading ap config"),
-					tr("Unsupported group cipers retrieved: %1").arg(toString(scanResult.group)));
-				return 0;
-			}
-		}
-		else {
-			QMessageBox::critical(this, tr("Error reading ap config"),
-				tr("Unsupported key management retrieved: %1").arg(toString(scanResult.keyManagement)));
-			return 0;
-		}
-		
-		int channel = frequencyToChannel(scanResult.freq);
-		int channelIndex = m_WirelessHW->getSupportedChannels().indexOf(channel);
-		ui.channelCombo->setCurrentIndex(channelIndex);
-		
-		ui.pskLeaveButton->setVisible(false);
-		ui.pskLeaveButton->setChecked(false);
-		
-		m_CurrentID = -1;
-		
-		return exec();
-	}*/
-	
-/*	void CAdhocConfig::convertSSID(bool hex) {
-		if (hex) {
-			ui.ssidEdit->setText(ui.ssidEdit->text().toAscii().toHex());
-			ui.ssidEdit->setValidator(m_HexValidator);
-		}
-		else {
-			ui.ssidEdit->setText(QByteArray::fromHex(ui.ssidEdit->text().toAscii()));
-			ui.ssidEdit->setValidator(0);
-		}
-	}*/
-	
 	//todo: Implement widget for lineedits with hexadecimal digit inputs instead of this ugly implementation
 	inline bool setTextAutoHex(QLineEdit * target, QString text) {
+		if (text.isEmpty()) {
+			target->clear();
+			return false;
+		}
+		
 		if (text[0] == '\"') {
 			target->setText(text.mid(1, text.length()-2));
 			return false;
@@ -208,19 +166,10 @@ namespace qnut {
 	void CAdhocConfig::populateUi() {
 		ui.ssidHexCheck->setChecked(setTextAutoHex(ui.ssidEdit, m_Config.get_ssid()));
 		
-/*		if (m_Config.get_key_mgmt() & KM_NONE)
-			ui.keyManagementCombo->setCurrentIndex(0);
-		else */
 		if (m_Config.get_key_mgmt() & KM_WPA_NONE)
 			ui.keyManagementCombo->setCurrentIndex(1);
 		else
 			ui.keyManagementCombo->setCurrentIndex(0);
-// 		else if (m_Config.get_key_mgmt() & KM_WPA_NONE)
-// 			ui.keyManagementCombo->setCurrentIndex(2);
-// 		else {
-// 			QMessageBox::critical(this, tr("Error reading ap config"),
-// 				tr("Unsupported key management retrieved: %1").arg((quint32)(m_Config.get_key_mgmt())));
-// 		}
 		
 		ui.grpCipGroup->setChecked(!(m_Config.get_group() & GCI_NONE));
 		ui.grpCipWEP40Check->setChecked(m_Config.get_group() & GCI_WEP40);
@@ -235,9 +184,11 @@ namespace qnut {
 		ui.pskLeaveButton->setVisible(true);
 		ui.pskLeaveButton->setChecked(true);
 		
-		bool isGlobalConfigured = !m_Config.hasValidNetworkId();
+		bool isGlobalConfigured = (m_CurrentID != -1) && (!m_Config.hasValidNetworkId());
 		
 		ui.pskLeaveButton->setVisible(isGlobalConfigured);
+		
+		ui.pskLeaveButton->setChecked(isGlobalConfigured);
 		
 		ui.wep0HexCheck->setChecked(setTextAutoHex(ui.wep0Edit, m_Config.get_wep_key0()));
 		ui.wep1HexCheck->setChecked(setTextAutoHex(ui.wep1Edit, m_Config.get_wep_key1()));
@@ -249,6 +200,11 @@ namespace qnut {
 		ui.wep2LeaveButton->setVisible(isGlobalConfigured);
 		ui.wep3LeaveButton->setVisible(isGlobalConfigured);
 		
+		ui.wep0LeaveButton->setChecked(isGlobalConfigured);
+		ui.wep1LeaveButton->setChecked(isGlobalConfigured);
+		ui.wep2LeaveButton->setChecked(isGlobalConfigured);
+		ui.wep3LeaveButton->setChecked(isGlobalConfigured);
+		
 		switch (m_Config.get_wep_tx_keyidx()) {
 		case 0: ui.wep0Radio->setChecked(true); break;
 		case 1: ui.wep1Radio->setChecked(true); break;
@@ -256,11 +212,6 @@ namespace qnut {
 		case 3: ui.wep3Radio->setChecked(true); break;
 		default: break;
 		}
-		
-		ui.wep0LeaveButton->setChecked(isGlobalConfigured);
-		ui.wep1LeaveButton->setChecked(isGlobalConfigured);
-		ui.wep2LeaveButton->setChecked(isGlobalConfigured);
-		ui.wep3LeaveButton->setChecked(isGlobalConfigured);
 	}
 }
 #endif
