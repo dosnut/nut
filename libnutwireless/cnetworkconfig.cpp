@@ -3,34 +3,26 @@
 namespace libnutwireless {
 
 
-CNetworkConfig::CNetworkConfig() {
+CNetworkConfig::CNetworkConfig() :
 	//Set default values
-	ssid = QString();
-	bssid = libnutcommon::MacAddress();
-	disabled = QOOL_UNDEFINED;
-	id_str = QString();
-	scan_ssid = QOOL_UNDEFINED; 
-	priority = -1;
-	mode = QOOL_UNDEFINED; 
-	frequency = -1; 
-	protocols = PROTO_UNDEFINED; 
-	key_mgmt = KM_UNDEFINED; 
-	auth_alg = AUTHALG_UNDEFINED; 
-	pairwise = PCI_UNDEFINED; 
-	group = GCI_UNDEFINED; 
-	psk = QString(); 
-	eapol_flags = EAPF_UNDEFINED;
-	mixed_cell = QOOL_UNDEFINED; 
-	proactive_key_caching = QOOL_UNDEFINED; 
-	wep_key0 = QString(); 
-	wep_key1 = QString();
-	wep_key2 = QString();
-	wep_key3 = QString();
-	wep_tx_keyidx = -1;
-	peerkey = QOOL_UNDEFINED;
-	eap = EAPM_UNDEFINED;
-	fragment_size = -1;
-	nai = QString();
+	disabled(QOOL_UNDEFINED),
+	scan_ssid(QOOL_UNDEFINED),
+	priority(-1),
+	mode(QOOL_UNDEFINED),
+	frequency(-1),
+	protocols(PROTO_UNDEFINED),
+	key_mgmt(KM_UNDEFINED),
+	auth_alg(AUTHALG_UNDEFINED),
+	pairwise(PCI_UNDEFINED),
+	group(GCI_UNDEFINED),
+	eapol_flags(EAPF_UNDEFINED),
+	mixed_cell(QOOL_UNDEFINED),
+	proactive_key_caching(QOOL_UNDEFINED),
+	wep_tx_keyidx(-1),
+	peerkey(QOOL_UNDEFINED),
+	eap(EAPM_UNDEFINED),
+	fragment_size(-1)
+{
 	netId.id = -1;
 	netId.pid = -1;
 }
@@ -88,22 +80,29 @@ CNetworkConfig::CNetworkConfig(const CNetworkConfig &c) :
 	netId(c.netId)
 {}
 
-
-CNetworkConfig::CNetworkConfig(ScanResult scan) {
-	CNetworkConfig();
-	bssid = scan.bssid;
-	ssid = scan.ssid;
-	group = scan.group;
-	pairwise = scan.pairwise;
-	key_mgmt = scan.keyManagement;
-	protocols =  scan.protocols;
-	if (scan.opmode == OPM_ADHOC) {
-		frequency = scan.freq;
-		mode = QOOL_TRUE;
-	}
-	else {
-		mode = QOOL_FALSE;
-	}
+CNetworkConfig::CNetworkConfig(ScanResult scan) :
+	ssid(scan.ssid),
+	bssid(scan.bssid),
+	disabled(QOOL_UNDEFINED),
+	scan_ssid(QOOL_UNDEFINED),
+	priority(-1),
+	mode(scan.opmode == OPM_ADHOC ? QOOL_TRUE : QOOL_FALSE),
+	frequency(scan.opmode == OPM_ADHOC ? scan.freq : -1),
+	protocols(scan.protocols),
+	key_mgmt(scan.keyManagement),
+	auth_alg(AUTHALG_UNDEFINED),
+	pairwise(scan.pairwise),
+	group(scan.group),
+	eapol_flags(EAPF_UNDEFINED),
+	mixed_cell(QOOL_UNDEFINED),
+	proactive_key_caching(QOOL_UNDEFINED),
+	wep_tx_keyidx(-1),
+	peerkey(QOOL_UNDEFINED),
+	eap(EAPM_UNDEFINED),
+	fragment_size(-1)
+{
+	netId.id = -1;
+	netId.pid = -1;
 }
 
 CNetworkConfig::~CNetworkConfig() {
@@ -254,246 +253,247 @@ void CNetworkConfig::writeTo(QTextStream &stream) {
 }
 
 #define QUOTED(a) '\"' + a + '\"'
+#define DEP_QUOTED(a, b) (b ? QUOTED(a) : a) 
 
 //parser stuff
-bool CNetworkConfig::set_ssid(QString str, bool addQuotes) {
-	ssid = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_ssid(QString value, bool addQuotes) {
+	ssid = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_bssid(libnutcommon::MacAddress addrr) {
-	bssid = addrr;
+bool CNetworkConfig::set_bssid(libnutcommon::MacAddress value) {
+	bssid = value;
 	return true;
 }
-bool CNetworkConfig::set_disabled(bool d) {
-	disabled = toQOOL(d);
+bool CNetworkConfig::set_disabled(bool value) {
+	disabled = toQOOL(value);
 	return true;
 }
-bool CNetworkConfig::set_id_str(QString str) {
-	id_str = str;
-	netId = toNetworkId(str);
+bool CNetworkConfig::set_id_str(QString value) {
+	id_str = value;
+	netId = toNetworkId(value);
 	return true;
 }
-bool CNetworkConfig::set_scan_ssid(bool enabled) {
-	scan_ssid = toQOOL(enabled);
+bool CNetworkConfig::set_scan_ssid(bool value) {
+	scan_ssid = toQOOL(value);
 	return true;
 }
-bool CNetworkConfig::set_priority(int p) {
+bool CNetworkConfig::set_priority(int value) {
 	if (priority >= 0) {
-		priority = p;
+		priority = value;
 		return true;
 	}
 	return false;
 }
-bool CNetworkConfig::set_mode(bool mode) {
-	mode = toQOOL(mode);
+bool CNetworkConfig::set_mode(bool value) {
+	mode = toQOOL(value);
 	return true;
 }
-bool CNetworkConfig::set_frequency(int freq) {
-	if (freq > 0) {
-		frequency = freq;
+bool CNetworkConfig::set_frequency(int value) {
+	if (value > 0) {
+		frequency = value;
 		return true;
 	}
 	else return false;
 }
-bool CNetworkConfig::set_proto(QString p) {
-	protocols = toProtocols(p);
+bool CNetworkConfig::set_proto(QString value) {
+	protocols = toProtocols(value);
 	return true;
 }
-bool CNetworkConfig::set_key_mgmt(QString k) {
-	key_mgmt = toKeyMgmt(k);
+bool CNetworkConfig::set_key_mgmt(QString value) {
+	key_mgmt = toKeyMgmt(value);
 	return true;
 }
-bool CNetworkConfig::set_auth_alg(QString a) {
-	auth_alg = toAuthAlg(a);
+bool CNetworkConfig::set_auth_alg(QString value) {
+	auth_alg = toAuthAlg(value);
 	return true;
 }
-bool CNetworkConfig::set_pairwise(QString p) {
-	pairwise = toPairwiseCiphers(p);
+bool CNetworkConfig::set_pairwise(QString value) {
+	pairwise = toPairwiseCiphers(value);
 	return true;
 }
-bool CNetworkConfig::set_group(QString g) {
-	group = toGroupCiphers(g);
+bool CNetworkConfig::set_group(QString value) {
+	group = toGroupCiphers(value);
 	return true;
 }
-bool CNetworkConfig::set_psk(QString str, bool addQuotes) {
-	if (str != "*") {
-		psk = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_psk(QString value, bool addQuotes) {
+	if (value != "*") {
+		psk = DEP_QUOTED(value, addQuotes);
 		return true;
 	}
 	return false;
 }
-bool CNetworkConfig::set_eapol_flags(QString e) {
-	eapol_flags = toEapolFlags(e);
+bool CNetworkConfig::set_eapol_flags(QString value) {
+	eapol_flags = toEapolFlags(value);
 	return true;
 }
-bool CNetworkConfig::set_eapol_flags(int e) {
-	if (e >= 0 && e <= 3) {
-		eapol_flags = (EapolFlags)e;
+bool CNetworkConfig::set_eapol_flags(int value) {
+	if (value >= 0 && value <= 3) {
+		eapol_flags = (EapolFlags)value;
 		return true;
 	}
 	return false;
 }
-bool CNetworkConfig::set_mixed_cell(bool enabled) {
-	mixed_cell = toQOOL(enabled);
+bool CNetworkConfig::set_mixed_cell(bool value) {
+	mixed_cell = toQOOL(value);
 	return true;
 }
-bool CNetworkConfig::set_proactive_key_caching(bool enabled) {
-	proactive_key_caching = toQOOL(enabled);
+bool CNetworkConfig::set_proactive_key_caching(bool value) {
+	proactive_key_caching = toQOOL(value);
 	return true;
 }
-bool CNetworkConfig::set_wep_key0(QString str, bool addQuotes) {
-	if (str != "*") {
-		wep_key0 = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_wep_key0(QString value, bool addQuotes) {
+	if (value != "*") {
+		wep_key0 = DEP_QUOTED(value, addQuotes);
 		return true;
 	}
 	return false;
 }
-bool CNetworkConfig::set_wep_key1(QString str, bool addQuotes) {
-	if (str != "*") {
-		wep_key1 = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_wep_key1(QString value, bool addQuotes) {
+	if (value != "*") {
+		wep_key1 = DEP_QUOTED(value, addQuotes);
 		return true;
 	}
 	return false;
 }
-bool CNetworkConfig::set_wep_key2(QString str, bool addQuotes) {
-	if (str != "*") {
-		wep_key2 = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_wep_key2(QString value, bool addQuotes) {
+	if (value != "*") {
+		wep_key2 = DEP_QUOTED(value, addQuotes);
 		return true;
 	}
 	return false;
 }
-bool CNetworkConfig::set_wep_key3(QString str, bool addQuotes) {
-	if (str != "*") {
-		wep_key3 = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_wep_key3(QString value, bool addQuotes) {
+	if (value != "*") {
+		wep_key3 = DEP_QUOTED(value, addQuotes);;
 		return true;
 	}
 	return false;
 }
-bool CNetworkConfig::set_wep_tx_keyidx(int idx) {
-	if (idx >= 0 && idx <= 3) {
-		wep_tx_keyidx = idx;
+bool CNetworkConfig::set_wep_tx_keyidx(int value) {
+	if (value >= 0 && value <= 3) {
+		wep_tx_keyidx = value;
 		return true;
 	}
 	else return false;
 }
-bool CNetworkConfig::set_peerkey(bool enabled) {
-	peerkey = toQOOL(enabled);
+bool CNetworkConfig::set_peerkey(bool value) {
+	peerkey = toQOOL(value);
 	return true;
 }
-bool CNetworkConfig::set_eap(QString str) {
-	eap = toEapMethod(str);
+bool CNetworkConfig::set_eap(QString value) {
+	eap = toEapMethod(value);
 	return true;
 }
-bool CNetworkConfig::set_identity(QString str, bool addQuotes) {
-	identity = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_identity(QString value, bool addQuotes) {
+	identity = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_anonymous_identity(QString str, bool addQuotes) {
-	anonymous_identity = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_anonymous_identity(QString value, bool addQuotes) {
+	anonymous_identity = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_password(QString str, bool addQuotes) {
-	if (str != "*") {
-		password = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_password(QString value, bool addQuotes) {
+	if (value != "*") {
+		password = DEP_QUOTED(value, addQuotes);
 		return true;
 	}
 	return false;
 }
-bool CNetworkConfig::set_ca_cert(QString str, bool addQuotes) {
-	ca_cert = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_ca_cert(QString value, bool addQuotes) {
+	ca_cert = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_ca_path(QString str, bool addQuotes) {
-	ca_path = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_ca_path(QString value, bool addQuotes) {
+	ca_path = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_client_cert(QString str, bool addQuotes) {
-	client_cert = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_client_cert(QString value, bool addQuotes) {
+	client_cert = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_private_key(QString str, bool addQuotes) {
-	private_key = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_private_key(QString value, bool addQuotes) {
+	private_key = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_private_key_passwd(QString str, bool addQuotes) {
-	if (str != "*") {
-		private_key_passwd = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_private_key_passwd(QString value, bool addQuotes) {
+	if (value != "*") {
+		private_key_passwd = DEP_QUOTED(value, addQuotes);
 		return true;
 	}
 	return false;
 }
-bool CNetworkConfig::set_dh_file(QString str, bool addQuotes) {
-	dh_file = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_dh_file(QString value, bool addQuotes) {
+	dh_file = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_subject_match(QString str, bool addQuotes) {
-	subject_match = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_subject_match(QString value, bool addQuotes) {
+	subject_match = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_altsubject_match(QString str, bool addQuotes) {
-	altsubject_match = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_altsubject_match(QString value, bool addQuotes) {
+	altsubject_match = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_phase1(QString str, bool addQuotes) {
-	phase1 = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_phase1(QString value, bool addQuotes) {
+	phase1 = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_phase2(QString str, bool addQuotes) {
-	phase2 = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_phase2(QString value, bool addQuotes) {
+	phase2 = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_ca_cert2(QString str, bool addQuotes) {
-	ca_cert2 = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_ca_cert2(QString value, bool addQuotes) {
+	ca_cert2 = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_ca_path2(QString str, bool addQuotes) {
-	ca_path2 = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_ca_path2(QString value, bool addQuotes) {
+	ca_path2 = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_client_cert2(QString str, bool addQuotes) {
-	client_cert2 = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_client_cert2(QString value, bool addQuotes) {
+	client_cert2 = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_private_key2(QString str, bool addQuotes) {
-	private_key2 = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_private_key2(QString value, bool addQuotes) {
+	private_key2 = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_private_key2_passwd(QString str, bool addQuotes) {
-	if (str != "*") {
-		private_key2_passwd = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_private_key2_passwd(QString value, bool addQuotes) {
+	if (value != "*") {
+		private_key2_passwd = DEP_QUOTED(value, addQuotes);
 		return true;
 	}
 	return false;
 }
-bool CNetworkConfig::set_dh_file2(QString str, bool addQuotes) {
-	dh_file2 = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_dh_file2(QString value, bool addQuotes) {
+	dh_file2 = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_subject_match2(QString str, bool addQuotes) {
-	subject_match2 = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_subject_match2(QString value, bool addQuotes) {
+	subject_match2 = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_altsubject_match2(QString str, bool addQuotes) {
-	altsubject_match2 = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_altsubject_match2(QString value, bool addQuotes) {
+	altsubject_match2 = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_fragment_size(int size) {
-	fragment_size = size;
+bool CNetworkConfig::set_fragment_size(int value) {
+	fragment_size = value;
 	return true;
 }
-bool CNetworkConfig::set_eappsk(QString str) {
-	if (str != "*") {
-		eappsk = str;
+bool CNetworkConfig::set_eappsk(QString value) {
+	if (value != "*") {
+		eappsk = value;
 		return true;
 	}
 	return false;
 }
-bool CNetworkConfig::set_nai(QString str, bool addQuotes) {
-	nai = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_nai(QString value, bool addQuotes) {
+	nai = DEP_QUOTED(value, addQuotes);
 	return true;
 }
-bool CNetworkConfig::set_pac_file(QString str, bool addQuotes) {
-	pac_file = addQuotes ? QUOTED(str) : str;
+bool CNetworkConfig::set_pac_file(QString value, bool addQuotes) {
+	pac_file = DEP_QUOTED(value, addQuotes);
 	return true;
 }
 
