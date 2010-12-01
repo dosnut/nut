@@ -100,10 +100,13 @@ namespace nuts {
 	void DeviceManager::ca_timer() {
 		if (!m_ca_evts.empty()) {
 			struct ca_evt e = m_ca_evts.takeFirst();
-			if (e.up)
-				m_devices[e.ifName]->gotCarrier(e.ifIndex);
-			else
-				m_devices[e.ifName]->lostCarrier();
+			Device * dev = m_devices.value(e.ifName,0);
+			if (dev) {
+				if (e.up)
+					dev->gotCarrier(e.ifIndex);
+				else
+					dev->lostCarrier();
+			}
 		}
 		if (m_ca_evts.empty())
 			m_carrier_timer.stop();
