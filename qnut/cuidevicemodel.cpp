@@ -13,12 +13,13 @@
 #include "cuidevice.h"
 #include "common.h"
 
-#define OV_MOD_NAME    0
-#define OV_MOD_STATUS  1
-#define OV_MOD_TYPE    2
-#define OV_MOD_ENV     3
-#define OV_MOD_IP      4
-#define OV_MOD_NETWORK 5
+#define OV_MOD_NAME     0
+#define OV_MOD_STATUS   1
+#define OV_MOD_TYPE     2
+#define OV_MOD_ENV      3
+#define OV_MOD_IP       4
+#define OV_MOD_NETWORK  5
+#define OV_MOD_COLCOUNT 6
 
 namespace qnut {
 	using namespace libnutclient;
@@ -88,7 +89,7 @@ namespace qnut {
 		if (targetPos == -1)
 			return;
 		
-		emit dataChanged(index(targetPos, 0), index(targetPos, columnCount()));
+		emit dataChanged(index(targetPos, 0), index(targetPos, OV_MOD_COLCOUNT-1));
 	}
 	
 	void CUIDeviceModel::updateSignalQuality() {
@@ -112,7 +113,7 @@ namespace qnut {
 	}
 	
 	int CUIDeviceModel::columnCount(const QModelIndex & /*parent*/) const {
-		return 6;
+		return OV_MOD_COLCOUNT;
 	}
 	
 	QModelIndex CUIDeviceModel::index(int row, int column, const QModelIndex & /*parent*/) const {
