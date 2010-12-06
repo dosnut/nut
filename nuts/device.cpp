@@ -6,6 +6,7 @@
 #include <QProcess>
 #include <QStringList>
 #include <QTimerEvent>
+#include <QFile>
 #include "dhcppacket.h"
 #include "random.h"
 
@@ -249,7 +250,7 @@ namespace nuts {
 	void Device::gotCarrier(int ifIndex, const QString &essid) {
 		m_interfaceIndex = ifIndex;
 		m_essid = essid;
-		m_hasWLAN = !essid.isEmpty();
+		m_hasWLAN  = (QFile::exists(QString("/sys/class/net/%s/wireless").arg(m_name))) || !essid.isEmpty();
 		libnutcommon::MacAddress mAddr = m_dm->m_hwman.getMacAddress(m_name);
 		if (mAddr.valid()) m_macAddress = mAddr;
 		if (mAddr.zero()) log << "Device(" << m_name << "): couldn't get MacAddress from hardware:" << mAddr.toString() << endl;
