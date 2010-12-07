@@ -251,8 +251,10 @@ namespace qnut {
 		
 		if (m_CurrentID == -1)
 			status = m_WifiInterface->getWpaSupplicant()->addNetwork(m_Config);
-		else
+		else {
+			m_Config.setEqualsToUndefinded(m_OldConfig);
 			status = m_WifiInterface->getWpaSupplicant()->editNetwork(m_CurrentID, m_Config);
+		}
 		
 		QStringList errormsg;
 		
