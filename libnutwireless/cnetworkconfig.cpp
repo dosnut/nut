@@ -252,6 +252,67 @@ void CNetworkConfig::writeTo(QTextStream &stream) {
 	stream << QString("}\n");
 }
 
+#define SET_EQUAL_TO(a, b, c) a = (a == b) ? c : a
+
+bool CNetworkConfig::setEqualsToUndefinded(CNetworkConfig & other) {
+	SET_EQUAL_TO(ssid, other.ssid, QString());
+	SET_EQUAL_TO(bssid, other.bssid, libnutcommon::MacAddress());
+	SET_EQUAL_TO(disabled, other.disabled, QOOL_UNDEFINED);
+	SET_EQUAL_TO(id_str, other.id_str, QString());
+	SET_EQUAL_TO(scan_ssid, other.scan_ssid, QOOL_UNDEFINED);
+	SET_EQUAL_TO(priority, other.priority, -1);
+	SET_EQUAL_TO(mode, other.mode, QOOL_UNDEFINED);
+	SET_EQUAL_TO(frequency, other.frequency, -1);
+	SET_EQUAL_TO(protocols, other.protocols, PROTO_UNDEFINED);
+	SET_EQUAL_TO(key_mgmt, other.key_mgmt, KM_UNDEFINED);
+	SET_EQUAL_TO(auth_alg, other.auth_alg, AUTHALG_UNDEFINED);
+	SET_EQUAL_TO(pairwise, other.pairwise, PCI_UNDEFINED);
+	SET_EQUAL_TO(group, other.group, GCI_UNDEFINED);
+	SET_EQUAL_TO(psk, other.psk, QString());
+	SET_EQUAL_TO(eapol_flags, other.eapol_flags, EAPF_UNDEFINED);
+	SET_EQUAL_TO(mixed_cell, other.mixed_cell, QOOL_UNDEFINED);
+	SET_EQUAL_TO(proactive_key_caching, other.proactive_key_caching, QOOL_UNDEFINED);
+	
+	SET_EQUAL_TO(wep_key0, other.wep_key0, QString());
+	SET_EQUAL_TO(wep_key1, other.wep_key1, QString());
+	SET_EQUAL_TO(wep_key2, other.wep_key2, QString());
+	SET_EQUAL_TO(wep_key3, other.wep_key3, QString());
+	SET_EQUAL_TO(wep_tx_keyidx, other.wep_tx_keyidx, -1);
+	
+	SET_EQUAL_TO(peerkey, other.peerkey, QOOL_UNDEFINED);
+	
+	SET_EQUAL_TO(eap, other.eap, EAPM_UNDEFINED);
+	SET_EQUAL_TO(identity, other.identity, QString());
+	SET_EQUAL_TO(anonymous_identity, other.anonymous_identity, QString());
+	SET_EQUAL_TO(password, other.password, QString());
+	
+	SET_EQUAL_TO(ca_cert, other.ca_cert, QString());
+	SET_EQUAL_TO(ca_path, other.ca_path, QString());
+	SET_EQUAL_TO(client_cert, other.client_cert, QString());
+	SET_EQUAL_TO(private_key, other.private_key, QString());
+	SET_EQUAL_TO(private_key_passwd, other.private_key_passwd, QString());
+	SET_EQUAL_TO(dh_file, other.dh_file, QString());
+	SET_EQUAL_TO(subject_match, other.subject_match, QString());
+	SET_EQUAL_TO(altsubject_match, other.altsubject_match, QString());
+	
+	SET_EQUAL_TO(ca_cert2, other.ca_cert2, QString());
+	SET_EQUAL_TO(ca_path2, other.ca_path2, QString());
+	SET_EQUAL_TO(client_cert2, other.client_cert2, QString());
+	SET_EQUAL_TO(private_key2, other.private_key2, QString());
+	SET_EQUAL_TO(private_key2_passwd, other.private_key2_passwd, QString());
+	SET_EQUAL_TO(dh_file2, other.dh_file2, QString());
+	SET_EQUAL_TO(subject_match2, other.subject_match2, QString());
+	SET_EQUAL_TO(altsubject_match2, other.altsubject_match2, QString());
+	
+	SET_EQUAL_TO(phase1, other.phase1, QString());
+	SET_EQUAL_TO(phase2, other.phase2, QString());
+	
+	SET_EQUAL_TO(fragment_size, other.fragment_size, -1);
+	SET_EQUAL_TO(eappsk, other.eappsk, QString());
+	SET_EQUAL_TO(nai, other.nai, QString());
+	SET_EQUAL_TO(pac_file, other.pac_file, QString());
+}
+
 #define QUOTED(a) '\"' + a + '\"'
 #define DEP_QUOTED(a, b) (b ? QUOTED(a) : a) 
 

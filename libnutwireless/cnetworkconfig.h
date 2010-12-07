@@ -77,7 +77,9 @@ namespace libnutwireless {
 			CNetworkConfig(ScanResult scan);
 			~CNetworkConfig();
 			void writeTo(QTextStream &stream);
-
+			
+			bool setEqualsToUndefinded(CNetworkConfig & other);
+			
 			//Access functions
 			inline QString get_ssid() { return ssid;}
 			inline libnutcommon::MacAddress get_bssid() { return bssid; }
