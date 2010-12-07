@@ -170,9 +170,6 @@ QString toString(KeyManagement keym) {
 	//{KM_NONE=1, KM_WPA_PSK=2, KM_WPA_EAP=4, KM_IEEE8021X=8}
 	if (keym) {
 		QStringList ret;
-		if (keym & KM_OFF) { //For wpa_supplicant none/off is the same (none=wep, Off=plain)
-			ret.append("NONE");
-		}
 		if (keym & KM_NONE) {
 			ret.append("NONE");
 		}

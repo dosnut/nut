@@ -734,7 +734,7 @@ void CWextHW::readScanResults() {
 							iwe.u.data.flags |= IW_ENCODE_NOKEY;
 						}
 						if(iwe.u.data.flags & IW_ENCODE_DISABLED) { //Encryption is disabled
-							singleres.keyManagement = KM_OFF;
+							singleres.keyManagement = KM_NONE;
 							qDebug() << "PARING ENCODE-Information: NO KEY";
 						}
 						else {

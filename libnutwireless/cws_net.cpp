@@ -60,11 +60,6 @@ NetconfigStatus CWpaSupplicant::checkAdHocNetwork(CNetworkConfig &config) {
 				failures.failures = (NetconfigFailures)(failures.failures | NCF_KEYMGMT);
 			}
 		}
-		else {
-			if ( KM_OFF != config.get_key_mgmt()) {
-				failures.failures = (NetconfigFailures)(failures.failures | NCF_KEYMGMT);
-			}
-		}
 	}
 	else {
 		if (PROTO_WPA != config.get_protocols()) {
@@ -110,8 +105,10 @@ NetconfigStatus CWpaSupplicant::editNetwork(int netid, CNetworkConfig config) {
 	failStatus.id = netid;
 
 	//Set the network
-	if (!setNetworkVariable(netid,"ssid",config.get_ssid()) ) {
-		failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_SSID);
+	if (!config.get_ssid().isEmpty()) {
+		if (!setNetworkVariable(netid,"ssid",config.get_ssid()) ) {
+			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_SSID);
+		}
 	}
 	if (!setBssid(netid,config.get_bssid().toString()) ) { //Always set bssid, otherwise wpa_supplicant doesn't care about "any" bssid
 		failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_BSSID);
@@ -499,16 +496,11 @@ CNetworkConfig CWpaSupplicant::getNetworkConfig(int id) {
 		config.set_peerkey(toQOOL(response));
 	}
 
-	//Check if we have Wep or plaintext:
-	if ( (KM_NONE & config.get_key_mgmt()) && (-1 == config.get_wep_tx_keyidx()) ) {
-		config.set_key_mgmt((KeyManagement) ((!KM_NONE & config.get_key_mgmt()) | KM_OFF));
-	}
-
 	//Check if we need to fetch wpa_settings //return now, otherwise, get the eap part
 	if (! ( config.get_key_mgmt() & (KM_IEEE8021X | KM_WPA_EAP) ) ){
 		return config;
 	}
-	
+
 	//Get eap network config
 	response = wpaCtrlCmd_GET_NETWORK(id,"eap");
 	if ("FAIL\n" != response) {

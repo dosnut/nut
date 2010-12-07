@@ -25,7 +25,7 @@ namespace libnutwireless {
 	typedef enum {PCI_UNDEFINED=0, PCI_NONE=1, PCI_TKIP=2, PCI_CCMP=4, PCI_DEF=6} PairwiseCiphers;
 	
 	/** Enum of possible  key management */
-	typedef enum {KM_UNDEFINED=0, KM_OFF=2, KM_NONE=4, KM_WPA_NONE=8, KM_WPA_PSK=16, KM_WPA_EAP=32, KM_IEEE8021X=64, KM_DEF=48} KeyManagement; //TODO:change parsers due to KM_OFF
+	typedef enum {KM_UNDEFINED=0, KM_NONE=4, KM_WPA_NONE=8, KM_WPA_PSK=16, KM_WPA_EAP=32, KM_IEEE8021X=64, KM_DEF=48} KeyManagement; //TODO:change parsers due to KM_OFF
 	
 	/** Enum of possible authentication  algorithms */
 	typedef enum {AUTHALG_UNDEFINED=0, AUTHALG_OPEN=1, AUTHALG_SHARED=2, AUTHALG_LEAP=4} AuthenticationAlgs; //Default: automatic selection
