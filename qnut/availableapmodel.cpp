@@ -134,11 +134,8 @@ namespace qnut {
 				if (keyFlags == KM_UNDEFINED)
 					return tr("undefined");
 				
-				if (keyFlags == KM_OFF)
-					return tr("none");
-				
 				if (keyFlags == KM_NONE)
-					return tr("WEP");
+					return tr("none/WEP");
 				
 				if (keyFlags == KM_WPA_NONE)
 					return tr("WPA PSK (ad-hoc)");
