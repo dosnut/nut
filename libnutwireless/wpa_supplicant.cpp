@@ -134,7 +134,11 @@ bool CWpaSupplicant::ap_scan(int type) {
 	return false;
 }
 bool CWpaSupplicant::save_config() {
-	return !("FAIL\n" == wpaCtrlCmd_SAVE_CONFIG());
+	bool ok = !("FAIL\n" == wpaCtrlCmd_SAVE_CONFIG());
+	if (ok) {
+		m_managedNetworks.clear();
+	}
+	return ok;
 }
 void CWpaSupplicant::disconnect_device() {
 	wpaCtrlCmd_DISCONNECT();
@@ -191,6 +195,7 @@ NetconfigStatus CWpaSupplicant::addNetwork(CNetworkConfig config) {
 		status.failures = NCF_ALL;
 		status.eap_failures = ENCF_ALL;
 		status.id = -1;
+		m_managedNetworks.remove(netId);
 		return status;
 	}
 	else {
