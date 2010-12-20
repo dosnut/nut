@@ -62,7 +62,7 @@ namespace qnut {
 		
 		m_Config.set_mode(true);
 		
-		if (ui.confTabs->isTabEnabled(3)) {
+		if (ui.confTabs->isTabEnabled(1)) {
 			if (!(ui.wep0LeaveButton->isChecked() || ui.wep0Edit->text().isEmpty()))
 				m_Config.set_wep_key0(ui.wep0Edit->text(), !ui.wep0HexCheck->isChecked());
 			if (!(ui.wep1LeaveButton->isChecked() || ui.wep1Edit->text().isEmpty()))
