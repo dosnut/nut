@@ -42,6 +42,8 @@ namespace qnut {
 		void togglePlainPSK(bool show);
 		
 		virtual void populateUi();
+	private:
+		void populateErrorCodeEvaluator();
 	};
 }
 #endif

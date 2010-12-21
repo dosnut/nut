@@ -31,6 +31,8 @@ class QLineEdit;
 class QCheckBox;
 class QRegExpValidator;
 
+class CErrorCodeEvaluator;
+
 namespace libnutwireless {
 	class CWireless;
 	class NetconfigStatus;
@@ -61,13 +63,15 @@ namespace qnut {
 		 */
 		CAbstractWifiNetConfigDialog(libnutwireless::CWireless * interface, QWidget * parent = 0);
 		/// @brief Destroyes the object.
-		~CAbstractWifiNetConfigDialog();
+		virtual ~CAbstractWifiNetConfigDialog();
 	public slots:
 		virtual void accept();
 		virtual void resetUi();
 	protected:
 		static QRegExpValidator * m_HexValidator;
 		static int m_HexValidatorRefs;
+		
+		CErrorCodeEvaluator * m_ErrorCodeEvaluator;
 		
 		QMap<QCheckBox *, QLineEdit *> m_HexEditMap;
 		

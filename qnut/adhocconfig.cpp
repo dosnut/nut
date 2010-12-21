@@ -10,6 +10,7 @@
 #include <libnutwireless/cwireless.h>
 #include <libnutwireless/conversion.h>
 #include "adhocconfig.h"
+#include "cerrorcodeevaluator.h"
 
 namespace qnut {
 	using namespace libnutwireless;
@@ -17,8 +18,8 @@ namespace qnut {
 	CAdhocConfig::CAdhocConfig(CWireless * supplicant, QWidget * parent) : CAbstractWifiNetConfigDialog(supplicant, parent) {
 		ui.setupUi(this);
 		
-		quint32 chan = 0;
-		ui.channelCombo->addItem(tr("auto"), -1);
+		quint32 chan;
+		ui.channelCombo->addItem(tr("not set"), -1);
 		foreach (quint32 i, m_WifiInterface->getHardware()->getSupportedFrequencies()) {
 			chan = frequencyToChannel(i);
 			ui.channelCombo->addItem(QString::number(chan), chan);
@@ -42,6 +43,8 @@ namespace qnut {
 		connect(ui.buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked(bool)), this, SLOT(applyConfiguration()));
 		connect(ui.buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked(bool)), this, SLOT(resetUi()));
 		setAuthConfig(0);
+		
+		populateErrorCodeEvaluator();
 	}
 	
 	void CAdhocConfig::setAuthConfig(int type) {
@@ -121,15 +124,30 @@ namespace qnut {
 			status = m_WifiInterface->getWpaSupplicant()->editNetwork(m_CurrentID, m_Config);
 		}
 		
-		QStringList errormsg;
-		
-		getConfigErrors(&status, errormsg);
-		
-		if (!errormsg.isEmpty()) {
-			QString errors = errormsg.join(", ");
-			QMessageBox::critical(this, tr("Error on applying settings"),
-				tr("WPA supplicant reported the following errors:") + '\n' + errors);
-			qDebug(errors.toAscii().data());
+		if (status.failures || status.eap_failures) {
+			unsigned long int errorCode;
+			QString errormsg = tr("Please check the following settings:");
+			
+			// check for basic config errors
+			if (status.failures) {
+				errorCode = status.failures;
+				m_ErrorCodeEvaluator->evaluate(errormsg, "\n - ", errorCode);
+				status.failures = (libnutwireless::NetconfigFailures)(errorCode);
+			}
+			
+			// eap failures are irrelevant here
+			
+			// check for additional errors
+			if (status.failures || status.eap_failures) {
+				QStringList errors;
+				
+				if (!errormsg.isEmpty())
+					errormsg += '\n';
+				getConfigErrors(&status, errors);
+				errormsg += tr("Additionally the following errors were reported:") + '\n' + errors.join(", ");
+			}
+			
+			QMessageBox::critical(this, tr("Error on applying settings"), errormsg);
 			return false;
 		}
 		
@@ -214,6 +232,21 @@ namespace qnut {
 		case 3: ui.wep3Radio->setChecked(true); break;
 		default: break;
 		}
+	}
+	
+	inline void CAdhocConfig::populateErrorCodeEvaluator() {
+		// register general error codes
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_SSID, "SSID");
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_KEYMGMT, tr("Key Management"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_GROUP, ui.grpCipGroup->title());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_PSK, tr("Pre Shared Key"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY0, tr("WEP key 0"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY1, tr("WEP key 1"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY2, tr("WEP key 2"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY3, tr("WEP key 3"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY_IDX, tr("selected WEP key index"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_FREQ, tr("Channel"));
+		// not needed : NCF_PRIORITY NCF_PAIRWISE NCF_SCAN_SSID NCF_DISABLED NCF_PROA_KEY_CACHING NCF_PROTO NCF_BSSID NCF_MODE
 	}
 }
 #endif

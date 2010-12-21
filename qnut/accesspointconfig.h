@@ -36,6 +36,7 @@ namespace qnut {
 		 * @param parent parent widget
 		 */
 		CAccessPointConfig(libnutwireless::CWireless * interface, QWidget * parent = 0);
+		virtual ~CAccessPointConfig();
 	protected:
 		Ui::apconf ui;
 		
@@ -69,6 +70,9 @@ namespace qnut {
 		void setUiEAPPhase(int phase);
 		
 		virtual void populateUi();
+	private:
+		CErrorCodeEvaluator * m_EapErrorCodeEvaluator;
+		inline void populateErrorCodeEvaluator();
 	};
 }
 #endif

@@ -23,9 +23,12 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QRegExpValidator>
+
 #include <libnutwireless/wpa_supplicant.h>
 #include <libnutwireless/wstypes.h>
 #include <libnutwireless/cwireless.h>
+
+#include "cerrorcodeevaluator.h"
 
 namespace qnut {
 	using namespace libnutwireless;
@@ -34,6 +37,7 @@ namespace qnut {
 	int CAbstractWifiNetConfigDialog::m_HexValidatorRefs = 0;
 	
 	CAbstractWifiNetConfigDialog::CAbstractWifiNetConfigDialog(libnutwireless::CWireless * interface, QWidget * parent) : QDialog(parent),
+		m_ErrorCodeEvaluator(new CErrorCodeEvaluator()),
 		m_WifiInterface(interface),
 		m_CurrentID(0)
 	{
@@ -45,6 +49,8 @@ namespace qnut {
 	}
 	
 	CAbstractWifiNetConfigDialog::~CAbstractWifiNetConfigDialog() {
+		delete m_ErrorCodeEvaluator;
+		
 		m_HexValidatorRefs--;
 		if (!m_HexValidatorRefs && m_HexValidator) {
 			delete m_HexValidator;

@@ -58,6 +58,8 @@ set(SOURCES_CPP main.cpp
 	cuidevicemodel.cpp
 	cuidevice.cpp
 	cnotificationmanager.cpp
+	
+	cerrorcodeevaluator.cpp
 )
 
 set(TRANSLATIONS_TS ${PROJECT_NAME}_de.ts ${PROJECT_NAME}_pt_BR.ts)

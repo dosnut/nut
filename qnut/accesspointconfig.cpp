@@ -11,7 +11,10 @@
 #include <QMessageBox>
 #include <libnutwireless/cwireless.h>
 #include <libnutwireless/wpa_supplicant.h>
+
 #include "accesspointconfig.h"
+
+#include "cerrorcodeevaluator.h"
 
 #define WRITE_BACK_AUTOQUOTE(f, t) f(t, !(t.isEmpty()))
 
@@ -40,6 +43,8 @@ namespace qnut {
 	
 	CAccessPointConfig::CAccessPointConfig(libnutwireless::CWireless * interface, QWidget * parent) : CAbstractWifiNetConfigDialog(interface, parent) {
 		ui.setupUi(this);
+		
+		m_EapErrorCodeEvaluator = new CErrorCodeEvaluator();
 		
 		ui.eapPSKEdit->setValidator(m_HexValidator);
 		
@@ -102,6 +107,12 @@ namespace qnut {
 		connect(ui.buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked(bool)), this, SLOT(applyConfiguration()));
 		connect(ui.buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked(bool)), this, SLOT(resetUi()));
 		setAuthConfig(0);
+		
+		populateErrorCodeEvaluator();
+	}
+	
+	CAccessPointConfig::~CAccessPointConfig() {
+		delete m_EapErrorCodeEvaluator;
 	}
 	
 	void CAccessPointConfig::setAuthConfig(int type) {
@@ -256,15 +267,35 @@ namespace qnut {
 			status = m_WifiInterface->getWpaSupplicant()->editNetwork(m_CurrentID, m_Config);
 		}
 		
-		QStringList errormsg;
-		
-		getConfigErrors(&status, errormsg);
-		
-		if (!errormsg.isEmpty()) {
-			QString errors = errormsg.join(", ");
-			QMessageBox::critical(this, tr("Error on applying settings"),
-				tr("WPA supplicant reported the following errors:") + '\n' + errors);
-			qDebug(qPrintable(errors));
+		if (status.failures || status.eap_failures) {
+			unsigned long int errorCode;
+			QString errormsg = tr("Please check the following settings:");
+			
+			// check for basic config errors
+			if (status.failures) {
+				errorCode = status.failures;
+				m_ErrorCodeEvaluator->evaluate(errormsg, "\n - ", errorCode);
+				status.failures = (libnutwireless::NetconfigFailures)(errorCode);
+			}
+			
+			// check for eap config errors
+			if (status.eap_failures) {
+				errorCode = status.eap_failures;
+				m_ErrorCodeEvaluator->evaluate(errormsg,  "\n - ", errorCode);
+				status.eap_failures = (libnutwireless::EapNetconfigFailures)(errorCode);
+			}
+			
+			// check for additional errors
+			if (status.failures || status.eap_failures) {
+				QStringList errors;
+				
+				if (!errormsg.isEmpty())
+					errormsg += '\n';
+				getConfigErrors(&status, errors);
+				errormsg += tr("Additionally the following errors were reported:") + '\n' + errors.join(", ");
+			}
+			
+			QMessageBox::critical(this, tr("Error on applying settings"), errormsg);
 			return false;
 		}
 		
@@ -508,6 +539,56 @@ namespace qnut {
 		
 		ui.scanCheck->setChecked(m_Config.get_scan_ssid());
 		ui.autoEnableCheck->setChecked(!m_Config.get_disabled());
+	}
+	
+	inline void CAccessPointConfig::populateErrorCodeEvaluator() {
+		// register general error codes
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_SSID, "SSID");
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_BSSID, "BSSID");
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_DISABLED, ui.autoEnableCheck->text());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_SCAN_SSID, ui.scanCheck->text());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_PROTO, tr("WPA2 mode"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_KEYMGMT, tr("Key Management"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_PAIRWISE, ui.prwCipGroup->title());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_GROUP, ui.grpCipGroup->title());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_PSK, tr("Pre Shared Key"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_PROA_KEY_CACHING, ui.proativeCheck->text());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY0, tr("WEP key 0"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY1, tr("WEP key 1"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY2, tr("WEP key 2"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY3, tr("WEP key 3"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY_IDX, tr("selected WEP key index"));
+		// missing : NCF_PRIORITY
+		// not needed : NCF_FREQ NCF_MODE
+		
+		// register eap error codes
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_EAP, ui.eapMethodGroup->title());
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_IDENTITY, tr("Identity"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_ANON_IDENTITY, tr("Anonymous Identity"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_PASSWD, tr("Password"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_EAPPSK, tr("EAP Pre Shared Key"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_NAI, tr("Network Access Identifier"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_FRAGMENT_SIZE, tr("Fragment Size"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_PAC_FILE, tr("Proxy Access Control (PAC) File"));
+		
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_CA_CERT, tr("CA Certificate file in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_CLIENT_CERT, tr("Client Certificate file in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_PRIVATE_KEY, tr("Private Key file in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_PRIVATE_KEY_PASSWD, tr("Private Key password in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_PHASE1, tr("Phase parameters in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_SUBJECT_MATCH, tr("Subject Match in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_ALTSUBJECT_MATCH, tr("Alt. Subject Match in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_DH_FILE, tr("DH/DSA file in phase 1"));
+		
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_CA_CERT2, tr("CA Certificate file in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_CLIENT_CERT2, tr("Client Certificate file in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_PRIVATE_KEY2, tr("Private Key file in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_PRIVATE_KEY2_PASSWD, tr("Private Key password in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_PHASE2, tr("Phase parameters in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_SUBJECT_MATCH2, tr("Subject Match in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_ALTSUBJECT_MATCH2, tr("Alt. Subject Match in phase 1"));
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_DH_FILE2, tr("DH/DSA file in phase 1"));
+		// missing : ENCF_CA_PATH ENCF_CA_PATH2
 	}
 }
 #endif
