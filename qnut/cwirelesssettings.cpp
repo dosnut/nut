@@ -26,11 +26,11 @@
 #include "common.h"
 #include "constants.h"
 
-#include "accesspointconfig.h"
-#include "adhocconfig.h"
+#include "caccesspointconfig.h"
+#include "cadhocconfig.h"
 
-#include "managedapmodel.h"
-#include "availableapmodel.h"
+#include "cmanagedapmodel.h"
+#include "cavailableapmodel.h"
 
 namespace qnut {
 	//TODO make only theese functions available that are supported by the wpa_supplicant

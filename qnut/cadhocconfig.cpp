@@ -9,7 +9,7 @@
 #include <QMessageBox>
 #include <libnutwireless/cwireless.h>
 #include <libnutwireless/conversion.h>
-#include "adhocconfig.h"
+#include "cadhocconfig.h"
 #include "cerrorcodeevaluator.h"
 
 namespace qnut {

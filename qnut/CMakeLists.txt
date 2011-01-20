@@ -21,13 +21,13 @@ set(SOURCES_MOC_H
 	connectionmanager.h
 	ipconfiguration.h
 	interfacedetailsmodel.h
-	wirelesssettings.h
+	cwirelesssettings.h
 	managedapmodel.h
 	environmenttreemodel.h
 	availableapmodel.h
 	cabstractwifinetconfigdialog.h
-	accesspointconfig.h
-	adhocconfig.h
+	caccesspointconfig.h
+	cadhocconfig.h
 	environmentdetailsmodel.h
 	dnslistmodel.h
 	ipeditdelegate.h
@@ -43,13 +43,13 @@ set(SOURCES_CPP main.cpp
 	ipconfiguration.cpp
 	common.cpp
 	interfacedetailsmodel.cpp
-	wirelesssettings.cpp
+	cwirelesssettings.cpp
 	managedapmodel.cpp
 	environmenttreemodel.cpp
 	availableapmodel.cpp
 	cabstractwifinetconfigdialog.cpp
-	accesspointconfig.cpp
-	adhocconfig.cpp
+	caccesspointconfig.cpp
+	cadhocconfig.cpp
 	environmentdetailsmodel.cpp
 	dnslistmodel.cpp
 	ipeditdelegate.cpp
