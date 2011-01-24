@@ -254,7 +254,7 @@ void CNetworkConfig::writeTo(QTextStream &stream) {
 
 #define SET_EQUAL_TO(a, b, c) a = (a == b) ? c : a
 
-bool CNetworkConfig::setEqualsToUndefinded(CNetworkConfig & other) {
+void CNetworkConfig::setEqualsToUndefinded(CNetworkConfig & other) {
 	SET_EQUAL_TO(ssid, other.ssid, QString());
 	SET_EQUAL_TO(bssid, other.bssid, libnutcommon::MacAddress());
 	SET_EQUAL_TO(disabled, other.disabled, QOOL_UNDEFINED);
@@ -339,7 +339,7 @@ bool CNetworkConfig::set_scan_ssid(bool value) {
 	return true;
 }
 bool CNetworkConfig::set_priority(int value) {
-	if (priority >= 0) {
+	if (value >= 0) {
 		priority = value;
 		return true;
 	}
