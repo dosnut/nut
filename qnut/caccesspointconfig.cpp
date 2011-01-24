@@ -148,7 +148,9 @@ namespace qnut {
 			m_Config.set_ssid(ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"');
 		
 		m_Config.set_scan_ssid(toQOOL(ui.scanCheck->isChecked()));
+		
 		m_Config.set_disabled(toQOOL(!ui.autoEnableCheck->isChecked()));
+		m_Config.set_priority(ui.prioritySpin->value());
 		
 		if (ui.anyBSSIDCheck->isChecked())
 			m_Config.set_bssid(MacAddress());
@@ -462,6 +464,7 @@ namespace qnut {
 	
 	void CAccessPointConfig::populateUi() {
 		ui.ssidHexCheck->setChecked(setTextAutoHex(ui.ssidEdit, m_Config.get_ssid()));
+		ui.scanCheck->setChecked(m_Config.get_scan_ssid());
 		
 		ui.anyBSSIDCheck->setChecked(m_Config.get_bssid().zero());
 		if (!m_Config.get_bssid().zero())
@@ -538,8 +541,8 @@ namespace qnut {
 		default: break;
 		}
 		
-		ui.scanCheck->setChecked(m_Config.get_scan_ssid());
 		ui.autoEnableCheck->setChecked(!m_Config.get_disabled());
+		ui.prioritySpin->setValue(m_Config.get_priority());
 	}
 	
 	inline void CAccessPointConfig::populateErrorCodeEvaluator() {
