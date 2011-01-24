@@ -1,3 +1,10 @@
+//
+// C++ Implementation: CNotificationManager
+//
+// Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
+//
+// Copyright: See COPYING file that comes with this distribution
+//
 #include "cnotificationmanager.h"
 
 #include <QWidget>
@@ -5,13 +12,13 @@
 #include <QIcon>
 #include <QMenu>
 #include <QAction>
-
 #include <QApplication>
+
+#include <libnutclient/cdevice.h>
 
 #include "cuidevice.h"
 #include "constants.h"
 #include "common.h"
-#include <libnutclient/cdevice.h>
 
 namespace qnut {
 	using namespace libnutclient;

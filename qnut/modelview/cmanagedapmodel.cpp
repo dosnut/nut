@@ -12,7 +12,8 @@
 #include <QIcon>
 #include <QFont>
 #include <QApplication>
-#include "managedapmodel.h"
+
+#include "modelview/cmanagedapmodel.h"
 #include "constants.h"
 
 namespace qnut {

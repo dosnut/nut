@@ -9,8 +9,8 @@
 #include <QHostAddress>
 #include <QEvent>
 #include <QLineEdit>
-#include <QDebug>
-#include "ipeditdelegate.h"
+
+#include "modelview/cipeditdelegate.h"
 
 namespace qnut {
 	CIPEditDelegate::CIPEditDelegate(QObject * parent) : QStyledItemDelegate(parent) {

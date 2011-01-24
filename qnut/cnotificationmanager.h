@@ -1,3 +1,10 @@
+//
+// C++ Interface: CNotificationManager
+//
+// Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
+//
+// Copyright: See COPYING file that comes with this distribution
+//
 #ifndef QNUT_CNOTIFICATIONMANAGER_H
 #define QNUT_CNOTIFICATIONMANAGER_H
 

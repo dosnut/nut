@@ -6,10 +6,12 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 #include <QIcon>
+
 #include <libnutclient/cdevicemanager.h>
 #include <libnutclient/cdevice.h>
 #include <libnutclient/cenvironment.h>
-#include "cuidevicemodel.h"
+
+#include "modelview/cuidevicemodel.h"
 #include "cuidevice.h"
 #include "common.h"
 

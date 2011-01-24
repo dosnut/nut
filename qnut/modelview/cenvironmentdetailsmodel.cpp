@@ -8,7 +8,8 @@
 #include <QIcon>
 #include <libnutclient/cdevice.h>
 #include <libnutclient/cenvironment.h>
-#include "environmentdetailsmodel.h"
+
+#include "modelview/cenvironmentdetailsmodel.h"
 #include "constants.h"
 
 #define ENVDET_MOD_STATEMENT 0

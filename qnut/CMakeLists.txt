@@ -2,67 +2,73 @@ project(qnut)
 
 find_package(Qt4 COMPONENTS QtCore QtGui QtDbus QtNetwork REQUIRED)
 
-include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR})
+include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/utils ${CMAKE_SOURCE_DIR})
 include(${QT_USE_FILE})
 
 set(INSTALL_SHARE_PREFIX ${CMAKE_INSTALL_PREFIX}/share)
 set(INSTALL_SHARE_TARGET_PREFIX ${INSTALL_SHARE_PREFIX}/${PROJECT_NAME})
 
 set(FORMS
-	ipconf.ui
-	devset.ui
-	airset.ui
-	apconfexp.ui
-	devdet.ui
-	adhocexp.ui
+	ui/devicedetails.ui
+	ui/ipconfiguration.ui
+	ui/devicesettings.ui
+	ui/wirelesssettings.ui
+	ui/accesspointconfig.ui
+	ui/adhocconfig.ui
 )
 
 set(SOURCES_MOC_H
-	connectionmanager.h
-	ipconfiguration.h
-	interfacedetailsmodel.h
+	cconnectionmanager.h
+	cipconfiguration.h
 	cwirelesssettings.h
-	managedapmodel.h
-	environmenttreemodel.h
-	availableapmodel.h
 	cabstractwifinetconfigdialog.h
 	caccesspointconfig.h
 	cadhocconfig.h
-	environmentdetailsmodel.h
-	dnslistmodel.h
-	ipeditdelegate.h
-	devicesettings.h
-	commandlistmodel.h
-	cuidevicemodel.h
+	cdevicesettings.h
 	cuidevice.h
 	cnotificationmanager.h
+	
+	modelview/cuidevicemodel.h
+	modelview/cenvironmenttreemodel.h
+	modelview/cinterfacedetailsmodel.h
+	modelview/cenvironmentdetailsmodel.h
+	modelview/cavailableapmodel.h
+	modelview/cmanagedapmodel.h
+	modelview/cdnslistmodel.h
+	modelview/cipeditdelegate.h
+	modelview/ccommandlistmodel.h
 )
 
 set(SOURCES_CPP main.cpp
-	connectionmanager.cpp
-	ipconfiguration.cpp
 	common.cpp
-	interfacedetailsmodel.cpp
+	
+	cconnectionmanager.cpp
+	cipconfiguration.cpp
 	cwirelesssettings.cpp
-	managedapmodel.cpp
-	environmenttreemodel.cpp
-	availableapmodel.cpp
 	cabstractwifinetconfigdialog.cpp
 	caccesspointconfig.cpp
 	cadhocconfig.cpp
-	environmentdetailsmodel.cpp
-	dnslistmodel.cpp
-	ipeditdelegate.cpp
-	devicesettings.cpp
-	commandlistmodel.cpp
-	cuidevicemodel.cpp
+	cdevicesettings.cpp
 	cuidevice.cpp
 	cnotificationmanager.cpp
 	
-	cerrorcodeevaluator.cpp
+	modelview/cuidevicemodel.cpp
+	modelview/cenvironmenttreemodel.cpp
+	modelview/cinterfacedetailsmodel.cpp
+	modelview/cenvironmentdetailsmodel.cpp
+	modelview/cavailableapmodel.cpp
+	modelview/cmanagedapmodel.cpp
+	modelview/cdnslistmodel.cpp
+	modelview/cipeditdelegate.cpp
+	modelview/ccommandlistmodel.cpp
+	
+	utils/cerrorcodeevaluator.cpp
 )
 
-set(TRANSLATIONS_TS ${PROJECT_NAME}_de.ts ${PROJECT_NAME}_pt_BR.ts)
+set(TRANSLATIONS_TS
+	translations/${PROJECT_NAME}_de.ts
+	translations/${PROJECT_NAME}_pt_BR.ts
+)
 
 qt4_wrap_ui(FORMS_H ${FORMS})
 qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})

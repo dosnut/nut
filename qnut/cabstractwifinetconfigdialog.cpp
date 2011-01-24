@@ -28,7 +28,7 @@
 #include <libnutwireless/wstypes.h>
 #include <libnutwireless/cwireless.h>
 
-#include "cerrorcodeevaluator.h"
+#include "utils/cerrorcodeevaluator.h"
 
 namespace qnut {
 	using namespace libnutwireless;

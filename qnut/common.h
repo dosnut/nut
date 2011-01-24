@@ -14,7 +14,6 @@
 #include <QAction>
 #include <QString>
 #include <QHostAddress>
-
 #include <libnutclient/cenvironment.h>
 
 namespace libnutclient {

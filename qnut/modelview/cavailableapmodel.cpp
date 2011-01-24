@@ -9,7 +9,8 @@
 #include <QIcon>
 #include <libnutwireless/cwireless.h>
 #include <libnutwireless/conversion.h>
-#include "availableapmodel.h"
+
+#include "modelview/cavailableapmodel.h"
 #include "common.h"
 #include "constants.h"
 

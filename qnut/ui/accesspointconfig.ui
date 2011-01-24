@@ -7,19 +7,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>609</width>
-    <height>631</height>
+    <width>607</width>
+    <height>634</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Configure Access Point</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="eapMainTabLayout_2">
    <item>
     <layout class="QFormLayout" name="mainSettingsLayout">
-     <property name="fieldGrowthPolicy">
-      <enum>QFormLayout::ExpandingFieldsGrow</enum>
-     </property>
      <item row="0" column="0">
       <widget class="QLabel" name="ssidLabel">
        <property name="text">
@@ -44,7 +41,7 @@
        </item>
       </layout>
      </item>
-     <item row="1" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="bssidLabel">
        <property name="text">
         <string>BSSID:</string>
@@ -54,7 +51,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
+     <item row="2" column="1">
       <layout class="QHBoxLayout" name="bssidLayout">
        <item>
         <widget class="QLineEdit" name="bssidEdit">
@@ -81,7 +78,7 @@
        </item>
       </layout>
      </item>
-     <item row="2" column="0">
+     <item row="3" column="0">
       <widget class="QLabel" name="keyManagementLabel">
        <property name="text">
         <string>Key management:</string>
@@ -91,7 +88,7 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
+     <item row="3" column="1">
       <layout class="QHBoxLayout" name="keyManagementLayout">
        <item>
         <widget class="QComboBox" name="keyManagementCombo">
@@ -164,6 +161,13 @@
        </item>
       </layout>
      </item>
+     <item row="1" column="1">
+      <widget class="QCheckBox" name="scanCheck">
+       <property name="text">
+        <string>Enable SSID scanning (slower but needed if SSID is hidden)</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -181,7 +185,7 @@
       <attribute name="title">
        <string>Encryption</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="encTabLayout">
        <item>
         <widget class="QGroupBox" name="grpCipGroup">
          <property name="title">
@@ -190,7 +194,7 @@
          <property name="checkable">
           <bool>true</bool>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <layout class="QHBoxLayout" name="grpCipLayout">
           <item>
            <widget class="QCheckBox" name="grpCipWEP40Check">
             <property name="text">
@@ -243,7 +247,7 @@
          <property name="checkable">
           <bool>true</bool>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout">
+         <layout class="QHBoxLayout" name="prwCipLayout">
           <item>
            <widget class="QCheckBox" name="prwCipTKIPCheck">
             <property name="text">
@@ -285,7 +289,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer">
+        <spacer name="encTabSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -303,7 +307,7 @@
       <attribute name="title">
        <string>WEP Keys</string>
       </attribute>
-      <layout class="QVBoxLayout">
+      <layout class="QVBoxLayout" name="wepTabLayout">
        <item>
         <layout class="QGridLayout" name="wepGrid">
          <item row="0" column="0">
@@ -456,7 +460,7 @@
       <attribute name="title">
        <string>Pre Shared Key</string>
       </attribute>
-      <layout class="QVBoxLayout">
+      <layout class="QVBoxLayout" name="pskTabLayout">
        <item>
         <layout class="QHBoxLayout" name="pskLayout">
          <item>
@@ -534,13 +538,16 @@
       <attribute name="title">
        <string>EAP General</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
+      <layout class="QFormLayout" name="eapMainTabLayout">
+       <property name="fieldGrowthPolicy">
+        <enum>QFormLayout::ExpandingFieldsGrow</enum>
+       </property>
+       <item row="0" column="0" colspan="2">
         <widget class="QGroupBox" name="eapMethodGroup">
          <property name="title">
           <string>EAP method</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout">
+         <layout class="QGridLayout" name="eapMethodGroupLayout">
           <item row="0" column="0">
            <widget class="QCheckBox" name="eapMethodMD5Check">
             <property name="text">
@@ -642,198 +649,178 @@
          </layout>
         </widget>
        </item>
-       <item>
-        <layout class="QFormLayout" name="formLayout_2">
-         <property name="fieldGrowthPolicy">
-          <enum>QFormLayout::ExpandingFieldsGrow</enum>
+       <item row="1" column="0">
+        <widget class="QLabel" name="identyLabel">
+         <property name="text">
+          <string>Identity:</string>
          </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="identyLabel">
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy">
+          <cstring>identiyEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="identiyEdit"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="anonymousIdentityLabel">
+         <property name="text">
+          <string>Anonymous Identity:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy">
+          <cstring>anonymousIdentityEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="anonymousIdentityEdit"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="eapPasswordLabel">
+         <property name="text">
+          <string>Password:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="buddy">
+          <cstring>eapPasswordEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <layout class="QHBoxLayout" name="eapPasswordLayout">
+         <item>
+          <widget class="QLineEdit" name="eapPasswordEdit">
+           <property name="echoMode">
+            <enum>QLineEdit::Password</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="eapPasswordLeaveButton">
            <property name="text">
-            <string>Identity:</string>
+            <string>leave unchanged</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-           <property name="buddy">
-            <cstring>identiyEdit</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="identiyEdit"/>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="anonymousIdentityLabel">
-           <property name="text">
-            <string>Anonymous Identity:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-           <property name="buddy">
-            <cstring>anonymousIdentityEdit</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="anonymousIdentityEdit"/>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="eapPasswordLabel">
-           <property name="text">
-            <string>Password:</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-           <property name="buddy">
-            <cstring>eapPasswordEdit</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <layout class="QHBoxLayout" name="eapPasswordLayout">
-           <item>
-            <widget class="QLineEdit" name="eapPasswordEdit">
-             <property name="echoMode">
-              <enum>QLineEdit::Password</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="eapPasswordLeaveButton">
-             <property name="text">
-              <string>leave unchanged</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="eapPSKLabel">
-           <property name="text">
-            <string>EAP Pre Shared Key (hex.):</string>
-           </property>
-           <property name="buddy">
-            <cstring>eapPSKEdit</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <layout class="QHBoxLayout" name="eapPSKLayout">
-           <item>
-            <widget class="QLineEdit" name="eapPSKEdit">
-             <property name="toolTip">
-              <string>32 digits, 128-Bit Pre Shared Key</string>
-             </property>
-             <property name="maxLength">
-              <number>32</number>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="eapPSKLeaveButton">
-             <property name="text">
-              <string>leave unchanged</string>
-             </property>
-             <property name="checkable">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="naiLabel">
-           <property name="text">
-            <string>Network Access Identifier (NAI):</string>
-           </property>
-           <property name="buddy">
-            <cstring>naiEdit</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QLineEdit" name="naiEdit"/>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="pacLabel">
-           <property name="text">
-            <string>Proxy Access Control (PAC) file:</string>
-           </property>
-           <property name="buddy">
-            <cstring>pacEdit</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="1">
-          <layout class="QHBoxLayout" name="pacLayout">
-           <item>
-            <widget class="QLineEdit" name="pacEdit"/>
-           </item>
-           <item>
-            <widget class="QToolButton" name="pacBrowse">
-             <property name="text">
-              <string>...</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="7" column="0">
-          <widget class="QLabel" name="fragmentLabel">
-           <property name="text">
-            <string>Fragment size:</string>
-           </property>
-           <property name="buddy">
-            <cstring>fragmentSpin</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="1">
-          <widget class="QSpinBox" name="fragmentSpin">
-           <property name="buttonSymbols">
-            <enum>QAbstractSpinBox::UpDownArrows</enum>
-           </property>
-           <property name="specialValueText">
-            <string>Undefined</string>
-           </property>
-           <property name="minimum">
-            <number>-1</number>
-           </property>
-           <property name="maximum">
-            <number>65535</number>
-           </property>
-           <property name="value">
-            <number>-1</number>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0" colspan="2">
-          <widget class="Line" name="line_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
         </layout>
        </item>
-       <item>
-        <spacer name="verticalSpacer_2">
+       <item row="4" column="0" colspan="2">
+        <widget class="Line" name="eapPasswordLine">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Horizontal</enum>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="eapPSKLabel">
+         <property name="text">
+          <string>EAP Pre Shared Key (hex.):</string>
          </property>
-        </spacer>
+         <property name="buddy">
+          <cstring>eapPSKEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <layout class="QHBoxLayout" name="eapPSKLayout">
+         <item>
+          <widget class="QLineEdit" name="eapPSKEdit">
+           <property name="toolTip">
+            <string>32 digits, 128-Bit Pre Shared Key</string>
+           </property>
+           <property name="maxLength">
+            <number>32</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="eapPSKLeaveButton">
+           <property name="text">
+            <string>leave unchanged</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="naiLabel">
+         <property name="text">
+          <string>Network Access Identifier (NAI):</string>
+         </property>
+         <property name="buddy">
+          <cstring>naiEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QLineEdit" name="naiEdit"/>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="pacLabel">
+         <property name="text">
+          <string>Proxy Access Control (PAC) file:</string>
+         </property>
+         <property name="buddy">
+          <cstring>pacEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <layout class="QHBoxLayout" name="pacLayout">
+         <item>
+          <widget class="QLineEdit" name="pacEdit"/>
+         </item>
+         <item>
+          <widget class="QToolButton" name="pacBrowse">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="fragmentLabel">
+         <property name="text">
+          <string>Fragment size:</string>
+         </property>
+         <property name="buddy">
+          <cstring>fragmentSpin</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="QSpinBox" name="fragmentSpin">
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::UpDownArrows</enum>
+         </property>
+         <property name="specialValueText">
+          <string>Undefined</string>
+         </property>
+         <property name="minimum">
+          <number>-1</number>
+         </property>
+         <property name="maximum">
+          <number>65535</number>
+         </property>
+         <property name="value">
+          <number>-1</number>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -841,8 +828,11 @@
       <attribute name="title">
        <string>EAP Authentification</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
+      <layout class="QFormLayout" name="eapAuthTabLayout">
+       <property name="fieldGrowthPolicy">
+        <enum>QFormLayout::ExpandingFieldsGrow</enum>
+       </property>
+       <item row="0" column="0" colspan="2">
         <layout class="QHBoxLayout" name="phaseShowLayout">
          <item>
           <widget class="QLabel" name="phaseShowLabel">
@@ -886,12 +876,101 @@
          </item>
         </layout>
        </item>
-       <item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="phaseParamLabel">
+         <property name="text">
+          <string>Phase parameters:</string>
+         </property>
+         <property name="buddy">
+          <cstring>phaseParamEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="phaseParamEdit"/>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <widget class="Line" name="altSubjectMatchLine">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="altSubjectMatchLabel">
+         <property name="text">
+          <string>Alt. Subject Match:</string>
+         </property>
+         <property name="buddy">
+          <cstring>altSubjectMatchEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLineEdit" name="altSubjectMatchEdit"/>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="subjectMatchLabel">
+         <property name="text">
+          <string>Subject Match:</string>
+         </property>
+         <property name="buddy">
+          <cstring>subjectMatchEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QLineEdit" name="subjectMatchEdit"/>
+       </item>
+       <item row="7" column="1">
+        <layout class="QHBoxLayout" name="dhFileLayout">
+         <item>
+          <widget class="QLineEdit" name="dhFileEdit"/>
+         </item>
+         <item>
+          <widget class="QToolButton" name="dhFileBrowse">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="8" column="0">
+        <widget class="Line" name="phaseParamLine">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QLabel" name="dhFileLabel">
+         <property name="text">
+          <string>DH/DSA file:</string>
+         </property>
+         <property name="buddy">
+          <cstring>dhFileEdit</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
         <widget class="QGroupBox" name="eapCertGroup">
          <property name="title">
           <string>Certificates</string>
          </property>
-         <layout class="QFormLayout" name="formLayout">
+         <layout class="QFormLayout" name="eapCertGroupLayout">
           <property name="fieldGrowthPolicy">
            <enum>QFormLayout::ExpandingFieldsGrow</enum>
           </property>
@@ -946,12 +1025,12 @@
          </layout>
         </widget>
        </item>
-       <item>
+       <item row="2" column="0" colspan="2">
         <widget class="QGroupBox" name="eapKeyGroup">
          <property name="title">
           <string>Private Key</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_3">
+         <layout class="QFormLayout" name="eapKeyGroupLayout">
           <item row="0" column="0">
            <widget class="QLabel" name="keyFileLabel">
             <property name="text">
@@ -1010,109 +1089,48 @@
          </layout>
         </widget>
        </item>
-       <item>
-        <layout class="QFormLayout" name="phaseSettingsLayout">
-         <property name="fieldGrowthPolicy">
-          <enum>QFormLayout::ExpandingFieldsGrow</enum>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="miscTab">
+      <attribute name="title">
+       <string>Misc</string>
+      </attribute>
+      <layout class="QFormLayout" name="miscTablayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="priorityLabel">
+         <property name="text">
+          <string>Priority:</string>
          </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="phaseParamLabel">
-           <property name="text">
-            <string>Phase parameters:</string>
-           </property>
-           <property name="buddy">
-            <cstring>phaseParamEdit</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="phaseParamEdit"/>
-         </item>
-         <item row="1" column="0" colspan="2">
-          <widget class="Line" name="line">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="subjectMatchLabel">
-           <property name="text">
-            <string>Subject Match:</string>
-           </property>
-           <property name="buddy">
-            <cstring>subjectMatchEdit</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="subjectMatchEdit"/>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="altSubjectMatchLabel">
-           <property name="text">
-            <string>Alt. Subject Match:</string>
-           </property>
-           <property name="buddy">
-            <cstring>altSubjectMatchEdit</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="altSubjectMatchEdit"/>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="dhFileLabel">
-           <property name="text">
-            <string>DH/DSA file:</string>
-           </property>
-           <property name="buddy">
-            <cstring>dhFileEdit</cstring>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <layout class="QHBoxLayout" name="dhFileLayout">
-           <item>
-            <widget class="QLineEdit" name="dhFileEdit"/>
-           </item>
-           <item>
-            <widget class="QToolButton" name="dhFileBrowse">
-             <property name="text">
-              <string>...</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="4" column="0" colspan="2">
-          <widget class="Line" name="line_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="prioritySpin">
+         <property name="specialValueText">
+          <string>default</string>
+         </property>
+         <property name="minimum">
+          <number>-1</number>
+         </property>
+         <property name="maximum">
+          <number>255</number>
+         </property>
+         <property name="value">
+          <number>-1</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QCheckBox" name="autoEnableCheck">
+         <property name="text">
+          <string>Enable automatic selection</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="scanCheck">
-     <property name="text">
-      <string>Enable SSID scanning (slower but needed if SSID is hidden)</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="autoEnableCheck">
-     <property name="text">
-      <string>Enable automatic selection</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
     </widget>
    </item>
    <item>
@@ -1147,7 +1165,6 @@
   <tabstop>anyBSSIDCheck</tabstop>
   <tabstop>keyManagementCombo</tabstop>
   <tabstop>rsnCombo</tabstop>
-  <tabstop>confTabs</tabstop>
   <tabstop>grpCipGroup</tabstop>
   <tabstop>grpCipWEP40Check</tabstop>
   <tabstop>grpCipWEP104Check</tabstop>
@@ -1211,13 +1228,8 @@
   <tabstop>keyFileBrowse</tabstop>
   <tabstop>keyPasswordEdit</tabstop>
   <tabstop>keyPasswordLeaveButton</tabstop>
-  <tabstop>phaseParamEdit</tabstop>
-  <tabstop>subjectMatchEdit</tabstop>
-  <tabstop>altSubjectMatchEdit</tabstop>
   <tabstop>dhFileEdit</tabstop>
   <tabstop>dhFileBrowse</tabstop>
-  <tabstop>scanCheck</tabstop>
-  <tabstop>autoEnableCheck</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>

@@ -5,14 +5,15 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-#ifndef QNUT_WIRELESSSETTINGS_H
-#define QNUT_WIRELESSSETTINGS_H
+#ifndef QNUT_CWIRELESSSETTINGS_H
+#define QNUT_CWIRELESSSETTINGS_H
 
 #ifndef QNUT_NO_WIRELESS
 #include <QDialog>
 #include <libnutwireless/hwtypes.h>
 #include <libnutcommon/device.h>
-#include "ui_airset.h"
+
+#include "ui_wirelesssettings.h"
 
 namespace libnutclient {
 	class CDevice;

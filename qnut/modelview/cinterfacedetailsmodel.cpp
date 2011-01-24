@@ -8,7 +8,7 @@
 #include <libnutclient/client.h>
 #include <QIcon>
 
-#include "interfacedetailsmodel.h"
+#include "modelview/cinterfacedetailsmodel.h"
 #include "common.h"
 
 #define IFDET_MOD_ITEM   0

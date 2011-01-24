@@ -1,6 +1,7 @@
 #include <QtGui>
 #include <QTranslator>
-#include "connectionmanager.h"
+
+#include "cconnectionmanager.h"
 #include "constants.h"
 
 using namespace qnut;

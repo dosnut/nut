@@ -8,13 +8,15 @@
 /*
         TRANSLATOR qnut::QObject
 */
+#include "common.h"
+
 #include <libnutclient/cdevice.h>
 #include <libnutclient/cenvironment.h>
 #include <libnutclient/cinterface.h>
 #include <libnutwireless/wpa_supplicant.h>
-#include "common.h"
-#include "constants.h"
 #include <libnutwireless/cwireless.h>
+
+#include "constants.h"
 
 namespace qnut {
 	using namespace libnutcommon;

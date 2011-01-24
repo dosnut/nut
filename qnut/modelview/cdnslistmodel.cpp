@@ -5,7 +5,7 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-#include "dnslistmodel.h"
+#include "modelview/cdnslistmodel.h"
 
 namespace qnut {
 	CDNSListModel::CDNSListModel(QList<QHostAddress> * dnsList, QObject * parent) : QAbstractListModel(parent), m_DNSList(dnsList) {

@@ -1,16 +1,17 @@
 //
-// C++ Interface: devicesettings
+// C++ Interface: CDeviceSettings
 //
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-#ifndef QNUT_DEVICESETTINGS_H
-#define QNUT_DEVICESETTINGS_H
+#ifndef QNUT_CDEVICESETTINGS_H
+#define QNUT_CDEVICESETTINGS_H
 
 #include <QDialog>
-#include "ui_devset.h"
+
 #include "common.h"
+#include "ui_devicesettings.h"
 
 namespace qnut {
 	class CDeviceDetails;

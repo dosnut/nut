@@ -5,7 +5,7 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-#include "commandlistmodel.h"
+#include "modelview/ccommandlistmodel.h"
 
 namespace qnut {
 	CCommandListModel::CCommandListModel(QObject * parent) : QAbstractListModel(parent) {}

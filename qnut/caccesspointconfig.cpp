@@ -1,20 +1,21 @@
 //
-// C++ Implementation: accesspointconfig
+// C++ Implementation: CAccessPointConfig
 //
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
 //
 #ifndef QNUT_NO_WIRELESS
+#include "caccesspointconfig.h"
+
 #include <QFileDialog>
 #include <QToolTip>
 #include <QMessageBox>
+
 #include <libnutwireless/cwireless.h>
 #include <libnutwireless/wpa_supplicant.h>
 
-#include "accesspointconfig.h"
-
-#include "cerrorcodeevaluator.h"
+#include "utils/cerrorcodeevaluator.h"
 
 #define WRITE_BACK_AUTOQUOTE(f, t) f(t, !(t.isEmpty()))
 

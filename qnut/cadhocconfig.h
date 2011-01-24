@@ -1,17 +1,16 @@
 //
-// C++ Interface: adhocconfig
+// C++ Interface: CAdhocConfig
 //
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-#ifndef QNUT_ADHOCCONFIG_H
-#define QNUT_ADHOCCONFIG_H
+#ifndef QNUT_CADHOCCONFIG_H
+#define QNUT_CADHOCCONFIG_H
 
 #ifndef QNUT_NO_WIRELESS
 #include "cabstractwifinetconfigdialog.h"
-
-#include "ui_adhocexp.h"
+#include "ui_adhocconfig.h"
 
 namespace qnut {
 	/**

@@ -1,5 +1,5 @@
 //
-// C++ Interface: accesspointconfig
+// C++ Interface: CAccessPointConfig
 //
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
@@ -13,7 +13,8 @@
 
 #include <libnutwireless/cnetworkconfig.h>
 #include <QSignalMapper>
-#include "ui_apconfexp.h"
+
+#include "ui_accesspointconfig.h"
 
 namespace qnut {
 	/**

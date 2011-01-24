@@ -1,5 +1,5 @@
 //
-// C++ Interface: ipconfiguration
+// C++ Interface: CIPConfiguration
 //
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
@@ -10,7 +10,8 @@
 
 #include <QDialog>
 #include <libnutcommon/config.h>
-#include "ui_ipconf.h"
+
+#include "ui_ipconfiguration.h"
 
 namespace qnut {
 	/**

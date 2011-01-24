@@ -9,54 +9,59 @@ OBJECTS_DIR = build/
 MOC_DIR = build/
 UI_DIR = build/
 TARGET = qnut
-FORMS = ipconf.ui \
-	devset.ui \
-	airset.ui \
-	apconfexp.ui \
-	devdet.ui \
-	adhocexp.ui
-TRANSLATIONS = qnut_de.ts \
-	qnut_pt_BR.ts
-HEADERS += connectionmanager.h \
+FORMS = \
+	ui/devicedetails.ui \
+	ui/ipconfiguration.ui \
+	ui/devicesettings.ui \
+	ui/wirelesssettings.ui \
+	ui/accesspointconfig.ui \
+	ui/adhocconfig.ui
+TRANSLATIONS = \
+	translations/qnut_de.ts \
+	translations/qnut_pt_BR.ts
+HEADERS += \
 	constants.h \
-	ipconfiguration.h \
 	common.h \
-	interfacedetailsmodel.h \
-	wirelesssettings.h \
-	managedapmodel.h \
-	environmenttreemodel.h \
-	availableapmodel.h \
+	cconnectionmanager.h \
+	cipconfiguration.h \
+	cwirelesssettings.h \
 	cabstractwifinetconfigdialog.h \
-	accesspointconfig.h \
-	adhocconfig.h \
-	environmentdetailsmodel.h \
-	dnslistmodel.h \
-	ipeditdelegate.h \
-	devicesettings.h \
-	commandlistmodel.h \
-	cuidevicemodel.h \
+	caccesspointconfig.h \
+	cadhocconfig.h \
+	cdevicesettings.h \
 	cuidevice.h \
-	cnotificationmanager.h
+	cnotificationmanager.h \
+	modelview/cuidevicemodel.h \
+	modelview/cenvironmenttreemodel.h \
+	modelview/cinterfacedetailsmodel.h \
+	modelview/cenvironmentdetailsmodel.h \
+	modelview/cavailableapmodel.h \
+	modelview/cmanagedapmodel.h \
+	modelview/cdnslistmodel.h \
+	modelview/cipeditdelegate.h \
+	modelview/ccommandlistmodel.h \
+	utils/cerrorcodeevaluator.h
 SOURCES += main.cpp \
-	connectionmanager.cpp \
-	ipconfiguration.cpp \
 	common.cpp \
-	interfacedetailsmodel.cpp \
-	wirelesssettings.cpp \
-	managedapmodel.cpp \
-	environmenttreemodel.cpp \
-	availableapmodel.cpp \
+	cconnectionmanager.cpp \
+	cipconfiguration.cpp \
+	cwirelesssettings.cpp \
 	cabstractwifinetconfigdialog.cpp \
-	accesspointconfig.cpp \
-	adhocconfig.cpp \
-	environmentdetailsmodel.cpp \
-	dnslistmodel.cpp \
-	ipeditdelegate.cpp \
-	devicesettings.cpp \
-	commandlistmodel.cpp \
-	cuidevicemodel.cpp \
+	caccesspointconfig.cpp \
+	cadhocconfig.cpp \
+	cdevicesettings.cpp \
 	cuidevice.cpp \
-	cnotificationmanager.cpp
+	cnotificationmanager.cpp \
+	modelview/cuidevicemodel.cpp \
+	modelview/cenvironmenttreemodel.cpp \
+	modelview/cinterfacedetailsmodel.cpp \
+	modelview/cenvironmentdetailsmodel.cpp \
+	modelview/cavailableapmodel.cpp\
+	modelview/cmanagedapmodel.cpp \
+	modelview/cdnslistmodel.cpp \
+	modelview/cipeditdelegate.cpp \
+	modelview/ccommandlistmodel.cpp \
+	utils/cerrorcodeevaluator.cpp
 DESTDIR = .
 target.path = /usr/bin
 iconstarget.path = /usr/share/qnut/icons
@@ -64,7 +69,7 @@ iconstarget.files = res/*.png \
 	res/qnut.svg \
 	res/qnut_small.svg
 langtarget.path = /usr/share/qnut/lang
-langtarget.files = qnut_*.qm
+langtarget.files = translations/qnut_*.qm
 shortcuttarget.path = /usr/share/applications
 shortcuttarget.files = qnut.desktop
 INSTALLS += target \

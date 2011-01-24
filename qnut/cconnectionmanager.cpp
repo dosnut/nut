@@ -1,10 +1,12 @@
 //
-// C++ Implementation: connectionmanager
+// C++ Implementation: CConnectionManager
 //
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
 //
+#include "cconnectionmanager.h"
+
 #include <QDate>
 #include <QToolBar>
 #include <QMenu>
@@ -17,11 +19,9 @@
 #include <libnutclient/cdevice.h>
 #include <libnutwireless/cwireless.h>
 
-#include "connectionmanager.h"
-
 #include "common.h"
 #include "constants.h"
-#include "cuidevicemodel.h"
+#include "modelview/cuidevicemodel.h"
 #include "cuidevice.h"
 #include "cnotificationmanager.h"
 

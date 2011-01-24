@@ -6,12 +6,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 #ifndef QNUT_NO_WIRELESS
-#include "wirelesssettings.h"
-
-#include <libnutclient/client.h>
-
-#include <libnutwireless/cwireless.h>
-#include <libnutwireless/conversion.h>
+#include "cwirelesssettings.h"
 
 #include <QHeaderView>
 #include <QMessageBox>
@@ -23,14 +18,19 @@
 #include <QSettings>
 #include <QSignalMapper>
 
+#include <libnutclient/client.h>
+
+#include <libnutwireless/cwireless.h>
+#include <libnutwireless/conversion.h>
+
 #include "common.h"
 #include "constants.h"
 
 #include "caccesspointconfig.h"
 #include "cadhocconfig.h"
 
-#include "cmanagedapmodel.h"
-#include "cavailableapmodel.h"
+#include "modelview/cmanagedapmodel.h"
+#include "modelview/cavailableapmodel.h"
 
 namespace qnut {
 	//TODO make only theese functions available that are supported by the wpa_supplicant

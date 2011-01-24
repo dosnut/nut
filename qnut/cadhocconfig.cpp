@@ -1,16 +1,18 @@
 //
-// C++ Implementation: adhocconfig
+// C++ Implementation: CAdhocConfig
 //
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
 //
 #ifndef QNUT_NO_WIRELESS
+#include "cadhocconfig.h"
+
 #include <QMessageBox>
 #include <libnutwireless/cwireless.h>
 #include <libnutwireless/conversion.h>
-#include "cadhocconfig.h"
-#include "cerrorcodeevaluator.h"
+
+#include "utils/cerrorcodeevaluator.h"
 
 namespace qnut {
 	using namespace libnutwireless;

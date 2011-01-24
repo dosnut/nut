@@ -1,5 +1,5 @@
 //
-// C++ Implementation: ipconfiguration
+// C++ Implementation: CIPConfiguration
 //
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
@@ -9,9 +9,10 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QSettings>
-#include "ipconfiguration.h"
-#include "dnslistmodel.h"
-#include "ipeditdelegate.h"
+
+#include "cipconfiguration.h"
+#include "modelview/cdnslistmodel.h"
+#include "modelview/cipeditdelegate.h"
 
 namespace qnut {
 	using namespace libnutcommon;

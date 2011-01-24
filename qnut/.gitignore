@@ -1,6 +1,5 @@
 build
 Makefile*
-ui
 moc_*
 fp
 qnut

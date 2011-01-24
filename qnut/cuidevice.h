@@ -1,17 +1,18 @@
 //
-// C++ Interface: cuidevice
+// C++ Interface: UI Device
 //
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-#ifndef QNUT_UIDEVICE_H
-#define QNUT_UIDEVICE_H
+#ifndef QNUT_CUIDEVICE_H
+#define QNUT_CUIDEVICE_H
 
 #include <QWidget>
 #include <libnutcommon/device.h>
-#include "ui_devdet.h"
+
 #include "common.h"
+#include "ui_devicedetails.h"
 
 namespace libnutclient {
 	class CDevice;

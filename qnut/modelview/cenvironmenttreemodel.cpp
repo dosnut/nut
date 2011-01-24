@@ -9,7 +9,8 @@
 #include <libnutclient/cdevice.h>
 #include <libnutclient/cenvironment.h>
 #include <libnutclient/cinterface.h>
-#include "environmenttreemodel.h"
+
+#include "modelview/cenvironmenttreemodel.h"
 #include "common.h"
 #include "constants.h"
 

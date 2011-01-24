@@ -1,12 +1,12 @@
 //
-// C++ Interface: connectionmanager
+// C++ Interface: CConnectionManager
 //
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-#ifndef QNUT_CONNECTIONMANAGER_H
-#define QNUT_CONNECTIONMANAGER_H
+#ifndef QNUT_CCONNECTIONMANAGER_H
+#define QNUT_CCONNECTIONMANAGER_H
 
 #include <QMainWindow>
 #include <QItemSelection>

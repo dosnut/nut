@@ -1,10 +1,12 @@
 //
-// C++ Implementation: cuidevice
+// C++ Implementation: UI Device
 //
 // Author: Oliver Groß <z.o.gross@gmx.de>, (C) 2007
 //
 // Copyright: See COPYING file that comes with this distribution
 //
+#include "cuidevice.h"
+
 #include <QHeaderView>
 #include <QProcess>
 #include <QDir>
@@ -17,17 +19,16 @@
 #include <libnutclient/cinterface.h>
 #include <libnutwireless/cwireless.h>
 
-#include "cuidevice.h"
 #include "common.h"
 #include "constants.h"
-#include "environmenttreemodel.h"
-#include "interfacedetailsmodel.h"
-#include "environmentdetailsmodel.h"
-#include "ipconfiguration.h"
-#include "devicesettings.h"
+#include "modelview/cenvironmenttreemodel.h"
+#include "modelview/cenvironmentdetailsmodel.h"
+#include "modelview/cinterfacedetailsmodel.h"
+#include "cipconfiguration.h"
+#include "cdevicesettings.h"
 
 #ifndef QNUT_NO_WIRELESS
-#include "wirelesssettings.h"
+#include "cwirelesssettings.h"
 #endif
 
 namespace qnut {
