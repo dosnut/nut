@@ -1,4 +1,4 @@
-VERSION = 0.5.6
+VERSION = 0.5.7
 TEMPLATE = lib
 CONFIG += create_prl
 CONFIG -= thread

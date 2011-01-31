@@ -1,3 +1,28 @@
+network-utilities (0.5.7-1) unstable; urgency=low
+
+  [ Stefan Bühler ]
+  * New release
+
+  [ Daniel Bahrdt ]
+  * [nuts] fix segfault if device is removed. lostCarrier event was dispatched though the device was deleted before.
+  * [nuts]Don't use essid as check for a wirelessdevice as some cards return a no essid if not associated
+  * [nuts] Check in sys if device has wireless
+  * [libnutwireless] remove managed configs if config is saved to wpa_supplicant
+
+  [ Oliver Groß ]
+  * [libnutwireless] fixed cnetworkconfig constructors and set_* methods
+  * [libnutwireless] clean indentation
+  * [qnut/wireless] fixed adhoc config dialog
+  * [qnut/wireless] fixed access point config
+  * [qnut] gui lockup fix?
+  * [libnutwireless] removed obsolete KM_OFF flag
+  * [qnut/wireless] removed parsing KM_OFF flag
+  * [libnutwireless] added setEqualsToUndefinded to CNetworkConfig
+  * [qnut/wireless] added check for equal settings before editing a network
+  * [qnut/wireless] fixed setting wep keys
+
+ -- Stefan Bühler <stbuehler@web.de>  Mon, 31 Jan 2011 12:31:43 +0100
+
 network-utilities (0.5.6-1) unstable; urgency=low
 
   * New release
