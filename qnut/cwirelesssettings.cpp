@@ -111,10 +111,10 @@ namespace qnut {
 		
 		m_SwitchNetworkAction    = new QAction(QIcon(UI_ICON_FORCE), tr("S&witch"), this);
 		m_ConfigureNetworkAction = new QAction(QIcon(UI_ICON_CONFIGURE), tr("&Configure..."), this);
-		m_EnableNetworkAction    = new QAction(QIcon(UI_ICON_ENABLE), tr("&Enable"), this);
-		m_DisableNetworkAction   = new QAction(QIcon(UI_ICON_DISABLE), tr("&Disable"), this);
+		m_EnableNetworkAction    = new QAction(QIcon(UI_ICON_AP), tr("&Enable"), this);
+		m_DisableNetworkAction   = new QAction(QIcon(UI_ICON_AP_DOWN), tr("&Disable"), this);
 		
-		enableNetworksAction         = new QAction(QIcon(UI_ICON_ENABLE_ALL), tr("Enable &all"), this);
+		enableNetworksAction         = new QAction(/*QIcon(UI_ICON_ENABLE_ALL), */tr("Enable &all"), this);
 		importNetworksAction         = new QAction(/*QIcon(UI_ICON_IMPORT), */tr("&Import networks..."), this);
 		exportNetworkAction          = new QAction(/*QIcon(UI_ICON_EXPORT), */tr("E&xport selected network..."), this);
 		exportMultipleNetworksAction = new QAction(/*QIcon(UI_ICON_MULTIEXPORT), */tr("Export all &networks..."), this);
