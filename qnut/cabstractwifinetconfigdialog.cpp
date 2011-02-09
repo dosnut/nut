@@ -17,7 +17,7 @@
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 */
-
+#ifndef QNUT_NO_WIRELESS
 #include "cabstractwifinetconfigdialog.h"
 
 #include <QLineEdit>
@@ -171,3 +171,5 @@ namespace qnut {
 	}
 	
 }
+#endif
+

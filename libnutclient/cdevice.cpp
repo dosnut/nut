@@ -30,7 +30,9 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) :
 	m_state(libnutcommon::DS_UNCONFIGURED),
 	m_type(libnutcommon::DT_ETH),
 	m_activeEnvironment(0),
+#ifndef LIBNUT_NO_WIRELESS
 	m_wlAccess(0),
+#endif
 	m_index(-1)
 {} //TODO:Init all! pointers to 0
 

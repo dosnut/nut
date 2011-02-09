@@ -1,4 +1,3 @@
-project(nut)
 cmake_minimum_required(VERSION 2.6)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
@@ -21,6 +20,8 @@ PROJECT(network-utiltities)
 SET(PACKAGE_NAME ${CMAKE_PROJECT_NAME})
 SET(PACKAGE_VERSION 0.5.7)
 
+option(USE_WIRELESS "Enable support for wireless networks through wpa_supplicant." ON)
+
 set(DEBUG_FLAGS "-Wall -Wno-long-long -pedantic")
 set(CMAKE_C_FLAGS "-std=c99")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${DEBUG_FLAGS}")
@@ -36,11 +37,18 @@ add_dependencies(cnut nutcommon)
 add_subdirectory(nuts nuts)
 add_dependencies(nuts nutcommon)
 
-add_subdirectory(libnutwireless libnutwireless)
-add_dependencies(nutwireless nutcommon)
+if(USE_WIRELESS)
+	add_subdirectory(libnutwireless libnutwireless)
+	add_dependencies(nutwireless nutcommon)
+else(USE_WIRELESS)
+	add_definitions(-DQNUT_NO_WIRELESS -DLIBNUT_NO_WIRELESS)
+endif(USE_WIRELESS)
 
 add_subdirectory(libnutclient libnutclient)
-add_dependencies(nutclient nutcommon nutwireless)
+add_dependencies(nutclient nutcommon)
+if(USE_WIRELESS)
+	add_dependencies(nutclient nutwireless)
+endif(USE_WIRELESS)
 
 add_subdirectory(qnut qnut)
 add_dependencies(qnut nutclient)
