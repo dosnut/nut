@@ -46,7 +46,7 @@ namespace qnut {
 		/// @brief Destroyes the object and writes the settings to "~/.qnut/qnut.conf".
 		~CConnectionManager();
 		
-		static CNotificationManager * notificationManager();
+		CNotificationManager * notificationManager() { return m_NotificationManager; }
 	private:
 		libnutclient::CDeviceManager * m_DeviceManager;
 		libnutclient::CLog m_LogFile;

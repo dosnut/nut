@@ -23,10 +23,10 @@
 namespace qnut {
 	using namespace libnutclient;
 	
-	CNotificationManager::CNotificationManager(QWidget * parent) : QObject(parent) {
+	CNotificationManager::CNotificationManager(QWidget * mainWindow, QObject * parent) : QObject(parent), m_MainWindow(mainWindow) {
 		m_MainIcon = new QSystemTrayIcon(QIcon(UI_ICON_QNUT_SMALL), this);
 		QMenu * trayMenu = new QMenu("QNUT");
-		trayMenu->addAction(tr("Open Connection &Manager"), parent, SLOT(show()));
+		trayMenu->addAction(tr("Open Connection &Manager"), m_MainWindow, SLOT(show()));
 		trayMenu->addSeparator();
 		m_InsertMarker = trayMenu->addSeparator();
 		trayMenu->addAction(tr("&Quit"), qApp, SLOT(quit()));
@@ -35,12 +35,10 @@ namespace qnut {
 		m_MainIcon->setContextMenu(trayMenu);
 		
 		connect(m_MainIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-			this, SLOT(handleMainIconClicks(QSystemTrayIcon::ActivationReason)));
+			this, SLOT(handleMainIconActivated(QSystemTrayIcon::ActivationReason)));
 		
-		if (parent) {
-			connect(m_MainIcon, SIGNAL(messageClicked()), parent, SLOT(show()));
+		if (m_MainWindow)
 			qApp->setQuitOnLastWindowClosed(false);
-		}
 	}
 	
 	CNotificationManager::~CNotificationManager() {}
@@ -81,13 +79,12 @@ namespace qnut {
 		setIconVisible(uiDevice->m_ShowTrayIcon, uiDevice);
 		
 		connect(uiDevice, SIGNAL(showNotificationRequested(libnutcommon::DeviceState)),
-			this, SLOT(showNotification(libnutcommon::DeviceState)));
+			this, SLOT(showStateNotification(libnutcommon::DeviceState)));
 		connect(uiDevice, SIGNAL(updateTrayIconRequested(libnutcommon::DeviceState)),
 			this, SLOT(updateDeviceIcon()));
 		connect(uiDevice, SIGNAL(showTrayIconRequested(bool)),
 			this, SLOT(setIconVisible(bool)));
 		
-		connect(newTrayIcon, SIGNAL(messageClicked()), uiDevice->m_ShowEnvironmentsAction, SIGNAL(triggered()));
 		connect(newTrayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 			this, SLOT(handleDeviceIconActivated(QSystemTrayIcon::ActivationReason)));
 	}
@@ -105,13 +102,32 @@ namespace qnut {
 	}
 	
 	void CNotificationManager::showMessage(QString title, QString message, CUIDevice * uiDevice) {
+		if (uiDevice)
+			showMessage(title, message, uiDevice->m_ShowEnvironmentsAction, SLOT(trigger()), uiDevice);
+		else
+			showMessage(title, message, m_MainWindow, SLOT(show()));
+	}
+	
+	void CNotificationManager::showMessage(QString title, QString message, QObject * reciever, const char * slot, CUIDevice * uiDevice) {
 		if (!m_NotificationsEnabled)
 			return;
 		
-		if (uiDevice && m_UIDeviceIcons.contains(uiDevice) && m_UIDeviceIcons[uiDevice]->isVisible())
-			m_UIDeviceIcons[uiDevice]->showMessage(title, message, QSystemTrayIcon::Information, 4000);
+		QString titleResult = tr("QNUT");
+		QSystemTrayIcon * trayIcon;
+		if (uiDevice && m_UIDeviceIcons.contains(uiDevice) && m_UIDeviceIcons[uiDevice]->isVisible()) {
+			trayIcon = m_UIDeviceIcons[uiDevice];
+			titleResult += " (" + uiDevice->device()->getName() + ')';
+		}
 		else
-			m_MainIcon->showMessage(title, message, QSystemTrayIcon::Information, 4000);
+			trayIcon = m_MainIcon;
+		
+		if (!title.isEmpty())
+			titleResult += " - " + title;
+		
+		disconnect(trayIcon, SIGNAL(messageClicked()), NULL, NULL);
+		if (reciever)
+			connect(trayIcon, SIGNAL(messageClicked()), reciever, slot);
+		trayIcon->showMessage(titleResult, message, QSystemTrayIcon::Information, 4000);
 	}
 	
 	inline void CNotificationManager::updateDeviceIcon(CUIDevice * uiDevice) {
@@ -124,7 +140,7 @@ namespace qnut {
 		updateDeviceIcon(qobject_cast<CUIDevice *>(sender()));
 	}
 	
-	void CNotificationManager::showNotification(libnutcommon::DeviceState state) {
+	void CNotificationManager::showStateNotification(libnutcommon::DeviceState state) {
 		if (!m_NotificationsEnabled)
 			return;
 		
@@ -132,10 +148,7 @@ namespace qnut {
 		if (!uiDevice)
 			return;
 		
-		QString title = tr("QNUT");
 		QString message;
-		QSystemTrayIcon * trayIcon = m_UIDeviceIcons[uiDevice];
-		
 		switch (state) {
 		case libnutcommon::DS_UP:
 			message = tr("%2 is now up and running on network: %1")
@@ -155,15 +168,15 @@ namespace qnut {
 			return;
 		}
 		
-		if (trayIcon->isVisible())
-			title += " - " + uiDevice->device()->getName();
+		{
+			QSystemTrayIcon * trayIcon = m_UIDeviceIcons.value(uiDevice, NULL);
+			message = message.arg(trayIcon && trayIcon->isVisible() ? tr("Device") : uiDevice->device()->getName());
+		}
 		
-		message = message.arg(trayIcon->isVisible() ? tr("Device") : uiDevice->device()->getName());
-		
-		if (!trayIcon->isVisible())
-			trayIcon = m_MainIcon;
-		
-		trayIcon->showMessage(title, message, QSystemTrayIcon::Information, 4000);
+		if (state == libnutcommon::DS_UNCONFIGURED)
+			showMessage(QString(), message, uiDevice->m_ShowEnvironmentsAction, SLOT(trigger()), uiDevice);
+		else
+			showMessage(QString(), message, NULL, NULL, uiDevice);
 	}
 	
 	void CNotificationManager::setToolTip(QString toolTip, CUIDevice * uiDevice) {
@@ -174,29 +187,29 @@ namespace qnut {
 	}
 	
 	void CNotificationManager::handleDeviceIconActivated(QSystemTrayIcon::ActivationReason reason) {
-		if (reason == QSystemTrayIcon::Trigger) {
-			CUIDevice * target = m_UIDeviceIcons.key(qobject_cast<QSystemTrayIcon *>(sender()), NULL);
-			if (target)
-				target->m_ShowEnvironmentsAction->trigger();
-		}
+		if (reason != QSystemTrayIcon::Trigger)
+			return;
+		
+		CUIDevice * target = m_UIDeviceIcons.key(qobject_cast<QSystemTrayIcon *>(sender()), NULL);
+		if (target)
+			target->m_ShowEnvironmentsAction->trigger();
 	}
 	
-	void CNotificationManager::handleMainIconClicks(QSystemTrayIcon::ActivationReason reason) {
-		QWidget * mainwin = qobject_cast<QWidget *>(parent());
-		if (!mainwin)
+	void CNotificationManager::handleMainIconActivated(QSystemTrayIcon::ActivationReason reason) {
+		if (!m_MainWindow)
 			return;
 		
 		switch (reason) {
-			case QSystemTrayIcon::Trigger:
-				if (mainwin->isMinimized() || !mainwin->isVisible()) {
-					mainwin->show();
-					mainwin->setWindowState((mainwin->windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
-				}
-				else
-					mainwin->close();
-				break;
-			default:
-				break;
+		case QSystemTrayIcon::Trigger:
+			if (!m_MainWindow->isVisible() || !m_MainWindow->isActiveWindow() || m_MainWindow->isMinimized()) {
+				m_MainWindow->show();
+				m_MainWindow->activateWindow();
+			}
+			else
+				m_MainWindow->close();
+			break;
+		default:
+			break;
 		}
 	}
 }

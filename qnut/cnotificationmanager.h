@@ -22,7 +22,7 @@ namespace qnut {
 	class CNotificationManager : public QObject {
 		Q_OBJECT
 	public:
-		CNotificationManager(QWidget * parent = NULL);
+		CNotificationManager(QWidget * mainWindow = NULL, QObject * parent = NULL);
 		~CNotificationManager();
 		
 		bool notificationsEnabled() const { return m_NotificationsEnabled; }
@@ -41,8 +41,10 @@ namespace qnut {
 		void setNotificationsEnabled(bool value);
 		
 		void showMessage(QString title, QString message, CUIDevice * uiDevice = NULL);
+		void showMessage(QString title, QString message, QObject * reciever, const char * slot, CUIDevice * uiDevice = NULL);
 		void setToolTip(QString tooltip, CUIDevice * uiDevice = NULL);
 	private:
+		QWidget * m_MainWindow;
 		QSystemTrayIcon * m_MainIcon;
 		QHash<CUIDevice *, QSystemTrayIcon *> m_UIDeviceIcons;
 		
@@ -53,10 +55,10 @@ namespace qnut {
 		void setIconVisible(bool value);
 		
 		void updateDeviceIcon();
-		void showNotification(libnutcommon::DeviceState state);
+		void showStateNotification(libnutcommon::DeviceState state);
 		
 		void handleDeviceIconActivated(QSystemTrayIcon::ActivationReason reason);
-		void handleMainIconClicks(QSystemTrayIcon::ActivationReason reason);
+		void handleMainIconActivated(QSystemTrayIcon::ActivationReason reason);
 	};
 }
 #endif // QNUT_CNOTIFICATIONMANAGER_H

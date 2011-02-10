@@ -34,11 +34,6 @@ namespace qnut {
 		m_LogFile(this, UI_FILE_LOG)
 	{
 		m_DeviceManager = new CDeviceManager(this);
-		if (CNotificationManager::trayIconsAvailable()) {
-			m_NotificationManager = new CNotificationManager(this);
-		}
-		else
-			m_NotificationManager = NULL;
 		
 		resize(600, 322);
 		setWindowIcon(QIcon(UI_ICON_QNUT_SMALL));
@@ -71,6 +66,13 @@ namespace qnut {
 		m_TabWidget->addTab(m_OverView, tr("Overview"));
 		
 		setCentralWidget(m_TabWidget);
+		
+		if (CNotificationManager::trayIconsAvailable()) {
+			m_NotificationManager = new CNotificationManager(this);
+			connect(m_NotificationManager, SIGNAL(requestedUIDeviceWidget(QWidget*)), m_TabWidget, SLOT(setCurrentWidget(QWidget*)));
+		}
+		else
+			m_NotificationManager = NULL;
 		
 		createActions();
 		readSettings();
@@ -119,6 +121,8 @@ namespace qnut {
 		
 		delete m_UIDeviceModel;
 		delete m_DeviceManager;
+		if (m_NotificationManager)
+			delete m_NotificationManager;
 		CUIDevice::cleanup();
 	}
 	
@@ -404,13 +408,13 @@ namespace qnut {
 	}
 	
 	void CConnectionManager::showDeviceDetails(QWidget * widget) {
+		m_TabWidget->setCurrentWidget(widget);
 		show();
 		activateWindow();
-		m_TabWidget->setCurrentWidget(widget);
 	}
 	
 	void CConnectionManager::showDeviceDetails(const QModelIndex & index) {
 		CUIDevice * selectedUIDevice = static_cast<CUIDevice *>(m_UIDeviceProxyModel->mapToSource(index).internalPointer());
-		showDeviceDetails(selectedUIDevice);
+		m_TabWidget->setCurrentWidget(selectedUIDevice);
 	}
 }
