@@ -47,7 +47,7 @@ namespace qnut {
 		hiddenListView->setIconSize(QSize(24, 24));
 		hiddenListView->setGridSize(QSize(96, 64));
 		
-		setWindowTitle(tr("Wireless Settings for \"%1\"").arg(m_Device->getName()));
+		setWindowTitle(tr("QNUT - Wireless Settings for \"%1\"").arg(m_Device->getName()));
 		setWindowIcon(QIcon(UI_ICON_AP));
 		
 		ui.nameLabel->setText(m_Device->getName());
