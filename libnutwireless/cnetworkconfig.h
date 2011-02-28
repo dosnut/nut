@@ -203,7 +203,7 @@ namespace libnutwireless {
 	}
 
 	inline uint qHash(const libnutwireless::CNetworkConfig::NetworkId &key) {
-		return qHash(QPair<qint64,qint32>::QPair(key.pid,key.id));
+		return qHash(QPair<qint64,qint32>(key.pid,key.id));
 	}
 }
 #endif
