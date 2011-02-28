@@ -179,7 +179,7 @@
       <item row="0" column="8" rowspan="2">
        <widget class="QToolButton" name="reassociateButton">
         <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonTextBesideIcon</enum>
+         <enum>Qt::ToolButtonFollowStyle</enum>
         </property>
         <property name="autoRaise">
          <bool>true</bool>

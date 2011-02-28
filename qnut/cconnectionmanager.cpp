@@ -40,6 +40,7 @@ namespace qnut {
 		
 		m_ToolBar = new QToolBar(tr("Main Toolbar"), this);
 		m_ToolBar->setObjectName("MainToolbar");
+		m_ToolBar->setToolButtonStyle(Qt::ToolButtonFollowStyle);
 		
 		m_LogEdit = new QTextEdit(this);
 		m_LogEdit->hide();
