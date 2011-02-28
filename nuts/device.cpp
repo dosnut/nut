@@ -784,12 +784,14 @@ namespace nuts {
 		quint32 lastip = m_zc_probe_ip.toIPv4Address();
 		const quint32 baseip = 0xA9FE0000; // 169.254.0.0
 		const quint32 mask = 0xFFFF;
-		quint32 rnd = hashMac(m_env->m_device->getMacAddress()), ip;
-		do {
-			while ((rnd >> 8) == 0 || (rnd >> 8) == 0xFF)
+		quint32 ip = baseip | hashMac(m_env->m_device->getMacAddress());
+		while (ip == lastip) {
+			quint32 rnd;
+			do {
 				rnd = getRandomUInt32() & mask;
+			} while ((rnd >> 8) == 0 || (rnd >> 8) == 0xFF);
 			ip = baseip | rnd;
-		} while (ip == lastip);
+		}
 		m_zc_probe_ip = QHostAddress(ip);
 		m_zc_arp_probe = m_env->m_device->m_arp.probeIPv4(m_zc_probe_ip);
 		if (!m_zc_arp_probe || m_zc_arp_probe->getState() != ARPProbe::PROBING) {
