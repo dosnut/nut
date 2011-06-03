@@ -11,6 +11,8 @@ device "eth0";
 device "eth1" {
 	// the default environment has a single dhcp configured inteface
 	dhcp;
+	// try dhcp, after 10 seconds fallback to zeroconf
+	environment "zeroconf" dhcp fallback 10 zeroconf;
 	// at home we have an interface with static ip address config
 	// and we are at home if there is a computer (for example a router)
 	// with the ip 192.168.0.1

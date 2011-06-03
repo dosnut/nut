@@ -1,0 +1,24 @@
+Nut manages your network devices (dhcp, static, zeroconf); currently only supports IPv4 on Linux.
+
+Support for wpa_assistant is included in the client.
+
+Requires:
+
+* Qt 4
+* resolvconf / openresolv
+* libnl (server) >= 1.1
+* libiw (client)
+
+Parts:
+
+* nuts: Server
+* libnutcommon: Library needed from server and client
+* libnutclient: Client library
+* libnutwireless: Client library for wpa_supplicant
+* qnut: Qt Client
+* cnut: Command line client
+
+Example configs in the source:
+
+* /docs/config.example
+* /nuts/nuts.config
