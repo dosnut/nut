@@ -150,7 +150,7 @@ namespace qnut {
 		bool readOld = QFile::exists(UI_PATH_DEV(m_Device->getName()) + "dev.conf") && settings->childGroups().isEmpty();
 		
 		if (readOld) {
-			qDebug("[QNUT] no new device config found, trying old one");
+			qDebug("[QNUT] no device config found, trying legacy");
 			delete settings;
 			settings = new QSettings(configFile, QSettings::IniFormat);
 			settings->beginGroup(UI_SETTINGS_MAIN);

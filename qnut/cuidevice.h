@@ -57,7 +57,7 @@ namespace qnut {
 		 */
 		CUIDevice(libnutclient::CDevice * parentDevice, QWidget * parent = 0);
 		
-		/// @brief Destroyes the object and writes the settings to "~/.qnut/<device name>/dev.conf".
+		/// @brief Destroyes the object and saves all settings for this device.
 		~CUIDevice();
 		
 		/// @brief Returns a pointer to the managed device.
