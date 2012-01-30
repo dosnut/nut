@@ -476,7 +476,7 @@ namespace qnut {
 		
 		QAction * currentAction;
 		
-		if (m_Device->getState() > DS_ACTIVATED) {
+		if (m_Device->getState() > DS_ACTIVATED && m_ManagedAPModel->currentID() != -1) {
 			QString ssid = m_ManagedAPModel->cachedNetworks().at(m_ManagedAPModel->currentID()).ssid;
 			CAvailableAPModel::IndexList * scanList = m_AvailableAPModel->scanResultIdListBySSID(ssid);
 			if (scanList) {
