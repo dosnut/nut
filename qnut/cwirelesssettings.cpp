@@ -477,7 +477,8 @@ namespace qnut {
 		QAction * currentAction;
 		
 		if (m_Device->getState() > DS_ACTIVATED) {
-			CAvailableAPModel::IndexList * scanList = m_AvailableAPModel->scanResultIdListBySSID(m_Device->getEssid());
+			QString ssid = m_ManagedAPModel->cachedNetworks().at(m_ManagedAPModel->currentID()).ssid;
+			CAvailableAPModel::IndexList * scanList = m_AvailableAPModel->scanResultIdListBySSID(ssid);
 			if (scanList) {
 				QString bssidString;
 				for (int i = 0; i < scanList->count(); i++) {
@@ -494,7 +495,6 @@ namespace qnut {
 			currentAction = m_SetBSSIDMenu->addAction(tr("< no matching scan results >"));
 			currentAction->setEnabled(false);
 		}
-		
 	}
 	
 	void CWirelessSettings::keepScanResultsVisible(bool value) {

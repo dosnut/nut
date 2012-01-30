@@ -93,16 +93,31 @@ namespace qnut {
 	}
 	
 	QString currentNetwork(CDevice * device, bool appendQuality) {
-#ifndef QNUT_NO_WIRELESS
-		if (appendQuality && device->getWireless()) {
-			SignalQuality signal = device->getWireless()->getHardware()->getSignalQuality();
-			return device->getEssid() + " (" +
-				QString::number(signal.quality.value) + '/'+
-				QString::number(signal.quality.maximum) + ')';
-		}
-		else
+		switch (device->getType()) {
+		case DT_ETH:
+			return QObject::tr("local");
+		case DT_AIR:
+#ifdef QNUT_NO_WIRELESS
+			return device->getEssid(); // this is buggy on newer kernels
+#else
+			if (device->getWireless()) {
+				SignalQuality signal = device->getWireless()->getHardware()->getSignalQuality();
+				QString result = signal.ssid;
+				
+				if (result.isEmpty())
+					result = QObject::tr("unknown Network");
+				
+				if (appendQuality)
+					result += " (" +
+						QString::number(signal.quality.value) + '/'+
+						QString::number(signal.quality.maximum) + ')';
+				
+				return result;
+			}
 #endif
-			return (device->getType() == DT_AIR) ? device->getEssid() : QObject::tr("local");
+		default:
+			return QObject::tr("unknown Network");
+		}
 	}
 	
 	QString activeIP(CDevice * device) {
