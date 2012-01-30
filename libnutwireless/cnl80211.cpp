@@ -8,6 +8,7 @@
 #include <QTimerEvent>
 #include "conversion.h"
 
+#include <QtDebug>
 
 namespace libnutwireless {
 

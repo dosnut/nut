@@ -9,6 +9,8 @@ extern "C" {
 #include <stdlib.h>
 }
 
+#include <QtDebug>
+
 namespace libnutwireless {
 
 void CWextHW::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * scan) {

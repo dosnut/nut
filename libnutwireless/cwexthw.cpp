@@ -1,5 +1,8 @@
 #include "cwexthw.h"
 #include "conversion.h"
+
+#include <QtDebug>
+
 namespace libnutwireless {
 
 
