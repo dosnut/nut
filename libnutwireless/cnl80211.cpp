@@ -8,8 +8,6 @@
 #include <QTimerEvent>
 #include "conversion.h"
 
-#include <QtDebug>
-
 namespace libnutwireless {
 
 //copied from net-wireless/iw
@@ -136,7 +134,7 @@ int CNL80211::parseNlScanResult(nl_msg * msg) {
 	bss_policy[NL80211_BSS_SIGNAL_UNSPEC].type = NLA_U8;
 
 	if (msg_hdr->nlmsg_flags & NLM_F_MULTI)
-		qDebug() << "netlink: Mutlipart message";
+		qDebug("netlink: Mutlipart message");
 
 	//Parse the complete message
 	nla_parse(attr_buffer, NL80211_ATTR_MAX, genlmsg_attrdata(msg_header, 0), genlmsg_attrlen(msg_header, 0), NULL);

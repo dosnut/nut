@@ -1,8 +1,6 @@
 #include "cwexthw.h"
 #include "conversion.h"
 
-#include <QtDebug>
-
 namespace libnutwireless {
 
 
@@ -38,11 +36,11 @@ bool CWextHW::open() {
 	//Get file Descriptor to NET kernel
 	if ( (m_wextFd = iw_sockets_open()) < 0) {
 		m_wextFd = -1;
-		qWarning() << tr("ERROR: Could not open socket to net kernel");
+		qWarning(qPrintable(tr("ERROR: Could not open socket to net kernel")));
 		return false;
 	}
 	else { //Socket is set up, now set SocketNotifier
-		qDebug() << QString("File Descriptor for Wext is: %1").arg(QString::number(m_wextFd));
+		qDebug("File Descriptor for Wext is: %i", m_wextFd);
 		//Start timer for reading wireless info (like in /proc/net/wireless)
 		if (m_wextFd != -1)
 			readSignalQuality();
