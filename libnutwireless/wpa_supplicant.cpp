@@ -2,6 +2,7 @@
 #include "wpa_supplicant.h"
 #include "cconfigparser.h"
 
+#include <QDebug>
 
 namespace libnutwireless {
 

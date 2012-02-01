@@ -9,7 +9,7 @@ extern "C" {
 #include <stdlib.h>
 }
 
-#include <QtDebug>
+#include <QDebug>
 
 namespace libnutwireless {
 
