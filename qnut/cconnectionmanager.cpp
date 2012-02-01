@@ -91,7 +91,7 @@ namespace qnut {
 		
 		connect(&m_LogFile, SIGNAL(printed(const QString &)), m_LogEdit, SLOT(append(const QString &)));
 		
-		m_LogFile << tr("%1 (v%2) started").arg(UI_NAME, UI_VERSION);
+		m_LogFile << tr("%1 (v%2) started").arg(UI_STRING_NAME_TR, UI_VERSION);
 		m_LogFile << QDateTime::currentDateTime().toString();
 		
 		setWindowTitle(tr("QNUT - Connection Manager"));
@@ -390,7 +390,7 @@ namespace qnut {
 		
 		aboutBox.setIconPixmap(QPixmap(UI_ICON_QNUT));
 		aboutBox.setWindowTitle(tr("About QNUT"));
-		aboutBox.setText(UI_NAME + "\nv" + QString(UI_VERSION));
+		aboutBox.setText(UI_STRING_NAME_TR + "\nv" + QString(UI_VERSION));
 		aboutBox.setStandardButtons(QMessageBox::Ok);
 		
 		aboutBox.exec();

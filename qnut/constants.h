@@ -4,22 +4,19 @@
 #ifndef UI_VERSION
 # define UI_VERSION                     "unknown (unsupported buildsystem)"
 #endif
-#define UI_NAME                         tr("QNUT - Qt client for Network UTility Server (NUTS)")
+#define UI_STRING_NAME                  "QNUT - Qt client for Network UTility Server (NUTS)"
+#define UI_STRING_NAME_TR               QObject::tr("QNUT - Qt client for Network UTility Server (NUTS)")
+
 
 #define UI_STRING_ORGANIZATION          "nut"
 #define UI_STRING_APPNAME               "qnut"
 
 
-#define UI_DIR_SCRIPT_UP                "up/"
-#define UI_DIR_SCRIPT_UNCONFIGURED      "unconfigured/"
-#define UI_DIR_SCRIPT_CARRIER           "carrier/"
-#define UI_DIR_SCRIPT_ACTIVATED         "activated/"
-#define UI_DIR_SCRIPT_DEACTIVATED       "deactivated/"
-
 #define UI_PATH_TRANSLATIONS            "/usr/share/qnut/lang/"
 #define UI_PATH_ICONS                   "/usr/share/qnut/icons/"
 
 #define UI_FILE_LOG                     (QDir::toNativeSeparators(QDir::homePath()) + "/" + ".qnut.log")
+
 
 #define UI_ICON_QNUT                    UI_PATH_ICONS "qnut.svg"
 #define UI_ICON_QNUT_SMALL              UI_PATH_ICONS "qnut_small.svg"
@@ -41,6 +38,8 @@
 #define UI_ICON_REMOVE                  UI_PATH_ICONS "remove.png"
 
 #define UI_ICON_ADD_ADHOC               UI_PATH_ICONS "add_adhoc.png"
+
+#define UI_ICON_ADVANCED                UI_PATH_ICONS "selected.png"
 
 #define UI_ICON_FORCE                   UI_PATH_ICONS "force.png"
 #define UI_ICON_WARNING                 UI_PATH_ICONS "warning.png"
@@ -121,11 +120,18 @@
 
 #define UI_SETTINGS_LASTFILEOPENDIR     "lastFileOpenDir"
 
+
 #ifndef QNUT_SETTINGS_NOCOMPAT
 #define UI_DIR_WORK                     ".qnut/"
 #define UI_PATH_WORK                    (QDir::toNativeSeparators(QDir::homePath()) + "/" UI_DIR_WORK)
 #define UI_PATH_DEV(a)                  ((UI_PATH_WORK + a) + '/')
 #define UI_FILE_CONFIG                  (UI_PATH_WORK + "qnut.conf")
+
+#define UI_DIR_SCRIPT_UP                "up/"
+#define UI_DIR_SCRIPT_UNCONFIGURED      "unconfigured/"
+#define UI_DIR_SCRIPT_CARRIER           "carrier/"
+#define UI_DIR_SCRIPT_ACTIVATED         "activated/"
+#define UI_DIR_SCRIPT_DEACTIVATED       "deactivated/"
 
 #define UI_FLAG_SCRIPT_NONE             0x00
 #define UI_FLAG_SCRIPT_UP               0x01

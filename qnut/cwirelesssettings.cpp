@@ -133,7 +133,7 @@ namespace qnut {
 		manageNetworksMenu->setIcon(QIcon(UI_ICON_EDIT));
 		
 		advancedFuntionsMenu = new QMenu(tr("Advanced..."));
-// 		advancedFuntionsMenu->setIcon(QIcon(UI_ICON_ADVANCED));
+		advancedFuntionsMenu->setIcon(QIcon(UI_ICON_ADVANCED));
 		
 		m_SetBSSIDMenu = new QMenu(tr("Switch to alternate BSSID"));
 		m_SetBSSIDMenu->setIcon(QIcon(UI_ICON_AP));
@@ -216,7 +216,7 @@ namespace qnut {
 		
 		ui.manageNetworksButton->setMenu(manageNetworksMenu);
 		ui.manageNetworksButton->setText(manageNetworksMenu->title());
-		ui.manageNetworksButton->setIcon(QIcon(UI_ICON_EDIT));
+		ui.manageNetworksButton->setIcon(manageNetworksMenu->icon());
 		ui.manageNetworksButton->setPopupMode(QToolButton::InstantPopup);
 		
 		ui.addNetworkButton->setDefaultAction(addNetworkAction);
@@ -225,7 +225,7 @@ namespace qnut {
 		
 		ui.advancedFunctionsButton->setMenu(advancedFuntionsMenu);
 		ui.advancedFunctionsButton->setText(advancedFuntionsMenu->title());
-		ui.advancedFunctionsButton->setIcon(QIcon(UI_ICON_SELECTED));
+		ui.advancedFunctionsButton->setIcon(advancedFuntionsMenu->icon());
 		ui.advancedFunctionsButton->setPopupMode(QToolButton::InstantPopup);
 		
 		ui.reassociateButton->setDefaultAction(reassociateAction);
