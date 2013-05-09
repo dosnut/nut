@@ -1,0 +1,104 @@
+Source: network-utilities
+Section: admin
+Priority: important
+Maintainer: Stefan Bühler <source@stbuehler.de>
+Uploaders: Oliver Groß <neokensuke@freenet.de>, Stefan Bühler <stbuehler@web.de>
+Build-Depends: cdbs, debhelper (>= 9), qt4-dev-tools, libqt4-dev, bison,
+ flex, libnl-dev (>= 1.0~pre8), libiw-dev, cmake
+Standards-Version: 3.9.4
+
+Package: nuts
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}, resolvconf
+Recommends: wpasupplicant
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the server.
+
+Package: nuts-dbg
+Section: debug
+Architecture: any
+Depends: ${misc:Depends}, nuts (= ${binary:Version})
+Priority: extra
+Recommends: wpasupplicant
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the debug symbols for the server.
+
+Package: qnut
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the Qt client.
+
+Package: qnut-dbg
+Section: debug
+Architecture: any
+Depends: ${misc:Depends}, qnut (= ${binary:Version})
+Priority: extra
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the debug symbols for the Qt client.
+
+Package: cnut
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the command line client.
+
+Package: cnut-dbg
+Section: debug
+Architecture: any
+Depends: ${misc:Depends}, cnut (= ${binary:Version})
+Priority: extra
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the debug symbols for the command line client.
+
+Package: libnutclient0
+Section: libs
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Recommends: nuts (= ${binary:Version})
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the client library.
+
+Package: libnutclient0-dbg
+Section: debug
+Architecture: any
+Depends: ${misc:Depends}, libnutclient0 (= ${binary:Version})
+Priority: extra
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the debug symbols for the client library.
+
+Package: libnutclient0-dev
+Section: libdevel
+Architecture: any
+Depends: ${misc:Depends}, libnutclient0 (= ${binary:Version})
+Priority: extra
+Description: Network UTility (substitute for ifupdown)
+ Manages your network cards; the server has an DBus Interface,
+ which the clients use to control the server.
+ .
+ This package contains the development files for the client library.
+

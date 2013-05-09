@@ -1,0 +1,5 @@
+debian/tmp/usr/sbin/nuts
+resources/nuts-dbus.conf /etc/dbus-1/system.d
+nuts/nuts.config /etc/nuts/
+nuts/dispatch /etc/nuts/
+nuts/events/* /etc/nuts/events/

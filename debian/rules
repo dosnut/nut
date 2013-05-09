@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+  
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/cmake.mk
+
+$(patsubst %,binary-install/%,$(DEB_PACKAGES)) :: binary-install/%:
+	$(if $(wildcard debian/$(cdbs_curpkg)/usr/share/applications/*), dh_desktop -p$(cdbs_curpkg) $(DEB_DH_DESKTOP_ARGS))
+
+CXXFLAGS+=-DQT_NO_DEBUG_OUTPUT
+
+DEB_CMAKE_EXTRA_FLAGS=-DCMAKE_BUILD_TYPE="RelWithDebInfo"
+DEB_CMAKE_EXTRA_FLAGS+=-DDBUS_PID_FILE_DIR:FILEPATH="/var/run/dbus" -DDBUS_PID_FILE_NAME="pid"
+DEB_CMAKE_EXTRA_FLAGS+=-DCMAKE_SHARED_LINKER_FLAGS="$(LDFLAGS)" -DCMAKE_EXE_LINKER_FLAGS="$(LDFLAGS)"
+
+DEB_INSTALL_MANPAGES_nuts=resources/nuts.1
+DEB_INSTALL_MANPAGES_qnut=resources/qnut.1
+DEB_INSTALL_MANPAGES_cnut=resources/cnut.1
