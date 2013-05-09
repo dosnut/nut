@@ -18,7 +18,7 @@ ENDMACRO(ADD_TARGET_PROPERTIES)
 
 PROJECT(network-utiltities)
 SET(PACKAGE_NAME ${CMAKE_PROJECT_NAME})
-SET(PACKAGE_VERSION 0.5.7)
+SET(PACKAGE_VERSION 0.5.8)
 
 option(USE_WIRELESS "Enable support for wireless networks through wpa_supplicant." ON)
 
