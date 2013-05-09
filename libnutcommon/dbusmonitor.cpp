@@ -4,6 +4,7 @@
 extern "C" {
 #include <sys/inotify.h>
 #include <errno.h>
+#include <unistd.h>
 }
 namespace libnutcommon {
 

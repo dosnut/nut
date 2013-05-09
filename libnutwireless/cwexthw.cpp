@@ -36,7 +36,7 @@ bool CWextHW::open() {
 	//Get file Descriptor to NET kernel
 	if ( (m_wextFd = iw_sockets_open()) < 0) {
 		m_wextFd = -1;
-		qWarning(qPrintable(tr("ERROR: Could not open socket to net kernel")));
+		qWarning("%s", qPrintable(tr("ERROR: Could not open socket to net kernel")));
 		return false;
 	}
 	else { //Socket is set up, now set SocketNotifier

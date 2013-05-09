@@ -10,6 +10,9 @@
 //
 //
 #include "log.h"
+extern "C" {
+#include <unistd.h>
+}
 
 namespace nuts {
 	QTextStream err;

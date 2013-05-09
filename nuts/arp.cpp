@@ -22,6 +22,7 @@
 #include <linux/if.h>
 #include <linux/if_arp.h>
 #include <linux/if_ether.h>
+#include <unistd.h>
 
 #include "log.h"
 #include "device.h"

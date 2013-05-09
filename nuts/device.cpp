@@ -30,6 +30,8 @@ extern "C" {
 #include <linux/ethtool.h>
 #include <linux/sysctl.h>
 #include <linux/route.h>
+#include <unistd.h>
+
 void perror(const char *s); 
 }
 

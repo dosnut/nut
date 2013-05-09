@@ -33,6 +33,8 @@ extern "C" {
 #include <linux/ethtool.h>
 #include <linux/sysctl.h>
 #include <linux/wireless.h>
+#include <unistd.h>
+
 // hardware_ext.c
 extern struct nla_policy ifla_policy[IFLA_MAX+1];
 extern struct nla_policy ifa_ipv4_policy[IFA_MAX+1];
