@@ -16,18 +16,42 @@ MACRO(ADD_TARGET_PROPERTIES _target _name)
 ENDMACRO(ADD_TARGET_PROPERTIES)
 
 
-PROJECT(network-utiltities)
+PROJECT(network-utiltities C CXX)
 SET(PACKAGE_NAME ${CMAKE_PROJECT_NAME})
 SET(PACKAGE_VERSION 0.5.8)
 
+include(CMakeDetermineCCompiler)
+include(CMakeDetermineCXXCompiler)
+
+# default to RelWithDebInfo
+if("${CMAKE_BUILD_TYPE}" STREQUAL "")
+	set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel." FORCE)
+endif("${CMAKE_BUILD_TYPE}" STREQUAL "")
+
+set(BASE_CXX_FLAGS "-std=c++11" CACHE STRING "Basic C++ flags to select required language features")
+set(BASE_C_FLAGS "-std=c99" CACHE STRING "Basic C flags to select required language features")
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	set(EXTRA_CXX_FLAGS "-Wall -Wno-long-long -Wextra -Wno-unused-parameter -pedantic" CACHE STRING "Extra flags used by the compiler during all build types.")
+	set(EXTRA_EXE_LINKER_FLAGS "-Wl,--as-needed" CACHE STRING "Extra flags used by the linker.")
+else("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	set(EXTRA_CXX_FLAGS "" CACHE STRING "Extra flags used by the compiler during all build types.")
+	set(EXTRA_EXE_LINKER_FLAGS "" CACHE STRING "Extra flags used by the linker.")
+endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+	set(EXTRA_C_FLAGS "-Wall -Wno-long-long -Wextra -Wno-unused-parameter -pedantic" CACHE STRING "Extra flags used by the compiler during all build types.")
+else("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+	set(EXTRA_C_FLAGS "" CACHE STRING "Extra flags used by the compiler during all build types.")
+endif("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${BASE_CXX_FLAGS} ${EXTRA_CXX_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EXTRA_EXE_LINKER_FLAGS}")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${BASE_C_FLAGS} ${EXTRA_C_FLAGS}")
+
+
 option(USE_WIRELESS "Enable support for wireless networks through wpa_supplicant." ON)
 
-set(DEBUG_FLAGS "-Wall -Wno-long-long -pedantic")
-set(CMAKE_C_FLAGS "-std=c99")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${DEBUG_FLAGS}")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${DEBUG_FLAGS}")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${DEBUG_FLAGS}")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${DEBUG_FLAGS}")
 
 add_subdirectory(libnutcommon libnutcommon)
 
