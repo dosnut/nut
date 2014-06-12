@@ -23,7 +23,7 @@ namespace nuts {
 #include "device.h"
 
 namespace nuts {
-	
+
 	class DBusDeviceManager: public QDBusAbstractAdaptor {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".DeviceManager")
@@ -38,8 +38,8 @@ namespace nuts {
 
 			void initTree();
 			void timerEvent(QTimerEvent *event);
-			
-			
+
+
 			/** Registers DeviceManager+subtree with dbus **/
 			void registerAll();
 			/** Unregisters DeviceManager+subtree with dbus **/
@@ -49,7 +49,7 @@ namespace nuts {
 		private slots:
 			void devAdded(QString devName, Device *dev);
 			void devRemoved(QString devName, Device *dev);
-			
+
 			friend int mainApp(int argc, char* argv[]);
 			friend class DeviceManager;
 
@@ -59,12 +59,12 @@ namespace nuts {
 		public:
 			DBusDeviceManager(DeviceManager *devmgr);
 			virtual ~DBusDeviceManager();
-	
+
 		public slots:
 			QList<QDBusObjectPath> getDeviceList();
 			QStringList getDeviceNames();
 
-			
+
 			bool createBridge(QString name);
 			bool destroyBridge(QDBusObjectPath devicePath);
 			bool destroyBridge(qint32 deviceId);
@@ -79,7 +79,7 @@ namespace nuts {
 			void deviceAdded(const QString &devname);
 			void deviceRemoved(const QString &devname);
 	};
-	
+
 	class DBusDevice: public QDBusAbstractAdaptor {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Device")
@@ -91,15 +91,15 @@ namespace nuts {
 			libnutcommon::DeviceProperties m_dbusProperties;
 			int m_activeEnvironment;
 			bool registered;
-		
+
 		private slots:
 			void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState);
 			void environmentChanged(int newEnvironment);
-		
+
 		public:
 			DBusDevice(Device *dev, QDBusConnection *connection, const QString &path);
 			virtual ~DBusDevice();
-			
+
 			QString getPath();
 			void registerAll();
 			void unregisterAll();
@@ -123,14 +123,14 @@ namespace nuts {
 			}
 			QList<qint32> getEnvironmentIds();
 			QString getEssid() { return m_device->essid(); }
-		
+
 		signals:
 			void stateChanged(int newState, int oldState);
 			void environmentChangedActive(const QString &objectpath);
 			void environmentChangedActive(qint32 envId);
 			void newWirelessNetworkFound();
 	};
-	
+
 	class DBusEnvironment: public QDBusAbstractAdaptor {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Environment")
@@ -152,13 +152,13 @@ namespace nuts {
 			DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path, Device* dev);
 			virtual ~DBusEnvironment();
 			inline Environment * getEnvironment() const { return m_environment; }
-	
+
 			QString getPath();
 			void registerAll();
 			void unregisterAll();
 			void setAllDBusConnection(QDBusConnection * connection);
 			void emitChange(bool change);
-	
+
 		public slots:
 			libnutcommon::EnvironmentProperties getProperties();
 			libnutcommon::EnvironmentConfig getConfig();
@@ -191,16 +191,16 @@ namespace nuts {
 		public:
 			DBusInterface_IPv4(Interface_IPv4 *iface, QDBusConnection *connection, const QString &path);
 			virtual ~DBusInterface_IPv4();
-	
+
 			QString getPath();
 			void registerAll();
 			void unregisterAll();
 			void setAllDBusConnection(QDBusConnection * connection) { m_dbusConnection = connection; }
-		
+
 		public slots:
 			libnutcommon::InterfaceProperties getProperties();
 			libnutcommon::IPv4Config getConfig();
-	
+
 			bool needUserSetup() { return m_interface->needUserSetup(); }
 			bool setUserConfig(libnutcommon::IPv4UserConfig userConfig) { return m_interface->setUserConfig(userConfig); }
 			libnutcommon::IPv4UserConfig getUserConfig() { return m_interface->getUserConfig(); }
@@ -214,7 +214,7 @@ namespace nuts {
 
 			//void activate() { m_interface->start();}
 			//void deactivate() { m_interface->stop();}
-		
+
 		signals:
 			void stateChanged(const libnutcommon::InterfaceProperties &properties);
 	};
@@ -222,7 +222,7 @@ namespace nuts {
 	class DBusInterface_IPv6: public QDBusAbstractAdaptor {
 		Q_OBJECT
 		Q_CLASSINFO("D-BUS Interface", "de.unistuttgart.nut" ".Interface_IPv6");
-		
+
 	}
 	#endif
 }

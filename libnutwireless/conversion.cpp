@@ -3,7 +3,7 @@
 namespace libnutwireless {
 int frequencyToChannel(int freq) {
 	switch (freq) {
-		//2,4GHz part 
+		//2,4GHz part
 		case 2412: return 1;
 		case 2417: return 2;
 		case 2422: return 3;

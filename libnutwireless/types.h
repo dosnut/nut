@@ -17,22 +17,22 @@ namespace libnutwireless {
 
 	/** Enum of possible protocols. RSN=WPA2 */
 	typedef enum {PROTO_UNDEFINED=0, PROTO_WPA=1, PROTO_RSN=2, PROTO_DEFAULT=3} Protocols; //RSN=WPA2
-	
+
 	/** Enum of possible group ciphers. */
 	typedef enum {GCI_UNDEFINED=0,  GCI_NONE=2, GCI_WEP40=4, GCI_WEP104=8, GCI_TKIP=16, GCI_CCMP=32, GCI_WRAP=64, GCI_DEF=60} GroupCiphers;
-	
+
 	/** Enum of possible pairwise ciphers */
 	typedef enum {PCI_UNDEFINED=0, PCI_NONE=1, PCI_TKIP=2, PCI_CCMP=4, PCI_DEF=6} PairwiseCiphers;
-	
+
 	/** Enum of possible  key management */
 	typedef enum {KM_UNDEFINED=0, KM_NONE=4, KM_WPA_NONE=8, KM_WPA_PSK=16, KM_WPA_EAP=32, KM_IEEE8021X=64, KM_DEF=48} KeyManagement; //TODO:change parsers due to KM_OFF
-	
+
 	/** Enum of possible authentication  algorithms */
 	typedef enum {AUTHALG_UNDEFINED=0, AUTHALG_OPEN=1, AUTHALG_SHARED=2, AUTHALG_LEAP=4} AuthenticationAlgs; //Default: automatic selection
 
 	/** Possible events from wpa_supplicant, not complete */
 	typedef enum {EVENT_OTHER, EVENT_DISCONNECTED, EVENT_CONNECTED, EVENT_TERMINATING, EVENT_PASSWORD_CHANGED, EVENT_EAP_NOTIFICATION, EVENT_EAP_STARTED, EVENT_EAP_METHOD, EVENT_EAP_SUCCESS, EVENT_EAP_FAILURE } EventType;
-	
+
 	/** Eapol flags */
 	typedef enum {EAPF_UNDEFINED=-1, EAPF_WIRED=0,EAPF_DYN_UNICAST_WEP=1, EAPF_BCAST_WEP=2,EAPF_DEFAULT=3} EapolFlags;
 
@@ -91,7 +91,7 @@ namespace libnutwireless {
 	}
 	/// Convert QOOL to number (QOOL_UNDEFINED=-1, QOOL_FALSE=0, QOOL_TRUE=1)
 	inline int toNumber(QOOL b) {
-		return ( (b == QOOL_UNDEFINED) ? -1 : ( (b == QOOL_TRUE) ? 1 : 0)); 
+		return ( (b == QOOL_UNDEFINED) ? -1 : ( (b == QOOL_TRUE) ? 1 : 0));
 	}
 	/// Convert QString to bool ("1" = true; otherwise false)
 	inline bool toBool(QString str) {

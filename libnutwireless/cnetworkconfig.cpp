@@ -31,51 +31,51 @@ CNetworkConfig::CNetworkConfig(const CNetworkConfig &c) :
 	ssid(c.ssid),
 	bssid(c.bssid),
 	disabled(c.disabled),
-	id_str(c.id_str), 
-	scan_ssid(c.scan_ssid), 
+	id_str(c.id_str),
+	scan_ssid(c.scan_ssid),
 	priority(c.priority),
-	mode(c.mode), 
+	mode(c.mode),
 	frequency(c.frequency),
-	protocols(c.protocols), 
-	key_mgmt(c.key_mgmt), 
-	auth_alg(c.auth_alg), 
-	pairwise(c.pairwise), 
-	group(c.group), 
-	psk(c.psk), 
-	eapol_flags(c.eapol_flags), 
-	mixed_cell(c.mixed_cell), 
-	proactive_key_caching(c.proactive_key_caching), 
-	wep_key0(c.wep_key0), 
+	protocols(c.protocols),
+	key_mgmt(c.key_mgmt),
+	auth_alg(c.auth_alg),
+	pairwise(c.pairwise),
+	group(c.group),
+	psk(c.psk),
+	eapol_flags(c.eapol_flags),
+	mixed_cell(c.mixed_cell),
+	proactive_key_caching(c.proactive_key_caching),
+	wep_key0(c.wep_key0),
 	wep_key1(c.wep_key1),
 	wep_key2(c.wep_key2),
 	wep_key3(c.wep_key3),
-	wep_tx_keyidx(c.wep_tx_keyidx), 
-	peerkey(c.peerkey), 
-	eap(c.eap), 
-	identity(c.identity), 
-	anonymous_identity(c.anonymous_identity), 
-	password(c.password), 
-	ca_cert(c.ca_cert), 
-	ca_path(c.ca_path), 
-	client_cert(c.client_cert), 
-	private_key(c.private_key), 
-	private_key_passwd(c.private_key_passwd), 
-	dh_file(c.dh_file), 
-	subject_match(c.subject_match), 
-	altsubject_match(c.altsubject_match), 
-	phase1(c.phase1), 
-	phase2(c.phase2), 
-	ca_cert2(c.ca_cert2), 
-	ca_path2(c.ca_path2), 
-	client_cert2(c.client_cert2), 
-	private_key2(c.private_key2), 
-	private_key2_passwd(c.private_key2_passwd), 
-	dh_file2(c.dh_file2), 
-	subject_match2(c.subject_match2), 
-	altsubject_match2(c.altsubject_match2), 
-	fragment_size(c.fragment_size), 
-	eappsk(c.eappsk), 
-	nai(c.nai), 
+	wep_tx_keyidx(c.wep_tx_keyidx),
+	peerkey(c.peerkey),
+	eap(c.eap),
+	identity(c.identity),
+	anonymous_identity(c.anonymous_identity),
+	password(c.password),
+	ca_cert(c.ca_cert),
+	ca_path(c.ca_path),
+	client_cert(c.client_cert),
+	private_key(c.private_key),
+	private_key_passwd(c.private_key_passwd),
+	dh_file(c.dh_file),
+	subject_match(c.subject_match),
+	altsubject_match(c.altsubject_match),
+	phase1(c.phase1),
+	phase2(c.phase2),
+	ca_cert2(c.ca_cert2),
+	ca_path2(c.ca_path2),
+	client_cert2(c.client_cert2),
+	private_key2(c.private_key2),
+	private_key2_passwd(c.private_key2_passwd),
+	dh_file2(c.dh_file2),
+	subject_match2(c.subject_match2),
+	altsubject_match2(c.altsubject_match2),
+	fragment_size(c.fragment_size),
+	eappsk(c.eappsk),
+	nai(c.nai),
 	pac_file(c.pac_file),
 	netId(c.netId)
 {}
@@ -153,33 +153,33 @@ void CNetworkConfig::writeTo(QTextStream &stream) {
 	if (!id_str.isEmpty())
 		stream << QString("id_str=%1\n").arg( id_str);
 	if (QOOL_UNDEFINED != scan_ssid)
-		stream << QString("scan_ssid=%1\n").arg( toString(scan_ssid)); 
+		stream << QString("scan_ssid=%1\n").arg( toString(scan_ssid));
 	if (priority >= 0)
 		stream << QString("priority=%1\n").arg( QString::number(priority));
 	if (QOOL_UNDEFINED != mode)
-		stream << QString("mode=%1\n").arg( toString(mode)); 
+		stream << QString("mode=%1\n").arg( toString(mode));
 	if (frequency != -1)
-		stream << QString("frequency=%1\n").arg( frequency); 
+		stream << QString("frequency=%1\n").arg( frequency);
 	if (PROTO_UNDEFINED != protocols)
-		stream << QString("proto=%1\n").arg( toString(protocols)); 
+		stream << QString("proto=%1\n").arg( toString(protocols));
 	if (KM_UNDEFINED != key_mgmt)
 		stream << QString("key_mgmt=%1\n").arg( toString(key_mgmt));
 	if (AUTHALG_UNDEFINED != auth_alg)
-		stream << QString("auth_alg=%1\n").arg( toString(auth_alg)); 
+		stream << QString("auth_alg=%1\n").arg( toString(auth_alg));
 	if (PCI_UNDEFINED != pairwise)
-		stream << QString("pairwise=%1\n").arg( toString(pairwise)); 
+		stream << QString("pairwise=%1\n").arg( toString(pairwise));
 	if (GCI_UNDEFINED != group)
-		stream << QString("group=%1\n").arg( toString(group)); 
+		stream << QString("group=%1\n").arg( toString(group));
 	if (!psk.isEmpty())
-		stream << QString("psk=%1\n").arg( psk); 
+		stream << QString("psk=%1\n").arg( psk);
 	if (EAPF_UNDEFINED != eapol_flags)
 		stream << QString("eapol_flags=%1\n").arg( toString(eapol_flags));
 	if (QOOL_UNDEFINED != mixed_cell)
-		stream << QString("mixed_cell=%1\n").arg( toString(mixed_cell)); 
+		stream << QString("mixed_cell=%1\n").arg( toString(mixed_cell));
 	if (QOOL_UNDEFINED != proactive_key_caching)
-		stream << QString("proactive_key_caching=%1\n").arg( toString(proactive_key_caching)); 
+		stream << QString("proactive_key_caching=%1\n").arg( toString(proactive_key_caching));
 	if (!wep_key0.isEmpty())
-		stream << QString("wep_key0=%1\n").arg( wep_key0); 
+		stream << QString("wep_key0=%1\n").arg( wep_key0);
 	if (!wep_key1.isEmpty())
 		stream << QString("wep_key1=%1\n").arg( wep_key1);
 	if (!wep_key2.isEmpty())
@@ -198,57 +198,57 @@ void CNetworkConfig::writeTo(QTextStream &stream) {
 		stream << QString("peerkey=%1\n").arg(toString(peerkey));
 
 	if (EAPM_UNDEFINED != eap)
-		stream << QString("eap=%1\n").arg( toString(eap)); 
+		stream << QString("eap=%1\n").arg( toString(eap));
 	if (!identity.isEmpty())
-		stream << QString("identity=%1\n").arg( identity); 
+		stream << QString("identity=%1\n").arg( identity);
 	if (!anonymous_identity.isEmpty())
-		stream << QString("anonymous_identity=%1\n").arg( anonymous_identity); 
+		stream << QString("anonymous_identity=%1\n").arg( anonymous_identity);
 	if (!password.isEmpty())
-		stream << QString("password=%1\n").arg( password); 
+		stream << QString("password=%1\n").arg( password);
 	if (!ca_cert.isEmpty())
-		stream << QString("ca_cert=%1\n").arg(ca_cert); 
+		stream << QString("ca_cert=%1\n").arg(ca_cert);
 	if (!ca_path.isEmpty())
-		stream << QString("ca_path=%1\n").arg( ca_path); 
+		stream << QString("ca_path=%1\n").arg( ca_path);
 	if (!client_cert.isEmpty())
-		stream << QString("client_cert=%1\n").arg( client_cert); 
+		stream << QString("client_cert=%1\n").arg( client_cert);
 	if (!private_key.isEmpty())
-		stream << QString("private_key=%1\n").arg( private_key); 
+		stream << QString("private_key=%1\n").arg( private_key);
 	if (!private_key_passwd.isEmpty())
-		stream << QString("private_key_passwd=%1\n").arg( private_key_passwd); 
+		stream << QString("private_key_passwd=%1\n").arg( private_key_passwd);
 	if (!dh_file.isEmpty())
-		stream << QString("dh_file=%1\n").arg( dh_file); 
+		stream << QString("dh_file=%1\n").arg( dh_file);
 	if (!subject_match.isEmpty())
-		stream << QString("subject_match=%1\n").arg( subject_match); 
+		stream << QString("subject_match=%1\n").arg( subject_match);
 	if (!altsubject_match.isEmpty())
 		stream << QString("altsubject_match=%1\n").arg( altsubject_match);
 	if (!phase1.isEmpty())
-		stream << QString("phase1=%1\n").arg( phase1); 
+		stream << QString("phase1=%1\n").arg( phase1);
 	if (!phase2.isEmpty())
-		stream << QString("phase2=%1\n").arg( phase2); 
+		stream << QString("phase2=%1\n").arg( phase2);
 	if (!ca_cert2.isEmpty())
-		stream << QString("ca_cert2=%1\n").arg( ca_cert2); 
+		stream << QString("ca_cert2=%1\n").arg( ca_cert2);
 	if (!ca_path2.isEmpty())
-		stream << QString("ca_path2=%1\n").arg( ca_path2); 
+		stream << QString("ca_path2=%1\n").arg( ca_path2);
 	if (!client_cert2.isEmpty())
-		stream << QString("client_cert2=%1\n").arg( client_cert2); 
+		stream << QString("client_cert2=%1\n").arg( client_cert2);
 	if (!private_key2.isEmpty())
-		stream << QString("private_key2=%1\n").arg( private_key2); 
+		stream << QString("private_key2=%1\n").arg( private_key2);
 	if (!private_key2_passwd.isEmpty())
-		stream << QString("private_key2_passwd=%1\n").arg( private_key2_passwd); 
+		stream << QString("private_key2_passwd=%1\n").arg( private_key2_passwd);
 	if (!dh_file2.isEmpty())
-		stream << QString("dh_file2=%1\n").arg( dh_file2); 
+		stream << QString("dh_file2=%1\n").arg( dh_file2);
 	if (!subject_match2.isEmpty())
-		stream << QString("subject_match2=%1\n").arg( subject_match2); 
+		stream << QString("subject_match2=%1\n").arg( subject_match2);
 	if (!altsubject_match2.isEmpty())
-		stream << QString("altsubject_match2=%1\n").arg( altsubject_match2); 
+		stream << QString("altsubject_match2=%1\n").arg( altsubject_match2);
 	if (fragment_size != -1)
-		stream << QString("fragment_size=%1\n").arg( fragment_size); 
+		stream << QString("fragment_size=%1\n").arg( fragment_size);
 	if (!eappsk.isEmpty())
-		stream << QString("eappsk=%1\n").arg( eappsk); 
+		stream << QString("eappsk=%1\n").arg( eappsk);
 	if (!eappsk.isEmpty())
-		stream << QString("nai=%1\n").arg( nai); 
+		stream << QString("nai=%1\n").arg( nai);
 	if (!pac_file.isEmpty())
-		stream << QString("pac_file=%1\n").arg( pac_file); 
+		stream << QString("pac_file=%1\n").arg( pac_file);
 	stream << QString("}\n");
 }
 
@@ -272,20 +272,20 @@ void CNetworkConfig::setEqualsToUndefinded(CNetworkConfig & other) {
 	SET_EQUAL_TO(eapol_flags, other.eapol_flags, EAPF_UNDEFINED);
 	SET_EQUAL_TO(mixed_cell, other.mixed_cell, QOOL_UNDEFINED);
 	SET_EQUAL_TO(proactive_key_caching, other.proactive_key_caching, QOOL_UNDEFINED);
-	
+
 	SET_EQUAL_TO(wep_key0, other.wep_key0, QString());
 	SET_EQUAL_TO(wep_key1, other.wep_key1, QString());
 	SET_EQUAL_TO(wep_key2, other.wep_key2, QString());
 	SET_EQUAL_TO(wep_key3, other.wep_key3, QString());
 	SET_EQUAL_TO(wep_tx_keyidx, other.wep_tx_keyidx, -1);
-	
+
 	SET_EQUAL_TO(peerkey, other.peerkey, QOOL_UNDEFINED);
-	
+
 	SET_EQUAL_TO(eap, other.eap, EAPM_UNDEFINED);
 	SET_EQUAL_TO(identity, other.identity, QString());
 	SET_EQUAL_TO(anonymous_identity, other.anonymous_identity, QString());
 	SET_EQUAL_TO(password, other.password, QString());
-	
+
 	SET_EQUAL_TO(ca_cert, other.ca_cert, QString());
 	SET_EQUAL_TO(ca_path, other.ca_path, QString());
 	SET_EQUAL_TO(client_cert, other.client_cert, QString());
@@ -294,7 +294,7 @@ void CNetworkConfig::setEqualsToUndefinded(CNetworkConfig & other) {
 	SET_EQUAL_TO(dh_file, other.dh_file, QString());
 	SET_EQUAL_TO(subject_match, other.subject_match, QString());
 	SET_EQUAL_TO(altsubject_match, other.altsubject_match, QString());
-	
+
 	SET_EQUAL_TO(ca_cert2, other.ca_cert2, QString());
 	SET_EQUAL_TO(ca_path2, other.ca_path2, QString());
 	SET_EQUAL_TO(client_cert2, other.client_cert2, QString());
@@ -303,10 +303,10 @@ void CNetworkConfig::setEqualsToUndefinded(CNetworkConfig & other) {
 	SET_EQUAL_TO(dh_file2, other.dh_file2, QString());
 	SET_EQUAL_TO(subject_match2, other.subject_match2, QString());
 	SET_EQUAL_TO(altsubject_match2, other.altsubject_match2, QString());
-	
+
 	SET_EQUAL_TO(phase1, other.phase1, QString());
 	SET_EQUAL_TO(phase2, other.phase2, QString());
-	
+
 	SET_EQUAL_TO(fragment_size, other.fragment_size, -1);
 	SET_EQUAL_TO(eappsk, other.eappsk, QString());
 	SET_EQUAL_TO(nai, other.nai, QString());
@@ -314,7 +314,7 @@ void CNetworkConfig::setEqualsToUndefinded(CNetworkConfig & other) {
 }
 
 #define QUOTED(a) '\"' + a + '\"'
-#define DEP_QUOTED(a, b) (b ? QUOTED(a) : a) 
+#define DEP_QUOTED(a, b) (b ? QUOTED(a) : a)
 
 //parser stuff
 bool CNetworkConfig::set_ssid(QString value, bool addQuotes) {

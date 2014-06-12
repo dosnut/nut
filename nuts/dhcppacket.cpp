@@ -1,7 +1,7 @@
 //
 // C++ Implementation: dhcppacket
 //
-// Description: 
+// Description:
 //
 //
 // Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
@@ -55,7 +55,7 @@ namespace nuts {
 
 		return (quint16) ~sum;
 	}
-	
+
 	DHCPPacket::DHCPPacket(bool client)
 	: sendUnicast(false), creationFailed(false) {
 		memset(&msg, 0, sizeof(msg));
@@ -78,7 +78,7 @@ namespace nuts {
 			msg.cookie = htonl(DHCP_MAGIC);
 		}
 	}
-	
+
 	DHCPPacket::DHCPPacket(bool client, const QHostAddress &unicast_addr)
 	: sendUnicast(true), creationFailed(false), unicast_addr(unicast_addr) {
 		memset(&msg, 0, sizeof(msg));
@@ -101,7 +101,7 @@ namespace nuts {
 			msg.cookie = htonl(DHCP_MAGIC);
 		}
 	}
-	
+
 	DHCPPacket::DHCPPacket(QDataStream &in, quint32 from_ip)
 	: sendUnicast(false), creationFailed(false) {
 		memset(&headers, 0, sizeof(headers));
@@ -127,10 +127,10 @@ namespace nuts {
 			options.insert(k, buf);
 		}
 	}
-	
+
 	DHCPPacket::~DHCPPacket() {
 	}
-		
+
 	DHCPPacket* DHCPPacket::parseRaw(QByteArray &buf) {
 		// Packet big enough?
 		if (buf.size() < (int) (sizeof(struct dhcp_msg) + sizeof(struct udp_dhcp_packet)))
@@ -158,7 +158,7 @@ namespace nuts {
 		in.skipRawData(sizeof(*h));
 		return new DHCPPacket(in, h->ip.saddr);
 	}
-	
+
 	DHCPPacket* DHCPPacket::parseData(QByteArray &buf, struct sockaddr_in &from) {
 		// Packet big enough?
 		if (buf.size() < (int) sizeof(struct dhcp_msg))
@@ -171,7 +171,7 @@ namespace nuts {
 		QDataStream in(buf);
 		return new DHCPPacket(in, from.sin_addr.s_addr);
 	}
-	
+
 	bool DHCPPacket::check() {
 		if (creationFailed) return false;
 		msgdata.clear();
@@ -208,11 +208,11 @@ namespace nuts {
 		h->ip.check = checksum((char*) &h->ip, sizeof(h->ip));
 		return true;
 	}
-	
+
 	libnutcommon::MacAddress DHCPPacket::getClientMac() {
 		return libnutcommon::MacAddress(msg.chaddr);
 	}
-	
+
 	void DHCPPacket::setClientMac(const libnutcommon::MacAddress &chaddr) {
 		memcpy(msg.chaddr, chaddr.data.bytes, 6);
 		quint8 clid[7];
@@ -220,25 +220,25 @@ namespace nuts {
 		clid[0] = ARPHRD_ETHER;
 		setOption(DHCP_CLIENT_ID, clid, sizeof(clid));
 	}
-	
+
 	void DHCPPacket::setClientAddress(const QHostAddress &addr) {
 		msg.ciaddr = htonl(addr.toIPv4Address());
 	}
-	
+
 	void DHCPPacket::setXID(quint32 xid) {
 		msg.xid = xid;
 	}
-	
+
 	void DHCPPacket::setOption(quint8 op, const QVector<quint8>& data) {
 		options.insert(op, data);
 	}
-	
+
 	void DHCPPacket::setOption(quint8 op, const quint8* data, int size) {
 		QVector<quint8> buf(size);
 		memcpy(buf.data(), data, size);
 		options.insert(op, buf);
 	}
-	
+
 	void DHCPPacket::setOptionString(quint8 op, const QString& s) {
 		QByteArray buf = s.toUtf8();
 		int size = buf.size();
@@ -250,32 +250,32 @@ namespace nuts {
 		memcpy(buf2.data(), buf.data(), size);
 		options.insert(op, buf2);
 	}
-	
+
 	void DHCPPacket::setOptionFrom(quint8 op, const DHCPPacket &p) {
 		options.insert(op, p.options.value(op));
 	}
-	
+
 	DHCPClientPacket::DHCPClientPacket(Interface_IPv4 *iface)
 	: DHCPPacket(true), iface(iface) {
 		setClientMac(iface->m_env->m_device->getMacAddress());
 	}
-	
+
 	DHCPClientPacket::DHCPClientPacket(Interface_IPv4 *iface, const QHostAddress &unicast_addr)
 	: DHCPPacket(true, unicast_addr), iface(iface) {
 		setClientMac(iface->m_env->m_device->getMacAddress());
 	}
-	
+
 	void DHCPClientPacket::setVendor() {
 		setOptionString(DHCP_VENDOR, "nuts-0.1");
 	}
-	
+
 	void DHCPClientPacket::setParamRequest() {
 		quint8 parameter_request[] = {
 			0x01, 0x03, 0x06, 0x0c, 0x0f, 0x11, 0x1c, 0x28, 0x29, 0x2a
 		};
 		setOption(DHCP_PARAM_REQ, parameter_request, sizeof(parameter_request));
 	}
-	
+
 	void DHCPClientPacket::doDHCPDiscover() {
 		quint32 xid = getRandomUInt32();
 		while (!iface->registerXID(xid)) xid++;
@@ -284,7 +284,7 @@ namespace nuts {
 		setParamRequest();
 		setVendor();
 	}
-	
+
 	void DHCPClientPacket::doDHCPRequest(const DHCPPacket &reply) {
 		setXID(reply.msg.xid);
 		setMessageType(DHCP_REQUEST);
@@ -294,7 +294,7 @@ namespace nuts {
 		setParamRequest();
 		setVendor();
 	}
-	
+
 	void DHCPClientPacket::doDHCPRenew(const QHostAddress &ip) {
 		// should be unicast to server
 		quint32 xid = 0;
@@ -306,7 +306,7 @@ namespace nuts {
 		setClientAddress(ip);
 		setVendor();
 	}
-	
+
 	void DHCPClientPacket::doDHCPRebind(const QHostAddress &ip) {
 		quint32 xid = getRandomUInt32();
 		while (!iface->registerXID(xid)) xid++;
@@ -315,7 +315,7 @@ namespace nuts {
 		setClientAddress(ip);
 		setVendor();
 	}
-	
+
 	void DHCPClientPacket::doDHCPRelease(const QHostAddress &ip, const QVector<quint8> server_id) {
 		// should be unicast to server
 		quint32 xid = getRandomUInt32();
@@ -325,7 +325,7 @@ namespace nuts {
 		setClientAddress(ip);
 		setOption(DHCP_SERVER_ID, server_id);
 	}
-	
+
 	void DHCPClientPacket::requestIP(const QHostAddress &ip) {
 		quint32 addr = htonl(ip.toIPv4Address());
 		quint8 *a = (quint8*) &addr;

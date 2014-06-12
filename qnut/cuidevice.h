@@ -27,14 +27,14 @@ namespace qnut {
 	class CWirelessSettings;
 #endif
 	class CNotificationManager;
-	
+
 	/**
 	 * @brief CUIDevice interacts directly with CDevice.
 	 * @author Oliver Groß <z.o.gross@gmx.de>
-	 * 
+	 *
 	 * On creation, the CUIDevice sets up the user interface for a detailed view
 	 * of the environments/interfaces tree.
-	 * 
+	 *
 	 * The main tasks of CUIDevice are:
 	 *  - interact directly with CDevice
 	 *  - provide detailed information for environments and interfaces
@@ -42,7 +42,7 @@ namespace qnut {
 	 *  - execute scripts for each status change of the given device (if enabled in scripting settings)
 	 *  - provide a tray icon for the given device witch reflects the current status (tool tip and pop-up messages)
 	 *  - save the configurations made for the given device (in "~/.qnut/<device name>/dev.conf")
-	 * 
+	 *
 	 * The devices details provides functions to open the windows for scritping and
 	 * wireless settings (if the device has wireless extensions).
 	 */
@@ -56,16 +56,16 @@ namespace qnut {
 		 * @param parent pointer to the parent widget
 		 */
 		CUIDevice(libnutclient::CDevice * parentDevice, QWidget * parent = 0);
-		
+
 		/// @brief Destroyes the object and saves all settings for this device.
 		~CUIDevice();
-		
+
 		/// @brief Returns a pointer to the managed device.
 		inline libnutclient::CDevice * device() const { return m_Device; }
-		
+
 		/// @brief Returns a pointer to the sub menu of the managed device.
 		inline QMenu * deviceMenu() const { return m_DeviceMenu; }
-		
+
 		/// @brief Returns the list of Actions of the managed device.
 		inline QList<QAction *> deviceActions() const { return m_DeviceActions; }
 		/// @brief Returns the list of Actions in the context menu of the environments/interfaces tree.
@@ -75,7 +75,7 @@ namespace qnut {
 		 * @param state device state
 		 */
 		inline QList<ToggleableCommand> & commandList(int state) { return m_CommandList[state]; }
-		
+
 		static void init();
 		static void cleanup();
 		static const QSignalMapper * showRequestMapper() { return m_ShowRequestMapper; }
@@ -93,7 +93,7 @@ namespace qnut {
 		 * @param message the message itself
 		 */
 		void showMessageRequested(QString title, QString message);
-		
+
 		void showNotificationRequested(libnutcommon::DeviceState state);
 		void updateTrayIconRequested(libnutcommon::DeviceState state);
 #ifndef QNUT_NO_WIRELESS
@@ -105,37 +105,37 @@ namespace qnut {
 #ifndef QNUT_NO_WIRELESS
 		CWirelessSettings * m_WirelessSettings;
 #endif
-		
+
 		static QSignalMapper * m_ShowRequestMapper;
-		
+
 		QMenu * m_DeviceMenu;
 		QList<QAction *> m_DeviceActions;
 		QAction * m_ShowEnvironmentsAction;
 		QAction * m_EnterEnvironmentAction;
 		QAction * m_IPConfigurationAction;
-		
+
 		bool m_ShowTrayIcon;
 		bool m_CommandsEnabled;
 		bool m_NotificationsEnabled;
 		//TODO create device settings struct/class
 		QList<ToggleableCommand> m_CommandList[5];
-		
+
 		QSet<libnutclient::CInterface *> m_IPConfigsToRemember;
-		
+
 		libnutclient::CDevice * m_Device;
-		
+
 		inline void readCommands(QSettings * settings);
 		inline void readIPConfigs(QSettings * settings);
 
 		inline void writeCommands(QSettings * settings);
 		inline void writeIPConfigs(QSettings * settings);
-		
+
 		inline void readSettings();
 		inline void writeSettings();
 		inline void createActions();
 		inline void createView();
 		inline void setHeadInfo();
-		
+
 		inline void executeCommand(QStringList & env, QString path);
 	private slots:
 		void handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);

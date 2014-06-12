@@ -55,7 +55,7 @@ namespace nuts {
 			registered = false;
 		}
 	}
-	
+
 	void DBusDeviceManager::setAllDBusConnection(QDBusConnection * connection) {
 		QHash<QString, nuts::DBusDevice *>::iterator dbusdev = m_dbusDevices.begin();
 		while (dbusdev != m_dbusDevices.end()) {
@@ -81,7 +81,7 @@ namespace nuts {
 	void DBusDeviceManager::dbusStopped() {
 		stopDBus();
 	}
-	
+
 	void DBusDeviceManager::dbusStarted() {
 		//call stopDBus to clear all information
 		stopDBus();
@@ -100,7 +100,7 @@ namespace nuts {
 			m_dbusConnection.unregisterService(NUT_DBUS_URL);
 		}
 	}
-	
+
 	void DBusDeviceManager::timerEvent(QTimerEvent *event) {
 		if ( event->timerId() == m_timerId ) {
 			if (!m_dbusConnection.isConnected()) {
@@ -112,7 +112,7 @@ namespace nuts {
 			}
 		}
 	}
-	
+
 	//SLOT: Inserts device into device hash
 	void DBusDeviceManager::devAdded(QString devName, Device *dev) {
 		DBusDevice *dbus_device;
@@ -127,8 +127,8 @@ namespace nuts {
 		emit deviceAdded(QDBusObjectPath(dbus_device->getPath()));
 		emit deviceAdded(devName);
 	}
-	
-	
+
+
 	void DBusDeviceManager::devRemoved(QString devName, Device* /* *dev */) {
 		if (m_dbusDevices.contains(devName)) {
 			DBusDevice * dbus_device = m_dbusDevices[devName];
@@ -138,7 +138,7 @@ namespace nuts {
 		}
 		// dbus_device is deleted as child of dev
 	}
-	
+
 	QList<QDBusObjectPath> DBusDeviceManager::getDeviceList() {
 		QList<QDBusObjectPath> paths;
 		foreach (DBusDevice *dbus_device, m_dbusDevices) {
@@ -174,7 +174,7 @@ namespace nuts {
 
 		//Set dbus device path an register objects
 		m_dbusPath = path + '/' + dev->getName();
-		
+
 		//Add Environments
 		foreach (Environment *env, m_device->getEnvironments()) {
 			DBusEnvironment *dbus_env = new DBusEnvironment(env, m_dbusConnection, m_dbusPath,m_device);
@@ -193,13 +193,13 @@ namespace nuts {
 		setAutoRelaySignals(true);
 		connect(m_device,SIGNAL(environmentChanged(int)),this,SLOT(environmentChanged(int)));
 	}
-	
+
 	DBusDevice::~DBusDevice() {
 		if (registered) {
 			m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
 		}
 	}
-	
+
 	QString DBusDevice::getPath() {
 		return m_dbusPath;
 	}
@@ -287,7 +287,7 @@ namespace nuts {
 		}
 		return m_dbusProperties;
 	}
-	
+
 	QList<QDBusObjectPath> DBusDevice::getEnvironments() {
 		QList<QDBusObjectPath> paths;
 		foreach (DBusEnvironment *dbus_env, m_dbusEnvironments) {
@@ -324,7 +324,7 @@ namespace nuts {
 			return m_dbusProperties.activeEnvironment = QString();
 		}
 	}
-	
+
 	void DBusDevice::enable() {
 		m_device->enable(true);
 	}
@@ -337,7 +337,7 @@ namespace nuts {
 	: QDBusAbstractAdaptor(env), m_environment(env), m_dbusConnection(connection), m_device(dev), registered(false) {
 		//Set dbus path an register object
 		m_dbusPath = path + QString("/%1").arg(m_environment->getID());
-		
+
 		//Insert interfaces
 		foreach (Interface *interface, m_environment->getInterfaces()) {
 			//Check if interface is IPv4 or IPv6
@@ -359,13 +359,13 @@ namespace nuts {
 			#endif
 		}
 	}
-	
+
 	DBusEnvironment::~DBusEnvironment() {
 		if (registered) {
 			m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
 		}
 	}
-	
+
 	QString DBusEnvironment::getPath() {
 		return m_dbusPath;
 	}
@@ -415,12 +415,12 @@ namespace nuts {
 	void DBusEnvironment::selectResultReady() {
 		emit selectsResultChanged(m_environment->getSelectResult(),m_environment->getSelectResults());
 	}
-	
+
 	//Function for device to emit a statechange of an environment
 	void DBusEnvironment::emitChange(bool change) {
 		emit stateChanged(change);
 	}
-	
+
 	libnutcommon::EnvironmentProperties DBusEnvironment::getProperties() {
 		m_dbusProperties.name = m_environment->getName();
 		m_dbusProperties.active = (m_device->getEnvironment() == m_environment->getID());
@@ -429,7 +429,7 @@ namespace nuts {
 	libnutcommon::EnvironmentConfig DBusEnvironment::getConfig() {
 		return (m_environment->getConfig());
 	}
-	
+
 	QList<QDBusObjectPath> DBusEnvironment::getInterfaces() {
 		QList<QDBusObjectPath> paths;
 		//Append IPv4 Paths
@@ -469,7 +469,7 @@ namespace nuts {
 		m_dbusProperties.gateway = m_interface->gateway;
 		m_dbusProperties.netmask = m_interface->netmask;
 		m_dbusProperties.ifState = m_interface->getState();
-		
+
 		if (!m_interface->dnsserver.isEmpty()) {
 			m_dbusProperties.dns = m_interface->dnsserver;
 		}
@@ -478,7 +478,7 @@ namespace nuts {
 		}
 		connect(m_interface,SIGNAL(statusChanged(libnutcommon::InterfaceState, Interface_IPv4*)),SLOT(interfaceStatusChanged(libnutcommon::InterfaceState)));
 	}
-	
+
 	DBusInterface_IPv4::~DBusInterface_IPv4() {
 		m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
 	}

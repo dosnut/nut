@@ -116,7 +116,7 @@ pac_file     return PAC_FILE;
 }
 
 <StrVal>{
-	\"          { BEGIN(INITIAL); yylval.str->append("\""); return STRVAL; }	
+	\"          { BEGIN(INITIAL); yylval.str->append("\""); return STRVAL; }
 	[^\\\"\n]*  { yylval.str->append(yytext); }
 	\n          { configparsererror(libnutcconfigparser, "Unexpected newline in string, ending string\n");
 	              ++line_num;

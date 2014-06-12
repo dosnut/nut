@@ -15,11 +15,11 @@
 
 namespace qnut {
 	class CDeviceDetails;
-	
+
 	/**
 	 * @brief CDeviceSettings provides a dialog to configure device specific settings like notfications, scripts to run, etc..
 	 * @author Oliver Groß <z.o.gross@gmx.de>
-	 * 
+	 *
 	 * On creation, the CDeviceSettings sets up its user interface.
 	 * Settings so far implemented:
 	 * - show Icon in notificaion area
@@ -38,7 +38,7 @@ namespace qnut {
 		inline bool trayIconVisibleResult() const { return ui.trayiconCheckBox->isChecked(); }
 		/// @brief returns the resulting enabled state for notifications
 		inline bool notificationEnabledResult() const { return !ui.disableNotificationsCheck->isChecked(); }
-		
+
 		/**
 		 * @brief Opens the dialog and returns true if changes are made.
 		 * @param commandLists initial command lists
@@ -55,7 +55,7 @@ namespace qnut {
 		CDeviceSettings(QWidget * parent = 0);
 	private:
 		static int m_LastIndex;
-		
+
 		Ui::devset ui;
 		int m_LastList;
 		QList<ToggleableCommand> m_CommandLists[5];

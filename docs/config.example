@@ -38,7 +38,7 @@ device "eth1" {
 device "wlan0" {
 	// this device is not activated by default on startup
 	no-auto-start;
-	
+
 	// this device requires the wpa_supplicant for connection so we specify a config
 	// file and a driver (wext is the default fallback if no driver is given)
 	wpa-supplicant config "/etc/wpa_supplicant/wpa_supplicant.conf" driver "wext";
@@ -50,13 +50,13 @@ device "wlan0" {
 	//       ctrl_interface=/var/run/wpa_supplicant
 	//       ctrl_interface_group=netdev
 	//       update_config=1
-	
+
 	// the interface configuration for the default environment shall be dhcp so we
 	// don't have to sepcify it
-	
+
 	// the short form for a environment with a dhcp configured interface
 	environment "EAPNet" select essid "eapnet";
-	
+
 	// at home we have a static and a dynamic interface if we find one of the
 	// two ip with the given mac address in the specified network
 	environment "home" {
@@ -80,10 +80,10 @@ device "wlan0" {
 			dns-server 192.168.0.1;
 		};
 	};
-	
+
 	// we can also let the user (client) specify the interface configuation
 	environment "userdefinable" static user;
-	
+
 	// if we want to have a peer to peer network (ad-hoc) we might define the
 	// following environment with a zeroconf interface
 	environment "adhoc" { zeroconf; select essid "myadhoc"; };

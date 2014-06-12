@@ -8,7 +8,7 @@
 
 namespace libnutclient {
 	/** @brief CLog provides a logging facility for the client
-		
+
 		The Log can be used to save the logging information to a file.
 		You can get access to the text via the printed signal,
 		which is called every time the logging functions are invoked.

@@ -27,7 +27,7 @@ set(SOURCES_MOC_H
 	cdevicesettings.h
 	cuidevice.h
 	cnotificationmanager.h
-	
+
 	modelview/cuidevicemodel.h
 	modelview/cenvironmenttreemodel.h
 	modelview/cinterfacedetailsmodel.h
@@ -41,7 +41,7 @@ set(SOURCES_MOC_H
 
 set(SOURCES_CPP main.cpp
 	common.cpp
-	
+
 	cconnectionmanager.cpp
 	cipconfiguration.cpp
 	cwirelesssettings.cpp
@@ -51,7 +51,7 @@ set(SOURCES_CPP main.cpp
 	cdevicesettings.cpp
 	cuidevice.cpp
 	cnotificationmanager.cpp
-	
+
 	modelview/cuidevicemodel.cpp
 	modelview/cenvironmenttreemodel.cpp
 	modelview/cinterfacedetailsmodel.cpp
@@ -61,7 +61,7 @@ set(SOURCES_CPP main.cpp
 	modelview/cdnslistmodel.cpp
 	modelview/cipeditdelegate.cpp
 	modelview/ccommandlistmodel.cpp
-	
+
 	utils/cerrorcodeevaluator.cpp
 )
 

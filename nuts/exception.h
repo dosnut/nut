@@ -1,7 +1,7 @@
 //
 // C++ Interface: exception
 //
-// Description: 
+// Description:
 //
 //
 // Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
@@ -35,7 +35,7 @@ namespace nuts {
 				return _msg;
 			}
 	};
-	
+
 	class NetlinkInitException : public Exception {
 		public:
 			NetlinkInitException(const QString &msg) : Exception(msg) { }

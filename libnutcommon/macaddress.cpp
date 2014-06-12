@@ -15,7 +15,7 @@ namespace libnutcommon {
 		data = MacAddress(addr);
 		return argument;
 	}
-	
+
 	static inline int read_hexdigit(char c) {
 		if ('0' <= c && c <= '9')
 			return c - '0';
@@ -25,7 +25,7 @@ namespace libnutcommon {
 			return c - 'A' + 10;
 		return -1;
 	}
-	
+
 	static inline char* hex2quint8(char* msg, quint8 &val) {
 		int i;
 		val = 0;
@@ -41,7 +41,7 @@ namespace libnutcommon {
 		val |= i;
 		return msg;
 	}
-	
+
 	MacAddress::MacAddress(const QString &str) {
 		data.ui64 = 0;
 		if (str == QLatin1String("any") || str.isEmpty()) {
@@ -70,7 +70,7 @@ namespace libnutcommon {
 		}
 //		qDebug() << QString("-> %1").arg(toString());
 	}
-	
+
 	MacAddress::MacAddress(const quint8 *d) {
 		if (d == 0) {
 			MacAddress();

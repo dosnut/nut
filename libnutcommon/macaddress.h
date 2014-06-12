@@ -30,7 +30,7 @@ namespace libnutcommon {
 				quint8 bytes[6];
 				quint16 words[3];
 			} data;
-			
+
 			inline bool operator==(const MacAddress &ma) const {
 				return data.ui64 == ma.data.ui64;
 			}
@@ -46,15 +46,15 @@ namespace libnutcommon {
 					data.bytes[0],data.bytes[1],data.bytes[2],data.bytes[3],data.bytes[4],data.bytes[5]);
 				return QString(buf);
 			}
-			
+
 			inline bool zero() const {
 				return data.ui64 == 0;
 			}
-			
+
 			inline bool valid() const {
 				return !zero();
 			}
-			
+
 			inline void clear() {
 				data.ui64 = 0;
 			}

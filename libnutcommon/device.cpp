@@ -13,7 +13,7 @@ namespace libnutcommon {
 		const char* names[] = { "off", "static", "dhcp", "zeroconf", "waitforconfig" };
 		return names[(int) state];
 	}
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceProperties & devprop) {
 		argument.beginStructure();
 		argument << devprop.name << devprop.activeEnvironment << (int) devprop.state << (int) devprop.type;
@@ -30,7 +30,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentProperties &envprop) {
 		argument.beginStructure();
 		argument << envprop.name;
@@ -45,7 +45,7 @@ namespace libnutcommon {
 		argument >> envprop.active;
 		return argument;
 	}
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop) {
 		argument.beginStructure();
 		argument << ifprop.ifState;
@@ -68,7 +68,7 @@ namespace libnutcommon {
 		qRegisterMetaType<DeviceProperties>("DeviceProperties");
 		qRegisterMetaType<EnvironmentProperties>("EnvironmentProperties");
 		qRegisterMetaType<InterfaceProperties>("InterfaceProperties");
-		
+
 		qDBusRegisterMetaType<DeviceProperties>();
 		qDBusRegisterMetaType<EnvironmentProperties>();
 		qDBusRegisterMetaType<InterfaceProperties>();

@@ -30,7 +30,7 @@ namespace cnut {
 	QString getInterfaceState(QDBusConnection * connection, QString &ifPath);
 	QString getInterfaceType(QDBusConnection * connection, QString &ifPath);
 	QStringList getInterfaceProperties(QDBusConnection * connection, QString &ifPath);
-	
+
 	//Set functions
 	bool setEnvironment(QDBusConnection * connection, QString &devPath, int index);
 	void setEnvironment(QDBusConnection * connection, QString &devPath, QString &envPath);

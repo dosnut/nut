@@ -12,12 +12,12 @@ set(SOURCES_MOC_H
 	device.h
 # 	config.h
 	hardware.h
-	
+
 	sighandler.h
 # 	log.h
 # 	dhcppacket.h
 # 	exception.h
-	
+
 	dbus.h
 	arp.h
 # 	random.h
@@ -28,11 +28,11 @@ set(SOURCES_CPP
 	device.cpp
 	config.cpp
 	hardware.cpp
-	
+
 	sighandler.cpp
 	log.cpp
 	dhcppacket.cpp
-	
+
 	dbus.cpp
 	arp.cpp
 	random.cpp

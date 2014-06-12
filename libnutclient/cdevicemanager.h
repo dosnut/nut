@@ -61,7 +61,7 @@ namespace libnutclient {
 		void clearInformation();
 		void timerEvent(QTimerEvent *event);
 		void dbusKilled(bool doinit=true);
-		
+
 		void nutsStopped();
 		void nutsStarted();
 

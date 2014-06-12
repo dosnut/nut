@@ -57,7 +57,7 @@ namespace qnut {
 		virtual bool execute(int id);
 		/// @brief Opens the dialog for adding a new annonymous network
 		virtual bool execute();
-		
+
 		/**
 		 * @brief Creates the object and initializes some variables.
 		 * @param parent parent widget
@@ -71,19 +71,19 @@ namespace qnut {
 	protected:
 		static QRegExpValidator * m_HexValidator;
 		static int m_HexValidatorRefs;
-		
+
 		CErrorCodeEvaluator * m_ErrorCodeEvaluator;
-		
+
 		QMap<QCheckBox *, QLineEdit *> m_HexEditMap;
-		
+
 		libnutwireless::CWireless * m_WifiInterface;
-		
+
 		libnutwireless::CNetworkConfig m_Config;
 		libnutwireless::CNetworkConfig m_OldConfig;
 		int m_CurrentID;
-		
+
 		static void getConfigErrors(libnutwireless::NetconfigStatus * status, QStringList & errormsg);
-		
+
 		static void convertLineEditText(QLineEdit * lineEdit, bool hex);
 	protected slots:
 		virtual bool applyConfiguration() = 0;

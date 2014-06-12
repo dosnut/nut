@@ -29,10 +29,10 @@ namespace qnut {
 	/**
 	 * @brief CAvailableAPModel provides an item model for an overview of the available networks (scan results) from a wpa_supplicant.
 	 * @author Oliver Groß <z.o.gross@gmx.de>
-	 * 
+	 *
 	 * The class provides all functions for a read-only model specified in the Qt 4 documentation.
 	 * Additionally: A function to retrieve the cached data is provided.
-	 * 
+	 *
 	 * The model supports the display the following information in columns for each scan result:
 	 *  - SSID
 	 *  - key management
@@ -47,7 +47,7 @@ namespace qnut {
 	public:
 		/// @brief Type definition for a list of ids
 		typedef QList<int> IndexList;
-		
+
 		/**
 		 * @brief Creates the object and initializes the model according to the given wpa_supplicant object.
 		 * @param wpaSupplicant pointer to a wpa_supplicant (if NULL nothing is displayed)
@@ -56,16 +56,16 @@ namespace qnut {
 		CAvailableAPModel(libnutwireless::CWirelessHW * data = NULL, QObject * parent = 0);
 		/// @brief Destroyes the object.
 		~CAvailableAPModel();
-		
+
 		/// @brief Returns the cached list of scan results.
 		const QList<libnutwireless::ScanResult> & cachedScans() const { return m_Scans; }
-		
+
 		/// @brief Returns a cached scan result id by a given model index
 		int scanResultIdByModelIndex(const QModelIndex & index) const;
-		
+
 		/// @brief Returns a pointer to a list of scan result ids that match the provided SSID
 		IndexList * scanResultIdListBySSID(QString ssid) const { return m_GroupedScans.value(ssid, NULL); }
-		
+
 		QVariant data(const QModelIndex & index, int role) const;
 		Qt::ItemFlags flags(const QModelIndex & index) const;
 		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
@@ -81,13 +81,13 @@ namespace qnut {
 	private:
 		void setWpaSupplicant(libnutwireless::CWirelessHW * m_WirelessAcces);
 		libnutwireless::CWirelessHW * m_WirelessAcces;
-		
+
 		QHash<QString, IndexList *> m_GroupedScans;
-		
+
 		QList<QString> m_SSIDs;
 		QList<libnutwireless::ScanResult> m_Scans;
 	};
-	
+
 	class CAvailableAPProxyModel : public QSortFilterProxyModel {
 		Q_OBJECT
 	public:

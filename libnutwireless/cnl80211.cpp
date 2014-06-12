@@ -85,14 +85,14 @@ bool CNL80211::open() {
 		close();
 		return false;
 	}
-	
+
 	m_nlFd = nl_socket_get_fd(m_nlSocket);
 	m_nlSn = new QSocketNotifier(m_nlFd,QSocketNotifier::Read,this);
 	connect(m_nlSn,SIGNAL(activated(int)), this, SLOT(readNlMessage(void)));
-	
+
 	//Start Signal Quality polling
 	m_sqTimerId = startTimer(m_sqPollrate);
-	
+
 	m_connected = true;
 	return true;
 }
@@ -152,7 +152,7 @@ int CNL80211::parseNlScanResult(nl_msg * msg) {
 
 	scanresult.bssid = libnutcommon::MacAddress((ether_addr*)(bss_buffer[NL80211_BSS_BSSID]));
 	scanresult.signal.bssid = scanresult.bssid;
-	
+
 	if (bss_buffer[NL80211_BSS_FREQUENCY])
 		scanresult.freq = nla_get_u32(bss_buffer[NL80211_BSS_FREQUENCY]);
 
@@ -193,7 +193,7 @@ void CNL80211::scan() {
 		emit message("Could not allocate netlink message");
 		return;
 	}
-	
+
 	//allocate the callback function with default verbosity
 // 	nl_cb * cb = nl_cb_alloc(NL_CB_DEFAULT);
 // 	if (!cb) {
@@ -203,13 +203,13 @@ void CNL80211::scan() {
 // 	}
 
 	nl_socket_modify_cb(m_nlSocket, NL_CB_VALID, NL_CB_CUSTOM, &cbForScanResults, this);
-	
+
 	genlmsg_put(msg, 0, 0, genl_family_get_id(m_nlFamily), 0, (NLM_F_REQUEST | NLM_F_DUMP), NL80211_CMD_GET_SCAN, 0);
 	//Set the interface we want to operate on
 	nla_put_u32(msg, NL80211_ATTR_IFNAME,devidx);
-	
+
 	//hier kommt noch was rein
-	
+
 	//Send the message
 	nl_send_auto_complete(m_nlSocket,msg);
 	nlmsg_free(msg);

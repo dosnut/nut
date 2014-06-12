@@ -1,14 +1,14 @@
 %{
 	#include "config.h"
-	
+
 
 	extern int configparserlex (void);
 	extern int line_num;
-	
+
 	using namespace nuts;
-	
+
 	static void configparsererror (ConfigParser *cp, const char* s);
-	
+
 	//Check if invoked action worked (e.g. newDevice -> device creation worked)
 	#define CHECK(action) do { if (!(cp->action)) YYERROR; } while (0)
 %}
@@ -25,14 +25,14 @@
 %token REGEXP
 %token NOAUTOSTART
 %token DEFAULT
-%token DHCP NODHCP ZEROCONF NOZEROCONF STATIC 
+%token DHCP NODHCP ZEROCONF NOZEROCONF STATIC
 %token FALLBACK TIMEOUT CONTINUEDHCP
 %token IP NETMASK GATEWAY DNSSERVER METRIC
 %token LABELINDEX
 %token SELECT USER ARP ESSID
 %token AND OR
 %token WLAN MODE
- 
+
 %token WPASUPPLICANT CONFIG DRIVER
 
 %token <str> STRING
@@ -150,7 +150,7 @@ static: STATIC { CHECK(envStatic());  } staticconfig { CHECK(finishStatic()); }
 ;
 
 staticconfig: '{' staticoptions '}'
-	|  '{' staticoptions '}' ';' 
+	|  '{' staticoptions '}' ';'
 	| staticoption_ip
 ;
 

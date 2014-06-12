@@ -19,7 +19,7 @@ namespace libnutclient {
 namespace libnutclient {
 
 	/** @brief The Environment manages the interfaces
-		
+
 		The Environment manages its associated interfaces. It also provides information about the Environment (name, select results, state).
 		It reports state changes via 3 signals
 
@@ -51,7 +51,7 @@ namespace libnutclient {
 		bool m_selectResultFetched;
 		bool m_selectResultsFetched;
 		bool m_initCompleted;
-		
+
 		void refreshAll();
 		void rebuild(const QList<QDBusObjectPath> &paths);
 		void checkInitCompleted();
@@ -80,7 +80,7 @@ namespace libnutclient {
 		inline const CInterfaceList& getInterfaces() { return m_interfaces;}
 		inline bool getState() const { return m_state; }
 		inline int getIndex() const { return m_index;}
-		
+
 		CEnvironment(CDevice * parent, QDBusObjectPath dbusPath);
 		~CEnvironment();
 	public slots:
@@ -88,7 +88,7 @@ namespace libnutclient {
 		libnutcommon::EnvironmentConfig& getConfig();
 		libnutcommon::SelectResult& getSelectResult(bool refresh=false);
 		QVector<libnutcommon::SelectResult>& getSelectResults(bool refresh=false);
-		
+
 
 	signals:
 		void initializationFailed(CEnvironment * environment); //TODO:Implement this: has to be called if init fails
@@ -97,11 +97,11 @@ namespace libnutclient {
 		void newDataAvailable();
 
 		/** @brief Environment signals
-		
+
 			activeChanged(bool active) is emitted when environment get's activated or deactivated
 			interfacesUpdated() is emitted when interfaces are added or removed
 			selectResultsChanged() is emitted when select results changed (this normaly hapens, when they're completly done)
-			
+
 		*/
 		void activeChanged(bool active);
 		void interfacesUpdated();

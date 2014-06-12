@@ -10,7 +10,7 @@
 	#include "config.h"
 	int line_num = 1;
 
-	#ifdef USED_CMAKE	
+	#ifdef USED_CMAKE
 	#include "configparser_yacc.hpp"
 	#else
 	#include "configparser_yacc.h"
@@ -86,7 +86,7 @@ driver      return DRIVER;
 .          /* ignore. TODO: only ignore whitespaces*/
 
 <String>{
-	\"          { BEGIN(INITIAL); return STRING; }	
+	\"          { BEGIN(INITIAL); return STRING; }
 	[^\\\"\n]*  { yylval.str->append(yytext); }
 	\n          { printf("Unexpected newline in string, ending string\n");
 	              ++line_num;

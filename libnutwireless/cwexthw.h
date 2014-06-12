@@ -14,23 +14,23 @@ class CWextHW: public CWirelessHW {
 	protected:
 		QString m_ifname;
 		int m_wextFd;
-		
+
 		QList<quint32> m_supportedFrequencies;
-		
+
 		//Signal Quality Stuff
 		qint32 m_sqPollrate;
 		qint32 m_sqTimeOutCount;
 		qint32 m_sqTimerId;
 		SignalQuality m_sq;
-		
+
 		//Scanning Stuff
 		qint32 m_scPollrate;
 		qint32 m_scTimeOutCount;
 		qint32 m_scTimerId;
 		QList<ScanResult> m_scanResults;
-		
-		
-		/** Raw signal is contains the data from the kernel. 
+
+
+		/** Raw signal is contains the data from the kernel.
 			For human readable format, it has to be converted to SignalQuality */
 		struct	WextRawSignal {
 			quint8 qual;	/* link quality (%retries, SNR, %missed beacons or better...) */
@@ -60,7 +60,7 @@ class CWextHW: public CWirelessHW {
 			QList<qint32> bitrates;
 			//Further information pending...
 		};
-		
+
 	protected:
 
 		void readSignalQuality();
@@ -68,9 +68,9 @@ class CWextHW: public CWirelessHW {
 		SignalQuality convertValues(WextRawScan &scan);
 		void parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * scan);
 		void setScanResults(QList<WextRawScan> wextScanResults);
-		
+
 		virtual void timerEvent(QTimerEvent *event);
-		
+
 	public:
 		CWextHW(QObject* parent, QString ifname);
 		~CWextHW();

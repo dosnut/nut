@@ -1,7 +1,7 @@
 //
 // C++ Interface: dhcppacket
 //
-// Description: 
+// Description:
 //
 //
 // Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
@@ -71,7 +71,7 @@ enum dhcp_options {
 	DHCP_VENDOR          = 0x3c,
 	DHCP_CLIENT_ID       = 0x3d,
 	DHCP_FQDN            = 0x51,
-		
+
 	DHCP_END             = 0xFF
 };
 
@@ -103,21 +103,21 @@ namespace nuts {
 			struct udp_dhcp_packet headers;
 			QHash< quint8, QVector<quint8> > options;
 			QByteArray msgdata;
-			
+
 			bool sendUnicast, creationFailed;
 			QHostAddress unicast_addr;
-			
+
 		public:
 			DHCPPacket(QDataStream &in, quint32 from_ip /* network order */);
 			DHCPPacket(bool client);
 			DHCPPacket(bool client, const QHostAddress &unicast_addr);
 			virtual ~DHCPPacket();
-			
+
 			static DHCPPacket* parseRaw(QByteArray &buf);
 			static DHCPPacket* parseData(QByteArray &buf, struct sockaddr_in &from);
-			
+
 			bool check();
-			
+
 			void setClientMac(const libnutcommon::MacAddress &chaddr);
 			void setClientAddress(const QHostAddress &addr);
 			void setXID(quint32 xid);
@@ -129,7 +129,7 @@ namespace nuts {
 			inline void setOptionData(quint8 op, const T& data) {
 				setOption(op, (quint8*) &data, sizeof(data));
 			}
-			
+
 			libnutcommon::MacAddress getClientMac();
 			inline quint32 getXID() {
 				return msg.xid;
@@ -152,13 +152,13 @@ namespace nuts {
 				}
 				return def;
 			}
-			
+
 			inline QHostAddress getOptionAddress(quint8 op) {
 				if (options.contains(op))
 					return QHostAddress(ntohl(getOptionData<quint32>(op,0)));
 				return QHostAddress();
 			}
-			
+
 			inline QList<QHostAddress> getOptionAddresses(quint8 op) {
 				QList<QHostAddress> l;
 				QVector<quint8> data = getOption(op);
@@ -169,21 +169,21 @@ namespace nuts {
 				}
 				return l;
 			}
-			
+
 			inline void setBootOp(enum bootp_op bop) {
 				msg.op = bop;
 			}
 			inline enum bootp_op getBootOp() {
 				return (enum bootp_op) msg.op;
 			}
-			
+
 			inline void setMessageType(enum dhcp_message_type msgt) {
 				setOptionData(DHCP_MESSAGE_TYPE, (quint8) msgt);
 			}
 			inline enum dhcp_message_type getMessageType() {
 				return (enum dhcp_message_type) getOptionData<quint8>(DHCP_MESSAGE_TYPE, 0xffu);
 			}
-			
+
 			// id is htonl(IPv4)
 			inline void setDHCPServerID(quint32 id) {
 				setOptionData(DHCP_SERVER_ID, id);
@@ -191,12 +191,12 @@ namespace nuts {
 			inline quint32 getDHCPServerID() {
 				return getOptionData<quint32>(DHCP_SERVER_ID, 0xffffffffu);
 			}
-			
+
 			// This is the client ip address returned from the server
 			inline QHostAddress getYourIP() {
 				return QHostAddress(ntohl(msg.yiaddr));
 			}
-			
+
 			inline void send(Interface_IPv4 *iface) {
 				if (sendUnicast) {
 					iface->sendUnicastDHCP(this);
@@ -205,31 +205,31 @@ namespace nuts {
 				}
 			}
 	};
-	
+
 	class DHCPClientPacket : public DHCPPacket {
 			Interface_IPv4 *iface;
-		
+
 		public:
 			// broadcast packet
 			DHCPClientPacket(Interface_IPv4 *iface);
-			
+
 			// unicast packet
 			DHCPClientPacket(Interface_IPv4 *iface, const QHostAddress &unicast_addr);
-			
+
 			// set vendor option ("nuts-0.1")
 			void setVendor();
 			// set requested parameter option
 			void setParamRequest();
-			
+
 			// broadcasts
 			void doDHCPDiscover();
 			void doDHCPRequest(const DHCPPacket &reply);
 			void doDHCPRebind(const QHostAddress &ip);
-			
+
 			// unicasts
 			void doDHCPRenew(const QHostAddress &ip);
 			void doDHCPRelease(const QHostAddress &ip, const QVector<quint8> server_id);
-			
+
 			void requestIP(const QHostAddress &ip);
 			void send();
 	};

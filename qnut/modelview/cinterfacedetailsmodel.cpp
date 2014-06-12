@@ -25,22 +25,22 @@ namespace qnut {
 			//connect(m_Interface, SIGNAL(userConfigApplied()), this, SIGNAL(layoutChanged()));
 		}
 	}
-	
+
 	CInterfaceDetailsModel::~CInterfaceDetailsModel() {
 		m_Interface = NULL;
 	}
-	
+
 	int CInterfaceDetailsModel::columnCount(const QModelIndex &) const {
 		if (m_Interface == NULL)
 			return 0;
 		else
 			return 2;
 	}
-	
+
 	int CInterfaceDetailsModel::rowCount(const QModelIndex & parent) const {
 		if (m_Interface == NULL)
 			return 0;
-		
+
 		if (!parent.isValid())
 			if (m_Interface->getState() == IFS_WAITFORCONFIG)
 				return 4 + m_Interface->getUserConfig().dnsservers().size();
@@ -54,17 +54,17 @@ namespace qnut {
 			return 0;
 		}
 	}
-	
+
 	QVariant CInterfaceDetailsModel::data(const QModelIndex & index, int role) const {
 		if (m_Interface == NULL)
 			return QVariant();
-		
+
 		if (!index.isValid())
 			return QVariant();
-		
+
 		if (role != Qt::DisplayRole)
 			return QVariant();
-		
+
 		switch (index.column()) {
 		case IFDET_MOD_ITEM:
 			switch (index.row()) {
@@ -165,27 +165,27 @@ namespace qnut {
 		default:
 			break;
 		}
-		
+
 		return QVariant();
 	}
-	
+
 	Qt::ItemFlags CInterfaceDetailsModel::flags(const QModelIndex & index) const {
 		if (m_Interface == NULL)
 			return 0;
-		
+
 		if (!index.isValid())
 			return 0;
-		
+
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	}
-	
+
 	QVariant CInterfaceDetailsModel::headerData(int section, Qt::Orientation orientation, int role) const {
 		if (m_Interface == NULL)
 			return QVariant();
-		
+
 		if (role != Qt::DisplayRole)
 			return QVariant();
-		
+
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
 			case IFDET_MOD_ITEM:
@@ -198,22 +198,22 @@ namespace qnut {
 		}
 		return QVariant();
 	}
-	
+
 	QModelIndex CInterfaceDetailsModel::index(int row, int column, const QModelIndex & parent) const {
 		if (m_Interface == NULL)
 			return QModelIndex();
-		
+
 		if (!hasIndex(row, column, parent))
 			return QModelIndex();
-		
+
 		if (!parent.isValid()) {
 			//if (row < 4 + m_Interface->dnsserver.size())
 			return createIndex(row, column, (void *)NULL);
 		}
-		
+
 		return QModelIndex();
 	}
-	
+
 	QModelIndex CInterfaceDetailsModel::parent(const QModelIndex &) const {
 		return QModelIndex();
 	}

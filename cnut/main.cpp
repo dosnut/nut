@@ -22,7 +22,7 @@ int main(int argc, char * argv[]) {
 	//Nuts is running, now let's parse our commands
 
 	QStringList rawCmdList = app.arguments();
-	
+
 	//Transform commands into command list:
 	CommandList cmdList = toCommandList(rawCmdList);
 	return dispatchCommands(cmdList,&connection);

@@ -22,7 +22,7 @@ namespace libnutwireless {
 	/** @brief CWpaSupplicant is the main class for communicatin with wpa_supplicant
 
 		It provides all necessary functions to communicate with wpa_supplicant.
-		
+
 		To open the wpa_supplicant interface, open() has to be called.
 		To close it, close() has to be called.
 		We try to do all tasks automatically as far as possible.
@@ -74,7 +74,7 @@ namespace libnutwireless {
 				It checks for plaintext,wep and wpa networks.
 			**/
 			NetconfigStatus checkAdHocNetwork(CNetworkConfig &config);
-			
+
 			//Set ap_scan defaults
 			void setApScanDefault();
 
@@ -124,15 +124,15 @@ namespace libnutwireless {
 
 			///Splits a message at newlines
 			QStringList sliceMessage(QString str);
-			
+
 			//Parse MIB Variables
 			MIBVariables parseMIB(QStringList list);
 			MIBVariable::MIBVariable_type parseMIBType(QString str);
-			
+
 			//parse list network
 			QList<ShortNetworkInfo> parseListNetwork(QStringList list);
 			NetworkFlags parseNetworkFlags(QString str);
-		
+
 			//parse Status with helper functionss
 			Status parseStatus(QStringList list);
 			Status::WPA_STATE parseWpaState(QString str);
@@ -143,8 +143,8 @@ namespace libnutwireless {
 			Status::EAP_STATE parseEapState(QString str);
 			Status::METHOD_STATE parseMethodState(QString str);
 			Status::DECISION parseDecision(QString str);
-		
-			
+
+
 			//parse Event
 			EventType parseEvent(QString str);
 			Request parseReq(QString str);
@@ -157,14 +157,14 @@ namespace libnutwireless {
 			void detachWpa();
 
 		public:
-			/** 
-			 * 
+			/**
+			 *
 			 * @param m_ifname interface name
 			 * The interface's socket has to be at /var/run/wpa_supplicant/ifname_name
 			 */
 			CWpaSupplicant(QObject * parent, QString m_ifname);
 			~CWpaSupplicant();
-			
+
 			/** Get the Hash of the managed network configs */
 			inline QHash<CNetworkConfig::NetworkId,CNetworkConfig> & getManagedConfigs() { return m_managedNetworks; }
 			/** open connection to wpa_supplicant */
@@ -172,9 +172,9 @@ namespace libnutwireless {
 			/** close connection to wpa_supplicant */
 			inline bool close() {return closeWpa("libnutclient",false); }
 			bool connected();
-			
+
 			void scan();
-			
+
 		public slots:
 			/**Set if the log should be enabled */
 			void setLog(bool enabled);
@@ -209,7 +209,7 @@ namespace libnutwireless {
 			void terminate();
 			void preauth(libnutcommon::MacAddress bssid);
 			int addNetwork(); //return -1 if failed, otherwise return network id
-			
+
 			/**
 				Function to add a Network. Errors will be written in NetconfigStatus
 				EAP-Networks are automatically detected.
@@ -219,15 +219,15 @@ namespace libnutwireless {
 
 			/** Same as above, but check if network is already managed (checks id_str) **/
 			NetconfigStatus addOnlyNewNetwork(CNetworkConfig config);
-			
-			/** Function to add multiple networks. Same as above 
+
+			/** Function to add multiple networks. Same as above
 			*/
 			QList<NetconfigStatus> addNetworks(QList<CNetworkConfig> configs);
 
 			/** Same as above, but check if network is already managed (checks id_str) **/
 			QList<NetconfigStatus> addOnlyNewNetworks(QList<CNetworkConfig> configs);
 
-			
+
 			/** Function to add networks read from a stream */
 			QList<NetconfigStatus> addNetworks(QTextStream * stream);
 			/**
@@ -243,7 +243,7 @@ namespace libnutwireless {
 
 			NetconfigStatus editNetwork(int netid, CNetworkConfig config);
 			CNetworkConfig getNetworkConfig(int id);
-			
+
 			void removeNetwork(int id);
 			bool setBssid(int id, libnutcommon::MacAddress bssid);
 
@@ -253,7 +253,7 @@ namespace libnutwireless {
 
 			QList<ShortNetworkInfo> listNetworks();
 			Status status();
-			
+
 			//Seldomly used functions
 			MIBVariables getMIBVariables();
 			Capabilities getCapabilities();

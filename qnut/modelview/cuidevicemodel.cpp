@@ -27,20 +27,20 @@ namespace qnut {
 	using namespace libnutclient;
 	using namespace libnutwireless;
 	using namespace libnutcommon;
-	
+
 	CUIDeviceModel::CUIDeviceModel(QObject * parent) : QAbstractItemModel(parent) {
 	}
-	
+
 	CUIDeviceModel::~CUIDeviceModel() {
 		qDeleteAll(m_UIDevices);
 		m_UIDevices.clear();
 	}
-	
+
 	CUIDevice * CUIDeviceModel::addUIDevice(CDevice * device) {
 		CUIDevice * newDevice = new CUIDevice(device);
 		beginInsertRows(QModelIndex(), m_UIDevices.size(), m_UIDevices.size());
 		m_UIDevices.append(newDevice);
-		
+
 		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)),
 			this, SLOT(updateDeviceState()));
 #ifndef QNUT_NO_WIRELESS
@@ -51,16 +51,16 @@ namespace qnut {
 		endInsertRows();
 		return newDevice;
 	}
-	
+
 	void CUIDeviceModel::removeUIDevice(CUIDevice * target) {
 		int targetPos = m_UIDevices.indexOf(target);
 		removeUIDevice(targetPos);
 	}
-	
+
 	void CUIDeviceModel::removeUIDevice(int position) {
 		if (position < 0 || position >= m_UIDevices.size())
 			return;
-		
+
 		beginRemoveRows(QModelIndex(), position, position);
 		CUIDevice * target = m_UIDevices.takeAt(position);
 		disconnect(target->device(), SIGNAL(stateChanged(libnutcommon::DeviceState)),
@@ -73,7 +73,7 @@ namespace qnut {
 		delete target;
 		endRemoveRows();
 	}
-	
+
 	int CUIDeviceModel::findUIDevice(CDevice * device) {
 		int targetPos;
 		for (targetPos = 0; targetPos < m_UIDevices.size(); targetPos++) {
@@ -81,63 +81,63 @@ namespace qnut {
 				return targetPos;
 			}
 		}
-		
+
 		return -1;
 	}
-	
+
 	void CUIDeviceModel::updateDeviceState() {
 		int targetPos = findUIDevice(qobject_cast<CDevice *>(sender()));
-		
+
 		if (targetPos == -1)
 			return;
-		
+
 		emit dataChanged(index(targetPos, 0), index(targetPos, OV_MOD_COLCOUNT-1));
 	}
-	
+
 	void CUIDeviceModel::updateSignalQuality() {
 		int targetPos = m_UIDevices.indexOf(qobject_cast<CUIDevice *>(sender()));
-		
+
 		if (targetPos == -1)
 			return;
-		
+
 		emit dataChanged(index(targetPos, OV_MOD_NETWORK), index(targetPos, OV_MOD_NETWORK));
 	}
-	
+
 	Qt::ItemFlags CUIDeviceModel::flags(const QModelIndex & index) const {
 		if (!index.isValid())
 			return 0;
-		
+
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	}
-	
+
 	QModelIndex CUIDeviceModel::parent(const QModelIndex &) const {
 		return QModelIndex();
 	}
-	
+
 	int CUIDeviceModel::columnCount(const QModelIndex & /*parent*/) const {
 		return OV_MOD_COLCOUNT;
 	}
-	
+
 	QModelIndex CUIDeviceModel::index(int row, int column, const QModelIndex & /*parent*/) const {
 		return (row >= m_UIDevices.size()) ?
 			QModelIndex() :
 			createIndex(row, column, (void *)(m_UIDevices.at(row)));
 	}
-	
+
 	bool CUIDeviceModel::hasChildren(const QModelIndex & parent) const {
 		return !parent.isValid();
 	}
-	
+
 	int CUIDeviceModel::rowCount(const QModelIndex & parent) const {
 		return parent.isValid() ? 0 : m_UIDevices.count();
 	}
-	
+
 	QVariant CUIDeviceModel::data(const QModelIndex & index, int role) const {
 		if (!index.isValid())
 			return QVariant();
-		
+
 		CDevice * data = static_cast<CUIDevice *>(index.internalPointer())->device();
-		
+
 		if (role == Qt::DisplayRole) {
 			switch (index.column()) {
 			case OV_MOD_NAME:
@@ -173,11 +173,11 @@ namespace qnut {
 		}
 		return QVariant();
 	}
-	
+
 	QVariant CUIDeviceModel::headerData(int section, Qt::Orientation orientation, int role) const {
 		if (role != Qt::DisplayRole)
 			return QVariant();
-		
+
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
 			case OV_MOD_NAME:

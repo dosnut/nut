@@ -10,12 +10,12 @@ int main(int argc, char * argv[])
 {
 	libnutcommon::init();
 	QApplication app(argc, argv);
-	
+
 	QString locale = QLocale::system().name();
 	QTranslator translator;
 	translator.load(QString(UI_PATH_TRANSLATIONS "qnut_") + locale);
 	app.installTranslator(&translator);
-	
+
 #ifndef QNUT_SETTINGS_NOCOMPAT
 	{
 		QDir workdir(UI_PATH_WORK);
@@ -25,9 +25,9 @@ int main(int argc, char * argv[])
 		}
 	}
 #endif
-	
+
 	QDir::setCurrent(QDir::homePath());
-	
+
 	CConnectionManager mainwin;
 	return app.exec();
 }

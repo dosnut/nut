@@ -1,7 +1,7 @@
 //
 // C++ Implementation: hardware
 //
-// Description: 
+// Description:
 //
 //
 // Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
@@ -58,12 +58,12 @@ namespace nuts {
 		QSocketNotifier *nln = new QSocketNotifier(netlink_fd, QSocketNotifier::Read, this);
 		connect(nln, SIGNAL(activated(int)), this, SLOT(read_netlinkmsgs()));
 	}
-	
+
 	HardwareManager::~HardwareManager() {
 		free_ethtool();
 		free_netlink();
 	}
-	
+
 	bool HardwareManager::controlOn(int ifIndex, bool force) {
 		if (ifIndex < 0) return false;
 		if (!ifup(ifIndex2Name(ifIndex), force))
@@ -101,16 +101,16 @@ namespace nuts {
 		}
 		return true;
 	}
-	
+
 	bool HardwareManager::init_netlink() {
 		nlh = nl_handle_alloc();
 		if (!nlh) return false;
 		nl_socket_set_peer_port(nlh, 0);
-		
+
 		if (nl_connect(nlh, NETLINK_ROUTE) != 0) goto cleanup;
 		if (nl_socket_add_membership(nlh, RTNLGRP_LINK) != 0) goto cleanup;
 		if (nl_socket_add_membership(nlh, RTNLGRP_IPV4_IFADDR) != 0) goto cleanup;
-		
+
 		netlink_fd = nl_socket_get_fd(nlh);
 		nlcache = rtnl_link_alloc_cache(nlh);
 		return true;
@@ -140,7 +140,7 @@ namespace nuts {
 	void HardwareManager::free_ethtool() {
 		close(ethtool_fd);
 	}
-	
+
 	bool HardwareManager::ifup(const QString &ifname, bool force) {
 /*		nl_cache_update(nlh, nlcache);
 		struct rtnl_link *request = rtnl_link_alloc();
@@ -247,11 +247,11 @@ namespace nuts {
 		}
 		return ifr.ifr_ifindex;
 	}
-	
+
 	struct nl_handle *HardwareManager::getNLHandle() {
 		return nlh;
 	}
-	
+
 	libnutcommon::MacAddress HardwareManager::getMacAddress(const QString &ifName) {
 		struct ifreq ifr;
 		if (!ifreq_init(ifr, ifName)) {
@@ -264,7 +264,7 @@ namespace nuts {
 		}
 		return libnutcommon::MacAddress((quint8*) ifr.ifr_hwaddr.sa_data);
 	}
-	
+
 	bool HardwareManager::ifreq_init(struct ifreq &ifr, const QString &ifname) {
 		QByteArray buf = ifname.toUtf8();
 		if (buf.size() >= IFNAMSIZ) return false;
@@ -275,13 +275,13 @@ namespace nuts {
 	void HardwareManager::ifreq_init(struct ifreq &ifr) {
 		memset((char*) &ifr, 0, sizeof(ifr));
 	}
-	
+
 	void HardwareManager::read_netlinkmsgs() {
 		struct sockaddr_nl peer;
 		unsigned char *msg;
 		int n, msgsize;
 		struct nlmsghdr *hdr;
-		
+
 		msgsize = n = nl_recv(nlh, &peer, &msg, 0);
 		for (hdr = (struct nlmsghdr*) msg; nlmsg_ok(hdr, n); hdr = (struct nlmsghdr*) nlmsg_next(hdr, &n)) {
 //			log << QString("Message type 0x%1").arg(hdr->nlmsg_type, 0, 16) << endl;
@@ -348,11 +348,11 @@ namespace nuts {
 		if (ifIndex >= ifStates.size()) return false;
 		return ifStates[ifIndex].active;
 	}
-	
+
 	static void iwreq_init(struct iwreq &iwr) {
 		memset((char*) &iwr, 0, sizeof(iwr));
 	}
-	
+
 	static bool iwreq_init(struct iwreq &iwr, const QString &ifname) {
 		QByteArray buf = ifname.toUtf8();
 		if (buf.size() >= IFNAMSIZ) return false;
@@ -360,7 +360,7 @@ namespace nuts {
 		strncpy (iwr.ifr_ifrn.ifrn_name, buf.constData(), buf.size());
 		return true;
 	}
-	
+
 	bool HardwareManager::ifExists(const QString &ifName) {
 		struct ifreq ifr;
 		if (!ifreq_init(ifr, ifName)) {
@@ -376,14 +376,14 @@ namespace nuts {
 		ifStates[ifIndex] = ifstate(false);
 		return true;
 	}
-	
+
 	bool HardwareManager::hasWLAN(const QString &ifName) {
 		struct iwreq iwr;
 		iwreq_init(iwr, ifName);
 		if (ioctl(ethtool_fd, SIOCGIWNAME, &iwr) < 0) return false;
 		return true;
 	}
-	
+
 	bool HardwareManager::getEssid(const QString &ifName, QString &essid) {
 		essid = "";
 		struct iwreq iwr;

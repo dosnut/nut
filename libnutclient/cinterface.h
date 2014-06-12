@@ -19,11 +19,11 @@ namespace libnutclient {
 namespace libnutclient {
 
 	/** @brief The Interface represents one network interface
-		
+
 		It provides information about its configuration (ip,netmask,gateway,dnsservers,state).
 		There's also a function to set an own interface configuration
 		It also emits a signal on data changes.
-		
+
 	*/
 	class CInterface : public CLibNut {
 		Q_OBJECT
@@ -72,7 +72,7 @@ namespace libnutclient {
 		inline const QHostAddress& getGateway() { return m_gateway; }
 		inline const QList<QHostAddress>& getDnsServers() { return m_dnsservers; }
 		inline int getIndex() const { return m_index;}
-		
+
 		libnutcommon::IPv4UserConfig getUserConfig(bool refresh=false);
 		const libnutcommon::IPv4Config& getConfig() const { return m_config; }
 
@@ -85,7 +85,7 @@ namespace libnutclient {
 		void deactivate();
 		bool needUserSetup();
 		void setUserConfig(const libnutcommon::IPv4UserConfig &cuserConfig);
-		
+
 	signals:
 		void initializationFailed(CInterface * interface); //TODO:Implement this: has to be called if init fails
 		void initializationCompleted(CInterface * interface);

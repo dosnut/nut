@@ -25,10 +25,10 @@ namespace qnut {
 	struct ToggleableCommand {
 		bool enabled;
 		QString path;
-		
+
 		ToggleableCommand() : enabled(false) {}
 	};
-	
+
 	/**
 	 * @brief Returns a QString of the filename for the given device according to its state.
 	 * @param device pointer to an existing instance of a CDevice
@@ -59,7 +59,7 @@ namespace qnut {
 	 * @param device pointer to an existing instance of a CDevice
 	 */
 	QString activeIP(libnutclient::CDevice * device);
-	
+
 	/**
 	 * @brief Returns the string representation of a valid (not "NULL") QHostAddress. If the given address is not valid "none" will be returned.
 	 * @param address the host address to convert
@@ -67,7 +67,7 @@ namespace qnut {
 	inline QString toStringDefault(QHostAddress address) {
 		return address.isNull() ? QObject::tr("none") : address.toString();
 	}
-	
+
 	inline QString getNameDefault(libnutclient::CEnvironment * environment) {
 		return environment->getName().isEmpty() ? QObject::tr("default") : environment->getName();
 	}

@@ -19,20 +19,20 @@ namespace libnutcommon {
 		DeviceState state;
 		DeviceType type;
 	};
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceProperties &devprop);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceProperties &devprop);
-	
+
 	struct EnvironmentProperties {
 		QString name;
 		bool active;
 	};
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentProperties &envprop);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentProperties &envprop);
-	
+
 	enum InterfaceState { IFS_OFF, IFS_STATIC, IFS_DHCP, IFS_ZEROCONF, IFS_WAITFORCONFIG };
-	
+
 	struct InterfaceProperties {
 		InterfaceState ifState;
 		QHostAddress ip;
@@ -41,7 +41,7 @@ namespace libnutcommon {
 		QList<QHostAddress> dns;
 		int gateway_metric;
 	};
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceProperties &ifprop);
 

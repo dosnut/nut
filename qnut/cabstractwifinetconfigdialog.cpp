@@ -32,10 +32,10 @@
 
 namespace qnut {
 	using namespace libnutwireless;
-	
+
 	QRegExpValidator * CAbstractWifiNetConfigDialog::m_HexValidator = NULL;
 	int CAbstractWifiNetConfigDialog::m_HexValidatorRefs = 0;
-	
+
 	CAbstractWifiNetConfigDialog::CAbstractWifiNetConfigDialog(libnutwireless::CWireless * interface, QWidget * parent) : QDialog(parent),
 		m_ErrorCodeEvaluator(new CErrorCodeEvaluator()),
 		m_WifiInterface(interface),
@@ -47,59 +47,59 @@ namespace qnut {
 			m_HexValidator = new QRegExpValidator(regexp, this);
 		}
 	}
-	
+
 	CAbstractWifiNetConfigDialog::~CAbstractWifiNetConfigDialog() {
 		delete m_ErrorCodeEvaluator;
-		
+
 		m_HexValidatorRefs--;
 		if (!m_HexValidatorRefs && m_HexValidator) {
 			delete m_HexValidator;
 			m_HexValidator = NULL;
 		}
 	}
-	
+
 	bool CAbstractWifiNetConfigDialog::execute() {
 		m_Config = libnutwireless::CNetworkConfig();
 		m_OldConfig = m_Config;
-		
+
 		m_CurrentID = -1;
-		
+
 		populateUi();
 		return exec();
 	}
-	
+
 	bool CAbstractWifiNetConfigDialog::execute(ScanResult scanResult) {
 		m_Config = libnutwireless::CNetworkConfig(scanResult);
 		m_OldConfig = m_Config;
-		
+
 		m_CurrentID = -1;
-		
+
 		populateUi();
 		return exec();
 	}
-	
+
 	bool CAbstractWifiNetConfigDialog::execute(int id) {
 		m_Config = m_WifiInterface->getWpaSupplicant()->getNetworkConfig(id);
 		m_OldConfig = m_Config;
-		
+
 		m_CurrentID = id;
-		
+
 		populateUi();
 		return exec();
 	}
-	
+
 	void CAbstractWifiNetConfigDialog::accept() {
 		if (applyConfiguration())
 			QDialog::accept();
 	}
-	
+
 	void CAbstractWifiNetConfigDialog::resetUi() {
 		m_Config = m_OldConfig;
 		populateUi();
 	}
-	
+
 	#define FLAG_PREPARE_OUTPUT(a, b, c) if(a & c) b << #c;
-	
+
 	void CAbstractWifiNetConfigDialog::getConfigErrors(libnutwireless::NetconfigStatus * status, QStringList & errormsg) {
 		if (status->failures != NCF_NONE) {
 // 			FLAG_PREPARE_OUTPUT(status->failures, errormsg, NCF_ALL)
@@ -127,7 +127,7 @@ namespace qnut {
 			FLAG_PREPARE_OUTPUT(status->failures, errormsg, NCF_WEP_KEY_IDX)
 			FLAG_PREPARE_OUTPUT(status->failures, errormsg, NCF_PEERKEY)
 		}
-		
+
 		if (status->eap_failures != ENCF_NONE) {
 // 			FLAG_PREPARE_OUTPUT(status->failures, errormsg, ENCF_ALL)
 			FLAG_PREPARE_OUTPUT(status->failures, errormsg, ENCF_EAP)
@@ -158,7 +158,7 @@ namespace qnut {
 			FLAG_PREPARE_OUTPUT(status->failures, errormsg, ENCF_PAC_FILE)
 		}
 	}
-	
+
 	void CAbstractWifiNetConfigDialog::convertLineEditText(QLineEdit * lineEdit, bool hex) {
 		if (hex) {
 			lineEdit->setText(lineEdit->text().toAscii().toHex());
@@ -169,13 +169,13 @@ namespace qnut {
 			lineEdit->setValidator(NULL);
 		}
 	}
-	
+
 	void CAbstractWifiNetConfigDialog::convertLineEditText(bool hex) {
 		QCheckBox * hexCheck = qobject_cast<QCheckBox *>(sender());
 		if (hexCheck/* && m_HexEditMap.contains(hexCheck)*/)
 			convertLineEditText(m_HexEditMap[hexCheck], hex);
 	}
-	
+
 }
 #endif
 

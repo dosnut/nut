@@ -18,9 +18,9 @@ namespace qnut {
 	/**
 	 * @brief CInterfaceDetailsModel provides an item model for an overview of the details from an interface.
 	 * @author Oliver Groß <z.o.gross@gmx.de>
-	 * 
+	 *
 	 * The class provides all functions for a read-only model specified in the Qt 4 documentation.
-	 * 
+	 *
 	 * The model supports the display the following information in rows for the given interface:
 	 *  - type ((user)static, dynamic, zeroconf)
 	 *  - ip address
@@ -39,7 +39,7 @@ namespace qnut {
 		CInterfaceDetailsModel(libnutclient::CInterface * data = NULL, QObject * parent = 0);
 		/// @brief Destroyes the object.
 		~CInterfaceDetailsModel();
-		
+
 		QVariant data(const QModelIndex & index, int role) const;
 		Qt::ItemFlags flags(const QModelIndex & index) const;
 		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;

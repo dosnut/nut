@@ -35,9 +35,9 @@ namespace cnut {
 		NUT_COMMANDS command;
 		QString value;
 	};
-	
+
 	typedef QList<NutCommand> CommandList;
-	
+
 	typedef enum {
 	RETVAL_SUCCESS=0, RETVAL_UNKNOWN_COMMAND,
 	RETVAL_DBUS_ERROR, RETVAL_NUTS_OFF,

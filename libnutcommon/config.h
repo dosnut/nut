@@ -22,22 +22,22 @@ namespace libnutcommon {
 	class SelectConfig;
 	class EnvironmentConfig;
 	class IPv4Config;
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const Config &data);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, Config &data);
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data);
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const SelectRule &data);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectRule &data);
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const SelectConfig &data);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectConfig &data);
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentConfig &data);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentConfig &data);
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4Config &data);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4Config &data);
 }
@@ -65,37 +65,37 @@ namespace libnutcommon {
 				CopyMark() : m_isCopy(false) { }
 				CopyMark(const CopyMark &) : m_isCopy(true) { }
 				operator bool () { return m_isCopy; }
-				
+
 				static CopyMark Copy() { return CopyMark(true); }
 				static CopyMark NoCopy() { return CopyMark(false); }
 		};
 	}
-	
+
 	/** @brief Container for all \link DeviceConfig device configs\endlink. A deviceName may contain wildcards (not supported yet).
 	 */
 	class Config {
 		private:
 			internal::CopyMark m_isCopy;
-		
+
 		protected:
 			friend class nuts::ConfigParser;
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const Config &data);
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, Config &data);
-			
+
 			QList<QString> m_devNames;
 			QList<DeviceConfig*> m_devConfigs;
-		
+
 		public:
 			Config();
 			virtual ~Config();
-			
+
 			DeviceConfig* getDevice(const QString &deviceName) {
 				int id = m_devNames.indexOf(deviceName);
 				if (id >= 0) {
 					return m_devConfigs.at(id);
 				}
 			}
-			
+
 			const QList<QString> &getNames() {
 				return m_devNames;
 			}
@@ -106,7 +106,7 @@ namespace libnutcommon {
 
 			bool contains(QString deviceName) { return m_devNames.contains(deviceName);}
 	};
-	
+
 	/** @brief Each device has a list of \link EnvironmentConfig Environments\endlink and some additional config values.
 	 *
 	 * Each device can have many Environments, but it can only be in one; each
@@ -119,29 +119,29 @@ namespace libnutcommon {
 	class DeviceConfig {
 		private:
 			internal::CopyMark m_isCopy;
-		
+
 		protected:
 			friend class nuts::ConfigParser;
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data);
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data);
-			
+
 			QList<EnvironmentConfig*> m_environments;
 			bool m_noAutoStart;
 			QString m_wpaConfigFile;
 			QString m_wpaDriver;
 			bool m_isRegExp;
 			int m_gateway_metric;
-		
+
 		public:
 			DeviceConfig();
 			virtual ~DeviceConfig();
-			
+
 			const QList<EnvironmentConfig*>& getEnvironments() {
 				return m_environments;
 			}
-			
+
 			bool noAutoStart() const { return m_noAutoStart; }
-			
+
 			QString wpaConfigFile() const { return m_wpaConfigFile; }
 			QString wpaDriver() const { return m_wpaDriver; }
 
@@ -151,7 +151,7 @@ namespace libnutcommon {
 
 			DeviceConfig * createCopy() { return this;}
 	};
-	
+
 	/** @brief Result type of a select test.
 	 *
 	 */
@@ -166,13 +166,13 @@ namespace libnutcommon {
 		protected:
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const SelectResult &data);
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, SelectResult &data);
-			
+
 			bool_t m_value;
-			
+
 		public:
 			SelectResult(bool_t value = False)
 			: m_value(value) { }
-			
+
 			SelectResult& operator = (bool_t value) {
 				m_value = value;
 				return *this;
@@ -185,7 +185,7 @@ namespace libnutcommon {
 				m_value = (bool_t) value;
 				return *this;
 			}
-			
+
 			SelectResult operator || (const SelectResult &other) {
 				const bool_t op_or[16] = {
 					False  , User , NotUser, True,
@@ -204,20 +204,20 @@ namespace libnutcommon {
 				};
 				return op_and[m_value*4 + other.m_value];
 			}
-			
+
 			operator bool_t () const {
 				return m_value;
 			}
-			
+
 			operator qint8 () const {
 				return (qint8) m_value;
 			}
-			
+
 			SelectResult operator !() const {
 				return (SelectResult::bool_t) (3 - m_value);
 			}
 	};
-	
+
 	/** @brief A select operation.
 	 *
 	 */
@@ -234,13 +234,13 @@ namespace libnutcommon {
 				SEL_AND_BLOCK,  //!< Select a list of \link SelectRule SelectRules\endlink, results combined with AND
 				SEL_OR_BLOCK   //!< Select a list of \link SelectRule SelectRules\endlink, results combined with OR
 			} SelectType;
-			
+
 			SelectRule() : invert(false), selType(SEL_USER) { }
 			SelectRule(const QHostAddress &ipAddr, bool invert = false) : invert(invert), selType(SEL_ARP), ipAddr(ipAddr) { }
 			SelectRule(const QHostAddress &ipAddr, const libnutcommon::MacAddress &macAddr, bool invert = false) : invert(invert), selType(SEL_ARP), ipAddr(ipAddr), macAddr(macAddr) { }
 			SelectRule(const QString &essid, bool invert = false) : invert(invert), selType(SEL_ESSID), essid(essid) { }
 			SelectRule(quint32 block, SelectType blockType, bool invert = false) : invert(invert), selType(blockType), block(block) { }
-			
+
 			bool invert;        //!< Invert result; unused for now.
 			SelectType selType;
 			quint32 block;      //!< Block identifier in SelectConfig for SEL_*_BLOCK
@@ -248,7 +248,7 @@ namespace libnutcommon {
 			QHostAddress ipAddr;
 			libnutcommon::MacAddress macAddr;
 	};
-	
+
 	/** @brief SelectConfig for an environment.
 	 *
 	 * This structure represents a tree of SelectRules; try qnut for visualization.
@@ -260,13 +260,13 @@ namespace libnutcommon {
 
 		public:
 			SelectConfig() { }
-			
+
 			QVector<SelectRule> filters;         //!< List of \link SelectRule SelectRules\endlink
 			//! List of blocks; each block is a list of filter ids.
 			//! The type of the block (AND/OR) is specified in the rule for the block
 			QVector< QVector<quint32> > blocks;
 	};
-	
+
 	/** @brief Each EnvironmentConfig of a \link DeviceConfig device\endlink has a list
 	 *         of \link IPv4Config interfaces\endlink, which configure the ips.
 	 *
@@ -279,20 +279,20 @@ namespace libnutcommon {
 			friend class nuts::ConfigParser;
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentConfig &data);
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentConfig &data);
-			
+
 			QString m_name;
 			QList<IPv4Config*> m_ipv4Interfaces;
 			SelectConfig m_select;
-			
+
 		public:
 			EnvironmentConfig(const QString &name = "");
 			virtual ~EnvironmentConfig();
-			
+
 			QString getName() { return m_name; } //!< A description for that environment. It does not have to be unique.
 			const QList<IPv4Config*>& getIPv4Interfaces() { return m_ipv4Interfaces; }
 			const SelectConfig &getSelect() { return m_select; }
 	};
-	
+
 	/** @brief Each IPv4Config stands for one ip of an interface.
 	 *
 	 * There are several methods how to to this, and some
@@ -315,7 +315,7 @@ namespace libnutcommon {
 				DO_STATIC    = 4,   //!< Use values from config file.
 				DO_USERSTATIC = 8	//!< Use values specified at runtime by a user
 			} Flags;
-			
+
 			/** @brief Unused/Unsupported. Could be used to overwrite some value with static configured ones.
 			 *
 			 */
@@ -325,12 +325,12 @@ namespace libnutcommon {
 				OW_GATEWAY   = 4,
 				OW_DNSSERVER = 8
 			} OverwriteFlags;
-		
+
 		protected:
 			friend class nuts::ConfigParser;
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const IPv4Config &data);
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4Config &data);
-			
+
 			QHostAddress m_static_ip, m_static_netmask, m_static_gateway;
 			QList<QHostAddress> m_static_dnsservers;
 
@@ -340,10 +340,10 @@ namespace libnutcommon {
 			int m_overwriteFlags;
 			int m_timeout;
 			bool m_continue_dhcp;
-		
-		public:	
+
+		public:
 			IPv4Config(int flags = IPv4Config::DO_DHCP | IPv4Config::DO_ZEROCONF, int overwriteFlags = 0);
-			
+
 			const QHostAddress& getStaticIP() const { return m_static_ip; }
 			const QHostAddress& getStaticNetmask() const { return m_static_netmask; }
 			const QHostAddress& getStaticGateway() const { return m_static_gateway; }
@@ -355,7 +355,7 @@ namespace libnutcommon {
 			OverwriteFlags getOverwriteFlags() const { return (OverwriteFlags) m_overwriteFlags; }
 			int getTimeOut() const { return m_timeout; }
 	};
-	
+
 	/** @brief If an interface has to be configured by the user (IPv4Config::DO_USERSTATIC), he/she has to
 	 *         set that information with this class.
 	 *
@@ -364,7 +364,7 @@ namespace libnutcommon {
 		protected:
 			friend QDBusArgument &operator<< (QDBusArgument &argument, const IPv4UserConfig &data);
 			friend const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4UserConfig &data);
-			
+
 			QHostAddress m_ip, m_netmask, m_gateway;
 			QList<QHostAddress> m_dnsservers;
 
@@ -374,10 +374,10 @@ namespace libnutcommon {
 
 			const QHostAddress& netmask() const { return m_netmask; }
 			bool setNetmask(const QHostAddress &netmask) { m_netmask = netmask; return true; }
-		
+
 			const QHostAddress& gateway() const { return m_gateway; }
 			bool setGateway(const QHostAddress &gateway) { m_gateway = gateway; return true; }
-		
+
 			const QList<QHostAddress>& dnsservers() const { return m_dnsservers; }
 			bool setDnsservers(const QList<QHostAddress>& dnsservers) { m_dnsservers = dnsservers; return true; }
 

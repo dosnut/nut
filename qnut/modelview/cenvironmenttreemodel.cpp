@@ -21,7 +21,7 @@
 namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutclient;
-	
+
 	CEnvironmentTreeModel::CEnvironmentTreeModel(CDevice * data, QObject * parent) : QAbstractItemModel(parent) {
 		m_Device = data;
 		if (data) {
@@ -33,22 +33,22 @@ namespace qnut {
 			}
 		}
 	}
-	
+
 	CEnvironmentTreeModel::~CEnvironmentTreeModel() {
 		m_Device = NULL;
 	}
-	
+
 	int CEnvironmentTreeModel::columnCount(const QModelIndex &) const {
 		if (m_Device == NULL)
 			return 0;
 		else
 			return 3;
 	}
-	
+
 	int CEnvironmentTreeModel::rowCount(const QModelIndex & parent) const {
 		if (m_Device == NULL)
 			return 0;
-		
+
 		if (!parent.isValid())
 			return m_Device->getEnvironments().count();
 		else {
@@ -59,13 +59,13 @@ namespace qnut {
 				return 0;
 		}
 	}
-	
+
 	QVariant CEnvironmentTreeModel::data(const QModelIndex & index, int role) const {
 		if ((m_Device == NULL) || (!index.isValid()))
 			return QVariant();
-		
+
 		QObject * currentData = static_cast<QObject *>(index.internalPointer());
-		
+
 		if ((role == Qt::DecorationRole) && (index.column() == ENVTREE_MOD_ITEM)) {
 			if (currentData->parent() == m_Device)
 				return QIcon(static_cast<CEnvironment *>(currentData) == m_Device->getActiveEnvironment() ? UI_ICON_ENVIRONMENT_ACTIVE : UI_ICON_ENVIRONMENT);
@@ -79,10 +79,10 @@ namespace qnut {
 					return QIcon(UI_ICON_INTERFACE_ACTIVE);
 				}
 		}
-		
+
 		if (role != Qt::DisplayRole)
 			return QVariant();
-		
+
 		switch (index.column()) {
 		case ENVTREE_MOD_ITEM:
 			if (currentData->parent() == m_Device) {
@@ -118,27 +118,27 @@ namespace qnut {
 		default:
 			break;
 		}
-		
+
 		return QVariant();
 	}
-	
+
 	Qt::ItemFlags CEnvironmentTreeModel::flags(const QModelIndex & index) const {
 		if (m_Device == NULL)
 			return 0;
-		
+
 		if (!index.isValid())
 			return 0;
-		
+
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	}
-	
+
 	QVariant CEnvironmentTreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
 		if (m_Device == NULL)
 			return QVariant();
-		
+
 		if (role != Qt::DisplayRole)
 			return QVariant();
-		
+
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
 			case ENVTREE_MOD_ITEM:
@@ -153,14 +153,14 @@ namespace qnut {
 		}
 		return QVariant();
 	}
-	
+
 	QModelIndex CEnvironmentTreeModel::index(int row, int column, const QModelIndex & parent) const {
 		if (m_Device == NULL)
 			return QModelIndex();
-		
+
 		if (!hasIndex(row, column, parent))
 			return QModelIndex();
-		
+
 		if (!parent.isValid()) {
 			return createIndex(row, column, m_Device->getEnvironments()[row]);
 		}
@@ -169,19 +169,19 @@ namespace qnut {
 			return createIndex(row, column, parentData->getInterfaces()[row]);
 		}
 	}
-	
+
 	QModelIndex CEnvironmentTreeModel::parent(const QModelIndex & index) const {
 		if (m_Device == NULL)
 			return QModelIndex();
-		
+
 		if (!index.isValid())
 			return QModelIndex();
-		
+
 		if (index.internalPointer() == NULL)
 			return QModelIndex();
-		
+
 		QObject * parentData = static_cast<QObject *>(index.internalPointer())->parent();
-		
+
 		if (parentData->parent() == m_Device)
 			return createIndex(static_cast<CEnvironment *>(parentData)->getIndex(), 0, (void *)(parentData));
 		else

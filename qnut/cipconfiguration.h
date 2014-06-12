@@ -17,7 +17,7 @@ namespace qnut {
 	/**
 	 * @brief CIPConfiguration provides a dialog to configure an user definable interface.
 	 * @author Oliver Groß <z.o.gross@gmx.de>
-	 * 
+	 *
 	 * On creation, the CScriptSettings sets up the user interface to configure an user definable interface.
 	 * It provides a public function to open the dialog for an existing user configuration.
 	 */
@@ -41,7 +41,7 @@ namespace qnut {
 	private slots:
 		void addDNS();
 		void removeDNS();
-		
+
 		void importConfig();
 		void exportConfig();
 		void handleSelectionChanged(const QItemSelection & selected);

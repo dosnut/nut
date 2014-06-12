@@ -20,7 +20,7 @@ namespace libnutwireless {
 			int priority;
 			QOOL mode; //0 = infrastructure (Managed) mode, i.e., associate with an AP (default) 1 = IBSS (ad-hoc, peer-to-peer)
 			int frequency;
-			Protocols protocols; //list of accepted protocols 
+			Protocols protocols; //list of accepted protocols
 			KeyManagement key_mgmt; // list of accepted authenticated key management protocols
 			AuthenticationAlgs auth_alg; //list of allowed IEEE 802.11 authentication algorithms
 			PairwiseCiphers pairwise; //list of accepted pairwise (unicast) ciphers for WPA (CCMP,TKIP,NONE)
@@ -70,16 +70,16 @@ namespace libnutwireless {
 				qint32 id;
 			} netId;
 			static CNetworkConfig::NetworkId toNetworkId(QString str);
-			
+
 		public:
 			CNetworkConfig();
 			CNetworkConfig(const CNetworkConfig &config);
 			CNetworkConfig(ScanResult scan);
 			~CNetworkConfig();
 			void writeTo(QTextStream &stream);
-			
+
 			void setEqualsToUndefinded(CNetworkConfig & other);
-			
+
 			//Access functions
 			inline QString get_ssid() { return ssid;}
 			inline libnutcommon::MacAddress get_bssid() { return bssid; }
@@ -93,48 +93,48 @@ namespace libnutwireless {
 			inline KeyManagement get_key_mgmt() { return key_mgmt; }
 			inline AuthenticationAlgs get_auth_alg() { return auth_alg; }
 			inline PairwiseCiphers get_pairwise() { return pairwise; }
-			inline GroupCiphers get_group() { return group; } 
-			inline QString get_psk() { return psk; } 
-			inline EapolFlags get_eapol_flags() { return eapol_flags; } 
-			inline QOOL get_mixed_cell() { return mixed_cell; } 
-			inline QOOL get_proactive_key_caching() { return proactive_key_caching; } 
-			inline QString get_wep_key0() { return wep_key0; } 
+			inline GroupCiphers get_group() { return group; }
+			inline QString get_psk() { return psk; }
+			inline EapolFlags get_eapol_flags() { return eapol_flags; }
+			inline QOOL get_mixed_cell() { return mixed_cell; }
+			inline QOOL get_proactive_key_caching() { return proactive_key_caching; }
+			inline QString get_wep_key0() { return wep_key0; }
 			inline QString get_wep_key1() { return wep_key1; }
 			inline QString get_wep_key2() { return wep_key2; }
 			inline QString get_wep_key3() { return wep_key3; }
-			inline char get_wep_tx_keyidx() { return wep_tx_keyidx; } 
+			inline char get_wep_tx_keyidx() { return wep_tx_keyidx; }
 			inline QOOL get_peerkey() { return peerkey; }
-			inline EapMethod get_eap() { return eap; } 
-			inline QString get_identity() { return identity; } 
-			inline QString get_anonymous_identity() { return anonymous_identity; } 
-			inline QString get_password() { return password; } 
-			inline QString get_ca_cert() { return ca_cert; } 
-			inline QString get_ca_path() { return ca_path; } 
-			inline QString get_client_cert() { return client_cert; } 
-			inline QString get_private_key() { return private_key; } 
-			inline QString get_private_key_passwd() { return private_key_passwd; } 
-			inline QString get_dh_file() { return dh_file; } 
-			inline QString get_subject_match() { return subject_match; } 
-			inline QString get_altsubject_match() { return altsubject_match; } 
-			inline QString get_phase1() { return phase1; } 
-			inline QString get_phase2() { return phase2; } 
-			inline QString get_ca_cert2() { return ca_cert2; } 
-			inline QString get_ca_path2() { return ca_path2; } 
-			inline QString get_client_cert2() { return client_cert2; } 
-			inline QString get_private_key2() { return private_key2; } 
-			inline QString get_private_key2_passwd() { return private_key2_passwd; } 
-			inline QString get_dh_file2() { return dh_file2; } 
-			inline QString get_subject_match2() { return subject_match2; } 
-			inline QString get_altsubject_match2() { return altsubject_match2; } 
-			inline int get_fragment_size() { return fragment_size; } 
-			inline QString get_eappsk() { return eappsk; } 
-			inline QString get_nai() { return nai; } 
-			inline QString get_pac_file() { return pac_file; } 
-			
+			inline EapMethod get_eap() { return eap; }
+			inline QString get_identity() { return identity; }
+			inline QString get_anonymous_identity() { return anonymous_identity; }
+			inline QString get_password() { return password; }
+			inline QString get_ca_cert() { return ca_cert; }
+			inline QString get_ca_path() { return ca_path; }
+			inline QString get_client_cert() { return client_cert; }
+			inline QString get_private_key() { return private_key; }
+			inline QString get_private_key_passwd() { return private_key_passwd; }
+			inline QString get_dh_file() { return dh_file; }
+			inline QString get_subject_match() { return subject_match; }
+			inline QString get_altsubject_match() { return altsubject_match; }
+			inline QString get_phase1() { return phase1; }
+			inline QString get_phase2() { return phase2; }
+			inline QString get_ca_cert2() { return ca_cert2; }
+			inline QString get_ca_path2() { return ca_path2; }
+			inline QString get_client_cert2() { return client_cert2; }
+			inline QString get_private_key2() { return private_key2; }
+			inline QString get_private_key2_passwd() { return private_key2_passwd; }
+			inline QString get_dh_file2() { return dh_file2; }
+			inline QString get_subject_match2() { return subject_match2; }
+			inline QString get_altsubject_match2() { return altsubject_match2; }
+			inline int get_fragment_size() { return fragment_size; }
+			inline QString get_eappsk() { return eappsk; }
+			inline QString get_nai() { return nai; }
+			inline QString get_pac_file() { return pac_file; }
+
 			//non config related
 			inline NetworkId getNetworkId() { return netId; }
 			inline bool hasValidNetworkId() { return (netId.id != -1 && netId.pid != -1); }
-			
+
 			//Set functions:
 			inline void set_proto(Protocols proto) { protocols = proto; };
 			inline void set_key_mgmt(KeyManagement k) { key_mgmt = k; }
@@ -142,9 +142,9 @@ namespace libnutwireless {
 			inline void set_pairwise(PairwiseCiphers p) { pairwise = p; };
 			inline void set_group(GroupCiphers g) { group = g; };
 			inline void set_eap(EapMethod e) { eap = e; }
-			
+
 			inline void setNetworkId(NetworkId id) { netId = id; id_str = QString("\"nut:%1:%2\"").arg(id.pid).arg(id.id); };
-			
+
 			//Set Parse functions:
 			bool set_ssid(QString value, bool addQuotes = false);
 			bool set_bssid(libnutcommon::MacAddress value);
@@ -179,25 +179,25 @@ namespace libnutwireless {
 			bool set_client_cert(QString value, bool addQuotes = false);
 			bool set_private_key(QString value, bool addQuotes = false);
 			bool set_private_key_passwd(QString value, bool addQuotes = false);
-			bool set_dh_file(QString value, bool addQuotes = false); 
-			bool set_subject_match(QString value, bool addQuotes = false); 
-			bool set_altsubject_match(QString value, bool addQuotes = false); 
-			bool set_phase1(QString value, bool addQuotes = false); 
-			bool set_phase2(QString value, bool addQuotes = false); 
-			bool set_ca_cert2(QString value, bool addQuotes = false); 
-			bool set_ca_path2(QString value, bool addQuotes = false); 
-			bool set_client_cert2(QString value, bool addQuotes = false); 
-			bool set_private_key2(QString value, bool addQuotes = false); 
+			bool set_dh_file(QString value, bool addQuotes = false);
+			bool set_subject_match(QString value, bool addQuotes = false);
+			bool set_altsubject_match(QString value, bool addQuotes = false);
+			bool set_phase1(QString value, bool addQuotes = false);
+			bool set_phase2(QString value, bool addQuotes = false);
+			bool set_ca_cert2(QString value, bool addQuotes = false);
+			bool set_ca_path2(QString value, bool addQuotes = false);
+			bool set_client_cert2(QString value, bool addQuotes = false);
+			bool set_private_key2(QString value, bool addQuotes = false);
 			bool set_private_key2_passwd(QString value, bool addQuotes = false);
-			bool set_dh_file2(QString value, bool addQuotes = false); 
-			bool set_subject_match2(QString value, bool addQuotes = false); 
-			bool set_altsubject_match2(QString value, bool addQuotes = false); 
+			bool set_dh_file2(QString value, bool addQuotes = false);
+			bool set_subject_match2(QString value, bool addQuotes = false);
+			bool set_altsubject_match2(QString value, bool addQuotes = false);
 			bool set_fragment_size(int value);
-			bool set_eappsk(QString value); 
-			bool set_nai(QString value, bool addQuotes = false); 
-			bool set_pac_file(QString value, bool addQuotes = false); 
+			bool set_eappsk(QString value);
+			bool set_nai(QString value, bool addQuotes = false);
+			bool set_pac_file(QString value, bool addQuotes = false);
 	};
-	
+
 	inline bool operator==(const libnutwireless::CNetworkConfig::NetworkId &a, const libnutwireless::CNetworkConfig::NetworkId &b) {
 		return ((a.id == b.id) && (a.pid == b.pid));
 	}

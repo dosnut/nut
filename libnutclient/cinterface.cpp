@@ -50,7 +50,7 @@ void CInterface::init() {
 	connect(m_dbusInterface,SIGNAL(gotUserConfig(libnutcommon::IPv4UserConfig)),this,SLOT(dbusretGetUserConfig(libnutcommon::IPv4UserConfig)));
 
 	connect(m_dbusInterface,SIGNAL(gotNeedUserSetup(bool)),this,SLOT(dbusretGetNeedUserSetup(bool)));
-	
+
 	connect(m_dbusInterface,SIGNAL(gotSetUserConfig(bool)),this,SLOT(dbusretSetUserConfig(bool)));
 
 	connect(m_dbusInterface, SIGNAL(stateChanged(libnutcommon::InterfaceProperties)), this, SLOT(dbusStateChanged(libnutcommon::InterfaceProperties)));
@@ -94,10 +94,10 @@ void CInterface::dbusretGetProperties(libnutcommon::InterfaceProperties properti
 
 void CInterface::dbusretGetConfig(libnutcommon::IPv4Config config) {
 	m_config = config;
-	
+
 	m_configFetched = true;
 	checkInitCompleted();
-	
+
 	emit newDataAvailable();
 }
 
@@ -107,7 +107,7 @@ void CInterface::dbusretGetNeedUserSetup(bool need) {
 
 	m_needUserSetupFeteched = true;
 	checkInitCompleted();
-	
+
 	emit newDataAvailable();
 }
 
@@ -118,11 +118,11 @@ void CInterface::dbusretSetUserConfig(bool worked) {
 
 void CInterface::dbusretGetUserConfig(libnutcommon::IPv4UserConfig config) {
 	m_userConfig = config;
-	
+
 	m_userConfigFetched = true;
 	checkInitCompleted();
-	
-	emit newDataAvailable();	
+
+	emit newDataAvailable();
 }
 
 void CInterface::dbusret_errorOccured(QDBusError error, QString method) {

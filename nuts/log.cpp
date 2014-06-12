@@ -1,7 +1,7 @@
 //
 // C++ Implementation: log
 //
-// Description: 
+// Description:
 //
 //
 // Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
@@ -40,17 +40,17 @@ namespace nuts {
 					log.setDevice(fout);
 				}
 			}
-			
+
 			~CLogInit() {
 				delete ferr; delete fout;
 			}
 	};
-	
+
 	static CLogInit *loginit;
 	void LogInit() {
 		loginit = new CLogInit();
 	}
-	
+
 	void LogDestroy() {
 		delete loginit;
 		loginit = 0;

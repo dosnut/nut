@@ -20,7 +20,7 @@ CDeviceManager::CDeviceManager(QObject * parent) :
 	m_dbusTimerId(-1),
 	m_dbusPath("/manager"),
 	m_dbusMonitor(this),
-	m_dbusInterface(0) 
+	m_dbusInterface(0)
 {
 	m_dbusConnection = &m_dbusGlobalConnection;
 	//Init dbus monitor

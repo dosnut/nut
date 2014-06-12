@@ -77,7 +77,7 @@ CEnvironment::~CEnvironment() {
 	disconnect(m_dbusEnvironment,SIGNAL(gotInterfaces(QList< QDBusObjectPath >)),this,SLOT(dbusretGetInterfaces(QList<QDBusObjectPath>)));
 	disconnect(m_dbusEnvironment,SIGNAL(gotSelectResult(libnutcommon::SelectResult)),this,SLOT(dbusretGetSelectResult(libnutcommon::SelectResult)));
 	disconnect(m_dbusEnvironment,SIGNAL(gotSelectResults(QVector< libnutcommon :: SelectResult >)),this,SLOT(dbusretGetSelectResults(QVector<libnutcommon::SelectResult>)));
-	
+
 	CInterface * interface;
 	while (!m_interfaces.isEmpty()) {
 		interface = m_interfaces.takeFirst();
@@ -133,19 +133,19 @@ void CEnvironment::dbusretGetProperties(libnutcommon::EnvironmentProperties prop
 
 void CEnvironment::dbusretGetConfig(libnutcommon::EnvironmentConfig config) {
 	m_config = config;
-	
+
 	m_configFetched = true;
 	checkInitCompleted();
-	
+
 	emit newDataAvailable();
 }
 
 void CEnvironment::dbusretGetSelectResult(libnutcommon::SelectResult selectResult) {
 	m_selectResult = selectResult;
-	
+
 	m_selectResultFetched = true;
 	checkInitCompleted();
-	
+
 	emit newDataAvailable();
 }
 
@@ -154,7 +154,7 @@ void CEnvironment::dbusretGetSelectResults(QVector<libnutcommon::SelectResult> s
 
 	m_selectResultsFetched = true;
 	checkInitCompleted();
-	
+
 	emit newDataAvailable();
 }
 

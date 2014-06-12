@@ -51,7 +51,7 @@ namespace libnutcommon {
 				m_inotifyFd = inotify_init();
 			}
 			qDebug() << "Filedescriptor for inotify is " << m_inotifyFd;
-	
+
 			if ( (-1 != m_inotifyFd) && (NULL == m_inotifiySocketNotifier) ) {
 
 				m_inotifiySocketNotifier = new QSocketNotifier(m_inotifyFd,QSocketNotifier::Read,this);
@@ -106,7 +106,7 @@ namespace libnutcommon {
 		}
 		qDebug() << "Set dbus pid to:" << m_dbusPid;
 	}
-	
+
 	void CDBusMonitor::setInotifier() {
 		qDebug() << "(Inotify) Setting up watches";
 		//Setup watch
@@ -118,7 +118,7 @@ namespace libnutcommon {
 			}
 		}
 	}
-	
+
 	void CDBusMonitor::inotifyEvent(int socket) {
 		qDebug() << "(Inotify) Event occured";
 		if (socket == m_inotifyFd) {
@@ -178,7 +178,7 @@ namespace libnutcommon {
 					}
 				}
 				//process events
-	
+
 				//Check watch:
 				qDebug() << "Watch file descriptor is " << m_inWatchPidDirFd << "from event" <<  event->wd;
 

@@ -10,16 +10,16 @@ extern "C" {
 }
 
 namespace libnutwireless {
-	
+
 	//CWpa_supplicant
-	
-	
+
+
 	//Wpa_supplicant control commands:
 	QString CWpaSupplicant::wpaCtrlCommand(QString cmd = "PING") {
 		//int wpa_ctrl_request(struct wpa_ctrl *ctrl, const char *cmd, size_t cmd_len,
 		//	     char *reply, size_t *reply_len,
 		//	     void (*msg_cb)(char *msg, size_t len));
-		//	     
+		//
 		//Check if we have a control interface:
 		if (cmd_ctrl == NULL || event_ctrl == NULL) {
 			return QString();
@@ -31,7 +31,7 @@ namespace libnutwireless {
 		QByteArray command("PING");
 		char reply[4096];
 		size_t reply_len = sizeof(reply);
-		
+
 		int status = wpa_ctrl_request(cmd_ctrl, command.constData(), command.size(), reply, &reply_len,NULL);
 		if ( (status != 0) or (QString::fromUtf8(reply, reply_len) != "PONG\n") ) {
 			qDebug() << QString("(status=%2)PING COMMAND RESPONSE: %1").arg(QString::fromUtf8(reply, reply_len),QString::number(status));
@@ -42,7 +42,7 @@ namespace libnutwireless {
 			size_t reply_len = sizeof(reply);
 
 			command = cmd.toAscii();
-			
+
 			status = wpa_ctrl_request(cmd_ctrl, command.constData(), command.size(), reply, &reply_len,NULL);
 			if (0 == status) {
 				qDebug() << cmd + " : " + QString::fromUtf8(reply, reply_len) + " EOC";
@@ -62,19 +62,19 @@ namespace libnutwireless {
 			return QString::fromUtf8(reply, reply_len);
 		}
 	}
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 // 	void CWpaSupplicant::printMessage(QString msg) {
 // 		if (m_logEnabled) {
 // 			emit(message(msg));
 // 		}
 // 	}
-	
-	
+
+
 	//Private slots:
 	//Reads messages from wpa_supplicant
 	void CWpaSupplicant::readFromWpa(int socket) {
@@ -100,8 +100,8 @@ namespace libnutwireless {
 			}
 		}
 	}
-	
-	
+
+
 	/*
 	//CTRL-RSP-<field name>-<network id>-<value>
 	*/
@@ -129,7 +129,7 @@ namespace libnutwireless {
 			emit(eventMessage(event));
 		}
 	}
-	
+
 	void CWpaSupplicant::eventDispatcher(QString event) {
 		QStringList str_list = event.split('\n',QString::KeepEmptyParts);
 		InteractiveType type;
@@ -148,7 +148,7 @@ namespace libnutwireless {
 			}
 		}
 	}
-	
+
 	//Public functions:
 
 	void CWpaSupplicant::openWpa(bool) {
@@ -189,7 +189,7 @@ namespace libnutwireless {
 			m_connectTimerId = startTimer(dynamicTimerTime(m_timerCount));
 			return;
 		}
-			
+
 		//Atach event monitor
 		status = wpa_ctrl_attach(event_ctrl);
 		//Status : 0 = succ; -1 = fail, -2 = timeout
@@ -214,17 +214,17 @@ namespace libnutwireless {
 
 		//Set ap_scan default
 		setApScanDefault();
-		
+
 		//Continue of old features:
 		emit(stateChanged(true));
 		printMessage(tr("wpa_supplicant connection established"));
 		if (m_managedNetworks.size() > 0) {
 			addOnlyNewNetworks(m_managedNetworks.values());
-			
+
 		}
 		return;
 	}
-	
+
 	bool CWpaSupplicant::closeWpa(QString call_func, bool internal) {
 		if (m_connectTimerId != -1) {
 			killTimer(m_connectTimerId);
@@ -251,7 +251,7 @@ namespace libnutwireless {
 		return true;
 	}
 	int CWpaSupplicant::dynamicTimerTime(int m_timerCount) {
-		if (m_timerCount > 0) { 
+		if (m_timerCount > 0) {
 			if (m_timerCount <= 5) {
 				return 1000;
 			}
@@ -267,15 +267,15 @@ namespace libnutwireless {
 			return 0;
 		}
 	}
-	
-	
+
+
 	//Slot is executed when aplication is about to quit;
 	void CWpaSupplicant::detachWpa() {
 		if (event_ctrl != NULL) {
 			wpa_ctrl_detach(event_ctrl);
 		}
 	}
-	
+
 	void CWpaSupplicant::timerEvent(QTimerEvent *event) {
 		if (event->timerId() == m_connectTimerId) {
 			if (!m_wpaConnected) {
@@ -288,7 +288,7 @@ namespace libnutwireless {
 			}
 		}
 	}
-	
+
 	bool CWpaSupplicant::connected() {
 		if (wpaCtrlCmd_PING() == "PONG\n") {
 			return true;
@@ -297,18 +297,18 @@ namespace libnutwireless {
 			return false;
 		}
 	}
-	
+
 	void CWpaSupplicant::setLog(bool enabled) {
 		m_logEnabled = enabled;
 	}
 
-	
+
 	void CWpaSupplicant::scan() {
 		if (0 != wpaCtrlCmd_SCAN().indexOf("OK")) {
 			printMessage("Error while scanning");
 		}
 	}
-	
-	
+
+
 
 }

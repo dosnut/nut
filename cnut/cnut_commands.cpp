@@ -136,7 +136,7 @@ namespace cnut {
 		else {
 			return QString();
 		}
-	
+
 	}
 	QString getInterfaceState(QDBusConnection * connection, QString &ifPath) {
 		return toString(getRawInterfaceProperties(connection,ifPath).ifState);
@@ -213,7 +213,7 @@ namespace cnut {
 			return QString();
 		}
 	}
-	
+
 	QString getEnvironmentPathByName(QDBusConnection * connection, QString &devPath, QString &envName) {
 		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath, *connection, 0);
 		QDBusReply<QList<QDBusObjectPath> > replyenvs = dbusDev.getEnvironments();
@@ -260,7 +260,7 @@ namespace cnut {
 		}
 		return ifPath;
 	}
-	
+
 	libnutcommon::DeviceProperties getDeviceProperties(QDBusConnection * connection, QString &devPath) {
 		DBusDeviceInterface dbusDev(NUT_DBUS_URL, devPath ,*connection, 0);
 		QDBusReply<libnutcommon::DeviceProperties> replyprops = dbusDev.getProperties();

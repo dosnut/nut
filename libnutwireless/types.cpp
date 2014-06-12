@@ -256,10 +256,10 @@ QString toString(EapMethod method) {
 
 
 QString toNumberString(QOOL b) {
-	return ( (b == QOOL_UNDEFINED) ? "-1" : ( (b == QOOL_TRUE) ? "1" : "0")); 
+	return ( (b == QOOL_UNDEFINED) ? "-1" : ( (b == QOOL_TRUE) ? "1" : "0"));
 }
 QString toString(QOOL b) {
-	return ( (b == QOOL_UNDEFINED) ? "undefined" : ( (b == QOOL_TRUE) ? "true" : "false")); 
+	return ( (b == QOOL_UNDEFINED) ? "undefined" : ( (b == QOOL_TRUE) ? "true" : "false"));
 }
 bool toBool(QOOL b) {
 	return (b == QOOL_TRUE);
@@ -268,7 +268,7 @@ QOOL toQOOL(bool b) {
 	return ( b ? QOOL_TRUE : QOOL_FALSE);
 }
 QOOL toQOOL(int i) {
-	return ( i < 0 ? QOOL_UNDEFINED : ( i == 0 ? QOOL_FALSE : QOOL_TRUE)); 
+	return ( i < 0 ? QOOL_UNDEFINED : ( i == 0 ? QOOL_FALSE : QOOL_TRUE));
 }
 
 }

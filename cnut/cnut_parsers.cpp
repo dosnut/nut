@@ -2,7 +2,7 @@
 #include "cnut_parsers.h"
 
 namespace cnut {
-	
+
 	void help() {
 		print(QString("--list (-l) %1").arg(QObject::tr("Lists available devices/environments/interfaces")));
 		print(QString("--device (-D) <devicename> %1").arg(QObject::tr("Choose device")));
@@ -27,7 +27,7 @@ namespace cnut {
 		print(QString("cnut --device eth0 --state %1").arg(QObject::tr("Shows state of device eth0")));
 		print(QString("cnut --device eth0 --environment \"home\" --state %1").arg(QObject::tr("Shows state of environment home of device eth0")));
 	}
-	
+
 	int dispatchCommands(CommandList commands, QDBusConnection * connection) {
 		//Commands are sorted in this order:
 		//--listDevices
@@ -35,7 +35,7 @@ namespace cnut {
 		//--device <> --state
 		//--device <> --environment <>
 		//--device <> --environment <> --state
-		
+
 		QString devPath;
 		QString envPath;
 		QString ifPath;
@@ -292,7 +292,7 @@ namespace cnut {
 		}
 		return RETVAL_SUCCESS;
 	}
-	
+
 	NUT_COMMANDS cmdStrToNUT_CMDS(QString cmd) {
 // 		qDebug() << QString("Current parsed command: %1").arg(cmd);
 		if ("--list" == cmd || "-l" == cmd) {
@@ -396,7 +396,7 @@ namespace cnut {
 				cmdList.append(command);
 				++cmdIter;
 			}
-			
+
 		}
 		qStableSort(cmdList);
 		return cmdList;

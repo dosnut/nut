@@ -14,7 +14,7 @@ namespace nuts {
 		QCoreApplication app(argc, argv);
 		SigHandler *sighandler;
 		DeviceManager *devManager;
-		
+
 		try {
 			sighandler = new SigHandler();
 			devManager = new DeviceManager(argc > 1 ? argv[1] : "/etc/nuts/nuts.config");

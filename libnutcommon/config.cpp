@@ -31,7 +31,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data) {
 		argument.beginStructure();
 		argument << data.m_noAutoStart;
@@ -64,7 +64,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const SelectResult &data) {
 		argument.beginStructure();
 		argument << (quint8) (qint8) data;
@@ -79,7 +79,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const SelectRule &data) {
 		argument.beginStructure();
 		argument << data.invert << (quint8) data.selType << data.block << data.essid << data.ipAddr << data.macAddr;
@@ -94,7 +94,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const SelectConfig &data) {
 		argument.beginStructure();
 		argument << data.filters << data.blocks;
@@ -107,7 +107,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentConfig &data) {
 		argument.beginStructure();
 		argument << data.m_name << data.m_select;
@@ -132,7 +132,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4Config &data) {
 		argument.beginStructure();
 		argument << (quint32) data.getFlags() << (quint32) data.getOverwriteFlags()
@@ -141,7 +141,7 @@ namespace libnutcommon {
 			<< data.m_static_gateway
 			<< data.m_static_dnsservers
 			<< data.m_gateway_metric;
-		
+
 		argument.endStructure();
 		return argument;
 	}
@@ -160,7 +160,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4UserConfig &data) {
 		argument.beginStructure();
 		argument << data.m_ip << data.m_netmask << data.m_gateway << data.m_dnsservers;
@@ -173,10 +173,10 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	
+
 	Config::Config() {
 	}
-	
+
 	Config::~Config() {
 		if (!m_isCopy) {
 			foreach(DeviceConfig* dc, m_devConfigs)
@@ -184,11 +184,11 @@ namespace libnutcommon {
 			m_devConfigs.clear();
 		}
 	}
-	
+
 	DeviceConfig::DeviceConfig()
 	: m_noAutoStart(false), m_isRegExp(false), m_gateway_metric(-1) {
 	}
-	
+
 	DeviceConfig::~DeviceConfig() {
 		if (!m_isCopy) {
 			foreach(EnvironmentConfig* ec, m_environments)
@@ -196,7 +196,7 @@ namespace libnutcommon {
 			m_environments.clear();
 		}
 	}
-	
+
 	EnvironmentConfig::EnvironmentConfig(const QString &name)
 	: m_name(name) {
 	}
@@ -207,7 +207,7 @@ namespace libnutcommon {
 			m_ipv4Interfaces.clear();
 		}
 	}
-	
+
 	IPv4Config::IPv4Config(int flags, int overwriteFlags)
 	: m_gateway_metric(-1), m_flags(flags), m_overwriteFlags(overwriteFlags), m_timeout(0), m_continue_dhcp(false) {
 	}
@@ -223,7 +223,7 @@ namespace libnutcommon {
 		qRegisterMetaType< EnvironmentConfig >("libnutcommon::EnvironmentConfig");
 		qRegisterMetaType< IPv4Config >("libnutcommon::IPv4Config");
 		qRegisterMetaType< IPv4UserConfig >("libnutcommon::IPv4UserConfig");
-	
+
 		qDBusRegisterMetaType< Config >();
 		qDBusRegisterMetaType< DeviceConfig >();
 		qDBusRegisterMetaType< SelectResult >();

@@ -23,11 +23,11 @@ void CWextHW::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * sc
 	int i;
 	uint16_t ver = 0;
 	uint16_t cnt = 0;
-	
+
 	if (ielen > buflen) {
 		ielen = buflen;
 	}
-	
+
 	//set wpa_oui
 	switch (iebuf[0]) {
 		case 0x30:		/* WPA2 */
@@ -37,11 +37,11 @@ void CWextHW::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * sc
 			}
 			wpa_oui = wpa2_oui;
 			break;
-	
+
 		case 0xdd:		/* WPA or else */
 			wpa_oui = wpa1_oui;
-	
-			/* Not all IEs that start with 0xdd are WPA. 
+
+			/* Not all IEs that start with 0xdd are WPA.
 			* So check that the OUI is valid. Note : offset==2 */
 			if ((ielen < 8) || (memcmp(&iebuf[offset], wpa_oui, 3) != 0) || (iebuf[offset + 3] != 0x01)) {
 				return;
@@ -50,16 +50,16 @@ void CWextHW::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * sc
 			/* Skip the OUI type */
 			offset += 4;
 			break;
-		
+
 		default:
 			return;
 	}
-	
+
 	/* Pick version number (little endian) */
 	ver = iebuf[offset] | (iebuf[offset + 1] << 8);
 	(void)(ver); // unused
 	offset += 2;
-	
+
 	//Set protocoltype
 	if (iebuf[0] == 0xdd) { //WPA1
 		scan->protocols = (Protocols) (scan->protocols | PROTO_WPA);
@@ -68,13 +68,13 @@ void CWextHW::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * sc
 		scan->protocols = (Protocols) (scan->protocols | PROTO_RSN);
 	}
 	/* From here, everything is technically optional. */
-	
+
 	/* Check if we are done */
 	if (ielen < (offset + 4)) {
 		/* We have a short IE.  So we should not assume TKIP/TKIP, just return */
 		return;
 	}
-	
+
 	/* Next we have our group cipher. */
 	if (memcmp(&iebuf[offset], wpa_oui, 3) != 0) {
 // 			printf("                        Group Cipher : Proprietary\n");
@@ -107,13 +107,13 @@ void CWextHW::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * sc
 		}
 	}
 	offset += 4;
-	
+
 	/* Check if we are done */
 	if (ielen < (offset + 2)) {
 		/* We don't have a pairwise cipher, or auth method. DO NOT Assume TKIP. */
 		return;
 	}
-	
+
 	/* Otherwise, we have some number of pairwise ciphers. */
 	cnt = iebuf[offset] | (iebuf[offset + 1] << 8);
 	offset += 2;
@@ -121,7 +121,7 @@ void CWextHW::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * sc
 	if (ielen < (offset + 4*cnt)) {
 		return;
 	}
-	
+
 	for(i = 0; i < cnt; i++) {
 		if (memcmp(&iebuf[offset], wpa_oui, 3) != 0) {
 // 				printf(" Proprietary");
@@ -137,21 +137,21 @@ void CWextHW::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * sc
 		}
 		offset+=4;
 	}
-	
+
 	/* Check if we are done */
 	if (ielen < (offset + 2)) {
 		return;
 	}
-	
+
 	/* Now, we have authentication suites. */
 	cnt = iebuf[offset] | (iebuf[offset + 1] << 8);
 	offset += 2;
 
-	
+
 	if (ielen < (offset + 4*cnt)) {
 		return;
 	}
-	
+
 	for(i = 0; i < cnt; i++) {
 		if(memcmp(&iebuf[offset], wpa_oui, 3) != 0) { //don't care about proprietary
 // 				printf(" Proprietary");
@@ -187,7 +187,7 @@ void CWextHW::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * sc
 		}
 		offset+=4;
 	}
-	
+
 	/* Check if we are done */
 	if (ielen < (offset + 1)) {
 		return;
@@ -237,7 +237,7 @@ SignalQuality CWextHW::convertValues(WextRawScan &scan) {
 					res.level.nonrcpi.value = (scan.quality.level >= 64) ? scan.quality.level - 0x100 : scan.quality.level;
 					qDebug() << "Converting: LEVEL ABS:" << res.level.nonrcpi.value << "from" << scan.quality.level;
 				}
-			
+
 				/* Deal with noise level in dBm (absolute power measurement) */
 				if ( !(scan.quality.updated & IW_QUAL_NOISE_INVALID) ) {
 
@@ -291,15 +291,15 @@ void CWextHW::readSignalQuality() {
 	/* workaround */
 	struct wireless_config wifiConfig;
 	memset(&wifiConfig,0,sizeof(struct wireless_config));
-	/* Get basic information */ 
+	/* Get basic information */
 	if(iw_get_basic_config(m_wextFd, m_ifname.toAscii().constData(), &wifiConfig) < 0) {
-		/* If no wireless name : no wireless extensions */ 
-		/* But let's check if the interface exists at all */ 
+		/* If no wireless name : no wireless extensions */
+		/* But let's check if the interface exists at all */
 		struct ifreq ifr;
-		memset(&ifr,0,sizeof(struct ifreq)); 
-	
-		strncpy(ifr.ifr_name, m_ifname.toAscii().data(), IFNAMSIZ); 
-		if(ioctl(m_wextFd, SIOCGIFFLAGS, &ifr) < 0) 
+		memset(&ifr,0,sizeof(struct ifreq));
+
+		strncpy(ifr.ifr_name, m_ifname.toAscii().data(), IFNAMSIZ);
+		if(ioctl(m_wextFd, SIOCGIFFLAGS, &ifr) < 0)
 			qWarning() << tr("(Wireless Extension) No device present");
 		else
 			qWarning() << tr("(Wireless Extension) device not supported");
@@ -316,17 +316,17 @@ void CWextHW::readSignalQuality() {
 			res.freq = (int) (wifiConfig.freq/1e6);
 		}
 	}
-	
+
 	struct iwreq wrq;
 	memset(&wrq,0,sizeof(struct iwreq));
-	
+
 	/* Get AP address */
 	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWAP, &wrq) >= 0) {
 		//Add mac address of current ap;
 		res.bssid = libnutcommon::MacAddress((ether_addr*)wrq.u.ap_addr.sa_data);
 		qDebug() << "Got AP: " << res.bssid.toString();
 	}
-	
+
 	/* Get ssid */
 	quint8 * buffer = new quint8[IW_ESSID_MAX_SIZE];
 	memset(buffer, '\0', IW_ESSID_MAX_SIZE);
@@ -352,21 +352,21 @@ void CWextHW::readSignalQuality() {
 		qDebug() << "Got ssid: " << res.ssid;
 	}
 	delete[] buffer;
-	
+
 	/* Get bit rate */
 	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWRATE, &wrq) >= 0) {
 		res.bitrates.append((qint32) wrq.u.bitrate.value);
 		qDebug() << "Got bit rate: " << res.bitrates[0];
 	}
-	
+
 	/* Get Power Management settings */
 	wrq.u.power.flags = 0;
 	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWPOWER, &wrq) >= 0) {
 		qDebug() << "Got power";
 	}
 	/* workaround */
-	
-	
+
+
 	/* Get range stuff */
 	qDebug() << QString("Getting range stuff for %1").arg(m_ifname.toAscii().data());
 	if (iw_get_range_info(m_wextFd, m_ifname.toAscii().data(), &range) >= 0) {
@@ -390,9 +390,9 @@ void CWextHW::readSignalQuality() {
 		}
 		return;
 	}
-	
+
 	qDebug() << "Got range stuff";
-	
+
 
 	//Set supported Frequencies if the list is not empty;
 	if (m_supportedFrequencies.isEmpty() && hasRange) {
@@ -418,7 +418,7 @@ void CWextHW::readSignalQuality() {
 	else {
 		qDebug() << "m_supportedFrequencies not set";
 	}
-	
+
 	if (hasRange) {
 		res.maxquality.level = (quint8) range.max_qual.level;
 		res.maxquality.qual = (quint8) range.max_qual.qual;
@@ -440,7 +440,7 @@ void CWextHW::readSignalQuality() {
 		wrq.u.data.length = sizeof(struct iw_statistics);
 		wrq.u.data.flags = 1; // Clear updated flag
 		strncpy(wrq.ifr_name, m_ifname.toAscii().data(), IFNAMSIZ);
-		
+
 		qDebug() << "Getting wireless stats";
 		if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
 			qWarning() << tr("Error occured while fetching wireless info: ") << strerror(errno);
@@ -499,37 +499,37 @@ void CWextHW::readScanResults() {
 	singleres.pairwise = PCI_UNDEFINED;
 	singleres.protocols = PROTO_UNDEFINED;
 	singleres.keyManagement = KM_UNDEFINED;
-	
+
 	/* workaround */
 	struct wireless_config wifiConfig;
 	memset(&wifiConfig,0,sizeof(struct wireless_config));
 
-	/* Get basic information */ 
+	/* Get basic information */
 	if(iw_get_basic_config(m_wextFd, m_ifname.toAscii().constData(), &wifiConfig) < 0) {
-		/* If no wireless name : no wireless extensions */ 
-		/* But let's check if the interface exists at all */ 
+		/* If no wireless name : no wireless extensions */
+		/* But let's check if the interface exists at all */
 		struct ifreq ifr;
-		memset(&ifr,0,sizeof(struct ifreq)); 
-	
-		strncpy(ifr.ifr_name, m_ifname.toAscii().data(), IFNAMSIZ); 
-		if(ioctl(m_wextFd, SIOCGIFFLAGS, &ifr) < 0) 
+		memset(&ifr,0,sizeof(struct ifreq));
+
+		strncpy(ifr.ifr_name, m_ifname.toAscii().data(), IFNAMSIZ);
+		if(ioctl(m_wextFd, SIOCGIFFLAGS, &ifr) < 0)
 			qWarning() << tr("(Wireless Extension) No device present");
 		else
 			qWarning() << tr("(Wireless Extension) Device not supported");
 		return;
 	}
 	qDebug() << "Fetched basic config.";
-	
+
 	/* Get AP address */
 	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWAP, &wrq) >= 0) {
 		qDebug() << "Got AP";
 	}
-	
+
 	/* Get bit rate */
 	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWRATE, &wrq) >= 0) {
 		qDebug() << "Got bit rate";
 	}
-	
+
 	/* Get Power Management settings */
 	wrq.u.power.flags = 0;
 	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWPOWER, &wrq) >= 0) {
@@ -559,7 +559,7 @@ void CWextHW::readScanResults() {
 		m_scTimerId = startTimer(m_scPollrate);
 		return;
 	}
-	
+
 	qDebug() << "Got range stuff";
 
 	if (has_range) {
@@ -579,7 +579,7 @@ void CWextHW::readScanResults() {
 
 	unsigned char * newbuf;
 	for (int i=0; i <= 16; i++) { //realloc (don't do this forever)
-		//Allocate newbuffer 
+		//Allocate newbuffer
 		newbuf = (uchar*) realloc(buffer, buflen);
 		if(newbuf == NULL) {
 			if (buffer) {
@@ -590,17 +590,17 @@ void CWextHW::readScanResults() {
 			return;
 		}
 		buffer = newbuf;
-		
+
 		//Set Request variables:
 		wrq.u.data.pointer = buffer;
 		wrq.u.data.flags = 0;
 		wrq.u.data.length = buflen;
-		
+
 		//Get the data:
 		if (iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWSCAN, &wrq) < 0) {
 			//Buffer is too small
 			if((errno == E2BIG) && (range.we_version_compiled > 16)) {
-				
+
 				//check if driver gives any hints about scan length:
 				if (wrq.u.data.length > buflen) {
 					buflen = wrq.u.data.length;
@@ -618,7 +618,7 @@ void CWextHW::readScanResults() {
 				m_scTimerId = startTimer(m_scPollrate);
 				return;
 			}
-			
+
 			//Bad error occured
 			if (buffer) {
 				free(buffer);
@@ -639,7 +639,7 @@ void CWextHW::readScanResults() {
 		struct stream_descr stream;
 		memset(&stream,0,sizeof(struct stream_descr));
 		int ret;
-		
+
 		//Init event stream
 // 		char buffer2[128];
 		libnutcommon::MacAddress tmpMac;
@@ -702,7 +702,7 @@ void CWextHW::readScanResults() {
 							}
 						}
 						break;
-					
+
 					case SIOCGIWMODE:
 						qDebug() << "Mode:" << singleres.bssid.toString();
 						if(iwe.u.mode >= IW_NUM_OPER_MODE) {
@@ -742,7 +742,7 @@ void CWextHW::readScanResults() {
 						}
 						else {
 							//Extract key information: (See iwlib.c line 1500)
-							
+
 							//keyflags: iwe.u.data.flags
 							//keysize = iwe.u.data.length
 							//
@@ -761,7 +761,7 @@ void CWextHW::readScanResults() {
 						singleres.bitrates.append((qint32) iwe.u.bitrate.value);
 						qDebug() << "Adding Bitrate: " << (qint32) iwe.u.bitrate.value;
 						break;
-					
+
 					case IWEVGENIE: //group/pairwsie ciphers etc.
 						//buffer = iwe.u.data.pointer
 						//bufflen = iwe.u.data.length
@@ -794,7 +794,7 @@ void CWextHW::readScanResults() {
 					qDebug() << "End parsing one network" << singleres.bssid.toString();
 				}
 			}
-	
+
 		} while(ret > 0);
 
 		//Delete buffer

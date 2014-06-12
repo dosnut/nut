@@ -21,7 +21,7 @@ DESTDIR = .
 
 target.path = /usr/bin
 
-INSTALLS += target 
+INSTALLS += target
 
 INCLUDEPATH += ..
 

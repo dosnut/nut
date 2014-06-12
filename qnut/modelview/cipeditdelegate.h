@@ -14,9 +14,9 @@ namespace qnut {
 	/**
 	 * @brief CIPEditDelegate provides an item delegate for editing ip addresses.
 	 * @author Oliver Groß <z.o.gross@gmx.de>
-	 * 
+	 *
 	 * The class provides all functions for a simple item delegate specified in the Qt 4 documentation.
-	 * 
+	 *
 	 * As editor QLineEdit with an input mask for ip addresses is used.
 	 */
 	class CIPEditDelegate : public QStyledItemDelegate {
@@ -27,9 +27,9 @@ namespace qnut {
 		 * @param parent parent object
 		 */
 		CIPEditDelegate(QObject * parent = 0);
-		
+
 		QWidget * createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const;
-		
+
 		void setEditorData(QWidget * editor, const QModelIndex & index) const;
 		void setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index) const;
 	};

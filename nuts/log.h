@@ -1,7 +1,7 @@
 //
 // C++ Interface: log
 //
-// Description: 
+// Description:
 //
 //
 // Author: Stefan Bühler <stbuehler@web.de>, (C) 2007

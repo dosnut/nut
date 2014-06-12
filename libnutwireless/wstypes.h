@@ -4,16 +4,16 @@
 #include "types.h"
 
 namespace libnutwireless {
-	
+
 	/** Enum of possible NetworkFlags */
 	typedef enum {NF_NONE, NF_CURRENT, NF_DISABLED} NetworkFlags;
-	
+
 	/** Enum of possible interaction types **/
 	typedef enum {INTERACT_MSG, INTERACT_REQ,INTERACT_EVENT} InteractiveType;
-	
+
 	/** RequestType contains all possible requests from wpa_supplicant. */
 	typedef enum {REQ_FAIL, REQ_PASSWORD, REQ_IDENTITY, REQ_NEW_PASSWORD, REQ_PIN, REQ_OTP, REQ_PASSPHRASE} RequestType;
-	
+
 	/** Enum of possible config failures.  */
 	typedef enum {
 	NCF_NONE=0x0000000000, NCF_SSID=0x0000000001,NCF_BSSID=0x0000000002,NCF_DISABLED=0x0000000004,
@@ -37,7 +37,7 @@ namespace libnutwireless {
 	ENCF_ALTSUBJECT_MATCH2=0x0000200000, ENCF_FRAGMENT_SIZE=0x0000400000, ENCF_EAPPSK=0x0000800000,
 	ENCF_NAI=0x00001000000, ENCF_PAC_FILE=0x00002000000, ENCF_ALL=0x00003FFFFFF
 	} EapNetconfigFailures;
-	
+
 	/**
 		NetconfigStatus contains error information when configuring a network
 		@param failures Standard network failures
@@ -51,7 +51,7 @@ namespace libnutwireless {
 		EapNetconfigFailures eap_failures;
 		int id;
 	};
-	
+
 	/** wpa_supplicant's capabilities */
 	struct Capabilities {
 		EapMethod eap;
@@ -120,7 +120,7 @@ namespace libnutwireless {
 			bool * logic;
 		} value;
 	};
-	
+
 //	/** One wpa_suplicant network variable. Reserved for future purpose. */
 // 	struct NetworkVariable {
 // 		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} Type;
@@ -137,7 +137,7 @@ namespace libnutwireless {
 		RequestType type;
 		int id;
 	};
-	
+
 	/** Information about a configured network (see listNetworks) */
 	struct ShortNetworkInfo {
 		int id;
@@ -146,9 +146,9 @@ namespace libnutwireless {
 		NetworkFlags flags;
 		bool adhoc;
 	};
-	
+
 	//Comparison functions
-	
+
 	/** Compare ShortNetworkinfo by ID*/
 	inline bool lessThanID(ShortNetworkInfo a, ShortNetworkInfo b) {
 		return (a.id < b.id);
@@ -170,9 +170,9 @@ namespace libnutwireless {
 		return (!a.adhoc && b.adhoc);
 	}
 
-	
+
 	//Conversion functions:
-	
+
 	///Convert RequestType to QString
 	QString toString(RequestType reqt);
 }

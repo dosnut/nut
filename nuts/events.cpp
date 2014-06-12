@@ -1,7 +1,7 @@
 //
 // C++ Implementation: events
 //
-// Description: 
+// Description:
 //
 //
 // Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
@@ -18,10 +18,10 @@ namespace nuts {
 	Events::Events(QObject *parent)
 	: QObject(parent) {
 	}
-	
+
 	Events::~Events() {
 	}
-	
+
 	void Events::start(QStringList &environment, const QString &event, const QString &device, const QString &env, int iface) {
 		QStringList args;
 		args << event << device;
@@ -34,11 +34,11 @@ namespace nuts {
 		connect(process, SIGNAL(finished( int )), process, SLOT(deleteLater()));
 		connect(process, SIGNAL(error( QProcess::ProcessError )), process, SLOT(deleteLater()));
 	}
-	
+
 	void setupEnvironment(QStringList &environment) {
 		environment = QProcess::systemEnvironment();
 	}
-	
+
 	void setupEnvironment(QStringList &environment, Device *dev) {
 		environment
 			<< QString("NUT_DEVICE=%1").arg(dev->getName())
@@ -46,14 +46,14 @@ namespace nuts {
 			<< QString("NUT_ESSID=%1").arg(dev->essid())
 			;
 	}
-	
+
 	void setupEnvironment(QStringList &environment, Environment *env) {
 		environment
 			<< QString("NUT_ENVIRONMENT=%1").arg(env->getName())
 			<< QString("NUT_ENVIRONMENT_INDEX=%1").arg(env->getID())
 			;
 	}
-	
+
 	void setupEnvironment(QStringList &environment, Interface_IPv4* iface) {
 		environment
 			<< QString("NUT_IP=%1").arg(iface->ip.toString())
@@ -67,7 +67,7 @@ namespace nuts {
 			dnsservers << dns.toString();
 		environment << QString("NUT_DNSSERVER=%1").arg(dnsservers.join(","));
 	}
-	
+
 	void Events::deviceAdded(QString devName, Device *dev) {
 		QStringList e;
 		setupEnvironment(e);

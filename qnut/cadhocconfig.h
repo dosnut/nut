@@ -16,7 +16,7 @@ namespace qnut {
 	/**
 	 * @brief CAdhocConfig provides a dialog to configure a managed ad-hoc nework or add a new ad-hoc network for the given wpa_supplicant.
 	 * @author Oliver Groß <z.o.gross@gmx.de>
-	 * 
+	 *
 	 * On creation, the CAdhocConfig sets up the user interface according to the given instance of a wpa_supplicant.
 	 * The class provides function to execute the dialog for adding (w/o scan result) and configuring a network (by network id).
 	 *
@@ -34,12 +34,12 @@ namespace qnut {
 		Ui::ahconf ui;
 	protected slots:
 		void setAuthConfig(int type);
-		
+
 		virtual bool applyConfiguration();
-		
+
 		void countPskChars(QString psk);
 		void togglePlainPSK(bool show);
-		
+
 		virtual void populateUi();
 	private:
 		void populateErrorCodeEvaluator();

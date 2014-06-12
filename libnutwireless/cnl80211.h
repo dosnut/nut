@@ -22,7 +22,7 @@ class CNL80211: public CWirelessHW {
 	Q_OBJECT
 	private:
 		QString m_ifname;
-		
+
 		//Netlink connection stuff
 		nl_cb * m_nlCallback;
 		nl_sock * m_nlSocket;
@@ -31,24 +31,24 @@ class CNL80211: public CWirelessHW {
 		bool m_connected;
 		int m_nlFd;
 		QSocketNotifier * m_nlSn;
-		
+
 		QList<quint32> m_supportedFrequencies;
-		
+
 		//Signal Quality Stuff
 		qint32 m_sqPollrate;
 		qint32 m_sqTimeOutCount;
 		qint32 m_sqTimerId;
 		SignalQuality m_sq;
-		
+
 		//Scan stuff
 		QList<ScanResult> m_scanResults;
-		
+
 	protected:
 		virtual void timerEvent(QTimerEvent *event);
 		void readSignalQuality() {};
 	protected slots:
 		void readNlMessage();
-	
+
 	public:
 		CNL80211(QObject* parent, QString ifname);
 		~CNL80211();
@@ -61,7 +61,7 @@ class CNL80211: public CWirelessHW {
 		virtual int getSignalQualityPollRate();
 		virtual QList<quint32> getSupportedChannels();
 		virtual QList<quint32> getSupportedFrequencies();
-		
+
 		int parseNlScanResult(nl_msg * msg);
 };
 
