@@ -12,6 +12,9 @@
  * See README and COPYING for more details.
  */
 
+#define _XOPEN_SOURCE 700
+#define _BSD_SOURCE
+
 #include "includes.h"
 
 #include "os.h"
