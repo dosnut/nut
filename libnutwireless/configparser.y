@@ -81,7 +81,7 @@
 
 %error-verbose
 
-%parse-param {CConfigParser *cp};
+%parse-param {libnutwireless::CConfigParser *cp};
 %start input
 
 %%

@@ -1,10 +1,5 @@
 
 #include "config.h"
-#ifdef USED_CMAKE
-#include "configparser_yacc.hpp"
-#else
-#include "configparser_yacc.h"
-#endif
 
 extern "C" {
 #include <stdio.h>
@@ -14,7 +9,7 @@ extern "C" {
 #include "log.h"
 #include <QRegExp>
 
-void configparserparse(nuts::ConfigParser *cp);
+int configparserparse(nuts::ConfigParser *cp);
 extern FILE *configparserin;
 
 /* sub configuration structures will

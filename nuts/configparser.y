@@ -43,7 +43,7 @@
 
 %error-verbose
 
-%parse-param {ConfigParser *cp};
+%parse-param {nuts::ConfigParser *cp};
 %start input
 
 %%

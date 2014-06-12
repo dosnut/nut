@@ -7,7 +7,7 @@ extern "C" {
 }
 #include <iostream>
 
-void configparserparse(libnutwireless::CConfigParser * cp);
+int configparserparse(libnutwireless::CConfigParser * cp);
 extern FILE *configparserin;
 extern libnutwireless::CConfigParser * libnutcconfigparser;
 int configparserlex_destroy(void);
