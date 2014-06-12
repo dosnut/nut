@@ -57,6 +57,7 @@ void CWextHW::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * sc
 	
 	/* Pick version number (little endian) */
 	ver = iebuf[offset] | (iebuf[offset + 1] << 8);
+	(void)(ver); // unused
 	offset += 2;
 	
 	//Set protocoltype
