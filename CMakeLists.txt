@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.10 FATAL_ERROR)
+cmake_policy(SET CMP0022 NEW)
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 MACRO(ADD_TARGET_PROPERTIES _target _name)
@@ -22,6 +24,8 @@ SET(PACKAGE_VERSION 0.5.8)
 
 include(CMakeDetermineCCompiler)
 include(CMakeDetermineCXXCompiler)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # default to RelWithDebInfo
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
@@ -52,27 +56,30 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${BASE_C_FLAGS} ${EXTRA_C_FLAGS}")
 
 option(USE_WIRELESS "Enable support for wireless networks through wpa_supplicant." ON)
 
+set(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output directory for libraries")
+set(CMAKE_INSTALL_INCLUDEDIR include CACHE PATH "Output directory for includes")
 
-add_subdirectory(libnutcommon libnutcommon)
+find_library(LIB_NL nl)
 
-add_subdirectory(cnut cnut)
+add_subdirectory(libnutcommon)
+
+add_subdirectory(cnut)
 add_dependencies(cnut nutcommon)
 
-add_subdirectory(nuts nuts)
+add_subdirectory(nuts)
 add_dependencies(nuts nutcommon)
 
 if(USE_WIRELESS)
-	add_subdirectory(libnutwireless libnutwireless)
-	add_dependencies(nutwireless nutcommon)
+	add_subdirectory(libnutwireless)
 else(USE_WIRELESS)
 	add_definitions(-DQNUT_NO_WIRELESS -DLIBNUT_NO_WIRELESS)
 endif(USE_WIRELESS)
 
-add_subdirectory(libnutclient libnutclient)
+add_subdirectory(libnutclient)
 add_dependencies(nutclient nutcommon)
 if(USE_WIRELESS)
 	add_dependencies(nutclient nutwireless)
 endif(USE_WIRELESS)
 
-add_subdirectory(qnut qnut)
+add_subdirectory(qnut)
 add_dependencies(qnut nutclient)

@@ -105,10 +105,10 @@ namespace qnut {
 			else {
 				CInterface * interface = static_cast<CInterface *>(currentData);
 				if ((interface->getState() == IFS_OFF) || (interface->getState() == IFS_WAITFORCONFIG)) {
-					if (interface->getConfig().getFlags() & IPv4Config::DO_STATIC)
-						return toStringDefault(interface->getConfig().getStaticIP());
-					else if (interface->getConfig().getFlags() & IPv4Config::DO_USERSTATIC)
-						return toStringDefault(interface->getUserConfig().ip());
+					if (interface->getConfig().flags & IPv4Config::DO_STATIC)
+						return toStringDefault(interface->getConfig().static_ip);
+					else if (interface->getConfig().flags & IPv4Config::DO_USERSTATIC)
+						return toStringDefault(interface->getUserConfig().ip);
 					else
 						return tr("none");
 				}

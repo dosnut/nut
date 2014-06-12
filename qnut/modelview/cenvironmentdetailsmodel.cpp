@@ -33,7 +33,7 @@ namespace qnut {
 	CEnvironmentDetailsModel::CEnvironmentDetailsModel(CEnvironment * data, QObject * parent) : QAbstractItemModel(parent) {
 		m_Environment = data;
 		if (m_Environment) {
-			m_SelectConfig = data->getConfig().getSelect();
+			m_SelectConfig = data->getConfig().select;
 
 			m_ParentRules.resize(m_SelectConfig.filters.size());
 			m_ParentRules[0] = 0;

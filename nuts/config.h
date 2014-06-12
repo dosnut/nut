@@ -23,14 +23,10 @@ namespace nuts {
 			QString m_configFile;
 
 			libnutcommon::Config *m_config;
-			libnutcommon::DeviceConfig *m_curdevconfig;
-			libnutcommon::EnvironmentConfig *m_curenvconfig;
-			libnutcommon::IPv4Config *m_curipv4config;
+			std::shared_ptr<libnutcommon::DeviceConfig> m_curdevconfig;
+			std::shared_ptr<libnutcommon::EnvironmentConfig> m_curenvconfig;
+			std::shared_ptr<libnutcommon::IPv4Config> m_curipv4config;
 			bool m_curisfallback;
-
-			qint32 m_exact_dev_names_idx;
-			qint32 m_regexp_dev_names_idx;
-			qint32 m_wildcard_dev_names_idx;
 
 			QStack<quint32> m_selBlocks;
 
@@ -38,7 +34,7 @@ namespace nuts {
 
 			void selectAdd(const libnutcommon::SelectRule &rule);
 
-			bool finishEnvironment(libnutcommon::EnvironmentConfig *envc, local_env_config *l_envc);
+			bool finishEnvironment(std::shared_ptr<libnutcommon::EnvironmentConfig> const& envc, local_env_config *l_envc);
 
 		public:
 			ConfigParser(const QString &configFile);

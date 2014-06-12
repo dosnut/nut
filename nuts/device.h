@@ -60,7 +60,7 @@ namespace nuts {
 
 			QHash<QString, Device*> m_devices;
 
-			void addDevice(const QString &ifname, libnutcommon::DeviceConfig *dc);
+			void addDevice(const QString &ifname, std::shared_ptr<libnutcommon::DeviceConfig> dc);
 
 			friend class Device;
 			friend class Interface_IPv4;
@@ -144,7 +144,7 @@ namespace nuts {
 			DeviceManager *m_dm;
 			QString m_name;
 			int m_interfaceIndex;
-			libnutcommon::DeviceConfig *m_config;
+			std::shared_ptr<libnutcommon::DeviceConfig> m_config;
 
 			int m_activeEnv, m_nextEnv, m_userEnv;
 			int m_waitForEnvSelects;
@@ -191,7 +191,7 @@ namespace nuts {
 			void writeDHCPClientSocket();
 
 		private:
-			Device(DeviceManager* dm, const QString &name, libnutcommon::DeviceConfig *config, bool hasWLAN);
+			Device(DeviceManager* dm, const QString &name, std::shared_ptr<libnutcommon::DeviceConfig> config, bool hasWLAN);
 			virtual ~Device();
 
 		public slots:
@@ -242,7 +242,7 @@ namespace nuts {
 			QVector<libnutcommon::SelectResult> m_selectResults;
 			libnutcommon::SelectResult m_selectResult;
 
-			libnutcommon::EnvironmentConfig *m_config;
+			std::shared_ptr<libnutcommon::EnvironmentConfig> m_config;
 			QBitArray m_ifUpStatus;
 			bool m_envIsUp, m_envStart;
 
@@ -268,14 +268,14 @@ namespace nuts {
 			void selectArpRequestFoundMac(libnutcommon::MacAddress mac, QHostAddress ip);
 
 		public:
-			Environment(Device *device, libnutcommon::EnvironmentConfig *config, int id);
+			Environment(Device *device, std::shared_ptr<libnutcommon::EnvironmentConfig> config, int id);
 			virtual ~Environment();
 
 			Device* getDevice() { return m_device; }
 
 			const QList<Interface*>& getInterfaces() { return m_ifs; }
 			int getID() { return m_id; }
-			QString getName() { return m_config->getName(); }
+			QString getName() { return m_config->name; }
 			const libnutcommon::EnvironmentConfig& getConfig() { return *m_config; }
 
 			bool selectionDone() { return (m_selArpWaiting == -1); }
@@ -364,10 +364,8 @@ namespace nuts {
 			ARPWatch *m_zc_arp_watch;
 			ARPAnnounce *m_zc_arp_announce;
 
-			libnutcommon::IPv4Config *m_config;
-
+			std::shared_ptr<libnutcommon::IPv4Config> m_config;
 			libnutcommon::InterfaceState m_ifstate;
-
 			libnutcommon::IPv4UserConfig m_userConfig;
 
 			void dhcp_send_discover();
@@ -419,7 +417,7 @@ namespace nuts {
 			void zc_watch_conflict();
 
 		public:
-			Interface_IPv4(Environment *env, int index, libnutcommon::IPv4Config *config);
+			Interface_IPv4(Environment *env, int index, std::shared_ptr<libnutcommon::IPv4Config> config);
 			virtual ~Interface_IPv4();
 			virtual void start();
 			virtual void stop();

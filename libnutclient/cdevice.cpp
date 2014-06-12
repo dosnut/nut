@@ -262,11 +262,11 @@ void CDevice::dbusretGetConfig(libnutcommon::DeviceConfig config) {
 
 	m_config = config;
 	#ifndef LIBNUT_NO_WIRELESS
-	m_needWireless = !(m_config.wpaConfigFile().isEmpty());
+	m_needWireless = !(m_config.wpaConfigFile.isEmpty());
 
 	//Only use wpa_supplicant if we need one
 	if (m_needWireless) {
-		*log << tr("(%2) wpa_supplicant config file at: %1").arg(m_config.wpaConfigFile(),m_name);
+		*log << tr("(%2) wpa_supplicant config file at: %1").arg(m_config.wpaConfigFile,m_name);
 
 		m_wlAccess = new libnutwireless::CWireless(this,m_name);
 		connect(m_wlAccess,SIGNAL(message(QString)),log,SLOT(log(QString)));

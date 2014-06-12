@@ -28,11 +28,11 @@ namespace qnut {
 
 	bool CIPConfiguration::execute(libnutcommon::IPv4UserConfig & config, bool & remember) {
 		ui.rememberCheck->setChecked(remember);
-		ui.ipEdit->setText(config.ip().toString());
-		ui.netmaskEdit->setText(config.netmask().toString());
-		ui.gatewayEdit->setText(config.gateway().toString());
+		ui.ipEdit->setText(config.ip.toString());
+		ui.netmaskEdit->setText(config.netmask.toString());
+		ui.gatewayEdit->setText(config.gateway.toString());
 
-		m_DNSList = config.dnsservers();
+		m_DNSList = config.dnsservers;
 
 		ui.dnsList->setModel(new CDNSListModel(&m_DNSList));
 		ui.dnsList->setItemDelegate(new CIPEditDelegate());
@@ -41,10 +41,10 @@ namespace qnut {
 			this, SLOT(handleSelectionChanged(const QItemSelection &)));
 
 		if (exec() == QDialog::Accepted) {
-			config.setIP(QHostAddress(ui.ipEdit->text()));
-			config.setNetmask(QHostAddress(ui.netmaskEdit->text()));
-			config.setGateway(QHostAddress(ui.gatewayEdit->text()));
-			config.setDnsservers(m_DNSList);
+			config.ip= QHostAddress(ui.ipEdit->text());
+			config.netmask= QHostAddress(ui.netmaskEdit->text());
+			config.gateway= QHostAddress(ui.gatewayEdit->text());
+			config.dnsservers= m_DNSList;
 
 			remember = ui.rememberCheck->isChecked();
 

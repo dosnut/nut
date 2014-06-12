@@ -51,15 +51,10 @@ add_flex_bison_dependency(CONFIGPARSER_L CONFIGPARSER_Y)
 
 qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})
 
-add_library(${PROJECT_NAME} STATIC
+add_library(${PROJECT_NAME} OBJECT
 	${SOURCES_C}
 	${SOURCES_CPP}
 	${SOURCES_MOC_CPP}
 	${FLEX_CONFIGPARSER_L_OUTPUTS}
 	${BISON_CONFIGPARSER_Y_OUTPUTS}
-)
-
-target_link_libraries(${PROJECT_NAME}
-	${QT_LIBRARIES}
-	${CMAKE_BINARY_DIR}/libnutcommon/libnutcommon.a
 )

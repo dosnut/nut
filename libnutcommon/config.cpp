@@ -1,46 +1,15 @@
 #include "common.h"
 
 namespace libnutcommon {
-	QDBusArgument &operator<< (QDBusArgument &argument, const Config &data) {
-		argument.beginStructure();
-		argument.beginMap( QVariant::String, qMetaTypeId<DeviceConfig>() );
-		QListIterator<QString> name(data.m_devNames);
-		QListIterator<DeviceConfig*> config(data.m_devConfigs);
-		while (name.hasNext() && config.hasNext()) {
-			argument.beginMapEntry();
-			argument << name.next() << *config.next();
-			argument.endMapEntry();
-		}
-		argument.endMap();
-		argument.endStructure();
-		return argument;
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, Config &data) {
-		argument.beginStructure();
-		argument.beginMap();
-		while (!argument.atEnd()) {
-			QString name;
-			DeviceConfig *dc = new DeviceConfig();
-			argument.beginMapEntry();
-			argument >> name >> *dc;
-			argument.endMapEntry();
-			data.m_devNames.append(name);
-			data.m_devConfigs.append(dc);
-		}
-		argument.endMap();
-		argument.endStructure();
-		return argument;
-	}
-
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data) {
 		argument.beginStructure();
-		argument << data.m_noAutoStart;
-		argument << data.m_wpaConfigFile;
-		argument << data.m_wpaDriver;
-		argument << data.m_isRegExp;
-		argument << data.m_gateway_metric;
+		argument << data.noAutoStart;
+		argument << data.wpaConfigFile;
+		argument << data.wpaDriver;
+		argument << false; // data.isRegExp got killed
+		argument << data.gateway_metric;
 		argument.beginArray( qMetaTypeId<EnvironmentConfig>() );
-		foreach(EnvironmentConfig* ec, data.m_environments) {
+		for(auto const& ec: data.environments) {
 			argument << *ec;
 		}
 		argument.endArray();
@@ -49,16 +18,17 @@ namespace libnutcommon {
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data) {
 		argument.beginStructure();
-		argument >> data.m_noAutoStart;
-		argument >> data.m_wpaConfigFile;
-		argument >> data.m_wpaDriver;
-		argument >> data.m_isRegExp;
-		argument >> data.m_gateway_metric;
+		argument >> data.noAutoStart;
+		argument >> data.wpaConfigFile;
+		argument >> data.wpaDriver;
+		bool deprecated_isRegExp;
+		argument >> deprecated_isRegExp;
+		argument >> data.gateway_metric;
 		argument.beginArray();
 		while (!argument.atEnd()) {
-			EnvironmentConfig *ec = new EnvironmentConfig();
+			auto ec = std::make_shared<EnvironmentConfig>();
 			argument >> *ec;
-			data.m_environments.push_back(ec);
+			data.environments.push_back(std::move(ec));
 		}
 		argument.endArray();
 		argument.endStructure();
@@ -67,7 +37,7 @@ namespace libnutcommon {
 
 	QDBusArgument &operator<< (QDBusArgument &argument, const SelectResult &data) {
 		argument.beginStructure();
-		argument << (quint8) (qint8) data;
+		argument << (quint8) (SelectResult::bool_t) data;
 		argument.endStructure();
 		return argument;
 	}
@@ -75,7 +45,7 @@ namespace libnutcommon {
 		argument.beginStructure();
 		quint8 tmp;
 		argument >> tmp;
-		data = (qint8) tmp;
+		data = (SelectResult::bool_t) tmp;
 		argument.endStructure();
 		return argument;
 	}
@@ -110,9 +80,9 @@ namespace libnutcommon {
 
 	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentConfig &data) {
 		argument.beginStructure();
-		argument << data.m_name << data.m_select;
+		argument << data.name << data.select;
 		argument.beginArray( qMetaTypeId<IPv4Config>() );
-		foreach(IPv4Config* ic, data.m_ipv4Interfaces) {
+		for(auto const& ic: data.ipv4Interfaces) {
 			argument << *ic;
 		}
 		argument.endArray();
@@ -121,12 +91,12 @@ namespace libnutcommon {
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentConfig &data) {
 		argument.beginStructure();
-		argument >> data.m_name >> data.m_select;
+		argument >> data.name >> data.select;
 		argument.beginArray();
 		while (!argument.atEnd()) {
-			IPv4Config *ic = new IPv4Config();
+			auto ic = std::make_shared<IPv4Config>();
 			argument >> *ic;
-			data.m_ipv4Interfaces.push_back(ic);
+			data.ipv4Interfaces.push_back(std::move(ic));
 		}
 		argument.endArray();
 		argument.endStructure();
@@ -135,12 +105,12 @@ namespace libnutcommon {
 
 	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4Config &data) {
 		argument.beginStructure();
-		argument << (quint32) data.getFlags() << (quint32) data.getOverwriteFlags()
-			<< data.m_static_ip
-			<< data.m_static_netmask
-			<< data.m_static_gateway
-			<< data.m_static_dnsservers
-			<< data.m_gateway_metric;
+		argument << (quint32) data.flags << (quint32) data.overwriteFlags
+			<< data.static_ip
+			<< data.static_netmask
+			<< data.static_gateway
+			<< data.static_dnsservers
+			<< data.gateway_metric;
 
 		argument.endStructure();
 		return argument;
@@ -149,72 +119,98 @@ namespace libnutcommon {
 		argument.beginStructure();
 		quint32 flags, oFlags;
 		argument >> flags >> oFlags;
-		data.m_flags = (IPv4Config::Flags) flags;
-		data.m_overwriteFlags = (IPv4Config::OverwriteFlags) oFlags;
+		data.flags = (IPv4Config::Flags) flags;
+		data.overwriteFlags = (IPv4Config::OverwriteFlags) oFlags;
 		argument
-			>> data.m_static_ip
-			>> data.m_static_netmask
-			>> data.m_static_gateway
-			>> data.m_static_dnsservers
-			>> data.m_gateway_metric;
+			>> data.static_ip
+			>> data.static_netmask
+			>> data.static_gateway
+			>> data.static_dnsservers
+			>> data.gateway_metric;
 		argument.endStructure();
 		return argument;
 	}
 
 	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4UserConfig &data) {
 		argument.beginStructure();
-		argument << data.m_ip << data.m_netmask << data.m_gateway << data.m_dnsservers;
+		argument << data.ip << data.netmask << data.gateway << data.dnsservers;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4UserConfig &data) {
 		argument.beginStructure();
-		argument >> data.m_ip >> data.m_netmask >> data.m_gateway >> data.m_dnsservers;
+		argument >> data.ip >> data.netmask >> data.gateway >> data.dnsservers;
 		argument.endStructure();
 		return argument;
 	}
 
-	Config::Config() {
+	bool DeviceNamePattern::operator<(const DeviceNamePattern &other) const {
+		return type < other.type || (type == other.type &&
+			pattern < other.pattern
+			);
 	}
 
-	Config::~Config() {
-		if (!m_isCopy) {
-			foreach(DeviceConfig* dc, m_devConfigs)
-				delete dc;
-			m_devConfigs.clear();
+	bool DeviceNamePattern::match(QString name) const {
+		switch (type) {
+		case Plain:
+			return pattern == name;
+		case RegExp:
+			return QRegExp{ pattern, Qt::CaseSensitive, QRegExp::RegExp }.exactMatch(name);
+		case Wildcard:
+			return QRegExp{ pattern, Qt::CaseSensitive, QRegExp::Wildcard }.exactMatch(name);
 		}
+		return false;
 	}
 
-	DeviceConfig::DeviceConfig()
-	: m_noAutoStart(false), m_isRegExp(false), m_gateway_metric(-1) {
-	}
-
-	DeviceConfig::~DeviceConfig() {
-		if (!m_isCopy) {
-			foreach(EnvironmentConfig* ec, m_environments)
-				delete ec;
-			m_environments.clear();
+	QString DeviceNamePattern::typeString() const {
+		switch (type) {
+		case Plain:
+			return { "Plain" };
+		case RegExp:
+			return { "RegExp" };
+		case Wildcard:
+			return { "Wildcard" };
 		}
+		return { "" };
 	}
 
-	EnvironmentConfig::EnvironmentConfig(const QString &name)
-	: m_name(name) {
+	std::shared_ptr<DeviceConfig> Config::create(const DeviceNamePattern& pattern) {
+		return namedDeviceConfigs.emplace(pattern, std::make_shared<DeviceConfig>()).first->second;
 	}
-	EnvironmentConfig::~EnvironmentConfig() {
-		if (!m_isCopy) {
-			foreach(IPv4Config *ic, m_ipv4Interfaces)
-				delete ic;
-			m_ipv4Interfaces.clear();
+
+	std::shared_ptr<DeviceConfig> Config::lookup(QString deviceName) {
+		for (auto const& ndc: namedDeviceConfigs) {
+			if (ndc.first.match(deviceName)) return ndc.second;
 		}
+		return { };
 	}
 
-	IPv4Config::IPv4Config(int flags, int overwriteFlags)
-	: m_gateway_metric(-1), m_flags(flags), m_overwriteFlags(overwriteFlags), m_timeout(0), m_continue_dhcp(false) {
+	SelectResult SelectResult::operator||(const SelectResult &other) const {
+		const bool_t op_or[16] = {
+			False  , User , NotUser, True,
+			User   , User , True   , True,
+			NotUser, True , NotUser, True,
+			True   , True , True   , True
+		};
+		return op_or[m_value*4 + other.m_value];
 	}
+	SelectResult SelectResult::operator&&(const SelectResult &other) const {
+		const bool_t op_and[16] = {
+			False  , False, False  , False,
+			False  , User , False  , User,
+			False  , False, NotUser, NotUser,
+			False  , User , NotUser, True
+		};
+		return op_and[m_value*4 + other.m_value];
+	}
+
+	SelectResult SelectResult::operator!() const {
+		return (SelectResult::bool_t) (3 - m_value);
+	}
+
 
 	// called by common.cpp: init()
 	void config_init() {
-		qRegisterMetaType< Config >("libnutcommon::Config");
 		qRegisterMetaType< DeviceConfig >("libnutcommon::DeviceConfig");
 		qRegisterMetaType< SelectResult >("libnutcommon::SelectResult");
 		qRegisterMetaType< QVector< SelectResult > >("QVector<libnutcommon::SelectRule>");
@@ -224,7 +220,6 @@ namespace libnutcommon {
 		qRegisterMetaType< IPv4Config >("libnutcommon::IPv4Config");
 		qRegisterMetaType< IPv4UserConfig >("libnutcommon::IPv4UserConfig");
 
-		qDBusRegisterMetaType< Config >();
 		qDBusRegisterMetaType< DeviceConfig >();
 		qDBusRegisterMetaType< SelectResult >();
 		qDBusRegisterMetaType< QVector< SelectResult > >();

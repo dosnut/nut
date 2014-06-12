@@ -109,13 +109,13 @@ namespace qnut {
 			if (settings->childGroups().contains(i->getName())) {
 				settings->beginGroup(i->getName());
 				foreach (CInterface * j, i->getInterfaces()) {
-					if (j->getConfig().getFlags() & IPv4Config::DO_USERSTATIC && settings->childGroups().contains(QString::number(j->getIndex()))) {
+					if (j->getConfig().flags & IPv4Config::DO_USERSTATIC && settings->childGroups().contains(QString::number(j->getIndex()))) {
 						libnutcommon::IPv4UserConfig config;
 
 						settings->beginGroup(QString::number(j->getIndex()));
-						config.setIP(QHostAddress(settings->value(UI_SETTINGS_IP).toString()));
-						config.setNetmask(QHostAddress(settings->value(UI_SETTINGS_NETMASK).toString()));
-						config.setGateway(QHostAddress(settings->value(UI_SETTINGS_GATEWAY).toString()));
+						config.ip = QHostAddress(settings->value(UI_SETTINGS_IP).toString());
+						config.netmask = QHostAddress(settings->value(UI_SETTINGS_NETMASK).toString());
+						config.gateway = QHostAddress(settings->value(UI_SETTINGS_GATEWAY).toString());
 
 						QList<QHostAddress> dnsServers;
 						int size = settings->beginReadArray(UI_SETTINGS_DNSSERVERS);
@@ -127,7 +127,7 @@ namespace qnut {
 						}
 						settings->endArray();
 
-						config.setDnsservers(dnsServers);
+						config.dnsservers = dnsServers;
 						settings->endGroup();
 
 						if (config.valid())
@@ -249,13 +249,13 @@ namespace qnut {
 				settings->beginGroup(qobject_cast<CEnvironment *>(i->parent())->getName());
 				settings->beginGroup(QString::number(i->getIndex()));
 
-				settings->setValue(UI_SETTINGS_IP, i->getUserConfig().ip().toString());
-				settings->setValue(UI_SETTINGS_NETMASK, i->getUserConfig().netmask().toString());
-				settings->setValue(UI_SETTINGS_GATEWAY, i->getUserConfig().gateway().toString());
-				settings->beginWriteArray(UI_SETTINGS_DNSSERVERS, i->getUserConfig().dnsservers().size());
-				for (int k = 0; k < i->getUserConfig().dnsservers().size(); ++k) {
+				settings->setValue(UI_SETTINGS_IP, i->getUserConfig().ip.toString());
+				settings->setValue(UI_SETTINGS_NETMASK, i->getUserConfig().netmask.toString());
+				settings->setValue(UI_SETTINGS_GATEWAY, i->getUserConfig().gateway.toString());
+				settings->beginWriteArray(UI_SETTINGS_DNSSERVERS, i->getUserConfig().dnsservers.size());
+				for (int k = 0; k < i->getUserConfig().dnsservers.size(); ++k) {
 					settings->setArrayIndex(k);
-					settings->setValue(UI_SETTINGS_ADDRESS, i->getUserConfig().dnsservers()[k].toString());
+					settings->setValue(UI_SETTINGS_ADDRESS, i->getUserConfig().dnsservers[k].toString());
 				}
 				settings->endArray();
 
@@ -397,7 +397,7 @@ namespace qnut {
 				CInterface * interface = static_cast<CInterface *>(targetIndex.internalPointer());
 				environment = qobject_cast<CEnvironment *>(interface->parent());
 
-				m_IPConfigurationAction->setEnabled(interface->getConfig().getFlags() & libnutcommon::IPv4Config::DO_USERSTATIC);
+				m_IPConfigurationAction->setEnabled(interface->getConfig().flags & libnutcommon::IPv4Config::DO_USERSTATIC);
 				ui.detailsView->setRootIsDecorated(false);
 				ui.detailsView->setModel(new CInterfaceDetailsModel(interface));
 			}

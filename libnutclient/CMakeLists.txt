@@ -24,30 +24,26 @@ set(SOURCES_CPP
 	clog.cpp
 )
 
-SET(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output directory for libraries")
-SET(CMAKE_INSTALL_INCLUDEDIR include CACHE PATH "Output directory for includes")
+set(SOURCES_OBJECT)
+if(USE_WIRELESS)
+	find_library(LIB_IW iw)
+	set(SOURCES_OBJECT $<TARGET_OBJECTS:nutwireless>)
+else(USE_WIRELESS)
+	set(LIB_IW)
+endif(USE_WIRELESS)
+
 
 qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})
 
 add_definitions(-DCONFIG_CTRL_IFACE -DCONFIG_CTRL_IFACE_UNIX)
 
-add_library(${PROJECT_NAME} SHARED ${SOURCES_CPP} ${SOURCES_MOC_CPP})
-
-IF(USE_WIRELESS)
-	add_target_properties(nutwireless COMPILE_FLAGS -fPIC)
-	find_library(LIB_IW iw)
-	SET(LIB_NUTWIRELESS ${nutwireless_BINARY_DIR}/libnutwireless.a ${LIB_IW})
-ENDIF(USE_WIRELESS)
-
-find_library(LIB_NL nl)
-SET(LIB_NUTCOMMON ${nutcommon_BINARY_DIR}/libnutcommon.a ${LIB_NL})
-
-add_target_properties(nutcommon COMPILE_FLAGS -fPIC)
+add_library(${PROJECT_NAME} SHARED ${SOURCES_CPP} ${SOURCES_MOC_CPP} ${SOURCES_OBJECT})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PACKAGE_VERSION} SOVERSION 0)
 
 target_link_libraries(${PROJECT_NAME}
-	${LIB_NUTWIRELESS}
-	${LIB_NUTCOMMON}
+	nutcommon
+	${LIB_NL}
+	${LIB_IW}
 	${QT_QTCORE_LIBRARY}
 	${QT_QTNETWORK_LIBRARY}
 	${QT_QTDBUS_LIBRARY}
@@ -61,4 +57,3 @@ install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${NUTCOMMON_H} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libnutcommon)
 install(FILES ${NUTWIRELESS_H} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libnutwireless)
 install(FILES ${NUTCLIENT_H} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libnutclient)
-

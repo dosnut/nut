@@ -85,11 +85,11 @@ add_executable(${PROJECT_NAME}
 add_target_properties(${PROJECT_NAME} COMPILE_FLAGS "-DUI_VERSION='\"${PACKAGE_VERSION}\"'")
 
 target_link_libraries(${PROJECT_NAME}
+	nutclient
+	nutcommon
 	${QT_QTCORE_LIBRARY}
 	${QT_QTGUI_LIBRARY}
 	${QT_QTNETWORK_LIBRARY}
-	-L${nutclient_BINARY_DIR}
-	-lnutclient
 )
 
 file(GLOB RES_ICONS res/*.png res/qnut.svg res/qnut_small.svg)
