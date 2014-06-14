@@ -147,18 +147,18 @@ namespace qnut {
 			case OV_MOD_TYPE:
 				return toStringTr(data->getType());
 			case OV_MOD_IP: {
-					if (data->getState() != DS_UP)
+					if (data->getState() != DeviceState::UP)
 						return QString('-');
 					else
 						return activeIP(data);
 				}
 			case OV_MOD_ENV:
-				if (data->getState() >= DS_UNCONFIGURED)
+				if (data->getState() >= DeviceState::UNCONFIGURED)
 					return getNameDefault(data->getActiveEnvironment());
 				else
 					return tr("none");
 			case OV_MOD_NETWORK:
-				if (data->getState() > DS_ACTIVATED)
+				if (data->getState() > DeviceState::ACTIVATED)
 					return currentNetwork(data);
 				else
 					return QString('-');

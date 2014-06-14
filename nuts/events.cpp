@@ -100,15 +100,15 @@ namespace nuts {
 	void Events::interfaceStatusChanged(libnutcommon::InterfaceState state, Interface_IPv4* iface) {
 		QString event;
 		switch (state) {
-			case libnutcommon::IFS_OFF:
+			case libnutcommon::InterfaceState::OFF:
 				event = "ifdown";
 				break;
-			case libnutcommon::IFS_STATIC:
-			case libnutcommon::IFS_DHCP:
-			case libnutcommon::IFS_ZEROCONF:
+			case libnutcommon::InterfaceState::STATIC:
+			case libnutcommon::InterfaceState::DHCP:
+			case libnutcommon::InterfaceState::ZEROCONF:
 				event = "ifup";
 				break;
-			case libnutcommon::IFS_WAITFORCONFIG:
+			case libnutcommon::InterfaceState::WAITFORCONFIG:
 				event = "ifwaitforconfig";
 				break;
 			default:

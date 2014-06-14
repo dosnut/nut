@@ -16,6 +16,8 @@
 #include <QMetaType>
 #include <QHash>
 
+#include <type_traits>
+
 namespace libnutcommon {
 	/** Init the libnutcommon library; you may call it more than once.
 	 */

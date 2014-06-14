@@ -67,7 +67,7 @@ namespace qnut {
 		connect(m_Device, SIGNAL(stateChanged(libnutcommon::DeviceState)),
 			this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
 
-		if (m_Device->getState() == DS_UP)
+		if (m_Device->getState() == DeviceState::UP)
 			ui.environmentTree->expand(ui.environmentTree->model()->index(m_Device->getEnvironments().indexOf(m_Device->getActiveEnvironment()), 0));
 	}
 
@@ -109,7 +109,7 @@ namespace qnut {
 			if (settings->childGroups().contains(i->getName())) {
 				settings->beginGroup(i->getName());
 				foreach (CInterface * j, i->getInterfaces()) {
-					if (j->getConfig().flags & IPv4Config::DO_USERSTATIC && settings->childGroups().contains(QString::number(j->getIndex()))) {
+					if (j->getConfig().flags & IPv4ConfigFlag::USERSTATIC && settings->childGroups().contains(QString::number(j->getIndex()))) {
 						libnutcommon::IPv4UserConfig config;
 
 						settings->beginGroup(QString::number(j->getIndex()));
@@ -174,23 +174,23 @@ namespace qnut {
 
 			newCommand.path = prefix + UI_DIR_SCRIPT_UP;
 			newCommand.enabled = scriptFlags & UI_FLAG_SCRIPT_UP;
-			m_CommandList[DS_UP] << newCommand;
+			m_CommandList[(quint32) DeviceState::UP] << newCommand;
 
 			newCommand.path = prefix + UI_DIR_SCRIPT_UNCONFIGURED;
 			newCommand.enabled = scriptFlags & UI_FLAG_SCRIPT_UNCONFIGURED;
-			m_CommandList[DS_UNCONFIGURED] << newCommand;
+			m_CommandList[(quint32) DeviceState::UNCONFIGURED] << newCommand;
 
 			newCommand.path = prefix + UI_DIR_SCRIPT_CARRIER;
 			newCommand.enabled = scriptFlags & UI_FLAG_SCRIPT_CARRIER;
-			m_CommandList[DS_CARRIER] << newCommand;
+			m_CommandList[(quint32) DeviceState::CARRIER] << newCommand;
 
 			newCommand.path = prefix + UI_DIR_SCRIPT_ACTIVATED;
 			newCommand.enabled = scriptFlags & UI_FLAG_SCRIPT_ACTIVATED;
-			m_CommandList[DS_ACTIVATED] << newCommand;
+			m_CommandList[(quint32) DeviceState::ACTIVATED] << newCommand;
 
 			newCommand.path = prefix + UI_DIR_SCRIPT_DEACTIVATED;
 			newCommand.enabled = scriptFlags & UI_FLAG_SCRIPT_DEACTIVATED;
-			m_CommandList[DS_DEACTIVATED] << newCommand;
+			m_CommandList[(quint32) DeviceState::DEACTIVATED] << newCommand;
 
 			settings->endGroup();
 		}
@@ -293,11 +293,11 @@ namespace qnut {
 
 		tempAction = m_DeviceMenu->addAction(QIcon(UI_ICON_ENABLE), tr("&Enable device"),
 			m_Device, SLOT(enable()));
-		tempAction->setEnabled(m_Device->getState() == DS_DEACTIVATED);
+		tempAction->setEnabled(m_Device->getState() == DeviceState::DEACTIVATED);
 
 		tempAction = m_DeviceMenu->addAction(QIcon(UI_ICON_DISABLE), tr("&Disable device"),
 			m_Device, SLOT(disable()));
-		tempAction->setDisabled(m_Device->getState() == DS_DEACTIVATED);
+		tempAction->setDisabled(m_Device->getState() == DeviceState::DEACTIVATED);
 
 		m_DeviceMenu->addSeparator();
 		m_DeviceMenu->addAction(QIcon(UI_ICON_CONFIGURE), tr("&Device settings..."),
@@ -352,7 +352,7 @@ namespace qnut {
 		ui.statusLabel->setText(toStringTr(m_Device->getState()));
 		ui.networkLabel->setText(tr("connected to: %1").arg(currentNetwork(m_Device, false)));
 
-		ui.networkLabel->setVisible(m_Device->getState() > DS_CARRIER);
+		ui.networkLabel->setVisible(m_Device->getState() > DeviceState::CARRIER);
 	}
 
 	inline void CUIDevice::executeCommand(QStringList & env, QString path) {
@@ -397,7 +397,7 @@ namespace qnut {
 				CInterface * interface = static_cast<CInterface *>(targetIndex.internalPointer());
 				environment = qobject_cast<CEnvironment *>(interface->parent());
 
-				m_IPConfigurationAction->setEnabled(interface->getConfig().flags & libnutcommon::IPv4Config::DO_USERSTATIC);
+				m_IPConfigurationAction->setEnabled(interface->getConfig().flags & libnutcommon::IPv4ConfigFlag::USERSTATIC);
 				ui.detailsView->setRootIsDecorated(false);
 				ui.detailsView->setModel(new CInterfaceDetailsModel(interface));
 			}
@@ -486,28 +486,28 @@ namespace qnut {
 	void CUIDevice::handleDeviceStateChange(DeviceState state) {
 		setHeadInfo();
 		ui.environmentTree->collapseAll();
-		if (state >= DS_UNCONFIGURED)
+		if (state >= DeviceState::UNCONFIGURED)
 			ui.environmentTree->expand(ui.environmentTree->model()->index(m_Device->getActiveEnvironment()->getIndex(), 0));
 
-		m_DeviceActions[0]->setEnabled(state == DS_DEACTIVATED);
-		m_DeviceActions[1]->setDisabled(state == DS_DEACTIVATED);
+		m_DeviceActions[0]->setEnabled(state == DeviceState::DEACTIVATED);
+		m_DeviceActions[1]->setDisabled(state == DeviceState::DEACTIVATED);
 
 		emit updateTrayIconRequested(state);
 
 		if (m_NotificationsEnabled)
 			emit showNotificationRequested(state);
 
-		if (m_CommandsEnabled && !(m_CommandList[state].isEmpty())) {
+		if (m_CommandsEnabled && !(m_CommandList[(quint32) state].isEmpty())) {
 			QFileInfo currentFile;
 			QStringList env;
 
 			env << "QNUT_DEV_NAME="  + m_Device->getName();
 			env << "QNUT_DEV_STATE=" + libnutcommon::toString(state);
 
-			if (state >= DS_UNCONFIGURED)
+			if (state >= DeviceState::UNCONFIGURED)
 				env << "QNUT_ENV_NAME=" + m_Device->getActiveEnvironment()->getName();
 
-			if (state == DS_UP) {
+			if (state == DeviceState::UP) {
 				env << "QNUT_IF_COUNT=" + QString::number(m_Device->getActiveEnvironment()->getInterfaces().count());
 				int j = 0;
 				foreach (CInterface * i, m_Device->getActiveEnvironment()->getInterfaces()) {
@@ -516,7 +516,7 @@ namespace qnut {
 				}
 			}
 
-			foreach (ToggleableCommand i, m_CommandList[state]) {
+			foreach (ToggleableCommand i, m_CommandList[(quint32) state]) {
 				if (i.enabled /*TODO check if path is valid: && QFile::exists(i.path)*/) {
 					currentFile.setFile(i.path);
 					if (currentFile.isDir()) {

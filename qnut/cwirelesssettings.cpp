@@ -282,14 +282,14 @@ namespace qnut {
 	}
 
 	void CWirelessSettings::updateUi(DeviceState state) {
-		ui.managedAvailableAPSplitter->setEnabled(state >= DS_ACTIVATED && m_Device->getWireless());
-		ui.actionsWidget->setEnabled(state >= DS_ACTIVATED && m_Device->getWireless());
-		ui.signalFrame->setEnabled(state > DS_ACTIVATED && m_Device->getWireless());
+		ui.managedAvailableAPSplitter->setEnabled(state >= DeviceState::ACTIVATED && m_Device->getWireless());
+		ui.actionsWidget->setEnabled(state >= DeviceState::ACTIVATED && m_Device->getWireless());
+		ui.signalFrame->setEnabled(state > DeviceState::ACTIVATED && m_Device->getWireless());
 
 		ui.iconLabel->setPixmap(QPixmap(iconFile(m_Device)));
 		ui.stateLabel->setText(toStringTr(state));
 
-		if (state <= DS_ACTIVATED) {
+		if (state <= DeviceState::ACTIVATED) {
 			ui.signalLabel->setText(tr("no signal info"));
 			ui.bssidLabel->setText("00:00:00:00:00:00");
 			ui.qualityLabel->setText(tr("Quality") + ": 0/0");
@@ -476,7 +476,7 @@ namespace qnut {
 
 		QAction * currentAction;
 
-		if (m_Device->getState() > DS_ACTIVATED && m_ManagedAPModel->currentID() != -1) {
+		if (m_Device->getState() > DeviceState::ACTIVATED && m_ManagedAPModel->currentID() != -1) {
 			QString ssid = m_ManagedAPModel->cachedNetworks().at(m_ManagedAPModel->currentID()).ssid;
 			CAvailableAPModel::IndexList * scanList = m_AvailableAPModel->scanResultIdListBySSID(ssid);
 			if (scanList) {

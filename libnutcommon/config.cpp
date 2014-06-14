@@ -1,14 +1,15 @@
 #include "common.h"
+#include "enum.h"
 
 namespace libnutcommon {
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data) {
 		argument.beginStructure();
-		argument << data.noAutoStart;
-		argument << data.wpaConfigFile;
-		argument << data.wpaDriver;
-		argument << false; // data.isRegExp got killed
-		argument << data.gateway_metric;
-		argument.beginArray( qMetaTypeId<EnvironmentConfig>() );
+		argument
+			<< data.noAutoStart
+			<< data.wpaConfigFile
+			<< data.wpaDriver
+			<< data.gateway_metric;
+		argument.beginArray(qMetaTypeId<EnvironmentConfig>());
 		for(auto const& ec: data.environments) {
 			argument << *ec;
 		}
@@ -18,12 +19,11 @@ namespace libnutcommon {
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data) {
 		argument.beginStructure();
-		argument >> data.noAutoStart;
-		argument >> data.wpaConfigFile;
-		argument >> data.wpaDriver;
-		bool deprecated_isRegExp;
-		argument >> deprecated_isRegExp;
-		argument >> data.gateway_metric;
+		argument
+			>> data.noAutoStart
+			>> data.wpaConfigFile
+			>> data.wpaDriver
+			>> data.gateway_metric;
 		argument.beginArray();
 		while (!argument.atEnd()) {
 			auto ec = std::make_shared<EnvironmentConfig>();
@@ -35,52 +35,67 @@ namespace libnutcommon {
 		return argument;
 	}
 
-	QDBusArgument &operator<< (QDBusArgument &argument, const SelectResult &data) {
-		argument.beginStructure();
-		argument << (quint8) (SelectResult::bool_t) data;
-		argument.endStructure();
-		return argument;
+	QDBusArgument& operator<< (QDBusArgument& argument, SelectResult selectResult) {
+		return dbusSerializeEnum(argument, selectResult);
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectResult &data) {
-		argument.beginStructure();
-		quint8 tmp;
-		argument >> tmp;
-		data = (SelectResult::bool_t) tmp;
-		argument.endStructure();
-		return argument;
+	const QDBusArgument& operator>> (const QDBusArgument& argument, SelectResult& selectResult) {
+		return dbusUnserializeEnum(argument, selectResult);
+	}
+
+	QDBusArgument& operator<< (QDBusArgument& argument, SelectType selectType) {
+		return dbusSerializeEnum(argument, selectType);
+	}
+	const QDBusArgument& operator>> (const QDBusArgument& argument, SelectType& selectType) {
+		return dbusUnserializeEnum(argument, selectType);
 	}
 
 	QDBusArgument &operator<< (QDBusArgument &argument, const SelectRule &data) {
 		argument.beginStructure();
-		argument << data.invert << (quint8) data.selType << data.block << data.essid << data.ipAddr << data.macAddr;
+		argument
+			<< data.invert
+			<< data.selType
+			<< data.block
+			<< data.essid
+			<< data.ipAddr
+			<< data.macAddr;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectRule &data) {
 		argument.beginStructure();
-		quint8 selType;
-		argument >> data.invert >> selType >> data.block >> data.essid >> data.ipAddr >> data.macAddr;
-		data.selType = (SelectRule::SelectType) selType;
+		argument
+			>> data.invert
+			>> data.selType
+			>> data.block
+			>> data.essid
+			>> data.ipAddr
+			>> data.macAddr;
 		argument.endStructure();
 		return argument;
 	}
 
 	QDBusArgument &operator<< (QDBusArgument &argument, const SelectConfig &data) {
 		argument.beginStructure();
-		argument << data.filters << data.blocks;
+		argument
+			<< data.filters
+			<< data.blocks;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectConfig &data) {
 		argument.beginStructure();
-		argument >> data.filters >> data.blocks;
+		argument
+			>> data.filters
+			>> data.blocks;
 		argument.endStructure();
 		return argument;
 	}
 
 	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentConfig &data) {
 		argument.beginStructure();
-		argument << data.name << data.select;
+		argument
+			<< data.name
+			<< data.select;
 		argument.beginArray( qMetaTypeId<IPv4Config>() );
 		for(auto const& ic: data.ipv4Interfaces) {
 			argument << *ic;
@@ -91,7 +106,9 @@ namespace libnutcommon {
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentConfig &data) {
 		argument.beginStructure();
-		argument >> data.name >> data.select;
+		argument
+			>> data.name
+			>> data.select;
 		argument.beginArray();
 		while (!argument.atEnd()) {
 			auto ic = std::make_shared<IPv4Config>();
@@ -103,25 +120,29 @@ namespace libnutcommon {
 		return argument;
 	}
 
+	QDBusArgument &operator<< (QDBusArgument &argument, IPv4ConfigFlags flags) {
+		return dbusSerializeFlags(argument, flags);
+	}
+	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4ConfigFlags &flags) {
+		return dbusUnserializeFlags(argument, flags);
+	}
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4Config &data) {
 		argument.beginStructure();
-		argument << (quint32) data.flags << (quint32) data.overwriteFlags
+		argument
+			<< data.flags
 			<< data.static_ip
 			<< data.static_netmask
 			<< data.static_gateway
 			<< data.static_dnsservers
 			<< data.gateway_metric;
-
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4Config &data) {
 		argument.beginStructure();
-		quint32 flags, oFlags;
-		argument >> flags >> oFlags;
-		data.flags = (IPv4Config::Flags) flags;
-		data.overwriteFlags = (IPv4Config::OverwriteFlags) oFlags;
 		argument
+			>> data.flags
 			>> data.static_ip
 			>> data.static_netmask
 			>> data.static_gateway
@@ -133,13 +154,21 @@ namespace libnutcommon {
 
 	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4UserConfig &data) {
 		argument.beginStructure();
-		argument << data.ip << data.netmask << data.gateway << data.dnsservers;
+		argument
+			<< data.ip
+			<< data.netmask
+			<< data.gateway
+			<< data.dnsservers;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4UserConfig &data) {
 		argument.beginStructure();
-		argument >> data.ip >> data.netmask >> data.gateway >> data.dnsservers;
+		argument
+			>> data.ip
+			>> data.netmask
+			>> data.gateway
+			>> data.dnsservers;
 		argument.endStructure();
 		return argument;
 	}
@@ -185,47 +214,76 @@ namespace libnutcommon {
 		return { };
 	}
 
-	SelectResult SelectResult::operator||(const SelectResult &other) const {
-		const bool_t op_or[16] = {
-			False  , User , NotUser, True,
-			User   , User , True   , True,
-			NotUser, True , NotUser, True,
-			True   , True , True   , True
-		};
-		return op_or[m_value*4 + other.m_value];
-	}
-	SelectResult SelectResult::operator&&(const SelectResult &other) const {
-		const bool_t op_and[16] = {
-			False  , False, False  , False,
-			False  , User , False  , User,
-			False  , False, NotUser, NotUser,
-			False  , User , NotUser, True
-		};
-		return op_and[m_value*4 + other.m_value];
+	bool evaluate(SelectResult a, bool user) {
+		bool result[] = { true, user, !user, false };
+		return result[(quint8) a];
 	}
 
-	SelectResult SelectResult::operator!() const {
-		return (SelectResult::bool_t) (3 - m_value);
+	SelectResult operator||(SelectResult a, SelectResult b) {
+		using SR = SelectResult;
+		auto ai = static_cast<quint8>(a);
+		auto bi = static_cast<quint8>(b);
+		static const SR op_or[16] = {
+			SR::False  , SR::User , SR::NotUser, SR::True,
+			SR::User   , SR::User , SR::True   , SR::True,
+			SR::NotUser, SR::True , SR::NotUser, SR::True,
+			SR::True   , SR::True , SR::True   , SR::True
+		};
+		return op_or[ai*4 + bi];
 	}
 
+	SelectResult operator&&(SelectResult a, SelectResult b) {
+		using SR = SelectResult;
+		auto ai = static_cast<quint8>(a);
+		auto bi = static_cast<quint8>(b);
+		static const SR op_and[16] = {
+			SR::False  , SR::False, SR::False  , SR::False,
+			SR::False  , SR::User , SR::False  , SR::User,
+			SR::False  , SR::False, SR::NotUser, SR::NotUser,
+			SR::False  , SR::User , SR::NotUser, SR::True
+		};
+		return op_and[ai*4 + bi];
+	}
+
+	SelectResult operator^(SelectResult a, SelectResult b) {
+		using SR = SelectResult;
+		auto ai = static_cast<quint8>(a);
+		auto bi = static_cast<quint8>(b);
+		static const SR op_xor[16] = {
+			SR::False  , SR::User   , SR::NotUser, SR::True,
+			SR::User   , SR::False  , SR::True   , SR::NotUser,
+			SR::NotUser, SR::True   , SR::False  , SR::User,
+			SR::True   , SR::NotUser, SR::User   , SR::False
+		};
+		return op_xor[ai*4 + bi];
+	}
+
+	SelectResult operator!(SelectResult a) {
+		auto ai = static_cast<quint8>(a);
+		return static_cast<SelectResult>(3 - ai);
+	}
 
 	// called by common.cpp: init()
 	void config_init() {
 		qRegisterMetaType< DeviceConfig >("libnutcommon::DeviceConfig");
 		qRegisterMetaType< SelectResult >("libnutcommon::SelectResult");
 		qRegisterMetaType< QVector< SelectResult > >("QVector<libnutcommon::SelectRule>");
+		qRegisterMetaType< SelectType >("libnutcommon::SelectType");
 		qRegisterMetaType< SelectRule >("libnutcommon::SelectRule");
 		qRegisterMetaType< SelectConfig >("libnutcommon::SelectConfig");
 		qRegisterMetaType< EnvironmentConfig >("libnutcommon::EnvironmentConfig");
+		qRegisterMetaType< IPv4ConfigFlags >("libnutcommon::IPv4ConfigFlags");
 		qRegisterMetaType< IPv4Config >("libnutcommon::IPv4Config");
 		qRegisterMetaType< IPv4UserConfig >("libnutcommon::IPv4UserConfig");
 
 		qDBusRegisterMetaType< DeviceConfig >();
 		qDBusRegisterMetaType< SelectResult >();
 		qDBusRegisterMetaType< QVector< SelectResult > >();
+		qDBusRegisterMetaType< SelectType >();
 		qDBusRegisterMetaType< SelectRule >();
 		qDBusRegisterMetaType< SelectConfig >();
 		qDBusRegisterMetaType< EnvironmentConfig >();
+		qDBusRegisterMetaType< IPv4ConfigFlags >();
 		qDBusRegisterMetaType< IPv4Config >();
 		qDBusRegisterMetaType< IPv4UserConfig >();
 	}

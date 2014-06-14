@@ -4,6 +4,10 @@ extern "C" {
 #include <net/ethernet.h>
 }
 
+#include <cstring>
+
+#include <QtEndian>
+
 namespace libnutcommon {
 	QDBusArgument &operator<< (QDBusArgument &argument, const MacAddress &data) {
 		argument << data.toString();
@@ -16,7 +20,7 @@ namespace libnutcommon {
 		return argument;
 	}
 
-	static inline int read_hexdigit(char c) {
+	static int read_hexdigit(char c) {
 		if ('0' <= c && c <= '9')
 			return c - '0';
 		if ('a' <= c && c <= 'f')
@@ -26,7 +30,7 @@ namespace libnutcommon {
 		return -1;
 	}
 
-	static inline char* hex2quint8(char* msg, quint8 &val) {
+	static char* hex2quint8(char* msg, quint8 &val) {
 		int i;
 		val = 0;
 		if (!msg || !*msg) return msg;
@@ -42,22 +46,24 @@ namespace libnutcommon {
 		return msg;
 	}
 
+	MacAddress const MacAddress::Zero { };
+
 	MacAddress::MacAddress(const QString &str) {
-		data.ui64 = 0;
+		data = Zero.data;
 		if (str == QLatin1String("any") || str.isEmpty()) {
 			return;
 		}
-		QByteArray buf = str.toUtf8();
-		char *s = buf.data();
+		auto buf = str.toUtf8();
+		auto s = buf.data();
 //		qDebug(s);
-		quint8 val;
-		char *s2;
 		for (int i = 0; i < 6; i++) {
 			if (!*s) {
 //				qDebug() << QString("Unexpected end of mac");
 				return;
 			}
-			if ((s2 = hex2quint8(s, val)) == s) {
+			quint8 val;
+			auto s2 = hex2quint8(s, val);
+			if (s2 == s) {
 //				qDebug() << QString("No hexdata found at pos %1, '%2'").arg((int) (s - buf.data())).arg(*s);
 				return;
 			}
@@ -75,18 +81,45 @@ namespace libnutcommon {
 		if (d == 0) {
 			MacAddress();
 		} else {
-			data.ui64 = 0;
-			for (int i = 0; i < 6; i++)
-				data.bytes[i] = d[i];
+			memcpy(data.bytes, d, sizeof(data.bytes));
 		}
 	}
-	MacAddress::MacAddress(const ether_addr * eth) {
-		data.ui64 = 0;
-		data.bytes[0] = (quint8) eth->ether_addr_octet[0];
-		data.bytes[1] = (quint8) eth->ether_addr_octet[1];
-		data.bytes[2] = (quint8) eth->ether_addr_octet[2];
-		data.bytes[3] = (quint8) eth->ether_addr_octet[3];
-		data.bytes[4] = (quint8) eth->ether_addr_octet[4];
-		data.bytes[5] = (quint8) eth->ether_addr_octet[5];
+	MacAddress::MacAddress(const ether_addr* eth) {
+		memcpy(data.bytes, eth->ether_addr_octet, sizeof(data));
+	}
+
+	bool MacAddress::operator==(const MacAddress &b) const {
+		return 0 == std::memcmp(&data, &b.data, sizeof(data));
+	}
+
+	bool MacAddress::operator!=(const MacAddress &b) const {
+		return 0 != std::memcmp(&data, &b.data, sizeof(data));
+	}
+
+	bool MacAddress::operator<(const MacAddress &b) const {
+		return 0 < std::memcmp(&data, &b.data, sizeof(data));
+	}
+	QString MacAddress::toString() const {
+		char buf[sizeof("00:00:00:00:00:00")];
+		sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
+			data.bytes[0],data.bytes[1],data.bytes[2],data.bytes[3],data.bytes[4],data.bytes[5]);
+		return QString(buf);
+	}
+
+	bool MacAddress::zero() const {
+		return Zero == *this;
+	}
+
+	bool MacAddress::valid() const {
+		return Zero != *this;
+	}
+
+	void MacAddress::clear() {
+		data = Zero.data;
+	}
+
+	uint qHash(const MacAddress& key) {
+		auto n = qFromBigEndian<quint64>(key.data.bytes);
+		return ::qHash(n);
 	}
 }

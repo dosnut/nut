@@ -81,7 +81,7 @@ driver      return DRIVER;
 
 \n         ++line_num;
 "//".*\n   ++line_num;
-[a-zA-Z0-9]+  printf("Unexpected keyword, ignoring\n");
+[a-zA-Z0-9]+  printf("Unexpected keyword '%s', ignoring\n", yytext);
 [!{};/]     return yytext[0];
 .          /* ignore. TODO: only ignore whitespaces*/
 

@@ -42,11 +42,11 @@ namespace qnut {
 			return 0;
 
 		if (!parent.isValid())
-			if (m_Interface->getState() == IFS_WAITFORCONFIG)
+			if (m_Interface->getState() == InterfaceState::WAITFORCONFIG)
 				return 4 + m_Interface->getUserConfig().dnsservers.size();
-			else if (m_Interface->getState() != IFS_OFF)
+			else if (m_Interface->getState() != InterfaceState::OFF)
 				return 4 + m_Interface->getDnsServers().size();
-			else if (m_Interface->getConfig().flags & IPv4Config::DO_STATIC)
+			else if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
 				return 4 + m_Interface->getConfig().static_dnsservers.size();
 			else
 				return 4;
@@ -84,31 +84,31 @@ namespace qnut {
 			switch (index.row()) {
 			case 0:
 				switch (m_Interface->getState()) {
-				case IFS_OFF:
-					if (m_Interface->getConfig().flags & IPv4Config::DO_USERSTATIC)
+				case InterfaceState::OFF:
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC)
 						return tr("user defined static");
-					else if (m_Interface->getConfig().flags & IPv4Config::DO_DHCP) {
+					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::DHCP) {
 						QString fallback;
-						if (m_Interface->getConfig().flags & IPv4Config::DO_ZEROCONF)
+						if (m_Interface->getConfig().flags & IPv4ConfigFlag::ZEROCONF)
 							fallback = ' ' + tr("fallback: zeroconf");
-						else if (m_Interface->getConfig().flags & IPv4Config::DO_STATIC)
+						else if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
 							fallback = ' ' + tr("fallback: static");
 						return tr("dynamic (DHCP)") + fallback;
 					}
-					else if (m_Interface->getConfig().flags & IPv4Config::DO_ZEROCONF)
+					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::ZEROCONF)
 						return tr("zeroconf");
-					else if (m_Interface->getConfig().flags & IPv4Config::DO_STATIC)
+					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
 						return tr("static");
 					break;
-				case IFS_STATIC:
-					if (m_Interface->getConfig().flags & IPv4Config::DO_DHCP)
+				case InterfaceState::STATIC:
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::DHCP)
 						return tr("static (fallback)");
 					else
 						return tr("static");
-				case IFS_DHCP:
+				case InterfaceState::DHCP:
 					return tr("dynamic");
-				case IFS_ZEROCONF:
-					if (m_Interface->getConfig().flags & IPv4Config::DO_DHCP)
+				case InterfaceState::ZEROCONF:
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::DHCP)
 						return tr("zeroconf (fallback)");
 					else
 						return tr("zeroconf");
@@ -117,10 +117,10 @@ namespace qnut {
 				}
 				return tr("unknown");
 			case 1:
-				if ((m_Interface->getState() == IFS_OFF) || (m_Interface->getState() == IFS_WAITFORCONFIG)) {
-					if (m_Interface->getConfig().flags & IPv4Config::DO_STATIC)
+				if ((m_Interface->getState() == InterfaceState::OFF) || (m_Interface->getState() == InterfaceState::WAITFORCONFIG)) {
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
 						return toStringDefault(m_Interface->getConfig().static_ip);
-					else if (m_Interface->getConfig().flags & IPv4Config::DO_USERSTATIC)
+					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC)
 						return toStringDefault(m_Interface->getUserConfig().ip);
 					else
 						return tr("none");
@@ -128,10 +128,10 @@ namespace qnut {
 				else
 					return toStringDefault(m_Interface->getIp());
 			case 2:
-				if ((m_Interface->getState() == IFS_OFF) || (m_Interface->getState() == IFS_WAITFORCONFIG)) {
-					if (m_Interface->getConfig().flags & IPv4Config::DO_STATIC)
+				if ((m_Interface->getState() == InterfaceState::OFF) || (m_Interface->getState() == InterfaceState::WAITFORCONFIG)) {
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
 						return toStringDefault(m_Interface->getConfig().static_netmask);
-					else if (m_Interface->getConfig().flags & IPv4Config::DO_USERSTATIC)
+					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC)
 						return toStringDefault(m_Interface->getUserConfig().netmask);
 					else
 						return tr("none");
@@ -139,10 +139,10 @@ namespace qnut {
 				else
 					return toStringDefault(m_Interface->getNetmask());
 			case 3:
-				if ((m_Interface->getState() == IFS_OFF) || (m_Interface->getState() == IFS_WAITFORCONFIG)) {
-					if (m_Interface->getConfig().flags & IPv4Config::DO_STATIC)
+				if ((m_Interface->getState() == InterfaceState::OFF) || (m_Interface->getState() == InterfaceState::WAITFORCONFIG)) {
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
 						return toStringDefault(m_Interface->getConfig().static_gateway);
-					else if (m_Interface->getConfig().flags & IPv4Config::DO_USERSTATIC)
+					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC)
 						return toStringDefault(m_Interface->getUserConfig().gateway);
 					else
 						return tr("none");
@@ -150,10 +150,10 @@ namespace qnut {
 				else
 					return toStringDefault(m_Interface->getGateway());
 			default:
-				if ((m_Interface->getState() == IFS_OFF) || (m_Interface->getState() == IFS_WAITFORCONFIG)) {
-					if (m_Interface->getConfig().flags & IPv4Config::DO_STATIC)
+				if ((m_Interface->getState() == InterfaceState::OFF) || (m_Interface->getState() == InterfaceState::WAITFORCONFIG)) {
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
 						return m_Interface->getConfig().static_dnsservers[index.row()-4].toString();
-					else if (m_Interface->getConfig().flags & IPv4Config::DO_USERSTATIC)
+					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC)
 						return m_Interface->getUserConfig().dnsservers[index.row()-4].toString();
 					else
 						break;

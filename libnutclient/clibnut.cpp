@@ -9,30 +9,30 @@ namespace libnutclient {
 using namespace libnutcommon;
 QString toStringTr(DeviceState state) {
 	switch (state) {
-		case DS_UP:             return CLibNut::tr("up");
-		case DS_UNCONFIGURED:   return CLibNut::tr("unconfigured");
-		case DS_CARRIER:        return CLibNut::tr("got carrier");
-		case DS_ACTIVATED:      return CLibNut::tr("activated");
-		case DS_DEACTIVATED:    return CLibNut::tr("deactivated");
+		case DeviceState::UP:             return CLibNut::tr("up");
+		case DeviceState::UNCONFIGURED:   return CLibNut::tr("unconfigured");
+		case DeviceState::CARRIER:        return CLibNut::tr("got carrier");
+		case DeviceState::ACTIVATED:      return CLibNut::tr("activated");
+		case DeviceState::DEACTIVATED:    return CLibNut::tr("deactivated");
 		default:                return QString();
 	}
 }
 QString toStringTr(DeviceType type) {
 	switch (type) {
-		case DT_ETH:    return CLibNut::tr("Ethernet");
-		case DT_AIR:    return CLibNut::tr("Wireless");
-		case DT_PPP:    return CLibNut::tr("PPP");
-		case DT_BRIDGE: return CLibNut::tr("Bridge");
+		case DeviceType::ETH:    return CLibNut::tr("Ethernet");
+		case DeviceType::AIR:    return CLibNut::tr("Wireless");
+		case DeviceType::PPP:    return CLibNut::tr("PPP");
+		case DeviceType::BRIDGE: return CLibNut::tr("Bridge");
 		default:        return QString();
 	}
 }
 QString toStringTr(InterfaceState state) {
 	switch (state) {
-		case IFS_OFF: return CLibNut::tr("off");
-		case IFS_STATIC: return CLibNut::tr("static");
-		case IFS_DHCP: return CLibNut::tr("dynamic");
-		case IFS_ZEROCONF: return CLibNut::tr("zeroconf");
-		case IFS_WAITFORCONFIG: return CLibNut::tr("wait for config");
+		case InterfaceState::OFF: return CLibNut::tr("off");
+		case InterfaceState::STATIC: return CLibNut::tr("static");
+		case InterfaceState::DHCP: return CLibNut::tr("dynamic");
+		case InterfaceState::ZEROCONF: return CLibNut::tr("zeroconf");
+		case InterfaceState::WAITFORCONFIG: return CLibNut::tr("wait for config");
 		default: return QString();
 	}
 }

@@ -433,6 +433,8 @@ namespace nuts {
 			bool setUserConfig(const libnutcommon::IPv4UserConfig &userConfig);
 			const libnutcommon::IPv4UserConfig &getUserConfig() { return m_userConfig; }
 
+			int gatewayMetric();
+
 		signals:
 			void statusChanged(libnutcommon::InterfaceState state, Interface_IPv4* iface);
 	};

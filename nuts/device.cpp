@@ -177,7 +177,7 @@ namespace nuts {
 
 	//Initialize with default values, add environments, connect to dm-events
 	Device::Device(DeviceManager* dm, const QString &name, std::shared_ptr<libnutcommon::DeviceConfig> config, bool hasWLAN)
-	: QObject(dm), m_arp(this), m_dm(dm), m_name(name), m_interfaceIndex(-1), m_config(config), m_activeEnv(-1), m_nextEnv(-1), m_userEnv(-1), m_waitForEnvSelects(0), m_state(libnutcommon::DS_DEACTIVATED), m_dhcp_client_socket(-1), m_hasWLAN(hasWLAN), m_wpa_supplicant(0) {
+	: QObject(dm), m_arp(this), m_dm(dm), m_name(name), m_interfaceIndex(-1), m_config(config), m_activeEnv(-1), m_nextEnv(-1), m_userEnv(-1), m_waitForEnvSelects(0), m_state(libnutcommon::DeviceState::DEACTIVATED), m_dhcp_client_socket(-1), m_hasWLAN(hasWLAN), m_wpa_supplicant(0) {
 		connect(this, SIGNAL(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState, Device*)), &m_dm->m_events, SLOT(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState, Device*)));
 
 		int i = 0;
@@ -200,13 +200,13 @@ namespace nuts {
 		m_state = state;
 		if (ostate == m_state) return;
 		switch (m_state) {
-			case libnutcommon::DS_DEACTIVATED:
-			case libnutcommon::DS_ACTIVATED:
+			case libnutcommon::DeviceState::DEACTIVATED:
+			case libnutcommon::DeviceState::ACTIVATED:
 				m_arp.stop();
 				break;
-			case libnutcommon::DS_CARRIER:
-			case libnutcommon::DS_UNCONFIGURED:
-			case libnutcommon::DS_UP:
+			case libnutcommon::DeviceState::CARRIER:
+			case libnutcommon::DeviceState::UNCONFIGURED:
+			case libnutcommon::DeviceState::UP:
 				m_arp.start();
 				break;
 		}
@@ -215,12 +215,12 @@ namespace nuts {
 
 	void Device::envUp(Environment* env) {
 		if (m_envs[m_activeEnv] != env) return;
-		setState(libnutcommon::DS_UP);
+		setState(libnutcommon::DeviceState::UP);
 		log << "Device(" << m_name << ") is up!" << endl;
 	}
 	void Device::envDown(Environment* env) {
 		if (m_activeEnv < 0 || m_envs[m_activeEnv] != env) return;
-		setState(libnutcommon::DS_CARRIER);
+		setState(libnutcommon::DeviceState::CARRIER);
 		log << "Device(" << m_name << ") is down!" << endl;
 		m_activeEnv = m_nextEnv;
 		m_nextEnv = -1;
@@ -230,7 +230,7 @@ namespace nuts {
 	}
 	void Device::envNeedUserSetup(Environment* env) {
 		if (m_envs[m_activeEnv] != env) return;
-		setState(libnutcommon::DS_UNCONFIGURED);
+		setState(libnutcommon::DeviceState::UNCONFIGURED);
 		log << "Device(" << m_name << ") needs user configuration!" << endl;
 	}
 
@@ -244,7 +244,7 @@ namespace nuts {
 		if (m_macAddress.zero()) log << "Device(" << m_name << "): couldn't get MacAddress" << endl;
 		log << "Device(" << m_name << ") gotCarrier" << endl;
 		if (m_hasWLAN) log << "ESSID: " << essid << endl;
-		setState(libnutcommon::DS_CARRIER);
+		setState(libnutcommon::DeviceState::CARRIER);
 		startEnvSelect();
 	}
 	void Device::lostCarrier() {
@@ -256,7 +256,7 @@ namespace nuts {
 			emit environmentChanged(m_activeEnv);
 		}
 		m_interfaceIndex = -1;
-		setState(libnutcommon::DS_ACTIVATED);
+		setState(libnutcommon::DeviceState::ACTIVATED);
 	}
 	bool Device::registerXID(quint32 xid, Interface_IPv4 *iface) {
 		if (!xid) return false;
@@ -397,9 +397,8 @@ namespace nuts {
 	}
 
 	void Device::checkEnvironment() {
-		libnutcommon::SelectResult user_res;
-		if (m_userEnv >= 0) user_res = m_envs[m_userEnv]->getSelectResult();
-		if ((m_userEnv >= 0) && (m_envs[m_userEnv]->selectionDone())) {
+		if (m_userEnv >= 0 && m_envs[m_userEnv]->selectionDone()) {
+			auto user_res = m_envs[m_userEnv]->getSelectResult();
 			if (user_res == libnutcommon::SelectResult::True || user_res == libnutcommon::SelectResult::User) {
 				setEnvironment(m_userEnv);
 				return;
@@ -435,17 +434,17 @@ namespace nuts {
 	}
 
 	bool Device::enable(bool force) {
-		if (m_state == libnutcommon::DS_DEACTIVATED) {
+		if (m_state == libnutcommon::DeviceState::DEACTIVATED) {
 			if (!m_dm->m_hwman.controlOn(m_name, force))
 				return false;
 			if (!startWPASupplicant())
 				return false;
-			setState(libnutcommon::DS_ACTIVATED);
+			setState(libnutcommon::DeviceState::ACTIVATED);
 		}
 		return true;
 	}
 	void Device::disable() {
-		if (m_state != libnutcommon::DS_DEACTIVATED) {
+		if (m_state != libnutcommon::DeviceState::DEACTIVATED) {
 			m_nextEnv = -1;
 			if (m_activeEnv != -1) {
 				m_envs[m_activeEnv]->stop();
@@ -455,7 +454,7 @@ namespace nuts {
 			m_interfaceIndex = -1;
 			stopWPASupplicant();
 			m_dm->m_hwman.controlOff(m_name);
-			setState(libnutcommon::DS_DEACTIVATED);
+			setState(libnutcommon::DeviceState::DEACTIVATED);
 		}
 	}
 
@@ -488,8 +487,8 @@ namespace nuts {
 
 
 	Environment::Environment(Device *device, std::shared_ptr<libnutcommon::EnvironmentConfig> config, int id)
-	: QObject(device), m_device(device), m_config(config), m_envIsUp(false), m_envStart(false), m_id(id), m_selArpWaiting(0), m_needUserSetup(false) {
-		m_selectResults.resize(m_config->select.filters.size());
+	: QObject{device}, m_device{device}, m_selectResult{}, m_config{config}, m_envIsUp{false}, m_envStart{false}, m_id{id}, m_selArpWaiting{0}, m_needUserSetup{false} {
+		m_selectResults.fill({}, config->select.filters.size());
 		for(auto const& ic: m_config->ipv4Interfaces) {
 			m_ifs.push_back(new Interface_IPv4(this, m_ifs.size(), ic));
 		}
@@ -557,10 +556,10 @@ namespace nuts {
 		int c = filters.size();
 		for (int i = 0; i < c; i++) {
 			switch (filters[i].selType) {
-				case libnutcommon::SelectRule::SEL_USER:
+				case libnutcommon::SelectType::USER:
 					m_selectResults[i] = libnutcommon::SelectResult::User;
 					break;
-				case libnutcommon::SelectRule::SEL_ARP:
+				case libnutcommon::SelectType::ARP:
 					r = m_device->m_arp.requestIPv4(QHostAddress((quint32) 0), filters[i].ipAddr);
 					if (!r) return false;
 					r->disconnect(this);
@@ -568,11 +567,11 @@ namespace nuts {
 					connect(r, SIGNAL(foundMac(libnutcommon::MacAddress, QHostAddress)),  SLOT(selectArpRequestFoundMac(libnutcommon::MacAddress, QHostAddress)));
 					m_selArpWaiting++;
 					break;
-				case libnutcommon::SelectRule::SEL_ESSID:
+				case libnutcommon::SelectType::ESSID:
 					m_selectResults[i] = (filters[i].essid == m_device->essid()) ? libnutcommon::SelectResult::True : libnutcommon::SelectResult::False;
 					break;
-				case libnutcommon::SelectRule::SEL_AND_BLOCK:
-				case libnutcommon::SelectRule::SEL_OR_BLOCK:
+				case libnutcommon::SelectType::AND_BLOCK:
+				case libnutcommon::SelectType::OR_BLOCK:
 					break;
 			}
 		}
@@ -598,17 +597,17 @@ namespace nuts {
 			return;
 		}
 		for (int i = c-1; i >= 0; i--) {
-			if (filters[i].selType == libnutcommon::SelectRule::SEL_AND_BLOCK) {
+			if (filters[i].selType == libnutcommon::SelectType::AND_BLOCK) {
 				const QVector<quint32> &block = blocks[filters[i].block];
-				libnutcommon::SelectResult tmp = libnutcommon::SelectResult::True;
+				auto tmp = libnutcommon::SelectResult::True;
 				foreach (quint32 j, block) {
 					tmp = tmp && m_selectResults[j];
 					if (tmp == libnutcommon::SelectResult::False) break;
 				}
 				m_selectResults[i] = tmp;
-			} else if (filters[i].selType == libnutcommon::SelectRule::SEL_OR_BLOCK) {
+			} else if (filters[i].selType == libnutcommon::SelectType::OR_BLOCK) {
 				const QVector<quint32> &block = blocks[filters[i].block];
-				libnutcommon::SelectResult tmp = libnutcommon::SelectResult::False;
+				auto tmp = libnutcommon::SelectResult::False;
 				foreach (quint32 j, block) {
 					tmp = tmp || m_selectResults[j];
 					if (tmp == libnutcommon::SelectResult::True) break;
@@ -627,7 +626,7 @@ namespace nuts {
 		const QVector<libnutcommon::SelectRule> &filters = m_config->select.filters;
 		int c = filters.size();
 		for (int i = 0; i < c; i++) {
-			if (filters[i].selType == libnutcommon::SelectRule::SEL_ARP && filters[i].ipAddr == ip) {
+			if (filters[i].selType == libnutcommon::SelectType::ARP && filters[i].ipAddr == ip) {
 				m_selectResults[i] = libnutcommon::SelectResult::False;
 				m_selArpWaiting--;
 			}
@@ -640,7 +639,7 @@ namespace nuts {
 		const QVector<libnutcommon::SelectRule> &filters = m_config->select.filters;
 		int c = filters.size();
 		for (int i = 0; i < c; i++) {
-			if (filters[i].selType == libnutcommon::SelectRule::SEL_ARP && filters[i].ipAddr == ip) {
+			if (filters[i].selType == libnutcommon::SelectType::ARP && filters[i].ipAddr == ip) {
 				if ((!filters[i].macAddr.zero()) && (filters[i].macAddr != mac)) {
 					m_selectResults[i] = libnutcommon::SelectResult::False;
 				} else {
@@ -671,8 +670,8 @@ namespace nuts {
 	}
 
 	Interface_IPv4::Interface_IPv4(Environment *env, int index, std::shared_ptr<libnutcommon::IPv4Config> config)
-	: Interface(env, index), m_dhcp_timer_id(-1), m_fallback_timer_id(-1), m_dm(env->m_device->m_dm), m_dhcp_xid(0), m_dhcpstate(DHCPS_OFF), m_zc_state(ZCS_OFF), m_zc_arp_probe(0), m_config(config), m_ifstate(libnutcommon::IFS_OFF) {
-		m_needUserSetup = m_config->flags & libnutcommon::IPv4Config::DO_USERSTATIC;
+	: Interface(env, index), m_dhcp_timer_id(-1), m_fallback_timer_id(-1), m_dm(env->m_device->m_dm), m_dhcp_xid(0), m_dhcpstate(DHCPS_OFF), m_zc_state(ZCS_OFF), m_zc_arp_probe(0), m_config(config), m_ifstate(libnutcommon::InterfaceState::OFF) {
+		m_needUserSetup = m_config->flags & libnutcommon::IPv4ConfigFlag::USERSTATIC;
 		connect(this, SIGNAL(statusChanged(libnutcommon::InterfaceState, Interface_IPv4*)), &m_env->m_device->m_dm->m_events, SLOT(interfaceStatusChanged(libnutcommon::InterfaceState, Interface_IPv4*)));
 	}
 
@@ -733,7 +732,7 @@ namespace nuts {
 			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, 0xffffffffu));
 				// T1: 0.5 * dhcp_lease_time
 				// T2: 0.875 * dhcp_lease_time ( 7/8 )
-			m_ifstate = libnutcommon::IFS_DHCP;
+			m_ifstate = libnutcommon::InterfaceState::DHCP;
 			systemUp();
 		}
 	}
@@ -755,17 +754,20 @@ namespace nuts {
 	}
 
 	void Interface_IPv4::zeroconf_setup_interface() {
-		if (m_ifstate != libnutcommon::IFS_OFF) return;
+		if (m_ifstate != libnutcommon::InterfaceState::OFF) return;
 		ip = m_zc_probe_ip;
 		netmask = QHostAddress((quint32) 0xFFFF0000);
 		gateway = QHostAddress((quint32) 0);
 		dnsserver.clear();
-		m_ifstate = libnutcommon::IFS_ZEROCONF;
+		m_ifstate = libnutcommon::InterfaceState::ZEROCONF;
 		systemUp();
 	}
 
 	quint16 hashMac(const libnutcommon::MacAddress &addr) {
-		return (quint16) (addr.data.words[0] ^ addr.data.words[1] ^ addr.data.words[2]);
+		auto w0 = qFromBigEndian<quint16>(addr.data.bytes);
+		auto w1 = qFromBigEndian<quint16>(addr.data.bytes + 2);
+		auto w2 = qFromBigEndian<quint16>(addr.data.bytes + 4);
+		return w0 ^ w1 ^ w2;
 	}
 
 	void Interface_IPv4::zeroconfProbe() {   // select new ip and start probe it
@@ -788,7 +790,7 @@ namespace nuts {
 			return;
 		}
 		// This did lead to segfaults... ;_)
-		// m_zc_arp_probe->setReserve(m_config->flags & libnutcommon::IPv4Config::DO_DHCP);
+		// m_zc_arp_probe->setReserve(m_config->flags & libnutcommon::IPv4ConfigFlag::DHCP);
 		connect(m_zc_arp_probe, SIGNAL(conflict(QHostAddress, libnutcommon::MacAddress)), SLOT(zc_probe_conflict()));
 		connect(m_zc_arp_probe, SIGNAL(ready(QHostAddress)), SLOT(zc_probe_ready()));
 	}
@@ -817,10 +819,10 @@ namespace nuts {
 	}
 
 	void Interface_IPv4::zeroconfAction() {
-		if (!(m_config->flags & libnutcommon::IPv4Config::DO_ZEROCONF))
+		if (!(m_config->flags & libnutcommon::IPv4ConfigFlag::ZEROCONF))
 			return;
-		bool hasDHCP = (m_config->flags & libnutcommon::IPv4Config::DO_DHCP);
-		if (m_ifstate == libnutcommon::IFS_DHCP)
+		bool hasDHCP = (m_config->flags & libnutcommon::IPv4ConfigFlag::DHCP);
+		if (m_ifstate == libnutcommon::InterfaceState::DHCP)
 			m_zc_state = ZCS_OFF;
 		for (;;) {
 			switch (m_zc_state) {
@@ -882,7 +884,7 @@ namespace nuts {
 	}
 	void Interface_IPv4::zc_watch_conflict() {
 		m_zc_arp_watch = 0; // Deletes itself
-		if (m_ifstate == libnutcommon::IFS_ZEROCONF) systemDown();
+		if (m_ifstate == libnutcommon::InterfaceState::ZEROCONF) systemDown();
 		m_zc_state = ZCS_CONFLICT;
 		zeroconfAction();
 	}
@@ -1066,7 +1068,7 @@ namespace nuts {
 		netmask = m_config->static_netmask;
 		gateway = m_config->static_gateway;
 		dnsserver = m_config->static_dnsservers;
-		m_ifstate = libnutcommon::IFS_STATIC;
+		m_ifstate = libnutcommon::InterfaceState::STATIC;
 		systemUp();
 	}
 	void Interface_IPv4::startUserStatic() {
@@ -1074,19 +1076,19 @@ namespace nuts {
 		netmask = m_userConfig.netmask;
 		gateway = m_userConfig.gateway;
 		dnsserver = m_userConfig.dnsservers;
-		m_ifstate = libnutcommon::IFS_STATIC;
+		m_ifstate = libnutcommon::InterfaceState::STATIC;
 		systemUp();
 	}
 
 	void Interface_IPv4::startFallback() {
 		fallback_set_timeout(-1);
-		if (m_ifstate != ip.isNull() || false == m_env->m_ifUpStatus[m_index]) { //TODO:Find a better way to check interface state
-			if (m_config->flags == (libnutcommon::IPv4Config::DO_DHCP | libnutcommon::IPv4Config::DO_ZEROCONF)) {
+		if (m_ifstate != (ip.isNull() ? libnutcommon::InterfaceState::OFF : libnutcommon::InterfaceState::STATIC) || false == m_env->m_ifUpStatus[m_index]) { //TODO:Find a better way to check interface state
+			if (m_config->flags == (libnutcommon::IPv4ConfigFlag::DHCP | libnutcommon::IPv4ConfigFlag::ZEROCONF)) {
 				//create new interface with dhcp only.
 				stopDHCP();
 				startZeroconf();
 			}
-			if (m_config->flags == (libnutcommon::IPv4Config::DO_DHCP | libnutcommon::IPv4Config::DO_STATIC)) {
+			if (m_config->flags == (libnutcommon::IPv4ConfigFlag::DHCP | libnutcommon::IPv4ConfigFlag::STATIC)) {
 				stopDHCP();
 				startStatic();
 			}
@@ -1096,25 +1098,25 @@ namespace nuts {
 
 	void Interface_IPv4::checkFallbackRunning() {
 		if (( -1 == m_fallback_timer_id && m_config->timeout > 0) && (
-			( m_config->flags == (libnutcommon::IPv4Config::DO_DHCP | libnutcommon::IPv4Config::DO_ZEROCONF)) ||
-			( m_config->flags == (libnutcommon::IPv4Config::DO_DHCP | libnutcommon::IPv4Config::DO_STATIC)) ) ) {
+			( m_config->flags == (libnutcommon::IPv4ConfigFlag::DHCP | libnutcommon::IPv4ConfigFlag::ZEROCONF)) ||
+			( m_config->flags == (libnutcommon::IPv4ConfigFlag::DHCP | libnutcommon::IPv4ConfigFlag::STATIC)) ) ) {
 			fallback_set_timeout(m_config->timeout*1000);
 		}
 	}
 
 	void Interface_IPv4::start() {
 		log << "Interface_IPv4::start" << endl;
-		if (m_config->flags & libnutcommon::IPv4Config::DO_DHCP) {
+		if (m_config->flags & libnutcommon::IPv4ConfigFlag::DHCP) {
 			startDHCP();
-		} else if (m_config->flags & libnutcommon::IPv4Config::DO_USERSTATIC) {
+		} else if (m_config->flags & libnutcommon::IPv4ConfigFlag::USERSTATIC) {
 			updateNeedUserSetup(!m_userConfig.valid()); //Check if user config is set otherwise let user set:
 			if (m_needUserSetup) {
-				m_ifstate = libnutcommon::IFS_WAITFORCONFIG;
+				m_ifstate = libnutcommon::InterfaceState::WAITFORCONFIG;
 				emit statusChanged(m_ifstate, this);
 			} else {
 				startUserStatic();
 			}
-		} else if (m_config->flags & libnutcommon::IPv4Config::DO_ZEROCONF) {
+		} else if (m_config->flags & libnutcommon::IPv4ConfigFlag::ZEROCONF) {
 			startZeroconf();
 		} else {
 			startStatic();
@@ -1173,7 +1175,7 @@ namespace nuts {
 		rtnl_addr_set_family(addr, AF_INET);
 		rtnl_addr_set_local(addr, local);
 		rtnl_addr_set_broadcast(addr, bcast);
-		if (m_ifstate == libnutcommon::IFS_ZEROCONF) {
+		if (m_ifstate == libnutcommon::InterfaceState::ZEROCONF) {
 			rtnl_addr_set_scope(addr, RT_SCOPE_LINK);
 			rtnl_addr_set_flags(addr, IFA_F_PERMANENT);
 		}
@@ -1189,15 +1191,13 @@ namespace nuts {
 		if (!gateway.isNull()) {
 //			log << "Try setting gateway" << endl;
 			struct rtentry rt;
-			int m;
 			memset(&rt, 0, sizeof(rt));
 			rt.rt_flags = RTF_UP | RTF_GATEWAY;
 			setSockaddrIPv4(rt.rt_dst);
 			setSockaddrIPv4(rt.rt_gateway, gateway.toIPv4Address());
 			setSockaddrIPv4(rt.rt_genmask);
-			if (-1 != (m = m_config->gateway_metric)) {
-				rt.rt_metric = m + 1;
-			} else if (-1 != (m = m_env->getDevice()->getConfig().gateway_metric)) {
+			auto m = gatewayMetric();
+			if (-1 != m) {
 				rt.rt_metric = m + 1;
 			}
 
@@ -1264,7 +1264,7 @@ namespace nuts {
 #endif
 		rtnl_addr_put(addr);
 		nl_addr_put(local);
-		m_ifstate = libnutcommon::IFS_OFF;
+		m_ifstate = libnutcommon::InterfaceState::OFF;
 		emit statusChanged(m_ifstate, this);
 		m_env->ifDown(this);
 	}
@@ -1378,14 +1378,14 @@ namespace nuts {
 	}
 
 	bool Interface_IPv4::setUserConfig(const libnutcommon::IPv4UserConfig &userConfig) {
-		if (!(m_config->flags & libnutcommon::IPv4Config::DO_USERSTATIC)) return false;
+		if (!(m_config->flags & libnutcommon::IPv4ConfigFlag::USERSTATIC)) return false;
 		m_userConfig = userConfig;
 		bool tmp = m_needUserSetup;
 		updateNeedUserSetup(!m_userConfig.valid());
 		if (m_needUserSetup) {
 			if (tmp) return true;
 			systemDown();
-			m_ifstate = libnutcommon::IFS_WAITFORCONFIG;
+			m_ifstate = libnutcommon::InterfaceState::WAITFORCONFIG;
 			emit statusChanged(m_ifstate, this);
 		} else {
 			//check if environment is active:
@@ -1396,4 +1396,8 @@ namespace nuts {
 		return true;
 	}
 
+	int Interface_IPv4::gatewayMetric() {
+		if (-1 != m_config->gateway_metric) return m_config->gateway_metric;
+		return m_env->getDevice()->getConfig().gateway_metric;
+	}
 }

@@ -71,9 +71,9 @@ namespace qnut {
 				return QIcon(static_cast<CEnvironment *>(currentData) == m_Device->getActiveEnvironment() ? UI_ICON_ENVIRONMENT_ACTIVE : UI_ICON_ENVIRONMENT);
 			else
 				switch (static_cast<CInterface *>(currentData)->getState()) {
-				case IFS_OFF:
+				case InterfaceState::OFF:
 					return QIcon(UI_ICON_INTERFACE);
-				case IFS_WAITFORCONFIG:
+				case InterfaceState::WAITFORCONFIG:
 					return QIcon(UI_ICON_WARNING);
 				default:
 					return QIcon(UI_ICON_INTERFACE_ACTIVE);
@@ -104,10 +104,10 @@ namespace qnut {
 			}
 			else {
 				CInterface * interface = static_cast<CInterface *>(currentData);
-				if ((interface->getState() == IFS_OFF) || (interface->getState() == IFS_WAITFORCONFIG)) {
-					if (interface->getConfig().flags & IPv4Config::DO_STATIC)
+				if ((interface->getState() == InterfaceState::OFF) || (interface->getState() == InterfaceState::WAITFORCONFIG)) {
+					if (interface->getConfig().flags & IPv4ConfigFlag::STATIC)
 						return toStringDefault(interface->getConfig().static_ip);
-					else if (interface->getConfig().flags & IPv4Config::DO_USERSTATIC)
+					else if (interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC)
 						return toStringDefault(interface->getUserConfig().ip);
 					else
 						return tr("none");

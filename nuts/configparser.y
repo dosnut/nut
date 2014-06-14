@@ -67,7 +67,7 @@ deviceoptions:
 	| deviceoptions deviceoption
 ;
 
-deviceoption: { CHECK(devDefaultEnvironment()); } environmentoption
+deviceoption: { CHECK(devDefaultEnvironment()); } environmentoptions ';'
 	| environment
 	| wpasupplicant
 	| NOAUTOSTART { CHECK(devNoAutoStart()); } ';'

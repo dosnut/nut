@@ -150,18 +150,18 @@ namespace qnut {
 
 		QString message;
 		switch (state) {
-		case libnutcommon::DS_UP:
+		case libnutcommon::DeviceState::UP:
 			message = tr("%2 is now up and running on network: %1")
 				.arg(currentNetwork(uiDevice->device()));
 			break;
-		case libnutcommon::DS_UNCONFIGURED:
+		case libnutcommon::DeviceState::UNCONFIGURED:
 			message = tr("%2 got carrier (to network: %1) but needs configuration.\n\nClick here to open the device details.")
 				.arg(currentNetwork(uiDevice->device()));
 			break;
-		case libnutcommon::DS_ACTIVATED:
+		case libnutcommon::DeviceState::ACTIVATED:
 			message = tr("%1 is now activated and waits for carrier.");
 			break;
-		case libnutcommon::DS_DEACTIVATED:
+		case libnutcommon::DeviceState::DEACTIVATED:
 			message = tr("%1 is now deactivated");
 			break;
 		default:
@@ -173,7 +173,7 @@ namespace qnut {
 			message = message.arg(trayIcon && trayIcon->isVisible() ? tr("Device") : uiDevice->device()->getName());
 		}
 
-		if (state == libnutcommon::DS_UNCONFIGURED)
+		if (state == libnutcommon::DeviceState::UNCONFIGURED)
 			showMessage(QString(), message, uiDevice->m_ShowEnvironmentsAction, SLOT(trigger()), uiDevice);
 		else
 			showMessage(QString(), message, NULL, NULL, uiDevice);

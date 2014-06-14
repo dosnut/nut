@@ -6,8 +6,8 @@
 #define DBUS_POLL_RATE 5000
 
 namespace nuts {
-	const QString DBusDeviceManager::m_dbusPath("/manager");
-	const QString DBusDeviceManager::m_dbusDevicesPath("/devices");
+	const QDBusObjectPath DBusDeviceManager::m_dbusPath("/manager");
+	const QDBusObjectPath DBusDeviceManager::m_dbusDevicesPath("/devices");
 
 	DBusDeviceManager::DBusDeviceManager(DeviceManager *devmgr)
 	: QDBusAbstractAdaptor(devmgr), m_dbusConnection(QDBusConnection::connectToBus(QDBusConnection::SystemBus, QString::fromLatin1("nuts_system_bus"))), m_devmgr(devmgr), m_timerId(-1), m_dbusMonitor(0),registered(0) {
@@ -26,13 +26,12 @@ namespace nuts {
 
 		//start dbus connection check timer
 		m_timerId = startTimer(DBUS_POLL_RATE);
-
 	}
 
 	void DBusDeviceManager::registerAll() {
 		if (!registered) {
 			m_dbusConnection.registerService(NUT_DBUS_URL);
-			m_dbusConnection.registerObject(m_dbusPath,m_devmgr);
+			m_dbusConnection.registerObject(m_dbusPath.path(), m_devmgr);
 			registered = true;
 		}
 		QHash<QString, nuts::DBusDevice *>::iterator dbusdev = m_dbusDevices.begin();
@@ -50,7 +49,7 @@ namespace nuts {
 		}
 		//unregister self
 		if (registered) {
-			m_dbusConnection.unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+			m_dbusConnection.unregisterObject(m_dbusPath.path(), QDBusConnection::UnregisterTree);
 			m_dbusConnection.unregisterService(NUT_DBUS_URL);
 			registered = false;
 		}
@@ -96,7 +95,7 @@ namespace nuts {
 
 	DBusDeviceManager::~DBusDeviceManager() {
 		if (registered) {
-			m_dbusConnection.unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+			m_dbusConnection.unregisterObject(m_dbusPath.path(), QDBusConnection::UnregisterTree);
 			m_dbusConnection.unregisterService(NUT_DBUS_URL);
 		}
 	}
@@ -117,22 +116,22 @@ namespace nuts {
 	void DBusDeviceManager::devAdded(QString devName, Device *dev) {
 		DBusDevice *dbus_device;
 		if (!m_dbusDevices.contains(devName)) {
-			dbus_device = new DBusDevice(dev, &m_dbusConnection, m_dbusDevicesPath);
+			dbus_device = new DBusDevice(dev, &m_dbusConnection, m_dbusDevicesPath.path());
 			m_dbusDevices.insert(devName, dbus_device);
 			dbus_device->registerAll();
 		}
 		else {
 			dbus_device = m_dbusDevices.value(devName);
 		}
-		emit deviceAdded(QDBusObjectPath(dbus_device->getPath()));
+		emit deviceAdded(dbus_device->getPath());
 		emit deviceAdded(devName);
 	}
 
 
-	void DBusDeviceManager::devRemoved(QString devName, Device* /* *dev */) {
+	void DBusDeviceManager::devRemoved(QString devName, Device* /* dev */) {
 		if (m_dbusDevices.contains(devName)) {
 			DBusDevice * dbus_device = m_dbusDevices[devName];
-			emit deviceRemoved(QDBusObjectPath(dbus_device->getPath()));
+			emit deviceRemoved(dbus_device->getPath());
 			emit deviceRemoved(devName);
 			m_dbusDevices.remove(devName);
 		}
@@ -142,7 +141,7 @@ namespace nuts {
 	QList<QDBusObjectPath> DBusDeviceManager::getDeviceList() {
 		QList<QDBusObjectPath> paths;
 		foreach (DBusDevice *dbus_device, m_dbusDevices) {
-			paths.append(QDBusObjectPath(dbus_device->getPath()));
+			paths.append(dbus_device->getPath());
 		}
 		return paths;
 	}
@@ -155,6 +154,7 @@ namespace nuts {
 		return names;
 	}
 
+#if 0
 	bool DBusDeviceManager::createBridge(QString /*name*/) { return false; }
 	bool DBusDeviceManager::destroyBridge(QDBusObjectPath /*devicePath*/) { return false; }
 	bool DBusDeviceManager::destroyBridge(qint32 /*deviceId*/) { return false; }
@@ -162,51 +162,41 @@ namespace nuts {
 	bool DBusDeviceManager::addToBridge(qint32 /*bridgeId*/, QList<qint32> /*deviceIds*/) { return false; }
 	bool DBusDeviceManager::removeFromBridge(QDBusObjectPath /*bridge*/, QList<QDBusObjectPath> /*devicePaths*/) { return false; }
 	bool DBusDeviceManager::removeFromBridge(qint32 /*bridgeId*/, QList<qint32> /*deviceIds*/) { return false; }
-
+#endif
 
 	DBusDevice::DBusDevice(Device *dev, QDBusConnection *connection, const QString &path)
 	: QDBusAbstractAdaptor(dev), m_device(dev), m_dbusConnection(connection), registered(false) {
 
-		//Set Device Properties
-		m_dbusProperties.type = m_device->hasWLAN() ? libnutcommon::DT_AIR : libnutcommon::DT_ETH;
-		m_dbusProperties.name = m_device->getName();
-		m_dbusProperties.state = m_device->getState();
-
 		//Set dbus device path an register objects
-		m_dbusPath = path + '/' + dev->getName();
+		m_dbusPath = QDBusObjectPath(path + '/' + dev->getName());
+
+		// remember active environment
+		m_activeEnvironment = m_device->getEnvironment();
 
 		//Add Environments
 		foreach (Environment *env, m_device->getEnvironments()) {
-			DBusEnvironment *dbus_env = new DBusEnvironment(env, m_dbusConnection, m_dbusPath,m_device);
+			DBusEnvironment *dbus_env = new DBusEnvironment(env, m_dbusConnection, m_dbusPath, m_device);
 			m_dbusEnvironments.append(dbus_env);
 		}
 
-		//Set active Environment
-		m_activeEnvironment = m_device->getEnvironment();
-		if (m_activeEnvironment >= 0) {
-			m_dbusProperties.activeEnvironment = m_dbusEnvironments[m_activeEnvironment]->getPath();
-		}
-		else {
-			m_dbusProperties.activeEnvironment = "";
-		}
-		connect(m_device,SIGNAL(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState, Device*)),this,SLOT(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState)));
+		connect(m_device,SIGNAL(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState, Device*)),this,SLOT(devStateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState)));
 		setAutoRelaySignals(true);
-		connect(m_device,SIGNAL(environmentChanged(int)),this,SLOT(environmentChanged(int)));
+		connect(m_device,SIGNAL(environmentChanged(int)),this,SLOT(devEnvironmentChanged(int)));
 	}
 
 	DBusDevice::~DBusDevice() {
 		if (registered) {
-			m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+			m_dbusConnection->unregisterObject(m_dbusPath.path(), QDBusConnection::UnregisterTree);
 		}
 	}
 
-	QString DBusDevice::getPath() {
+	QDBusObjectPath DBusDevice::getPath() {
 		return m_dbusPath;
 	}
 
 	void DBusDevice::registerAll() {
 		if (!registered && m_dbusConnection->isConnected()) {
-			m_dbusConnection->registerObject(m_dbusPath, m_device);
+			m_dbusConnection->registerObject(m_dbusPath.path(), m_device);
 			registered = true;
 		}
 		foreach(DBusEnvironment * dbusenv, m_dbusEnvironments) {
@@ -219,7 +209,7 @@ namespace nuts {
 			dbusenv->unregisterAll();
 		}
 		if (registered) {
-			m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+			m_dbusConnection->unregisterObject(m_dbusPath.path(), QDBusConnection::UnregisterTree);
 			registered = false;
 		}
 	}
@@ -231,7 +221,7 @@ namespace nuts {
 		}
 	}
 
-	void DBusDevice::stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState) {
+	void DBusDevice::devStateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState) {
 		//Check if active environment has changed:
 		if (m_activeEnvironment != m_device->getEnvironment() ) {
 			int oldActive = m_activeEnvironment;
@@ -244,15 +234,15 @@ namespace nuts {
 			}
 			//active Environment has changed for device:
 			if (0 > m_activeEnvironment) {
-				emit( environmentChangedActive(QString()) );
+				emit( environmentChangedActive({}) );
 			}
 			else {
 				emit( environmentChangedActive( m_dbusEnvironments[m_activeEnvironment]->getPath() ) );
 			}
 		}
-		emit(stateChanged((int) newState, (int) oldState));
+		emit(stateChanged(newState, oldState));
 	}
-	void DBusDevice::environmentChanged(int newEnvironment) {
+	void DBusDevice::devEnvironmentChanged(int newEnvironment) {
 		//Check if active environment has changed:
 		if (m_activeEnvironment != newEnvironment ) {
 			int oldActive = m_activeEnvironment;
@@ -265,7 +255,7 @@ namespace nuts {
 			}
 			//active Environment has changed for device:
 			if (0 > m_activeEnvironment) {
-				emit( environmentChangedActive(QString()) );
+				emit( environmentChangedActive({}) );
 			}
 			else {
 				emit( environmentChangedActive( m_dbusEnvironments[m_activeEnvironment]->getPath() ) );
@@ -275,26 +265,47 @@ namespace nuts {
 		}
 	}
 
+	void DBusDevice::enable() {
+		m_device->enable(true);
+	}
+
+	void DBusDevice::disable() {
+		m_device->disable();
+	}
+
+	void DBusDevice::setEnvironment(const QDBusObjectPath &path) {
+		foreach(DBusEnvironment * i, m_dbusEnvironments) {
+			if (i->getPath() == path) {
+				m_device->setUserPreferredEnvironment(i->getEnvironment()->getID());
+				break;
+			}
+		}
+	}
+
+	void DBusDevice::setEnvironment(qint32 env) {
+		m_device->setUserPreferredEnvironment(env);
+	}
+
 	libnutcommon::DeviceProperties DBusDevice::getProperties() {
-		m_dbusProperties.state = m_device->getState();
-		m_dbusProperties.type = m_device->hasWLAN() ? libnutcommon::DT_AIR : libnutcommon::DT_ETH;
-		int m_activeEnvironment = m_device->getEnvironment();
-		if (m_activeEnvironment >= 0) {
-			m_dbusProperties.activeEnvironment = m_dbusEnvironments[m_activeEnvironment]->getPath();
-		}
-		else {
-			m_dbusProperties.activeEnvironment = QString();
-		}
-		return m_dbusProperties;
+		auto props = libnutcommon::DeviceProperties();
+
+		props.name = m_device->getName();
+		props.state = m_device->getState();
+		props.type = m_device->hasWLAN() ? libnutcommon::DeviceType::AIR : libnutcommon::DeviceType::ETH;
+		int envNdx = m_device->getEnvironment();
+		if (envNdx >= 0) props.activeEnvironment = libnutcommon::OptionalQDBusObjectPath{m_dbusEnvironments[envNdx]->getPath()};
+
+		return props;
 	}
 
 	QList<QDBusObjectPath> DBusDevice::getEnvironments() {
 		QList<QDBusObjectPath> paths;
 		foreach (DBusEnvironment *dbus_env, m_dbusEnvironments) {
-			paths.append(QDBusObjectPath(dbus_env->getPath()));
+			paths.append(dbus_env->getPath());
 		}
 		return paths;
 	}
+
 	QList<qint32> DBusDevice::getEnvironmentIds() {
 		QList<qint32> envs;
 		foreach (nuts::Environment* env, m_device->getEnvironments()) {
@@ -307,36 +318,37 @@ namespace nuts {
 		return (m_device->getConfig());
 	}
 
-	void DBusDevice::setEnvironment(const QDBusObjectPath &path) {
-		foreach(DBusEnvironment * i, m_dbusEnvironments) {
-			if (i->getPath() == path.path()) {
-				m_device->setUserPreferredEnvironment((i->getEnvironment())->getID());
-				break;
-			}
-		}
+	libnutcommon::DeviceState DBusDevice::getState() {
+		return m_device->getState();
 	}
-	QString DBusDevice::getActiveEnvironment() {
+
+	libnutcommon::DeviceType DBusDevice::getType() {
+		return m_device->hasWLAN() ? libnutcommon::DeviceType::AIR : libnutcommon::DeviceType::ETH;
+	}
+
+	libnutcommon::OptionalQDBusObjectPath DBusDevice::getActiveEnvironment() {
 		int m_activeEnvironment = m_device->getEnvironment();
 		if (m_activeEnvironment >= 0) {
-			return m_dbusEnvironments[m_activeEnvironment]->getPath();
+			return libnutcommon::OptionalQDBusObjectPath{m_dbusEnvironments[m_activeEnvironment]->getPath()};
 		}
 		else {
-			return m_dbusProperties.activeEnvironment = QString();
+			return { };
 		}
 	}
 
-	void DBusDevice::enable() {
-		m_device->enable(true);
+	qint32 DBusDevice::getActiveEnvironmentIndex() {
+		return m_device->getEnvironment();
 	}
 
-	void DBusDevice::disable() {
-		m_device->disable();
+	QString DBusDevice::getEssid() {
+		return m_device->essid();
 	}
 
-	DBusEnvironment::DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path, Device * dev)
+
+	DBusEnvironment::DBusEnvironment(Environment *env, QDBusConnection *connection, const QDBusObjectPath &path, Device * dev)
 	: QDBusAbstractAdaptor(env), m_environment(env), m_dbusConnection(connection), m_device(dev), registered(false) {
 		//Set dbus path an register object
-		m_dbusPath = path + QString("/%1").arg(m_environment->getID());
+		m_dbusPath = QDBusObjectPath(path.path() + QString("/%1").arg(getID()));
 
 		//Insert interfaces
 		foreach (Interface *interface, m_environment->getInterfaces()) {
@@ -345,7 +357,7 @@ namespace nuts {
 			if (ifv4) {
 				DBusInterface_IPv4 *dbus_interface = new DBusInterface_IPv4(ifv4, m_dbusConnection, m_dbusPath);
 				m_dbusInterfacesIPv4.append(dbus_interface);
-				emit(interfaceAdded(QDBusObjectPath(dbus_interface->getPath())));
+				emit(interfaceAdded(dbus_interface->getPath()));
 			}
 			#ifdef IPv6
 			else {
@@ -362,17 +374,17 @@ namespace nuts {
 
 	DBusEnvironment::~DBusEnvironment() {
 		if (registered) {
-			m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+			m_dbusConnection->unregisterObject(m_dbusPath.path(), QDBusConnection::UnregisterTree);
 		}
 	}
 
-	QString DBusEnvironment::getPath() {
+	QDBusObjectPath DBusEnvironment::getPath() {
 		return m_dbusPath;
 	}
 
 	void DBusEnvironment::registerAll() {
 		if (!registered && m_dbusConnection->isConnected()) {
-			m_dbusConnection->registerObject(m_dbusPath, m_environment);
+			m_dbusConnection->registerObject(m_dbusPath.path(), m_environment);
 			registered = true;
 		}
 		foreach(DBusInterface_IPv4 * ifs, m_dbusInterfacesIPv4) {
@@ -395,7 +407,7 @@ namespace nuts {
 		}
 		#endif
 		if (registered) {
-			m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+			m_dbusConnection->unregisterObject(m_dbusPath.path(), QDBusConnection::UnregisterTree);
 			registered = false;
 		}
 	}
@@ -422,24 +434,26 @@ namespace nuts {
 	}
 
 	libnutcommon::EnvironmentProperties DBusEnvironment::getProperties() {
-		m_dbusProperties.name = m_environment->getName();
-		m_dbusProperties.active = (m_device->getEnvironment() == m_environment->getID());
-		return m_dbusProperties;
+		auto props = libnutcommon::EnvironmentProperties();
+		props.name = m_environment->getName();
+		props.active = (m_device->getEnvironment() == getID());
+		return props;
 	}
+
 	libnutcommon::EnvironmentConfig DBusEnvironment::getConfig() {
-		return (m_environment->getConfig());
+		return m_environment->getConfig();
 	}
 
 	QList<QDBusObjectPath> DBusEnvironment::getInterfaces() {
 		QList<QDBusObjectPath> paths;
 		//Append IPv4 Paths
 		foreach (DBusInterface_IPv4 *i, m_dbusInterfacesIPv4) {
-			paths.append(QDBusObjectPath(i->getPath()));
+			paths.append(i->getPath());
 		}
 		#ifdef IPv6
 		//Append IPv6 Paths
 		foreach (DBusInterface_IPv6 *i, m_dbusInterfacesIPv6) {
-			paths.append(QDBusObjectPath(i->getPath()));
+			paths.append(i->getPath());
 		}
 		#endif
 		return paths;
@@ -456,72 +470,100 @@ namespace nuts {
 	libnutcommon::SelectResult DBusEnvironment::getSelectResult() {
 		return m_environment->getSelectResult();
 	}
+
 	QVector<libnutcommon::SelectResult> DBusEnvironment::getSelectResults() {
 		return m_environment->getSelectResults();
 	}
 
+	qint32 DBusEnvironment::getID() {
+		return m_environment->getID();
+	}
 
-	DBusInterface_IPv4::DBusInterface_IPv4(Interface_IPv4 *iface, QDBusConnection *connection, const QString &path)
+	QString DBusEnvironment::getName() {
+		return m_environment->getName();
+	}
+
+	bool DBusEnvironment::getState() {
+		return (m_device->getEnvironment() == getID());
+	}
+
+
+	DBusInterface_IPv4::DBusInterface_IPv4(Interface_IPv4 *iface, QDBusConnection *connection, const QDBusObjectPath &path)
 	: QDBusAbstractAdaptor(iface), m_interface(iface), m_dbusConnection(connection), registered(false) {
-		m_dbusPath = path + QString("/%1").arg(m_interface->getIndex());
-		//Set Interface properties
-		m_dbusProperties.ip = m_interface->ip;
-		m_dbusProperties.gateway = m_interface->gateway;
-		m_dbusProperties.netmask = m_interface->netmask;
-		m_dbusProperties.ifState = m_interface->getState();
-
-		if (!m_interface->dnsserver.isEmpty()) {
-			m_dbusProperties.dns = m_interface->dnsserver;
-		}
-		else {
-			m_dbusProperties.dns = QList<QHostAddress>();
-		}
+		m_dbusPath = QDBusObjectPath(path.path() + QString("/%1").arg(m_interface->getIndex()));
 		connect(m_interface,SIGNAL(statusChanged(libnutcommon::InterfaceState, Interface_IPv4*)),SLOT(interfaceStatusChanged(libnutcommon::InterfaceState)));
 	}
 
 	DBusInterface_IPv4::~DBusInterface_IPv4() {
-		m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+		m_dbusConnection->unregisterObject(m_dbusPath.path(), QDBusConnection::UnregisterTree);
 	}
 
 	void DBusInterface_IPv4::registerAll() {
 		if (!registered && m_dbusConnection->isConnected()) {
-			m_dbusConnection->registerObject(m_dbusPath, m_interface);
+			m_dbusConnection->registerObject(m_dbusPath.path(), m_interface);
 			registered = true;
 		}
 	}
 
 	void DBusInterface_IPv4::unregisterAll() {
 		if (registered) {
-			m_dbusConnection->unregisterObject(m_dbusPath, QDBusConnection::UnregisterTree);
+			m_dbusConnection->unregisterObject(m_dbusPath.path(), QDBusConnection::UnregisterTree);
 			registered = false;
 		}
 	}
 
-	QString DBusInterface_IPv4::getPath() {
+	QDBusObjectPath DBusInterface_IPv4::getPath() {
 		return m_dbusPath;
 	}
-	//Private SLOTS:
 
 	void DBusInterface_IPv4::interfaceStatusChanged(libnutcommon::InterfaceState) {
-		m_dbusProperties.ip = m_interface->ip;
-		m_dbusProperties.gateway = m_interface->gateway;
-		m_dbusProperties.netmask = m_interface->netmask;
-		m_dbusProperties.ifState = m_interface->getState();
-		m_dbusProperties.dns = m_interface->dnsserver;
-
-		emit stateChanged(m_dbusProperties);
+		emit stateChanged(getProperties());
 	}
 
 	libnutcommon::InterfaceProperties DBusInterface_IPv4::getProperties() {
-		m_dbusProperties.ip = m_interface->ip;
-		m_dbusProperties.gateway = m_interface->gateway;
-		m_dbusProperties.netmask = m_interface->netmask;
-		m_dbusProperties.ifState = m_interface->getState();
-		m_dbusProperties.dns = m_interface->dnsserver;
-		return m_dbusProperties;
+		auto props = libnutcommon::InterfaceProperties();
+		props.ifState = m_interface->getState();
+		props.ip = m_interface->ip;
+		props.netmask = m_interface->netmask;
+		props.gateway = m_interface->gateway;
+		props.dns = m_interface->dnsserver;
+		props.gateway_metric = m_interface->gatewayMetric();
+		return props;
 	}
+
 	libnutcommon::IPv4Config DBusInterface_IPv4::getConfig() {
 		return (m_interface->getConfig());
 	}
 
+	bool DBusInterface_IPv4::needUserSetup() {
+		return m_interface->needUserSetup();
+	}
+
+	bool DBusInterface_IPv4::setUserConfig(libnutcommon::IPv4UserConfig userConfig) {
+		return m_interface->setUserConfig(userConfig);
+	}
+
+	libnutcommon::IPv4UserConfig DBusInterface_IPv4::getUserConfig() {
+		return m_interface->getUserConfig();
+	}
+
+	libnutcommon::InterfaceState DBusInterface_IPv4::getState() {
+		return m_interface->getState();
+	}
+
+	QHostAddress DBusInterface_IPv4::getIP() {
+		return m_interface->ip;
+	}
+
+	QHostAddress DBusInterface_IPv4::getNetmask() {
+		return m_interface->netmask;
+	}
+
+	QHostAddress DBusInterface_IPv4::getGateway() {
+		return m_interface->gateway;
+	}
+
+	QList<QHostAddress> DBusInterface_IPv4::getDns() {
+		return m_interface->dnsserver;
+	}
 }

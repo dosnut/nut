@@ -108,7 +108,7 @@ void DBusDeviceInterface::getConfig() {
 
 void DBusDeviceInterface::getActiveEnvironment() {
 	QList<QVariant> argumentList;
-	bool worked = callWithCallback(QLatin1String("getActiveEnvironment"), argumentList, this, SLOT(dbret_getActiveEnvironment(QString)), SLOT(dbret_errorOccured(QDBusError)));
+	bool worked = callWithCallback(QLatin1String("getActiveEnvironment"), argumentList, this, SLOT(dbret_getActiveEnvironment(libnutcommon::OptionalQDBusObjectPath)), SLOT(dbret_errorOccured(QDBusError)));
 	if (!worked)
 		emit queueErrorOccured("getActiveEnvironment");
 }

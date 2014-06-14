@@ -375,8 +375,8 @@ namespace qnut {
 				selectedUIDevice, SLOT(openWirelessSettings()));
 #endif
 
-			m_EnableDeviceAction->setEnabled(selectedUIDevice->device()->getState() == DS_DEACTIVATED);
-			m_DisableDeviceAction->setDisabled(selectedUIDevice->device()->getState() == DS_DEACTIVATED);
+			m_EnableDeviceAction->setEnabled(selectedUIDevice->device()->getState() == DeviceState::DEACTIVATED);
+			m_DisableDeviceAction->setDisabled(selectedUIDevice->device()->getState() == DeviceState::DEACTIVATED);
 			m_DeviceSettingsAction->setEnabled(true);
 
 #ifndef QNUT_NO_WIRELESS
@@ -397,8 +397,8 @@ namespace qnut {
 	}
 
 	void CConnectionManager::handleDeviceStateChange(DeviceState state) {
-		m_EnableDeviceAction->setEnabled(state == DS_DEACTIVATED);
-		m_DisableDeviceAction->setDisabled(state == DS_DEACTIVATED);
+		m_EnableDeviceAction->setEnabled(state == DeviceState::DEACTIVATED);
+		m_DisableDeviceAction->setDisabled(state == DeviceState::DEACTIVATED);
 	}
 
 	void CConnectionManager::showLog(bool doShow) {

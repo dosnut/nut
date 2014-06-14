@@ -64,7 +64,7 @@ namespace nuts {
 
 		auto pattern = DeviceNamePattern { name, regexp ? DeviceNamePattern::RegExp : wildcard ? DeviceNamePattern::Wildcard : DeviceNamePattern::Plain };
 
-		if (m_config->namedDeviceConfigs.find(pattern) == m_config->namedDeviceConfigs.end()) {
+		if (m_config->namedDeviceConfigs.find(pattern) != m_config->namedDeviceConfigs.end()) {
 			throw Exception(QString("Duplicate device name/pattern: %1 (%2)").arg(pattern.pattern).arg(pattern.typeString()));
 		}
 
@@ -87,7 +87,7 @@ namespace nuts {
 
 	bool ConfigParser::finishEnvironment(std::shared_ptr<libnutcommon::EnvironmentConfig> const& envc, local_env_config *l_envc) {
 		if ((envc->ipv4Interfaces.size() == 0) && (!l_envc->no_def_dhcp)) {
-			envc->ipv4Interfaces.push_back(std::make_shared<libnutcommon::IPv4Config>(libnutcommon::IPv4Config::DO_DHCP));
+			envc->ipv4Interfaces.push_back(std::make_shared<libnutcommon::IPv4Config>(libnutcommon::IPv4ConfigFlag::DHCP));
 		}
 		// Append "select user;" if no select config was given.
 		if (envc->select.filters.size() == 0) {
@@ -164,7 +164,7 @@ namespace nuts {
 		m_curipv4config.reset();
 		if (!m_curenvconfig) return false;
 		if (m_cur_env->m_hasdhcp) return false;
-		m_curipv4config = std::make_shared<libnutcommon::IPv4Config>(libnutcommon::IPv4Config::DO_DHCP);
+		m_curipv4config = std::make_shared<libnutcommon::IPv4Config>(libnutcommon::IPv4ConfigFlag::DHCP);
 		return true;
 	}
 
@@ -194,9 +194,9 @@ namespace nuts {
 			m_curipv4config->timeout = 10;
 		}
 		//check if interface type was defined, if not, set zeroconf
-		if ( !(m_curipv4config->flags & libnutcommon::IPv4Config::DO_STATIC ||
-			m_curipv4config->flags & libnutcommon::IPv4Config::DO_ZEROCONF) ) {
-			m_curipv4config->flags |= libnutcommon::IPv4Config::DO_ZEROCONF;
+		if ( !(m_curipv4config->flags & libnutcommon::IPv4ConfigFlag::STATIC ||
+			m_curipv4config->flags & libnutcommon::IPv4ConfigFlag::ZEROCONF) ) {
+			m_curipv4config->flags |= libnutcommon::IPv4ConfigFlag::ZEROCONF;
 		}
 		return true;
 	}
@@ -219,15 +219,15 @@ namespace nuts {
 		if (m_curisfallback) {
 			if (!m_curenvconfig) return false;
 			if (!m_curipv4config) return false;
-			if (libnutcommon::IPv4Config::DO_DHCP != m_curipv4config->flags) return false; //Check if this is the first time fallback is configured (dhcp only)
-			m_curipv4config->flags = m_curipv4config->flags | libnutcommon::IPv4Config::DO_ZEROCONF;
+			if (libnutcommon::IPv4ConfigFlag::DHCP != m_curipv4config->flags) return false; //Check if this is the first time fallback is configured (dhcp only)
+			m_curipv4config->flags = m_curipv4config->flags | libnutcommon::IPv4ConfigFlag::ZEROCONF;
 			return true;
 		}
 		else { //not in fallback, configuring "real" interface
 			m_curipv4config.reset();
 			if (!m_curenvconfig) return false;
 			if (m_cur_env->m_haszeroconf) return false; //TODO:wahts happening here?
-			m_curipv4config = std::make_shared<libnutcommon::IPv4Config>(libnutcommon::IPv4Config::DO_ZEROCONF);
+			m_curipv4config = std::make_shared<libnutcommon::IPv4Config>(libnutcommon::IPv4ConfigFlag::ZEROCONF);
 			return true;
 		}
 	}
@@ -251,14 +251,14 @@ namespace nuts {
 		if (m_curisfallback) {
 			if (!m_curenvconfig) return false;
 			if (!m_curipv4config) return false;
-			if (libnutcommon::IPv4Config::DO_DHCP != m_curipv4config->flags) return false; //Check if this is the first time fallback is configured (dhcp only)
-			m_curipv4config->flags = m_curipv4config->flags | libnutcommon::IPv4Config::DO_STATIC;
+			if (libnutcommon::IPv4ConfigFlag::DHCP != m_curipv4config->flags) return false; //Check if this is the first time fallback is configured (dhcp only)
+			m_curipv4config->flags = m_curipv4config->flags | libnutcommon::IPv4ConfigFlag::STATIC;
 			return true;
 		}
 		else {
 			m_curipv4config.reset();
 			if (!m_curenvconfig) return false;
-			m_curipv4config = std::make_shared<libnutcommon::IPv4Config>(libnutcommon::IPv4Config::DO_STATIC);
+			m_curipv4config = std::make_shared<libnutcommon::IPv4Config>(libnutcommon::IPv4ConfigFlag::STATIC);
 			return true;
 		}
 	}
@@ -279,7 +279,7 @@ namespace nuts {
 
 	bool ConfigParser::staticUser() {
 		if (!m_curipv4config) return false;
-		m_curipv4config->flags = libnutcommon::IPv4Config::DO_USERSTATIC;
+		m_curipv4config->flags = libnutcommon::IPv4ConfigFlag::USERSTATIC;
 		return true;
 	}
 
@@ -352,7 +352,7 @@ namespace nuts {
 	bool ConfigParser::selectAndBlock() {
 		if (!m_curenvconfig) return false;
 		quint32 blockid = m_curenvconfig->select.blocks.size();
-		selectAdd(libnutcommon::SelectRule(blockid, libnutcommon::SelectRule::SEL_AND_BLOCK));
+		selectAdd(libnutcommon::SelectRule(blockid, libnutcommon::SelectType::AND_BLOCK));
 		m_curenvconfig->select.blocks.append(QVector<quint32>());
 		m_selBlocks.push(blockid);
 		return true;
@@ -361,7 +361,7 @@ namespace nuts {
 	bool ConfigParser::selectOrBlock() {
 		if (!m_curenvconfig) return false;
 		quint32 blockid = m_curenvconfig->select.blocks.size();
-		selectAdd(libnutcommon::SelectRule(blockid, libnutcommon::SelectRule::SEL_OR_BLOCK));
+		selectAdd(libnutcommon::SelectRule(blockid, libnutcommon::SelectType::OR_BLOCK));
 		m_curenvconfig->select.blocks.append(QVector<quint32>());
 		m_selBlocks.push(blockid);
 		return true;

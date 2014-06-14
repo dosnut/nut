@@ -86,7 +86,7 @@ namespace libnutclient {
 		void dbret_getProperties(libnutcommon::DeviceProperties props) { emit gotProperties(props); }
 		void dbret_getEssid(QString essid) { emit gotEssid(essid); }
 		void dbret_getConfig(libnutcommon::DeviceConfig config) { emit gotConfig(config); }
-		void dbret_getActiveEnvironment(QString activeEnv) { emit gotActiveEnvironment(activeEnv); }
+		void dbret_getActiveEnvironment(libnutcommon::OptionalQDBusObjectPath activeEnv) { emit gotActiveEnvironment(activeEnv); }
 		void dbret_errorOccured(QDBusError error) { emit errorOccured(error); }
 
 	signals: // SIGNALS
@@ -95,16 +95,15 @@ namespace libnutclient {
 		void gotProperties(libnutcommon::DeviceProperties props);
 		void gotEssid(QString essid);
 		void gotConfig(libnutcommon::DeviceConfig config);
-		void gotActiveEnvironment(QString activeEnv);
+		void gotActiveEnvironment(libnutcommon::OptionalQDBusObjectPath activeEnv);
 
 		void errorOccured(QDBusError error);
 		void queueErrorOccured(QString method);
 
 		//DBUS Signals
-		void environmentChangedActive(const QString &newenv);
-		void stateChanged(int newState, int oldState);
+		void environmentChangedActive(libnutcommon::OptionalQDBusObjectPath newenv);
+		void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState);
 		void newWirelssNetworkFound();
-
 	};
 
 

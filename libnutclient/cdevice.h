@@ -75,13 +75,13 @@ namespace libnutclient {
 
 	private slots:
 
-		void environmentChangedActive(const QString &newenv);
-		void dbusStateChanged(int newState, int oldState);
+		void dbusEnvironmentChangedActive(libnutcommon::OptionalQDBusObjectPath newenv);
+		void dbusStateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState);
 
 		void dbusretGetProperties(libnutcommon::DeviceProperties props);
 		void dbusretGetEssid(QString essid);
 		void dbusretGetEnvironments(QList<QDBusObjectPath> envs);
-		void dbusretGetActiveEnvironment(QString activeEnv);
+		void dbusretGetActiveEnvironment(libnutcommon::OptionalQDBusObjectPath activeEnv);
 		void dbusretGetConfig(libnutcommon::DeviceConfig config);
 
 		void dbusret_errorOccured(QDBusError error, QString method = QString());

@@ -27,8 +27,8 @@ CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) :
 	m_configFetched(false),
 	m_activeEnvFetched(false),
 	m_initCompleted(false),
-	m_state(libnutcommon::DS_UNCONFIGURED),
-	m_type(libnutcommon::DT_ETH),
+	m_state(libnutcommon::DeviceState::UNCONFIGURED),
+	m_type(libnutcommon::DeviceType::ETH),
 	m_activeEnvironment(0),
 #ifndef LIBNUT_NO_WIRELESS
 	m_wlAccess(0),
@@ -58,13 +58,13 @@ void CDevice::init() {
 	connect(m_dbusDevice, SIGNAL(gotProperties(libnutcommon::DeviceProperties)), this, SLOT(dbusretGetProperties(libnutcommon::DeviceProperties)));
 	connect(m_dbusDevice, SIGNAL(gotEssid(QString)), this, SLOT(dbusretGetEssid(QString)));
 	connect(m_dbusDevice, SIGNAL(gotConfig(libnutcommon::DeviceConfig)), this, SLOT(dbusretGetConfig(libnutcommon::DeviceConfig)));
-	connect(m_dbusDevice, SIGNAL(gotActiveEnvironment(QString)), this, SLOT(dbusretGetActiveEnvironment(QString)));
+	connect(m_dbusDevice, SIGNAL(gotActiveEnvironment(libnutcommon::OptionalQDBusObjectPath)), this, SLOT(dbusretGetActiveEnvironment(libnutcommon::OptionalQDBusObjectPath)));
 
-	connect(m_dbusDevice, SIGNAL(environmentChangedActive(const QString &)),
-			this, SLOT(environmentChangedActive(const QString &)));
+	connect(m_dbusDevice, SIGNAL(environmentChangedActive(libnutcommon::OptionalQDBusObjectPath)),
+			this, SLOT(dbusEnvironmentChangedActive(libnutcommon::OptionalQDBusObjectPath)));
 
-	connect(m_dbusDevice, SIGNAL(stateChanged(int , int)),
-			this, SLOT(dbusStateChanged(int, int)));
+	connect(m_dbusDevice, SIGNAL(stateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState)),
+			this, SLOT(dbusStateChanged(libnutcommon::DeviceState, libnutcommon::DeviceState)));
 
 
 // 	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
@@ -132,45 +132,45 @@ void CDevice::checkInitCompleted() {
 }
 
 //CDevice private slots:
-void CDevice::environmentChangedActive(const QString &newenv) {
+void CDevice::dbusEnvironmentChangedActive(libnutcommon::OptionalQDBusObjectPath newenv) {
 	CEnvironment * oldenv = m_activeEnvironment;
-	if (newenv.isEmpty()) { //No active Environment is set.
+	if (!newenv) { //No active Environment is set.
 		m_activeEnvironment = NULL;
 	}
 	else {
-		m_activeEnvironment = m_dbusEnvironments.value(QDBusObjectPath(newenv), 0);
+		m_activeEnvironment = m_dbusEnvironments.value(newenv.objectPath(), 0);
 	}
 	emit(environmentChangedActive(m_activeEnvironment, oldenv));
 }
 //Every time our device changed from anything to active, our active environment may have changed
-void CDevice::dbusStateChanged(int newState, int oldState) {
-	#ifndef LIBNUT_NO_WIRELESS
-	//If switching from DS_DEACTIVATED to any other state then connect wpa_supplicant
-	if (DS_DEACTIVATED == oldState && !(DS_DEACTIVATED == newState) ) {
+void CDevice::dbusStateChanged(DeviceState newState, DeviceState oldState) {
+#ifndef LIBNUT_NO_WIRELESS
+	//If switching from DeviceState::DEACTIVATED to any other state then connect wpa_supplicant
+	if (DeviceState::DEACTIVATED == oldState && DeviceState::DEACTIVATED != newState ) {
 		if (m_needWireless) {
 			m_wlAccess->open();
 		}
 	}
-	else if (DS_DEACTIVATED == newState) {
+	else if (DeviceState::DEACTIVATED == newState) {
 		if (m_needWireless) {
 			m_wlAccess->close();
 		}
 	}
-	#endif
-	m_state = (DeviceState) newState;
+#endif
+	m_state = newState;
 
 	//get possible new essid
-	if (DT_AIR == m_type && !(newState == DS_DEACTIVATED) ) {
+	if (DeviceType::AIR == m_type && newState != DeviceState::DEACTIVATED ) {
 		m_dbusDevice->getEssid();
 	}
 	else {
 		m_essid = QString();
 	}
-	#ifndef LIBNUT_NO_WIRELESS
-	if (DT_AIR == m_type && DS_CARRIER <= m_state && m_wlAccess != NULL && m_wlAccess->getHardware() != NULL) {
+#ifndef LIBNUT_NO_WIRELESS
+	if (DeviceType::AIR == m_type && DeviceState::CARRIER <= m_state && m_wlAccess != NULL && m_wlAccess->getHardware() != NULL) {
 		m_wlAccess->getHardware()->setSignalQualityPollRate(500);
 	}
-	#endif
+#endif
 	emit(stateChanged(m_state));
 }
 
@@ -185,16 +185,16 @@ void CDevice::dbusretGetProperties(libnutcommon::DeviceProperties props) {
 	*log << tr("State: %1").arg(libnutclient::toStringTr(m_state));
 
 
-	if (DT_AIR == m_type) {
+	if (DeviceType::AIR == m_type) {
 		m_dbusDevice->getEssid();
 	}
 	else {
 		m_essidFetched = true;
-		qDebug("essid feteched");
+		qDebug("essid fetched");
 	}
 
 	m_propertiesFetched = true;
-	qDebug("Properties feteched");
+	qDebug("Properties fetched");
 	checkInitCompleted();
 
 	emit gotProperties(props);
@@ -241,14 +241,14 @@ void CDevice::dbusretGetEnvironments(QList<QDBusObjectPath> envs) {
 	emit newDataAvailable();
 }
 
-void CDevice::dbusretGetActiveEnvironment(QString activeEnv) {
-		if (activeEnv.isEmpty()) { //active env is not set
+void CDevice::dbusretGetActiveEnvironment(libnutcommon::OptionalQDBusObjectPath activeEnv) {
+		if (!activeEnv) { //active env is not set
 			m_activeEnvironment = 0;
 		}
 		else {
-			m_activeEnvironment = m_dbusEnvironments.value(QDBusObjectPath(activeEnv), NULL);
+			m_activeEnvironment = m_dbusEnvironments.value(activeEnv.objectPath(), NULL);
 		}
-		*log << tr("Active Environement: %1").arg(activeEnv);
+		*log << tr("Active Environement: %1").arg(activeEnv.path());
 
 		m_activeEnvFetched = true;
 		qDebug("activeenv fetched");
@@ -272,17 +272,17 @@ void CDevice::dbusretGetConfig(libnutcommon::DeviceConfig config) {
 		connect(m_wlAccess,SIGNAL(message(QString)),log,SLOT(log(QString)));
 		connect(m_dbusDevice,SIGNAL(newWirelssNetworkFound(void)),this,SIGNAL(newWirelessNetworkFound(void)));
 		//Connect to wpa_supplicant only if device is not deactivated
-		if (! (DS_DEACTIVATED == m_state) ) {
+		if (! (DeviceState::DEACTIVATED == m_state) ) {
 			m_wlAccess->open();
 		}
-		if (DT_AIR == m_type && DS_CARRIER <= m_state && m_wlAccess != NULL && m_wlAccess->getHardware() != NULL) {
+		if (DeviceType::AIR == m_type && DeviceState::CARRIER <= m_state && m_wlAccess != NULL && m_wlAccess->getHardware() != NULL) {
 			m_wlAccess->getHardware()->setSignalQualityPollRate(500);
 		}
 	}
 	#endif
 
 	m_configFetched = true;
-	qDebug("config feteched");
+	qDebug("config fetched");
 	checkInitCompleted();
 
 	emit gotConfig(m_config);
@@ -325,7 +325,7 @@ void CDevice::disable() {
 	m_dbusDevice->disable();
 }
 void CDevice::setEnvironment(CEnvironment * environment) {
-	if (DS_DEACTIVATED == m_state) {
+	if (DeviceState::DEACTIVATED == m_state) {
 		enable();
 	}
 	m_dbusDevice->setEnvironment(m_dbusEnvironments.key(environment));

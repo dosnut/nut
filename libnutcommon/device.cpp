@@ -1,74 +1,130 @@
 #include "common.h"
+#include "enum.h"
 
 namespace libnutcommon {
-	QString toString(enum DeviceState state) {
-		const char* names[] = { "deactivated", "activated", "carrier", "unconfigured", "up" };
-		return names[(int) state];
-	}
-	QString toString(enum DeviceType type) {
-		const char* names[] = { "eth", "air", "ppp" };
-		return names[(int) type];
-	}
-	QString toString(enum InterfaceState state) {
-		const char* names[] = { "off", "static", "dhcp", "zeroconf", "waitforconfig" };
-		return names[(int) state];
-	}
-
-	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceProperties & devprop) {
+	QDBusArgument& operator<<(QDBusArgument& argument, const OptionalQDBusObjectPath& optionalObjPath) {
+		// send as string; can't send empty QDBusObjectPath
 		argument.beginStructure();
-		argument << devprop.name << devprop.activeEnvironment << (int) devprop.state << (int) devprop.type;
+		argument << static_cast<QString>(optionalObjPath.path());
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceProperties &devprop) {
-		int tmp;
+
+	const QDBusArgument& operator>>(const QDBusArgument& argument, OptionalQDBusObjectPath& optionalObjPath) {
 		argument.beginStructure();
-		argument >> devprop.name >> devprop.activeEnvironment >> tmp;
-		devprop.state = (DeviceState) tmp;
+		QString tmp;
 		argument >> tmp;
-		devprop.type = (DeviceType) tmp;
+		optionalObjPath = OptionalQDBusObjectPath{tmp};
 		argument.endStructure();
 		return argument;
 	}
 
-	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentProperties &envprop) {
+	QString toString(DeviceState state) {
+		return enumArrayEntry(state, { "deactivated", "activated", "carrier", "unconfigured", "up" });
+	}
+	QDBusArgument& operator<<(QDBusArgument& argument, DeviceState devstate) {
+		return dbusSerializeEnum(argument, devstate);
+	}
+	const QDBusArgument& operator>>(const QDBusArgument& argument, DeviceState& devstate) {
+		return dbusUnserializeEnum(argument, devstate);
+	}
+
+	QString toString(DeviceType type) {
+		return enumArrayEntry(type, { "eth", "air", "ppp" });
+	}
+	QDBusArgument& operator<<(QDBusArgument& argument, DeviceType type) {
+		return dbusSerializeEnum(argument, type);
+	}
+	const QDBusArgument& operator>>(const QDBusArgument& argument, DeviceType& type) {
+		return dbusUnserializeEnum(argument, type);
+	}
+
+	QString toString(InterfaceState state) {
+		return enumArrayEntry(state, { "off", "static", "dhcp", "zeroconf", "waitforconfig" });
+	}
+	QDBusArgument& operator<<(QDBusArgument& argument, InterfaceState state) {
+		return dbusSerializeEnum(argument, state);
+	}
+	const QDBusArgument& operator>>(const QDBusArgument& argument, InterfaceState& state) {
+		return dbusUnserializeEnum(argument, state);
+	}
+
+
+	QDBusArgument &operator<<(QDBusArgument &argument, const DeviceProperties & devprop) {
 		argument.beginStructure();
-		argument << envprop.name;
-		argument << envprop.active;
+		argument
+			<< devprop.name
+			<< devprop.activeEnvironment
+			<< devprop.state
+			<< devprop.type;
+		argument.endStructure();
+		return argument;
+	}
+	const QDBusArgument &operator>>(const QDBusArgument &argument, DeviceProperties &devprop) {
+		argument.beginStructure();
+		argument
+			>> devprop.name
+			>> devprop.activeEnvironment
+			>> devprop.state
+			>> devprop.type;
 		argument.endStructure();
 		return argument;
 	}
 
-	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentProperties &envprop) {
+	QDBusArgument &operator<<(QDBusArgument &argument, const EnvironmentProperties &envprop) {
 		argument.beginStructure();
-		argument >> envprop.name;
-		argument >> envprop.active;
-		return argument;
-	}
-
-	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop) {
-		argument.beginStructure();
-		argument << ifprop.ifState;
-		argument << ifprop.ip << ifprop.netmask << ifprop.gateway << ifprop.dns;
+		argument
+			<< envprop.name
+			<< envprop.active;
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceProperties &ifprop) {
+
+	const QDBusArgument &operator>>(const QDBusArgument &argument, EnvironmentProperties &envprop) {
 		argument.beginStructure();
-		int tmp;
-		argument >> tmp;
-		ifprop.ifState = (InterfaceState) tmp;
-		argument >> ifprop.ip >> ifprop.netmask >> ifprop.gateway >> ifprop.dns;
+		argument
+			>> envprop.name
+			>> envprop.active;
+		return argument;
+	}
+
+	QDBusArgument &operator<<(QDBusArgument &argument, const InterfaceProperties &ifprop) {
+		argument.beginStructure();
+		argument
+			<< ifprop.ifState
+			<< ifprop.ip
+			<< ifprop.netmask
+			<< ifprop.gateway
+			<< ifprop.dns;
+		argument.endStructure();
+		return argument;
+	}
+	const QDBusArgument &operator>>(const QDBusArgument &argument, InterfaceProperties &ifprop) {
+		argument.beginStructure();
+		argument
+			>> ifprop.ifState
+			>> ifprop.ip
+			>> ifprop.netmask
+			>> ifprop.gateway
+			>> ifprop.dns;
 		argument.endStructure();
 		return argument;
 	}
 
 	// called by common.cpp: init()
 	void device_init() {
-		qRegisterMetaType<DeviceProperties>("DeviceProperties");
-		qRegisterMetaType<EnvironmentProperties>("EnvironmentProperties");
-		qRegisterMetaType<InterfaceProperties>("InterfaceProperties");
+		qRegisterMetaType<OptionalQDBusObjectPath>("libnutcommon::OptionalQDBusObjectPath");
+		qRegisterMetaType<DeviceState>("libnutcommon::DeviceState");
+		qRegisterMetaType<DeviceType>("libnutcommon::DeviceType");
+		qRegisterMetaType<InterfaceState>("libnutcommon::InterfaceState");
+		qRegisterMetaType<DeviceProperties>("libnutcommon::DeviceProperties");
+		qRegisterMetaType<EnvironmentProperties>("libnutcommon::EnvironmentProperties");
+		qRegisterMetaType<InterfaceProperties>("libnutcommon::InterfaceProperties");
 
+		qDBusRegisterMetaType<OptionalQDBusObjectPath>();
+		qDBusRegisterMetaType<DeviceState>();
+		qDBusRegisterMetaType<DeviceType>();
+		qDBusRegisterMetaType<InterfaceState>();
 		qDBusRegisterMetaType<DeviceProperties>();
 		qDBusRegisterMetaType<EnvironmentProperties>();
 		qDBusRegisterMetaType<InterfaceProperties>();

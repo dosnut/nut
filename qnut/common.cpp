@@ -24,34 +24,34 @@ namespace qnut {
 	using namespace libnutwireless;
 
 	QString iconFile(CDevice * device, bool stateAware) {
-		libnutcommon::DeviceState state = stateAware ? device->getState() : DS_ACTIVATED;
+		libnutcommon::DeviceState state = stateAware ? device->getState() : DeviceState::ACTIVATED;
 
 		switch (device->getType()) {
-		case DT_ETH:
+		case DeviceType::ETH:
 			switch (state) {
-			case DS_UP:             return QString(UI_ICON_ETH_UP);
-			case DS_UNCONFIGURED:   return QString(UI_ICON_ETH_UNCONFIGURED);
-			case DS_CARRIER:        return QString(UI_ICON_ETH_CARRIER);
-			case DS_ACTIVATED:      return QString(UI_ICON_ETH_ACTIVATED);
-			case DS_DEACTIVATED:    return QString(UI_ICON_ETH_DEACTIVATED);
+			case DeviceState::UP:             return QString(UI_ICON_ETH_UP);
+			case DeviceState::UNCONFIGURED:   return QString(UI_ICON_ETH_UNCONFIGURED);
+			case DeviceState::CARRIER:        return QString(UI_ICON_ETH_CARRIER);
+			case DeviceState::ACTIVATED:      return QString(UI_ICON_ETH_ACTIVATED);
+			case DeviceState::DEACTIVATED:    return QString(UI_ICON_ETH_DEACTIVATED);
 			default:                break;
 			}
-		case DT_AIR:
+		case DeviceType::AIR:
 			switch (state) {
-			case DS_UP:             return QString(UI_ICON_AIR_UP);
-			case DS_UNCONFIGURED:   return QString(UI_ICON_AIR_UNCONFIGURED);
-			case DS_CARRIER:        return QString(UI_ICON_AIR_CARRIER);
-			case DS_ACTIVATED:      return QString(UI_ICON_AIR_ACTIVATED);
-			case DS_DEACTIVATED:    return QString(UI_ICON_AIR_DEACTIVATED);
+			case DeviceState::UP:             return QString(UI_ICON_AIR_UP);
+			case DeviceState::UNCONFIGURED:   return QString(UI_ICON_AIR_UNCONFIGURED);
+			case DeviceState::CARRIER:        return QString(UI_ICON_AIR_CARRIER);
+			case DeviceState::ACTIVATED:      return QString(UI_ICON_AIR_ACTIVATED);
+			case DeviceState::DEACTIVATED:    return QString(UI_ICON_AIR_DEACTIVATED);
 			default:                break;
 			}
-		case DT_BRIDGE:
+		case DeviceType::BRIDGE:
 			switch (state) {
-			case DS_UP:             return QString(UI_ICON_BRIDGE_UP);
-			case DS_UNCONFIGURED:   return QString(UI_ICON_BRIDGE_UNCONFIGURED);
-			case DS_CARRIER:        return QString(UI_ICON_BRIDGE_CARRIER);
-			case DS_ACTIVATED:      return QString(UI_ICON_BRIDGE_ACTIVATED);
-			case DS_DEACTIVATED:    return QString(UI_ICON_BRIDGE_DEACTIVATED);
+			case DeviceState::UP:             return QString(UI_ICON_BRIDGE_UP);
+			case DeviceState::UNCONFIGURED:   return QString(UI_ICON_BRIDGE_UNCONFIGURED);
+			case DeviceState::CARRIER:        return QString(UI_ICON_BRIDGE_CARRIER);
+			case DeviceState::ACTIVATED:      return QString(UI_ICON_BRIDGE_ACTIVATED);
+			case DeviceState::DEACTIVATED:    return QString(UI_ICON_BRIDGE_DEACTIVATED);
 			default:                break;
 			}
 		default:
@@ -69,10 +69,10 @@ namespace qnut {
 	QString shortSummary(CDevice * device) {
 		QString result = device->getName() + ": " + toStringTr(device->getState());
 
-		if (device->getState() > DS_ACTIVATED)
+		if (device->getState() > DeviceState::ACTIVATED)
 			result += ' ' + ('(' + currentNetwork(device, false)) + ')';
 
-		if (device->getState() > DS_CARRIER)
+		if (device->getState() > DeviceState::CARRIER)
 			result += ", " + activeIP(device);
 
 		return result;
@@ -82,10 +82,10 @@ namespace qnut {
 		QString result = QObject::tr("Type: %1").arg(toStringTr(device->getType())) + '\n' +
 			QObject::tr("State: %1").arg(toStringTr(device->getState()));
 
-		if (device->getState() >= DS_UNCONFIGURED) {
+		if (device->getState() >= DeviceState::UNCONFIGURED) {
 			result += ' ';
 			result += '(' + activeIP(device) + ')';
-			if (device->getType() == DT_AIR)
+			if (device->getType() == DeviceType::AIR)
 				result += '\n' + QObject::tr("Connected to: %1").arg(currentNetwork(device));
 		}
 
@@ -94,9 +94,9 @@ namespace qnut {
 
 	QString currentNetwork(CDevice * device, bool appendQuality) {
 		switch (device->getType()) {
-		case DT_ETH:
+		case DeviceType::ETH:
 			return QObject::tr("local");
-		case DT_AIR:
+		case DeviceType::AIR:
 #ifdef QNUT_NO_WIRELESS
 			return device->getEssid(); // this is buggy on newer kernels
 #else
@@ -121,13 +121,13 @@ namespace qnut {
 	}
 
 	QString activeIP(CDevice * device) {
-		if (device->getState() < DS_UNCONFIGURED)
+		if (device->getState() < DeviceState::UNCONFIGURED)
 			return QString('-');
 
 		QString result = QString("");
 
 		foreach (CInterface * i, device->getActiveEnvironment()->getInterfaces()) {
-			if (i->getState() != IFS_OFF) {
+			if (i->getState() != InterfaceState::OFF) {
 				if (result.length() == 0)
 					result = i->getIp().toString();
 				else {

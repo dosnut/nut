@@ -20,8 +20,8 @@ namespace qnut {
 	using namespace libnutclient;
 
 	void CEnvironmentDetailsModel::fillParentRules(quint32 start) {
-		if ((m_SelectConfig.filters[start].selType == SelectRule::SEL_AND_BLOCK) ||
-		    (m_SelectConfig.filters[start].selType == SelectRule::SEL_OR_BLOCK)) {
+		if ((m_SelectConfig.filters[start].selType == SelectType::AND_BLOCK) ||
+		    (m_SelectConfig.filters[start].selType == SelectType::OR_BLOCK)) {
 			quint32 block = m_SelectConfig.filters[start].block;
 			foreach (quint32 i, m_SelectConfig.blocks[block]) {
 				m_ParentRules[i] = start;
@@ -64,8 +64,8 @@ namespace qnut {
 		if (!parent.isValid())
 			return 1;
 
-		if ((m_SelectConfig.filters[parent.internalId()].selType == SelectRule::SEL_AND_BLOCK) ||
-			(m_SelectConfig.filters[parent.internalId()].selType == SelectRule::SEL_OR_BLOCK))
+		if ((m_SelectConfig.filters[parent.internalId()].selType == SelectType::AND_BLOCK) ||
+			(m_SelectConfig.filters[parent.internalId()].selType == SelectType::OR_BLOCK))
 			return m_SelectConfig.blocks[m_SelectConfig.filters[parent.internalId()].block].size();
 
 		return 0;
@@ -91,43 +91,43 @@ namespace qnut {
 			case ENVDET_MOD_STATEMENT:
 				if (m_SelectConfig.filters[index.internalId()].invert)
 					switch (m_SelectConfig.filters[index.internalId()].selType) {
-					case SelectRule::SEL_USER:
+					case SelectType::USER:
 						return tr("not by user");
-					case SelectRule::SEL_ARP:
+					case SelectType::ARP:
 						return tr("not by arp");
-					case SelectRule::SEL_ESSID:
+					case SelectType::ESSID:
 						return tr("not by ssid");
-					case SelectRule::SEL_AND_BLOCK:
+					case SelectType::AND_BLOCK:
 						return tr("at least one not");
-					case SelectRule::SEL_OR_BLOCK:
+					case SelectType::OR_BLOCK:
 						return tr("all not");
 					default:
 						break;
 					}
 				else
 					switch (m_SelectConfig.filters[index.internalId()].selType) {
-					case SelectRule::SEL_USER:
+					case SelectType::USER:
 						return tr("by user");
-					case SelectRule::SEL_ARP:
+					case SelectType::ARP:
 						return tr("by arp");
-					case SelectRule::SEL_ESSID:
+					case SelectType::ESSID:
 						return tr("by ssid");
-					case SelectRule::SEL_AND_BLOCK:
+					case SelectType::AND_BLOCK:
 						return tr("all");
-					case SelectRule::SEL_OR_BLOCK:
+					case SelectType::OR_BLOCK:
 						return tr("at least one");
 					default:
 						break;
 					}
 			case ENVDET_MOD_VALUE:
 				switch (m_SelectConfig.filters[index.internalId()].selType) {
-				case SelectRule::SEL_ARP:
+				case SelectType::ARP:
 					if (m_SelectConfig.filters[index.internalId()].macAddr.valid())
 						return m_SelectConfig.filters[index.internalId()].ipAddr.toString() + ", "+
 							m_SelectConfig.filters[index.internalId()].macAddr.toString();
 					else
 						return m_SelectConfig.filters[index.internalId()].ipAddr.toString();
-				case SelectRule::SEL_ESSID:
+				case SelectType::ESSID:
 					return m_SelectConfig.filters[index.internalId()].essid;
 				default:
 					break;
