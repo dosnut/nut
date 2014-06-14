@@ -1081,14 +1081,14 @@ namespace nuts {
 	}
 
 	void Interface_IPv4::startFallback() {
-		fallback_set_timeout(-1);
-		if (m_ifstate != (ip.isNull() ? libnutcommon::InterfaceState::OFF : libnutcommon::InterfaceState::STATIC) || false == m_env->m_ifUpStatus[m_index]) { //TODO:Find a better way to check interface state
+		auto is_up = m_env->m_ifUpStatus.at(m_index);
+		/* we should never get here if the interface is up or DHCP was successful; check anyway. */
+		if (libnutcommon::InterfaceState::DHCP != m_ifstate && !is_up) {
 			if (m_config->flags == (libnutcommon::IPv4ConfigFlag::DHCP | libnutcommon::IPv4ConfigFlag::ZEROCONF)) {
-				//create new interface with dhcp only.
 				stopDHCP();
 				startZeroconf();
 			}
-			if (m_config->flags == (libnutcommon::IPv4ConfigFlag::DHCP | libnutcommon::IPv4ConfigFlag::STATIC)) {
+			else if (m_config->flags == (libnutcommon::IPv4ConfigFlag::DHCP | libnutcommon::IPv4ConfigFlag::STATIC)) {
 				stopDHCP();
 				startStatic();
 			}
