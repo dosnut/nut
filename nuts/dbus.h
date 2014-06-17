@@ -30,16 +30,12 @@ namespace nuts {
 		QHash<QString, DBusDevice*> m_dbusDevices;
 		static const QDBusObjectPath m_dbusPath, m_dbusDevicesPath;
 
-		void onDbusConnected(QDBusConnection& connection) override;
-		void onDbusDisconnected(QDBusConnection& connection) override;
-
 	private slots:
 		void devAdded(QString devName, Device* dev);
 		void devRemoved(QString devName, Device* dev);
 
 	public:
 		DBusDeviceManager(DeviceManager* devmgr);
-		~DBusDeviceManager();
 
 	// DBus API: de.unistuttgart.nut /manager de.unistuttgart.nut.DeviceManager.*
 	public slots:
@@ -70,14 +66,10 @@ namespace nuts {
 	private:
 		Device* const m_device;
 		QList<DBusEnvironment*> m_dbusEnvironments;
-		QDBusObjectPath const m_dbusPath;
 
 		libnutcommon::DeviceProperties m_properties, m_last_notified_properties;
 		int m_activeEnvironment;
 		void checkPropertiesUpdate();
-
-		void onDbusConnected(QDBusConnection& connection) override;
-		void onDbusDisconnected(QDBusConnection& connection) override;
 
 	private slots:
 		void devPropertiesChanged(libnutcommon::DeviceProperties properties);
@@ -85,9 +77,6 @@ namespace nuts {
 
 	public:
 		DBusDevice(Device* dev, const QString& path);
-		~DBusDevice();
-
-		QDBusObjectPath getPath();
 
 	// DBus API: de.unistuttgart.nut /devices/<devname> de.unistuttgart.nut.Device.*
 	public slots:
@@ -132,23 +121,16 @@ namespace nuts {
 #ifdef IPv6
 		QList<DBusInterface_IPv6*> m_dbusInterfacesIPv6;
 #endif
-		QDBusObjectPath const m_dbusPath;
 
 		libnutcommon::EnvironmentProperties m_properties, m_last_notified_properties;
 		void checkPropertiesUpdate();
-
-		void onDbusConnected(QDBusConnection& connection) override;
-		void onDbusDisconnected(QDBusConnection& connection) override;
 
 	private slots:
 		void envPropertiesChanged(libnutcommon::EnvironmentProperties properties);
 
 	public:
 		DBusEnvironment(Environment *env, const QDBusObjectPath &path);
-		~DBusEnvironment();
 		Environment* getEnvironment() const { return m_environment; }
-
-		QDBusObjectPath getPath();
 
 	// DBus API: de.unistuttgart.nut /devices/<devname>/<envNdx> de.unistuttgart.nut.Environment.*
 	public slots:
@@ -178,15 +160,11 @@ namespace nuts {
 	Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Interface_IPv4")
 	private:
 		Interface_IPv4* const m_interface;
-		QDBusObjectPath const m_dbusPath;
 
 		libnutcommon::InterfaceProperties m_properties, m_last_notified_properties;
 		libnutcommon::IPv4UserConfig m_userConfig, m_last_notified_userConfig;
 		void checkPropertiesUpdate();
 		void checkUserConfigUpdate();
-
-		void onDbusConnected(QDBusConnection& connection) override;
-		void onDbusDisconnected(QDBusConnection& connection) override;
 
 	private slots:
 		void interfacePropertiesChanged(libnutcommon::InterfaceProperties properties);
@@ -194,9 +172,6 @@ namespace nuts {
 
 	public:
 		DBusInterface_IPv4(Interface_IPv4* iface, const QDBusObjectPath& path);
-		virtual ~DBusInterface_IPv4();
-
-		QDBusObjectPath getPath();
 
 	// DBus API: de.unistuttgart.nut /devices/<devname>/<envNdx>/<ifNdx> de.unistuttgart.nut.Interface_IPv4.*
 	public slots:

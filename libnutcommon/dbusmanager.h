@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QDBusConnection>
 #include <QDBusAbstractAdaptor>
+#include <QDBusObjectPath>
 
 QT_BEGIN_NAMESPACE
 class QDBusConnectionInterface;
@@ -88,12 +89,13 @@ namespace libnutcommon {
 		void _onDbusDisconnected(QDBusConnection const& connection);
 
 	protected:
-		/* register your object in onDbusConnected() */
-		virtual void onDbusConnected(QDBusConnection& connection);
-		/* unregister your object in onDbusDisconnected(), unless you don't
-		 * care or are sure the "parent" object gets deleted anyway (which
-		 * automatically unregisters it)
+		QDBusObjectPath const m_path;
+
+		/* usually not needed - parent() is registered at m_path automatically
+		 * call unregister() in destructor to receive final onDbusDisconnected()
+		 * in your class
 		 */
+		virtual void onDbusConnected(QDBusConnection& connection);
 		virtual void onDbusDisconnected(QDBusConnection& connection);
 
 		/* register your service names in the constructor */
@@ -109,15 +111,14 @@ namespace libnutcommon {
 		 */
 		void registerAdaptor(DBusAbstractAdapater* child);
 
-		/* call in your destructor (while onDbusDisconnected() still ends
-		 * in your class; ~DBusAbstractAdapater() calls it too but due to how
-		 * "virtual" dispatching works won't reach your onDbusDisconnected())
-		 */
+		/* see onDbusDisconnected; usually you don't need to call this */
 		void unregisterAll();
 
 	public:
-		DBusAbstractAdapater(QObject* parent);
+		DBusAbstractAdapater(QDBusObjectPath path, QObject* parent);
 		~DBusAbstractAdapater();
+
+		QDBusObjectPath const& getPath() const { return m_path; }
 
 		/* you can connect adapters to many dbus managers; usually you only
 		 * connect the top-level adaptor to a manager, and use registerAdaptor

@@ -119,8 +119,8 @@ namespace libnutcommon {
 		}
 	}
 
-	DBusAbstractAdapater::DBusAbstractAdapater(QObject* parent)
-	: QDBusAbstractAdaptor(parent) {
+	DBusAbstractAdapater::DBusAbstractAdapater(QDBusObjectPath path, QObject* parent)
+	: QDBusAbstractAdaptor(parent), m_path(std::move(path)) {
 	}
 
 	DBusAbstractAdapater::~DBusAbstractAdapater() {
@@ -143,6 +143,7 @@ namespace libnutcommon {
 		}
 
 		for (auto& c: l) {
+			c.unregisterObject(m_path.path());
 			onDbusDisconnected(c);
 			emit dbusDisconnected(c);
 		}
@@ -165,6 +166,9 @@ namespace libnutcommon {
 		if (found) return;
 
 		auto c = connection; // registerService() doesn't work on const& -.-
+
+		/* only add connection if we could register our own object */
+		if (!c.registerObject(m_path.path(), parent())) return;
 
 		for (auto s: m_services) {
 			if (c.registerService(s.first)) s.second.push_back(c);
