@@ -79,7 +79,7 @@ namespace libnutcommon {
 		bool noAutoStart = false;
 		QString wpaConfigFile;
 		QString wpaDriver;
-		int gateway_metric = -1;
+		int gatewayMetric = -1;
 	};
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data);
@@ -197,7 +197,7 @@ namespace libnutcommon {
 		QList<QHostAddress> static_dnsservers;
 
 		IPv4ConfigFlags flags = IPv4ConfigFlag::DHCP | IPv4ConfigFlag::ZEROCONF;
-		int gateway_metric = -1;
+		int gatewayMetric = -1;
 		int timeout = 0;
 		bool continue_dhcp = false;
 
@@ -206,26 +206,6 @@ namespace libnutcommon {
 	};
 	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4Config &data);
 	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4Config &data);
-
-	/** @brief If an interface has to be configured by the user (IPv4ConfigFlag::USERSTATIC), he/she has to
-	 *         set that information with this class.
-	 *
-	 */
-	class IPv4UserConfig {
-	public:
-		QHostAddress ip;
-		QHostAddress netmask;
-		QHostAddress gateway;
-		QList<QHostAddress> dnsservers;
-
-		/** @brief A very basic check if the configuration is valid.
-		 */
-		bool valid() {
-			return !ip.isNull();
-		}
-	};
-	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4UserConfig &data);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4UserConfig &data);
 }
 
 Q_DECLARE_METATYPE(libnutcommon::DeviceConfig)
@@ -237,6 +217,5 @@ Q_DECLARE_METATYPE(libnutcommon::SelectConfig)
 Q_DECLARE_METATYPE(libnutcommon::EnvironmentConfig)
 Q_DECLARE_METATYPE(libnutcommon::IPv4ConfigFlags)
 Q_DECLARE_METATYPE(libnutcommon::IPv4Config)
-Q_DECLARE_METATYPE(libnutcommon::IPv4UserConfig)
 
 #endif

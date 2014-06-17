@@ -138,7 +138,7 @@ namespace nuts {
 
 	bool ConfigParser::devMetric(int metric) {
 		if (!m_curdevconfig) return false;
-		m_curdevconfig->gateway_metric = metric;
+		m_curdevconfig->gatewayMetric = metric;
 		return true;
 	}
 

@@ -10,9 +10,7 @@
 */
 #include "common.h"
 
-#include <libnutclient/cdevice.h>
-#include <libnutclient/cenvironment.h>
-#include <libnutclient/cinterface.h>
+#include <libnutclient/client.h>
 #include <libnutwireless/wpa_supplicant.h>
 #include <libnutwireless/cwireless.h>
 
@@ -120,14 +118,14 @@ namespace qnut {
 		}
 	}
 
-	QString activeIP(CDevice * device) {
+	QString activeIP(CDevice* device) {
 		if (device->getState() < DeviceState::UNCONFIGURED)
 			return QString('-');
 
-		QString result = QString("");
+		QString result;
 
-		foreach (CInterface * i, device->getActiveEnvironment()->getInterfaces()) {
-			if (i->getState() != InterfaceState::OFF) {
+		for(auto i: device->getActiveEnvironment()->getInterfaces()) {
+			if (InterfaceState::OFF != i->getState()) {
 				if (result.length() == 0)
 					result = i->getIp().toString();
 				else {

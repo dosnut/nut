@@ -40,12 +40,12 @@ const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &da
 Q_DECLARE_METATYPE(QHostAddress)
 Q_DECLARE_METATYPE(QList<QHostAddress>)
 
-Q_DECLARE_METATYPE(QVector< quint32 >)
-Q_DECLARE_METATYPE(QVector< QVector< quint32 > >)
+Q_DECLARE_METATYPE(QVector<quint32>)
+Q_DECLARE_METATYPE(QVector< QVector<quint32> >)
 
-#include "config.h"
+Q_DECLARE_METATYPE(QList<qint32>)
+
 #include "device.h"
-#include "macaddress.h"
-#include "dbusmonitor.h"
+#include "dbusmanager.h"
 
 #endif

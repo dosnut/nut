@@ -186,7 +186,7 @@ namespace nuts {
 			void arpTimerAdd(ARPTimer *t);
 			void arpTimerDelete(ARPTimer *t);
 
-			void timerEvent(QTimerEvent *event);
+			void timerEvent(QTimerEvent *event) override;
 
 			friend class Device;
 			bool start();

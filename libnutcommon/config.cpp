@@ -8,7 +8,7 @@ namespace libnutcommon {
 			<< data.noAutoStart
 			<< data.wpaConfigFile
 			<< data.wpaDriver
-			<< data.gateway_metric;
+			<< data.gatewayMetric;
 		argument.beginArray(qMetaTypeId<EnvironmentConfig>());
 		for(auto const& ec: data.environments) {
 			argument << *ec;
@@ -23,7 +23,7 @@ namespace libnutcommon {
 			>> data.noAutoStart
 			>> data.wpaConfigFile
 			>> data.wpaDriver
-			>> data.gateway_metric;
+			>> data.gatewayMetric;
 		argument.beginArray();
 		while (!argument.atEnd()) {
 			auto ec = std::make_shared<EnvironmentConfig>();
@@ -135,7 +135,7 @@ namespace libnutcommon {
 			<< data.static_netmask
 			<< data.static_gateway
 			<< data.static_dnsservers
-			<< data.gateway_metric;
+			<< data.gatewayMetric;
 		argument.endStructure();
 		return argument;
 	}
@@ -147,28 +147,7 @@ namespace libnutcommon {
 			>> data.static_netmask
 			>> data.static_gateway
 			>> data.static_dnsservers
-			>> data.gateway_metric;
-		argument.endStructure();
-		return argument;
-	}
-
-	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4UserConfig &data) {
-		argument.beginStructure();
-		argument
-			<< data.ip
-			<< data.netmask
-			<< data.gateway
-			<< data.dnsservers;
-		argument.endStructure();
-		return argument;
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4UserConfig &data) {
-		argument.beginStructure();
-		argument
-			>> data.ip
-			>> data.netmask
-			>> data.gateway
-			>> data.dnsservers;
+			>> data.gatewayMetric;
 		argument.endStructure();
 		return argument;
 	}
@@ -274,7 +253,6 @@ namespace libnutcommon {
 		qRegisterMetaType< EnvironmentConfig >("libnutcommon::EnvironmentConfig");
 		qRegisterMetaType< IPv4ConfigFlags >("libnutcommon::IPv4ConfigFlags");
 		qRegisterMetaType< IPv4Config >("libnutcommon::IPv4Config");
-		qRegisterMetaType< IPv4UserConfig >("libnutcommon::IPv4UserConfig");
 
 		qDBusRegisterMetaType< DeviceConfig >();
 		qDBusRegisterMetaType< SelectResult >();
@@ -285,6 +263,5 @@ namespace libnutcommon {
 		qDBusRegisterMetaType< EnvironmentConfig >();
 		qDBusRegisterMetaType< IPv4ConfigFlags >();
 		qDBusRegisterMetaType< IPv4Config >();
-		qDBusRegisterMetaType< IPv4UserConfig >();
 	}
 }

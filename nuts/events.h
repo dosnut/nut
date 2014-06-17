@@ -35,11 +35,13 @@ namespace nuts {
 		private:
 			void start(QStringList &environment, const QString &event, const QString &device, const QString &env = QString(), int iface=-1);
 
+		public:
+			void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState, Device* device);
+			void interfaceStatusChanged(libnutcommon::InterfaceState state, Interface_IPv4* iface);
+
 		public slots:
 			void deviceAdded(QString devName, Device *dev);
 			void deviceRemoved(QString devName, Device *dev);
-			void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState, Device* device);
-			void interfaceStatusChanged(libnutcommon::InterfaceState state, Interface_IPv4* iface);
 	};
 }
 

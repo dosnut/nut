@@ -49,14 +49,25 @@ namespace libnutcommon {
 		return dbusUnserializeEnum(argument, state);
 	}
 
+	bool operator==(DeviceProperties const& a, DeviceProperties const& b) {
+		return a.name              == b.name
+			&& a.type              == b.type
+			&& a.activeEnvironment == b.activeEnvironment
+			&& a.state             == b.state
+			&& a.essid             == b.essid;
+	}
+	bool operator!=(DeviceProperties const& a, DeviceProperties const& b) {
+		return !(a == b);
+	}
 
 	QDBusArgument &operator<<(QDBusArgument &argument, const DeviceProperties & devprop) {
 		argument.beginStructure();
 		argument
 			<< devprop.name
+			<< devprop.type
 			<< devprop.activeEnvironment
 			<< devprop.state
-			<< devprop.type;
+			<< devprop.essid;
 		argument.endStructure();
 		return argument;
 	}
@@ -64,18 +75,33 @@ namespace libnutcommon {
 		argument.beginStructure();
 		argument
 			>> devprop.name
+			>> devprop.type
 			>> devprop.activeEnvironment
 			>> devprop.state
-			>> devprop.type;
+			>> devprop.essid;
 		argument.endStructure();
 		return argument;
+	}
+
+	bool operator==(EnvironmentProperties const& a, EnvironmentProperties const& b) {
+		return a.name          == b.name
+			&& a.id            == b.id
+			&& a.active        == b.active
+			&& a.selectResult  == b.selectResult
+			&& a.selectResults == b.selectResults;
+	}
+	bool operator!=(EnvironmentProperties const& a, EnvironmentProperties const& b) {
+		return !(a == b);
 	}
 
 	QDBusArgument &operator<<(QDBusArgument &argument, const EnvironmentProperties &envprop) {
 		argument.beginStructure();
 		argument
 			<< envprop.name
-			<< envprop.active;
+			<< envprop.id
+			<< envprop.active
+			<< envprop.selectResult
+			<< envprop.selectResults;
 		argument.endStructure();
 		return argument;
 	}
@@ -84,29 +110,80 @@ namespace libnutcommon {
 		argument.beginStructure();
 		argument
 			>> envprop.name
-			>> envprop.active;
+			>> envprop.id
+			>> envprop.active
+			>> envprop.selectResult
+			>> envprop.selectResults;
 		return argument;
+	}
+
+	bool operator==(InterfaceProperties const& a, InterfaceProperties const& b) {
+		return a.state         == b.state
+			&& a.ip            == b.ip
+			&& a.netmask       == b.netmask
+			&& a.gateway       == b.gateway
+			&& a.dnsServers    == b.dnsServers
+			&& a.gatewayMetric == b.gatewayMetric
+			&& a.needUserSetup == b.needUserSetup;
+	}
+	bool operator!=(InterfaceProperties const& a, InterfaceProperties const& b) {
+		return !(a == b);
 	}
 
 	QDBusArgument &operator<<(QDBusArgument &argument, const InterfaceProperties &ifprop) {
 		argument.beginStructure();
 		argument
-			<< ifprop.ifState
+			<< ifprop.state
 			<< ifprop.ip
 			<< ifprop.netmask
 			<< ifprop.gateway
-			<< ifprop.dns;
+			<< ifprop.dnsServers
+			<< ifprop.gatewayMetric
+			<< ifprop.needUserSetup;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>>(const QDBusArgument &argument, InterfaceProperties &ifprop) {
 		argument.beginStructure();
 		argument
-			>> ifprop.ifState
+			>> ifprop.state
 			>> ifprop.ip
 			>> ifprop.netmask
 			>> ifprop.gateway
-			>> ifprop.dns;
+			>> ifprop.dnsServers
+			>> ifprop.gatewayMetric
+			>> ifprop.needUserSetup;
+		argument.endStructure();
+		return argument;
+	}
+
+	bool operator==(IPv4UserConfig const& a, IPv4UserConfig const& b) {
+		return a.ip         == b.ip
+			&& a.netmask    == b.netmask
+			&& a.gateway    == b.gateway
+			&& a.dnsServers == b.dnsServers;
+	}
+	bool operator!=(IPv4UserConfig const& a, IPv4UserConfig const& b) {
+		return !(a == b);
+	}
+
+	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4UserConfig &data) {
+		argument.beginStructure();
+		argument
+			<< data.ip
+			<< data.netmask
+			<< data.gateway
+			<< data.dnsServers;
+		argument.endStructure();
+		return argument;
+	}
+	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4UserConfig &data) {
+		argument.beginStructure();
+		argument
+			>> data.ip
+			>> data.netmask
+			>> data.gateway
+			>> data.dnsServers;
 		argument.endStructure();
 		return argument;
 	}
@@ -120,6 +197,7 @@ namespace libnutcommon {
 		qRegisterMetaType<DeviceProperties>("libnutcommon::DeviceProperties");
 		qRegisterMetaType<EnvironmentProperties>("libnutcommon::EnvironmentProperties");
 		qRegisterMetaType<InterfaceProperties>("libnutcommon::InterfaceProperties");
+		qRegisterMetaType<IPv4UserConfig>("libnutcommon::IPv4UserConfig");
 
 		qDBusRegisterMetaType<OptionalQDBusObjectPath>();
 		qDBusRegisterMetaType<DeviceState>();
@@ -128,5 +206,6 @@ namespace libnutcommon {
 		qDBusRegisterMetaType<DeviceProperties>();
 		qDBusRegisterMetaType<EnvironmentProperties>();
 		qDBusRegisterMetaType<InterfaceProperties>();
+		qDBusRegisterMetaType<IPv4UserConfig>();
 	}
 }

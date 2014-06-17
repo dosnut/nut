@@ -14,9 +14,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QSignalMapper>
-#include <libnutclient/cdevice.h>
-#include <libnutclient/cenvironment.h>
-#include <libnutclient/cinterface.h>
+#include <libnutclient/client.h>
 #include <libnutwireless/cwireless.h>
 
 #include "common.h"
@@ -127,7 +125,7 @@ namespace qnut {
 						}
 						settings->endArray();
 
-						config.dnsservers = dnsServers;
+						config.dnsServers = dnsServers;
 						settings->endGroup();
 
 						if (config.valid())
@@ -252,10 +250,10 @@ namespace qnut {
 				settings->setValue(UI_SETTINGS_IP, i->getUserConfig().ip.toString());
 				settings->setValue(UI_SETTINGS_NETMASK, i->getUserConfig().netmask.toString());
 				settings->setValue(UI_SETTINGS_GATEWAY, i->getUserConfig().gateway.toString());
-				settings->beginWriteArray(UI_SETTINGS_DNSSERVERS, i->getUserConfig().dnsservers.size());
-				for (int k = 0; k < i->getUserConfig().dnsservers.size(); ++k) {
+				settings->beginWriteArray(UI_SETTINGS_DNSSERVERS, i->getUserConfig().dnsServers.size());
+				for (int k = 0; k < i->getUserConfig().dnsServers.size(); ++k) {
 					settings->setArrayIndex(k);
-					settings->setValue(UI_SETTINGS_ADDRESS, i->getUserConfig().dnsservers[k].toString());
+					settings->setValue(UI_SETTINGS_ADDRESS, i->getUserConfig().dnsServers[k].toString());
 				}
 				settings->endArray();
 
@@ -410,7 +408,7 @@ namespace qnut {
 				ui.detailsView->expandAll();
 			}
 
-			m_EnterEnvironmentAction->setDisabled(environment->getState());
+			m_EnterEnvironmentAction->setDisabled(environment->isActive());
 
 			connect(environment, SIGNAL(activeChanged(bool)), m_EnterEnvironmentAction, SLOT(setDisabled(bool)));
 			connect(m_EnterEnvironmentAction, SIGNAL(triggered()), environment, SLOT(enter()));
@@ -428,7 +426,7 @@ namespace qnut {
 		QModelIndex selectedIndex = (ui.environmentTree->selectionModel()->selection().indexes())[0];
 
 		CInterface * interface = static_cast<CInterface *>(selectedIndex.internalPointer());
-		libnutcommon::IPv4UserConfig config = interface->getUserConfig(true);
+		libnutcommon::IPv4UserConfig config = interface->getUserConfig();
 		bool remember = m_IPConfigsToRemember.contains(interface);
 		if (dialog.execute(config, remember)) {
 			interface->setUserConfig(config);

@@ -65,19 +65,15 @@ set(SOURCES_CPP main.cpp
 	utils/cerrorcodeevaluator.cpp
 )
 
-set(TRANSLATIONS_TS
-	translations/${PROJECT_NAME}_de.ts
-	translations/${PROJECT_NAME}_pt_BR.ts
-)
+file(GLOB TRANSLATIONS_TS translations/${PROJECT_NAME}_*.ts)
 
 qt4_wrap_ui(FORMS_H ${FORMS})
 qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})
-qt4_add_translation(TRANSLATIONS_QM ${TRANSLATIONS_TS})
+qt4_create_translation(TRANSLATIONS_QM ${SOURCES_CPP} ${FORMS} ${TRANSLATIONS_TS})
 
 add_executable(${PROJECT_NAME}
 	${SOURCES_CPP}
 	${SOURCES_MOC_CPP}
-	${SOURCES_H}
 	${FORMS_H}
 	${TRANSLATIONS_QM}
 )

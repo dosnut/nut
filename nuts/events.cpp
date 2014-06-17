@@ -42,8 +42,8 @@ namespace nuts {
 	void setupEnvironment(QStringList &environment, Device *dev) {
 		environment
 			<< QString("NUT_DEVICE=%1").arg(dev->getName())
-			<< QString("NUT_HAS_WLAN=%1").arg(dev->hasWLAN())
-			<< QString("NUT_ESSID=%1").arg(dev->essid())
+			<< QString("NUT_HAS_WLAN=%1").arg(dev->isAir())
+			<< QString("NUT_ESSID=%1").arg(dev->getEssid())
 			;
 	}
 
@@ -56,16 +56,16 @@ namespace nuts {
 
 	void setupEnvironment(QStringList &environment, Interface_IPv4* iface) {
 		environment
-			<< QString("NUT_IP=%1").arg(iface->ip.toString())
-			<< QString("NUT_NETMASK=%1").arg(iface->netmask.toString())
-			<< QString("NUT_LOCALDOMAIN=%1").arg(iface->localdomain)
+			<< QString("NUT_IP=%1").arg(iface->getIP().toString())
+			<< QString("NUT_NETMASK=%1").arg(iface->getNetmask().toString())
+			<< QString("NUT_LOCALDOMAIN=%1").arg(iface->getLocalDomain())
 			<< QString("NUT_STATUS=%1").arg(libnutcommon::toString(iface->getState()));
-		if (!iface->gateway.isNull())
-			environment << QString("NUT_GATEWAY=%1").arg(iface->gateway.toString());
-		QStringList dnsservers;
-		foreach (QHostAddress dns, iface->dnsserver)
-			dnsservers << dns.toString();
-		environment << QString("NUT_DNSSERVER=%1").arg(dnsservers.join(","));
+		if (!iface->getGateway().isNull())
+			environment << QString("NUT_GATEWAY=%1").arg(iface->getGateway().toString());
+		QStringList dnsServers;
+		foreach (QHostAddress dns, iface->getDnsServers())
+			dnsServers << dns.toString();
+		environment << QString("NUT_DNSSERVER=%1").arg(dnsServers.join(","));
 	}
 
 	void Events::deviceAdded(QString devName, Device *dev) {

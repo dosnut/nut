@@ -1,34 +1,114 @@
 //TODO: define return values
 #include "cnut_parsers.h"
 
-namespace cnut {
+#include <QTextStream>
 
-	void help() {
-		print(QString("--list (-l) %1").arg(QObject::tr("Lists available devices/environments/interfaces")));
-		print(QString("--device (-D) <devicename> %1").arg(QObject::tr("Choose device")));
-		print(QString("--environment (-E) <environment name> %1").arg(QObject::tr("Choose environment in given device")));
-		print(QString("--environment (-E) <environment index> %1").arg(QObject::tr("Choose environment in given device")));
-		print(QString("--interface <interface index> (-I) %1").arg(QObject::tr("Choose interface")));
-		print(QString("--device <devname> --list %1").arg(QObject::tr("Lists environments of device set by --Device")));
-		print(QString("--enable (-1) %1").arg(QObject::tr("Enables given device")));
-		print(QString("--disable (-0) %1").arg(QObject::tr("Disables given device")));
-		print(QString("--type (-t) %1").arg(QObject::tr("returns type of given device or interface")));
-		print(QString("--state (-s) %1").arg(QObject::tr("returns state of given device or environment or interface")));
-		print(QString("--activeEnvironment (-a) %1").arg(QObject::tr("returns active Environment of given device")));
-		print(QString("--setEnvironment (-S) <environment name> %1").arg(QObject::tr("Activates the environment on the given device")));
-		print(QString("--properties (-p) %1").arg(QObject::tr("Returns interface properties (one ip per line): ip,netmask,gateway,dns-servers")));
-		print(QString("--setEnvironment (-S) <index> %1").arg(
-		QObject::tr("Activates the environment on the given device.")));
-		print(QString("--selectable %1").arg("returns if an environment is selected,selectable or not selectable"));
-		print(QString("--with-index %1").arg(QObject::tr("In conjunction with --list and --device this will list environments with index in front of name")));
-		print(""); print("");
-		print(QObject::tr("Examples:"));
-		print(QString("cnut --device eth0 --enable %1").arg(QObject::tr("Enables device eth0")));
-		print(QString("cnut --device eth0 --state %1").arg(QObject::tr("Shows state of device eth0")));
-		print(QString("cnut --device eth0 --environment \"home\" --state %1").arg(QObject::tr("Shows state of environment home of device eth0")));
+namespace cnut {
+	namespace {
+		bool cmdNeedsArguments(NUT_COMMANDS cmd) {
+			switch (cmd) {
+			case CMD_DEVICE:
+			case CMD_ENVIRONMENT:
+			case CMD_SET_ENVIRONMENT:
+			case CMD_INTERFACE:
+				return true;
+			default:
+				return false;
+			}
+		}
+
+		NUT_COMMANDS cmdStrToNUT_CMDS(QString cmd) {
+//			qDebug() << QString("Current parsed command: %1").arg(cmd);
+			if ("--list" == cmd || "-l" == cmd) {
+				return CMD_LIST;
+			}
+			else if ("--device" == cmd || "-D" == cmd) {
+				return CMD_DEVICE;
+			}
+			else if ("--enable" == cmd || "-1" == cmd) {
+				return CMD_ENABLE;
+			}
+			else if ("--disable" == cmd || "-0" == cmd) {
+				return CMD_DISABLE;
+			}
+			else if ("--type" == cmd || "-t" == cmd) {
+				return CMD_TYPE;
+			}
+			else if ("--state" == cmd || "-s" == cmd) {
+				return CMD_STATE;
+			}
+			else if ("--activeEnvironment" == cmd || "-a" == cmd) {
+				return CMD_ACTIVE_ENVIRONMENT;
+			}
+			else if ("--setEnvironment" == cmd || "-S" == cmd) {
+				return CMD_SET_ENVIRONMENT;
+			}
+			else if ("--environment" == cmd || "-E" == cmd) {
+				return CMD_ENVIRONMENT;
+			}
+			else if("--selectable" == cmd) {
+				return CMD_SELECTABLE;
+			}
+			else if("--with-index" == cmd) {
+				return CMD_WITH_INDEX;
+			}
+			else if("--interface" == cmd || "-I" == cmd) {
+				return CMD_INTERFACE;
+			}
+			else if ("--properties" == cmd || "-p" == cmd) {
+				return CMD_PROPERTIES;
+			}
+			else if ("--help" == cmd || "-h" == cmd) {
+				return CMD_HELP;
+			}
+			else {
+				return CMD_UNKNOWN;
+			}
+		}
+
+		void print_out(QTextStream& out, QString const& str) {
+			out << str << "\n";
+		}
+		void print_out(QTextStream& out, QStringList const& list) {
+			for (auto const& s: list) {
+				print_out(out, s);
+			}
+		}
+		template<typename... Args>
+		inline void print(Args&&... args) {
+			QTextStream out { stdout };
+			print_out(out, std::forward<Args>(args)...);
+		}
+
+		void help() {
+			QTextStream(stdout)
+				<< QString("--list (-l) %1").arg(QObject::tr("Lists available devices/environments/interfaces")) << "\n"
+				<< QString("--device (-D) <devicename> %1").arg(QObject::tr("Choose device")) << "\n"
+				<< QString("--environment (-E) <environment name> %1").arg(QObject::tr("Choose environment in given device")) << "\n"
+				<< QString("--environment (-E) <environment index> %1").arg(QObject::tr("Choose environment in given device")) << "\n"
+				<< QString("--interface <interface index> (-I) %1").arg(QObject::tr("Choose interface")) << "\n"
+				<< QString("--device <devname> --list %1").arg(QObject::tr("Lists environments of device set by --Device")) << "\n"
+				<< QString("--enable (-1) %1").arg(QObject::tr("Enables given device")) << "\n"
+				<< QString("--disable (-0) %1").arg(QObject::tr("Disables given device")) << "\n"
+				<< QString("--type (-t) %1").arg(QObject::tr("returns type of given device")) << "\n"
+				<< QString("--state (-s) %1").arg(QObject::tr("returns state of given device or environment or interface")) << "\n"
+				<< QString("--activeEnvironment (-a) %1").arg(QObject::tr("returns active Environment of given device")) << "\n"
+				<< QString("--setEnvironment (-S) <environment name> %1").arg(QObject::tr("Activates the environment on the given device")) << "\n"
+				<< QString("--properties (-p) %1").arg(QObject::tr("Returns interface properties (one ip per line): ip,netmask,gateway,dns-servers")) << "\n"
+				<< QString("--setEnvironment (-S) <index> %1").arg(QObject::tr("Activates the environment on the given device.")) << "\n"
+				<< QString("--selectable %1").arg("returns if an environment is selected,selectable or not selectable") << "\n"
+				<< QString("--with-index %1").arg(QObject::tr("In conjunction with --list and --device this will list environments with index in front of name")) << "\n"
+				<< "\n"
+				<< "\n"
+				<< QObject::tr("Examples:") << "\n"
+				<< QString("cnut --device eth0 --enable %1").arg(QObject::tr("Enables device eth0")) << "\n"
+				<< QString("cnut --device eth0 --state %1").arg(QObject::tr("Shows state of device eth0")) << "\n"
+				<< QString("cnut --device eth0 --environment \"home\" --state %1").arg(QObject::tr("Shows state of environment home of device eth0")) << "\n"
+				;
+		}
 	}
 
-	int dispatchCommands(CommandList commands, QDBusConnection * connection) {
+	int dispatchCommands(CommandList commands, QDBusConnection connection) {
 		//Commands are sorted in this order:
 		//--listDevices
 		//--device <> --listEnvironments
@@ -36,9 +116,10 @@ namespace cnut {
 		//--device <> --environment <>
 		//--device <> --environment <> --state
 
-		QString devPath;
-		QString envPath;
-		QString ifPath;
+		OptionalQDBusObjectPath devPath;
+		OptionalQDBusObjectPath envPath;
+		OptionalQDBusObjectPath ifPath;
+
 		bool doEnv = false;
 		bool doIf = false;
 		bool doDev = false;
@@ -60,43 +141,43 @@ namespace cnut {
 			else if (CMD_DEVICE == cmd.command) {
 				devPath = getDevicePathByName(connection,cmd.value);
 				doDev = true;
-				if (devPath.isEmpty()) {
+				if (!devPath) {
 					print(QObject::tr("Device not found"));
 					return RETVAL_DEVICE_NOT_FOUND;
 				}
 			}
 			else if (CMD_ENABLE == cmd.command) {
-				if (devPath.isEmpty()) {
+				if (!devPath) {
 					print(QObject::tr("No device specified"));
 					return RETVAL_DEVICE_NOT_SPECIFIED;
 				}
 				else {
-					enableDevice(connection,devPath);
+					enableDevice(connection,devPath.objectPath());
 				}
 				return RETVAL_SUCCESS;
 			}
 			else if (CMD_DISABLE == cmd.command) {
-				if (devPath.isEmpty()) {
+				if (!devPath) {
 					print(QObject::tr("No device specified"));
 					return RETVAL_DEVICE_NOT_SPECIFIED;
 				}
 				else {
-					disableDevice(connection,devPath);
+					disableDevice(connection,devPath.objectPath());
 				}
 				return RETVAL_SUCCESS;
 			}
 			else if (CMD_ACTIVE_ENVIRONMENT == cmd.command) {
-				if (devPath.isEmpty()) {
+				if (!devPath) {
 					print(QObject::tr("No device specified"));
 					return RETVAL_DEVICE_NOT_SPECIFIED;
 				}
 				else {
-					print(getActiveEnvironment(connection,devPath));
+					print(getActiveEnvironment(connection,devPath.objectPath()));
 				}
 				return RETVAL_SUCCESS;
 			}
 			else if (CMD_SET_ENVIRONMENT == cmd.command) {
-				if (devPath.isEmpty()) {
+				if (!devPath) {
 					print(QObject::tr("No device specified"));
 					return RETVAL_DEVICE_NOT_SPECIFIED;
 				}
@@ -111,31 +192,30 @@ namespace cnut {
 						name.remove(0,1);
 
 // 						qDebug() << QString("Parsed setEnvironment with: %1").arg(name);
-						envPath = getEnvironmentPathByName(connection,devPath,name);
-						if (envPath.isEmpty()) {
+						envPath = getEnvironmentPathByName(connection,devPath.objectPath(),name);
+						if (!envPath) {
 							print(QObject::tr("Environment not found"));
 							return RETVAL_ENVIRONMENT_NOT_FOUND;
 						}
 						else {
-							setEnvironment(connection,devPath,envPath);
+							setEnvironment(connection,devPath.objectPath(),envPath.objectPath());
 						}
 					}
 					else { //index
 						bool ok;
 						qint32 index = cmd.value.toInt(&ok);
 						if (ok) {
-							if (!setEnvironment(connection,devPath,index)) {
-								return RETVAL_SUCCESS;
-							}
+							setEnvironment(connection,devPath.objectPath(),index);
+							return RETVAL_SUCCESS;
 						}
 						else { //QT strips ", so let's try it with name:
-							envPath = getEnvironmentPathByName(connection,devPath,cmd.value);
-							if (envPath.isEmpty()) {
+							envPath = getEnvironmentPathByName(connection,devPath.objectPath(),cmd.value);
+							if (!envPath) {
 								print(QObject::tr("Environment not found"));
 								return RETVAL_ENVIRONMENT_NOT_FOUND;
 							}
 							else {
-								setEnvironment(connection,devPath,envPath);
+								setEnvironment(connection,devPath.objectPath(),envPath.objectPath());
 								return RETVAL_SUCCESS;
 							}
 						}
@@ -143,7 +223,7 @@ namespace cnut {
 				}
 			}
 			else if (CMD_ENVIRONMENT == cmd.command) {
-				if (devPath.isEmpty()) {
+				if (!devPath) {
 					print(QObject::tr("No device specified"));
 					return RETVAL_DEVICE_NOT_SPECIFIED;
 				}
@@ -152,20 +232,20 @@ namespace cnut {
 					bool ok;
 					qint32 index = cmd.value.toInt(&ok);
 					if (ok) { //try number first
-						envPath = getEnvironmentPathByIndex(connection,devPath,index);
+						envPath = getEnvironmentPathByIndex(connection,devPath.objectPath(),index);
 					}
 					else {
-						envPath = getEnvironmentPathByName(connection,devPath,cmd.value);
+						envPath = getEnvironmentPathByName(connection,devPath.objectPath(),cmd.value);
 					}
 				}
 			}
 			else if (CMD_SELECTABLE == cmd.command) {
-				if (envPath.isEmpty()) {
+				if (!envPath) {
 					print(QObject::tr("No environment specified"));
 					return RETVAL_ENVIRONMENT_NOT_SPECIFIED;
 				}
 				else {
-					print(getEnvironmentSelectable(connection,envPath));
+					print(getEnvironmentSelectable(connection,envPath.objectPath()));
 					return RETVAL_SUCCESS;
 				}
 			}
@@ -173,7 +253,7 @@ namespace cnut {
 				envNamesWithIndex = true;
 			}
 			else if (CMD_INTERFACE == cmd.command) {
-				if (envPath.isEmpty()) {
+				if (!envPath) {
 					print(QObject::tr("No environment specified"));
 					return RETVAL_ENVIRONMENT_NOT_SPECIFIED;
 				}
@@ -182,7 +262,7 @@ namespace cnut {
 					bool ok;
 					qint32 index = cmd.value.toInt(&ok);
 					if (ok) { //try number first
-						ifPath = getInterfacePathByIndex(connection,envPath,index);
+						ifPath = getInterfacePathByIndex(connection,envPath.objectPath(),index);
 					}
 					else {
 						print(QObject::tr("Interface not found"));
@@ -191,93 +271,77 @@ namespace cnut {
 				}
 			}
 			else if (CMD_PROPERTIES == cmd.command) {
-				if (ifPath.isEmpty()) {
+				if (!ifPath) {
 					print(QObject::tr("No interface specified"));
 					return RETVAL_INTERFACE_NOT_SPECIFIED;
 				}
 				else {
-					print(getInterfaceProperties(connection,ifPath));
+					print(getInterfaceProperties(connection,ifPath.objectPath()));
 				}
 				return RETVAL_SUCCESS;
 			}
 			else if (CMD_STATE == cmd.command) { //check which state is meant
 				if (doIf) { //interface state
-					if (ifPath.isEmpty()) {
+					if (!ifPath) {
 						print(QObject::tr("No interface specified"));
 						return RETVAL_INTERFACE_NOT_SPECIFIED;
 					}
 					else {
-						print(getInterfaceState(connection,ifPath));
+						print(getInterfaceState(connection,ifPath.objectPath()));
 					}
 				}
 				else if (doEnv) { //env state
-					if (devPath.isEmpty()) {
+					if (!devPath) {
 						print(QObject::tr("No device specified"));
 						return RETVAL_DEVICE_NOT_SPECIFIED;
 					}
-					else if (envPath.isEmpty()) {
+					else if (!envPath) {
 						print(QObject::tr("No environment specified"));
 						return RETVAL_ENVIRONMENT_NOT_SPECIFIED;
 					}
 					else {
-						print(getEnvironmentState(connection,envPath));
+						print(getEnvironmentActive(connection,envPath.objectPath()));
 					}
 				}
 				else { //dev state
-					if (devPath.isEmpty()) {
+					if (!devPath) {
 						print(QObject::tr("No device specified"));
 						return RETVAL_DEVICE_NOT_SPECIFIED;
 					}
 					else {
-						print(getDeviceState(connection,devPath));
+						print(getDeviceState(connection,devPath.objectPath()));
 					}
 				}
 				return RETVAL_SUCCESS;
 			}
-			else if (CMD_TYPE == cmd.command) { //check which type is meant
-				if (doIf) {
-					if (ifPath.isEmpty()) {
-						print(QObject::tr("No device specified"));
-						return RETVAL_INTERFACE_NOT_SPECIFIED;
-					}
-					else {
-						print(getInterfaceType(connection,ifPath));
-					}
+			else if (CMD_TYPE == cmd.command) {
+				if (!devPath) {
+					print(QObject::tr("No device specified"));
+					return RETVAL_DEVICE_NOT_SPECIFIED;
 				}
 				else {
-					if (devPath.isEmpty()) {
-						print(QObject::tr("No device specified"));
-						return RETVAL_DEVICE_NOT_SPECIFIED;
-					}
-					else {
-						print(getDeviceType(connection,devPath));
-					}
+					print(getDeviceType(connection,devPath.objectPath()));
 				}
 				return RETVAL_SUCCESS;
 			}
 			else if (CMD_LIST == cmd.command) {
 				//Check which list is meant
 				if (doEnv) { //List interfaces
-					if (envPath.isEmpty()) {
+					if (!envPath) {
 						print(QObject::tr("No environment specified"));
 						return RETVAL_ENVIRONMENT_NOT_SPECIFIED;
 					}
 					else {
-						print(listInterfaceIndexes(connection,envPath));
+						print(listInterfaceIndexes(connection,envPath.objectPath()));
 					}
 				}
 				else if (doDev) { //list environments
-					if (devPath.isEmpty()) {
+					if (!devPath) {
 						print(QObject::tr("No device specified"));
 						return RETVAL_DEVICE_NOT_SPECIFIED;
 					}
 					else {
-						if (envNamesWithIndex) {
-							print(listEnvironmentNamesWithIndex(connection,devPath));
-						}
-						else {
-							print(listEnvironmentNames(connection,devPath));
-						}
+						print(listEnvironmentNames(connection, devPath.objectPath(), envNamesWithIndex));
 					}
 				}
 				else { //List devices
@@ -291,59 +355,6 @@ namespace cnut {
 			}
 		}
 		return RETVAL_SUCCESS;
-	}
-
-	NUT_COMMANDS cmdStrToNUT_CMDS(QString cmd) {
-// 		qDebug() << QString("Current parsed command: %1").arg(cmd);
-		if ("--list" == cmd || "-l" == cmd) {
-			return CMD_LIST;
-		}
-		else if ("--device" == cmd || "-D" == cmd) {
-			return CMD_DEVICE;
-		}
-		else if ("--enable" == cmd || "-1" == cmd) {
-			return CMD_ENABLE;
-		}
-		else if ("--disable" == cmd || "-0" == cmd) {
-			return CMD_DISABLE;
-		}
-		else if ("--type" == cmd || "-t" == cmd) {
-			return CMD_TYPE;
-		}
-		else if ("--state" == cmd || "-s" == cmd) {
-			return CMD_STATE;
-		}
-		else if ("--activeEnvironment" == cmd || "-a" == cmd) {
-			return CMD_ACTIVE_ENVIRONMENT;
-		}
-		else if ("--setEnvironment" == cmd || "-S" == cmd) {
-			return CMD_SET_ENVIRONMENT;
-		}
-		else if ("--environment" == cmd || "-E" == cmd) {
-			return CMD_ENVIRONMENT;
-		}
-		else if("--selectable" == cmd) {
-			return CMD_SELECTABLE;
-		}
-		else if("--with-index" == cmd) {
-			return CMD_WITH_INDEX;
-		}
-		else if("--interface" == cmd || "-I" == cmd) {
-			return CMD_INTERFACE;
-		}
-		else if ("--properties" == cmd || "-p" == cmd) {
-			return CMD_PROPERTIES;
-		}
-		else if ("--help" == cmd || "-h" == cmd) {
-			return CMD_HELP;
-		}
-		else {
-			return CMD_UNKNOWN;
-		}
-	}
-
-	inline bool cmdNeedsArguments(NUT_COMMANDS cmd) {
-		return (CMD_DEVICE == cmd || CMD_ENVIRONMENT == cmd || CMD_SET_ENVIRONMENT == cmd || CMD_INTERFACE == cmd);
 	}
 
 	//Transform argument list as passed by QApplication::arguments to own cmd list

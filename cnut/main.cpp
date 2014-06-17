@@ -1,5 +1,9 @@
-#include "main.h"
+#include "cnut_parsers.h"
+#include "cnut_commands.h"
+#include <QCoreApplication>
+
 using namespace cnut;
+
 int main(int argc, char * argv[]) {
 
 	libnutcommon::init();
@@ -25,5 +29,5 @@ int main(int argc, char * argv[]) {
 
 	//Transform commands into command list:
 	CommandList cmdList = toCommandList(rawCmdList);
-	return dispatchCommands(cmdList,&connection);
+	return dispatchCommands(cmdList, connection);
 }

@@ -79,7 +79,7 @@ namespace libnutwireless {
 			void setApScanDefault();
 
 			/**Function to dispatch the timer events */
-			void timerEvent(QTimerEvent *event);
+			void timerEvent(QTimerEvent *event) override;
 
 		private: //abstracted low-level wpa_supplicant functions
 			//Abstracted Commands:

@@ -5,11 +5,12 @@
 #include <QList>
 #include <QHash>
 
-#include "clibnut.h"
+#include "cnutservice.h"
+#include "libnutcommon/common.h"
 
 namespace libnutclient {
-	class CLog;
-	class DBusDeviceInterface;
+	class DBusDevice;
+
 	class CDeviceManager;
 	class CDevice;
 	class CEnvironment;
@@ -17,124 +18,98 @@ namespace libnutclient {
 	typedef QList<CEnvironment *> CEnvironmentList;
 }
 
+#ifndef LIBNUT_NO_WIRELESS
 namespace libnutwireless {
 	class CWireless;
 }
+#endif
 
 namespace libnutclient {
 	/** @brief The Device represents a hardware device with its Environments
 
 		The Devices provides information about the state of the hardware device.
 		It also manages its environments.
-
-		Events are emitted on an environment change and a state change of the device
 	*/
-	class CDevice : public CLibNut {
+	class CDevice : public CNutServiceClient {
 		Q_OBJECT
+	private:
 		friend class CDeviceManager;
 		friend class CEnvironment;
-		friend class CInterface;
-		friend class DBusDeviceInterface;
-	private:
-		//CDeviceManager * parent;
-		QDBusObjectPath m_dbusPath;
-		QHash<QDBusObjectPath, CEnvironment*> m_dbusEnvironments;
-		CLog * log;
-		DBusDeviceInterface * m_dbusDevice;
-		libnutcommon::DeviceConfig m_config;
-#ifndef LIBNUT_NO_WIRELESS
-		bool m_needWireless;
-#endif
 
-		//device init variables
-		bool m_propertiesFetched;
-		bool m_environmentsFetched;
-		bool m_essidFetched;
-		bool m_configFetched;
-		bool m_activeEnvFetched;
-		bool m_initCompleted;
+		CDeviceManager* m_devManager = nullptr;
+		DBusDevice* m_dbusDevice = nullptr;
+		QDBusObjectPath m_dbusPath;
+
+		int m_initCounter = 0;
+		bool checkInitDone();
+		void checkInitDone(bool previous);
 
 		//Device information
 		CEnvironmentList m_environments;
-		QString m_name;
-		QString m_essid;
-		libnutcommon::DeviceState m_state;
-		libnutcommon::DeviceType m_type;
-		CEnvironment * m_activeEnvironment;
+		QHash<QDBusObjectPath, CEnvironment*> m_dbusEnvironments;
+		CEnvironment* m_activeEnvironment = nullptr;
+
+		libnutcommon::DeviceProperties m_properties;
+		libnutcommon::DeviceConfig m_config;
+
 #ifndef LIBNUT_NO_WIRELESS
-		libnutwireless::CWireless * m_wlAccess;
+		bool m_needWireless = false;
+		libnutwireless::CWireless* m_wlAccess = nullptr;
 #endif
-		int m_index;
 
-	//private  methods
-		void refreshAll();
-		void setActiveEnvironment(CEnvironment * env, QDBusObjectPath m_dbusPath);
-		void rebuild(QList<QDBusObjectPath> paths);
-		void checkInitCompleted();
+		int m_index = -1; /* maintained by CDeviceManager */
 
+		void updateLogPrefix();
+		void clear();
+
+		/* callbacks from CEnvironment */
+		void environmentInitializationFailed(CEnvironment* environment);
+		void environmentInitializationCompleted(CEnvironment* environment);
+
+	protected:
+		void dbusLostService() override;
+		void dbusConnectService(QString service, QDBusConnection connection) override;
 
 	private slots:
+		void dbusPropertiesChanged(libnutcommon::DeviceProperties properties);
 
-		void dbusEnvironmentChangedActive(libnutcommon::OptionalQDBusObjectPath newenv);
-		void dbusStateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState);
-
-		void dbusretGetProperties(libnutcommon::DeviceProperties props);
-		void dbusretGetEssid(QString essid);
-		void dbusretGetEnvironments(QList<QDBusObjectPath> envs);
-		void dbusretGetActiveEnvironment(libnutcommon::OptionalQDBusObjectPath activeEnv);
-		void dbusretGetConfig(libnutcommon::DeviceConfig config);
-
-		void dbusret_errorOccured(QDBusError error, QString method = QString());
-
-		void environmentInitializationFailed(CEnvironment * environment);
-		void environmentInitializationCompleted(CEnvironment * environment);
 	public:
-		//Initializes this device
-		void init();
-		inline const CEnvironmentList& getEnvironments() { return m_environments; }
-		inline const QString& getName() { return m_name; }
-		inline const QString& getEssid() { return m_essid; }
-		inline libnutcommon::DeviceState getState() { return m_state; }
-		inline libnutcommon::DeviceType getType() { return m_type; }
-		inline CEnvironment * getActiveEnvironment() { return m_activeEnvironment; }
+		CDevice(CDeviceManager* parent, QDBusObjectPath dbuspath);
+		~CDevice();
+
+		QDBusObjectPath path() const { return m_dbusPath; }
+
+		const CEnvironmentList& getEnvironments() const { return m_environments; }
+		QString getName() const { return m_properties.name; }
+		QString getEssid() const { return m_properties.essid; }
+		libnutcommon::DeviceState getState() const { return m_properties.state; }
+		libnutcommon::DeviceType getType() const { return m_properties.type; }
+		CEnvironment* getActiveEnvironment() { return m_activeEnvironment; }
+
+#ifndef LIBNUT_NO_WIRELESS
 		/** If the device has a wpa_supplicant config, this function returns the pointer
 			to the wpa_supplicant object; See CWpaSupplicant.
 			If no config file is present, the pointer will be null.
 		*/
-		#ifndef LIBNUT_NO_WIRELESS
-		inline libnutwireless::CWireless * getWireless() { return m_wlAccess; }
-		#endif
-		inline int getIndex() { return m_index; }
+		libnutwireless::CWireless* getWireless() { return m_wlAccess; }
+#endif
+		int getIndex() const { return m_index; }
 
-		CDevice(CDeviceManager * parent, QDBusObjectPath dbuspath);
-		~CDevice();
-		libnutcommon::DeviceConfig& getConfig();
+		const libnutcommon::DeviceConfig& getConfig() const { return m_config; }
 
 	public slots:
 		void enable();
 		void disable();
-		void setEnvironment(CEnvironment * environment);
+		void setEnvironment(libnutclient::CEnvironment* environment);
 
 	signals:
-
-		void initializationFailed(CDevice * device); //TODO:Implement this: has to be called if init fails
-		void initializationCompleted(CDevice * device);
-
-
 		void newDataAvailable();
-		void environmentChangedActive(libnutclient::CEnvironment * current, libnutclient::CEnvironment * previous);
-		void stateChanged(libnutcommon::DeviceState newState);
+		void activeEnvironmentChanged(libnutclient::CEnvironment* current, libnutclient::CEnvironment* previous);
+		void stateChanged(libnutcommon::DeviceState state);
+		void propertiesChanged(libnutcommon::DeviceProperties properties);
+		void essidUpdate(QString essid);
 		void newWirelessNetworkFound();
-		void gotProperties(libnutcommon::DeviceProperties properties);
-		void gotEssid(QString essid);
-		void gotActiveEnvironment(libnutclient::CEnvironment * activeEnv);
-		void gotConfig(libnutcommon::DeviceConfig config);
-		void gotEnvironments();
-
 	};
-
-// #include "server_proxy.h"
-// #endif
 }
 
 #endif

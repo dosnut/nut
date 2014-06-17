@@ -6,22 +6,23 @@ include(${QT_USE_FILE})
 include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR})
 
 set(SOURCES_MOC_H
-	server_proxy.h
+	dbus.h
 	cinterface.h
 	cenvironment.h
 	cdevice.h
 	cdevicemanager.h
-	clibnut.h
 	clog.h
+	cnutservice.h
 )
 set(SOURCES_CPP
-	server_proxy.cpp
+	dbus.cpp
 	cinterface.cpp
 	cenvironment.cpp
 	cdevice.cpp
 	cdevicemanager.cpp
 	clibnut.cpp
 	clog.cpp
+	cnutservice.cpp
 )
 
 set(SOURCES_OBJECT)
@@ -32,12 +33,14 @@ else(USE_WIRELESS)
 	set(LIB_IW)
 endif(USE_WIRELESS)
 
+file(GLOB TRANSLATIONS_TS translations/${PROJECT_NAME}_*.ts)
 
 qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})
+qt4_create_translation(TRANSLATIONS_QM ${SOURCES_CPP} ${TRANSLATIONS_TS})
 
 add_definitions(-DCONFIG_CTRL_IFACE -DCONFIG_CTRL_IFACE_UNIX)
 
-add_library(${PROJECT_NAME} SHARED ${SOURCES_CPP} ${SOURCES_MOC_CPP} ${SOURCES_OBJECT})
+add_library(${PROJECT_NAME} SHARED ${SOURCES_CPP} ${SOURCES_MOC_CPP} ${SOURCES_OBJECT} ${TRANSLATIONS_QM})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PACKAGE_VERSION} SOVERSION 0)
 
 target_link_libraries(${PROJECT_NAME}
@@ -49,11 +52,8 @@ target_link_libraries(${PROJECT_NAME}
 	${QT_QTDBUS_LIBRARY}
 )
 
-file(GLOB NUTCOMMON_H ${nutcommon_SOURCE_DIR}/*.h)
-file(GLOB NUTWIRELESS_H ${nutwireless_SOURCE_DIR}/*.h)
 file(GLOB NUTCLIENT_H ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 
 install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(FILES ${NUTCOMMON_H} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libnutcommon)
-install(FILES ${NUTWIRELESS_H} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libnutwireless)
+install(FILES ${TRANSLATIONS_QM} DESTINATION ${INSTALL_SHARE_TARGET_PREFIX}/lang)
 install(FILES ${NUTCLIENT_H} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libnutclient)

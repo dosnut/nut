@@ -13,6 +13,7 @@
 #include <QHash>
 #include <libnutclient/cdevicemanager.h>
 #include <libnutclient/clog.h>
+#include <libnutcommon/common.h>
 
 class QTabWidget;
 class QTextEdit;

@@ -43,7 +43,7 @@ namespace qnut {
 
 		if (!parent.isValid())
 			if (m_Interface->getState() == InterfaceState::WAITFORCONFIG)
-				return 4 + m_Interface->getUserConfig().dnsservers.size();
+				return 4 + m_Interface->getUserConfig().dnsServers.size();
 			else if (m_Interface->getState() != InterfaceState::OFF)
 				return 4 + m_Interface->getDnsServers().size();
 			else if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
@@ -154,7 +154,7 @@ namespace qnut {
 					if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
 						return m_Interface->getConfig().static_dnsservers[index.row()-4].toString();
 					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC)
-						return m_Interface->getUserConfig().dnsservers[index.row()-4].toString();
+						return m_Interface->getUserConfig().dnsServers[index.row()-4].toString();
 					else
 						break;
 				}
@@ -208,7 +208,7 @@ namespace qnut {
 
 		if (!parent.isValid()) {
 			//if (row < 4 + m_Interface->dnsserver.size())
-			return createIndex(row, column, (void *)NULL);
+			return createIndex(row, column, nullptr);
 		}
 
 		return QModelIndex();

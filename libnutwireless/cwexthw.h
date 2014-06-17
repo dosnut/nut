@@ -69,7 +69,7 @@ class CWextHW: public CWirelessHW {
 		void parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * scan);
 		void setScanResults(QList<WextRawScan> wextScanResults);
 
-		virtual void timerEvent(QTimerEvent *event);
+		void timerEvent(QTimerEvent *event) override;
 
 	public:
 		CWextHW(QObject* parent, QString ifname);

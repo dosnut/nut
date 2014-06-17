@@ -32,9 +32,12 @@ namespace libnutcommon {
 		qDBusRegisterMetaType< QHostAddress >();
 		qDBusRegisterMetaType< QList<QHostAddress> >();
 
-		qRegisterMetaType< QVector< quint32 > >("QVector< quint32 >");
-		qRegisterMetaType< QVector< QVector< quint32 > > >("QVector< QVector< quint32 > >");
-		qDBusRegisterMetaType< QVector< quint32 > >();
-		qDBusRegisterMetaType< QVector< QVector< quint32 > > >();
+		qRegisterMetaType< QVector<quint32> >("QVector<quint32>");
+		qRegisterMetaType< QVector< QVector<quint32> > >("QVector< QVector<quint32> >");
+		qDBusRegisterMetaType< QVector<quint32> >();
+		qDBusRegisterMetaType< QVector< QVector<quint32> > >();
+
+		qRegisterMetaType< QList<qint32> >("QList<qint32>");
+		qDBusRegisterMetaType< QList<qint32> >();
 	}
 }

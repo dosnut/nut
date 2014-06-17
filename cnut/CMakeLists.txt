@@ -7,24 +7,18 @@ include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_S
 
 add_definitions(-D_REENTRANT)
 
-set(SOURCES_MOC_H
-	server_proxy.h
-)
 set(SOURCES_CPP main.cpp
 	cnut_commands.cpp
 	cnut_parsers.cpp
-	server_proxy.cpp
 )
-
-qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})
 
 add_executable(${PROJECT_NAME}
 	${SOURCES_CPP}
-	${SOURCES_MOC_CPP}
 )
 
 target_link_libraries(${PROJECT_NAME}
 	nutcommon
+	nutclient
 	${QT_QTCORE_LIBRARY}
 	${QT_QTNETWORK_LIBRARY}
 	${QT_QTDBUS_LIBRARY}

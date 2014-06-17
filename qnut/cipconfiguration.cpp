@@ -32,7 +32,7 @@ namespace qnut {
 		ui.netmaskEdit->setText(config.netmask.toString());
 		ui.gatewayEdit->setText(config.gateway.toString());
 
-		m_DNSList = config.dnsservers;
+		m_DNSList = config.dnsServers;
 
 		ui.dnsList->setModel(new CDNSListModel(&m_DNSList));
 		ui.dnsList->setItemDelegate(new CIPEditDelegate());
@@ -44,7 +44,7 @@ namespace qnut {
 			config.ip= QHostAddress(ui.ipEdit->text());
 			config.netmask= QHostAddress(ui.netmaskEdit->text());
 			config.gateway= QHostAddress(ui.gatewayEdit->text());
-			config.dnsservers= m_DNSList;
+			config.dnsServers= m_DNSList;
 
 			remember = ui.rememberCheck->isChecked();
 

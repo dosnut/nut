@@ -33,7 +33,10 @@ namespace qnut {
 		QMainWindow(parent),
 		m_LogFile(this, UI_FILE_LOG)
 	{
-		m_DeviceManager = new CDeviceManager(this);
+		auto service = new CNutService(this);
+		connect(service, SIGNAL(log(QString)), &m_LogFile, SLOT(log(QString)));
+
+		m_DeviceManager = new CDeviceManager(service);
 
 		resize(600, 322);
 		setWindowIcon(QIcon(UI_ICON_QNUT_SMALL));
@@ -108,7 +111,6 @@ namespace qnut {
 		CUIDevice::init();
 		connect(CUIDevice::showRequestMapper(), SIGNAL(mapped(QWidget*)), this, SLOT(showDeviceDetails(QWidget *)));
 
-		m_DeviceManager->init(&m_LogFile);
 		if (m_NotificationManager)
 			m_NotificationManager->setIconVisible(true, NULL);
 		else

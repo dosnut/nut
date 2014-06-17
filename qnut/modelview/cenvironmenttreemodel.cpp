@@ -6,9 +6,7 @@
 // Copyright: See COPYING file that comes with this distribution
 //
 #include <QIcon>
-#include <libnutclient/cdevice.h>
-#include <libnutclient/cenvironment.h>
-#include <libnutclient/cinterface.h>
+#include <libnutclient/client.h>
 
 #include "modelview/cenvironmenttreemodel.h"
 #include "common.h"
@@ -92,7 +90,7 @@ namespace qnut {
 				return '#' + QString::number(static_cast<CInterface *>(currentData)->getIndex());
 		case ENVTREE_MOD_STATUS:
 			if (currentData->parent() == m_Device) {
-				return (static_cast<CEnvironment *>(currentData)->getState()) ? tr("active") : QString('-');
+				return (static_cast<CEnvironment *>(currentData)->isActive()) ? tr("active") : QString('-');
 			}
 			else {
 				return toStringTr(static_cast<CInterface *>(currentData)->getState());

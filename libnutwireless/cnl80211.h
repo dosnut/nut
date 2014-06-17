@@ -44,7 +44,7 @@ class CNL80211: public CWirelessHW {
 		QList<ScanResult> m_scanResults;
 
 	protected:
-		virtual void timerEvent(QTimerEvent *event);
+		void timerEvent(QTimerEvent *event) override;
 		void readSignalQuality() {};
 	protected slots:
 		void readNlMessage();
