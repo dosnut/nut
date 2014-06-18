@@ -77,14 +77,20 @@ namespace libnutclient {
 		CDevice(CDeviceManager* parent, QDBusObjectPath dbuspath);
 		~CDevice();
 
+		int getIndex() const { return m_index; }
 		QDBusObjectPath path() const { return m_dbusPath; }
 
-		const CEnvironmentList& getEnvironments() const { return m_environments; }
+		libnutcommon::DeviceProperties const& getProperties() const { return m_properties; }
 		QString getName() const { return m_properties.name; }
-		QString getEssid() const { return m_properties.essid; }
-		libnutcommon::DeviceState getState() const { return m_properties.state; }
 		libnutcommon::DeviceType getType() const { return m_properties.type; }
 		CEnvironment* getActiveEnvironment() { return m_activeEnvironment; }
+		libnutcommon::DeviceState getState() const { return m_properties.state; }
+		QString getEssid() const { return m_properties.essid; }
+		libnutcommon::MacAddress getMacAddress() const { return m_properties.macAddress; }
+
+		const libnutcommon::DeviceConfig& getConfig() const { return m_config; }
+
+		const CEnvironmentList& getEnvironments() const { return m_environments; }
 
 #ifndef LIBNUT_NO_WIRELESS
 		/** If the device has a wpa_supplicant config, this function returns the pointer
@@ -93,9 +99,6 @@ namespace libnutclient {
 		*/
 		libnutwireless::CWireless* getWireless() { return m_wlAccess; }
 #endif
-		int getIndex() const { return m_index; }
-
-		const libnutcommon::DeviceConfig& getConfig() const { return m_config; }
 
 	public slots:
 		void enable();

@@ -121,9 +121,6 @@ namespace nuts {
 	 */
 	class Device : public QObject {
 		Q_OBJECT
-		Q_PROPERTY(QString name READ getName) //!< Name of the device in the kernel, e.g. "eth0"
-		Q_PROPERTY(int environment READ getEnvironment WRITE setEnvironment) //!< Number of the active environment, or -1
-		Q_PROPERTY(libnutcommon::DeviceState state READ getState)
 	private:
 		void setState(libnutcommon::DeviceState state);
 
@@ -157,7 +154,6 @@ namespace nuts {
 
 		// Device properties
 		libnutcommon::DeviceProperties m_properties;
-		libnutcommon::MacAddress m_macAddress;
 
 		// WPA
 		QProcess *m_wpa_supplicant;
@@ -198,9 +194,9 @@ namespace nuts {
 		int getEnvironment() { return m_activeEnv; } //!< Active environment, or -1
 		libnutcommon::DeviceState getState() const { return m_properties.state; }
 		QString getEssid() { return m_properties.essid; }
+		libnutcommon::MacAddress getMacAddress() { return m_properties.macAddress; }
 
 		bool isAir() const { return libnutcommon::DeviceType::AIR == m_properties.type; }
-		libnutcommon::MacAddress getMacAddress() { return m_macAddress; }
 
 		const libnutcommon::DeviceConfig& getConfig() const { return *m_config; }
 
@@ -329,7 +325,7 @@ namespace nuts {
 			DHCPS_OFF,
 			DHCPS_INIT_START,  // reset dhcp_retry, -> DHCPS_INIT
 			DHCPS_INIT,        // (++dhcp_retry >= 5) -> failed, Discover all -> selecting
- 			DHCPS_SELECTING,   // Waiting for offer; request a offer -> requesting, timeout -> init
+			DHCPS_SELECTING,   // Waiting for offer; request a offer -> requesting, timeout -> init
 			DHCPS_REQUESTING,  // Requested a offer, waiting for ack -> bound, nak -> init
 			DHCPS_BOUND,       // bound, on timeout request -> renew
 			DHCPS_RENEWING,    // wait for ack -> bound, on timeout request -> rebind, on nak -> init

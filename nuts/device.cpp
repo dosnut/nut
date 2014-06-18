@@ -200,11 +200,14 @@ namespace nuts {
 
 	void Device::setState(DeviceState state) {
 		auto ostate = m_properties.state;
+		if (ostate == state) return;
 		m_properties.state = state;
-		if (ostate == m_properties.state) return;
 		switch (m_properties.state) {
 		case DeviceState::DEACTIVATED:
 		case DeviceState::ACTIVATED:
+			m_properties.essid.clear();
+			// mac address usually doesn't change - not clearing it.
+			// m_properties.macAddress.clear();
 			m_arp.stop();
 			break;
 		case DeviceState::CARRIER:
@@ -244,10 +247,8 @@ namespace nuts {
 		m_properties.essid = essid;
 		auto hasWLAN = (QFile::exists(QString("/sys/class/net/%1/wireless").arg(m_properties.name))) || !essid.isEmpty();
 		m_properties.type = hasWLAN ? DeviceType::AIR : DeviceType::ETH;
-		auto mAddr = m_dm->m_hwman.getMacAddress(m_properties.name);
-		if (mAddr.valid()) m_macAddress = mAddr;
-		if (mAddr.zero()) log << "Device(" << m_properties.name << "): couldn't get MacAddress from hardware:" << mAddr.toString() << endl;
-		if (m_macAddress.zero()) log << "Device(" << m_properties.name << "): couldn't get MacAddress" << endl;
+		m_properties.macAddress = m_dm->m_hwman.getMacAddress(m_properties.name);
+		if (m_properties.macAddress.zero()) log << "Device(" << m_properties.name << "): couldn't get MacAddress" << endl;
 		log << "Device(" << m_properties.name << ") gotCarrier" << endl;
 		if (hasWLAN) log << "ESSID: " << essid << endl;
 		setState(DeviceState::CARRIER);
@@ -347,7 +348,7 @@ namespace nuts {
 		DHCPPacket *packet = DHCPPacket::parseRaw(buf);
 		if (!packet) return;
 		// check mac
-		if (packet->getClientMac() != m_macAddress)
+		if (packet->getClientMac() != m_properties.macAddress)
 			goto cleanup;
 		xid = packet->getXID();
 		iface = m_dhcp_xid_iface.value(xid);
@@ -709,6 +710,13 @@ namespace nuts {
 		m_properties.state = state;
 		m_last_notified_properties = m_properties;
 		m_dm->m_events.interfaceStatusChanged(state, this);
+		if (InterfaceState::OFF == state || InterfaceState::WAITFORCONFIG == state) {
+			/* kept for for m_dm->m_events, now clear it */
+			m_properties.ip.clear();
+			m_properties.netmask.clear();
+			m_properties.gateway.clear();
+			m_properties.dnsServers.clear();
+		}
 		emit propertiesChanged(m_properties);
 	}
 

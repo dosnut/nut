@@ -179,6 +179,7 @@ namespace libnutclient {
 		DBUS_ACTION_0(qint32, getActiveEnvironmentIndex)
 		DBUS_ACTION_0(libnutcommon::DeviceState, getState)
 		DBUS_ACTION_0(QString, getEssid)
+		DBUS_ACTION_0(libnutcommon::MacAddress, getMacAddress)
 
 		/* constant config */
 		DBUS_CACHEABLE_METHOD(libnutcommon::DeviceConfig, getConfig)

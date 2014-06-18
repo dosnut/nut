@@ -74,6 +74,7 @@ namespace libnutcommon {
 		OptionalQDBusObjectPath activeEnvironment;
 		DeviceState state = DeviceState::DEACTIVATED;
 		QString essid;
+		MacAddress macAddress;
 	};
 	bool operator==(DeviceProperties const& a, DeviceProperties const& b);
 	bool operator!=(DeviceProperties const& a, DeviceProperties const& b);

@@ -54,7 +54,8 @@ namespace libnutcommon {
 			&& a.type              == b.type
 			&& a.activeEnvironment == b.activeEnvironment
 			&& a.state             == b.state
-			&& a.essid             == b.essid;
+			&& a.essid             == b.essid
+			&& a.macAddress        == b.macAddress;
 	}
 	bool operator!=(DeviceProperties const& a, DeviceProperties const& b) {
 		return !(a == b);
@@ -67,7 +68,8 @@ namespace libnutcommon {
 			<< devprop.type
 			<< devprop.activeEnvironment
 			<< devprop.state
-			<< devprop.essid;
+			<< devprop.essid
+			<< devprop.macAddress;
 		argument.endStructure();
 		return argument;
 	}
@@ -78,7 +80,8 @@ namespace libnutcommon {
 			>> devprop.type
 			>> devprop.activeEnvironment
 			>> devprop.state
-			>> devprop.essid;
+			>> devprop.essid
+			>> devprop.macAddress;
 		argument.endStructure();
 		return argument;
 	}

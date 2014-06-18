@@ -69,9 +69,9 @@ namespace nuts {
 
 		libnutcommon::DeviceProperties m_properties, m_last_notified_properties;
 		int m_activeEnvironment;
-		void checkPropertiesUpdate();
 
 	private slots:
+		void checkPropertiesUpdate();
 		void devPropertiesChanged(libnutcommon::DeviceProperties properties);
 		void devActiveEnvironmentChanged(int environment);
 
@@ -90,6 +90,7 @@ namespace nuts {
 		qint32 getActiveEnvironmentIndex();
 		libnutcommon::DeviceState getState();
 		QString getEssid();
+		libnutcommon::MacAddress getMacAddress();
 
 		/* constant config */
 		libnutcommon::DeviceConfig getConfig();
@@ -123,9 +124,9 @@ namespace nuts {
 #endif
 
 		libnutcommon::EnvironmentProperties m_properties, m_last_notified_properties;
-		void checkPropertiesUpdate();
 
 	private slots:
+		void checkPropertiesUpdate();
 		void envPropertiesChanged(libnutcommon::EnvironmentProperties properties);
 
 	public:
@@ -163,10 +164,10 @@ namespace nuts {
 
 		libnutcommon::InterfaceProperties m_properties, m_last_notified_properties;
 		libnutcommon::IPv4UserConfig m_userConfig, m_last_notified_userConfig;
-		void checkPropertiesUpdate();
-		void checkUserConfigUpdate();
 
 	private slots:
+		void checkPropertiesUpdate();
+		void checkUserConfigUpdate();
 		void interfacePropertiesChanged(libnutcommon::InterfaceProperties properties);
 		void interfaceUserConfigChanged(libnutcommon::IPv4UserConfig userConfig);
 

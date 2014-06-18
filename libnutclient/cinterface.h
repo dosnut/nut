@@ -53,17 +53,20 @@ namespace libnutclient {
 		CInterface(CEnvironment* parent, QDBusObjectPath dbusPath, int index);
 		~CInterface();
 
+		int getIndex() const { return m_index; }
+
+		libnutcommon::InterfaceProperties const& getProperties() const { return m_properties; }
 		libnutcommon::InterfaceState getState() const { return m_properties.state; }
 		QHostAddress getIp() const { return m_properties.ip;}
 		QHostAddress getNetmask() const { return m_properties.netmask; }
 		QHostAddress getGateway() const { return m_properties.gateway; }
 		const QList<QHostAddress>& getDnsServers() const { return m_properties.dnsServers; }
-		int getIndex() const { return m_index; }
+		int getGatewayMetric() const { return m_properties.gatewayMetric; }
+		bool needUserSetup() const { return m_properties.needUserSetup; }
 
-		const libnutcommon::IPv4UserConfig& getUserConfig() const { return m_userConfig; }
 		const libnutcommon::IPv4Config& getConfig() const { return m_config; }
 
-		bool needUserSetup() const { return m_properties.needUserSetup; }
+		const libnutcommon::IPv4UserConfig& getUserConfig() const { return m_userConfig; }
 
 	public slots:
 		void setUserConfig(const libnutcommon::IPv4UserConfig& userConfig);

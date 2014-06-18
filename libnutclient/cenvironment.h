@@ -63,18 +63,20 @@ namespace libnutclient {
 		CEnvironment(CDevice* parent, QDBusObjectPath dbusPath, int index);
 		~CEnvironment();
 
+		/* local index - might be the same as getID() */
+		int getIndex() const { return m_index; }
 		QDBusObjectPath path() const { return m_dbusPath; }
-		/* local index - might be the same as the server "index" property */
-		int getIndex() const { return m_index;}
-		qint32 getID() const { return m_properties.id; }
 
+		libnutcommon::EnvironmentProperties const& getProperties() const { return m_properties; }
+		qint32 getID() const { return m_properties.id; }
 		QString getName() const { return m_properties.name; }
 		bool isActive() const { return m_properties.active; }
-		const CInterfaceList& getInterfaces() const { return m_interfaces;}
-
-		const libnutcommon::EnvironmentConfig& getConfig() const { return m_config; }
 		libnutcommon::SelectResult getSelectResult() const { return m_properties.selectResult; }
 		const QVector<libnutcommon::SelectResult>& getSelectResults() const { return m_properties.selectResults; }
+
+		const libnutcommon::EnvironmentConfig& getConfig() const { return m_config; }
+
+		const CInterfaceList& getInterfaces() const { return m_interfaces;}
 
 	public slots:
 		void enter();
