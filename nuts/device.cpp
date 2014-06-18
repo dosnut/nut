@@ -1,6 +1,5 @@
 
 #include "device.h"
-#include "dbus.h"
 #include "log.h"
 #include <QMutableListIterator>
 #include <QProcess>

@@ -25,6 +25,8 @@ namespace nuts {
 	class DBusDeviceManager: public libnutcommon::DBusAbstractAdapater {
 	Q_OBJECT
 	Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".DeviceManager")
+	Q_PROPERTY(QList<QDBusObjectPath> deviceList READ getDeviceList)
+	Q_PROPERTY(QStringList deviceNames READ getDeviceNames)
 	private:
 		DeviceManager* const m_devmgr;
 		QHash<QString, DBusDevice*> m_dbusDevices;
@@ -63,6 +65,17 @@ namespace nuts {
 	class DBusDevice: public libnutcommon::DBusAbstractAdapater {
 	Q_OBJECT
 	Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Device")
+	Q_PROPERTY(libnutcommon::DeviceProperties properties READ getProperties NOTIFY propertiesChanged)
+	Q_PROPERTY(QString name READ getName CONSTANT)
+	Q_PROPERTY(libnutcommon::DeviceType type READ getType)
+	Q_PROPERTY(libnutcommon::OptionalQDBusObjectPath activeEnvironment READ getActiveEnvironment NOTIFY activeEnvironmentChanged)
+	Q_PROPERTY(qint32 activeEnvironmentIndex READ getActiveEnvironmentIndex NOTIFY activeEnvironmentChanged)
+	Q_PROPERTY(libnutcommon::DeviceState state READ getState NOTIFY stateChanged)
+	Q_PROPERTY(QString essid READ getEssid)
+	Q_PROPERTY(libnutcommon::MacAddress macAddress READ getMacAddress)
+	Q_PROPERTY(libnutcommon::DeviceConfig config READ getConfig CONSTANT)
+	Q_PROPERTY(QList<QDBusObjectPath> environments READ getEnvironments CONSTANT)
+	Q_PROPERTY(QList<qint32> environmentIds READ getEnvironmentIds CONSTANT)
 	private:
 		Device* const m_device;
 		QList<DBusEnvironment*> m_dbusEnvironments;
@@ -84,8 +97,8 @@ namespace nuts {
 		/* single properties */
 		/* constant properties */
 		QString getName();
-		libnutcommon::DeviceType getType();
 		/* variable properties */
+		libnutcommon::DeviceType getType();
 		libnutcommon::OptionalQDBusObjectPath getActiveEnvironment();
 		qint32 getActiveEnvironmentIndex();
 		libnutcommon::DeviceState getState();
@@ -116,6 +129,16 @@ namespace nuts {
 	class DBusEnvironment: public libnutcommon::DBusAbstractAdapater {
 	Q_OBJECT
 	Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Environment")
+	Q_PROPERTY(libnutcommon::EnvironmentProperties properties READ getProperties)
+	Q_PROPERTY(qint32 ID READ getID)
+	Q_PROPERTY(QString name READ getName)
+	Q_PROPERTY(bool active READ isActive)
+	Q_PROPERTY(libnutcommon::SelectResult selectResult READ getSelectResult)
+	Q_PROPERTY(QVector<libnutcommon::SelectResult> selectResults READ getSelectResults)
+	Q_PROPERTY(libnutcommon::EnvironmentConfig config READ getConfig)
+	Q_PROPERTY(QList<QDBusObjectPath> interfaces READ getInterfaces)
+	Q_PROPERTY(QList<qint32> interfaceIds READ getInterfaceIds)
+
 	private:
 		Environment* const m_environment;
 		QList<DBusInterface_IPv4*> m_dbusInterfacesIPv4;
@@ -159,6 +182,16 @@ namespace nuts {
 	class DBusInterface_IPv4: public libnutcommon::DBusAbstractAdapater {
 	Q_OBJECT
 	Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Interface_IPv4")
+	Q_PROPERTY(libnutcommon::InterfaceProperties properties READ getProperties NOTIFY propertiesChanged)
+	Q_PROPERTY(libnutcommon::InterfaceState state READ getState)
+	Q_PROPERTY(QHostAddress IP READ getIP)
+	Q_PROPERTY(QHostAddress netmask READ getNetmask)
+	Q_PROPERTY(QHostAddress gateway READ getGateway)
+	Q_PROPERTY(QList<QHostAddress> dnsServers READ getDnsServers)
+	Q_PROPERTY(int gatewayMetric READ getGatewayMetric)
+	Q_PROPERTY(bool needUserSetup READ needUserSetup)
+	Q_PROPERTY(libnutcommon::IPv4Config config READ getConfig CONSTANT)
+	Q_PROPERTY(libnutcommon::IPv4UserConfig userConfig READ getUserConfig NOTIFY userConfigChanged)
 	private:
 		Interface_IPv4* const m_interface;
 
