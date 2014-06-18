@@ -47,7 +47,7 @@ namespace libnutclient {
 		old_devices.swap(m_devices);
 
 		/* remove notifications for "visible" devices */
-		for (auto const& dev: m_devices) {
+		for (auto const& dev: old_devices) {
 			emit deviceRemoved(dev);
 		}
 	}
