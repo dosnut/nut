@@ -77,32 +77,32 @@
 <context>
     <name>libnutclient::CDevice</name>
     <message>
-        <location filename="../cdevice.cpp" line="110"/>
+        <location filename="../cdevice.cpp" line="31"/>
         <source>wpa_supplicant config file at: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cdevice.cpp" line="134"/>
+        <location filename="../cdevice.cpp" line="130"/>
         <source>Device properties fetched: name=&apos;%1&apos;, type=%2, state=%3, essid=&apos;%4&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cdevice.cpp" line="136"/>
+        <location filename="../cdevice.cpp" line="132"/>
         <source>Device properties fetched: name=&apos;%1&apos;, type=%2, state=%3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cdevice.cpp" line="198"/>
+        <location filename="../cdevice.cpp" line="194"/>
         <source>Changed active environment: &apos;%1&apos; (%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cdevice.cpp" line="203"/>
+        <location filename="../cdevice.cpp" line="199"/>
         <source>Changed state: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cdevice.cpp" line="224"/>
+        <location filename="../cdevice.cpp" line="220"/>
         <source>Changed essid: &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>

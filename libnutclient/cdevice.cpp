@@ -24,7 +24,16 @@ namespace libnutclient {
 	void CDevice::checkInitDone(bool previous) {
 		if (!previous && checkInitDone()) {
 #ifndef LIBNUT_NO_WIRELESS
+			m_needWireless = !(m_config.wpaConfigFile.isEmpty());
+
+			//Only use wpa_supplicant if we need one
 			if (m_needWireless) {
+				contextLog(tr("wpa_supplicant config file at: %2").arg(m_config.wpaConfigFile));
+
+				m_wlAccess = new libnutwireless::CWireless(this, getName());
+				connect(m_wlAccess, SIGNAL(message(QString)), this, SIGNAL(log(QString)));
+				connect(m_dbusDevice, SIGNAL(newWirelessNetworkFound()), this, SIGNAL(newWirelessNetworkFound()));
+
 				//Connect to wpa_supplicant only if device is not deactivated
 				if (DeviceState::DEACTIVATED != m_properties.state) {
 					m_wlAccess->open();
@@ -101,19 +110,6 @@ namespace libnutclient {
 			--m_initCounter;
 
 			m_config = config;
-
-#ifndef LIBNUT_NO_WIRELESS
-			m_needWireless = !(m_config.wpaConfigFile.isEmpty());
-
-			//Only use wpa_supplicant if we need one
-			if (m_needWireless) {
-				contextLog(tr("wpa_supplicant config file at: %2").arg(m_config.wpaConfigFile));
-
-				m_wlAccess = new libnutwireless::CWireless(this, getName());
-				connect(m_wlAccess, SIGNAL(message(QString)), this, SIGNAL(log(QString)));
-				connect(m_dbusDevice, SIGNAL(newWirelessNetworkFound()), this, SIGNAL(newWirelessNetworkFound()));
-			}
-#endif
 
 			checkInitDone(initDone);
 		};
