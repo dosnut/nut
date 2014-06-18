@@ -80,7 +80,7 @@ namespace qnut {
 		void updateScans();
 	private:
 		void setWpaSupplicant(libnutwireless::CWirelessHW * m_WirelessAcces);
-		libnutwireless::CWirelessHW * m_WirelessAcces;
+		libnutwireless::CWirelessHW * m_WirelessAcces = nullptr;
 
 		QHash<QString, IndexList *> m_GroupedScans;
 

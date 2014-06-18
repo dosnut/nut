@@ -42,31 +42,31 @@ namespace qnut {
 		Q_OBJECT
 	private:
 		Ui::airset ui;
-		libnutclient::CDevice * m_Device;
+		libnutclient::CDevice* const m_Device;
 
-		CManagedAPModel * m_ManagedAPModel;
-		CManagedAPProxyModel * m_ManagedAPProxyModel;
-		CAvailableAPModel * m_AvailableAPModel;
-		CAvailableAPProxyModel * m_AvailableAPProxyModel;
+		CManagedAPModel * m_ManagedAPModel = nullptr;
+		CManagedAPProxyModel * m_ManagedAPProxyModel = nullptr;
+		CAvailableAPModel * m_AvailableAPModel = nullptr;
+		CAvailableAPProxyModel * m_AvailableAPProxyModel = nullptr;
 
-		CAccessPointModel * m_AccessPointModel;
+		CAccessPointModel * m_AccessPointModel = nullptr;
 
-		QAction * m_EnableNetworkAction;
-		QAction * m_DisableNetworkAction;
-		QAction * m_SwitchNetworkAction;
-		QAction * m_ConfigureNetworkAction;
-		QAction * m_RemoveNetworkAction;
+		QAction * m_EnableNetworkAction = nullptr;
+		QAction * m_DisableNetworkAction = nullptr;
+		QAction * m_SwitchNetworkAction = nullptr;
+		QAction * m_ConfigureNetworkAction = nullptr;
+		QAction * m_RemoveNetworkAction = nullptr;
 
-		QAction * m_ToggleScanResultsAction;
+		QAction * m_ToggleScanResultsAction = nullptr;
 
-		QAction * m_SaveNetworksAction;
-		QAction * m_RescanNetworksAction;
-		QAction * m_AutoSaveNetworksAction;
-		QAction * m_KeepScanResultsAction;
+		QAction * m_SaveNetworksAction = nullptr;
+		QAction * m_RescanNetworksAction = nullptr;
+		QAction * m_AutoSaveNetworksAction = nullptr;
+		QAction * m_KeepScanResultsAction = nullptr;
 
-		QSignalMapper * m_SetBSSIDMapper;
+		QSignalMapper * m_SetBSSIDMapper = nullptr;
 
-		QMenu * m_SetBSSIDMenu;
+		QMenu * m_SetBSSIDMenu = nullptr;
 
 		inline void createActions();
 		QModelIndex selectedIndex(QAbstractItemView * view);

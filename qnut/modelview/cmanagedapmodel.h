@@ -63,8 +63,8 @@ namespace qnut {
 	private:
 		void setWpaSupplicant(libnutwireless::CWpaSupplicant * wpaSupplicant);
 		QList<libnutwireless::ShortNetworkInfo> m_Networks;
-		libnutwireless::CWpaSupplicant * m_Supplicant;
-		int m_CurrentID;
+		libnutwireless::CWpaSupplicant * m_Supplicant = nullptr;
+		int m_CurrentID = -1;
 	};
 
 	class CManagedAPProxyModel : public QSortFilterProxyModel {
