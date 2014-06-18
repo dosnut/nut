@@ -1,4 +1,5 @@
 
+#include "configparser.h"
 #include "device.h"
 #include "log.h"
 #include <QMutableListIterator>
@@ -46,7 +47,7 @@ namespace nuts {
 	using namespace libnutcommon;
 
 	DeviceManager::DeviceManager(const QString &configFile)
-	: m_configParser(configFile), m_config(m_configParser.getConfig()) {
+	: m_config(parseConfig(configFile)) {
 		connect(&m_hwman, SIGNAL(gotCarrier(const QString&, int, const QString)), SLOT(gotCarrier(const QString &, int, const QString)));
 		connect(&m_hwman, SIGNAL(lostCarrier(const QString&)), SLOT(lostCarrier(const QString &)));
 		connect(&m_hwman, SIGNAL(newDevice(const QString&, int)), SLOT(newDevice(const QString &, int)));
@@ -69,7 +70,7 @@ namespace nuts {
 
 	void DeviceManager::addDevices() {
 		foreach(QString real_dev, m_hwman.get_ifNames()) {
-			auto devConfig = m_config->lookup(real_dev);
+			auto devConfig = m_config.lookup(real_dev);
 			if (devConfig) {
 				addDevice(real_dev, devConfig);
 			}
@@ -159,7 +160,7 @@ namespace nuts {
 		Device *d = m_devices.value(ifName, 0);
 		if (d) return;
 
-		auto devConfig = m_config->lookup(ifName);
+		auto devConfig = m_config.lookup(ifName);
 		if (devConfig) {
 			addDevice(ifName, devConfig);
 		}

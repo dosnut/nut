@@ -28,7 +28,6 @@ namespace nuts {
 	class DHCPClientPacket;
 }
 
-#include "config.h"
 #include "hardware.h"
 #include "arp.h"
 #include "events.h"
@@ -46,9 +45,8 @@ namespace nuts {
 	class DeviceManager : public QObject {
 		Q_OBJECT
 	private:
-		ConfigParser m_configParser;
 		Events m_events;
-		libnutcommon::Config *m_config;
+		libnutcommon::Config m_config;
 		QTimer m_carrier_timer;
 		/// Internal structure for delaying carrier events.
 		struct ca_evt {
@@ -93,7 +91,7 @@ namespace nuts {
 		 * @brief Get the config.
 		 * @return Config
 		 */
-		const libnutcommon::Config& getConfig() { return *m_config; }
+		const libnutcommon::Config& getConfig() { return m_config; }
 
 	signals:
 		/**

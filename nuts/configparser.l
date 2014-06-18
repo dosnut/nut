@@ -1,17 +1,19 @@
 
 %x String
 %x Comment
+%option bison-bridge bison-locations reentrant
 %option stack
 %option noyywrap
 %option nounput
 %option noyy_top_state
 
 %{
-	#include "config.h"
-	int line_num = 1;
+	#include "configparser_p.h"
 
-	#include "configparser_yacc.hpp"
-	#define yylval configparserlval
+	using namespace nuts;
+
+	#define YYSTYPE config_tokenvalue
+	#define YYLTYPE config_lloc
 %}
 
 %%
@@ -58,49 +60,52 @@ driver      return DRIVER;
 
 
 (1|true|TRUE|True) {
-			yylval.b = true; return BOOL; }
+            yylval->b = true; return BOOL; }
 
 (0|false|FALSE|False) {
-			yylval.b = false; return BOOL; }
+            yylval->b = false; return BOOL; }
 
 ([[:digit:]]{1,3}\.){3}[[:digit:]]{1,3} {
-            yylval.addr = new QHostAddress(QString(yytext)); return IPv4_VAL; }
+            yylval->addr = QHostAddress(QString(yytext)); return IPv4_VAL; }
 
 ([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2} {
-            yylval.macAddr = new libnutcommon::MacAddress(QString(yytext)); return MACADDR; }
+            yylval->macAddr = libnutcommon::MacAddress(QString(yytext)); return MACADDR; }
 
 (-[[:blank:]]*)?[[:digit:]]+ {
-            yylval.i = atoi(yytext); return INTEGER; }
+            yylval->i = atoi(yytext); return INTEGER; }
 
-\"         yylval.str = new QString(); BEGIN(String);
-"/*"       yy_push_state(Comment);
+\"          yylval->str.clear(); BEGIN(String);
+"/*"        yy_push_state(Comment, yyscanner);
 
-\n         ++line_num;
-"//".*\n   ++line_num;
-[a-zA-Z0-9]+  printf("Unexpected keyword '%s', ignoring\n", yytext);
+\n          ++yylloc->lineNum;
+"//".*\n    ++yylloc->lineNum;
 [!{};/]     return yytext[0];
-.          /* ignore. TODO: only ignore whitespaces*/
+[ \t\v\r]+  /* ignore white space */
+[a-zA-Z0-9_.'\-+*#]+  {
+            yylval->str = QString(yytext); return INVALID_TOKEN; }
+.           {
+            yylval->str = QString(yytext); return INVALID_CHAR; }
 
 <String>{
 	\"          { BEGIN(INITIAL); return STRING; }
-	[^\\\"\n]*  { yylval.str->append(yytext); }
+	[^\\\"\n]*  { yylval->str.append(yytext); }
 	\n          { printf("Unexpected newline in string, ending string\n");
-	              ++line_num;
+	              ++yylloc->lineNum;
 	              BEGIN(INITIAL); return STRING;
 	            }
-	\\n         { yylval.str->append("\n"); }
-	\\\"        { yylval.str->append("\""); }
-	\\.         { yylval.str->append(yytext[1]); }
+	\\n         { yylval->str.append("\n"); }
+	\\\"        { yylval->str.append("\""); }
+	\\.         { yylval->str.append(yytext[1]); }
 }
 
 	/* comments may be nested */
 <Comment>{
 	[^/*\n]*        /* eat anything that's not a '*', '/' or newline */
 	"*"+[^*/\n]*   /* eat up '*'s not followed by '/'s */
-	"*"+"/"        yy_pop_state();
+	"*"+"/"        yy_pop_state(yyscanner);
 	"/"+[^*/\n]*
-	"/"+"*"        yy_push_state(Comment);
-	\n             ++line_num;
+	"/"+"*"        yy_push_state(Comment, yyscanner);
+	\n             ++yylloc->lineNum;
 }
 
 %%

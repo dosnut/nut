@@ -9,7 +9,8 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_CURR
 
 set(SOURCES_MOC_H
 	device.h
-# 	config.h
+# 	configparser.h
+# 	configparser_p.h
 	hardware.h
 
 	sighandler.h
@@ -25,7 +26,7 @@ set(SOURCES_MOC_H
 set(SOURCES_CPP
 	main.cpp
 	device.cpp
-	config.cpp
+	configparser.cpp
 	hardware.cpp
 
 	sighandler.cpp
@@ -41,9 +42,7 @@ set(SOURCES_C
 	hardware_ext.c
 )
 
-bison_target(CONFIGPARSER_Y configparser.y ${CMAKE_CURRENT_BINARY_DIR}/configparser_yacc.cpp COMPILE_FLAGS "-p configparser")
 flex_target(CONFIGPARSER_L configparser.l ${CMAKE_CURRENT_BINARY_DIR}/configparser_lex.cpp COMPILE_FLAGS "-Pconfigparser")
-add_flex_bison_dependency(CONFIGPARSER_L CONFIGPARSER_Y)
 
 qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})
 
