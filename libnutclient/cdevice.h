@@ -18,7 +18,7 @@ namespace libnutclient {
 	typedef QList<CEnvironment *> CEnvironmentList;
 }
 
-#ifndef LIBNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 namespace libnutwireless {
 	class CWireless;
 }
@@ -52,9 +52,12 @@ namespace libnutclient {
 		libnutcommon::DeviceProperties m_properties;
 		libnutcommon::DeviceConfig m_config;
 
-#ifndef LIBNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		bool m_needWireless = false;
 		libnutwireless::CWireless* m_wlAccess = nullptr;
+#else
+		bool unused_m_needWireless = false;
+		void* unused_m_wlAccess = nullptr;
 #endif
 
 		int m_index = -1; /* maintained by CDeviceManager */
@@ -92,7 +95,7 @@ namespace libnutclient {
 
 		const CEnvironmentList& getEnvironments() const { return m_environments; }
 
-#ifndef LIBNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		/** If the device has a wpa_supplicant config, this function returns the pointer
 			to the wpa_supplicant object; See CWpaSupplicant.
 			If no config file is present, the pointer will be null.

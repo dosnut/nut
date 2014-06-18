@@ -8,7 +8,7 @@
 #ifndef QNUT_AVAILABLEAPMODEL_H
 #define QNUT_AVAILABLEAPMODEL_H
 
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
 #include <libnutwireless/hwtypes.h>

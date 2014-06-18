@@ -43,7 +43,7 @@ set(SOURCES_C
 	wpa_ctrl/os_unix.c
 )
 
-add_definitions(-DUSED_CMAKE -DCONFIG_CTRL_IFACE -DCONFIG_CTRL_IFACE_UNIX)
+add_definitions(-DCONFIG_CTRL_IFACE -DCONFIG_CTRL_IFACE_UNIX)
 
 bison_target(CONFIGPARSER_Y configparser.y ${CMAKE_CURRENT_BINARY_DIR}/configparser_yacc.cpp COMPILE_FLAGS "-p configparser")
 flex_target(CONFIGPARSER_L configparser.l ${CMAKE_CURRENT_BINARY_DIR}/configparser_lex.cpp COMPILE_FLAGS "-Pconfigparser")

@@ -8,7 +8,7 @@
 /*
         TRANSLATOR qnut::QObject
 */
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 #include <QIcon>
 #include <QFont>
 #include <QApplication>

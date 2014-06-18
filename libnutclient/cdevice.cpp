@@ -1,7 +1,7 @@
 #include "client.h"
 #include "libnutcommon/common.h"
 #include "dbus.h"
-#ifndef LIBNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 # include "libnutwireless/cwireless.h"
 #endif
 
@@ -23,7 +23,7 @@ namespace libnutclient {
 
 	void CDevice::checkInitDone(bool previous) {
 		if (!previous && checkInitDone()) {
-#ifndef LIBNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 			m_needWireless = !(m_config.wpaConfigFile.isEmpty());
 
 			//Only use wpa_supplicant if we need one
@@ -198,7 +198,7 @@ namespace libnutclient {
 		if (state_changed) {
 			contextLog(tr("Changed state: %1").arg(toStringTr(m_properties.state)));
 
-#ifndef LIBNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 			if (m_needWireless) {
 				if (DeviceState::DEACTIVATED == oldState) {
 					// got "activated"

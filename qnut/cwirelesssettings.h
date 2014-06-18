@@ -8,7 +8,7 @@
 #ifndef QNUT_CWIRELESSSETTINGS_H
 #define QNUT_CWIRELESSSETTINGS_H
 
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 #include <QDialog>
 #include <libnutwireless/hwtypes.h>
 #include <libnutcommon/device.h>

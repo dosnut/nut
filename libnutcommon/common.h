@@ -47,5 +47,6 @@ Q_DECLARE_METATYPE(QList<qint32>)
 
 #include "device.h"
 #include "dbusmanager.h"
+#include "version.h"
 
 #endif

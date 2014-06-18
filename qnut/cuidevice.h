@@ -23,7 +23,7 @@ class QSignalMapper;
 class QSettings;
 
 namespace qnut {
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 	class CWirelessSettings;
 #endif
 	class CNotificationManager;
@@ -82,7 +82,7 @@ namespace qnut {
 	public slots:
 		/// @brief Opens the device settings dialog.
 		void openDeviceSettings();
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		/// @brief Opens ths wireless settings window.
 		void openWirelessSettings();
 #endif
@@ -96,13 +96,13 @@ namespace qnut {
 
 		void showNotificationRequested(libnutcommon::DeviceState state);
 		void updateTrayIconRequested(libnutcommon::DeviceState state);
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		void wirelessInformationUpdated();
 #endif
 		void showTrayIconRequested(bool value);
 	private:
 		Ui::devdet ui;
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		CWirelessSettings * m_WirelessSettings;
 #endif
 

@@ -1,7 +1,7 @@
 #ifndef LIBNUTWIRELESS_CNL80211_H
 #define LIBNUTWIRELESS_CNL80211_H
 
-#ifndef LIBNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 #include "cwirelesshw.h"
 
 #ifndef CONFIG_LIBNL20

@@ -44,14 +44,12 @@ qt4_wrap_cpp(SOURCES_BASIC_MOC_CPP ${SOURCES_BASIC_MOC_H})
 qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})
 qt4_create_translation(TRANSLATIONS_QM ${SOURCES_CPP} ${TRANSLATIONS_TS})
 
-add_definitions(-DCONFIG_CTRL_IFACE -DCONFIG_CTRL_IFACE_UNIX)
-
 # nutclient_basic is linked by cnut; it uses only the "native" dbus interfaces,
 # not the state tracking wrappers
 add_library(${PROJECT_NAME}_basic OBJECT ${SOURCSE_BASIC_CPP} ${SOURCES_BASIC_MOC_CPP})
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES_CPP} ${SOURCES_MOC_CPP} ${SOURCES_OBJECT} ${TRANSLATIONS_QM} $<TARGET_OBJECTS:${PROJECT_NAME}_basic>)
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PACKAGE_VERSION} SOVERSION 0)
+set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PACKAGE_VERSION} SOVERSION ${PACKAGE_SO_VERSION})
 
 target_link_libraries(${PROJECT_NAME}
 	nutcommon

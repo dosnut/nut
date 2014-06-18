@@ -5,13 +5,12 @@ include(${QT_USE_FILE})
 
 include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR})
 
-add_definitions(-D_REENTRANT)
-
 set(SOURCES_CPP main.cpp
 	cnut_commands.cpp
 	cnut_parsers.cpp
 )
 
+# only link the "basic" (dbus.cpp) part of libnutclient as "object"
 add_executable(${PROJECT_NAME}
 	${SOURCES_CPP}
 	$<TARGET_OBJECTS:nutclient_basic>

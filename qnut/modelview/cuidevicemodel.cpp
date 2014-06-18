@@ -41,7 +41,7 @@ namespace qnut {
 
 		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)),
 			this, SLOT(updateDeviceState()));
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		if (device->getWireless())
 			connect(newDevice, SIGNAL(wirelessInformationUpdated()),
 				this, SLOT(updateSignalQuality()));
@@ -63,7 +63,7 @@ namespace qnut {
 		CUIDevice * target = m_UIDevices.takeAt(position);
 		disconnect(target->device(), SIGNAL(stateChanged(libnutcommon::DeviceState)),
 			this, SLOT(updateDeviceState()));
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		if (target->device()->getWireless())
 			connect(target, SIGNAL(wirelessInformationUpdated()),
 				this, SLOT(updateSignalQuality()));

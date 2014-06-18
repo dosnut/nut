@@ -73,7 +73,7 @@ namespace qnut {
 		QAction * m_DisableDeviceAction;
 
 		QAction * m_DeviceSettingsAction;
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		QAction * m_WirelessSettingsAction;
 #endif
 

@@ -95,7 +95,7 @@ namespace qnut {
 		case DeviceType::ETH:
 			return QObject::tr("local");
 		case DeviceType::AIR:
-#ifdef QNUT_NO_WIRELESS
+#ifdef NUT_NO_WIRELESS
 			return device->getEssid(); // this is buggy on newer kernels
 #else
 			if (device->getWireless()) {

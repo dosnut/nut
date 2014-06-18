@@ -42,8 +42,6 @@ set(SOURCES_C
 	hardware_ext.c
 )
 
-add_definitions(-DUSED_CMAKE)
-
 bison_target(CONFIGPARSER_Y configparser.y ${CMAKE_CURRENT_BINARY_DIR}/configparser_yacc.cpp COMPILE_FLAGS "-p configparser")
 flex_target(CONFIGPARSER_L configparser.l ${CMAKE_CURRENT_BINARY_DIR}/configparser_lex.cpp COMPILE_FLAGS "-Pconfigparser")
 add_flex_bison_dependency(CONFIGPARSER_L CONFIGPARSER_Y)

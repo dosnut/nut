@@ -6,7 +6,7 @@
 #ifndef LIBNUTWIRELESS_WPA_SUPPLICANT_H
 #define LIBNUTWIRELESS_WPA_SUPPLICANT_H
 
-#ifndef LIBNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 #include "cnetworkconfig.h"
 #include "wstypes.h"
 #include <QHostAddress>

@@ -13,11 +13,7 @@
 	unsigned char char_buff = 0;
 	libnutwireless::CConfigParser * libnutcconfigparser;
 	void configparsererror (libnutwireless::CConfigParser *cp, const char* s);
-	#ifdef USED_CMAKE
 	#include "configparser_yacc.hpp"
-	#else
-	#include "configparser_yacc.h"
-	#endif
 	#define yylval configparserlval
 	#define YY_INPUT(buf,result,max_size) { result = libnutcconfigparser->readFromStream(buf,max_size); }
 %}

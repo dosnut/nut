@@ -94,7 +94,7 @@ namespace qnut {
 
 		connect(&m_LogFile, SIGNAL(printed(const QString &)), m_LogEdit, SLOT(append(const QString &)));
 
-		m_LogFile << tr("%1 (v%2) started").arg(UI_STRING_NAME_TR, UI_VERSION);
+		m_LogFile << tr("%1 (v%2) started").arg(UI_STRING_NAME_TR, libnutcommon::version());
 		m_LogFile << QDateTime::currentDateTime().toString();
 
 		setWindowTitle(tr("QNUT - Connection Manager"));
@@ -176,7 +176,7 @@ namespace qnut {
 		m_EnableDeviceAction     = new QAction(QIcon(UI_ICON_ENABLE), tr("&Enable"), this);
 		m_DisableDeviceAction    = new QAction(QIcon(UI_ICON_DISABLE), tr("&Disable"), this);
 		m_DeviceSettingsAction   = new QAction(QIcon(UI_ICON_CONFIGURE), tr("&Device settings..."), this);
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		m_WirelessSettingsAction = new QAction(QIcon(UI_ICON_AP), tr("&Wireless settings..."), this);
 #endif
 		m_ClearLogAction         = new QAction(QIcon(UI_ICON_CLEAR), tr("&Clear log"), this);
@@ -184,7 +184,7 @@ namespace qnut {
 		m_EnableDeviceAction->setEnabled(false);
 		m_DisableDeviceAction->setEnabled(false);
 		m_DeviceSettingsAction->setEnabled(false);
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		m_WirelessSettingsAction->setEnabled(false);
 #endif
 
@@ -194,7 +194,7 @@ namespace qnut {
 		m_OverView->addAction(m_DisableDeviceAction);
 		m_OverView->addAction(getSeparator(this));
 		m_OverView->addAction(m_DeviceSettingsAction);
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		m_OverView->addAction(m_WirelessSettingsAction);
 #endif
 
@@ -347,7 +347,7 @@ namespace qnut {
 				deselectedUIDevice->device(), SLOT(disable()));
 			disconnect(m_DeviceSettingsAction, SIGNAL(triggered()),
 				deselectedUIDevice, SLOT(openDeviceSettings()));
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 			disconnect(m_WirelessSettingsAction, SIGNAL(triggered()),
 				deselectedUIDevice, SLOT(openWirelessSettings()));
 #endif
@@ -357,7 +357,7 @@ namespace qnut {
 			m_EnableDeviceAction->setEnabled(false);
 			m_DisableDeviceAction->setEnabled(false);
 			m_DeviceSettingsAction->setEnabled(false);
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 			m_WirelessSettingsAction->setEnabled(false);
 #endif
 		}
@@ -372,7 +372,7 @@ namespace qnut {
 				selectedUIDevice->device(), SLOT(disable()));
 			connect(m_DeviceSettingsAction, SIGNAL(triggered()),
 				selectedUIDevice, SLOT(openDeviceSettings()));
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 			connect(m_WirelessSettingsAction, SIGNAL(triggered()),
 				selectedUIDevice, SLOT(openWirelessSettings()));
 #endif
@@ -381,7 +381,7 @@ namespace qnut {
 			m_DisableDeviceAction->setDisabled(selectedUIDevice->device()->getState() == DeviceState::DEACTIVATED);
 			m_DeviceSettingsAction->setEnabled(true);
 
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 			m_WirelessSettingsAction->setEnabled(selectedUIDevice->device()->getWireless());
 #endif
 		}
@@ -392,7 +392,7 @@ namespace qnut {
 
 		aboutBox.setIconPixmap(QPixmap(UI_ICON_QNUT));
 		aboutBox.setWindowTitle(tr("About QNUT"));
-		aboutBox.setText(UI_STRING_NAME_TR + "\nv" + QString(UI_VERSION));
+		aboutBox.setText(UI_STRING_NAME_TR + "\nv" + libnutcommon::version());
 		aboutBox.setStandardButtons(QMessageBox::Ok);
 
 		aboutBox.exec();

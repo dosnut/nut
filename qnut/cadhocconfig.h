@@ -8,7 +8,7 @@
 #ifndef QNUT_CADHOCCONFIG_H
 #define QNUT_CADHOCCONFIG_H
 
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 #include "cabstractwifinetconfigdialog.h"
 #include "ui_adhocconfig.h"
 

@@ -25,7 +25,7 @@
 #include "cipconfiguration.h"
 #include "cdevicesettings.h"
 
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 #include "cwirelesssettings.h"
 #endif
 
@@ -47,7 +47,7 @@ namespace qnut {
 	CUIDevice::CUIDevice(CDevice * parentDevice, QWidget * parent) : QWidget(parent) {
 		m_Device = parentDevice;
 
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		if (m_Device->getWireless()) {
 			m_WirelessSettings = new CWirelessSettings(m_Device);
 			connect(m_Device->getWireless()->getHardware(), SIGNAL(signalQualityUpdated(libnutwireless::SignalQuality)),
@@ -71,7 +71,7 @@ namespace qnut {
 
 	CUIDevice::~CUIDevice() {
 		writeSettings();
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		if (m_WirelessSettings)
 			delete m_WirelessSettings;
 #endif
@@ -198,7 +198,7 @@ namespace qnut {
 		readCommands(settings);
 #endif
 
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		if (m_WirelessSettings)
 			m_WirelessSettings->readSettings(settings);
 #endif
@@ -273,7 +273,7 @@ namespace qnut {
 		settings.setValue(UI_SETTINGS_SHOWDETAILS, ui.detailsButton->isChecked());
 		settings.setValue(UI_SETTINGS_HIDENOTIFICATIONS, !m_NotificationsEnabled);
 
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		if (m_WirelessSettings)
 			m_WirelessSettings->writeSettings(&settings);
 #endif
@@ -300,7 +300,7 @@ namespace qnut {
 		m_DeviceMenu->addSeparator();
 		m_DeviceMenu->addAction(QIcon(UI_ICON_CONFIGURE), tr("&Device settings..."),
 			this, SLOT(openDeviceSettings()));
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		tempAction = m_DeviceMenu->addAction(QIcon(UI_ICON_AP), tr("&Wireless settings..."),
 			this, SLOT(openWirelessSettings()));
 		tempAction->setEnabled(m_Device->getWireless());
@@ -474,7 +474,7 @@ namespace qnut {
 		}
 	}
 
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 	void CUIDevice::openWirelessSettings() {
 		m_WirelessSettings->show();
 		m_WirelessSettings->activateWindow();

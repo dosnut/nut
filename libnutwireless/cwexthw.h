@@ -1,7 +1,7 @@
 #ifndef LIBNUTWIRELESS_CWEXTHW_H
 #define LIBNUTWIRELESS_CWEXTHW_H
 
-#ifndef LIBNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 #include "cwirelesshw.h"
 #include <QTimerEvent>
 

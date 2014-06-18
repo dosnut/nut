@@ -1,7 +1,7 @@
 #ifndef LIBNUTWIRELESS_CWIRELESSHW_H
 #define LIBNUTWIRELESS_CWIRELESSHW_H
 
-#ifndef LIBNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 #include "cnetworkconfig.h"
 #include "hwtypes.h"
 

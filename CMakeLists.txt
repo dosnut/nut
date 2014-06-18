@@ -3,24 +3,10 @@ cmake_policy(SET CMP0022 NEW)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
-MACRO(ADD_TARGET_PROPERTIES _target _name)
-	SET(_properties)
-	FOREACH(_prop ${ARGN})
-		SET(_properties "${_properties} ${_prop}")
-	ENDFOREACH(_prop)
-	GET_TARGET_PROPERTY(_old_properties ${_target} ${_name})
-	MESSAGE(STATUS "adding property to ${_target} ${_name}:" ${_properties})
-	IF(NOT _old_properties)
-		# in case it's NOTFOUND
-		SET(_old_properties)
-	ENDIF(NOT _old_properties)
-	SET_TARGET_PROPERTIES(${_target} PROPERTIES ${_name} "${_old_properties} ${_properties}")
-ENDMACRO(ADD_TARGET_PROPERTIES)
-
-
 PROJECT(network-utiltities C CXX)
 SET(PACKAGE_NAME ${CMAKE_PROJECT_NAME})
 SET(PACKAGE_VERSION 0.5.8)
+set(PACKAGE_SO_VERSION 0) # .so version for libnutclient and libnutcommon
 
 include(CMakeDetermineCCompiler)
 include(CMakeDetermineCXXCompiler)
@@ -62,24 +48,14 @@ set(CMAKE_INSTALL_INCLUDEDIR include CACHE PATH "Output directory for includes")
 find_library(LIB_NL nl)
 
 add_subdirectory(libnutcommon)
-
-add_subdirectory(cnut)
-add_dependencies(cnut nutcommon)
-
-add_subdirectory(nuts)
-add_dependencies(nuts nutcommon)
+add_subdirectory(libnutclient)
 
 if(USE_WIRELESS)
 	add_subdirectory(libnutwireless)
 else(USE_WIRELESS)
-	add_definitions(-DQNUT_NO_WIRELESS -DLIBNUT_NO_WIRELESS)
+	add_definitions(-DNUT_NO_WIRELESS)
 endif(USE_WIRELESS)
 
-add_subdirectory(libnutclient)
-add_dependencies(nutclient nutcommon)
-if(USE_WIRELESS)
-	add_dependencies(nutclient nutwireless)
-endif(USE_WIRELESS)
-
+add_subdirectory(cnut)
+add_subdirectory(nuts)
 add_subdirectory(qnut)
-add_dependencies(qnut nutclient)

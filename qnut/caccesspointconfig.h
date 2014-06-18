@@ -8,7 +8,7 @@
 #ifndef QNUT_ACCESSPOINTCONFIG_H
 #define QNUT_ACCESSPOINTCONFIG_H
 
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 #include "cabstractwifinetconfigdialog.h"
 
 #include <libnutwireless/cnetworkconfig.h>

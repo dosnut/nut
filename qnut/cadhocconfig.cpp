@@ -5,7 +5,7 @@
 //
 // Copyright: See COPYING file that comes with this distribution
 //
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 #include "cadhocconfig.h"
 
 #include <QMessageBox>
