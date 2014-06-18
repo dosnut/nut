@@ -10,6 +10,7 @@ set(PACKAGE_SO_VERSION 0) # .so version for libnutclient and libnutcommon
 
 include(CMakeDetermineCCompiler)
 include(CMakeDetermineCXXCompiler)
+include(MyQtTranslation)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -45,6 +46,10 @@ option(USE_WIRELESS "Enable support for wireless networks through wpa_supplicant
 set(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output directory for libraries")
 set(CMAKE_INSTALL_INCLUDEDIR include CACHE PATH "Output directory for includes")
 
+find_package(Qt4 COMPONENTS QtCore QtGui QtDbus QtNetwork REQUIRED)
+# only qnut uses gui
+set(QT_DONT_USE_QTGUI 1)
+
 find_library(LIB_NL nl)
 
 add_subdirectory(libnutcommon)
@@ -59,3 +64,11 @@ endif(USE_WIRELESS)
 add_subdirectory(cnut)
 add_subdirectory(nuts)
 add_subdirectory(qnut)
+
+# sadly touches files always even when nothing changed
+option(UPDATE_TRANSLATIONS "Automatically update translations in source directory" OFF)
+
+if(UPDATE_TRANSLATIONS)
+  add_dependencies(nutclient update-translations)
+  add_dependencies(qnut update-translations)
+endif(UPDATE_TRANSLATIONS)

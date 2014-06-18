@@ -1,9 +1,7 @@
 project(nutclient)
 
-find_package(Qt4 COMPONENTS QtCore QtNetwork QtDBus REQUIRED)
 include(${QT_USE_FILE})
-
-include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR})
 
 set(SOURCES_BASIC_MOC_H
 	dbus.h
@@ -42,7 +40,7 @@ file(GLOB TRANSLATIONS_TS translations/${PROJECT_NAME}_*.ts)
 
 qt4_wrap_cpp(SOURCES_BASIC_MOC_CPP ${SOURCES_BASIC_MOC_H})
 qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})
-qt4_create_translation(TRANSLATIONS_QM ${SOURCES_CPP} ${TRANSLATIONS_TS})
+my_qt4_create_translation(TRANSLATIONS_QM ${SOURCES_CPP} ${TRANSLATIONS_TS})
 
 # nutclient_basic is linked by cnut; it uses only the "native" dbus interfaces,
 # not the state tracking wrappers
@@ -55,9 +53,7 @@ target_link_libraries(${PROJECT_NAME}
 	nutcommon
 	${LIB_NL}
 	${LIB_IW}
-	${QT_QTCORE_LIBRARY}
-	${QT_QTNETWORK_LIBRARY}
-	${QT_QTDBUS_LIBRARY}
+	${QT_LIBRARIES}
 )
 
 file(GLOB NUTCLIENT_H ${CMAKE_CURRENT_SOURCE_DIR}/*.h)

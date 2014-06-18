@@ -1,9 +1,9 @@
 project(qnut)
 
-find_package(Qt4 COMPONENTS QtCore QtGui QtDbus QtNetwork REQUIRED)
-
-include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/utils ${CMAKE_SOURCE_DIR})
+set(QT_DONT_USE_QTGUI 0)
 include(${QT_USE_FILE})
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/utils ${CMAKE_SOURCE_DIR})
 
 set(INSTALL_SHARE_PREFIX ${CMAKE_INSTALL_PREFIX}/share)
 set(INSTALL_SHARE_TARGET_PREFIX ${INSTALL_SHARE_PREFIX}/${PROJECT_NAME})
@@ -69,7 +69,7 @@ file(GLOB TRANSLATIONS_TS translations/${PROJECT_NAME}_*.ts)
 
 qt4_wrap_ui(FORMS_H ${FORMS})
 qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})
-qt4_create_translation(TRANSLATIONS_QM ${SOURCES_CPP} ${FORMS} ${TRANSLATIONS_TS})
+my_qt4_create_translation(TRANSLATIONS_QM ${SOURCES_CPP} ${FORMS} ${TRANSLATIONS_TS})
 
 add_executable(${PROJECT_NAME}
 	${SOURCES_CPP}
@@ -81,9 +81,7 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
 	nutclient
 	nutcommon
-	${QT_QTCORE_LIBRARY}
-	${QT_QTGUI_LIBRARY}
-	${QT_QTNETWORK_LIBRARY}
+	${QT_LIBRARIES}
 )
 
 file(GLOB RES_ICONS res/*.png res/qnut.svg res/qnut_small.svg)

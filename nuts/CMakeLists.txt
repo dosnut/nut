@@ -1,12 +1,11 @@
 project(nuts)
 
-find_package(Qt4 COMPONENTS QtCore QtNetwork QtDBus REQUIRED)
 include(${QT_USE_FILE})
 
 find_package(BISON)
 find_package(FLEX)
 
-include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(SOURCES_MOC_H
 	device.h
@@ -60,9 +59,7 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
 	nutcommon
 	${LIB_NL}
-	${QT_QTCORE_LIBRARY}
-	${QT_QTNETWORK_LIBRARY}
-	${QT_QTDBUS_LIBRARY}
+	${QT_LIBRARIES}
 )
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/sbin)
