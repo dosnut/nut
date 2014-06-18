@@ -5,8 +5,14 @@ include(${QT_USE_FILE})
 
 include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR})
 
-set(SOURCES_MOC_H
+set(SOURCES_BASIC_MOC_H
 	dbus.h
+	)
+set(SOURCSE_BASIC_CPP
+	dbus.cpp
+	)
+
+set(SOURCES_MOC_H
 	cinterface.h
 	cenvironment.h
 	cdevice.h
@@ -15,7 +21,6 @@ set(SOURCES_MOC_H
 	cnutservice.h
 )
 set(SOURCES_CPP
-	dbus.cpp
 	cinterface.cpp
 	cenvironment.cpp
 	cdevice.cpp
@@ -35,12 +40,17 @@ endif(USE_WIRELESS)
 
 file(GLOB TRANSLATIONS_TS translations/${PROJECT_NAME}_*.ts)
 
+qt4_wrap_cpp(SOURCES_BASIC_MOC_CPP ${SOURCES_BASIC_MOC_H})
 qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})
 qt4_create_translation(TRANSLATIONS_QM ${SOURCES_CPP} ${TRANSLATIONS_TS})
 
 add_definitions(-DCONFIG_CTRL_IFACE -DCONFIG_CTRL_IFACE_UNIX)
 
-add_library(${PROJECT_NAME} SHARED ${SOURCES_CPP} ${SOURCES_MOC_CPP} ${SOURCES_OBJECT} ${TRANSLATIONS_QM})
+# nutclient_basic is linked by cnut; it uses only the "native" dbus interfaces,
+# not the state tracking wrappers
+add_library(${PROJECT_NAME}_basic OBJECT ${SOURCSE_BASIC_CPP} ${SOURCES_BASIC_MOC_CPP})
+
+add_library(${PROJECT_NAME} SHARED ${SOURCES_CPP} ${SOURCES_MOC_CPP} ${SOURCES_OBJECT} ${TRANSLATIONS_QM} $<TARGET_OBJECTS:${PROJECT_NAME}_basic>)
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PACKAGE_VERSION} SOVERSION 0)
 
 target_link_libraries(${PROJECT_NAME}

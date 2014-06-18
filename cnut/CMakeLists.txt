@@ -14,11 +14,11 @@ set(SOURCES_CPP main.cpp
 
 add_executable(${PROJECT_NAME}
 	${SOURCES_CPP}
+	$<TARGET_OBJECTS:nutclient_basic>
 )
 
 target_link_libraries(${PROJECT_NAME}
 	nutcommon
-	nutclient
 	${QT_QTCORE_LIBRARY}
 	${QT_QTNETWORK_LIBRARY}
 	${QT_QTDBUS_LIBRARY}
