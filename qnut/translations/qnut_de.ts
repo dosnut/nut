@@ -16,23 +16,23 @@
     </message>
     <message>
         <source>Type: %1</source>
-        <translation type="unfinished">Typ: %1</translation>
+        <translation>Typ: %1</translation>
     </message>
     <message>
         <source>State: %1</source>
-        <translation type="unfinished">Status: %1</translation>
+        <translation>Status: %1</translation>
     </message>
     <message>
         <source>Connected to: %1</source>
-        <translation type="unfinished">Verbunden mit: %1</translation>
+        <translation>Verbunden mit: %1</translation>
     </message>
     <message>
         <source>local</source>
-        <translation type="unfinished">lokal</translation>
+        <translation>lokal</translation>
     </message>
     <message>
         <source>unknown Network</source>
-        <translation type="unfinished"></translation>
+        <translation>unbekanntes Netzwerk</translation>
     </message>
     <message>
         <source>none</source>
