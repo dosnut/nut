@@ -14,6 +14,9 @@
 /* fcntl, F_SETFD, FD_CLOEXEC */
 #include <fcntl.h>
 
+/* suppress warning in netlink/addr.h */
+struct addrinfo;
+
 #include <netlink/netlink.h>
 #include <netlink/msg.h>
 
