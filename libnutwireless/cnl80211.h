@@ -4,11 +4,6 @@
 #ifndef NUT_NO_WIRELESS
 #include "cwirelesshw.h"
 
-#ifndef CONFIG_LIBNL20
-#  define nl_sock nl_handle
-#endif
-
-
 struct nl_cb;
 struct nl_sock;
 struct nl_cache;

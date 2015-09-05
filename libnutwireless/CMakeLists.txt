@@ -58,5 +58,10 @@ add_library(${PROJECT_NAME} OBJECT
 	${BISON_CONFIGPARSER_Y_OUTPUTS}
 )
 
+object_link_library(${PROJECT_NAME} PUBLIC
+	libnl
+	libnl-genl
+)
+
 file(GLOB NUTWIRELESS_H ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 install(FILES ${NUTWIRELESS_H} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libnutwireless)

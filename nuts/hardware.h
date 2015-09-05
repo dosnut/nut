@@ -10,7 +10,7 @@
 #include <libnutcommon/macaddress.h>
 
 extern "C" {
-	struct nl_handle;
+	struct nl_sock;
 	struct nl_cache;
 	struct ifreq;
 }
@@ -23,9 +23,10 @@ namespace nuts {
 	class HardwareManager : public QObject {
 		Q_OBJECT
 		private:
-			int netlink_fd, ethtool_fd;
-			struct nl_handle *nlh;
-			struct nl_cache *nlcache;
+			int netlink_fd{-1};
+			int ethtool_fd{-1};
+			struct ::nl_sock *nlh{nullptr};
+			struct ::nl_cache *nlcache{nullptr};
 			struct ifstate {
 				bool active, carrier, exists;
 				ifstate() : active(false), carrier(false), exists(false) { }
@@ -61,7 +62,7 @@ namespace nuts {
 			QList<QString> get_ifNames();
 			int ifName2Index(const QString &ifName);
 
-			struct nl_handle *getNLHandle();
+			struct ::nl_sock *getNLHandle();
 
 			libnutcommon::MacAddress getMacAddress(const QString &ifName);
 

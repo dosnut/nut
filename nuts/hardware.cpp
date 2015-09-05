@@ -103,7 +103,7 @@ namespace nuts {
 	}
 
 	bool HardwareManager::init_netlink() {
-		nlh = nl_handle_alloc();
+		nlh = nl_socket_alloc();
 		if (!nlh) return false;
 		nl_socket_set_peer_port(nlh, 0);
 
@@ -112,16 +112,20 @@ namespace nuts {
 		if (nl_socket_add_membership(nlh, RTNLGRP_IPV4_IFADDR) != 0) goto cleanup;
 
 		netlink_fd = nl_socket_get_fd(nlh);
-		nlcache = rtnl_link_alloc_cache(nlh);
+		if (0 != rtnl_link_alloc_cache(nlh, AF_UNSPEC, &nlcache)) {
+			goto cleanup;
+		}
+
 		return true;
-	cleanup:
+
+cleanup:
 		free_netlink();
 		return false;
 	}
 	void HardwareManager::free_netlink() {
 		nl_cache_free(nlcache);
 		nl_close(nlh);
-		nl_handle_destroy(nlh);
+		nl_socket_free(nlh);
 	}
 	bool HardwareManager::init_ethtool() {
 		ethtool_fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
@@ -248,7 +252,7 @@ namespace nuts {
 		return ifr.ifr_ifindex;
 	}
 
-	struct nl_handle *HardwareManager::getNLHandle() {
+	struct nl_sock *HardwareManager::getNLHandle() {
 		return nlh;
 	}
 
