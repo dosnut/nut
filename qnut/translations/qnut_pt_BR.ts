@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="pt_BR">
+<TS version="2.1" language="pt_BR">
 <context>
     <name></name>
     <message>
@@ -1550,122 +1550,122 @@
         <translation>Barra de Ferramentas Principal</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="136"/>
+        <location filename="../cconnectionmanager.cpp" line="138"/>
         <source>&amp;File</source>
         <translation>&amp;Arquivo</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="139"/>
+        <location filename="../cconnectionmanager.cpp" line="141"/>
         <source>&amp;Close</source>
         <translation>&amp;Fechar</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="143"/>
+        <location filename="../cconnectionmanager.cpp" line="145"/>
         <source>&amp;Quit</source>
         <translation>&amp;Sair</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="145"/>
+        <location filename="../cconnectionmanager.cpp" line="147"/>
         <source>&amp;Edit</source>
         <translation>&amp;Editar</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="147"/>
+        <location filename="../cconnectionmanager.cpp" line="149"/>
         <source>&amp;View</source>
         <translation>&amp;Ver</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="151"/>
+        <location filename="../cconnectionmanager.cpp" line="153"/>
         <source>Show %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="156"/>
+        <location filename="../cconnectionmanager.cpp" line="158"/>
         <source>Show &amp;balloon tips</source>
         <translation>Mostrar dicas de &amp;balão</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="157"/>
+        <location filename="../cconnectionmanager.cpp" line="159"/>
         <source>Show balloon tips on certain events like state changes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="162"/>
+        <location filename="../cconnectionmanager.cpp" line="164"/>
         <source>Show &amp;log</source>
         <translation>Mostrar &amp;log</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="163"/>
+        <location filename="../cconnectionmanager.cpp" line="165"/>
         <source>Show log tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="166"/>
+        <location filename="../cconnectionmanager.cpp" line="168"/>
         <source>&amp;Help</source>
         <translation>&amp;Ajuda</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="168"/>
+        <location filename="../cconnectionmanager.cpp" line="170"/>
         <source>&amp;About QNUT</source>
         <translation>Sobre o Q&amp;NUT</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="169"/>
+        <location filename="../cconnectionmanager.cpp" line="171"/>
         <source>Show about dialog of QNUT</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="171"/>
+        <location filename="../cconnectionmanager.cpp" line="173"/>
         <source>About &amp;Qt</source>
         <translation>Sobre &amp;Qt</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="172"/>
+        <location filename="../cconnectionmanager.cpp" line="174"/>
         <source>Show about dialog of Qt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="175"/>
+        <location filename="../cconnectionmanager.cpp" line="177"/>
         <source>&amp;Refresh devices</source>
         <translation>&amp;Atualizar dispositivos</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="176"/>
+        <location filename="../cconnectionmanager.cpp" line="178"/>
         <source>&amp;Enable</source>
         <translation>&amp;Habilitar</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="177"/>
+        <location filename="../cconnectionmanager.cpp" line="179"/>
         <source>&amp;Disable</source>
         <translation>&amp;Desabilitar</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="178"/>
+        <location filename="../cconnectionmanager.cpp" line="180"/>
         <source>&amp;Device settings...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="180"/>
+        <location filename="../cconnectionmanager.cpp" line="182"/>
         <source>&amp;Wireless settings...</source>
         <translation>Definições de &amp;comunicação...</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="182"/>
+        <location filename="../cconnectionmanager.cpp" line="184"/>
         <source>&amp;Clear log</source>
         <translation>Limpar &amp;log</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="310"/>
+        <location filename="../cconnectionmanager.cpp" line="312"/>
         <source>no devices present</source>
         <translation>Nenhum dispositivo presente</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="394"/>
+        <location filename="../cconnectionmanager.cpp" line="396"/>
         <source>About QNUT</source>
         <translation>Sobre o QNUT</translation>
     </message>
     <message>
-        <location filename="../cconnectionmanager.cpp" line="408"/>
+        <location filename="../cconnectionmanager.cpp" line="410"/>
         <source>Log</source>
         <translation>Log</translation>
     </message>
@@ -2007,44 +2007,44 @@ BSSID: %3</source>
 <context>
     <name>qnut::CNotificationManager</name>
     <message>
-        <location filename="../cnotificationmanager.cpp" line="29"/>
+        <location filename="../cnotificationmanager.cpp" line="31"/>
         <source>Open Connection &amp;Manager</source>
         <translation type="unfinished">Abrir Gerenciado&amp;r de Conexão</translation>
     </message>
     <message>
-        <location filename="../cnotificationmanager.cpp" line="32"/>
+        <location filename="../cnotificationmanager.cpp" line="35"/>
         <source>&amp;Quit</source>
         <translation type="unfinished">&amp;Sair</translation>
     </message>
     <message>
-        <location filename="../cnotificationmanager.cpp" line="115"/>
+        <location filename="../cnotificationmanager.cpp" line="119"/>
         <source>QNUT</source>
         <translation type="unfinished">QNUT</translation>
     </message>
     <message>
-        <location filename="../cnotificationmanager.cpp" line="154"/>
+        <location filename="../cnotificationmanager.cpp" line="158"/>
         <source>%2 is now up and running on network: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cnotificationmanager.cpp" line="158"/>
+        <location filename="../cnotificationmanager.cpp" line="162"/>
         <source>%2 got carrier (to network: %1) but needs configuration.
 
 Click here to open the device details.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cnotificationmanager.cpp" line="162"/>
+        <location filename="../cnotificationmanager.cpp" line="166"/>
         <source>%1 is now activated and waits for carrier.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../cnotificationmanager.cpp" line="165"/>
+        <location filename="../cnotificationmanager.cpp" line="169"/>
         <source>%1 is now deactivated</source>
         <translation type="unfinished">%1 está desativado</translation>
     </message>
     <message>
-        <location filename="../cnotificationmanager.cpp" line="173"/>
+        <location filename="../cnotificationmanager.cpp" line="177"/>
         <source>Device</source>
         <translation type="unfinished">Dispositivo</translation>
     </message>
@@ -2429,6 +2429,44 @@ Click here to open the device details.</source>
     <message>
         <source>local</source>
         <translation type="obsolete">Local</translation>
+    </message>
+</context>
+<context>
+    <name>scrset</name>
+    <message>
+        <location filename="../ui/scriptsettings.ui" line="14"/>
+        <source>Scripting Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/scriptsettings.ui" line="20"/>
+        <source>Execute scripts when device gets...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/scriptsettings.ui" line="26"/>
+        <source>...deactivated</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/scriptsettings.ui" line="33"/>
+        <source>...activated</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/scriptsettings.ui" line="40"/>
+        <source>...carrier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/scriptsettings.ui" line="47"/>
+        <source>...carrier and stays unconfigured</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/scriptsettings.ui" line="54"/>
+        <source>...up</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="de">
+<TS version="2.1" language="de">
 <context>
     <name></name>
     <message>
@@ -1861,6 +1861,37 @@ Click here to open the device details.</source>
     <message>
         <source>local</source>
         <translation type="obsolete">lokal</translation>
+    </message>
+</context>
+<context>
+    <name>scrset</name>
+    <message>
+        <source>Scripting Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Execute scripts when device gets...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>...deactivated</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>...activated</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>...carrier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>...carrier and stays unconfigured</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>...up</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>
