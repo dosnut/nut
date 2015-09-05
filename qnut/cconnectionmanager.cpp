@@ -111,16 +111,18 @@ namespace qnut {
 		CUIDevice::init();
 		connect(CUIDevice::showRequestMapper(), SIGNAL(mapped(QWidget*)), this, SLOT(showDeviceDetails(QWidget *)));
 
-		if (m_NotificationManager)
-			m_NotificationManager->setIconVisible(true, NULL);
-		else
+		if (!m_NotificationManager) {
 			show();
+		}
 	}
 
 	CConnectionManager::~CConnectionManager() {
 		writeSettings();
 
 		m_TabWidget->clear();
+
+		m_UIDeviceModel->disconnect(this);
+		m_DeviceManager->disconnect(this);
 
 		delete m_UIDeviceModel;
 		delete m_DeviceManager;
