@@ -1,2 +1,1 @@
 debian/tmp/usr/bin/cnut
-resources/cnut.bash_completion /etc/bash_completion.d/

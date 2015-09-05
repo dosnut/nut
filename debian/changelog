@@ -1,3 +1,42 @@
+network-utilities (0.5.9-1) experimental; urgency=medium
+
+  * fix build errors with more recent bison
+  * [cmake] add -std=c++11, more and configurable warning flags, default to
+    RelWithDebInfo
+  * [libnutwireless/wpa_ctrl] make libc function definitions visible with
+    feature macros
+  * [libnutwireless] mark `ver` as unused variable
+  * whitespace cleanup: remove trailing whitespace
+  * removed Doxyfile
+  * [libnutcommon] c++11-ify config structures, some cmake cleanup, make
+    libnutcommon a shared lib
+  * cleanup common types and dbus interface
+  * [nuts] fix state check in Interface_IPv4::startFallback
+  * [dbus] DBus rewrite
+  * [dbus] refactor DBusAbstractAdapater: always require a path to register the
+    object
+  * [dbus] add mac address to device properties + more
+  * [qnut] initialize some pointer to nullptr
+  * [libnutclient] fix missing deviceRemoved() events
+  * [libnutclient] delay CWireless creation until device name is available
+  * [dbus] simplify ACL rules by using destination/sender instead of interface;
+    also enables introspection
+  * [dbus] device type can change; expose all properties with Q_PROPERTY
+  * [cnut/nutclient] link (statically) only dbus.cpp into cnut
+  * [qmake] remove all *.pro files, using cmake now
+  * cleanup .gitignore files
+  * [cmake] common version, minimize -D flags, some cleanup
+  * [cmake] search for Qt4 in global file, fix translations
+  * [nuts] replace bison parser with recursive descent parser
+  * update to libnl 3.0, refactor cmake config/lib handling
+  * suppress warning about struct addrinfo inside paramer list
+  * put all output binaries into main build directory
+  * use full version for so version
+  * cleanup qnut.desktop mimetype
+  * Release 0.5.9
+
+ -- Stefan Bühler <stbuehler@web.de>  Sat, 05 Sep 2015 15:52:40 +0200
+
 network-utilities (0.5.8-1) unstable; urgency=low
 
   [ Daniel Bahrdt ]
