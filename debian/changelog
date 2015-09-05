@@ -1,3 +1,9 @@
+network-utilities (0.5.9-2) experimental; urgency=medium
+
+  * require pkg-config
+
+ -- Stefan Bühler <stbuehler@web.de>  Sat, 05 Sep 2015 19:01:24 +0200
+
 network-utilities (0.5.9-1) experimental; urgency=medium
 
   * fix build errors with more recent bison
