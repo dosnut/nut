@@ -8,7 +8,7 @@ Build-Depends: cdbs, debhelper (>= 9),
  bison, flex,
  libnl-3-dev, libnl-genl-3-dev, libnl-route-3-dev,
  libiw-dev,
- cmake,
+ cmake (>= 3),
  pkg-config,
 Standards-Version: 3.9.6
 
