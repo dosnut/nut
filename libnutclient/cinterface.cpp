@@ -1,5 +1,5 @@
 #include "client.h"
-#include "dbus.h"
+#include "libnutclientbase/dbus.h"
 #include "libnutcommon/common.h"
 
 namespace libnutclient {
@@ -44,7 +44,7 @@ namespace libnutclient {
 	void CInterface::dbusConnectService(QString service, QDBusConnection connection) {
 		if (m_dbusInterface) return;
 
-		m_dbusInterface = new DBusInterface_IPv4(service, m_dbusPath, connection, this);
+		m_dbusInterface = new libnutclientbase::DBusInterface_IPv4(service, m_dbusPath, connection, this);
 
 		/* all other signals are covered by these two */
 		connect(m_dbusInterface, SIGNAL(propertiesChanged(libnutcommon::InterfaceProperties)), this, SLOT(dbusPropertiesChanged(libnutcommon::InterfaceProperties)));

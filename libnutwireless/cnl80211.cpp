@@ -156,7 +156,7 @@ static int cbForScanResults(struct nl_msg *msg, void * arg) {
 
 void CNL80211::scan() {
 	//Get interface index for device:
-	unsigned int devidx = if_nametoindex(m_ifname.toAscii().constData());
+	unsigned int devidx = if_nametoindex(m_ifname.toLatin1().constData());
 	if (devidx == 0) {
 		emit message("Could not get interface index");
 		return;

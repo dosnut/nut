@@ -30,7 +30,7 @@ namespace libnutwireless {
 	int CConfigParser::readFromStream(char * buf, int max_size) {
 		QString str = stream->read(max_size-1);
 		int size = str.size();
-		memcpy(buf,str.toAscii().constData(),(size+1)*sizeof(char));
+		memcpy(buf,str.toLatin1().constData(),(size+1)*sizeof(char));
 		std::cout << buf << std::endl;
 		return size;
 	}

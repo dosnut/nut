@@ -41,7 +41,7 @@ namespace libnutwireless {
 		if (cmd != "PING") {
 			size_t reply_len = sizeof(reply);
 
-			command = cmd.toAscii();
+			command = cmd.toLatin1();
 
 			status = wpa_ctrl_request(cmd_ctrl, command.constData(), command.size(), reply, &reply_len,NULL);
 			if (0 == status) {
@@ -165,8 +165,8 @@ namespace libnutwireless {
 			m_connectTimerId = startTimer(dynamicTimerTime(m_timerCount));
 			return;
 		}
-		cmd_ctrl = wpa_ctrl_open(m_wpaSupplicantPath.toAscii().constData());
-		event_ctrl = wpa_ctrl_open(m_wpaSupplicantPath.toAscii().constData());
+		cmd_ctrl = wpa_ctrl_open(m_wpaSupplicantPath.toLatin1().constData());
+		event_ctrl = wpa_ctrl_open(m_wpaSupplicantPath.toLatin1().constData());
 		if (cmd_ctrl == NULL and event_ctrl == NULL) {
 			qWarning() << tr("Could not open wpa_supplicant control interface");
 			m_inConnectionPhase = true;

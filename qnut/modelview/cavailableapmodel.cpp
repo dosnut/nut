@@ -27,7 +27,7 @@ namespace qnut {
 	}
 
 	int CAvailableAPModel::scanResultIdByModelIndex(const QModelIndex & index) const {
-		if (index.internalId() == -1)
+		if (index.internalId() == quintptr(-1))
 			return m_GroupedScans[m_SSIDs[index.row()]]->at(0);
 		else
 			return index.internalId();
@@ -72,14 +72,14 @@ namespace qnut {
 	}
 
 	bool CAvailableAPModel::hasChildren(const QModelIndex & parent) const {
-		return !parent.isValid() || parent.internalId() == -1;
+		return !parent.isValid() || parent.internalId() == quintptr(-1);
 	}
 
 	int CAvailableAPModel::rowCount(const QModelIndex & parent) const {
 		if (m_SSIDs.isEmpty())
 			return 0;
 
-		if (parent.isValid() && parent.internalId() == -1) {
+		if (parent.isValid() && parent.internalId() == quintptr(-1)) {
 			IndexList * scans = m_GroupedScans[m_SSIDs[parent.row()]];
 			return scans->size();
 		}
@@ -109,7 +109,7 @@ namespace qnut {
 		if (role != Qt::DisplayRole)
 			return QVariant();
 
-		if (index.internalId() == -1) {
+		if (index.internalId() == quintptr(-1)) {
 			if (index.column() == UI_AVLAP_BSSID)
 				return tr("multiple");
 
@@ -258,12 +258,12 @@ namespace qnut {
 		if (m_SSIDs.isEmpty())
 			return QModelIndex();
 
-		if (parent.isValid() && parent.internalId() == -1)
+		if (parent.isValid() && parent.internalId() == quintptr(-1))
 			return createIndex(row, column, m_GroupedScans[m_SSIDs[parent.row()]]->at(row));
 
 		if (!parent.isValid()) {
 			IndexList * scans = m_GroupedScans[m_SSIDs[row]];
-			return createIndex(row, column, scans->size() > 1 ? -1 : scans->at(0));
+			return createIndex(row, column, scans->size() > 1 ? quintptr(-1) : scans->at(0));
 		}
 
 		return QModelIndex();
@@ -273,12 +273,12 @@ namespace qnut {
 		if (m_Scans.isEmpty() || !index.isValid())
 			return QModelIndex();
 
-		if (index.internalId() == -1)
+		if (index.internalId() == quintptr(-1))
 			return QModelIndex();
 
 		IndexList * scans = m_GroupedScans[m_Scans[index.internalId()].ssid];
 		if (scans->size() > 1)
-			return createIndex(m_SSIDs.indexOf(m_Scans[index.internalId()].ssid), 0, -1);
+			return createIndex(m_SSIDs.indexOf(m_Scans[index.internalId()].ssid), 0, quintptr(-1));
 
 		return QModelIndex();
 	}

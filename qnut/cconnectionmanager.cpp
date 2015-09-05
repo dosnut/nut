@@ -73,7 +73,7 @@ namespace qnut {
 
 		if (CNotificationManager::trayIconsAvailable()) {
 			m_NotificationManager = new CNotificationManager(this);
-			connect(m_NotificationManager, SIGNAL(requestedUIDeviceWidget(QWidget*)), m_TabWidget, SLOT(setCurrentWidget(QWidget*)));
+			// connect(m_NotificationManager, SIGNAL(requestedUIDeviceWidget(QWidget*)), m_TabWidget, SLOT(setCurrentWidget(QWidget*)));
 		}
 		else
 			m_NotificationManager = NULL;

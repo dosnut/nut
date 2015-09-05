@@ -1,5 +1,5 @@
-#ifndef LIBNUTCLIENT_DBUS_H
-#define LIBNUTCLIENT_DBUS_H
+#ifndef LIBNUTCLIENTBASE_DBUS_H
+#define LIBNUTCLIENTBASE_DBUS_H
 
 #include <QObject>
 #include <QList>
@@ -95,7 +95,7 @@ public slots: \
 	void method(type1 par1); \
 public:
 
-namespace libnutclient {
+namespace libnutclientbase {
 	/* callback type for functions returning Result */
 	template<typename... Result>
 	using ResultHandler = std::function<void(Result...)>;

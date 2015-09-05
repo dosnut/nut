@@ -82,7 +82,7 @@
 	}
 
 
-namespace libnutclient {
+namespace libnutclientbase {
 	namespace internal {
 		DBusCallbackWatcherBase::DBusCallbackWatcherBase(QObject* parent, QDBusPendingCallWatcher* watcher)
 		: QObject(nullptr != parent ? parent : watcher) {

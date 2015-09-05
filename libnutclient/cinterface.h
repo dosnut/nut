@@ -7,8 +7,11 @@
 #include "cnutservice.h"
 #include "libnutcommon/common.h"
 
-namespace libnutclient {
+namespace libnutclientbase {
 	class DBusInterface_IPv4;
+}
+
+namespace libnutclient {
 	class CEnvironment;
 }
 
@@ -25,7 +28,7 @@ namespace libnutclient {
 		friend class DBusInterface_IPv4;
 
 		CEnvironment* m_environment = nullptr;
-		DBusInterface_IPv4* m_dbusInterface = nullptr;
+		libnutclientbase::DBusInterface_IPv4* m_dbusInterface = nullptr;
 		QDBusObjectPath m_dbusPath;
 
 		int m_initCounter = 0;

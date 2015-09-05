@@ -65,8 +65,8 @@ namespace qnut {
 		ui.managedView->setModel(m_ManagedAPProxyModel);
 		ui.availableView->setModel(m_AvailableAPProxyModel);
 
-		ui.managedView->header()->setResizeMode(QHeaderView::ResizeToContents);
-		ui.availableView->header()->setResizeMode(QHeaderView::ResizeToContents);
+		ui.managedView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+		ui.availableView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
 		updateUi(m_Device->getState());
 

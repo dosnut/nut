@@ -1,10 +1,10 @@
 #include "cnut_commands.h"
-#include <libnutclient/dbus.h>
+#include <libnutclientbase/dbus.h>
 
 #include <QTextStream>
 
 namespace cnut {
-	using namespace libnutclient;
+	using namespace libnutclientbase;
 
 	namespace {
 		void checkAccessRights(QDBusError error) {

@@ -1,13 +1,13 @@
 include(CMakeParseArguments)
 
-# object_link_library(target PRIVATE libs* PUBLIC libs* INTERFACE libs*)
-function(object_link_library target)
+# object_link_libraries(target PRIVATE libs* PUBLIC libs* INTERFACE libs*)
+function(object_link_libraries target)
 	set(options)
 	set(oneValueArgs)
 	set(multiValueArgs PRIVATE PUBLIC INTERFACE)
 	cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 	if (ARG_UNPARSED_ARGUMENTS)
-		message(FATAL_ERROR "object_link_library: unknown arguments: ${ARG_UNPARSED_ARGUMENTS}")
+		message(FATAL_ERROR "object_link_libraries: unknown arguments: ${ARG_UNPARSED_ARGUMENTS}")
 	endif()
 
 	foreach(lib ${ARG_PRIVATE})
@@ -33,7 +33,7 @@ function(object_link_library target)
 
 	# always need to link them as "INTERFACE"
 	foreach(lib ${ARG_PRIVATE} ${ARG_PUBLIC} ${ARG_INTERFACE})
-		set_property(TARGET "${target}" APPEND PROPERTY INTERFACE_LINK_LIBRARIES $<TARGET_PROPERTY:${lib},INTERFACE_LINK_LIBRARIES>)
+		set_property(TARGET "${target}" APPEND PROPERTY INTERFACE_LINK_LIBRARIES ${lib})
 	endforeach()
 endfunction()
 
@@ -41,6 +41,7 @@ function(target_link_object target)
 	foreach(lib ${ARGN})
 		get_target_property(type "${lib}" TYPE)
 		if("${type}" STREQUAL "OBJECT_LIBRARY")
+			# target_sources doesn't work yet either...
 			target_include_directories("${target}" PUBLIC $<TARGET_PROPERTY:${lib},INTERFACE_INCLUDE_DIRECTORIES>)
 			target_include_directories("${target}" SYSTEM PUBLIC $<TARGET_PROPERTY:${lib},INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>)
 			target_compile_definitions("${target}" PUBLIC $<TARGET_PROPERTY:${lib},INTERFACE_COMPILE_DEFINITIONS>)
@@ -49,6 +50,7 @@ function(target_link_object target)
 			# generator expressions are broken in cmake...
 			# target_link_libraries("${target}" $<TARGET_PROPERTY:${lib},INTERFACE_LINK_LIBRARIES>)
 			get_target_property(libs "${lib}" INTERFACE_LINK_LIBRARIES)
+			message(STATUS "linking ${target} against ${libs} for ${lib}")
 			target_link_libraries("${target}" ${libs})
 		else()
 			target_link_libraries("${target}" "${lib}")
