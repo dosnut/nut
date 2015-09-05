@@ -7,8 +7,11 @@
 
 #include "cnutservice.h"
 
-namespace libnutclient {
+namespace libnutclientbase {
 	class DBusDeviceManager;
+}
+
+namespace libnutclient {
 	class CDeviceManager;
 	class CDevice;
 	class CEnvironment;
@@ -29,7 +32,7 @@ namespace libnutclient {
 	private:
 		friend class CDevice;
 
-		DBusDeviceManager* m_dbusDevmgr = nullptr;
+		libnutclientbase::DBusDeviceManager* m_dbusDevmgr = nullptr;
 		QHash<QDBusObjectPath, CDevice*> m_dbusDevices;
 		CDeviceList m_devices;
 

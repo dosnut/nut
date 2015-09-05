@@ -1,6 +1,6 @@
 #include "client.h"
 #include "libnutcommon/common.h"
-#include "dbus.h"
+#include "libnutclientbase/dbus.h"
 #ifndef NUT_NO_WIRELESS
 # include "libnutwireless/cwireless.h"
 #endif
@@ -79,12 +79,12 @@ namespace libnutclient {
 	void CDevice::dbusConnectService(QString service, QDBusConnection connection) {
 		if (m_dbusDevice) return;
 
-		m_dbusDevice = new DBusDevice(service, m_dbusPath, connection, this);
+		m_dbusDevice = new libnutclientbase::DBusDevice(service, m_dbusPath, connection, this);
 
 		/* all other signals are covered by this one */
 		connect(m_dbusDevice, SIGNAL(propertiesChanged(libnutcommon::DeviceProperties)), this, SLOT(dbusPropertiesChanged(libnutcommon::DeviceProperties)));
 
-		auto handleEnvironments = [this](libnutclient::DBusDevice::Result_getEnvironments envPaths) {
+		auto handleEnvironments = [this](libnutclientbase::DBusDevice::Result_getEnvironments envPaths) {
 			if (!m_dbusDevice) return;
 			auto initDone = checkInitDone();
 			--m_initCounter;

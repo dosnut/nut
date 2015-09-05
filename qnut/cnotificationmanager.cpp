@@ -25,14 +25,18 @@ namespace qnut {
 
 	CNotificationManager::CNotificationManager(QWidget * mainWindow, QObject * parent) : QObject(parent), m_MainWindow(mainWindow) {
 		m_MainIcon = new QSystemTrayIcon(QIcon(UI_ICON_QNUT_SMALL), this);
+
 		QMenu * trayMenu = new QMenu("QNUT");
+		trayMenu->setSeparatorsCollapsible(true);
 		trayMenu->addAction(tr("Open Connection &Manager"), m_MainWindow, SLOT(show()));
 		trayMenu->addSeparator();
 		m_InsertMarker = trayMenu->addSeparator();
+#if 0 /* kde shows quit itself.. couldn't find a workaround yet */
 		trayMenu->addAction(tr("&Quit"), qApp, SLOT(quit()));
-		trayMenu->setSeparatorsCollapsible(true);
+#endif
 
 		m_MainIcon->setContextMenu(trayMenu);
+		m_MainIcon->show();
 
 		connect(m_MainIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
 			this, SLOT(handleMainIconActivated(QSystemTrayIcon::ActivationReason)));

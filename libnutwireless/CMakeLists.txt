@@ -1,26 +1,13 @@
-project(nutwireless)
-
-include(${QT_USE_FILE})
-
 find_package(BISON)
 find_package(FLEX)
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+add_definitions(-DCONFIG_CTRL_IFACE -DCONFIG_CTRL_IFACE_UNIX)
 
-set(SOURCES_MOC_H
-# 	hwtypes.h
-# 	wstypes.h
-# 	types.h
-	wpa_supplicant.h
-	cwireless.h
-	cwirelesshw.h
-	cwexthw.h
-	cnl80211.h
-# 	cnetworkconfig.h
-# 	conversion.h
-# 	cconfigparser.h
-)
-set(SOURCES_CPP
+bison_target(CONFIGPARSER_Y configparser.y ${CMAKE_CURRENT_BINARY_DIR}/configparser_yacc.cpp COMPILE_FLAGS "-p configparser")
+flex_target(CONFIGPARSER_L configparser.l ${CMAKE_CURRENT_BINARY_DIR}/configparser_lex.cpp COMPILE_FLAGS "-Pconfigparser")
+add_flex_bison_dependency(CONFIGPARSER_L CONFIGPARSER_Y)
+
+add_library(nutwireless OBJECT
 	wstypes.cpp
 	cws_net.cpp
 	types.cpp
@@ -34,33 +21,23 @@ set(SOURCES_CPP
 	cnetworkconfig.cpp
 	conversion.cpp
 	cconfigparser.cpp
-)
-set(SOURCES_C
+	cwirelesshw.h
+
 	wpa_ctrl/wpa_ctrl.c
 	wpa_ctrl/common.c
 	wpa_ctrl/wpa_debug.c
 	wpa_ctrl/os_unix.c
-)
 
-add_definitions(-DCONFIG_CTRL_IFACE -DCONFIG_CTRL_IFACE_UNIX)
-
-bison_target(CONFIGPARSER_Y configparser.y ${CMAKE_CURRENT_BINARY_DIR}/configparser_yacc.cpp COMPILE_FLAGS "-p configparser")
-flex_target(CONFIGPARSER_L configparser.l ${CMAKE_CURRENT_BINARY_DIR}/configparser_lex.cpp COMPILE_FLAGS "-Pconfigparser")
-add_flex_bison_dependency(CONFIGPARSER_L CONFIGPARSER_Y)
-
-qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})
-
-add_library(${PROJECT_NAME} OBJECT
-	${SOURCES_C}
-	${SOURCES_CPP}
-	${SOURCES_MOC_CPP}
 	${FLEX_CONFIGPARSER_L_OUTPUTS}
 	${BISON_CONFIGPARSER_Y_OUTPUTS}
 )
 
-object_link_library(${PROJECT_NAME} PUBLIC
+object_link_libraries(nutwireless PUBLIC
+	nutcommon
 	libnl
 	libnl-genl
+	Qt5::Network
+	Qt5::Core
 )
 
 file(GLOB NUTWIRELESS_H ${CMAKE_CURRENT_SOURCE_DIR}/*.h)

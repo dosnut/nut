@@ -1,5 +1,6 @@
 #include <QtGui>
 #include <QTranslator>
+#include <QApplication>
 
 #include "cconnectionmanager.h"
 #include "constants.h"

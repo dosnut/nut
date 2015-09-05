@@ -7,8 +7,11 @@
 #include "cnutservice.h"
 #include "libnutcommon/common.h"
 
-namespace libnutclient {
+namespace libnutclientbase {
 	class DBusEnvironment;
+}
+
+namespace libnutclient {
 	class CDeviceManager;
 	class CDevice;
 	class CEnvironment;
@@ -30,7 +33,7 @@ namespace libnutclient {
 		friend class CInterface;
 
 		CDevice* m_device = nullptr;
-		DBusEnvironment* m_dbusEnvironment = nullptr;
+		libnutclientbase::DBusEnvironment* m_dbusEnvironment = nullptr;
 		QDBusObjectPath m_dbusPath;
 
 		int m_initCounter = 0;

@@ -1,6 +1,6 @@
 #include "cdevicemanager.h"
 #include "libnutcommon/common.h"
-#include "dbus.h"
+#include "libnutclientbase/dbus.h"
 #include "cdevice.h"
 
 namespace libnutclient {
@@ -27,7 +27,7 @@ namespace libnutclient {
 	void CDeviceManager::dbusConnectService(QString service, QDBusConnection connection) {
 		if (m_dbusDevmgr) return;
 
-		m_dbusDevmgr = new DBusDeviceManager(service, DBusDeviceManager::makePath(), connection, this);
+		m_dbusDevmgr = new libnutclientbase::DBusDeviceManager(service, libnutclientbase::DBusDeviceManager::makePath(), connection, this);
 		connect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
 		connect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
 

@@ -1,92 +1,63 @@
 project(qnut)
 
-set(QT_DONT_USE_QTGUI 0)
-include(${QT_USE_FILE})
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/utils ${CMAKE_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 set(INSTALL_SHARE_PREFIX ${CMAKE_INSTALL_PREFIX}/share)
-set(INSTALL_SHARE_TARGET_PREFIX ${INSTALL_SHARE_PREFIX}/${PROJECT_NAME})
+set(INSTALL_SHARE_TARGET_PREFIX ${INSTALL_SHARE_PREFIX}/qnut)
 
 set(FORMS
-	ui/devicedetails.ui
-	ui/ipconfiguration.ui
-	ui/devicesettings.ui
-	ui/wirelesssettings.ui
 	ui/accesspointconfig.ui
 	ui/adhocconfig.ui
+	ui/devicedetails.ui
+	ui/devicesettings.ui
+	ui/ipconfiguration.ui
+	ui/wirelesssettings.ui
 )
 
-set(SOURCES_MOC_H
-	cconnectionmanager.h
-	cipconfiguration.h
-	cwirelesssettings.h
-	cabstractwifinetconfigdialog.h
-	caccesspointconfig.h
-	cadhocconfig.h
-	cdevicesettings.h
-	cuidevice.h
-	cnotificationmanager.h
+file(GLOB TRANSLATIONS_TS translations/qnut_*.ts)
+file(GLOB_RECURSE TRANSLATIONS_USAGES *.cpp *.ui)
 
-	modelview/cuidevicemodel.h
-	modelview/cenvironmenttreemodel.h
-	modelview/cinterfacedetailsmodel.h
-	modelview/cenvironmentdetailsmodel.h
-	modelview/cavailableapmodel.h
-	modelview/cmanagedapmodel.h
-	modelview/cdnslistmodel.h
-	modelview/cipeditdelegate.h
-	modelview/ccommandlistmodel.h
-)
+qt5_wrap_ui(FORMS_H ${FORMS})
+qt5_create_translation(TRANSLATIONS_QM ${TRANSLATIONS_USAGES} ${TRANSLATIONS_TS})
 
-set(SOURCES_CPP main.cpp
-	common.cpp
-
-	cconnectionmanager.cpp
-	cipconfiguration.cpp
-	cwirelesssettings.cpp
+add_executable(qnut
 	cabstractwifinetconfigdialog.cpp
 	caccesspointconfig.cpp
 	cadhocconfig.cpp
+	cconnectionmanager.cpp
 	cdevicesettings.cpp
-	cuidevice.cpp
+	cipconfiguration.cpp
 	cnotificationmanager.cpp
+	common.cpp
+	cuidevice.cpp
+	cwirelesssettings.cpp
+	main.cpp
 
-	modelview/cuidevicemodel.cpp
+	modelview/cavailableapmodel.cpp
+	modelview/ccommandlistmodel.cpp
+	modelview/cdnslistmodel.cpp
+	modelview/cenvironmentdetailsmodel.cpp
 	modelview/cenvironmenttreemodel.cpp
 	modelview/cinterfacedetailsmodel.cpp
-	modelview/cenvironmentdetailsmodel.cpp
-	modelview/cavailableapmodel.cpp
-	modelview/cmanagedapmodel.cpp
-	modelview/cdnslistmodel.cpp
 	modelview/cipeditdelegate.cpp
-	modelview/ccommandlistmodel.cpp
+	modelview/cmanagedapmodel.cpp
+	modelview/cuidevicemodel.cpp
 
 	utils/cerrorcodeevaluator.cpp
-)
 
-file(GLOB TRANSLATIONS_TS translations/${PROJECT_NAME}_*.ts)
-
-qt4_wrap_ui(FORMS_H ${FORMS})
-qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})
-my_qt4_create_translation(TRANSLATIONS_QM ${SOURCES_CPP} ${FORMS} ${TRANSLATIONS_TS})
-
-add_executable(${PROJECT_NAME}
-	${SOURCES_CPP}
-	${SOURCES_MOC_CPP}
 	${FORMS_H}
 	${TRANSLATIONS_QM}
 )
 
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(qnut
 	nutclient
-	nutcommon
-	${QT_LIBRARIES}
+	Qt5::Gui
+	Qt5::Widgets
 )
 
 file(GLOB RES_ICONS res/*.png res/qnut.svg res/qnut_small.svg)
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+install(TARGETS qnut DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 install(FILES ${TRANSLATIONS_QM} DESTINATION ${INSTALL_SHARE_TARGET_PREFIX}/lang)
 install(FILES ${RES_ICONS} DESTINATION ${INSTALL_SHARE_TARGET_PREFIX}/icons)
-install(FILES ${PROJECT_NAME}.desktop DESTINATION ${INSTALL_SHARE_PREFIX}/applications)
+install(FILES qnut.desktop DESTINATION ${INSTALL_SHARE_PREFIX}/applications)

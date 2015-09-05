@@ -4,7 +4,7 @@ cmake_policy(SET CMP0022 NEW)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 PROJECT(network-utiltities
-	VERSION 0.5.9
+	VERSION 0.6.0
 	LANGUAGES C CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${network-utiltities_BINARY_DIR})
@@ -19,7 +19,6 @@ include(ExtraFlags)
 include(ImportNetlink)
 include(LanguageFlags)
 include(LinkObjectLibrary)
-include(MyQtTranslation)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(INTERPROCEDURAL_OPTIMIZATION ON)
@@ -37,7 +36,17 @@ endif()
 set(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output directory for libraries")
 set(CMAKE_INSTALL_INCLUDEDIR include CACHE PATH "Output directory for includes")
 
-find_package(Qt4 COMPONENTS QtCore QtGui QtDbus QtNetwork REQUIRED)
+include_directories(${CMAKE_SOURCE_DIR})
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5DBus REQUIRED)
+find_package(Qt5Network REQUIRED)
+find_package(Qt5LinguistTools REQUIRED)
+
 # only qnut uses gui
 set(QT_DONT_USE_QTGUI 1)
 
@@ -47,22 +56,16 @@ function(build_subdir)
 	endforeach()
 endfunction()
 
+build_subdir(libnutcommon)
+
 if(USE_WIRELESS)
 	build_subdir(libnutwireless)
 endif()
 
 build_subdir(
-	libnutcommon
+	libnutclientbase
 	libnutclient
 	cnut
 	nuts
 	qnut
 )
-
-# sadly touches files always even when nothing changed
-option(UPDATE_TRANSLATIONS "Automatically update translations in source directory" OFF)
-
-if(UPDATE_TRANSLATIONS)
-	add_dependencies(nutclient update-translations)
-	add_dependencies(qnut update-translations)
-endif()

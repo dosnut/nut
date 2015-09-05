@@ -16,7 +16,7 @@
 
 
 #define UI_ICON_QNUT                    UI_PATH_ICONS "qnut.svg"
-#define UI_ICON_QNUT_SMALL              UI_PATH_ICONS "qnut_small.svg"
+#define UI_ICON_QNUT_SMALL              UI_PATH_ICONS "qnut_small.png"
 
 #define UI_ICON_ENABLE                  UI_PATH_ICONS "enable.png"
 #define UI_ICON_ENABLE_ALL              UI_PATH_ICONS "enable_all.png"

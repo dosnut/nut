@@ -161,11 +161,11 @@ namespace qnut {
 
 	void CAbstractWifiNetConfigDialog::convertLineEditText(QLineEdit * lineEdit, bool hex) {
 		if (hex) {
-			lineEdit->setText(lineEdit->text().toAscii().toHex());
+			lineEdit->setText(lineEdit->text().toLatin1().toHex());
 			lineEdit->setValidator(m_HexValidator);
 		}
 		else {
-			lineEdit->setText(QByteArray::fromHex(lineEdit->text().toAscii()));
+			lineEdit->setText(QByteArray::fromHex(lineEdit->text().toLatin1()));
 			lineEdit->setValidator(NULL);
 		}
 	}

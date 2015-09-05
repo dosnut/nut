@@ -336,7 +336,7 @@ namespace qnut {
 		ui.detailsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 		ui.environmentTree->setModel(new CEnvironmentTreeModel(m_Device));
-		ui.environmentTree->header()->setResizeMode(QHeaderView::ResizeToContents);
+		ui.environmentTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 		ui.environmentTree->setIconSize(QSize(20,20));
 
 		connect(ui.environmentTree->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
@@ -356,7 +356,7 @@ namespace qnut {
 	inline void CUIDevice::executeCommand(QStringList & env, QString path) {
 		QProcess * process = new QProcess(this);
 		process->setEnvironment(env + QProcess::systemEnvironment());
-		qDebug("[QNUT] starting process: %s", path.toAscii().data());
+		qDebug("[QNUT] starting process: %s", path.toLatin1().data());
 		process->start(path);
 		connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), process, SLOT(deleteLater()));
 		connect(process, SIGNAL(error(QProcess::ProcessError)), process, SLOT(deleteLater()));

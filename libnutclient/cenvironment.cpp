@@ -1,5 +1,5 @@
 #include "client.h"
-#include "dbus.h"
+#include "libnutclientbase/dbus.h"
 #include "libnutcommon/common.h"
 
 namespace libnutclient {
@@ -52,12 +52,12 @@ namespace libnutclient {
 	void CEnvironment::dbusConnectService(QString service, QDBusConnection connection) {
 		if (m_dbusEnvironment) return;
 
-		m_dbusEnvironment = new DBusEnvironment(service, m_dbusPath, connection, this);
+		m_dbusEnvironment = new libnutclientbase::DBusEnvironment(service, m_dbusPath, connection, this);
 
 		/* all other signals are covered by this one */
 		connect(m_dbusEnvironment, SIGNAL(propertiesChanged(libnutcommon::EnvironmentProperties)), this, SLOT(dbusPropertiesChanged(libnutcommon::EnvironmentProperties)));
 
-		auto handleInterfaces = [this](libnutclient::DBusEnvironment::Result_getInterfaces ifPaths) {
+		auto handleInterfaces = [this](libnutclientbase::DBusEnvironment::Result_getInterfaces ifPaths) {
 			if (!m_dbusEnvironment) return;
 			auto initDone = checkInitDone();
 			--m_initCounter;

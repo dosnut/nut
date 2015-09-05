@@ -292,13 +292,13 @@ void CWextHW::readSignalQuality() {
 	struct wireless_config wifiConfig;
 	memset(&wifiConfig,0,sizeof(struct wireless_config));
 	/* Get basic information */
-	if(iw_get_basic_config(m_wextFd, m_ifname.toAscii().constData(), &wifiConfig) < 0) {
+	if(iw_get_basic_config(m_wextFd, m_ifname.toLatin1().constData(), &wifiConfig) < 0) {
 		/* If no wireless name : no wireless extensions */
 		/* But let's check if the interface exists at all */
 		struct ifreq ifr;
 		memset(&ifr,0,sizeof(struct ifreq));
 
-		strncpy(ifr.ifr_name, m_ifname.toAscii().data(), IFNAMSIZ);
+		strncpy(ifr.ifr_name, m_ifname.toLatin1().data(), IFNAMSIZ);
 		if(ioctl(m_wextFd, SIOCGIFFLAGS, &ifr) < 0)
 			qWarning() << tr("(Wireless Extension) No device present");
 		else
@@ -321,7 +321,7 @@ void CWextHW::readSignalQuality() {
 	memset(&wrq,0,sizeof(struct iwreq));
 
 	/* Get AP address */
-	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWAP, &wrq) >= 0) {
+	if(iw_get_ext(m_wextFd, m_ifname.toLatin1().data(), SIOCGIWAP, &wrq) >= 0) {
 		//Add mac address of current ap;
 		res.bssid = libnutcommon::MacAddress((ether_addr*)wrq.u.ap_addr.sa_data);
 		qDebug() << "Got AP: " << res.bssid.toString();
@@ -332,17 +332,17 @@ void CWextHW::readSignalQuality() {
 	memset(buffer, '\0', IW_ESSID_MAX_SIZE);
 	wrq.u.essid.pointer = (void *)buffer;
 	wrq.u.essid.length = IW_ESSID_MAX_SIZE;
-	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWESSID, &wrq) >= 0) {
+	if(iw_get_ext(m_wextFd, m_ifname.toLatin1().data(), SIOCGIWESSID, &wrq) >= 0) {
 		if (wrq.u.essid.length > IW_ESSID_MAX_SIZE)
 			wrq.u.essid.length = IW_ESSID_MAX_SIZE;
 		if (wrq.u.essid.flags) {
 			/* Does it have an ESSID index ? */
 			if ( wrq.u.essid.pointer && wrq.u.essid.length ) {
 				if ( (wrq.u.essid.flags & IW_ENCODE_INDEX) > 1) {
-					res.ssid = QString("%1 [%2]").arg(QString::fromAscii((char*) wrq.u.essid.pointer, wrq.u.essid.length), QString::number(wrq.u.essid.flags & IW_ENCODE_INDEX));
+					res.ssid = QString("%1 [%2]").arg(QString::fromLatin1((char*) wrq.u.essid.pointer, wrq.u.essid.length), QString::number(wrq.u.essid.flags & IW_ENCODE_INDEX));
 				}
 				else {
-					res.ssid = QString::fromAscii((char*) wrq.u.essid.pointer, wrq.u.essid.length);
+					res.ssid = QString::fromLatin1((char*) wrq.u.essid.pointer, wrq.u.essid.length);
 				}
 			}
 			else {
@@ -354,22 +354,22 @@ void CWextHW::readSignalQuality() {
 	delete[] buffer;
 
 	/* Get bit rate */
-	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWRATE, &wrq) >= 0) {
+	if(iw_get_ext(m_wextFd, m_ifname.toLatin1().data(), SIOCGIWRATE, &wrq) >= 0) {
 		res.bitrates.append((qint32) wrq.u.bitrate.value);
 		qDebug() << "Got bit rate: " << res.bitrates[0];
 	}
 
 	/* Get Power Management settings */
 	wrq.u.power.flags = 0;
-	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWPOWER, &wrq) >= 0) {
+	if(iw_get_ext(m_wextFd, m_ifname.toLatin1().data(), SIOCGIWPOWER, &wrq) >= 0) {
 		qDebug() << "Got power";
 	}
 	/* workaround */
 
 
 	/* Get range stuff */
-	qDebug() << QString("Getting range stuff for %1").arg(m_ifname.toAscii().data());
-	if (iw_get_range_info(m_wextFd, m_ifname.toAscii().data(), &range) >= 0) {
+	qDebug() << QString("Getting range stuff for %1").arg(m_ifname.toLatin1().data());
+	if (iw_get_range_info(m_wextFd, m_ifname.toLatin1().data(), &range) >= 0) {
 		hasRange = 1;
 		qDebug() << "Success readWirelessInfo getrange" << strerror(errno);
 	}
@@ -439,10 +439,10 @@ void CWextHW::readSignalQuality() {
 		wrq.u.data.pointer = (caddr_t) &stats;
 		wrq.u.data.length = sizeof(struct iw_statistics);
 		wrq.u.data.flags = 1; // Clear updated flag
-		strncpy(wrq.ifr_name, m_ifname.toAscii().data(), IFNAMSIZ);
+		strncpy(wrq.ifr_name, m_ifname.toLatin1().data(), IFNAMSIZ);
 
 		qDebug() << "Getting wireless stats";
-		if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWSTATS, &wrq) < 0) {
+		if(iw_get_ext(m_wextFd, m_ifname.toLatin1().data(), SIOCGIWSTATS, &wrq) < 0) {
 			qWarning() << tr("Error occured while fetching wireless info: ") << strerror(errno);
 		}
 		else { //Stats fetched
@@ -505,13 +505,13 @@ void CWextHW::readScanResults() {
 	memset(&wifiConfig,0,sizeof(struct wireless_config));
 
 	/* Get basic information */
-	if(iw_get_basic_config(m_wextFd, m_ifname.toAscii().constData(), &wifiConfig) < 0) {
+	if(iw_get_basic_config(m_wextFd, m_ifname.toLatin1().constData(), &wifiConfig) < 0) {
 		/* If no wireless name : no wireless extensions */
 		/* But let's check if the interface exists at all */
 		struct ifreq ifr;
 		memset(&ifr,0,sizeof(struct ifreq));
 
-		strncpy(ifr.ifr_name, m_ifname.toAscii().data(), IFNAMSIZ);
+		strncpy(ifr.ifr_name, m_ifname.toLatin1().data(), IFNAMSIZ);
 		if(ioctl(m_wextFd, SIOCGIFFLAGS, &ifr) < 0)
 			qWarning() << tr("(Wireless Extension) No device present");
 		else
@@ -521,26 +521,26 @@ void CWextHW::readScanResults() {
 	qDebug() << "Fetched basic config.";
 
 	/* Get AP address */
-	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWAP, &wrq) >= 0) {
+	if(iw_get_ext(m_wextFd, m_ifname.toLatin1().data(), SIOCGIWAP, &wrq) >= 0) {
 		qDebug() << "Got AP";
 	}
 
 	/* Get bit rate */
-	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWRATE, &wrq) >= 0) {
+	if(iw_get_ext(m_wextFd, m_ifname.toLatin1().data(), SIOCGIWRATE, &wrq) >= 0) {
 		qDebug() << "Got bit rate";
 	}
 
 	/* Get Power Management settings */
 	wrq.u.power.flags = 0;
-	if(iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWPOWER, &wrq) >= 0) {
+	if(iw_get_ext(m_wextFd, m_ifname.toLatin1().data(), SIOCGIWPOWER, &wrq) >= 0) {
 		qDebug() << "Got power";
 	}
 	/* workaround */
 
 	/* Get range stuff */
 	/* Get range stuff */
-	qDebug() << QString("Getting range stuff for %1").arg(m_ifname.toAscii().data());
-	if (iw_get_range_info(m_wextFd, m_ifname.toAscii().data(), &range) >= 0) {
+	qDebug() << QString("Getting range stuff for %1").arg(m_ifname.toLatin1().data());
+	if (iw_get_range_info(m_wextFd, m_ifname.toLatin1().data(), &range) >= 0) {
 		has_range = 1;
 		qDebug() << "Success readWirelessInfo getrange" << strerror(errno);
 	}
@@ -597,7 +597,7 @@ void CWextHW::readScanResults() {
 		wrq.u.data.length = buflen;
 
 		//Get the data:
-		if (iw_get_ext(m_wextFd, m_ifname.toAscii().data(), SIOCGIWSCAN, &wrq) < 0) {
+		if (iw_get_ext(m_wextFd, m_ifname.toLatin1().data(), SIOCGIWSCAN, &wrq) < 0) {
 			//Buffer is too small
 			if((errno == E2BIG) && (range.we_version_compiled > 16)) {
 
@@ -655,7 +655,7 @@ void CWextHW::readScanResults() {
 						//ap_addr has type socketaddr
 						//Workaround for macaddress
 // 						iw_saether_ntop(&(iwe.u.ap_addr), buffer2);
-// 						tmpMac = libnutcommon::MacAddress(QString::fromAscii(buffer2,128));
+// 						tmpMac = libnutcommon::MacAddress(QString::fromLatin1(buffer2,128));
 						tmpMac = libnutcommon::MacAddress( (ether_addr*) iwe.u.ap_addr.sa_data);
 						if (singleres.bssid.zero()) { //First bssid
 							singleres.bssid = tmpMac;
@@ -716,10 +716,10 @@ void CWextHW::readScanResults() {
 							/* Does it have an ESSID index ? */
 							if ( iwe.u.essid.pointer && iwe.u.essid.length ) {
 								if ( (iwe.u.essid.flags & IW_ENCODE_INDEX) > 1) {
-									singleres.ssid = QString("%1 [%2]").arg(QString::fromAscii((char*) iwe.u.essid.pointer,iwe.u.essid.length), QString::number(iwe.u.essid.flags & IW_ENCODE_INDEX));
+									singleres.ssid = QString("%1 [%2]").arg(QString::fromLatin1((char*) iwe.u.essid.pointer,iwe.u.essid.length), QString::number(iwe.u.essid.flags & IW_ENCODE_INDEX));
 								}
 								else {
-									singleres.ssid = QString("%1").arg(QString::fromAscii((char*) iwe.u.essid.pointer,iwe.u.essid.length));
+									singleres.ssid = QString("%1").arg(QString::fromLatin1((char*) iwe.u.essid.pointer,iwe.u.essid.length));
 								}
 							}
 							else {
