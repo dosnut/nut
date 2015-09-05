@@ -1,3 +1,13 @@
+network-utilities (0.6.0-1) experimental; urgency=medium
+
+  * move to Qt5; split libnutclientbase into separate library
+  * update translations files
+  * fix trayicon (use png, svg doesn't work), fix segfault on quit
+  * Translated using Weblate (German)
+  * Release 0.6.0
+
+ -- Stefan Bühler <stbuehler@web.de>  Sat, 05 Sep 2015 20:51:34 +0200
+
 network-utilities (0.5.9-3) experimental; urgency=medium
 
   * fix debian lib/*.install filenames, require cmake >= 3 in debian/control
