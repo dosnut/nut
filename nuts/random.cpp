@@ -1,7 +1,7 @@
 //
 // C++ Implementation: random
 //
-// Description: 
+// Description:
 //
 //
 // Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
@@ -27,7 +27,7 @@ namespace nuts {
 		if (fd >= 0)
 			close(fd);
 	}
-	
+
 	inline static void checkRandInit() {
 		static bool initialized = false;
 		if (!initialized) {

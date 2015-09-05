@@ -1,12 +1,11 @@
 project(nutwireless)
 
-find_package(Qt4 COMPONENTS QtCore QtNetwork QtDBus REQUIRED)
 include(${QT_USE_FILE})
 
 find_package(BISON)
 find_package(FLEX)
 
-include_directories(${QT_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(SOURCES_MOC_H
 # 	hwtypes.h
@@ -43,7 +42,7 @@ set(SOURCES_C
 	wpa_ctrl/os_unix.c
 )
 
-add_definitions(-DUSED_CMAKE -DCONFIG_CTRL_IFACE -DCONFIG_CTRL_IFACE_UNIX)
+add_definitions(-DCONFIG_CTRL_IFACE -DCONFIG_CTRL_IFACE_UNIX)
 
 bison_target(CONFIGPARSER_Y configparser.y ${CMAKE_CURRENT_BINARY_DIR}/configparser_yacc.cpp COMPILE_FLAGS "-p configparser")
 flex_target(CONFIGPARSER_L configparser.l ${CMAKE_CURRENT_BINARY_DIR}/configparser_lex.cpp COMPILE_FLAGS "-Pconfigparser")
@@ -51,7 +50,7 @@ add_flex_bison_dependency(CONFIGPARSER_L CONFIGPARSER_Y)
 
 qt4_wrap_cpp(SOURCES_MOC_CPP ${SOURCES_MOC_H})
 
-add_library(${PROJECT_NAME} STATIC
+add_library(${PROJECT_NAME} OBJECT
 	${SOURCES_C}
 	${SOURCES_CPP}
 	${SOURCES_MOC_CPP}
@@ -59,7 +58,10 @@ add_library(${PROJECT_NAME} STATIC
 	${BISON_CONFIGPARSER_Y_OUTPUTS}
 )
 
-target_link_libraries(${PROJECT_NAME}
-	${QT_LIBRARIES}
-	${CMAKE_BINARY_DIR}/libnutcommon/libnutcommon.a
+object_link_library(${PROJECT_NAME} PUBLIC
+	libnl
+	libnl-genl
 )
+
+file(GLOB NUTWIRELESS_H ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+install(FILES ${NUTWIRELESS_H} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libnutwireless)

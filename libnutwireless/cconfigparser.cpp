@@ -7,7 +7,7 @@ extern "C" {
 }
 #include <iostream>
 
-void configparserparse(libnutwireless::CConfigParser * cp);
+int configparserparse(libnutwireless::CConfigParser * cp);
 extern FILE *configparserin;
 extern libnutwireless::CConfigParser * libnutcconfigparser;
 int configparserlex_destroy(void);
@@ -22,11 +22,11 @@ namespace libnutwireless {
 		configparserlex_destroy();
 		return true;
 	}
-	
+
 	void CConfigParser::parseError(int line_num, QString msg) {
 		m_errors.append(QString("Error occured: %1 in Line %2").arg(msg,line_num));
 	}
-	
+
 	int CConfigParser::readFromStream(char * buf, int max_size) {
 		QString str = stream->read(max_size-1);
 		int size = str.size();

@@ -13,6 +13,7 @@
 #include <QHash>
 #include <libnutclient/cdevicemanager.h>
 #include <libnutclient/clog.h>
+#include <libnutcommon/common.h>
 
 class QTabWidget;
 class QTextEdit;
@@ -22,13 +23,13 @@ class QSortFilterProxyModel;
 namespace qnut {
 	class CUIDeviceModel;
 	class CNotificationManager;
-	
+
 	/**
 	 * @brief CConnectionManager acts as the main class (and window) of the application
 	 * @author Oliver Groß <z.o.gross@gmx.de>
-	 * 
+	 *
 	 * The connection manager itself provides only constructor and destructor.
-	 * 
+	 *
 	 * It's the main user interface of QNUT with the following tasks:
 	 *  - interact with the libnutclient::CDeviceManager
 	 *  - provide an overview of all managed devices and an application log (written to file: "~/.qnut/qnut.log")
@@ -42,43 +43,43 @@ namespace qnut {
 		 * @param parent parent widget
 		 */
 		CConnectionManager(QWidget * parent = 0);
-		
+
 		/// @brief Destroyes the object and writes the settings to "~/.qnut/qnut.conf".
 		~CConnectionManager();
-		
+
 		CNotificationManager * notificationManager() { return m_NotificationManager; }
 	private:
 		libnutclient::CDeviceManager * m_DeviceManager;
 		libnutclient::CLog m_LogFile;
-		
+
 		CNotificationManager * m_NotificationManager;
 		QSortFilterProxyModel * m_UIDeviceProxyModel;
 		CUIDeviceModel * m_UIDeviceModel;
-		
+
 		QTabWidget * m_TabWidget;
 		QTreeView * m_OverView;
 		QTextEdit * m_LogEdit;
-		
+
 		QMenu * m_EditMenu;
 		QToolBar * m_ToolBar;
-		
+
 		QAction * m_ShowLogAction;
 		QAction * m_ShowBalloonTipsAction;
-		
+
 		QAction * m_RefreshDevicesAction;
 		QAction * m_ClearLogAction;
-		
+
 		QAction * m_EnableDeviceAction;
 		QAction * m_DisableDeviceAction;
-		
+
 		QAction * m_DeviceSettingsAction;
-#ifndef QNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 		QAction * m_WirelessSettingsAction;
 #endif
-		
+
 		inline void createActions();
 		inline void distributeActions(int mode = 0);
-		
+
 		inline void readSettings();
 		inline void writeSettings();
 	private slots:

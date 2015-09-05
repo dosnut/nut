@@ -28,11 +28,11 @@ class QWidget;
 class CErrorCodeEvaluator {
 public:
 	CErrorCodeEvaluator();
-	
+
 	QString evaluate(unsigned long int code) const;
 	void evaluate(QStringList & target, unsigned long int & errorFlags) const;
 	void evaluate(QString & target, const QString & separator, unsigned long int & errorFlags) const;
-	
+
 	void registerErrorCode(unsigned long int code, const QString & string);
 	void unregisterErrorCode(unsigned long int code);
 protected:

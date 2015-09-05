@@ -1,7 +1,7 @@
 #ifndef LIBNUTWIRELESS_CWIRELESS_H
 #define LIBNUTWIRELESS_CWIRELESS_H
 
-#ifndef LIBNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 #include "wpa_supplicant.h"
 #include "cwexthw.h"
 #include "cnl80211.h"

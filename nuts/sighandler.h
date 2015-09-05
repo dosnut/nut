@@ -1,7 +1,7 @@
 //
 // C++ Interface: sighandler
 //
-// Description: 
+// Description:
 //
 //
 // Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
@@ -25,11 +25,11 @@ namespace nuts {
 			bool quitOnSignal;
 		private slots:
 			void pipe_rcv();
-			
+
 		public:
 			SigHandler(bool quitOnSignal = true);
 			virtual ~SigHandler();
-		
+
 		signals:
 			void gotSignal(int signum);
 			void appQuit();

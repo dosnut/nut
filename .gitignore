@@ -1,9 +1,7 @@
-Makefile
-Doxyfile
 *.kdevelop
 *.kdevelop.pcs
 *.kdevses
 *~
 build
-*.pro.user
 *.kdev4
+CMakeLists.txt.user

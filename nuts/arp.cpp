@@ -1,7 +1,7 @@
 //
 // C++ Implementation: arp
 //
-// Description: 
+// Description:
 //
 //
 // Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
@@ -34,7 +34,7 @@ namespace nuts {
 		gettimeofday(&tv, 0);
 		return Time(tv.tv_sec, tv.tv_usec);
 	}
-	
+
 	Time Time::random(int min, int max) {
 		float range = (max - min);
 		float r = min + range * ((float) getRandomUInt32()) / ((float) (quint32) -1);
@@ -47,7 +47,7 @@ namespace nuts {
 	Time Time::waitRandom(int min, int max) {
 		return random(min, max) + current();
 	}
-	
+
 	Time Time::wait(time_t sec, suseconds_t usec) {
 		return current() + Time(sec, usec);
 	}
@@ -162,20 +162,20 @@ static QByteArray readARPPacket(int socket) {
 namespace nuts {
 	ARPTimer::ARPTimer(ARP *arp)
 	: QObject(arp), m_arp(arp), m_nextTimeout(Time::current()) { }
-	
+
 	ARPTimer::ARPTimer(ARP *arp, const Time &firstTimeout)
 	: QObject(arp), m_arp(arp), m_nextTimeout(firstTimeout) { }
-	
+
 	ARPRequest::ARPRequest(ARP *arp, const QHostAddress &sourceip, const QHostAddress &targetip)
 	: ARPTimer(arp, Time()), m_sourceip(sourceip), m_targetip(targetip), m_remaining_trys(ARPConst::PROBE_NUM), m_finished(false) {
 		timeEvent();
 	}
-	
+
 	ARPRequest::~ARPRequest() {
 		if (!m_arp || m_finished) return;
 		finish();
 	}
-	
+
 	bool ARPRequest::timeEvent() {
 		if (m_finished) return false;
 		if (m_remaining_trys <= 0) {
@@ -185,42 +185,42 @@ namespace nuts {
 		} else {
 			--m_remaining_trys;
 			m_nextTimeout = Time::waitRandom(ARPConst::PROBE_MIN, ARPConst::PROBE_MAX);
-			
+
 			arp_packet_ipv4 packet;
 			arp_ipv4_request(packet, m_arp->m_device->getMacAddress(), m_sourceip, m_targetip);
 			m_arp->arpWrite(QByteArray((const char*) &packet, sizeof(packet)));
-			
+
 			return true;
 		}
 	}
-	
+
 	void ARPRequest::gotPacket(const libnutcommon::MacAddress &mac) {
 		if (mac.zero()) return;
 		finish();
 		emit foundMac(mac, m_targetip);
 	}
-	
+
 	void ARPRequest::finish() {
 		m_finished = true;
 		m_arp->m_requests.remove(m_targetip);
 		m_arp->arpTimerDelete(this);
 		deleteLater();
 	}
-	
+
 	ARPProbe::ARPProbe(ARP *arp, const QHostAddress &ip)
 	: ARPTimer(arp, Time::waitRandom(0, ARPConst::PROBE_WAIT)), m_ip(ip), m_remaining_trys(ARPConst::PROBE_NUM),
 	  m_finished(false), m_reserve(false), m_state(PROBING) {
 	}
-	
+
 	ARPProbe::~ARPProbe() {
 		if (!m_arp || m_finished) return;
 		finish();
 	}
-	
+
 	void ARPProbe::setReserve(bool reserve) {
 		m_reserve = reserve;
 	}
-	
+
 	bool ARPProbe::timeEvent() {
 		if (m_state == CONFLICT) return false;
 		if (m_remaining_trys <= 0 && !m_reserve) {
@@ -238,36 +238,36 @@ namespace nuts {
 				--m_remaining_trys;
 			}
 			m_nextTimeout = Time::waitRandom(ARPConst::PROBE_MIN, ARPConst::PROBE_MAX);
-			
+
 			arp_packet_ipv4 packet;
 			arp_ipv4_request(packet, m_arp->m_device->getMacAddress(), QHostAddress((quint32) 0), m_ip);
 			m_arp->arpWrite(QByteArray((const char*) &packet, sizeof(packet)));
-			
+
 			return true;
 		}
 	}
-	
+
 	void ARPProbe::gotPacket(const libnutcommon::MacAddress &mac) {
 		if (mac.zero()) return;
 		m_state = CONFLICT;
 		finish();
 		emit conflict(m_ip, mac);
 	}
-	
+
 	void ARPProbe::gotProbe(const libnutcommon::MacAddress &mac) {
 		if (mac.zero()) return;
 		m_state = CONFLICT;
 		finish();
 		emit conflict(m_ip, mac);
 	}
-	
+
 	void ARPProbe::finish() {
 		m_finished = true;
 		m_arp->m_probes.remove(m_ip);
 		m_arp->arpTimerDelete(this);
 		deleteLater();
 	}
-	
+
 	ARPAnnounce::ARPAnnounce(ARP *arp, const QHostAddress &ip)
 	: ARPTimer(arp), m_ip(ip), m_remaining_announces(ARPConst::ANNOUNCE_NUM) {
 		timeEvent();
@@ -285,26 +285,26 @@ namespace nuts {
 			return false;
 		}
 		m_remaining_announces--;
-		
+
 		arp_packet_ipv4 packet;
 		arp_ipv4_request(packet, m_arp->m_device->getMacAddress(), m_ip, m_ip);
 		m_arp->arpWrite(QByteArray((const char*) &packet, sizeof(packet)));
-		
+
 		m_nextTimeout = Time::wait(ARPConst::ANNOUNCE_INTERVAL);
 		return true;
 	}
-	
+
 	ARPWatch::~ARPWatch() {
 		if (m_arp) m_arp->m_watches.remove(m_ip);
 	}
-	
+
 	void ARPWatch::gotPacket(const libnutcommon::MacAddress &mac) {
 		if (m_arp) m_arp->m_watches.remove(m_ip);
 		m_arp = 0;
 		emit conflict(m_ip, mac);
 		deleteLater();
 	}
-	
+
 	ARP::ARP(Device* device)
 	: QObject(device), m_device(device), m_arp_socket(-1), m_timer_id(0) {
 	}
@@ -312,7 +312,7 @@ namespace nuts {
 	ARP::~ARP() {
 		stop();
 	}
-	
+
 	bool ARP::start() {
 		if (m_arp_socket != -1) return true;
 		int if_index = m_device->m_interfaceIndex;
@@ -339,7 +339,7 @@ namespace nuts {
 			m_arp_socket = -1;
 			return false;
 		}
-		
+
 		m_arp_read_nf = new QSocketNotifier(m_arp_socket, QSocketNotifier::Read);
 		m_arp_write_nf = new QSocketNotifier(m_arp_socket, QSocketNotifier::Write);
  		m_arp_write_nf->setEnabled(!m_arp_write_buf.empty());
@@ -347,7 +347,7 @@ namespace nuts {
  		connect(m_arp_write_nf, SIGNAL(activated(int)), SLOT(arpWriteNF()));
 		return true;
 	}
-	
+
 	void ARP::stop() {
 		if (m_arp_socket != -1) {
 			if (m_arp_read_nf) {
@@ -373,7 +373,7 @@ namespace nuts {
 			delete t;
 		}
 	}
-	
+
 	ARPRequest *ARP::requestIPv4(const QHostAddress &source_addr, const QHostAddress &target_addr) {
 		if (m_arp_socket == -1) return 0;
 		ARPRequest *r;
@@ -393,7 +393,7 @@ namespace nuts {
 		m_probes.insert(addr, p);
 		return p;
 	}
-	
+
 	ARPAnnounce* ARP::announceIPv4(const QHostAddress &addr) {
 		if (m_arp_socket == -1) return 0;
 		ARPAnnounce *a;
@@ -401,7 +401,7 @@ namespace nuts {
 		arpTimerAdd(a);
 		return a;
 	}
-	
+
 	ARPWatch* ARP::watchIPv4(const QHostAddress &addr) {
 		if (m_arp_socket == -1) return 0;
 		ARPWatch *w;
@@ -409,7 +409,7 @@ namespace nuts {
 		m_watches.insert(addr, w);
 		return w;
 	}
-	
+
 	void ARP::arpReadNF() {
 		QByteArray data = readARPPacket(m_arp_socket);
 		quint8 proto_len;
@@ -443,7 +443,7 @@ namespace nuts {
 				} break;
 		}
 	}
-	
+
 	void ARP::arpWriteNF() {
 //		log << "writeARPSocket" << endl;
 		if (!m_arp_write_buf.empty()) {
@@ -452,13 +452,13 @@ namespace nuts {
 		}
 		m_arp_write_nf->setEnabled(!m_arp_write_buf.empty());
 	}
-	
+
 	void ARP::arpWrite(const QByteArray &buf) {
 		if (m_arp_write_buf.empty() && m_arp_write_nf)
 			m_arp_write_nf->setEnabled(true);
 		m_arp_write_buf.append(buf);
 	}
-	
+
 	void ARP::recalcTimer() {
 		if (m_timer_id) {
 			killTimer(m_timer_id);
@@ -471,7 +471,7 @@ namespace nuts {
 			m_timer_id = startTimer(interval);
 		}
 	}
-	
+
 	void ARP::arpTimerAdd(ARPTimer *t) {
 		if (m_arp_timers.isEmpty() || t->m_nextTimeout < m_arp_timers.first()->m_nextTimeout) {
 			m_arp_timers.push_front(t);
@@ -488,13 +488,13 @@ namespace nuts {
 			m_arp_timers.push_back(t);
 		}
 	}
-	
+
 	void ARP::arpTimerDelete(ARPTimer *t) {
 		bool recalc = !m_arp_timers.isEmpty() && (t == m_arp_timers.first());
 		m_arp_timers.removeAll(t);
 		if (recalc) recalcTimer();
 	}
-	
+
 	void ARP::timerEvent(QTimerEvent *) {
 		Time now(Time::current());
 		if (m_arp_timers.isEmpty()) {

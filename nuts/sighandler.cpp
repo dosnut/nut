@@ -1,7 +1,7 @@
 //
 // C++ Implementation: sighandler
 //
-// Description: 
+// Description:
 //
 //
 // Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
@@ -39,14 +39,14 @@ namespace nuts {
 		if (pipe(pipefd) != 0) return;
 		fcntl(pipefd[0], F_SETFD, FD_CLOEXEC);
 		fcntl(pipefd[1], F_SETFD, FD_CLOEXEC);
-		
+
 		signal(SIGTERM, sig2pipe);
 		signal(SIGINT, sig2pipe);
 
 		QSocketNotifier *r = new QSocketNotifier(pipefd[0], QSocketNotifier::Read, this);
 		connect(r, SIGNAL(activated(int)), this, SLOT(pipe_rcv()));
 	}
-	
+
 	SigHandler::~SigHandler() {
 		close(pipefd[0]);
 		close(pipefd[1]);

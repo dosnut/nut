@@ -1,9 +1,6 @@
 #ifndef QNUT_CONSTANTS_H
 #define QNUT_CONSTANTS_H
 
-#ifndef UI_VERSION
-# define UI_VERSION                     "unknown (unsupported buildsystem)"
-#endif
 #define UI_STRING_NAME                  "QNUT - Qt client for Network UTility Server (NUTS)"
 #define UI_STRING_NAME_TR               QObject::tr("QNUT - Qt client for Network UTility Server (NUTS)")
 

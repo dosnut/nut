@@ -44,14 +44,14 @@ src_unpack() {
 	fi
 	git_src_unpack
 
-	epatch "$S"/gentoo/files/gentoo_linux_headers.diff || die 
+	epatch "$S"/gentoo/files/gentoo_linux_headers.diff || die
 }
 
 src_compile() {
 	cd "${S}"
 	config_defines=""
 	config_release=""
-	if use debug; then 
+	if use debug; then
 		config_release="debug"
 	else
 		config_release="release"
@@ -61,18 +61,18 @@ src_compile() {
 	if ! use wifi; then
 		config_defines="$config_defines LIBNUT_NO_WIRELESS QNUT_NO_WIRELESS"
 	fi
-	
+
 	if ! use X; then
 		#Patch nut.pro: we don't need libnutclient,libnutwireless and qnut
 		sed --in-place -e :a -e "s/libnutwireless\|libnutclient\|qnut//;ta" nut.pro
 	fi
-	
+
 	qmake -recursive -Wall "CONFIG+=$config_release" "DEFINES+=$config_defines"
 	make || die
 }
 
 src_install() {
-	
+
 	make INSTALL_ROOT="${D}" install || die
 
 	exeinto /etc/init.d/
@@ -80,7 +80,7 @@ src_install() {
 	dodir /etc/nuts
 	insinto /etc/nuts/
 	newins "${S}"/docs/config.example nuts.config.example
-	
+
 	exeinto /etc/nuts/
 	newexe "${S}"/nuts/dispatch dispatch
 	dodir /etc/nuts/events

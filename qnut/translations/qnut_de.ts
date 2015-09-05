@@ -11,104 +11,8 @@
 <context>
     <name>QObject</name>
     <message>
-        <source>Lists available devices/environments/interfaces</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Choose device</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Choose environment in given device</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Choose interface</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Lists environments of device set by --Device</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enables given device</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Disables given device</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>returns type of given device or interface</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>returns state of given device or environment or interface</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>returns active Environment of given device</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Activates the environment on the given device</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Returns interface properties (one ip per line): ip,netmask,gateway,dns-servers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Activates the environment on the given device.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>In conjunction with --list and --device this will list environments with index in front of name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Examples:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enables device eth0</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Shows state of device eth0</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Shows state of environment home of device eth0</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Device not found</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>No device specified</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Environment not found</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>No environment specified</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Interface not found</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>No interface specified</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>UNDEFINED</source>
-        <translation type="unfinished">UNDEFINIERT</translation>
+        <translation type="obsolete">UNDEFINIERT</translation>
     </message>
     <message>
         <source>Type: %1</source>
@@ -132,11 +36,11 @@
     </message>
     <message>
         <source>none</source>
-        <translation type="unfinished">keine</translation>
+        <translation type="obsolete">keine</translation>
     </message>
     <message>
         <source>default</source>
-        <translation type="unfinished">Standard</translation>
+        <translation type="obsolete">Standard</translation>
     </message>
     <message>
         <source>selected</source>
@@ -156,7 +60,7 @@
     </message>
     <message>
         <source>QNUT - Qt client for Network UTility Server (NUTS)</source>
-        <translation>QNUT - Qt Client für den Network UTility Server (NUTS)</translation>
+        <translation type="obsolete">QNUT - Qt Client für den Network UTility Server (NUTS)</translation>
     </message>
 </context>
 <context>
@@ -548,11 +452,11 @@
     </message>
     <message>
         <source>Pre Shared Key</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Schlüssel (PSK)</translation>
     </message>
     <message>
         <source>Key:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Schlüssel:</translation>
     </message>
     <message>
         <source>EAP General</source>
@@ -831,235 +735,63 @@
 <context>
     <name>libnutclient::CDevice</name>
     <message>
-        <source>Device properties fetched</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Name : %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Type: %1</source>
-        <translation type="unfinished">Typ: %1</translation>
+        <translation type="obsolete">Typ: %1</translation>
     </message>
     <message>
         <source>State: %1</source>
-        <translation type="unfinished">Status: %1</translation>
-    </message>
-    <message>
-        <source>Active Environement: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>(%2) wpa_supplicant config file at: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>libnutclient::CDeviceManager</name>
-    <message>
-        <source>Error while trying to access the dbus service</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Please make sure that dbus is running</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Please start nuts. Starting idle mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>NUTS has been started</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>NUTS has been stopped</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>You are not allowed to connect to nuts.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Please make sure you are in the correct group</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>(%1) Failed to get DeviceList</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Maybe you don&apos;t have sufficient rights</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Adding device at: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The dbus daemon has been stopped. Please restart dbus and nuts</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>dbus has been started initiating dbus interface</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>libnutclient::CInterface</name>
-    <message>
-        <source>Interface state of %1 has changed to %2</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Status: %1</translation>
     </message>
 </context>
 <context>
     <name>libnutclient::CLibNut</name>
     <message>
         <source>up</source>
-        <translation type="unfinished">verbunden</translation>
+        <translation type="obsolete">verbunden</translation>
     </message>
     <message>
         <source>unconfigured</source>
-        <translation type="unfinished">unkonfiguriert</translation>
+        <translation type="obsolete">unkonfiguriert</translation>
     </message>
     <message>
         <source>got carrier</source>
-        <translation type="unfinished">physikalisch verbunden</translation>
+        <translation type="obsolete">physikalisch verbunden</translation>
     </message>
     <message>
         <source>activated</source>
-        <translation type="unfinished">aktiviert</translation>
+        <translation type="obsolete">aktiviert</translation>
     </message>
     <message>
         <source>deactivated</source>
-        <translation type="unfinished">deaktiviert</translation>
+        <translation type="obsolete">deaktiviert</translation>
     </message>
     <message>
         <source>Wireless</source>
-        <translation type="unfinished">Drahtlos</translation>
+        <translation type="obsolete">Drahtlos</translation>
     </message>
     <message>
         <source>Bridge</source>
-        <translation type="unfinished">Brücke</translation>
+        <translation type="obsolete">Brücke</translation>
     </message>
     <message>
         <source>off</source>
-        <translation type="unfinished">aus</translation>
+        <translation type="obsolete">aus</translation>
     </message>
     <message>
         <source>static</source>
-        <translation type="unfinished">statisch</translation>
+        <translation type="obsolete">statisch</translation>
     </message>
     <message>
         <source>dynamic</source>
-        <translation type="unfinished">dynamisch</translation>
+        <translation type="obsolete">dynamisch</translation>
     </message>
     <message>
         <source>zeroconf</source>
-        <translation type="unfinished">zerconf</translation>
+        <translation type="obsolete">zerconf</translation>
     </message>
     <message>
         <source>wait for config</source>
-        <translation type="unfinished">unkonfiguriert</translation>
-    </message>
-    <message>
-        <source>Ethernet</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>PPP</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>libnutwireless::CWextHW</name>
-    <message>
-        <source>ERROR: Could not open socket to net kernel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>(Wireless Extension) No device present</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>(Wireless Extension) device not supported</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error occured while fetching wireless info: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Auto-resetting timer to 10 seconds</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cannot fetch wireless information as your wireless extension is too old</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Think about updating your kernel (it&apos;s way too old)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Warning, no timer present while trying to get scan results</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>(Wireless Extension) Device not supported</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Range information are not available</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>(%1) Failed to read scan data : %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>No Scanresults available</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>libnutwireless::CWpaSupplicant</name>
-    <message>
-        <source>Error while trying to receive messages from wpa_supplicant</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not open wpa_supplicant socket: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not open wpa_supplicant control interface</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not attach to wpa_supplicant</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>wpa_supplicant connection established</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>(%1)[%2] wpa_supplicant disconnected</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>auto-setting ap_scan=2.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Using your last ap_scan settings for auto-setting: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>You must set ap_scan to your needs!</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">unkonfiguriert</translation>
     </message>
 </context>
 <context>
@@ -1137,7 +869,7 @@
     </message>
     <message>
         <source>Pre Shared Key</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Schlüssel (PSK)</translation>
     </message>
     <message>
         <source>WEP key 0</source>
@@ -1264,7 +996,7 @@
     </message>
     <message>
         <source>Pre Shared Key</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Schlüssel (PSK)</translation>
     </message>
     <message>
         <source>WEP key 0</source>
@@ -2129,37 +1861,6 @@ Click here to open the device details.</source>
     <message>
         <source>local</source>
         <translation type="obsolete">lokal</translation>
-    </message>
-</context>
-<context>
-    <name>scrset</name>
-    <message>
-        <source>Scripting Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Execute scripts when device gets...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>...deactivated</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>...activated</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>...carrier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>...carrier and stays unconfigured</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>...up</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

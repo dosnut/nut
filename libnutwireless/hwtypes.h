@@ -8,8 +8,8 @@ namespace libnutwireless {
 	/** enum of possible signal encodig */
 	typedef enum {
 		WSR_UNKNOWN=0, WSR_RCPI=1, WSR_ABSOLUTE=2, WSR_RELATIVE=3
-	} SignalQualityType; 
-	
+	} SignalQualityType;
+
 	/** signal information in human readable format */
 	struct SignalQuality {
 		SignalQuality() : frequency(-1), type(WSR_UNKNOWN) {
@@ -42,7 +42,7 @@ namespace libnutwireless {
 			} nonrcpi;
 		} level;
 	};
-	
+
 	/** One scan result (network) in human readable format */
 	struct ScanResult {
 		ScanResult() {

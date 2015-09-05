@@ -1,54 +1,68 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+cmake_policy(SET CMP0022 NEW)
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
-MACRO(ADD_TARGET_PROPERTIES _target _name)
-	SET(_properties)
-	FOREACH(_prop ${ARGN})
-		SET(_properties "${_properties} ${_prop}")
-	ENDFOREACH(_prop)
-	GET_TARGET_PROPERTY(_old_properties ${_target} ${_name})
-	MESSAGE(STATUS "adding property to ${_target} ${_name}:" ${_properties})
-	IF(NOT _old_properties)
-		# in case it's NOTFOUND
-		SET(_old_properties)
-	ENDIF(NOT _old_properties)
-	SET_TARGET_PROPERTIES(${_target} PROPERTIES ${_name} "${_old_properties} ${_properties}")
-ENDMACRO(ADD_TARGET_PROPERTIES)
+PROJECT(network-utiltities
+	VERSION 0.5.9
+	LANGUAGES C CXX)
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${network-utiltities_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${network-utiltities_BINARY_DIR})
 
-PROJECT(network-utiltities)
-SET(PACKAGE_NAME ${CMAKE_PROJECT_NAME})
-SET(PACKAGE_VERSION 0.5.8)
+set(PACKAGE_NAME ${network-utiltities_PROJECT_NAME})
+set(PACKAGE_VERSION ${network-utiltities_VERSION})
+set(PACKAGE_SO_VERSION ${network-utiltities_VERSION}) # .so version for libnutclient and libnutcommon
+
+include(DefaultBuildType)
+include(ExtraFlags)
+include(ImportNetlink)
+include(LanguageFlags)
+include(LinkObjectLibrary)
+include(MyQtTranslation)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(INTERPROCEDURAL_OPTIMIZATION ON)
+set(INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
 option(USE_WIRELESS "Enable support for wireless networks through wpa_supplicant." ON)
+if(USE_WIRELESS)
+	include(ImportLibIW)
+else()
+	# fake the lib.
+	add_library("libiw" INTERFACE)
+	add_definitions(-DNUT_NO_WIRELESS)
+endif()
 
-set(DEBUG_FLAGS "-Wall -Wno-long-long -pedantic")
-set(CMAKE_C_FLAGS "-std=c99")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${DEBUG_FLAGS}")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${DEBUG_FLAGS}")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${DEBUG_FLAGS}")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${DEBUG_FLAGS}")
+set(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output directory for libraries")
+set(CMAKE_INSTALL_INCLUDEDIR include CACHE PATH "Output directory for includes")
 
-add_subdirectory(libnutcommon libnutcommon)
+find_package(Qt4 COMPONENTS QtCore QtGui QtDbus QtNetwork REQUIRED)
+# only qnut uses gui
+set(QT_DONT_USE_QTGUI 1)
 
-add_subdirectory(cnut cnut)
-add_dependencies(cnut nutcommon)
-
-add_subdirectory(nuts nuts)
-add_dependencies(nuts nutcommon)
+function(build_subdir)
+	foreach(dir ${ARGN})
+		add_subdirectory("${dir}" "${dir}-build")
+	endforeach()
+endfunction()
 
 if(USE_WIRELESS)
-	add_subdirectory(libnutwireless libnutwireless)
-	add_dependencies(nutwireless nutcommon)
-else(USE_WIRELESS)
-	add_definitions(-DQNUT_NO_WIRELESS -DLIBNUT_NO_WIRELESS)
-endif(USE_WIRELESS)
+	build_subdir(libnutwireless)
+endif()
 
-add_subdirectory(libnutclient libnutclient)
-add_dependencies(nutclient nutcommon)
-if(USE_WIRELESS)
-	add_dependencies(nutclient nutwireless)
-endif(USE_WIRELESS)
+build_subdir(
+	libnutcommon
+	libnutclient
+	cnut
+	nuts
+	qnut
+)
 
-add_subdirectory(qnut qnut)
-add_dependencies(qnut nutclient)
+# sadly touches files always even when nothing changed
+option(UPDATE_TRANSLATIONS "Automatically update translations in source directory" OFF)
+
+if(UPDATE_TRANSLATIONS)
+	add_dependencies(nutclient update-translations)
+	add_dependencies(qnut update-translations)
+endif()

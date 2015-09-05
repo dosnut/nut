@@ -5,7 +5,6 @@ Encoding=UTF-8
 Exec=qnut
 GenericName=Qt NUT client
 Icon=/usr/share/qnut/icons/qnut_small.png
-MimeType=
 Name=QNUT
 Terminal=false
 Type=Application

@@ -1,14 +1,14 @@
 %{
 	#include "cconfigparser.h"
-	
+
 
 	extern int configparserlex (void);
 	extern int line_num;
-	
+
 	using namespace libnutwireless;
-	
+
 	void configparsererror (libnutwireless::CConfigParser *cp, const char* s);
-	
+
 	//Check if invoked action worked (e.g. newDevice -> device creation worked)
 	#define CHECK(action) do { if (!cp->getCurrentNetwork() || !(cp->getCurrentNetwork()->action)) { printf("error\n"); YYERROR;} } while (0)
 %}
@@ -81,7 +81,7 @@
 
 %error-verbose
 
-%parse-param {CConfigParser *cp};
+%parse-param {libnutwireless::CConfigParser *cp};
 %start input
 
 %%
@@ -94,7 +94,7 @@ input:
 /*
 networkconfig:
 	'{' {printf("hdjihsdkfhsdlfah");} network '}'
-	| '{' network '}' ';' 
+	| '{' network '}' ';'
 ;*/
 
 network: networkoption

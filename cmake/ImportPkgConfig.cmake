@@ -1,0 +1,27 @@
+include(FindPkgConfig)
+
+# import_pkg_config(name modules+)
+function(import_pkg_config name)
+	if(NOT(TARGET "${name}"))
+		string(TOUPPER "${name}" prefix)
+		pkg_search_module("${prefix}" REQUIRED ${ARGN})
+
+		add_library("import-${name}-dynamic" INTERFACE)
+		target_link_libraries("import-${name}-dynamic" INTERFACE ${${prefix}_LDFLAGS_OTHERS} ${${prefix}_LIBRARIES})
+		target_include_directories("import-${name}-dynamic" INTERFACE ${${prefix}_INCLUDE_DIRS})
+		target_compile_options("import-${name}-dynamic" INTERFACE ${${prefix}_CFLAGS_OTHERS})
+
+		add_library("import-${name}-static" INTERFACE)
+		target_link_libraries("import-${name}-static" INTERFACE ${${prefix}_STATIC_LDFLAGS_OTHERS} ${${prefix}_STATIC_LIBRARIES})
+		target_include_directories("import-${name}-static" INTERFACE ${${prefix}_STATIC_INCLUDE_DIRS})
+		target_compile_options("import-${name}-static" INTERFACE ${${prefix}_STATIC_CFLAGS_OTHERS})
+
+		set("${prefix}_STATIC" OFF CACHE BOOL "Link ${name} statically")
+		mark_as_advanced(FORCE "${prefix}_STATIC")
+		if("${${prefix}_STATIC}")
+			add_library("${name}" ALIAS "import-${name}-static")
+		else()
+			add_library("${name}" ALIAS "import-${name}-dynamic")
+		endif()
+	endif()
+endfunction()

@@ -1,7 +1,7 @@
 //
 // C++ Implementation: events
 //
-// Description: 
+// Description:
 //
 //
 // Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
@@ -18,10 +18,10 @@ namespace nuts {
 	Events::Events(QObject *parent)
 	: QObject(parent) {
 	}
-	
+
 	Events::~Events() {
 	}
-	
+
 	void Events::start(QStringList &environment, const QString &event, const QString &device, const QString &env, int iface) {
 		QStringList args;
 		args << event << device;
@@ -34,40 +34,40 @@ namespace nuts {
 		connect(process, SIGNAL(finished( int )), process, SLOT(deleteLater()));
 		connect(process, SIGNAL(error( QProcess::ProcessError )), process, SLOT(deleteLater()));
 	}
-	
+
 	void setupEnvironment(QStringList &environment) {
 		environment = QProcess::systemEnvironment();
 	}
-	
+
 	void setupEnvironment(QStringList &environment, Device *dev) {
 		environment
 			<< QString("NUT_DEVICE=%1").arg(dev->getName())
-			<< QString("NUT_HAS_WLAN=%1").arg(dev->hasWLAN())
-			<< QString("NUT_ESSID=%1").arg(dev->essid())
+			<< QString("NUT_HAS_WLAN=%1").arg(dev->isAir())
+			<< QString("NUT_ESSID=%1").arg(dev->getEssid())
 			;
 	}
-	
+
 	void setupEnvironment(QStringList &environment, Environment *env) {
 		environment
 			<< QString("NUT_ENVIRONMENT=%1").arg(env->getName())
 			<< QString("NUT_ENVIRONMENT_INDEX=%1").arg(env->getID())
 			;
 	}
-	
+
 	void setupEnvironment(QStringList &environment, Interface_IPv4* iface) {
 		environment
-			<< QString("NUT_IP=%1").arg(iface->ip.toString())
-			<< QString("NUT_NETMASK=%1").arg(iface->netmask.toString())
-			<< QString("NUT_LOCALDOMAIN=%1").arg(iface->localdomain)
+			<< QString("NUT_IP=%1").arg(iface->getIP().toString())
+			<< QString("NUT_NETMASK=%1").arg(iface->getNetmask().toString())
+			<< QString("NUT_LOCALDOMAIN=%1").arg(iface->getLocalDomain())
 			<< QString("NUT_STATUS=%1").arg(libnutcommon::toString(iface->getState()));
-		if (!iface->gateway.isNull())
-			environment << QString("NUT_GATEWAY=%1").arg(iface->gateway.toString());
-		QStringList dnsservers;
-		foreach (QHostAddress dns, iface->dnsserver)
-			dnsservers << dns.toString();
-		environment << QString("NUT_DNSSERVER=%1").arg(dnsservers.join(","));
+		if (!iface->getGateway().isNull())
+			environment << QString("NUT_GATEWAY=%1").arg(iface->getGateway().toString());
+		QStringList dnsServers;
+		foreach (QHostAddress dns, iface->getDnsServers())
+			dnsServers << dns.toString();
+		environment << QString("NUT_DNSSERVER=%1").arg(dnsServers.join(","));
 	}
-	
+
 	void Events::deviceAdded(QString devName, Device *dev) {
 		QStringList e;
 		setupEnvironment(e);
@@ -100,15 +100,15 @@ namespace nuts {
 	void Events::interfaceStatusChanged(libnutcommon::InterfaceState state, Interface_IPv4* iface) {
 		QString event;
 		switch (state) {
-			case libnutcommon::IFS_OFF:
+			case libnutcommon::InterfaceState::OFF:
 				event = "ifdown";
 				break;
-			case libnutcommon::IFS_STATIC:
-			case libnutcommon::IFS_DHCP:
-			case libnutcommon::IFS_ZEROCONF:
+			case libnutcommon::InterfaceState::STATIC:
+			case libnutcommon::InterfaceState::DHCP:
+			case libnutcommon::InterfaceState::ZEROCONF:
 				event = "ifup";
 				break;
-			case libnutcommon::IFS_WAITFORCONFIG:
+			case libnutcommon::InterfaceState::WAITFORCONFIG:
 				event = "ifwaitforconfig";
 				break;
 			default:

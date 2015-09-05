@@ -1,8 +1,6 @@
 #ifndef NUTSDBUS_H
 #define NUTSDBUS_H
 
-#include <QDBusConnection>
-#include <QDBusAbstractAdaptor>
 #include <QDBusObjectPath>
 #include <QHostAddress>
 #include <QTimerEvent>
@@ -15,216 +13,231 @@ namespace nuts {
 	class DBusEnvironment;
 	class DBusInterface;
 	class DBusInterface_IPv4;
-	#ifdef IPv6
+#ifdef IPv6
 	class DBusInterface_IPv6;
-	#endif
+#endif
 }
 
 #include "device.h"
 
 namespace nuts {
-	
-	class DBusDeviceManager: public QDBusAbstractAdaptor {
-		Q_OBJECT
-		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".DeviceManager")
-		private:
-			QDBusConnection m_dbusConnection;
-			DeviceManager * m_devmgr;
-			QHash<QString, DBusDevice *> m_dbusDevices;
-			static const QString m_dbusPath, m_dbusDevicesPath;
-			int m_timerId;
-			libnutcommon::CDBusMonitor m_dbusMonitor;
-			bool registered;
 
-			void initTree();
-			void timerEvent(QTimerEvent *event);
-			
-			
-			/** Registers DeviceManager+subtree with dbus **/
-			void registerAll();
-			/** Unregisters DeviceManager+subtree with dbus **/
-			void unregisterAll();
-			/**Sets a new dbus connection for all subtrees **/
-			void setAllDBusConnection(QDBusConnection * connection);
-		private slots:
-			void devAdded(QString devName, Device *dev);
-			void devRemoved(QString devName, Device *dev);
-			
-			friend int mainApp(int argc, char* argv[]);
-			friend class DeviceManager;
+	class DBusDeviceManager: public libnutcommon::DBusAbstractAdapater {
+	Q_OBJECT
+	Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".DeviceManager")
+	Q_PROPERTY(QList<QDBusObjectPath> deviceList READ getDeviceList)
+	Q_PROPERTY(QStringList deviceNames READ getDeviceNames)
+	private:
+		DeviceManager* const m_devmgr;
+		QHash<QString, DBusDevice*> m_dbusDevices;
+		static const QDBusObjectPath m_dbusPath, m_dbusDevicesPath;
 
-			void stopDBus();
-			void dbusStopped();
-			void dbusStarted();
-		public:
-			DBusDeviceManager(DeviceManager *devmgr);
-			virtual ~DBusDeviceManager();
-	
-		public slots:
-			QList<QDBusObjectPath> getDeviceList();
-			QStringList getDeviceNames();
+	private slots:
+		void devAdded(QString devName, Device* dev);
+		void devRemoved(QString devName, Device* dev);
 
-			
-			bool createBridge(QString name);
-			bool destroyBridge(QDBusObjectPath devicePath);
-			bool destroyBridge(qint32 deviceId);
-			bool addToBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths);
-			bool addToBridge(qint32 bridgeId, QList<qint32> deviceIds);
-			bool removeFromBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths);
-			bool removeFromBridge(qint32 bridgeId, QList<qint32> deviceIds);
+	public:
+		DBusDeviceManager(DeviceManager* devmgr);
 
-		signals:
-			void deviceAdded(const QDBusObjectPath &objectpath);
-			void deviceRemoved(const QDBusObjectPath &objectpath);
-			void deviceAdded(const QString &devname);
-			void deviceRemoved(const QString &devname);
-	};
-	
-	class DBusDevice: public QDBusAbstractAdaptor {
-		Q_OBJECT
-		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Device")
-		private:
-			Device *m_device;
-			QDBusConnection *m_dbusConnection;
-			QList<DBusEnvironment* > m_dbusEnvironments;
-			QString m_dbusPath;
-			libnutcommon::DeviceProperties m_dbusProperties;
-			int m_activeEnvironment;
-			bool registered;
-		
-		private slots:
-			void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState);
-			void environmentChanged(int newEnvironment);
-		
-		public:
-			DBusDevice(Device *dev, QDBusConnection *connection, const QString &path);
-			virtual ~DBusDevice();
-			
-			QString getPath();
-			void registerAll();
-			void unregisterAll();
-			void setAllDBusConnection(QDBusConnection * connection);
+	// DBus API: de.unistuttgart.nut /manager de.unistuttgart.nut.DeviceManager.*
+	public slots:
+		QList<QDBusObjectPath> getDeviceList();
+		QStringList getDeviceNames();
 
-		public slots:
-			libnutcommon::DeviceProperties getProperties();
-			QList<QDBusObjectPath> getEnvironments();
-			libnutcommon::DeviceConfig getConfig();
-			Q_NOREPLY void enable();
-			Q_NOREPLY void disable();
-			Q_NOREPLY void setEnvironment(const QDBusObjectPath &path);
-			Q_NOREPLY void setEnvironment(qint32 env) {
-				m_device->setUserPreferredEnvironment(env);
-			}
-			qint32 getState() { return m_device->getState(); }
-			qint32 getType() { return m_device->hasWLAN() ? libnutcommon::DT_AIR : libnutcommon::DT_ETH; }
-			QString getActiveEnvironment();
-			qint32 getActiveEnvironmentIndex() {
-				return m_device->getEnvironment();
-			}
-			QList<qint32> getEnvironmentIds();
-			QString getEssid() { return m_device->essid(); }
-		
-		signals:
-			void stateChanged(int newState, int oldState);
-			void environmentChangedActive(const QString &objectpath);
-			void environmentChangedActive(qint32 envId);
-			void newWirelessNetworkFound();
-	};
-	
-	class DBusEnvironment: public QDBusAbstractAdaptor {
-		Q_OBJECT
-		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Environment")
-		private:
-			Environment *m_environment;
-			QDBusConnection *m_dbusConnection;
-			QList<DBusInterface_IPv4*> m_dbusInterfacesIPv4;
-			#ifdef IPv6
-			QList<DBusInterface_IPv6*> m_dbusInterfacesIPv6;
-			#endif
-			QString m_dbusPath;
-			libnutcommon::EnvironmentProperties m_dbusProperties;
-			Device * m_device;
-			bool registered;
+#if 0
+		// wishlist:
+		bool createBridge(QString name);
+		bool destroyBridge(QDBusObjectPath devicePath);
+		bool destroyBridge(qint32 deviceId);
+		bool addToBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths);
+		bool addToBridge(qint32 bridgeId, QList<qint32> deviceIds);
+		bool removeFromBridge(QDBusObjectPath bridge, QList<QDBusObjectPath> devicePaths);
+		bool removeFromBridge(qint32 bridgeId, QList<qint32> deviceIds);
+#endif
 
-		private slots:
-			void selectResultReady();
-		public:
-			DBusEnvironment(Environment *env, QDBusConnection *connection, const QString &path, Device* dev);
-			virtual ~DBusEnvironment();
-			inline Environment * getEnvironment() const { return m_environment; }
-	
-			QString getPath();
-			void registerAll();
-			void unregisterAll();
-			void setAllDBusConnection(QDBusConnection * connection);
-			void emitChange(bool change);
-	
-		public slots:
-			libnutcommon::EnvironmentProperties getProperties();
-			libnutcommon::EnvironmentConfig getConfig();
-			QList<QDBusObjectPath> getInterfaces();
-			libnutcommon::SelectResult getSelectResult();
-			QVector<libnutcommon::SelectResult> getSelectResults();
-
-			qint32 getID() { return m_environment->getID(); }
-			QString getName() { return m_environment->getName(); }
-			bool getState() { return (m_device->getEnvironment() == m_environment->getID()); }
-			QList<qint32> getInterfaceIds();
-		signals:
-			void interfaceAdded(const QDBusObjectPath &objectpath);
-			void interfaceRemoved(const QDBusObjectPath &objectpath);
-			void selectsResultChanged(libnutcommon::SelectResult result, QVector<libnutcommon::SelectResult> results);
-			void stateChanged(bool state);
+	signals:
+		void deviceAdded(const QDBusObjectPath& objectpath);
+		void deviceRemoved(const QDBusObjectPath& objectpath);
+		void deviceAdded(const QString& devname);
+		void deviceRemoved(const QString& devname);
 	};
 
-	class DBusInterface_IPv4: public QDBusAbstractAdaptor {
-		Q_OBJECT
-		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Interface_IPv4")
-		private:
-			Interface_IPv4 *m_interface;
-			QDBusConnection *m_dbusConnection;
-			QString m_dbusPath;
-			libnutcommon::InterfaceProperties m_dbusProperties;
-			bool registered;
-		private slots:
-			void interfaceStatusChanged(libnutcommon::InterfaceState state);
-		public:
-			DBusInterface_IPv4(Interface_IPv4 *iface, QDBusConnection *connection, const QString &path);
-			virtual ~DBusInterface_IPv4();
-	
-			QString getPath();
-			void registerAll();
-			void unregisterAll();
-			void setAllDBusConnection(QDBusConnection * connection) { m_dbusConnection = connection; }
-		
-		public slots:
-			libnutcommon::InterfaceProperties getProperties();
-			libnutcommon::IPv4Config getConfig();
-	
-			bool needUserSetup() { return m_interface->needUserSetup(); }
-			bool setUserConfig(libnutcommon::IPv4UserConfig userConfig) { return m_interface->setUserConfig(userConfig); }
-			libnutcommon::IPv4UserConfig getUserConfig() { return m_interface->getUserConfig(); }
+	class DBusDevice: public libnutcommon::DBusAbstractAdapater {
+	Q_OBJECT
+	Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Device")
+	Q_PROPERTY(libnutcommon::DeviceProperties properties READ getProperties NOTIFY propertiesChanged)
+	Q_PROPERTY(QString name READ getName CONSTANT)
+	Q_PROPERTY(libnutcommon::DeviceType type READ getType)
+	Q_PROPERTY(libnutcommon::OptionalQDBusObjectPath activeEnvironment READ getActiveEnvironment NOTIFY activeEnvironmentChanged)
+	Q_PROPERTY(qint32 activeEnvironmentIndex READ getActiveEnvironmentIndex NOTIFY activeEnvironmentChanged)
+	Q_PROPERTY(libnutcommon::DeviceState state READ getState NOTIFY stateChanged)
+	Q_PROPERTY(QString essid READ getEssid)
+	Q_PROPERTY(libnutcommon::MacAddress macAddress READ getMacAddress)
+	Q_PROPERTY(libnutcommon::DeviceConfig config READ getConfig CONSTANT)
+	Q_PROPERTY(QList<QDBusObjectPath> environments READ getEnvironments CONSTANT)
+	Q_PROPERTY(QList<qint32> environmentIds READ getEnvironmentIds CONSTANT)
+	private:
+		Device* const m_device;
+		QList<DBusEnvironment*> m_dbusEnvironments;
 
-			//generic information
-			qint32 getState() { return m_interface->getState(); }
-			QHostAddress getIP() { return m_interface->ip; }
-			QHostAddress getNetmask() { return m_interface->netmask; }
-			QHostAddress getGateway() { return m_interface->gateway; }
-			QList<QHostAddress> getDns() { return m_interface->dnsserver; }
+		libnutcommon::DeviceProperties m_properties, m_last_notified_properties;
+		int m_activeEnvironment;
 
-			//void activate() { m_interface->start();}
-			//void deactivate() { m_interface->stop();}
-		
-		signals:
-			void stateChanged(const libnutcommon::InterfaceProperties &properties);
+	private slots:
+		void checkPropertiesUpdate();
+		void devPropertiesChanged(libnutcommon::DeviceProperties properties);
+		void devActiveEnvironmentChanged(int environment);
+
+	public:
+		DBusDevice(Device* dev, const QString& path);
+
+	// DBus API: de.unistuttgart.nut /devices/<devname> de.unistuttgart.nut.Device.*
+	public slots:
+		libnutcommon::DeviceProperties getProperties();
+		/* single properties */
+		/* constant properties */
+		QString getName();
+		/* variable properties */
+		libnutcommon::DeviceType getType();
+		libnutcommon::OptionalQDBusObjectPath getActiveEnvironment();
+		qint32 getActiveEnvironmentIndex();
+		libnutcommon::DeviceState getState();
+		QString getEssid();
+		libnutcommon::MacAddress getMacAddress();
+
+		/* constant config */
+		libnutcommon::DeviceConfig getConfig();
+
+		/* list of sub objects (list doesn't change) */
+		QList<QDBusObjectPath> getEnvironments();
+		QList<qint32> getEnvironmentIds();
+
+		/* actions */
+		Q_NOREPLY void enable();
+		Q_NOREPLY void disable();
+		Q_NOREPLY void setEnvironment(QDBusObjectPath path);
+		Q_NOREPLY void setEnvironment(qint32 env);
+
+	signals:
+		void propertiesChanged(libnutcommon::DeviceProperties properties);
+		void stateChanged(libnutcommon::DeviceState state);
+		void activeEnvironmentChanged(libnutcommon::OptionalQDBusObjectPath objectpath);
+		void activeEnvironmentChanged(qint32 envId);
+		void newWirelessNetworkFound();
 	};
-	#ifdef IPv6
-	class DBusInterface_IPv6: public QDBusAbstractAdaptor {
-		Q_OBJECT
-		Q_CLASSINFO("D-BUS Interface", "de.unistuttgart.nut" ".Interface_IPv6");
-		
-	}
-	#endif
+
+	class DBusEnvironment: public libnutcommon::DBusAbstractAdapater {
+	Q_OBJECT
+	Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Environment")
+	Q_PROPERTY(libnutcommon::EnvironmentProperties properties READ getProperties)
+	Q_PROPERTY(qint32 ID READ getID)
+	Q_PROPERTY(QString name READ getName)
+	Q_PROPERTY(bool active READ isActive)
+	Q_PROPERTY(libnutcommon::SelectResult selectResult READ getSelectResult)
+	Q_PROPERTY(QVector<libnutcommon::SelectResult> selectResults READ getSelectResults)
+	Q_PROPERTY(libnutcommon::EnvironmentConfig config READ getConfig)
+	Q_PROPERTY(QList<QDBusObjectPath> interfaces READ getInterfaces)
+	Q_PROPERTY(QList<qint32> interfaceIds READ getInterfaceIds)
+
+	private:
+		Environment* const m_environment;
+		QList<DBusInterface_IPv4*> m_dbusInterfacesIPv4;
+#ifdef IPv6
+		QList<DBusInterface_IPv6*> m_dbusInterfacesIPv6;
+#endif
+
+		libnutcommon::EnvironmentProperties m_properties, m_last_notified_properties;
+
+	private slots:
+		void checkPropertiesUpdate();
+		void envPropertiesChanged(libnutcommon::EnvironmentProperties properties);
+
+	public:
+		DBusEnvironment(Environment *env, const QDBusObjectPath &path);
+		Environment* getEnvironment() const { return m_environment; }
+
+	// DBus API: de.unistuttgart.nut /devices/<devname>/<envNdx> de.unistuttgart.nut.Environment.*
+	public slots:
+		libnutcommon::EnvironmentProperties getProperties();
+		/* single properties */
+		/* constant properties */
+		qint32 getID(); /*! <envNdx> in QDBusObjectPath for this object */
+		QString getName();
+		/* variable properties */
+		bool isActive();
+		libnutcommon::SelectResult getSelectResult();
+		QVector<libnutcommon::SelectResult> getSelectResults();
+
+		/* constant config */
+		libnutcommon::EnvironmentConfig getConfig();
+
+		/* list of sub objects (list doesn't change) */
+		QList<QDBusObjectPath> getInterfaces();
+		QList<qint32> getInterfaceIds();
+
+	signals:
+		void propertiesChanged(libnutcommon::EnvironmentProperties properties);
+	};
+
+	class DBusInterface_IPv4: public libnutcommon::DBusAbstractAdapater {
+	Q_OBJECT
+	Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Interface_IPv4")
+	Q_PROPERTY(libnutcommon::InterfaceProperties properties READ getProperties NOTIFY propertiesChanged)
+	Q_PROPERTY(libnutcommon::InterfaceState state READ getState)
+	Q_PROPERTY(QHostAddress IP READ getIP)
+	Q_PROPERTY(QHostAddress netmask READ getNetmask)
+	Q_PROPERTY(QHostAddress gateway READ getGateway)
+	Q_PROPERTY(QList<QHostAddress> dnsServers READ getDnsServers)
+	Q_PROPERTY(int gatewayMetric READ getGatewayMetric)
+	Q_PROPERTY(bool needUserSetup READ needUserSetup)
+	Q_PROPERTY(libnutcommon::IPv4Config config READ getConfig CONSTANT)
+	Q_PROPERTY(libnutcommon::IPv4UserConfig userConfig READ getUserConfig NOTIFY userConfigChanged)
+	private:
+		Interface_IPv4* const m_interface;
+
+		libnutcommon::InterfaceProperties m_properties, m_last_notified_properties;
+		libnutcommon::IPv4UserConfig m_userConfig, m_last_notified_userConfig;
+
+	private slots:
+		void checkPropertiesUpdate();
+		void checkUserConfigUpdate();
+		void interfacePropertiesChanged(libnutcommon::InterfaceProperties properties);
+		void interfaceUserConfigChanged(libnutcommon::IPv4UserConfig userConfig);
+
+	public:
+		DBusInterface_IPv4(Interface_IPv4* iface, const QDBusObjectPath& path);
+
+	// DBus API: de.unistuttgart.nut /devices/<devname>/<envNdx>/<ifNdx> de.unistuttgart.nut.Interface_IPv4.*
+	public slots:
+		libnutcommon::InterfaceProperties getProperties();
+		/* single properties */
+		/* variable properties */
+		libnutcommon::InterfaceState getState();
+		QHostAddress getIP();
+		QHostAddress getNetmask();
+		QHostAddress getGateway();
+		QList<QHostAddress> getDnsServers();
+		int getGatewayMetric();
+		bool needUserSetup();
+
+		/* constant config */
+		libnutcommon::IPv4Config getConfig();
+
+		/* actions */
+		bool setUserConfig(libnutcommon::IPv4UserConfig userConfig);
+		libnutcommon::IPv4UserConfig getUserConfig();
+
+	signals:
+		void propertiesChanged(libnutcommon::InterfaceProperties properties);
+		void userConfigChanged(libnutcommon::IPv4UserConfig userConfig);
+	};
+
+#ifdef IPv6
+	class DBusInterface_IPv6: public libnutcommon::DBusAbstractAdapater {
+	Q_OBJECT
+	Q_CLASSINFO("D-BUS Interface", "de.unistuttgart.nut" ".Interface_IPv6");
+	};
+#endif
 }
 
 #endif

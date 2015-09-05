@@ -1,337 +1,248 @@
-#include "cdevice.h"
+#include "client.h"
 #include "libnutcommon/common.h"
-#include "cdevicemanager.h"
-#include "clog.h"
-#include "server_proxy.h"
-#include "cenvironment.h"
-#include "libnutwireless/cwireless.h"
+#include "dbus.h"
+#ifndef NUT_NO_WIRELESS
+# include "libnutwireless/cwireless.h"
+#endif
 
 namespace libnutclient {
-using namespace libnutcommon;
+	using namespace libnutcommon;
 
-/////////
-//CDevice
-/////////
-CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath) :
-	CLibNut(parent),
-	/*parent(parent),*/
-	m_dbusPath(m_dbusPath),
-	log(parent->log),
-	m_dbusDevice(0),
-#ifndef LIBNUT_NO_WIRELESS
-	m_needWireless(false),
+	CDevice::CDevice(CDeviceManager * parent, QDBusObjectPath m_dbusPath)
+	: CNutServiceClient(parent), m_devManager(parent), m_dbusPath(m_dbusPath) {
+		updateLogPrefix();
+	}
+
+	CDevice::~CDevice() {
+		clear();
+	}
+
+	bool CDevice::checkInitDone() {
+		return 0 == m_initCounter;
+	}
+
+	void CDevice::checkInitDone(bool previous) {
+		if (!previous && checkInitDone()) {
+#ifndef NUT_NO_WIRELESS
+			m_needWireless = !(m_config.wpaConfigFile.isEmpty());
+
+			//Only use wpa_supplicant if we need one
+			if (m_needWireless) {
+				contextLog(tr("wpa_supplicant config file at: %2").arg(m_config.wpaConfigFile));
+
+				m_wlAccess = new libnutwireless::CWireless(this, getName());
+				connect(m_wlAccess, SIGNAL(message(QString)), this, SIGNAL(log(QString)));
+				connect(m_dbusDevice, SIGNAL(newWirelessNetworkFound()), this, SIGNAL(newWirelessNetworkFound()));
+
+				//Connect to wpa_supplicant only if device is not deactivated
+				if (DeviceState::DEACTIVATED != m_properties.state) {
+					m_wlAccess->open();
+				}
+				if (DeviceType::AIR == m_properties.type && DeviceState::CARRIER <= m_properties.state && nullptr != m_wlAccess->getHardware()) {
+					m_wlAccess->getHardware()->setSignalQualityPollRate(500);
+				}
+			}
 #endif
-	m_propertiesFetched(false),
-	m_environmentsFetched(false),
-	m_essidFetched(false),
-	m_configFetched(false),
-	m_activeEnvFetched(false),
-	m_initCompleted(false),
-	m_state(libnutcommon::DS_UNCONFIGURED),
-	m_type(libnutcommon::DT_ETH),
-	m_activeEnvironment(0),
-#ifndef LIBNUT_NO_WIRELESS
-	m_wlAccess(0),
-#endif
-	m_index(-1)
-{} //TODO:Init all! pointers to 0
 
+			auto const& actEnvPath = m_properties.activeEnvironment;
+			m_activeEnvironment = actEnvPath ? m_dbusEnvironments.value(actEnvPath.objectPath(), nullptr) : nullptr;
 
-void CDevice::init() {
-	//get m_dbusConnection from parent:
-	m_dbusConnection = &(qobject_cast<CDeviceManager*>(parent())->m_dbusGlobalConnection);
-	m_dbusConnectionInterface = qobject_cast<CDeviceManager*>(parent())->m_dbusConnectionInterface;
-
-	if (!serviceCheck()) {
-		emit initializationFailed(this);
-		emit dbusErrorOccured();
-		return;
-	}
-
-	//connect to dbus-object
-	m_dbusDevice = new DBusDeviceInterface(NUT_DBUS_URL, m_dbusPath.path(),*m_dbusConnection, this);
-
-	//DBus interface is available: connect:
-	connect(m_dbusDevice, SIGNAL(errorOccured(QDBusError)), this, SLOT(dbusret_errorOccured(QDBusError)));
-
-	connect(m_dbusDevice, SIGNAL(gotEnvironments(QList<QDBusObjectPath>)), this, SLOT(dbusretGetEnvironments(QList<QDBusObjectPath>)));
-	connect(m_dbusDevice, SIGNAL(gotProperties(libnutcommon::DeviceProperties)), this, SLOT(dbusretGetProperties(libnutcommon::DeviceProperties)));
-	connect(m_dbusDevice, SIGNAL(gotEssid(QString)), this, SLOT(dbusretGetEssid(QString)));
-	connect(m_dbusDevice, SIGNAL(gotConfig(libnutcommon::DeviceConfig)), this, SLOT(dbusretGetConfig(libnutcommon::DeviceConfig)));
-	connect(m_dbusDevice, SIGNAL(gotActiveEnvironment(QString)), this, SLOT(dbusretGetActiveEnvironment(QString)));
-
-	connect(m_dbusDevice, SIGNAL(environmentChangedActive(const QString &)),
-			this, SLOT(environmentChangedActive(const QString &)));
-
-	connect(m_dbusDevice, SIGNAL(stateChanged(int , int)),
-			this, SLOT(dbusStateChanged(int, int)));
-
-
-// 	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
-	m_dbusDevice->getProperties();
-
-// 	*log << tr("Placing getConfig call at %1").arg(m_dbusPath.path());
-	m_dbusDevice->getConfig();
-
-// 	*log << tr("Placing getEnvironments call at: %1").arg(m_dbusPath.path());
-	m_dbusDevice->getEnvironments();
-}
-
-
-CDevice::~CDevice() {
-	//CWpa_supplicant will be killed as child of CDevices
-	CEnvironment * env;
-	while (!m_environments.isEmpty()) {
-		env = m_environments.takeFirst();
-// 		emit(environmentsUpdated()); //Pending for removal
-		env->deleteLater();
-	}
-}
-
-//CDevice private functions
-
-/**
- *  refreshAll rebuilds the device's environment list if any environmentpath has changed, otherwise
- *  it will just refresh the information
- */
-void CDevice::refreshAll() {
-// 	*log << tr("Refreshing device");
-// 	*log << tr("Placing getProperties call at: %1").arg(m_dbusPath.path());
-	m_dbusDevice->getProperties();
-
-// 	*log << tr("Placing getEnvironments call at: %1").arg(m_dbusPath.path());
-	m_dbusDevice->getEnvironments();
-
-}
-//Rebuilds the environment list
-void CDevice::rebuild(QList<QDBusObjectPath> paths) {
-	//Remove current list:
-	m_dbusEnvironments.clear();
-	CEnvironment * env;
-	while ( !m_environments.isEmpty() ) {
-		env = m_environments.takeFirst();
-		env->deleteLater();
-	}
-	//now rebuild:
-	foreach(QDBusObjectPath i, paths) {
-		env = new CEnvironment(this,i);
-		m_dbusEnvironments.insert(i,env);
-		connect(env,SIGNAL(initializationFailed(CEnvironment*)),this,SLOT(environmentInitializationFailed(CEnvironment*)));
-		connect(env,SIGNAL(initializationCompleted(CEnvironment*)),this,SLOT(environmentInitializationCompleted(CEnvironment*)));
-		connect(env,SIGNAL(dbusErrorOccured(QDBusError)),this,SLOT(dbusret_errorOccured(QDBusError)));
-		env->init();
-	}
-}
-
-void CDevice::checkInitCompleted() {
-	if ( m_propertiesFetched && m_environmentsFetched && m_essidFetched && m_configFetched && m_activeEnvFetched && !m_initCompleted) {
-		m_initCompleted = true;
-		qDebug("Device init completed: %s", m_name.toAscii().data());
-		emit initializationCompleted(this);
-	}
-}
-
-//CDevice private slots:
-void CDevice::environmentChangedActive(const QString &newenv) {
-	CEnvironment * oldenv = m_activeEnvironment;
-	if (newenv.isEmpty()) { //No active Environment is set.
-		m_activeEnvironment = NULL;
-	}
-	else {
-		m_activeEnvironment = m_dbusEnvironments.value(QDBusObjectPath(newenv), 0);
-	}
-	emit(environmentChangedActive(m_activeEnvironment, oldenv));
-}
-//Every time our device changed from anything to active, our active environment may have changed
-void CDevice::dbusStateChanged(int newState, int oldState) {
-	#ifndef LIBNUT_NO_WIRELESS
-	//If switching from DS_DEACTIVATED to any other state then connect wpa_supplicant
-	if (DS_DEACTIVATED == oldState && !(DS_DEACTIVATED == newState) ) {
-		if (m_needWireless) {
-			m_wlAccess->open();
+			m_devManager->deviceInitializationCompleted(this);
 		}
 	}
-	else if (DS_DEACTIVATED == newState) {
-		if (m_needWireless) {
-			m_wlAccess->close();
+
+	void CDevice::updateLogPrefix() {
+		m_logPrefix = (m_properties.name.isEmpty() ? m_dbusPath.path() : m_properties.name) + ": ";
+	}
+
+	void CDevice::clear() {
+		if (m_dbusDevice) {
+			m_dbusDevice->deleteLater();
+			m_dbusDevice = nullptr;
+		}
+
+		m_environments.clear(); // all environments are also in m_dbusEnvironments
+		/* mark environments for later deletion, but clear container before */
+		decltype(m_dbusEnvironments) tmp;
+		tmp.swap(m_dbusEnvironments);
+		for (auto const& env: tmp) {
+			env->deleteLater();
 		}
 	}
-	#endif
-	m_state = (DeviceState) newState;
 
-	//get possible new essid
-	if (DT_AIR == m_type && !(newState == DS_DEACTIVATED) ) {
-		m_dbusDevice->getEssid();
-	}
-	else {
-		m_essid = QString();
-	}
-	#ifndef LIBNUT_NO_WIRELESS
-	if (DT_AIR == m_type && DS_CARRIER <= m_state && m_wlAccess != NULL && m_wlAccess->getHardware() != NULL) {
-		m_wlAccess->getHardware()->setSignalQualityPollRate(500);
-	}
-	#endif
-	emit(stateChanged(m_state));
-}
-
-//CDevice private slots for dbus communication
-void CDevice::dbusretGetProperties(libnutcommon::DeviceProperties props) {
-	m_name = props.name;
-	m_type = props.type;
-	m_state = (DeviceState) props.state;
-	*log << tr("Device properties fetched");
-	*log << tr("Name : %1").arg(m_name);
-	*log << tr("Type: %1").arg(libnutclient::toStringTr(m_type));
-	*log << tr("State: %1").arg(libnutclient::toStringTr(m_state));
-
-
-	if (DT_AIR == m_type) {
-		m_dbusDevice->getEssid();
-	}
-	else {
-		m_essidFetched = true;
-		qDebug("essid feteched");
+	void CDevice::dbusLostService() {
+		clear();
+		if (!checkInitDone()) m_devManager->deviceInitializationFailed(this);
+		deleteLater();
 	}
 
-	m_propertiesFetched = true;
-	qDebug("Properties feteched");
-	checkInitCompleted();
+	void CDevice::dbusConnectService(QString service, QDBusConnection connection) {
+		if (m_dbusDevice) return;
 
-	emit gotProperties(props);
-	emit newDataAvailable();
-}
+		m_dbusDevice = new DBusDevice(service, m_dbusPath, connection, this);
 
+		/* all other signals are covered by this one */
+		connect(m_dbusDevice, SIGNAL(propertiesChanged(libnutcommon::DeviceProperties)), this, SLOT(dbusPropertiesChanged(libnutcommon::DeviceProperties)));
 
-void CDevice::dbusretGetEssid(QString essid) {
-	m_essid = essid;
+		auto handleEnvironments = [this](libnutclient::DBusDevice::Result_getEnvironments envPaths) {
+			if (!m_dbusDevice) return;
+			auto initDone = checkInitDone();
+			--m_initCounter;
 
-	m_essidFetched = true;
-	qDebug("essid fetched");
-	checkInitCompleted();
+			for (auto const& envPath: envPaths) {
+				++m_initCounter;
+				auto env = new CEnvironment(this, envPath, m_environments.size());
+				m_dbusEnvironments.insert(envPath, env);
+				m_environments.append(nullptr);
+			}
+			checkInitDone(initDone);
+		};
+		auto handleEnvironments_error = [this](QDBusError error) {
+			emit dbusError(m_dbusPath.path() + ": Device.getEnvironments", error);
+			m_devManager->deviceInitializationFailed(this);
+		};
+		++m_initCounter;
+		m_dbusDevice->getEnvironments(handleEnvironments, handleEnvironments_error, this);
 
-	emit gotEssid(essid);
-	emit newDataAvailable();
-}
+		auto handleConfig = [this](libnutcommon::DeviceConfig config) {
+			if (!m_dbusDevice) return;
+			auto initDone = checkInitDone();
+			--m_initCounter;
 
-void CDevice::dbusretGetEnvironments(QList<QDBusObjectPath> envs) {
-	//Compare local with remote list:
-	//if they are equal just refresh otherwise rebuild
-	bool envequal = (m_dbusEnvironments.size() == envs.size());
-	if (envequal) {
-		foreach(QDBusObjectPath i, envs) {
-			if ( !m_dbusEnvironments.contains(i) ) {
-				envequal = false;
-				break;
+			m_config = config;
+
+			checkInitDone(initDone);
+		};
+		auto handleConfig_error = [this](QDBusError error) {
+			emit dbusError(m_dbusPath.path() + ": Device.getConfig", error);
+			m_devManager->deviceInitializationFailed(this);
+		};
+		++m_initCounter;
+		m_dbusDevice->getConfig(handleConfig, handleConfig_error, this);
+
+		auto handleProperties = [this](libnutcommon::DeviceProperties props) {
+			if (!m_dbusDevice) return;
+			auto initDone = checkInitDone();
+			--m_initCounter;
+
+			// contextLog should show path as context for these message, update m_properties after logging.
+			if (DeviceType::AIR == props.type) {
+				contextLog(tr("Device properties fetched: name='%1', type=%2, state=%3, essid='%4'").arg(props.name, toStringTr(props.type), toStringTr(props.state), props.essid));
+			} else {
+				contextLog(tr("Device properties fetched: name='%1', type=%2, state=%3").arg(props.name, toStringTr(props.type), toStringTr(props.state)));
+			}
+			m_properties = props;
+			updateLogPrefix();
+
+			checkInitDone(initDone);
+		};
+		auto handleProperties_error = [this](QDBusError error) {
+			emit dbusError(m_dbusPath.path() + ": Device.getProperties", error);
+			m_devManager->deviceInitializationFailed(this);
+		};
+		++m_initCounter;
+		m_dbusDevice->getProperties(handleProperties, handleProperties_error, this);
+	}
+
+	void CDevice::environmentInitializationFailed(CEnvironment*) {
+		auto initDone = checkInitDone();
+		if (initDone) return; /* ignore after init is done */
+		/* fail device */
+		m_devManager->deviceInitializationFailed(this);
+	}
+
+	void CDevice::environmentInitializationCompleted(CEnvironment* environment) {
+		auto initDone = checkInitDone();
+		if (initDone) return; /* ignore after init is done */
+
+		auto internalEnvNdx = environment->m_index;
+		if (nullptr != m_environments[internalEnvNdx]) return; /* ignore after init is done */
+
+		m_environments[internalEnvNdx] = environment;
+		--m_initCounter;
+
+		checkInitDone(initDone);
+	}
+
+	void CDevice::dbusPropertiesChanged(libnutcommon::DeviceProperties properties) {
+		if (!checkInitDone()) {
+			/* no event handling yet */
+			m_properties = properties;
+			updateLogPrefix();
+			return;
+		}
+
+		auto oldState = m_properties.state;
+		bool actenv_changed = properties.activeEnvironment != m_properties.activeEnvironment;
+		bool state_changed = properties.state != m_properties.state;
+		bool essid_changed = properties.essid != m_properties.essid;
+
+		/* no changes? */
+		if (!actenv_changed && !state_changed && !essid_changed) return;
+
+		m_properties = properties;
+		updateLogPrefix();
+
+		if (actenv_changed) {
+			auto oldenv = m_activeEnvironment;
+			auto const& newEnvPath = m_properties.activeEnvironment;
+			m_activeEnvironment = newEnvPath ? m_dbusEnvironments.value(newEnvPath.objectPath(), nullptr) : nullptr;
+
+			if (oldenv != m_activeEnvironment) {
+				auto actEnvName = m_activeEnvironment ? m_activeEnvironment->getName() : "<none>";
+				auto actEnvNdx = m_activeEnvironment ? m_activeEnvironment->getIndex() : -1;
+				contextLog(tr("Changed active environment: '%1' (%2)").arg(actEnvName, QString::number(actEnvNdx)));
+				emit activeEnvironmentChanged(m_activeEnvironment, oldenv);
 			}
 		}
-	}
-	if (envequal) {
-		foreach(CEnvironment * i, m_environments) {
-			i->refreshAll();
+		if (state_changed) {
+			contextLog(tr("Changed state: %1").arg(toStringTr(m_properties.state)));
+
+#ifndef NUT_NO_WIRELESS
+			if (m_needWireless) {
+				if (DeviceState::DEACTIVATED == oldState) {
+					// got "activated"
+					m_wlAccess->open();
+				}
+				else if (DeviceState::DEACTIVATED == properties.state) {
+					m_wlAccess->close();
+				}
+			}
+
+			if (DeviceType::AIR == m_properties.type && DeviceState::CARRIER <= m_properties.state && nullptr != m_wlAccess->getHardware()) {
+				m_wlAccess->getHardware()->setSignalQualityPollRate(500);
+			}
+#endif
+
+			emit stateChanged(m_properties.state);
 		}
-	}
-	else {
-		rebuild(envs);
-	}
-
-	//Set active env (we can do this here, as we habe all envs in our hash and only set the pointer)
-	m_dbusDevice->getActiveEnvironment();
-
-	emit gotEnvironments();
-	emit newDataAvailable();
-}
-
-void CDevice::dbusretGetActiveEnvironment(QString activeEnv) {
-		if (activeEnv.isEmpty()) { //active env is not set
-			m_activeEnvironment = 0;
+		if (essid_changed) {
+			contextLog(tr("Changed essid: '%1'").arg(m_properties.essid));
+			emit essidUpdate(m_properties.essid);
 		}
-		else {
-			m_activeEnvironment = m_dbusEnvironments.value(QDBusObjectPath(activeEnv), NULL);
-		}
-		*log << tr("Active Environement: %1").arg(activeEnv);
 
-		m_activeEnvFetched = true;
-		qDebug("activeenv fetched");
-		checkInitCompleted();
-
-		emit gotActiveEnvironment(m_activeEnvironment);
+		emit propertiesChanged(m_properties);
 		emit newDataAvailable();
-}
+	}
 
-void CDevice::dbusretGetConfig(libnutcommon::DeviceConfig config) {
+	void CDevice::enable() {
+		if (m_dbusDevice) m_dbusDevice->enable();
+	}
 
-	m_config = config;
-	#ifndef LIBNUT_NO_WIRELESS
-	m_needWireless = !(m_config.wpaConfigFile().isEmpty());
+	void CDevice::disable() {
+		if (m_dbusDevice) m_dbusDevice->disable();
+	}
 
-	//Only use wpa_supplicant if we need one
-	if (m_needWireless) {
-		*log << tr("(%2) wpa_supplicant config file at: %1").arg(m_config.wpaConfigFile(),m_name);
+	void CDevice::setEnvironment(CEnvironment* environment) {
+		if (!m_dbusDevice) return;
 
-		m_wlAccess = new libnutwireless::CWireless(this,m_name);
-		connect(m_wlAccess,SIGNAL(message(QString)),log,SLOT(log(QString)));
-		connect(m_dbusDevice,SIGNAL(newWirelssNetworkFound(void)),this,SIGNAL(newWirelessNetworkFound(void)));
-		//Connect to wpa_supplicant only if device is not deactivated
-		if (! (DS_DEACTIVATED == m_state) ) {
-			m_wlAccess->open();
+		if (nullptr == environment) {
+			m_dbusDevice->setEnvironment(-1);
+		} else {
+			if (DeviceState::DEACTIVATED == m_properties.state) {
+				enable();
+			}
+			m_dbusDevice->setEnvironment(environment->path());
 		}
-		if (DT_AIR == m_type && DS_CARRIER <= m_state && m_wlAccess != NULL && m_wlAccess->getHardware() != NULL) {
-			m_wlAccess->getHardware()->setSignalQualityPollRate(500);
-		}
 	}
-	#endif
-
-	m_configFetched = true;
-	qDebug("config feteched");
-	checkInitCompleted();
-
-	emit gotConfig(m_config);
-	emit newDataAvailable();
-}
-
-
-void CDevice::dbusret_errorOccured(QDBusError error, QString method) {
-	qDebug("Error occured in dbus: %s at %s", QDBusError::errorString(error.type()).toAscii().data(), method.toAscii().data());
-	if (!m_initCompleted) { //error during init
-		emit initializationFailed(this);
-	}
-	if (!serviceCheck()) {
-		emit dbusErrorOccured();
-	}
-}
-
-void CDevice::environmentInitializationFailed(CEnvironment * /* environment */) {
-	if (!m_initCompleted) { //failure in init phase
-		emit initializationFailed(this);
-	}
-}
-
-void CDevice::environmentInitializationCompleted(CEnvironment * environment) {
-	m_environments.append(environment);
-	environment->m_index = m_environments.indexOf(environment);
-	if (m_environments.size() == m_dbusEnvironments.size()) { //check if all interfaces are ready
-		m_environmentsFetched = true;
-		checkInitCompleted();
-	}
-	emit newDataAvailable();
-}
-
-
-//CDevice SLOTS
-void CDevice::enable() {
-	m_dbusDevice->enable();
-}
-void CDevice::disable() {
-	m_dbusDevice->disable();
-}
-void CDevice::setEnvironment(CEnvironment * environment) {
-	if (DS_DEACTIVATED == m_state) {
-		enable();
-	}
-	m_dbusDevice->setEnvironment(m_dbusEnvironments.key(environment));
-}
-libnutcommon::DeviceConfig& CDevice::getConfig() {
-	return m_config;
-}
-
 }

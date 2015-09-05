@@ -77,11 +77,11 @@ NetconfigStatus CWpaSupplicant::checkAdHocNetwork(CNetworkConfig &config) {
 	}
 	return failures;
 }
-	
-	
+
+
 NetconfigStatus CWpaSupplicant::editNetwork(int netid, CNetworkConfig config) {
 	NetconfigStatus failStatus;
-	
+
 	//Check if the network we edit is managed by us and if the NetworkIds are the same
 	QString response = wpaCtrlCmd_GET_NETWORK(netid,"id_str");
 	if ("FAIL\n" != response) {
@@ -195,17 +195,17 @@ NetconfigStatus CWpaSupplicant::editNetwork(int netid, CNetworkConfig config) {
 	if (!config.get_wep_key0().isEmpty()) {
 		if ((0 == config.get_wep_key0().indexOf("\"") && 16+2 < config.get_wep_key0().length()) || !setNetworkVariable(netid,"wep_key0",config.get_wep_key0())) {
 			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_WEP_KEY0);
-		}	
+		}
 	}
 	if (!config.get_wep_key1().isEmpty()) {
 		if ((0 == config.get_wep_key1().indexOf("\"") && 16+2 < config.get_wep_key1().length()) || !setNetworkVariable(netid,"wep_key1",config.get_wep_key1())) {
 			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_WEP_KEY1);
-		}	
+		}
 	}
 	if (!config.get_wep_key2().isEmpty()) {
 		if ((0 == config.get_wep_key2().indexOf("\"") && 16+2 < config.get_wep_key2().length()) || !setNetworkVariable(netid,"wep_key2",config.get_wep_key2())) {
 			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_WEP_KEY2);
-		}	
+		}
 	}
 	if (!config.get_wep_key3().isEmpty()) {
 		if ((0 == config.get_wep_key3().indexOf("\"") && 16+2 < config.get_wep_key3().length()) || !setNetworkVariable(netid,"wep_key3",config.get_wep_key3())) {
@@ -371,7 +371,7 @@ NetconfigStatus CWpaSupplicant::editNetwork(int netid, CNetworkConfig config) {
 CNetworkConfig CWpaSupplicant::getNetworkConfig(int id) {
 	CNetworkConfig config;
 	QString response;
-	
+
 	//Check if this network is manged by us
 	response = wpaCtrlCmd_GET_NETWORK(id,"id_str");
 	if ("FAIL\n" != response) {
@@ -420,7 +420,7 @@ CNetworkConfig CWpaSupplicant::getNetworkConfig(int id) {
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"proto");
 	if ("FAIL\n" != response) {
-		config.set_proto(response); 
+		config.set_proto(response);
 	}
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"key_mgmt");
@@ -437,7 +437,7 @@ CNetworkConfig CWpaSupplicant::getNetworkConfig(int id) {
 	if ("FAIL\n" != response) {
 		config.set_pairwise(response);
 	}
-	
+
 	response = wpaCtrlCmd_GET_NETWORK(id,"group");
 	if ("FAIL\n" != response) {
 		config.set_group(response);

@@ -3,13 +3,13 @@
 #include <QDebug>
 
 namespace libnutwireless {
-	
-	
+
+
 	//parser Functions:
 	QStringList CWpaSupplicant::sliceMessage(QString str) {
 		return str.split('\n',QString::SkipEmptyParts);
 	}
-	
+
 	//MIB Variables:
 	//(dot11|dot1x)VARIABLENAME=<value>
 	//<value> = (TRUE|FALSE) | <Integer> | <String> | <other?>
@@ -57,7 +57,7 @@ namespace libnutwireless {
 		}
 		return MIBVariable::STRING;
 	}
-	
+
 	NetworkFlags CWpaSupplicant::parseNetworkFlags(QString str) {
 		if (str.contains("CURRENT",Qt::CaseInsensitive)) {
 			return NF_CURRENT;
@@ -93,7 +93,7 @@ namespace libnutwireless {
 
 	//parse config
 
-	
+
 	//Parse status:
 	/*
 	bssid=02:00:01:02:03:04
@@ -342,7 +342,7 @@ namespace libnutwireless {
 		}
 		return req;
 	}
-	
+
 	EventType CWpaSupplicant::parseEvent(QString str) {
 		if (str.contains("CONNECTED") ) {
 			return EVENT_CONNECTED;

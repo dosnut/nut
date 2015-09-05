@@ -45,7 +45,7 @@ void CErrorCodeEvaluator::evaluate(QString & target, const QString & separator, 
 		if (errorFlags & i.key()) {
 			if (!target.isEmpty())
 				target.append(separator);
-			
+
 			target.append(i.value());
 			errorFlags ^= i.key();
 		}

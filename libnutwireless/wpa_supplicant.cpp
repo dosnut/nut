@@ -1,4 +1,4 @@
-#ifndef LIBNUT_NO_WIRELESS
+#ifndef NUT_NO_WIRELESS
 #include "wpa_supplicant.h"
 #include "cconfigparser.h"
 

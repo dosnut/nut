@@ -9,17 +9,25 @@
 #include <QCoreApplication>
 #include <iostream>
 
+#include <libnutcommon/dbusmanager.h>
 namespace nuts {
 	int mainApp(int argc, char* argv[]) {
 		QCoreApplication app(argc, argv);
-		SigHandler *sighandler;
-		DeviceManager *devManager;
-		
+
+		std::unique_ptr<libnutcommon::DBusManager> dbusManager;
+		std::unique_ptr<SigHandler> sighandler;
+		std::unique_ptr<DeviceManager> devManager;
+
+// TODO: log when dbus connection got lost
+//	log << "dbus has been stopped, please restart it";
+
+
 		try {
-			sighandler = new SigHandler();
-			devManager = new DeviceManager(argc > 1 ? argv[1] : "/etc/nuts/nuts.config");
-			devManager->m_dbus_devMan = new DBusDeviceManager(devManager);
-			QObject::connect(sighandler, SIGNAL(appQuit()), devManager->m_dbus_devMan, SLOT(stopDBus()));
+			dbusManager.reset(new libnutcommon::DBusManager(libnutcommon::createDefaultDBusConnection));
+			sighandler.reset(new SigHandler());
+			devManager.reset(new DeviceManager(argc > 1 ? argv[1] : "/etc/nuts/nuts.config"));
+			auto dbusDevManager = new DBusDeviceManager(devManager.get());
+			dbusDevManager->connectManager(dbusManager.get());
 		} catch (Exception &e) {
 			err << "Initialize failed:" << endl
 				<< "    " << e.msg() << endl;
@@ -32,8 +40,9 @@ namespace nuts {
 			return -2;
 		}
 		try {
-			delete devManager;
-			delete sighandler;
+			devManager.reset();
+			sighandler.reset();
+			dbusManager.reset();
 		} catch (Exception &e) {
 			err << "Cleanup failed:" << endl
 					<< "    " << e.msg() << endl;

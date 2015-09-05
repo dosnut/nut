@@ -10,38 +10,38 @@
 namespace qnut {
 	CDNSListModel::CDNSListModel(QList<QHostAddress> * dnsList, QObject * parent) : QAbstractListModel(parent), m_DNSList(dnsList) {
 	}
-	
+
 	CDNSListModel::~CDNSListModel() {
 		m_DNSList = NULL;
 	}
-	
+
 	int CDNSListModel::rowCount(const QModelIndex &) const {
 		if (m_DNSList)
 			return m_DNSList->size();
 		else
 			return 0;
 	}
-	
+
 	QVariant CDNSListModel::data(const QModelIndex & index, int role) const {
 		if (!index.isValid())
 			return QVariant();
-		
+
 		if (index.row() >= m_DNSList->size())
 			return QVariant();
-	
+
 		if (role == Qt::DisplayRole)
 			return m_DNSList->at(index.row()).toString();
 		else
 			return QVariant();
 	}
-	
+
 	Qt::ItemFlags CDNSListModel::flags(const QModelIndex & index) const {
 		if (index.isValid())
 			return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
 		else
 			return Qt::ItemIsEnabled;
 	}
-	
+
 	bool CDNSListModel::setData(const QModelIndex & index, const QVariant & value, int role) {
 		if (index.isValid() && role == Qt::EditRole) {
 			QHostAddress address = QHostAddress(value.toString());
@@ -53,22 +53,22 @@ namespace qnut {
 		}
 		return false;
 	}
-	
+
 	QModelIndex CDNSListModel::appendRow(QHostAddress address) {
 		beginInsertRows(QModelIndex(), m_DNSList->size(), m_DNSList->size());
-		
+
 		*m_DNSList << address;
-		
+
 		endInsertRows();
 		return index(m_DNSList->size()-1);
 	}
-	
+
 	bool CDNSListModel::removeRows(int position, int rows, const QModelIndex & parent) {
 		beginRemoveRows(parent, position, position+rows-1);
-	
+
 		for (int i = position; i < position+rows; ++i)
 			m_DNSList->removeAt(i);
-	
+
 		endRemoveRows();
 		return true;
 	}

@@ -10,13 +10,13 @@ namespace libnutclient {
 
 namespace qnut {
 	class CUIDevice;
-	
+
 	/**
 	 * @brief CUIDeviceModel provides an item model to manage the ui representation of devicess.
 	 * @author Oliver Groß <z.o.gross@gmx.de>
-	 * 
+	 *
 	 * The class provides all functions for a read-only model specified in the Qt 4 documentation.
-	 * 
+	 *
 	 * The model supports the display the following information in columns for each device:
 	 *  - name
 	 *  - current status (deactivated, activated, got carrier, unconfigured, up)
@@ -35,15 +35,15 @@ namespace qnut {
 		CUIDeviceModel(QObject * parent = 0);
 		/// @brief Destroyes the object.
 		~CUIDeviceModel();
-		
+
 		CUIDevice * addUIDevice(libnutclient::CDevice * device);
 		void removeUIDevice(CUIDevice * target);
 		void removeUIDevice(int index);
-		
+
 		int findUIDevice(libnutclient::CDevice * device);
-		
+
 		const QList<CUIDevice *> & uiDevices() const { return m_UIDevices; }
-		
+
 		QVariant data(const QModelIndex & index, int role) const;
 		Qt::ItemFlags flags(const QModelIndex & index) const;
 		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;

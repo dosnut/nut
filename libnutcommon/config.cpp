@@ -1,46 +1,16 @@
 #include "common.h"
+#include "enum.h"
 
 namespace libnutcommon {
-	QDBusArgument &operator<< (QDBusArgument &argument, const Config &data) {
-		argument.beginStructure();
-		argument.beginMap( QVariant::String, qMetaTypeId<DeviceConfig>() );
-		QListIterator<QString> name(data.m_devNames);
-		QListIterator<DeviceConfig*> config(data.m_devConfigs);
-		while (name.hasNext() && config.hasNext()) {
-			argument.beginMapEntry();
-			argument << name.next() << *config.next();
-			argument.endMapEntry();
-		}
-		argument.endMap();
-		argument.endStructure();
-		return argument;
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, Config &data) {
-		argument.beginStructure();
-		argument.beginMap();
-		while (!argument.atEnd()) {
-			QString name;
-			DeviceConfig *dc = new DeviceConfig();
-			argument.beginMapEntry();
-			argument >> name >> *dc;
-			argument.endMapEntry();
-			data.m_devNames.append(name);
-			data.m_devConfigs.append(dc);
-		}
-		argument.endMap();
-		argument.endStructure();
-		return argument;
-	}
-	
 	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data) {
 		argument.beginStructure();
-		argument << data.m_noAutoStart;
-		argument << data.m_wpaConfigFile;
-		argument << data.m_wpaDriver;
-		argument << data.m_isRegExp;
-		argument << data.m_gateway_metric;
-		argument.beginArray( qMetaTypeId<EnvironmentConfig>() );
-		foreach(EnvironmentConfig* ec, data.m_environments) {
+		argument
+			<< data.noAutoStart
+			<< data.wpaConfigFile
+			<< data.wpaDriver
+			<< data.gatewayMetric;
+		argument.beginArray(qMetaTypeId<EnvironmentConfig>());
+		for(auto const& ec: data.environments) {
 			argument << *ec;
 		}
 		argument.endArray();
@@ -49,70 +19,85 @@ namespace libnutcommon {
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data) {
 		argument.beginStructure();
-		argument >> data.m_noAutoStart;
-		argument >> data.m_wpaConfigFile;
-		argument >> data.m_wpaDriver;
-		argument >> data.m_isRegExp;
-		argument >> data.m_gateway_metric;
+		argument
+			>> data.noAutoStart
+			>> data.wpaConfigFile
+			>> data.wpaDriver
+			>> data.gatewayMetric;
 		argument.beginArray();
 		while (!argument.atEnd()) {
-			EnvironmentConfig *ec = new EnvironmentConfig();
+			auto ec = std::make_shared<EnvironmentConfig>();
 			argument >> *ec;
-			data.m_environments.push_back(ec);
+			data.environments.push_back(std::move(ec));
 		}
 		argument.endArray();
 		argument.endStructure();
 		return argument;
 	}
-	
-	QDBusArgument &operator<< (QDBusArgument &argument, const SelectResult &data) {
-		argument.beginStructure();
-		argument << (quint8) (qint8) data;
-		argument.endStructure();
-		return argument;
+
+	QDBusArgument& operator<< (QDBusArgument& argument, SelectResult selectResult) {
+		return dbusSerializeEnum(argument, selectResult);
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectResult &data) {
-		argument.beginStructure();
-		quint8 tmp;
-		argument >> tmp;
-		data = (qint8) tmp;
-		argument.endStructure();
-		return argument;
+	const QDBusArgument& operator>> (const QDBusArgument& argument, SelectResult& selectResult) {
+		return dbusUnserializeEnum(argument, selectResult);
 	}
-	
+
+	QDBusArgument& operator<< (QDBusArgument& argument, SelectType selectType) {
+		return dbusSerializeEnum(argument, selectType);
+	}
+	const QDBusArgument& operator>> (const QDBusArgument& argument, SelectType& selectType) {
+		return dbusUnserializeEnum(argument, selectType);
+	}
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const SelectRule &data) {
 		argument.beginStructure();
-		argument << data.invert << (quint8) data.selType << data.block << data.essid << data.ipAddr << data.macAddr;
+		argument
+			<< data.invert
+			<< data.selType
+			<< data.block
+			<< data.essid
+			<< data.ipAddr
+			<< data.macAddr;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectRule &data) {
 		argument.beginStructure();
-		quint8 selType;
-		argument >> data.invert >> selType >> data.block >> data.essid >> data.ipAddr >> data.macAddr;
-		data.selType = (SelectRule::SelectType) selType;
+		argument
+			>> data.invert
+			>> data.selType
+			>> data.block
+			>> data.essid
+			>> data.ipAddr
+			>> data.macAddr;
 		argument.endStructure();
 		return argument;
 	}
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const SelectConfig &data) {
 		argument.beginStructure();
-		argument << data.filters << data.blocks;
+		argument
+			<< data.filters
+			<< data.blocks;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectConfig &data) {
 		argument.beginStructure();
-		argument >> data.filters >> data.blocks;
+		argument
+			>> data.filters
+			>> data.blocks;
 		argument.endStructure();
 		return argument;
 	}
-	
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentConfig &data) {
 		argument.beginStructure();
-		argument << data.m_name << data.m_select;
+		argument
+			<< data.name
+			<< data.select;
 		argument.beginArray( qMetaTypeId<IPv4Config>() );
-		foreach(IPv4Config* ic, data.m_ipv4Interfaces) {
+		for(auto const& ic: data.ipv4Interfaces) {
 			argument << *ic;
 		}
 		argument.endArray();
@@ -121,117 +106,162 @@ namespace libnutcommon {
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentConfig &data) {
 		argument.beginStructure();
-		argument >> data.m_name >> data.m_select;
+		argument
+			>> data.name
+			>> data.select;
 		argument.beginArray();
 		while (!argument.atEnd()) {
-			IPv4Config *ic = new IPv4Config();
+			auto ic = std::make_shared<IPv4Config>();
 			argument >> *ic;
-			data.m_ipv4Interfaces.push_back(ic);
+			data.ipv4Interfaces.push_back(std::move(ic));
 		}
 		argument.endArray();
 		argument.endStructure();
 		return argument;
 	}
-	
+
+	QDBusArgument &operator<< (QDBusArgument &argument, IPv4ConfigFlags flags) {
+		return dbusSerializeFlags(argument, flags);
+	}
+	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4ConfigFlags &flags) {
+		return dbusUnserializeFlags(argument, flags);
+	}
+
 	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4Config &data) {
 		argument.beginStructure();
-		argument << (quint32) data.getFlags() << (quint32) data.getOverwriteFlags()
-			<< data.m_static_ip
-			<< data.m_static_netmask
-			<< data.m_static_gateway
-			<< data.m_static_dnsservers
-			<< data.m_gateway_metric;
-		
+		argument
+			<< data.flags
+			<< data.static_ip
+			<< data.static_netmask
+			<< data.static_gateway
+			<< data.static_dnsservers
+			<< data.gatewayMetric;
 		argument.endStructure();
 		return argument;
 	}
 	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4Config &data) {
 		argument.beginStructure();
-		quint32 flags, oFlags;
-		argument >> flags >> oFlags;
-		data.m_flags = (IPv4Config::Flags) flags;
-		data.m_overwriteFlags = (IPv4Config::OverwriteFlags) oFlags;
 		argument
-			>> data.m_static_ip
-			>> data.m_static_netmask
-			>> data.m_static_gateway
-			>> data.m_static_dnsservers
-			>> data.m_gateway_metric;
+			>> data.flags
+			>> data.static_ip
+			>> data.static_netmask
+			>> data.static_gateway
+			>> data.static_dnsservers
+			>> data.gatewayMetric;
 		argument.endStructure();
 		return argument;
 	}
-	
-	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4UserConfig &data) {
-		argument.beginStructure();
-		argument << data.m_ip << data.m_netmask << data.m_gateway << data.m_dnsservers;
-		argument.endStructure();
-		return argument;
+
+	bool DeviceNamePattern::operator<(const DeviceNamePattern &other) const {
+		return type < other.type || (type == other.type &&
+			pattern < other.pattern
+			);
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4UserConfig &data) {
-		argument.beginStructure();
-		argument >> data.m_ip >> data.m_netmask >> data.m_gateway >> data.m_dnsservers;
-		argument.endStructure();
-		return argument;
-	}
-	
-	Config::Config() {
-	}
-	
-	Config::~Config() {
-		if (!m_isCopy) {
-			foreach(DeviceConfig* dc, m_devConfigs)
-				delete dc;
-			m_devConfigs.clear();
+
+	bool DeviceNamePattern::match(QString name) const {
+		switch (type) {
+		case Plain:
+			return pattern == name;
+		case RegExp:
+			return QRegExp{ pattern, Qt::CaseSensitive, QRegExp::RegExp }.exactMatch(name);
+		case Wildcard:
+			return QRegExp{ pattern, Qt::CaseSensitive, QRegExp::Wildcard }.exactMatch(name);
 		}
+		return false;
 	}
-	
-	DeviceConfig::DeviceConfig()
-	: m_noAutoStart(false), m_isRegExp(false), m_gateway_metric(-1) {
-	}
-	
-	DeviceConfig::~DeviceConfig() {
-		if (!m_isCopy) {
-			foreach(EnvironmentConfig* ec, m_environments)
-				delete ec;
-			m_environments.clear();
+
+	QString DeviceNamePattern::typeString() const {
+		switch (type) {
+		case Plain:
+			return { "Plain" };
+		case RegExp:
+			return { "RegExp" };
+		case Wildcard:
+			return { "Wildcard" };
 		}
+		return { "" };
 	}
-	
-	EnvironmentConfig::EnvironmentConfig(const QString &name)
-	: m_name(name) {
+
+	std::shared_ptr<DeviceConfig> Config::create(const DeviceNamePattern& pattern) {
+		return namedDeviceConfigs.emplace(pattern, std::make_shared<DeviceConfig>()).first->second;
 	}
-	EnvironmentConfig::~EnvironmentConfig() {
-		if (!m_isCopy) {
-			foreach(IPv4Config *ic, m_ipv4Interfaces)
-				delete ic;
-			m_ipv4Interfaces.clear();
+
+	std::shared_ptr<DeviceConfig> Config::lookup(QString deviceName) {
+		for (auto const& ndc: namedDeviceConfigs) {
+			if (ndc.first.match(deviceName)) return ndc.second;
 		}
+		return { };
 	}
-	
-	IPv4Config::IPv4Config(int flags, int overwriteFlags)
-	: m_gateway_metric(-1), m_flags(flags), m_overwriteFlags(overwriteFlags), m_timeout(0), m_continue_dhcp(false) {
+
+	bool evaluate(SelectResult a, bool user) {
+		bool result[] = { true, user, !user, false };
+		return result[(quint8) a];
+	}
+
+	SelectResult operator||(SelectResult a, SelectResult b) {
+		using SR = SelectResult;
+		auto ai = static_cast<quint8>(a);
+		auto bi = static_cast<quint8>(b);
+		static const SR op_or[16] = {
+			SR::False  , SR::User , SR::NotUser, SR::True,
+			SR::User   , SR::User , SR::True   , SR::True,
+			SR::NotUser, SR::True , SR::NotUser, SR::True,
+			SR::True   , SR::True , SR::True   , SR::True
+		};
+		return op_or[ai*4 + bi];
+	}
+
+	SelectResult operator&&(SelectResult a, SelectResult b) {
+		using SR = SelectResult;
+		auto ai = static_cast<quint8>(a);
+		auto bi = static_cast<quint8>(b);
+		static const SR op_and[16] = {
+			SR::False  , SR::False, SR::False  , SR::False,
+			SR::False  , SR::User , SR::False  , SR::User,
+			SR::False  , SR::False, SR::NotUser, SR::NotUser,
+			SR::False  , SR::User , SR::NotUser, SR::True
+		};
+		return op_and[ai*4 + bi];
+	}
+
+	SelectResult operator^(SelectResult a, SelectResult b) {
+		using SR = SelectResult;
+		auto ai = static_cast<quint8>(a);
+		auto bi = static_cast<quint8>(b);
+		static const SR op_xor[16] = {
+			SR::False  , SR::User   , SR::NotUser, SR::True,
+			SR::User   , SR::False  , SR::True   , SR::NotUser,
+			SR::NotUser, SR::True   , SR::False  , SR::User,
+			SR::True   , SR::NotUser, SR::User   , SR::False
+		};
+		return op_xor[ai*4 + bi];
+	}
+
+	SelectResult operator!(SelectResult a) {
+		auto ai = static_cast<quint8>(a);
+		return static_cast<SelectResult>(3 - ai);
 	}
 
 	// called by common.cpp: init()
 	void config_init() {
-		qRegisterMetaType< Config >("libnutcommon::Config");
 		qRegisterMetaType< DeviceConfig >("libnutcommon::DeviceConfig");
 		qRegisterMetaType< SelectResult >("libnutcommon::SelectResult");
 		qRegisterMetaType< QVector< SelectResult > >("QVector<libnutcommon::SelectRule>");
+		qRegisterMetaType< SelectType >("libnutcommon::SelectType");
 		qRegisterMetaType< SelectRule >("libnutcommon::SelectRule");
 		qRegisterMetaType< SelectConfig >("libnutcommon::SelectConfig");
 		qRegisterMetaType< EnvironmentConfig >("libnutcommon::EnvironmentConfig");
+		qRegisterMetaType< IPv4ConfigFlags >("libnutcommon::IPv4ConfigFlags");
 		qRegisterMetaType< IPv4Config >("libnutcommon::IPv4Config");
-		qRegisterMetaType< IPv4UserConfig >("libnutcommon::IPv4UserConfig");
-	
-		qDBusRegisterMetaType< Config >();
+
 		qDBusRegisterMetaType< DeviceConfig >();
 		qDBusRegisterMetaType< SelectResult >();
 		qDBusRegisterMetaType< QVector< SelectResult > >();
+		qDBusRegisterMetaType< SelectType >();
 		qDBusRegisterMetaType< SelectRule >();
 		qDBusRegisterMetaType< SelectConfig >();
 		qDBusRegisterMetaType< EnvironmentConfig >();
+		qDBusRegisterMetaType< IPv4ConfigFlags >();
 		qDBusRegisterMetaType< IPv4Config >();
-		qDBusRegisterMetaType< IPv4UserConfig >();
 	}
 }
