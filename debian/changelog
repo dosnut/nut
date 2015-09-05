@@ -1,3 +1,9 @@
+network-utilities (0.6.0-2) experimental; urgency=medium
+
+  * fix missing qt linguist dependency
+
+ -- Stefan Bühler <stbuehler@web.de>  Sat, 05 Sep 2015 22:04:22 +0200
+
 network-utilities (0.6.0-1) experimental; urgency=medium
 
   * move to Qt5; split libnutclientbase into separate library
