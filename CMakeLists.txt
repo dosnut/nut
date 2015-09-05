@@ -4,7 +4,7 @@ cmake_policy(SET CMP0022 NEW)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 PROJECT(network-utiltities
-	VERSION 0.5.8
+	VERSION 0.5.9
 	LANGUAGES C CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${network-utiltities_BINARY_DIR})
