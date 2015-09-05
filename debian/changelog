@@ -1,3 +1,9 @@
+network-utilities (0.5.9-3) experimental; urgency=medium
+
+  * fix debian lib/*.install filenames, require cmake >= 3 in debian/control
+
+ -- Stefan Bühler <stbuehler@web.de>  Sat, 05 Sep 2015 19:15:32 +0200
+
 network-utilities (0.5.9-2) experimental; urgency=medium
 
   * require pkg-config
