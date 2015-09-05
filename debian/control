@@ -4,7 +4,7 @@ Priority: important
 Maintainer: Stefan Bühler <source@stbuehler.de>
 Uploaders: Oliver Groß <neokensuke@freenet.de>, Stefan Bühler <stbuehler@web.de>
 Build-Depends: cdbs, debhelper (>= 9),
- qtbase5-dev-tools, qtbase5-dev,
+ qtbase5-dev-tools, qttools5-dev,
  bison, flex,
  libnl-3-dev, libnl-genl-3-dev, libnl-route-3-dev,
  libiw-dev,
