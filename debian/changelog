@@ -1,3 +1,9 @@
+network-utilities (0.6.0-3) experimental; urgency=medium
+
+  * add missing package containing linguist binaries
+
+ -- Stefan Bühler <stbuehler@web.de>  Sat, 05 Sep 2015 22:17:10 +0200
+
 network-utilities (0.6.0-2) experimental; urgency=medium
 
   * fix missing qt linguist dependency
