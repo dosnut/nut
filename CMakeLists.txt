@@ -12,7 +12,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${network-utiltities_BINARY_DIR})
 
 set(PACKAGE_NAME ${network-utiltities_PROJECT_NAME})
 set(PACKAGE_VERSION ${network-utiltities_VERSION})
-set(PACKAGE_SO_VERSION 0) # .so version for libnutclient and libnutcommon
+set(PACKAGE_SO_VERSION ${network-utiltities_VERSION}) # .so version for libnutclient and libnutcommon
 
 include(DefaultBuildType)
 include(ExtraFlags)
