@@ -18,7 +18,7 @@ CWpaSupplicant::CWpaSupplicant(QObject * parent, QString m_ifname) : QObject(par
 	qDebug() << (QString("Constructor set m_lastWasAdHoc=%1").arg((m_lastWasAdHoc) ? "true" : "false"));
 	//
 
-	connect(QCoreApplication::instance(),SIGNAL(aboutToQuit ()),this,SLOT(detachWpa()));
+	connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, &CWpaSupplicant::detachWpa);
 	m_apScanDefault = -1;
 	qDebug() << (QString("Constructor set ap_scan=%1").arg(QString::number(m_apScanDefault)));
 	m_lastWasAdHoc = false;

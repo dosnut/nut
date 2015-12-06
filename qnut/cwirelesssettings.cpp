@@ -73,20 +73,20 @@ namespace qnut {
 		ui.managedView->header()->setMinimumSectionSize(-1);
 		ui.availableView->header()->setMinimumSectionSize(-1);
 
-		connect(m_Device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(updateUi(libnutcommon::DeviceState)));
+		connect(m_Device, &CDevice::stateChanged, this, &CWirelessSettings::updateUi);
 
-		connect(ui.managedView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-			this, SLOT(handleManagedAPSelectionChanged(const QItemSelection &, const QItemSelection &)));
+		connect(ui.managedView->selectionModel(), &QItemSelectionModel::selectionChanged,
+			this, &CWirelessSettings::handleManagedAPSelectionChanged);
 
-		connect(ui.availableView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(addNetwork()));
-		connect(ui.managedView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(switchToSelectedNetwork()));
+		connect(ui.availableView, &QAbstractItemView::doubleClicked, this, &CWirelessSettings::addNetwork);
+		connect(ui.managedView, &QAbstractItemView::doubleClicked, this, &CWirelessSettings::switchToSelectedNetwork);
 
-		connect(ui.availableAPFilterEdit, SIGNAL(textChanged(const QString &)), m_AvailableAPProxyModel, SLOT(setFilterWildcard(const QString &)));
+		connect(ui.availableAPFilterEdit, &QLineEdit::textChanged, m_AvailableAPProxyModel, &CAvailableAPProxyModel::setFilterWildcard);
 
-		connect(m_Device->getWireless()->getHardware(), SIGNAL(signalQualityUpdated(libnutwireless::SignalQuality)),
-			this, SLOT(updateSignalInfo(libnutwireless::SignalQuality)));
+		connect(m_Device->getWireless()->getHardware(), &CWirelessHW::signalQualityUpdated,
+			this, &CWirelessSettings::updateSignalInfo);
 
-		connect(m_AvailableAPModel, SIGNAL(cachedScansUpdated()), this, SLOT(updateBSSIDMenu()));
+		connect(m_AvailableAPModel, &CAvailableAPModel::cachedScansUpdated, this, &CWirelessSettings::updateBSSIDMenu);
 	}
 
 	inline void CWirelessSettings::createActions() {
@@ -153,27 +153,27 @@ namespace qnut {
 		m_ConfigureNetworkAction->setEnabled(false);
 		m_RemoveNetworkAction->setEnabled(false);
 
-		connect(m_RescanNetworksAction, SIGNAL(triggered()), this, SLOT(handleRescanRequest()));
-		connect(m_ToggleScanResultsAction, SIGNAL(toggled(bool)), ui.availableAPGroupBox, SLOT(setVisible(bool)));
+		connect(m_RescanNetworksAction, &QAction::triggered, this, &CWirelessSettings::handleRescanRequest);
+		connect(m_ToggleScanResultsAction, &QAction::toggled, ui.availableAPGroupBox, &QGroupBox::setVisible);
 
-		connect(m_SwitchNetworkAction, SIGNAL(triggered()), this, SLOT(switchToSelectedNetwork()));
-		connect(m_ConfigureNetworkAction, SIGNAL(triggered()), this, SLOT(configureSelectedNetwork()));
-		connect(m_EnableNetworkAction, SIGNAL(triggered()), this, SLOT(enableSelectedNetwork()));
-		connect(m_DisableNetworkAction, SIGNAL(triggered()), this, SLOT(disableSelectedNetwork()));
+		connect(m_SwitchNetworkAction, &QAction::triggered, this, &CWirelessSettings::switchToSelectedNetwork);
+		connect(m_ConfigureNetworkAction, &QAction::triggered, this, &CWirelessSettings::configureSelectedNetwork);
+		connect(m_EnableNetworkAction, &QAction::triggered, this, &CWirelessSettings::enableSelectedNetwork);
+		connect(m_DisableNetworkAction, &QAction::triggered, this, &CWirelessSettings::disableSelectedNetwork);
 
-		connect(enableNetworksAction, SIGNAL(triggered()), this, SLOT(enableNetworks()));
-		connect(importNetworksAction, SIGNAL(triggered()), this, SLOT(importNetworks()));
-		connect(exportNetworkAction, SIGNAL(triggered()), this, SLOT(exportSelectedNetwork()));
-		connect(exportMultipleNetworksAction, SIGNAL(triggered()), this, SLOT(exportMultipleNetworks()));
+		connect(enableNetworksAction, &QAction::triggered, this, &CWirelessSettings::enableNetworks);
+		connect(importNetworksAction, &QAction::triggered, this, &CWirelessSettings::importNetworks);
+		connect(exportNetworkAction, &QAction::triggered, this, &CWirelessSettings::exportSelectedNetwork);
+		connect(exportMultipleNetworksAction, &QAction::triggered, this, &CWirelessSettings::exportMultipleNetworks);
 
-		connect(addNetworkAction, SIGNAL(triggered()), this, SLOT(addNetwork()));
-		connect(addAdhocAction, SIGNAL(triggered()), this, SLOT(addAdhoc()));
-		connect(m_RemoveNetworkAction, SIGNAL(triggered()), this, SLOT(removeSelectedNetwork()));
+		connect(addNetworkAction, &QAction::triggered, this, &CWirelessSettings::addNetwork);
+		connect(addAdhocAction, &QAction::triggered, this, &CWirelessSettings::addAdhoc);
+		connect(m_RemoveNetworkAction, &QAction::triggered, this, &CWirelessSettings::removeSelectedNetwork);
 
-		connect(m_SaveNetworksAction, SIGNAL(triggered()), m_Device->getWireless()->getWpaSupplicant(), SLOT(save_config()));
-		connect(reloadNetworksAction, SIGNAL(triggered()), m_Device->getWireless()->getWpaSupplicant(), SLOT(reconfigure()));
-		connect(m_KeepScanResultsAction, SIGNAL(toggled(bool)), this, SLOT(keepScanResultsVisible(bool)));
-		connect(reassociateAction, SIGNAL(triggered()), m_Device->getWireless()->getWpaSupplicant(), SLOT(reassociate()));
+		connect(m_SaveNetworksAction, &QAction::triggered, m_Device->getWireless()->getWpaSupplicant(), &CWpaSupplicant::save_config);
+		connect(reloadNetworksAction, &QAction::triggered, m_Device->getWireless()->getWpaSupplicant(), &CWpaSupplicant::reconfigure);
+		connect(m_KeepScanResultsAction, &QAction::toggled, this, &CWirelessSettings::keepScanResultsVisible);
+		connect(reassociateAction, &QAction::triggered, m_Device->getWireless()->getWpaSupplicant(), &CWpaSupplicant::reassociate);
 
 		manageNetworksMenu->addAction(enableNetworksAction);
 		manageNetworksMenu->addSeparator();
@@ -231,7 +231,7 @@ namespace qnut {
 		ui.reassociateButton->setDefaultAction(reassociateAction);
 
 		m_SetBSSIDMapper = new QSignalMapper(this);
-		connect(m_SetBSSIDMapper, SIGNAL(mapped(const QString &)), this, SLOT(handleBSSIDSwitchRequest(const QString &)));
+		connect(m_SetBSSIDMapper, static_cast<void(QSignalMapper::*)(const QString &)>(&QSignalMapper::mapped), this, &CWirelessSettings::handleBSSIDSwitchRequest);
 	}
 
 	void CWirelessSettings::updateSignalInfo(SignalQuality signal) {
@@ -486,7 +486,7 @@ namespace qnut {
 					currentAction = m_SetBSSIDMenu->addAction(tr("%1 (Quality: %2)")
 						.arg(bssidString, signalQualityToString(m_AvailableAPModel->cachedScans().at(scanList->at(i)).signal)));
 					m_SetBSSIDMapper->setMapping(currentAction, bssidString);
-					connect(currentAction, SIGNAL(triggered()), m_SetBSSIDMapper, SLOT(map()));
+					connect(currentAction, &QAction::triggered, m_SetBSSIDMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
 				}
 			}
 		}

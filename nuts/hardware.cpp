@@ -56,7 +56,7 @@ namespace nuts {
 		fcntl(netlink_fd, F_SETFD, FD_CLOEXEC);
 		fcntl(ethtool_fd, F_SETFD, FD_CLOEXEC);
 		QSocketNotifier *nln = new QSocketNotifier(netlink_fd, QSocketNotifier::Read, this);
-		connect(nln, SIGNAL(activated(int)), this, SLOT(read_netlinkmsgs()));
+		connect(nln, &QSocketNotifier::activated, this, &HardwareManager::read_netlinkmsgs);
 	}
 
 	HardwareManager::~HardwareManager() {

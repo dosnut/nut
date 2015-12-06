@@ -21,8 +21,8 @@ namespace qnut {
 	CInterfaceDetailsModel::CInterfaceDetailsModel(CInterface * data, QObject * parent) : QAbstractItemModel(parent) {
 		m_Interface = data;
 		if (m_Interface) {
-			connect(m_Interface, SIGNAL(stateChanged(libnutcommon::InterfaceState)), this, SIGNAL(layoutChanged()));
-			//connect(m_Interface, SIGNAL(userConfigApplied()), this, SIGNAL(layoutChanged()));
+			connect(m_Interface, &CInterface::stateChanged, this, &CInterfaceDetailsModel::layoutChangedDefault);
+			//connect(m_Interface, &CInterface::userConfigApplied, this, &CInterfaceDetailsModel::layoutChangedDefault);
 		}
 	}
 
@@ -216,5 +216,10 @@ namespace qnut {
 
 	QModelIndex CInterfaceDetailsModel::parent(const QModelIndex &) const {
 		return QModelIndex();
+	}
+
+	void CInterfaceDetailsModel::layoutChangedDefault()
+	{
+		layoutChanged();
 	}
 }

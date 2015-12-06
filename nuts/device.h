@@ -31,6 +31,7 @@ namespace nuts {
 #include "hardware.h"
 #include "arp.h"
 #include "events.h"
+#include "qobject_timer.h"
 
 namespace nuts {
 	/** @brief The DeviceManager keeps track of all hardware devices.
@@ -305,12 +306,10 @@ namespace nuts {
 	class Interface_IPv4 : public Interface {
 		Q_OBJECT
 	private:
-		int m_dhcp_timer_id = -1;     // timer id
+		QObjectTimer m_dhcp_timer;
 		int m_dhcp_retry;        // count retries
 		void timerEvent(QTimerEvent *event) override;
-		void dhcp_set_timeout(int msec);
-		void fallback_set_timeout(int msec);
-		int m_fallback_timer_id = -1;
+		QObjectTimer m_fallback_timer;
 
 		// make sure to call checkPropertiesUpdate() after each modification
 		// to m_properties

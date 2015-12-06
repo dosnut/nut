@@ -39,12 +39,13 @@ namespace qnut {
 		beginInsertRows(QModelIndex(), m_UIDevices.size(), m_UIDevices.size());
 		m_UIDevices.append(newDevice);
 
-		connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)),
-			this, SLOT(updateDeviceState()));
+		connect(device, &CDevice::stateChanged,
+			this, &CUIDeviceModel::updateDeviceState);
 #ifndef NUT_NO_WIRELESS
-		if (device->getWireless())
-			connect(newDevice, SIGNAL(wirelessInformationUpdated()),
-				this, SLOT(updateSignalQuality()));
+		if (device->getWireless()) {
+			connect(newDevice, &CUIDevice::wirelessInformationUpdated,
+				this, &CUIDeviceModel::updateSignalQuality);
+		}
 #endif
 		endInsertRows();
 		return newDevice;
@@ -61,12 +62,13 @@ namespace qnut {
 
 		beginRemoveRows(QModelIndex(), position, position);
 		CUIDevice * target = m_UIDevices.takeAt(position);
-		disconnect(target->device(), SIGNAL(stateChanged(libnutcommon::DeviceState)),
-			this, SLOT(updateDeviceState()));
+		disconnect(target->device(), &CDevice::stateChanged,
+			this, &CUIDeviceModel::updateDeviceState);
 #ifndef NUT_NO_WIRELESS
-		if (target->device()->getWireless())
-			connect(target, SIGNAL(wirelessInformationUpdated()),
-				this, SLOT(updateSignalQuality()));
+		if (target->device()->getWireless()) {
+			connect(target, &CUIDevice::wirelessInformationUpdated,
+				this, &CUIDeviceModel::updateSignalQuality);
+		}
 #endif
 		delete target;
 		endRemoveRows();

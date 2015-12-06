@@ -39,7 +39,7 @@ namespace qnut {
 			m_ParentRules[0] = 0;
 			fillParentRules();
 
-			connect(m_Environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
+			connect(m_Environment, &CEnvironment::activeChanged, this, &CEnvironmentDetailsModel::layoutChangedDefault);
 		}
 	}
 
@@ -204,5 +204,10 @@ namespace qnut {
 		}
 
 		return createIndex(parentRuleIndex, 0, parentRule);
+	}
+
+	void CEnvironmentDetailsModel::layoutChangedDefault()
+	{
+		layoutChanged();
 	}
 }

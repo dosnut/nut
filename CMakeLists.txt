@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 cmake_policy(SET CMP0022 NEW)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 PROJECT(network-utiltities
-	VERSION 0.6.0
+	VERSION 0.6.1
 	LANGUAGES C CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${network-utiltities_BINARY_DIR})
@@ -14,6 +14,7 @@ set(PACKAGE_NAME ${network-utiltities_PROJECT_NAME})
 set(PACKAGE_VERSION ${network-utiltities_VERSION})
 set(PACKAGE_SO_VERSION ${network-utiltities_VERSION}) # .so version for libnutclient and libnutcommon
 
+include(Qt5Translate)
 include(DefaultBuildType)
 include(ExtraFlags)
 include(ImportNetlink)

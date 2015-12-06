@@ -149,10 +149,10 @@ namespace libnutclientbase {
 		DBUS_ACTION_0(QStringList, getDeviceNames)
 
 	signals:
-		void deviceAdded(const QDBusObjectPath &objectpath);
-		void deviceRemoved(const QDBusObjectPath &objectpath);
-		void deviceAdded(const QString &devname);
-		void deviceRemoved(const QString &devname);
+		void deviceAddedPath(const QDBusObjectPath &objectpath);
+		void deviceRemovedPath(const QDBusObjectPath &objectpath);
+		void deviceAddedName(const QString &devname);
+		void deviceRemovedName(const QString &devname);
 	};
 
 

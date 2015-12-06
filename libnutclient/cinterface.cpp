@@ -47,8 +47,8 @@ namespace libnutclient {
 		m_dbusInterface = new libnutclientbase::DBusInterface_IPv4(service, m_dbusPath, connection, this);
 
 		/* all other signals are covered by these two */
-		connect(m_dbusInterface, SIGNAL(propertiesChanged(libnutcommon::InterfaceProperties)), this, SLOT(dbusPropertiesChanged(libnutcommon::InterfaceProperties)));
-		connect(m_dbusInterface, SIGNAL(userConfigChanged(libnutcommon::IPv4UserConfig)), this, SLOT(dbusUserConfigUpdate(libnutcommon::IPv4UserConfig)));
+		connect(m_dbusInterface, &libnutclientbase::DBusInterface_IPv4::propertiesChanged, this, &CInterface::dbusPropertiesChanged);
+		connect(m_dbusInterface, &libnutclientbase::DBusInterface_IPv4::userConfigChanged, this, &CInterface::dbusUserConfigUpdate);
 
 		auto handleConfig = [this](libnutcommon::IPv4Config config) {
 			if (!m_dbusInterface) return;

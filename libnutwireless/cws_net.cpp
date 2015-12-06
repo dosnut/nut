@@ -176,7 +176,7 @@ NetconfigStatus CWpaSupplicant::editNetwork(int netid, CNetworkConfig config) {
 			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_PSK);
 		}
 	}
-	if (! EAPF_UNDEFINED == config.get_eapol_flags() ) {
+	if (EAPF_UNDEFINED != config.get_eapol_flags() ) {
 		if ( !setNetworkVariable(netid,"eapol_flags",toString(config.get_eapol_flags()))) {
 			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_EAPOL_FLAGS);
 		}

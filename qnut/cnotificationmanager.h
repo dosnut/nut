@@ -35,14 +35,14 @@ namespace qnut {
 		void unregisterUIDevice(CUIDevice * uiDevice);
 
 		static bool trayIconsAvailable() { return QSystemTrayIcon::isSystemTrayAvailable(); }
+
 	public slots:
 		void setIconVisible(bool value, CUIDevice * uiDevice);
 
 		void setNotificationsEnabled(bool value);
 
-		void showMessage(QString title, QString message, CUIDevice * uiDevice = NULL);
-		void showMessage(QString title, QString message, QObject * reciever, const char * slot, CUIDevice * uiDevice = NULL);
 		void setToolTip(QString tooltip, CUIDevice * uiDevice = NULL);
+
 	private:
 		QWidget * m_MainWindow;
 		QSystemTrayIcon * m_MainIcon;
@@ -51,14 +51,23 @@ namespace qnut {
 		bool m_NotificationsEnabled;
 		QAction * m_InsertMarker;
 		inline void updateDeviceIcon(CUIDevice * uiDevice);
-	private slots:
-		void setIconVisible(bool value);
 
-		void updateDeviceIcon();
-		void showStateNotification(libnutcommon::DeviceState state);
+		QSystemTrayIcon * getTrayIcon(CUIDevice * uiDevice);
+		void showSomeMessage(QSystemTrayIcon * trayIcon, QString devName, QString title, QString message);
+
+	private slots:
+		void setIconVisibleBySender(bool value);
+
+		void updateDeviceIconBySender();
+		void showStateNotificationBySender(libnutcommon::DeviceState state);
 
 		void handleDeviceIconActivated(QSystemTrayIcon::ActivationReason reason);
 		void handleMainIconActivated(QSystemTrayIcon::ActivationReason reason);
+
+		void showDeviceMessage(QString title, QString message, CUIDevice * uiDevice);
+		void showGlobalMessage(QString title, QString message);
+
+		// void showMessage(QString title, QString message, QObject * reciever, const char * slot, CUIDevice * uiDevice = NULL);
 	};
 }
 #endif // QNUT_CNOTIFICATIONMANAGER_H

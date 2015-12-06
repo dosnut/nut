@@ -87,7 +87,7 @@ namespace qnut {
 		static void convertLineEditText(QLineEdit * lineEdit, bool hex);
 	protected slots:
 		virtual bool applyConfiguration() = 0;
-		virtual void convertLineEditText(bool hex);
+		virtual void convertLineEditTextToggle(bool hex);
 		virtual void populateUi() = 0;
 	};
 }

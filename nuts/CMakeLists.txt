@@ -6,21 +6,34 @@ find_package(FLEX)
 flex_target(CONFIGPARSER_L configparser.l ${CMAKE_CURRENT_BINARY_DIR}/configparser_lex.cpp COMPILE_FLAGS "-Pconfigparser")
 
 add_executable(${PROJECT_NAME}
-	main.cpp
-	device.cpp
-	configparser.cpp
-	hardware.cpp
-
-	sighandler.cpp
-	log.cpp
-	dhcppacket.cpp
-
-	dbus.cpp
 	arp.cpp
-	random.cpp
+	arp.h
+	configparser.cpp
+	configparser.h
+	configparser_p.h
+	dbus.cpp
+	dbus.h
+	device.cpp
+	device.h
+	dhcppacket.cpp
+	dhcppacket.h
 	events.cpp
-
+	events.h
+	exception.h
+	hardware.cpp
+	hardware.h
 	hardware_ext.c
+	log.cpp
+	log.h
+	main.cpp
+	qobject_timer.cpp
+	qobject_timer.h
+	random.cpp
+	random.h
+	sighandler.cpp
+	sighandler.h
+
+	configparser.l
 
 	${FLEX_CONFIGPARSER_L_OUTPUTS}
 	${BISON_CONFIGPARSER_Y_OUTPUTS}

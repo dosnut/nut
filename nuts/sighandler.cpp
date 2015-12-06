@@ -44,7 +44,7 @@ namespace nuts {
 		signal(SIGINT, sig2pipe);
 
 		QSocketNotifier *r = new QSocketNotifier(pipefd[0], QSocketNotifier::Read, this);
-		connect(r, SIGNAL(activated(int)), this, SLOT(pipe_rcv()));
+		connect(r, &QSocketNotifier::activated, this, &SigHandler::pipe_rcv);
 	}
 
 	SigHandler::~SigHandler() {

@@ -342,9 +342,9 @@ namespace nuts {
 
 		m_arp_read_nf = new QSocketNotifier(m_arp_socket, QSocketNotifier::Read);
 		m_arp_write_nf = new QSocketNotifier(m_arp_socket, QSocketNotifier::Write);
- 		m_arp_write_nf->setEnabled(!m_arp_write_buf.empty());
- 		connect(m_arp_read_nf, SIGNAL(activated(int)), SLOT(arpReadNF()));
- 		connect(m_arp_write_nf, SIGNAL(activated(int)), SLOT(arpWriteNF()));
+		m_arp_write_nf->setEnabled(!m_arp_write_buf.empty());
+		connect(m_arp_read_nf, &QSocketNotifier::activated, this, &ARP::arpReadNF);
+		connect(m_arp_write_nf, &QSocketNotifier::activated, this, &ARP::arpWriteNF);
 		return true;
 	}
 

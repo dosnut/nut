@@ -50,8 +50,8 @@ namespace qnut {
 #ifndef NUT_NO_WIRELESS
 		if (m_Device->getWireless()) {
 			m_WirelessSettings = new CWirelessSettings(m_Device);
-			connect(m_Device->getWireless()->getHardware(), SIGNAL(signalQualityUpdated(libnutwireless::SignalQuality)),
-				this, SIGNAL(wirelessInformationUpdated()));
+			connect(m_Device->getWireless()->getHardware(), &libnutwireless::CWirelessHW::signalQualityUpdated,
+				this, &CUIDevice::wirelessInformationUpdated);
 		}
 		else
 			m_WirelessSettings = NULL;
@@ -62,8 +62,8 @@ namespace qnut {
 
 		readSettings();
 
-		connect(m_Device, SIGNAL(stateChanged(libnutcommon::DeviceState)),
-			this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
+		connect(m_Device, &CDevice::stateChanged,
+			this, &CUIDevice::handleDeviceStateChange);
 
 		if (m_Device->getState() == DeviceState::UP)
 			ui.environmentTree->expand(ui.environmentTree->model()->index(m_Device->getEnvironments().indexOf(m_Device->getActiveEnvironment()), 0));
@@ -323,10 +323,10 @@ namespace qnut {
 
 		ui.environmentTree->setContextMenuPolicy(Qt::ActionsContextMenu);
 
-		connect(m_IPConfigurationAction, SIGNAL(triggered()), this, SLOT(openIPConfiguration()));
+		connect(m_IPConfigurationAction, &QAction::triggered, this, &CUIDevice::openIPConfiguration);
 
 		tempAction = new QAction(/*QIcon(UI_ICON_COPY),*/  tr("&Copy property"), this);
-		connect(tempAction, SIGNAL(triggered()), this, SLOT(copySelectedProperty()));
+		connect(tempAction, &QAction::triggered, this, &CUIDevice::copySelectedProperty);
 		ui.detailsView->addAction(tempAction);
 	}
 
@@ -339,8 +339,8 @@ namespace qnut {
 		ui.environmentTree->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 		ui.environmentTree->setIconSize(QSize(20,20));
 
-		connect(ui.environmentTree->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-			this, SLOT(handleSelectionChanged(const QItemSelection &, const QItemSelection &)));
+		connect(ui.environmentTree->selectionModel(), &QItemSelectionModel::selectionChanged,
+			this, &CUIDevice::handleSelectionChanged);
 		setHeadInfo();
 	}
 
@@ -358,8 +358,8 @@ namespace qnut {
 		process->setEnvironment(env + QProcess::systemEnvironment());
 		qDebug("[QNUT] starting process: %s", path.toLatin1().data());
 		process->start(path);
-		connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), process, SLOT(deleteLater()));
-		connect(process, SIGNAL(error(QProcess::ProcessError)), process, SLOT(deleteLater()));
+		connect(process, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), process, &QObject::deleteLater);
+		connect(process, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error), process, &QObject::deleteLater);
 	}
 
 	void CUIDevice::handleSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
@@ -375,8 +375,8 @@ namespace qnut {
 			else
 				environment = static_cast<CEnvironment *>(targetIndex.internalPointer());
 
-			disconnect(environment, SIGNAL(activeChanged(bool)), m_EnterEnvironmentAction, SLOT(setDisabled(bool)));
-			disconnect(m_EnterEnvironmentAction, SIGNAL(triggered()), environment, SLOT(enter()));
+			disconnect(environment, &CEnvironment::activeChanged, m_EnterEnvironmentAction, &QAction::setDisabled);
+			disconnect(m_EnterEnvironmentAction, &QAction::triggered, environment, &CEnvironment::enter);
 		}
 
 		QItemSelectionModel * oldSelectionModel = ui.detailsView->selectionModel();
@@ -410,8 +410,8 @@ namespace qnut {
 
 			m_EnterEnvironmentAction->setDisabled(environment->isActive());
 
-			connect(environment, SIGNAL(activeChanged(bool)), m_EnterEnvironmentAction, SLOT(setDisabled(bool)));
-			connect(m_EnterEnvironmentAction, SIGNAL(triggered()), environment, SLOT(enter()));
+			connect(environment, &CEnvironment::activeChanged, m_EnterEnvironmentAction, &QAction::setDisabled);
+			connect(m_EnterEnvironmentAction, &QAction::triggered, environment, &CEnvironment::enter);
 
 			ui.detailsView->setEnabled(true);
 

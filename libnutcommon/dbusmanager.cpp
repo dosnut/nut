@@ -145,7 +145,7 @@ namespace libnutcommon {
 		for (auto& c: l) {
 			c.unregisterObject(m_path.path());
 			onDbusDisconnected(c);
-			emit dbusDisconnected(c);
+			m_dbusDisconnected(c);
 		}
 	}
 
@@ -175,7 +175,7 @@ namespace libnutcommon {
 		}
 
 		onDbusConnected(c);
-		emit dbusConnected(connection);
+		m_dbusConnected(connection);
 	}
 
 	void DBusAbstractAdapater::_onDbusDisconnected(QDBusConnection const& connection) {
@@ -198,8 +198,8 @@ namespace libnutcommon {
 	}
 
 	void DBusAbstractAdapater::registerAdaptor(DBusAbstractAdapater* child) {
-		connect(this, SIGNAL(dbusConnected(QDBusConnection const&)), child, SLOT(_onDbusConnected(QDBusConnection const&)));
-		connect(this, SIGNAL(dbusDisconnected(QDBusConnection const&)), child, SLOT(_onDbusDisconnected(QDBusConnection const&)));
+		connect(&m_dbusConnected, &DBusAbstractAdapaterConnectionEmitter::notify, child, &DBusAbstractAdapater::_onDbusConnected);
+		connect(&m_dbusDisconnected, &DBusAbstractAdapaterConnectionEmitter::notify, child, &DBusAbstractAdapater::_onDbusDisconnected);
 		for (auto &c: m_connections) {
 			child->_onDbusConnected(c);
 		}
@@ -246,7 +246,12 @@ namespace libnutcommon {
 	}
 
 	void DBusAbstractAdapater::connectManager(DBusManager* manager) {
-		connect(manager, SIGNAL(connected(QDBusConnection const&)), this, SLOT(_onDbusConnected(QDBusConnection const&)));
-		connect(manager, SIGNAL(disconnected(QDBusConnection const&)), this, SLOT(_onDbusDisconnected(QDBusConnection const&)));
+		connect(manager, &DBusManager::connected, this, &DBusAbstractAdapater::_onDbusConnected);
+		connect(manager, &DBusManager::disconnected, this, &DBusAbstractAdapater::_onDbusDisconnected);
+	}
+
+	void DBusAbstractAdapaterConnectionEmitter::operator()(const QDBusConnection& connection)
+	{
+		emit notify(connection);
 	}
 }

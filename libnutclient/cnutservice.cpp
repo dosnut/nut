@@ -19,12 +19,12 @@ namespace libnutclient {
 
 		m_dbusServiceWatcher = new QDBusServiceWatcher(this);
 
-		connect(m_dbusManager, SIGNAL(connected(QDBusConnection const&)), SLOT(dbus_connected(QDBusConnection const&)));
-		connect(m_dbusManager, SIGNAL(disconnected(QDBusConnection const&)), SLOT(dbus_disconnected(QDBusConnection const&)));
-		connect(m_dbusManager, SIGNAL(waiting()), SLOT(dbus_waiting()));
+		connect(m_dbusManager, &DBusManager::connected, this, &CNutService::dbus_connected);
+		connect(m_dbusManager, &DBusManager::disconnected, this, &CNutService::dbus_disconnected);
+		connect(m_dbusManager, &DBusManager::waiting, this, &CNutService::dbus_waiting);
 
-		connect(m_dbusServiceWatcher, SIGNAL(serviceRegistered(const QString&)), this, SLOT(sw_dbusServiceRegistered()));
-		connect(m_dbusServiceWatcher, SIGNAL(serviceUnregistered(const QString&)), this, SLOT(sw_dbusServiceUnregistered()));
+		connect(m_dbusServiceWatcher, &QDBusServiceWatcher::serviceRegistered, this, &CNutService::sw_dbusServiceRegistered);
+		connect(m_dbusServiceWatcher, &QDBusServiceWatcher::serviceUnregistered, this, &CNutService::sw_dbusServiceUnregistered);
 		m_dbusServiceWatcher->addWatchedService(m_dbusService);
 	}
 
@@ -86,22 +86,22 @@ namespace libnutclient {
 
 	CNutServiceClient::CNutServiceClient(CNutService* serviceParent, QObject* parent)
 	: QObject(parent), m_serviceParent(serviceParent) {
-		connect(m_serviceParent, SIGNAL(dbusLostService()), this, SLOT(dbusLostService()));
-		connect(this, SIGNAL(dbusError(QString, QDBusError)), m_serviceParent, SLOT(handle_dbusError(QString, QDBusError)));
-		QTimer::singleShot(0, this, SLOT(initService()));
+		connect(m_serviceParent, &CNutService::dbusLostService, this, &CNutServiceClient::dbusLostService);
+		connect(this, &CNutServiceClient::dbusError, m_serviceParent, &CNutService::handle_dbusError);
+		QTimer::singleShot(0, this, &CNutServiceClient::initService);
 	}
 
 	CNutServiceClient::CNutServiceClient(CNutServiceClient* parent)
 	: CNutServiceClient(parent->m_serviceParent, parent) {
-		connect(this, SIGNAL(log(QString)), parent, SLOT(contextLog(QString)));
+		connect(this, &CNutServiceClient::log, parent, &CNutServiceClient::contextLog);
 	}
 	CNutServiceClient::CNutServiceClient(CNutService* service)
 	: CNutServiceClient(service, service) {
-		connect(this, SIGNAL(log(QString)), service, SIGNAL(log(QString)));
+		connect(this, &CNutServiceClient::log, service, &CNutService::log);
 	}
 
 	void CNutServiceClient::initService() {
-		connect(m_serviceParent, SIGNAL(dbusConnectService(QString, QDBusConnection)), this, SLOT(dbusConnectService(QString, QDBusConnection)));
+		connect(m_serviceParent, &CNutService::dbusConnectService, this, &CNutServiceClient::dbusConnectService);
 		if (m_serviceParent->m_servicePresent) {
 			dbusConnectService(m_serviceParent->m_dbusService, m_serviceParent->m_dbusServiceWatcher->connection());
 		}

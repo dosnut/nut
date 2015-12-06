@@ -32,18 +32,18 @@ namespace qnut {
 		m_HexEditMap.insert(ui.wep1HexCheck, ui.wep1Edit);
 		m_HexEditMap.insert(ui.wep2HexCheck, ui.wep2Edit);
 		m_HexEditMap.insert(ui.wep3HexCheck, ui.wep3Edit);
-		connect(ui.ssidHexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
-		connect(ui.wep0HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
-		connect(ui.wep1HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
-		connect(ui.wep2HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
-		connect(ui.wep3HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
+		connect(ui.ssidHexCheck, &QCheckBox::toggled, this, &CAdhocConfig::convertLineEditTextToggle);
+		connect(ui.wep0HexCheck, &QCheckBox::toggled, this, &CAdhocConfig::convertLineEditTextToggle);
+		connect(ui.wep1HexCheck, &QCheckBox::toggled, this, &CAdhocConfig::convertLineEditTextToggle);
+		connect(ui.wep2HexCheck, &QCheckBox::toggled, this, &CAdhocConfig::convertLineEditTextToggle);
+		connect(ui.wep3HexCheck, &QCheckBox::toggled, this, &CAdhocConfig::convertLineEditTextToggle);
 
-		connect(ui.pskEdit, SIGNAL(textChanged(QString)), this, SLOT(countPskChars(QString)));
-		connect(ui.showPlainPSKCheck, SIGNAL(toggled(bool)), this, SLOT(togglePlainPSK(bool)));
-		connect(ui.keyManagementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setAuthConfig(int)));
+		connect(ui.pskEdit, &QLineEdit::textChanged, this, &CAdhocConfig::countPskChars);
+		connect(ui.showPlainPSKCheck, &QCheckBox::toggled, this, &CAdhocConfig::togglePlainPSK);
+		connect(ui.keyManagementCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CAdhocConfig::setAuthConfig);
 
-		connect(ui.buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked(bool)), this, SLOT(applyConfiguration()));
-		connect(ui.buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked(bool)), this, SLOT(resetUi()));
+		connect(ui.buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked, this, &CAdhocConfig::applyConfiguration);
+		connect(ui.buttonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, this, &CAdhocConfig::resetUi);
 		setAuthConfig(0);
 
 		populateErrorCodeEvaluator();
