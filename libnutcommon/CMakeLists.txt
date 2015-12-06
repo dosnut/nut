@@ -7,12 +7,28 @@ object_link_libraries(nutcommon_version PUBLIC
 	Qt5::Core
 )
 
+# TARGET_OBJECTS and CMAKE_AUTOMOC are buggy with ninja in cmake < 3.4
+set(CMAKE_AUTOMOC OFF)
+
+qt5_wrap_cpp(nutcommon_MOC_SOURCE
+#	common.h
+#	config.h
+	dbusmanager.h
+#	device.h
+#	enum.h
+#	flags.h
+#	macaddress.h
+	TARGET nutcommon
+	)
+
 add_library(nutcommon SHARED
 	common.cpp
 	config.cpp
 	dbusmanager.cpp
 	device.cpp
 	macaddress.cpp
+
+	${nutcommon_MOC_SOURCE}
 
 	$<TARGET_OBJECTS:nutcommon_version>
 )
