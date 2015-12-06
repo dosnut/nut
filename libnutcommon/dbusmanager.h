@@ -75,12 +75,23 @@ namespace libnutcommon {
 		void waiting();
 	};
 
+	class DBusAbstractAdapaterConnectionEmitter : public QObject {
+		Q_OBJECT
+	public:
+		void operator()(QDBusConnection const& connection);
+
+	signals:
+		void notify(QDBusConnection const& connection);
+	};
 
 	class DBusAbstractAdapater: public QDBusAbstractAdaptor {
 		Q_OBJECT
 	private:
 		std::list<QDBusConnection> m_connections;
 		std::map<QString, std::list<QDBusConnection>> m_services;
+
+		DBusAbstractAdapaterConnectionEmitter m_dbusConnected;
+		DBusAbstractAdapaterConnectionEmitter m_dbusDisconnected;
 
 		void removeConnections(std::list<QDBusConnection>&& l);
 
@@ -125,10 +136,6 @@ namespace libnutcommon {
 		 * for child objects
 		 */
 		void connectManager(DBusManager* manager);
-
-	signals:
-		void dbusConnected(QDBusConnection const& connection);
-		void dbusDisconnected(QDBusConnection const& connection);
 	};
 }
 
