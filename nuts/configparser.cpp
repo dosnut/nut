@@ -102,7 +102,7 @@ namespace {
 			}
 			// Append "select user;" if no select config was given.
 			if (real->select.filters.empty()) {
-				real->select.filters.append({});
+				real->select.filters.append(libnutcommon::SelectRule{});
 			}
 		}
 
