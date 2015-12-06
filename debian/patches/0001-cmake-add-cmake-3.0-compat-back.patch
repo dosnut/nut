@@ -1,0 +1,122 @@
+From bb39c4f2d6ea867f4d08896515c93caa9e8aeee4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Stefan=20B=C3=BChler?= <stbuehler@web.de>
+Date: Mon, 7 Dec 2015 00:02:40 +0100
+Subject: [PATCH 1/2] [cmake] add cmake 3.0 compat back
+
+---
+ CMakeLists.txt              |  2 +-
+ cmake/LanguageFlags.cmake   | 19 +++++++++++++++----
+ libnutclient/CMakeLists.txt | 15 +++++++++++----
+ qnut/CMakeLists.txt         | 14 ++++++++++----
+ 4 files changed, 37 insertions(+), 13 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e36e982..26d4e60 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
++cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+ cmake_policy(SET CMP0022 NEW)
+ 
+ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+diff --git a/cmake/LanguageFlags.cmake b/cmake/LanguageFlags.cmake
+index 239d8f0..3391ea7 100644
+--- a/cmake/LanguageFlags.cmake
++++ b/cmake/LanguageFlags.cmake
+@@ -1,5 +1,16 @@
+-set(CMAKE_CXX_STANDARD 11)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
++# require at least 3.0; 3.1 knows C_STANDARD / CXX_STANDARD
++if((${CMAKE_MAJOR_VERSION} GREATER 3) OR (${CMAKE_MINOR_VERSION} GREATER 0))
++	set(CMAKE_CXX_STANDARD 11)
++	set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+-set(CMAKE_C_STANDARD 99)
+-set(CMAKE_C_STANDARD_REQUIRED ON)
++	set(CMAKE_C_STANDARD 99)
++	set(CMAKE_C_STANDARD_REQUIRED ON)
++else()
++	set(CMAKE_CXX11_FLAGS -std=c++11 CACHE STRING "flags to enable C++11")
++	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX11_FLAGS}")
++
++	set(CMAKE_C99_FLAGS -std=c99 CACHE STRING "flags to enable C99")
++	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C99_FLAGS}")
++
++	mark_as_advanced(FORCE CMAKE_CXX11_FLAGS CMAKE_C99_FLAGS)
++endif()
+diff --git a/libnutclient/CMakeLists.txt b/libnutclient/CMakeLists.txt
+index 88030c5..2072b89 100644
+--- a/libnutclient/CMakeLists.txt
++++ b/libnutclient/CMakeLists.txt
+@@ -17,6 +17,11 @@ qt5_wrap_cpp(nutclient_MOC_SOURCE
+ 	TARGET nutclient
+ 	)
+ 
++qt5_translate(
++	SOURCES ${TRANSLATIONS_USAGES}
++	TRANSLATIONS ${TRANSLATIONS_TS}
++	VARIABLE TRANSLATIONS_QM)
++
+ add_library(nutclient SHARED
+ 	cdevice.cpp
+ 	cdevice.h
+@@ -34,15 +39,17 @@ add_library(nutclient SHARED
+ 	cnutservice.cpp
+ 	cnutservice.h
+ 
++	${TRANSLATIONS_QM}
++
+ 	${nutclient_MOC_SOURCE}
+ 
+ 	$<TARGET_OBJECTS:nutwireless>
+ 	$<TARGET_OBJECTS:nutclientbase>
+ )
+-qt5_translate(
+-	SOURCES ${TRANSLATIONS_USAGES}
+-	TRANSLATIONS ${TRANSLATIONS_TS}
+-	TARGET nutclient)
++#qt5_translate(
++#	SOURCES ${TRANSLATIONS_USAGES}
++#	TRANSLATIONS ${TRANSLATIONS_TS}
++#	TARGET nutclient)
+ 
+ set_target_properties(nutclient PROPERTIES VERSION ${PACKAGE_VERSION} SOVERSION ${PACKAGE_SO_VERSION})
+ 
+diff --git a/qnut/CMakeLists.txt b/qnut/CMakeLists.txt
+index 1e9c6eb..e0830ad 100644
+--- a/qnut/CMakeLists.txt
++++ b/qnut/CMakeLists.txt
+@@ -19,6 +19,11 @@ file(GLOB_RECURSE TRANSLATIONS_USAGES *.cpp *.ui)
+ 
+ qt5_wrap_ui(FORMS_H ${FORMS})
+ 
++qt5_translate(
++	SOURCES ${TRANSLATIONS_USAGES}
++	TRANSLATIONS ${TRANSLATIONS_TS}
++	VARIABLE TRANSLATIONS_QM)
++
+ add_executable(qnut
+ 	cabstractwifinetconfigdialog.cpp
+ 	cabstractwifinetconfigdialog.h
+@@ -66,12 +71,13 @@ add_executable(qnut
+ 	utils/cerrorcodeevaluator.h
+ 
+ 	${FORMS_H}
++	${TRANSLATIONS_QM}
+ )
+ 
+-qt5_translate(
+-	SOURCES ${TRANSLATIONS_USAGES}
+-	TRANSLATIONS ${TRANSLATIONS_TS}
+-	TARGET qnut)
++#qt5_translate(
++#	SOURCES ${TRANSLATIONS_USAGES}
++#	TRANSLATIONS ${TRANSLATIONS_TS}
++#	TARGET qnut)
+ 
+ target_link_libraries(qnut
+ 	nutclient
+-- 
+2.6.2
+

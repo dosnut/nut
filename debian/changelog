@@ -1,3 +1,23 @@
+network-utilities (0.6.1-1) unstable; urgency=medium
+
+  * [cmake] use CMAKE_C[XX]_STANDARD[_REQUIRED] if available
+  * [cmake] LinkObjectLibrary: document how target_sources call would
+    look like if it worked
+  * [libnutwireless] fix comparison with EAPF_UNDEFINED
+  * [nuts] fix ambiguous value construction by adding type
+  * [cmake] manual "moc" in targets using TARGET_OBJECTS to workaround
+    cmake bug
+  * [cmake] create "qt5_translate" function to handle translations in a
+    sane way; require cmake 3.1
+  * [cmake] explicitly add all header and parser files in target sources
+  * connect by member function pointer
+  * [nutcommon] hide DBusAbstractAdapater internal signals
+  * [nuts] refactor and fix timer id management
+  * [qnut] add command line option to prevent minimizing to tray
+  * Release 0.6.1
+
+ -- Stefan Bühler <stbuehler@web.de>  Sun, 06 Dec 2015 20:34:43 +0100
+
 network-utilities (0.6.0-3) experimental; urgency=medium
 
   * add missing package containing linguist binaries

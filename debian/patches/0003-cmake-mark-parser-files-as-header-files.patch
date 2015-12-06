@@ -1,0 +1,49 @@
+From b79618dab814ef832d32f40483192d2faccf64b6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Stefan=20B=C3=BChler?= <stbuehler@web.de>
+Date: Mon, 7 Dec 2015 00:47:53 +0100
+Subject: [PATCH 1/1] [cmake] mark parser files as header files
+
+---
+ libnutwireless/CMakeLists.txt | 7 +++++++
+ nuts/CMakeLists.txt           | 7 +++++++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/libnutwireless/CMakeLists.txt b/libnutwireless/CMakeLists.txt
+index e9de1e5..a7dab7b 100644
+--- a/libnutwireless/CMakeLists.txt
++++ b/libnutwireless/CMakeLists.txt
+@@ -49,6 +49,13 @@ add_library(nutwireless OBJECT
+ 	${BISON_CONFIGPARSER_Y_OUTPUTS}
+ )
+ 
++set_property(SOURCE
++	configparser.l
++	configparser.y
++
++	PROPERTY HEADER_FILE_ONLY ON
++	)
++
+ object_link_libraries(nutwireless PUBLIC
+ 	nutcommon
+ 	libnl
+diff --git a/nuts/CMakeLists.txt b/nuts/CMakeLists.txt
+index 0932a00..0d0c776 100644
+--- a/nuts/CMakeLists.txt
++++ b/nuts/CMakeLists.txt
+@@ -39,6 +39,13 @@ add_executable(${PROJECT_NAME}
+ 	${BISON_CONFIGPARSER_Y_OUTPUTS}
+ )
+ 
++set_property(SOURCE
++	configparser.l
++
++	PROPERTY HEADER_FILE_ONLY ON
++	)
++
++
+ target_link_libraries(${PROJECT_NAME}
+ 	nutcommon
+ 	libnl
+-- 
+2.6.2
+
