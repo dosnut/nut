@@ -42,6 +42,7 @@ function(target_link_object target)
 		get_target_property(type "${lib}" TYPE)
 		if("${type}" STREQUAL "OBJECT_LIBRARY")
 			# target_sources doesn't work yet either...
+			# target_sources("${target}" PRIVATE $<TARGET_OBJECTS:${lib}>)
 			target_include_directories("${target}" PUBLIC $<TARGET_PROPERTY:${lib},INTERFACE_INCLUDE_DIRECTORIES>)
 			target_include_directories("${target}" SYSTEM PUBLIC $<TARGET_PROPERTY:${lib},INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>)
 			target_compile_definitions("${target}" PUBLIC $<TARGET_PROPERTY:${lib},INTERFACE_COMPILE_DEFINITIONS>)
