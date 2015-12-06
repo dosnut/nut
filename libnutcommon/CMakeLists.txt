@@ -1,6 +1,7 @@
 # recompile only a single file on version changes
 add_library(nutcommon_version OBJECT
 	version.cpp
+	version.h
 )
 set_target_properties(nutcommon_version PROPERTIES COMPILE_FLAGS "-DNUT_VERSION='\"${PACKAGE_VERSION}\"'")
 object_link_libraries(nutcommon_version PUBLIC
@@ -23,10 +24,17 @@ qt5_wrap_cpp(nutcommon_MOC_SOURCE
 
 add_library(nutcommon SHARED
 	common.cpp
+	common.h
 	config.cpp
+	config.h
 	dbusmanager.cpp
+	dbusmanager.h
 	device.cpp
+	device.h
+	enum.h
+	flags.h
 	macaddress.cpp
+	macaddress.h
 
 	${nutcommon_MOC_SOURCE}
 

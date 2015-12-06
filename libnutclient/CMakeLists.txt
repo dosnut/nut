@@ -19,12 +19,20 @@ qt5_wrap_cpp(nutclient_MOC_SOURCE
 
 add_library(nutclient SHARED
 	cdevice.cpp
+	cdevice.h
 	cdevicemanager.cpp
+	cdevicemanager.h
 	cenvironment.cpp
+	cenvironment.h
 	cinterface.cpp
+	cinterface.h
 	clibnut.cpp
+	clibnut.h
+	client.h
 	clog.cpp
+	clog.h
 	cnutservice.cpp
+	cnutservice.h
 
 	${nutclient_MOC_SOURCE}
 

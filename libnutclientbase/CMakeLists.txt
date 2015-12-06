@@ -2,6 +2,7 @@
 # not the state tracking wrappers
 add_library(nutclientbase OBJECT
 	dbus.cpp
+	dbus.h
 )
 
 object_link_libraries(nutclientbase PUBLIC

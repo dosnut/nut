@@ -21,28 +21,49 @@ qt5_wrap_ui(FORMS_H ${FORMS})
 
 add_executable(qnut
 	cabstractwifinetconfigdialog.cpp
+	cabstractwifinetconfigdialog.h
 	caccesspointconfig.cpp
+	caccesspointconfig.h
 	cadhocconfig.cpp
+	cadhocconfig.h
 	cconnectionmanager.cpp
+	cconnectionmanager.h
 	cdevicesettings.cpp
+	cdevicesettings.h
 	cipconfiguration.cpp
+	cipconfiguration.h
 	cnotificationmanager.cpp
+	cnotificationmanager.h
 	common.cpp
+	common.h
+	constants.h
 	cuidevice.cpp
+	cuidevice.h
 	cwirelesssettings.cpp
+	cwirelesssettings.h
 	main.cpp
 
 	modelview/cavailableapmodel.cpp
+	modelview/cavailableapmodel.h
 	modelview/ccommandlistmodel.cpp
+	modelview/ccommandlistmodel.h
 	modelview/cdnslistmodel.cpp
+	modelview/cdnslistmodel.h
 	modelview/cenvironmentdetailsmodel.cpp
+	modelview/cenvironmentdetailsmodel.h
 	modelview/cenvironmenttreemodel.cpp
+	modelview/cenvironmenttreemodel.h
 	modelview/cinterfacedetailsmodel.cpp
+	modelview/cinterfacedetailsmodel.h
 	modelview/cipeditdelegate.cpp
+	modelview/cipeditdelegate.h
 	modelview/cmanagedapmodel.cpp
+	modelview/cmanagedapmodel.h
 	modelview/cuidevicemodel.cpp
+	modelview/cuidevicemodel.h
 
 	utils/cerrorcodeevaluator.cpp
+	utils/cerrorcodeevaluator.h
 
 	${FORMS_H}
 )

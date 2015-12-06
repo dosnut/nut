@@ -5,7 +5,10 @@ add_executable(cnut
 	$<TARGET_OBJECTS:nutclientbase>
 
 	cnut_commands.cpp
+	cnut_commands.h
 	cnut_parsers.cpp
+	cnut_parsers.h
+	cnut_types.h
 	main.cpp
 )
 
