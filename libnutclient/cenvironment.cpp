@@ -55,7 +55,7 @@ namespace libnutclient {
 		m_dbusEnvironment = new libnutclientbase::DBusEnvironment(service, m_dbusPath, connection, this);
 
 		/* all other signals are covered by this one */
-		connect(m_dbusEnvironment, SIGNAL(propertiesChanged(libnutcommon::EnvironmentProperties)), this, SLOT(dbusPropertiesChanged(libnutcommon::EnvironmentProperties)));
+		connect(m_dbusEnvironment, &libnutclientbase::DBusEnvironment::propertiesChanged, this, &CEnvironment::dbusPropertiesChanged);
 
 		auto handleInterfaces = [this](libnutclientbase::DBusEnvironment::Result_getInterfaces ifPaths) {
 			if (!m_dbusEnvironment) return;

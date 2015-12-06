@@ -52,61 +52,61 @@ namespace qnut {
 		m_EAPPhaseButtons = new QButtonGroup(this);
 		m_EAPPhaseButtons->addButton(ui.phase1Radio, 1);
 		m_EAPPhaseButtons->addButton(ui.phase2Radio, 2);
-		connect(m_EAPPhaseButtons, SIGNAL(buttonPressed(int)), this, SLOT(setUiEAPPhase(int)));
+		connect(m_EAPPhaseButtons, static_cast<void(QButtonGroup::*)(int)>(&QButtonGroup::buttonPressed), this, &CAccessPointConfig::setUiEAPPhase);
 
 		//prepare maps
 		m_FileEditMapper = new QSignalMapper(this);
 		FileEditStrings newFileEditStrings;
-		connect(m_FileEditMapper, SIGNAL(mapped(QWidget*)), this, SLOT(selectFile(QWidget*)));
+		connect(m_FileEditMapper, static_cast<void(QSignalMapper::*)(QWidget*)>(&QSignalMapper::mapped), this, &CAccessPointConfig::selectFile);
 
 		newFileEditStrings.title = tr("Select Proxy Access Control (PAC) file");
 		newFileEditStrings.filter = tr("Proxy Access Control (PAC) files (%1)").arg("*.pac");
 		m_FileEditMapper->setMapping(ui.pacBrowse, ui.pacEdit);
 		m_FileSelectStringMap.insert(ui.pacEdit, newFileEditStrings);
-		connect(ui.pacBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
+		connect(ui.pacBrowse, &QToolButton::pressed, m_FileEditMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
 
 		newFileEditStrings.title = tr("Select CA certificate file");
 		newFileEditStrings.filter = tr("Certificate files (%1)").arg("*.pem");
 		m_FileEditMapper->setMapping(ui.caFileBrowse, ui.caFileEdit);
 		m_FileSelectStringMap.insert(ui.caFileEdit, newFileEditStrings);
-		connect(ui.caFileBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
+		connect(ui.caFileBrowse, &QToolButton::pressed, m_FileEditMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
 
 		newFileEditStrings.title = tr("Select client certificate file");
 		newFileEditStrings.filter = tr("Certificate files (%1)").arg("*.pem");
 		m_FileEditMapper->setMapping(ui.clientFileBrowse, ui.clientFileEdit);
 		m_FileSelectStringMap.insert(ui.clientFileEdit, newFileEditStrings);
-		connect(ui.clientFileBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
+		connect(ui.clientFileBrowse, &QToolButton::pressed, m_FileEditMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
 
 		newFileEditStrings.title = tr("Select key file");
 		newFileEditStrings.filter = tr("Key files (%1)").arg("*.pem");
 		m_FileEditMapper->setMapping(ui.keyFileBrowse, ui.keyFileEdit);
 		m_FileSelectStringMap.insert(ui.keyFileEdit, newFileEditStrings);
-		connect(ui.keyFileBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
+		connect(ui.keyFileBrowse, &QToolButton::pressed, m_FileEditMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
 
 		newFileEditStrings.title = tr("Select DH/DSA file");
 		newFileEditStrings.filter = tr("DH/DSA files (%1)").arg("*.pem");
 		m_FileEditMapper->setMapping(ui.dhFileBrowse, ui.dhFileEdit);
 		m_FileSelectStringMap.insert(ui.dhFileEdit, newFileEditStrings);
-		connect(ui.dhFileBrowse, SIGNAL(pressed()), m_FileEditMapper, SLOT(map()));
+		connect(ui.dhFileBrowse, &QToolButton::pressed, m_FileEditMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
 
 		m_HexEditMap.insert(ui.ssidHexCheck, ui.ssidEdit);
 		m_HexEditMap.insert(ui.wep0HexCheck, ui.wep0Edit);
 		m_HexEditMap.insert(ui.wep1HexCheck, ui.wep1Edit);
 		m_HexEditMap.insert(ui.wep2HexCheck, ui.wep2Edit);
 		m_HexEditMap.insert(ui.wep3HexCheck, ui.wep3Edit);
-		connect(ui.ssidHexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
-		connect(ui.wep0HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
-		connect(ui.wep1HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
-		connect(ui.wep2HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
-		connect(ui.wep3HexCheck, SIGNAL(toggled(bool)), this, SLOT(convertLineEditText(bool)));
+		connect(ui.ssidHexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::convertLineEditTextToggle);
+		connect(ui.wep0HexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::convertLineEditTextToggle);
+		connect(ui.wep1HexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::convertLineEditTextToggle);
+		connect(ui.wep2HexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::convertLineEditTextToggle);
+		connect(ui.wep3HexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::convertLineEditTextToggle);
 
-		connect(ui.pskEdit, SIGNAL(textChanged(QString)), this, SLOT(countPskChars(QString)));
-		connect(ui.showPlainPSKCheck, SIGNAL(toggled(bool)), this, SLOT(togglePlainPSK(bool)));
-		connect(ui.keyManagementCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setAuthConfig(int)));
-		connect(ui.rsnCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(handleRSNModeChanged(int)));
+		connect(ui.pskEdit, &QLineEdit::textChanged, this, &CAccessPointConfig::countPskChars);
+		connect(ui.showPlainPSKCheck, &QCheckBox::toggled, this, &CAccessPointConfig::togglePlainPSK);
+		connect(ui.keyManagementCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CAccessPointConfig::setAuthConfig);
+		connect(ui.rsnCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CAccessPointConfig::handleRSNModeChanged);
 
-		connect(ui.buttonBox->button(QDialogButtonBox::Apply), SIGNAL(clicked(bool)), this, SLOT(applyConfiguration()));
-		connect(ui.buttonBox->button(QDialogButtonBox::Reset), SIGNAL(clicked(bool)), this, SLOT(resetUi()));
+		connect(ui.buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked, this, &CAccessPointConfig::applyConfiguration);
+		connect(ui.buttonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked, this, &CAccessPointConfig::resetUi);
 		setAuthConfig(0);
 
 		populateErrorCodeEvaluator();

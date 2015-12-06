@@ -31,8 +31,8 @@ namespace nuts {
 		environment << QString("NUT_EVENT=%1").arg(event);
 		process->setEnvironment(environment);
 		process->start("/etc/nuts/dispatch", args);
-		connect(process, SIGNAL(finished( int )), process, SLOT(deleteLater()));
-		connect(process, SIGNAL(error( QProcess::ProcessError )), process, SLOT(deleteLater()));
+		connect(process, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), process, &QObject::deleteLater);
+		connect(process, static_cast<void(QProcess::*)(QProcess::ProcessError)>(&QProcess::error), process, &QObject::deleteLater);
 	}
 
 	void setupEnvironment(QStringList &environment) {

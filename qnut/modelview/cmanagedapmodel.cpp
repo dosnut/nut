@@ -35,8 +35,8 @@ namespace qnut {
 		m_Supplicant = wpaSupplicant;
 		if (m_Supplicant) {
 			updateNetworks();
-			connect(m_Supplicant, SIGNAL(networkListUpdated()), this, SLOT(updateNetworks()));
-			connect(m_Supplicant, SIGNAL(stateChanged(bool)), this, SLOT(updateNetworks()));
+			connect(m_Supplicant, &CWpaSupplicant::networkListUpdated, this, &CManagedAPModel::updateNetworks);
+			connect(m_Supplicant, &CWpaSupplicant::stateChanged, this, &CManagedAPModel::updateNetworks);
 		}
 	}
 

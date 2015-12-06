@@ -31,8 +31,8 @@ namespace libnutclient {
 				contextLog(tr("wpa_supplicant config file at: %2").arg(m_config.wpaConfigFile));
 
 				m_wlAccess = new libnutwireless::CWireless(this, getName());
-				connect(m_wlAccess, SIGNAL(message(QString)), this, SIGNAL(log(QString)));
-				connect(m_dbusDevice, SIGNAL(newWirelessNetworkFound()), this, SIGNAL(newWirelessNetworkFound()));
+				connect(m_wlAccess, &libnutwireless::CWireless::message, this, &CDevice::log);
+				connect(m_dbusDevice, &libnutclientbase::DBusDevice::newWirelessNetworkFound, this, &CDevice::newWirelessNetworkFound);
 
 				//Connect to wpa_supplicant only if device is not deactivated
 				if (DeviceState::DEACTIVATED != m_properties.state) {
@@ -82,7 +82,7 @@ namespace libnutclient {
 		m_dbusDevice = new libnutclientbase::DBusDevice(service, m_dbusPath, connection, this);
 
 		/* all other signals are covered by this one */
-		connect(m_dbusDevice, SIGNAL(propertiesChanged(libnutcommon::DeviceProperties)), this, SLOT(dbusPropertiesChanged(libnutcommon::DeviceProperties)));
+		connect(m_dbusDevice, &libnutclientbase::DBusDevice::propertiesChanged, this, &CDevice::dbusPropertiesChanged);
 
 		auto handleEnvironments = [this](libnutclientbase::DBusDevice::Result_getEnvironments envPaths) {
 			if (!m_dbusDevice) return;

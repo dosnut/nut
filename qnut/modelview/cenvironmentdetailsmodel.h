@@ -45,6 +45,10 @@ namespace qnut {
 		QModelIndex parent(const QModelIndex & index) const;
 		int rowCount(const QModelIndex & parent = QModelIndex()) const;
 		int columnCount(const QModelIndex & parent = QModelIndex()) const;
+
+	private slots:
+		void layoutChangedDefault();
+
 	private:
 		void fillParentRules(quint32 start = 0);
 

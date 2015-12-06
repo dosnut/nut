@@ -34,7 +34,7 @@ namespace qnut {
 		m_LogFile(this, UI_FILE_LOG)
 	{
 		auto service = new CNutService(this);
-		connect(service, SIGNAL(log(QString)), &m_LogFile, SLOT(log(QString)));
+		connect(service, &CNutService::log, &m_LogFile, &libnutclient::CLog::log);
 
 		m_DeviceManager = new CDeviceManager(service);
 
@@ -73,7 +73,7 @@ namespace qnut {
 
 		if (CNotificationManager::trayIconsAvailable()) {
 			m_NotificationManager = new CNotificationManager(this);
-			// connect(m_NotificationManager, SIGNAL(requestedUIDeviceWidget(QWidget*)), m_TabWidget, SLOT(setCurrentWidget(QWidget*)));
+			// connect(m_NotificationManager, &CNotificationManager::requestedUIDeviceWidget, m_TabWidget, &QTabWidget::setCurrentWidget);
 		}
 		else
 			m_NotificationManager = NULL;
@@ -84,15 +84,15 @@ namespace qnut {
 		if (m_ShowLogAction->isChecked())
 			showLog(true);
 
-		connect(m_DeviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(addUiDevice(libnutclient::CDevice *)));
-		connect(m_DeviceManager, SIGNAL(deviceAdded(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
-		connect(m_DeviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(removeUiDevice(libnutclient::CDevice *)));
-		connect(m_DeviceManager, SIGNAL(deviceRemoved(libnutclient::CDevice *)), this, SLOT(updateTrayIconInfo()));
+		connect(m_DeviceManager, &CDeviceManager::deviceAdded, this, &CConnectionManager::addUiDevice);
+		connect(m_DeviceManager, &CDeviceManager::deviceAdded, this, &CConnectionManager::updateTrayIconInfo);
+		connect(m_DeviceManager, &CDeviceManager::deviceRemoved, this, &CConnectionManager::removeUiDevice);
+		connect(m_DeviceManager, &CDeviceManager::deviceRemoved, this, &CConnectionManager::updateTrayIconInfo);
 
 		if (m_LogFile.error() != QFile::NoError)
 			m_LogEdit->append(tr("ERROR: %1").arg(tr("Cannot create/open log file.")));
 
-		connect(&m_LogFile, SIGNAL(printed(const QString &)), m_LogEdit, SLOT(append(const QString &)));
+		connect(&m_LogFile, &libnutclient::CLog::printed, m_LogEdit, &QTextEdit::append);
 
 		m_LogFile << tr("%1 (v%2) started").arg(UI_STRING_NAME_TR, libnutcommon::version());
 		m_LogFile << QDateTime::currentDateTime().toString();
@@ -103,13 +103,13 @@ namespace qnut {
 
 		m_ToolBar->addActions(m_EditMenu->actions());
 
-		connect(m_TabWidget, SIGNAL(currentChanged(int)), this, SLOT(handleTabChanged(int)));
-		connect(m_OverView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-			this, SLOT(handleSelectionChanged(const QItemSelection &, const QItemSelection &)));
-		connect(m_OverView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(showDeviceDetails(const QModelIndex &)));
+		connect(m_TabWidget, &QTabWidget::currentChanged, this, &CConnectionManager::handleTabChanged);
+		connect(m_OverView->selectionModel(), &QItemSelectionModel::selectionChanged,
+			this, &CConnectionManager::handleSelectionChanged);
+		connect(m_OverView, &QTreeView::doubleClicked, this, &CConnectionManager::showDeviceDetailsByIndex);
 
 		CUIDevice::init();
-		connect(CUIDevice::showRequestMapper(), SIGNAL(mapped(QWidget*)), this, SLOT(showDeviceDetails(QWidget *)));
+		connect(CUIDevice::showRequestMapper(), static_cast<void(QSignalMapper::*)(QWidget*)>(&QSignalMapper::mapped), this, &CConnectionManager::showDeviceDetails);
 
 		if (!m_NotificationManager) {
 			show();
@@ -158,7 +158,7 @@ namespace qnut {
 			m_ShowBalloonTipsAction = currentMenu->addAction(tr("Show &balloon tips"));
 			m_ShowBalloonTipsAction->setToolTip(tr("Show balloon tips on certain events like state changes"));
 			m_ShowBalloonTipsAction->setCheckable(true);
-			connect(m_ShowBalloonTipsAction, SIGNAL(toggled(bool)), m_NotificationManager, SLOT(setNotificationsEnabled(bool)));
+			connect(m_ShowBalloonTipsAction, &QAction::toggled, m_NotificationManager, &CNotificationManager::setNotificationsEnabled);
 		}
 
 		m_ShowLogAction = currentMenu->addAction(tr("Show &log"));
@@ -200,9 +200,9 @@ namespace qnut {
 		m_OverView->addAction(m_WirelessSettingsAction);
 #endif
 
-		connect(m_RefreshDevicesAction, SIGNAL(triggered()), m_DeviceManager, SLOT(refreshAll()));
-		connect(m_ClearLogAction, SIGNAL(triggered()), m_LogEdit, SLOT(clear()));
-		connect(m_ShowLogAction, SIGNAL(toggled(bool)), this, SLOT(showLog(bool)));
+		connect(m_RefreshDevicesAction, &QAction::triggered, m_DeviceManager, &CDeviceManager::refreshAll);
+		connect(m_ClearLogAction, &QAction::triggered, m_LogEdit, &QTextEdit::clear);
+		connect(m_ShowLogAction, &QAction::toggled, this, &CConnectionManager::showLog);
 
 		addToolBar(m_ToolBar);
 	}
@@ -281,7 +281,7 @@ namespace qnut {
 
 		if (m_NotificationManager) {
 			m_NotificationManager->registerUIDevice(newUIDevice);
-			connect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(updateTrayIconInfo()));
+			connect(device, &CDevice::stateChanged, this, &CConnectionManager::updateTrayIconInfo);
 		}
 
 		m_TabWidget->insertTab(m_UIDeviceModel->uiDevices().size(), newUIDevice, device->getName());
@@ -297,7 +297,7 @@ namespace qnut {
 
 		if (m_NotificationManager) {
 			m_NotificationManager->unregisterUIDevice(target);
-			disconnect(device, SIGNAL(stateChanged(libnutcommon::DeviceState)), this, SLOT(updateTrayIconInfo()));
+			disconnect(device, &CDevice::stateChanged, this, &CConnectionManager::updateTrayIconInfo);
 		}
 		m_UIDeviceModel->removeUIDevice(targetPos);
 	}
@@ -341,17 +341,17 @@ namespace qnut {
 		if (!deselectedIndexes.isEmpty()) {
 			CUIDevice * deselectedUIDevice = static_cast<CUIDevice *>(m_UIDeviceProxyModel->mapToSource(deselectedIndexes[0]).internalPointer());
 
-			disconnect(deselectedUIDevice->device(), SIGNAL(stateChanged(libnutcommon::DeviceState)),
-				this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
-			disconnect(m_EnableDeviceAction, SIGNAL(triggered()),
-				deselectedUIDevice->device(), SLOT(enable()));
-			disconnect(m_DisableDeviceAction, SIGNAL(triggered()),
-				deselectedUIDevice->device(), SLOT(disable()));
-			disconnect(m_DeviceSettingsAction, SIGNAL(triggered()),
-				deselectedUIDevice, SLOT(openDeviceSettings()));
+			disconnect(deselectedUIDevice->device(), &CDevice::stateChanged,
+				this, &CConnectionManager::handleDeviceStateChange);
+			disconnect(m_EnableDeviceAction, &QAction::triggered,
+				deselectedUIDevice->device(), &CDevice::enable);
+			disconnect(m_DisableDeviceAction, &QAction::triggered,
+				deselectedUIDevice->device(), &CDevice::disable);
+			disconnect(m_DeviceSettingsAction, &QAction::triggered,
+				deselectedUIDevice, &CUIDevice::openDeviceSettings);
 #ifndef NUT_NO_WIRELESS
-			disconnect(m_WirelessSettingsAction, SIGNAL(triggered()),
-				deselectedUIDevice, SLOT(openWirelessSettings()));
+			disconnect(m_WirelessSettingsAction, &QAction::triggered,
+				deselectedUIDevice, &CUIDevice::openWirelessSettings);
 #endif
 		}
 
@@ -366,17 +366,17 @@ namespace qnut {
 		else {
 			CUIDevice * selectedUIDevice = static_cast<CUIDevice *>(m_UIDeviceProxyModel->mapToSource(selectedIndexes[0]).internalPointer());
 
-			connect(selectedUIDevice->device(), SIGNAL(stateChanged(libnutcommon::DeviceState)),
-				this, SLOT(handleDeviceStateChange(libnutcommon::DeviceState)));
-			connect(m_EnableDeviceAction, SIGNAL(triggered()),
-				selectedUIDevice->device(), SLOT(enable()));
-			connect(m_DisableDeviceAction, SIGNAL(triggered()),
-				selectedUIDevice->device(), SLOT(disable()));
-			connect(m_DeviceSettingsAction, SIGNAL(triggered()),
-				selectedUIDevice, SLOT(openDeviceSettings()));
+			connect(selectedUIDevice->device(), &CDevice::stateChanged,
+				this, &CConnectionManager::handleDeviceStateChange);
+			connect(m_EnableDeviceAction, &QAction::triggered,
+				selectedUIDevice->device(), &CDevice::enable);
+			connect(m_DisableDeviceAction, &QAction::triggered,
+				selectedUIDevice->device(), &CDevice::disable);
+			connect(m_DeviceSettingsAction, &QAction::triggered,
+				selectedUIDevice, &CUIDevice::openDeviceSettings);
 #ifndef NUT_NO_WIRELESS
-			connect(m_WirelessSettingsAction, SIGNAL(triggered()),
-				selectedUIDevice, SLOT(openWirelessSettings()));
+			connect(m_WirelessSettingsAction, &QAction::triggered,
+				selectedUIDevice, &CUIDevice::openWirelessSettings);
 #endif
 
 			m_EnableDeviceAction->setEnabled(selectedUIDevice->device()->getState() == DeviceState::DEACTIVATED);
@@ -418,7 +418,7 @@ namespace qnut {
 		activateWindow();
 	}
 
-	void CConnectionManager::showDeviceDetails(const QModelIndex & index) {
+	void CConnectionManager::showDeviceDetailsByIndex(const QModelIndex & index) {
 		CUIDevice * selectedUIDevice = static_cast<CUIDevice *>(m_UIDeviceProxyModel->mapToSource(index).internalPointer());
 		m_TabWidget->setCurrentWidget(selectedUIDevice);
 	}

@@ -170,7 +170,7 @@ namespace qnut {
 		}
 	}
 
-	void CAbstractWifiNetConfigDialog::convertLineEditText(bool hex) {
+	void CAbstractWifiNetConfigDialog::convertLineEditTextToggle(bool hex) {
 		QCheckBox * hexCheck = qobject_cast<QCheckBox *>(sender());
 		if (hexCheck/* && m_HexEditMap.contains(hexCheck)*/)
 			convertLineEditText(m_HexEditMap[hexCheck], hex);

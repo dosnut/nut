@@ -19,11 +19,11 @@ namespace qnut {
 
 	CIPConfiguration::CIPConfiguration(QWidget * parent) : QDialog(parent) {
 		ui.setupUi(this);
-		connect(ui.addButton, SIGNAL(clicked()), this, SLOT(addDNS()));
-		connect(ui.removeButton, SIGNAL(clicked()), this, SLOT(removeDNS()));
+		connect(ui.addButton, &QPushButton::clicked, this, &CIPConfiguration::addDNS);
+		connect(ui.removeButton, &QPushButton::clicked, this, &CIPConfiguration::removeDNS);
 
-		connect(ui.importButton, SIGNAL(clicked()), this, SLOT(importConfig()));
-		connect(ui.exportButton, SIGNAL(clicked()), this, SLOT(exportConfig()));
+		connect(ui.importButton, &QPushButton::clicked, this, &CIPConfiguration::importConfig);
+		connect(ui.exportButton, &QPushButton::clicked, this, &CIPConfiguration::exportConfig);
 	}
 
 	bool CIPConfiguration::execute(libnutcommon::IPv4UserConfig & config, bool & remember) {
@@ -37,8 +37,8 @@ namespace qnut {
 		ui.dnsList->setModel(new CDNSListModel(&m_DNSList));
 		ui.dnsList->setItemDelegate(new CIPEditDelegate());
 
-		connect(ui.dnsList->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
-			this, SLOT(handleSelectionChanged(const QItemSelection &)));
+		connect(ui.dnsList->selectionModel(), &QItemSelectionModel::selectionChanged,
+			this, &CIPConfiguration::handleSelectionChanged);
 
 		if (exec() == QDialog::Accepted) {
 			config.ip= QHostAddress(ui.ipEdit->text());

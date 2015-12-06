@@ -40,7 +40,7 @@ namespace qnut {
 		m_WirelessAcces = wpaSupplicant;
 		if (m_WirelessAcces) {
 			updateScans();
-			connect(m_WirelessAcces, SIGNAL(scanCompleted()), this, SLOT(updateScans()));
+			connect(m_WirelessAcces, &CWirelessHW::scanCompleted, this, &CAvailableAPModel::updateScans);
 		}
 	}
 

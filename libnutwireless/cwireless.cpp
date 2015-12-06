@@ -7,8 +7,8 @@ CWireless::CWireless(QObject * parent, QString ifname) :
 	m_wpa_supplicant = new CWpaSupplicant(this, ifname);
 	m_wireless_hw = new CWextHW(this,ifname);
 // 	m_wireless_hw = new libnutwireless::CNL80211(this, m_ifname);
-	connect(m_wpa_supplicant, SIGNAL(message(QString)), this,SIGNAL(message(QString)));
-	connect(m_wireless_hw, SIGNAL(message(QString)), this, SIGNAL(message(QString)));
+	connect(m_wpa_supplicant, &CWpaSupplicant::message, this, &CWireless::message);
+	connect(m_wireless_hw, &CWextHW::message, this, &CWireless::message);
 }
 
 CWireless::~CWireless() {

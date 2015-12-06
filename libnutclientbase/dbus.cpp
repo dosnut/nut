@@ -86,7 +86,7 @@ namespace libnutclientbase {
 	namespace internal {
 		DBusCallbackWatcherBase::DBusCallbackWatcherBase(QObject* parent, QDBusPendingCallWatcher* watcher)
 		: QObject(nullptr != parent ? parent : watcher) {
-			connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this, SLOT(slot_finished(QDBusPendingCallWatcher*)));
+			connect(watcher, &QDBusPendingCallWatcher::finished, this, &DBusCallbackWatcherBase::slot_finished);
 		}
 
 		void DBusCallbackWatcherBase::slot_finished(QDBusPendingCallWatcher* watcher) {
@@ -177,7 +177,7 @@ namespace libnutclientbase {
 			auto watcher = container.pending.get();
 			if (nullptr == watcher) {
 				container.pending.reset(watcher = new QDBusPendingCallWatcher(makeCall(), &container));
-				QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), &container, SLOT(finished()));
+				QObject::connect(watcher, &QDBusPendingCallWatcher::finished, &container, &DBusPendingWatcher::finished);
 			}
 			return watcher;
 		}

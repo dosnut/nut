@@ -48,13 +48,13 @@ namespace nuts {
 
 	DeviceManager::DeviceManager(const QString &configFile)
 	: m_config(parseConfig(configFile)) {
-		connect(&m_hwman, SIGNAL(gotCarrier(const QString&, int, const QString)), SLOT(gotCarrier(const QString &, int, const QString)));
-		connect(&m_hwman, SIGNAL(lostCarrier(const QString&)), SLOT(lostCarrier(const QString &)));
-		connect(&m_hwman, SIGNAL(newDevice(const QString&, int)), SLOT(newDevice(const QString &, int)));
-		connect(&m_hwman, SIGNAL(delDevice(const QString&)), SLOT(delDevice(const QString&)));
+		connect(&m_hwman, &HardwareManager::gotCarrier, this, &DeviceManager::gotCarrier);
+		connect(&m_hwman, &HardwareManager::lostCarrier, this, &DeviceManager::lostCarrier);
+		connect(&m_hwman, &HardwareManager::newDevice, this, &DeviceManager::newDevice);
+		connect(&m_hwman, &HardwareManager::delDevice, this, &DeviceManager::delDevice);
 
-		connect(this, SIGNAL(deviceAdded(QString, Device*)), &m_events, SLOT(deviceAdded(QString, Device*)));
-		connect(this, SIGNAL(deviceRemoved(QString, Device*)), &m_events, SLOT(deviceRemoved(QString, Device*)));
+		connect(this, &DeviceManager::deviceAdded, &m_events, &Events::deviceAdded);
+		connect(this, &DeviceManager::deviceRemoved, &m_events, &Events::deviceRemoved);
 
 		 /* Wait for 400 ms before deliver carrier events
 		   There are 2 reasons:
@@ -64,7 +64,7 @@ namespace nuts {
 		    - in the case of lostCarrier, we want ignore short breaks.
 		*/
 		m_carrier_timer.setInterval(400);
-		connect(&m_carrier_timer, SIGNAL(timeout()), SLOT(ca_timer()));
+		connect(&m_carrier_timer, &QTimer::timeout, this, &DeviceManager::ca_timer);
 		addDevices();
 	}
 
@@ -316,8 +316,8 @@ namespace nuts {
 		m_dhcp_read_nf = new QSocketNotifier(m_dhcp_client_socket, QSocketNotifier::Read);
 		m_dhcp_write_nf = new QSocketNotifier(m_dhcp_client_socket, QSocketNotifier::Write);
 		m_dhcp_write_nf->setEnabled(!m_dhcp_write_buf.empty());
-		connect(m_dhcp_read_nf, SIGNAL(activated(int)), SLOT(readDHCPClientSocket()));
-		connect(m_dhcp_write_nf, SIGNAL(activated(int)), SLOT(writeDHCPClientSocket()));
+		connect(m_dhcp_read_nf, &QSocketNotifier::activated, this, &Device::readDHCPClientSocket);
+		connect(m_dhcp_write_nf, &QSocketNotifier::activated, this, &Device::writeDHCPClientSocket);
 		return true;
 	}
 	void Device::closeDHCPClientSocket() {
@@ -580,8 +580,8 @@ namespace nuts {
 				r = m_device->m_arp.requestIPv4(QHostAddress((quint32) 0), filters[i].ipAddr);
 				if (!r) return false;
 				r->disconnect(this);
-				connect(r, SIGNAL(timeout(QHostAddress)), SLOT(selectArpRequestTimeout(QHostAddress)));
-				connect(r, SIGNAL(foundMac(MacAddress, QHostAddress)),  SLOT(selectArpRequestFoundMac(MacAddress, QHostAddress)));
+				connect(r, &ARPRequest::timeout, this, &Environment::selectArpRequestTimeout);
+				connect(r, &ARPRequest::foundMac, this, &Environment::selectArpRequestFoundMac);
 				m_selArpWaiting++;
 				break;
 			case SelectType::ESSID:
@@ -829,16 +829,16 @@ namespace nuts {
 		}
 		// This did lead to segfaults... ;_)
 		// m_zc_arp_probe->setReserve(m_config->flags & IPv4ConfigFlag::DHCP);
-		connect(m_zc_arp_probe, SIGNAL(conflict(QHostAddress, MacAddress)), SLOT(zc_probe_conflict()));
-		connect(m_zc_arp_probe, SIGNAL(ready(QHostAddress)), SLOT(zc_probe_ready()));
+		connect(m_zc_arp_probe, &ARPProbe::conflict, this, &Interface_IPv4::zc_probe_conflict);
+		connect(m_zc_arp_probe, &ARPProbe::ready, this, &Interface_IPv4::zc_probe_ready);
 	}
 	void Interface_IPv4::zeroconfWatch() {
 		m_zc_arp_watch = m_env->m_device->m_arp.watchIPv4(m_zc_probe_ip);
-		connect(m_zc_arp_watch, SIGNAL(conflict(QHostAddress, MacAddress)), SLOT(zc_watch_conflict()));
+		connect(m_zc_arp_watch, &ARPWatch::conflict, this, &Interface_IPv4::zc_watch_conflict);
 	}
 	void Interface_IPv4::zeroconfAnnounce() {
 		m_zc_arp_announce = m_env->m_device->m_arp.announceIPv4(m_zc_probe_ip);
-		connect(m_zc_arp_announce, SIGNAL(ready(QHostAddress)), SLOT(zc_announce_ready()));
+		connect(m_zc_arp_announce, &ARPAnnounce::ready, this, &Interface_IPv4::zc_announce_ready);
 	}
 
 	void Interface_IPv4::zeroconfFree() {    // free ARPProbe and ARPWatch
@@ -1365,7 +1365,7 @@ namespace nuts {
 		m_dhcp_unicast_read_nf = 0;
 		if (!temporary) {
 			m_dhcp_unicast_read_nf = new QSocketNotifier(m_dhcp_unicast_socket, QSocketNotifier::Read);
-			connect(m_dhcp_unicast_read_nf, SIGNAL(activated(int)), SLOT(readDHCPUnicastClientSocket()));
+			connect(m_dhcp_unicast_read_nf, &QSocketNotifier::activated, this, &Interface_IPv4::readDHCPUnicastClientSocket);
 		}
 		return true;
 	}

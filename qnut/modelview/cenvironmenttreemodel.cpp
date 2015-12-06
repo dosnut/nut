@@ -24,9 +24,9 @@ namespace qnut {
 		m_Device = data;
 		if (data) {
 			foreach(CEnvironment * environment, m_Device->getEnvironments()) {
-				connect(environment, SIGNAL(activeChanged(bool)), this, SIGNAL(layoutChanged()));
+				connect(environment, &CEnvironment::activeChanged, this, &CEnvironmentTreeModel::layoutChangedDefault);
 				foreach(CInterface * interface, environment->getInterfaces()) {
-					connect(interface, SIGNAL(stateChanged(libnutcommon::InterfaceState)), this, SIGNAL(layoutChanged()));
+					connect(interface, &CInterface::stateChanged, this, &CEnvironmentTreeModel::layoutChangedDefault);
 				}
 			}
 		}
@@ -184,5 +184,10 @@ namespace qnut {
 			return createIndex(static_cast<CEnvironment *>(parentData)->getIndex(), 0, (void *)(parentData));
 		else
 			return QModelIndex();
+	}
+
+	void CEnvironmentTreeModel::layoutChangedDefault()
+	{
+		layoutChanged();
 	}
 }

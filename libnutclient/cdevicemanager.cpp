@@ -28,8 +28,8 @@ namespace libnutclient {
 		if (m_dbusDevmgr) return;
 
 		m_dbusDevmgr = new libnutclientbase::DBusDeviceManager(service, libnutclientbase::DBusDeviceManager::makePath(), connection, this);
-		connect(m_dbusDevmgr, SIGNAL(deviceAdded(const QDBusObjectPath&)), this, SLOT(dbusDeviceAdded(const QDBusObjectPath&)));
-		connect(m_dbusDevmgr, SIGNAL(deviceRemoved(const QDBusObjectPath&)), this, SLOT(dbusDeviceRemoved(const QDBusObjectPath&)));
+		connect(m_dbusDevmgr, &libnutclientbase::DBusDeviceManager::deviceAddedPath, this, &CDeviceManager::dbusDeviceAdded);
+		connect(m_dbusDevmgr, &libnutclientbase::DBusDeviceManager::deviceRemovedPath, this, &CDeviceManager::dbusDeviceRemoved);
 
 		reload();
 	}

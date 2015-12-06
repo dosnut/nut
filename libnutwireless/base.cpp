@@ -208,7 +208,7 @@ namespace libnutwireless {
 		//Set socket notifier
 		m_wpaFd = wpa_ctrl_get_fd(event_ctrl);
 		m_eventSn  = new QSocketNotifier(m_wpaFd, QSocketNotifier::Read,NULL);
-		connect(m_eventSn,SIGNAL(activated(int)),this,SLOT(readFromWpa(int)));
+		connect(m_eventSn, &QSocketNotifier::activated, this, &CWpaSupplicant::readFromWpa);
 		m_eventSn->setEnabled(true);
 		m_wpaConnected = true;
 
@@ -234,7 +234,7 @@ namespace libnutwireless {
 		}
 		if (m_wpaConnected) {
 			if (m_eventSn != NULL) {
-				disconnect(m_eventSn,SIGNAL(activated(int)),this,SLOT(readFromWpa(int)));
+				disconnect(m_eventSn, &QSocketNotifier::activated, this, &CWpaSupplicant::readFromWpa);
 				delete m_eventSn;
 				m_eventSn = NULL;
 			}

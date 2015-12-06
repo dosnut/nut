@@ -14,11 +14,11 @@ namespace qnut {
 	CDeviceSettings::CDeviceSettings(QWidget * parent) : QDialog(parent), m_LastList(-1) {
 		ui.setupUi(this);
 		ui.commandList->setModel(new CCommandListModel(this));
-		connect(ui.stateCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(updateCommandList(int)));
-		connect(ui.addButton, SIGNAL(clicked()), this, SLOT(addCommand()));
-		connect(ui.removeButton, SIGNAL(clicked()), this, SLOT(removeSelectedCommands()));
-		connect(ui.enableAllButton, SIGNAL(clicked()), this, SLOT(enableAllCommands()));
-		connect(ui.disableAllButton, SIGNAL(clicked()), this, SLOT(disableAllCommands()));
+		connect(ui.stateCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &CDeviceSettings::updateCommandList);
+		connect(ui.addButton, &QPushButton::clicked, this, &CDeviceSettings::addCommand);
+		connect(ui.removeButton, &QPushButton::clicked, this, &CDeviceSettings::removeSelectedCommands);
+		connect(ui.enableAllButton, &QPushButton::clicked, this, &CDeviceSettings::enableAllCommands);
+		connect(ui.disableAllButton, &QPushButton::clicked, this, &CDeviceSettings::disableAllCommands);
 	}
 
 	bool CDeviceSettings::execute(QList<ToggleableCommand> * commandLists, bool commandsEnabled, bool trayIconVisibility, bool notificationEnabled, bool globalNotifications) {

@@ -63,7 +63,7 @@ bool CNL80211::open() {
 
 	m_nlFd = nl_socket_get_fd(m_nlSocket);
 	m_nlSn = new QSocketNotifier(m_nlFd,QSocketNotifier::Read,this);
-	connect(m_nlSn,SIGNAL(activated(int)), this, SLOT(readNlMessage(void)));
+	connect(m_nlSn, &QSocketNotifier::activated, this, &CNL80211::readNlMessage);
 
 	//Start Signal Quality polling
 	m_sqTimerId = startTimer(m_sqPollrate);

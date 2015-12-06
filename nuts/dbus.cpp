@@ -16,8 +16,8 @@ namespace nuts {
 			devAdded(i->getName(), i);
 		}
 
-		connect(m_devmgr, SIGNAL(deviceAdded(QString, Device*)), SLOT(devAdded(QString, Device*)));
-		connect(m_devmgr, SIGNAL(deviceRemoved(QString, Device*)), SLOT(devRemoved(QString, Device*)));
+		connect(m_devmgr, &DeviceManager::deviceAdded, this, &DBusDeviceManager::devAdded);
+		connect(m_devmgr, &DeviceManager::deviceRemoved, this, &DBusDeviceManager::devRemoved);
 	}
 
 	//SLOT: Inserts device into device hash
@@ -92,8 +92,8 @@ namespace nuts {
 
 		m_last_notified_properties = m_properties;
 
-		connect(m_device,SIGNAL(activeEnvironmentChanged(int)),this,SLOT(devActiveEnvironmentChanged(int)));
-		connect(m_device,SIGNAL(propertiesChanged(libnutcommon::DeviceProperties)),this,SLOT(devPropertiesChanged(libnutcommon::DeviceProperties)));
+		connect(m_device, &Device::activeEnvironmentChanged, this, &DBusDevice::devActiveEnvironmentChanged);
+		connect(m_device, &Device::propertiesChanged, this, &DBusDevice::devPropertiesChanged);
 	}
 
 	void DBusDevice::checkPropertiesUpdate() {
@@ -127,7 +127,7 @@ namespace nuts {
 		m_properties.activeEnvironment = m_activeEnvironment >= 0
 			? m_dbusEnvironments[m_activeEnvironment]->getPath()
 			: OptionalQDBusObjectPath { };
-		QTimer::singleShot(10, this, SLOT(checkPropertiesUpdate()));
+		QTimer::singleShot(10, this, &DBusDevice::checkPropertiesUpdate);
 	}
 
 	void DBusDevice::devActiveEnvironmentChanged(int newEnvironment) {
@@ -135,7 +135,7 @@ namespace nuts {
 		m_properties.activeEnvironment = m_activeEnvironment >= 0
 			? m_dbusEnvironments[m_activeEnvironment]->getPath()
 			: OptionalQDBusObjectPath { };
-		QTimer::singleShot(10, this, SLOT(checkPropertiesUpdate()));
+		QTimer::singleShot(10, this, &DBusDevice::checkPropertiesUpdate);
 	}
 
 	DeviceProperties DBusDevice::getProperties() {
@@ -237,7 +237,7 @@ namespace nuts {
 #endif
 		}
 
-		connect(m_environment,SIGNAL(propertiesChanged(libnutcommon::EnvironmentProperties)),this,SLOT(envPropertiesChanged(libnutcommon::EnvironmentProperties)));
+		connect(m_environment, &Environment::propertiesChanged, this, &DBusEnvironment::envPropertiesChanged);
 	}
 
 	void DBusEnvironment::checkPropertiesUpdate() {
@@ -249,7 +249,7 @@ namespace nuts {
 
 	void DBusEnvironment::envPropertiesChanged(EnvironmentProperties properties) {
 		m_properties = properties;
-		QTimer::singleShot(10, this, SLOT(checkPropertiesUpdate()));
+		QTimer::singleShot(10, this, &DBusEnvironment::checkPropertiesUpdate);
 	}
 
 	EnvironmentProperties DBusEnvironment::getProperties() {
@@ -312,8 +312,8 @@ namespace nuts {
 		m_last_notified_properties = m_properties = m_interface->getProperties();
 		m_last_notified_userConfig = m_userConfig = m_interface->getUserConfig();
 
-		connect(m_interface,SIGNAL(propertiesChanged(libnutcommon::InterfaceProperties)),this,SLOT(interfacePropertiesChanged(libnutcommon::InterfaceProperties)));
-		connect(m_interface,SIGNAL(userConfigChanged(libnutcommon::IPv4UserConfig)),this,SLOT(interfaceUserConfigChanged(libnutcommon::IPv4UserConfig)));
+		connect(m_interface, &Interface_IPv4::propertiesChanged, this, &DBusInterface_IPv4::interfacePropertiesChanged);
+		connect(m_interface, &Interface_IPv4::userConfigChanged, this, &DBusInterface_IPv4::interfaceUserConfigChanged);
 	}
 
 	void DBusInterface_IPv4::checkPropertiesUpdate() {
@@ -331,7 +331,7 @@ namespace nuts {
 
 	void DBusInterface_IPv4::interfacePropertiesChanged(libnutcommon::InterfaceProperties properties) {
 		m_properties = properties;
-		QTimer::singleShot(10, this, SLOT(checkPropertiesUpdate()));
+		QTimer::singleShot(10, this, &DBusInterface_IPv4::checkPropertiesUpdate);
 	}
 	void DBusInterface_IPv4::interfaceUserConfigChanged(libnutcommon::IPv4UserConfig userConfig) {
 		m_userConfig = userConfig;

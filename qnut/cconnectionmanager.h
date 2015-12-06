@@ -91,7 +91,7 @@ namespace qnut {
 		void removeUiDevice(libnutclient::CDevice * device);
 		void handleDeviceStateChange(libnutcommon::DeviceState state);
 		void showDeviceDetails(QWidget * widget);
-		void showDeviceDetails(const QModelIndex & index);
+		void showDeviceDetailsByIndex(const QModelIndex & index);
 		void showAbout();
 	};
 }
