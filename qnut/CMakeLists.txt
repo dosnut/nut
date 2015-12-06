@@ -18,7 +18,6 @@ file(GLOB TRANSLATIONS_TS translations/qnut_*.ts)
 file(GLOB_RECURSE TRANSLATIONS_USAGES *.cpp *.ui)
 
 qt5_wrap_ui(FORMS_H ${FORMS})
-qt5_create_translation(TRANSLATIONS_QM ${TRANSLATIONS_USAGES} ${TRANSLATIONS_TS})
 
 add_executable(qnut
 	cabstractwifinetconfigdialog.cpp
@@ -46,8 +45,12 @@ add_executable(qnut
 	utils/cerrorcodeevaluator.cpp
 
 	${FORMS_H}
-	${TRANSLATIONS_QM}
 )
+
+qt5_translate(
+	SOURCES ${TRANSLATIONS_USAGES}
+	TRANSLATIONS ${TRANSLATIONS_TS}
+	TARGET qnut)
 
 target_link_libraries(qnut
 	nutclient

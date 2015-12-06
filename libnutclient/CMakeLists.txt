@@ -1,6 +1,5 @@
 file(GLOB TRANSLATIONS_TS translations/nutclient_*.ts)
 file(GLOB TRANSLATIONS_USAGES *.cpp)
-qt5_create_translation(TRANSLATIONS_QM ${TRANSLATIONS_USAGES} ${TRANSLATIONS_TS})
 
 # TARGET_OBJECTS and CMAKE_AUTOMOC are buggy with ninja in cmake < 3.4
 set(CMAKE_AUTOMOC OFF)
@@ -27,13 +26,16 @@ add_library(nutclient SHARED
 	clog.cpp
 	cnutservice.cpp
 
-	${TRANSLATIONS_QM}
-
 	${nutclient_MOC_SOURCE}
 
 	$<TARGET_OBJECTS:nutwireless>
 	$<TARGET_OBJECTS:nutclientbase>
 )
+qt5_translate(
+	SOURCES ${TRANSLATIONS_USAGES}
+	TRANSLATIONS ${TRANSLATIONS_TS}
+	TARGET nutclient)
+
 set_target_properties(nutclient PROPERTIES VERSION ${PACKAGE_VERSION} SOVERSION ${PACKAGE_SO_VERSION})
 
 
