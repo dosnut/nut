@@ -127,7 +127,11 @@ namespace nuts {
 		m_properties.activeEnvironment = m_activeEnvironment >= 0
 			? m_dbusEnvironments[m_activeEnvironment]->getPath()
 			: OptionalQDBusObjectPath { };
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 		QTimer::singleShot(10, this, &DBusDevice::checkPropertiesUpdate);
+#else
+		QTimer::singleShot(10, this, SLOT(checkPropertiesUpdate()));
+#endif
 	}
 
 	void DBusDevice::devActiveEnvironmentChanged(int newEnvironment) {
@@ -135,7 +139,11 @@ namespace nuts {
 		m_properties.activeEnvironment = m_activeEnvironment >= 0
 			? m_dbusEnvironments[m_activeEnvironment]->getPath()
 			: OptionalQDBusObjectPath { };
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 		QTimer::singleShot(10, this, &DBusDevice::checkPropertiesUpdate);
+#else
+		QTimer::singleShot(10, this, SLOT(checkPropertiesUpdate()));
+#endif
 	}
 
 	DeviceProperties DBusDevice::getProperties() {
@@ -249,7 +257,11 @@ namespace nuts {
 
 	void DBusEnvironment::envPropertiesChanged(EnvironmentProperties properties) {
 		m_properties = properties;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 		QTimer::singleShot(10, this, &DBusEnvironment::checkPropertiesUpdate);
+#else
+		QTimer::singleShot(10, this, SLOT(checkPropertiesUpdate()));
+#endif
 	}
 
 	EnvironmentProperties DBusEnvironment::getProperties() {
@@ -331,7 +343,11 @@ namespace nuts {
 
 	void DBusInterface_IPv4::interfacePropertiesChanged(libnutcommon::InterfaceProperties properties) {
 		m_properties = properties;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 		QTimer::singleShot(10, this, &DBusInterface_IPv4::checkPropertiesUpdate);
+#else
+		QTimer::singleShot(10, this, SLOT(checkPropertiesUpdate()));
+#endif
 	}
 	void DBusInterface_IPv4::interfaceUserConfigChanged(libnutcommon::IPv4UserConfig userConfig) {
 		m_userConfig = userConfig;
