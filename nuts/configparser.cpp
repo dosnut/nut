@@ -240,15 +240,17 @@ namespace {
 				pop();
 				for (;;) {
 					while (';' == peek()) pop();
-					searchOptionEnd(option());
 					if ('}' == peek()) {
 						pop();
 						while (';' == peek()) pop();
 						return true;
 					}
+					searchOptionEnd(option());
 				}
 			case ';':
 				pop();
+				return true;
+			case ENDOFFILE:
 				return true;
 			default:
 				searchOptionEnd(option());
