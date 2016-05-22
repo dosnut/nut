@@ -34,6 +34,8 @@ add_executable(${PROJECT_NAME}
 	random.h
 	sighandler.cpp
 	sighandler.h
+	timecls.cpp
+	timecls.h
 
 	configparser.l
 
