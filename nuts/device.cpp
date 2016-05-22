@@ -45,8 +45,8 @@ static inline void setSockaddrIPv4(struct sockaddr &s, quint32 host = 0, quint16
 namespace nuts {
 	using namespace libnutcommon;
 
-	DeviceManager::DeviceManager(const QString &configFile)
-	: m_config(parseConfig(configFile)) {
+	DeviceManager::DeviceManager(const QString &configFile, ProcessManager* processManager)
+	: m_events(processManager), m_config(parseConfig(configFile)) {
 		connect(&m_hwman, &HardwareManager::gotCarrier, this, &DeviceManager::gotCarrier);
 		connect(&m_hwman, &HardwareManager::lostCarrier, this, &DeviceManager::lostCarrier);
 		connect(&m_hwman, &HardwareManager::newDevice, this, &DeviceManager::newDevice);
@@ -84,11 +84,24 @@ namespace nuts {
 	}
 
 	DeviceManager::~DeviceManager() {
+		// shutdown() should be used to cleanup before
+
 		// manually deleting devices so HardwareManager is available for their destruction;
 		// in ~QObject  (deleteChildren) it is too late for them.
 		foreach (Device* device, m_devices)
 			delete device;
 		m_devices.clear();
+	}
+
+	void DeviceManager::shutdown()
+	{
+		// no new hardware anymore
+		disconnect(&m_hwman, &HardwareManager::newDevice, 0, 0);
+
+		for (QString const& ifName: m_devices.keys()) {
+			Device* device = m_devices.value(ifName, nullptr);
+			if (device) delete device;
+		}
 	}
 
 	void DeviceManager::ca_timer() {

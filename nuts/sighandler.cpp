@@ -60,8 +60,8 @@ namespace nuts {
 			switch (signum) {
 				case SIGTERM:
 				case SIGINT:
+					emit gotQuitSignal();
 					if (quitOnSignal) {
-						emit appQuit();
 						QCoreApplication::quit();
 					}
 			}

@@ -15,6 +15,8 @@
 #include "libnutcommon/common.h"
 
 namespace nuts {
+	class ProcessManager;
+
 	class DBusDeviceManager;
 
 	class DeviceManager;
@@ -43,7 +45,7 @@ namespace nuts {
 		If devices are created later (or are removed) by the kernel, it emits
 		signals if they are managed by the DeviceManager, i.e. are in the config file.
 	 */
-	class DeviceManager : public QObject {
+	class DeviceManager final : public QObject {
 		Q_OBJECT
 	private:
 		Events m_events;
@@ -80,8 +82,10 @@ namespace nuts {
 		 * @brief Constructs the DeviceManager
 		 * @param configFile Path to the configfile.
 		 */
-		DeviceManager(const QString &configFile);
-		virtual ~DeviceManager();
+		explicit DeviceManager(const QString &configFile, ProcessManager* processManager);
+		~DeviceManager();
+
+		void shutdown();
 
 		/**
 		 * @brief Gets all managed devices.

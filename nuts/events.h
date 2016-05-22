@@ -17,6 +17,8 @@
 #include <libnutcommon/common.h>
 
 namespace nuts {
+	class ProcessManager;
+
 	class Device;
 	class Environment;
 	class Interface_IPv4;
@@ -29,11 +31,11 @@ namespace nuts {
 	class Events : public QObject {
 		Q_OBJECT
 		public:
-			Events(QObject *parent = 0);
+			explicit Events(ProcessManager* processManager);
 			virtual ~Events();
 
 		private:
-			void start(QStringList &environment, const QString &event, const QString &device, const QString &env = QString(), int iface=-1);
+			void start(QProcessEnvironment const& environment, QString const& event, QString const& device, QString const& env = QString(), int iface = -1);
 
 		public:
 			void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState, Device* device);
@@ -42,6 +44,9 @@ namespace nuts {
 		public slots:
 			void deviceAdded(QString devName, Device *dev);
 			void deviceRemoved(QString devName, Device *dev);
+
+		private:
+			ProcessManager* m_processManager;
 	};
 }
 
