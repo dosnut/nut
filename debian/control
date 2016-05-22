@@ -3,7 +3,7 @@ Section: admin
 Priority: important
 Maintainer: Stefan Bühler <source@stbuehler.de>
 Uploaders: Oliver Groß <neokensuke@freenet.de>, Stefan Bühler <stbuehler@web.de>
-Build-Depends: cdbs, debhelper (>= 9),
+Build-Depends: cdbs (>= 0.4.123), debhelper (>= 9), dh-systemd (>= 1.5),
  qtbase5-dev-tools, qttools5-dev, qttools5-dev-tools,
  bison, flex,
  libnl-3-dev, libnl-genl-3-dev, libnl-route-3-dev,

@@ -1,0 +1,10 @@
+[Unit]
+Description=Network UTility Service
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/nuts
+Restart=on-failure
+
+[Install]
+WantedBy=network-online.target
