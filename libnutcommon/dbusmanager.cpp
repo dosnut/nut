@@ -40,7 +40,7 @@ namespace libnutcommon {
 	}
 
 	DBusManager::DBusManager(std::function<QDBusConnection()> createConnection, int checkMsec, int retryMsec, QObject* parent)
-	: QObject(parent), m_createConnection(createConnection), m_checkMsec(checkMsec), m_retryMsec(retryMsec) {
+	: QObject(parent), m_createConnection(std::move(createConnection)), m_checkMsec(checkMsec), m_retryMsec(retryMsec) {
 		m_reconnectTimerId = startTimer(0);
 	}
 

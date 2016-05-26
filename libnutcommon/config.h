@@ -26,20 +26,21 @@ namespace libnutcommon {
 }
 
 namespace libnutcommon {
+	enum class DeviceNamePatternType {
+		Plain,
+		RegExp,
+		Wildcard,
+	};
+
 	/** @brief Name, Wildcard or RegExp pattern for a device name
 	 * sorts plain value before regexp before wildcard, for use
 	 * as a key in std::map; first matching entry should "win".
 	 */
 	class DeviceNamePattern {
 	public:
-		enum PatternType {
-			Plain = 0,
-			RegExp = 1,
-			Wildcard = 2,
-		};
-
-		QString pattern;
-		PatternType type;
+		explicit DeviceNamePattern() = default;
+		explicit DeviceNamePattern(QString const& pattern, DeviceNamePatternType type)
+		: m_pattern(pattern), m_type(type) { }
 
 		bool operator<(DeviceNamePattern const& other) const;
 		bool operator>(DeviceNamePattern const& other) const { return other < *this; }
@@ -49,8 +50,9 @@ namespace libnutcommon {
 		/* whether name matches pattern */
 		bool match(QString const& name) const;
 
-		/* human readable "type" */
-		QString typeString() const;
+	private:
+		QString m_pattern;
+		DeviceNamePatternType m_type = DeviceNamePatternType::Plain;
 	};
 
 	/** @brief Container for all \link DeviceConfig device configs\endlink.

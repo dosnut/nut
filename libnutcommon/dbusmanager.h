@@ -38,6 +38,32 @@ namespace libnutcommon {
 	 */
 	class DBusManager final : public QObject {
 		Q_OBJECT
+	public:
+		explicit DBusManager(
+			std::function<QDBusConnection()> createConnection = createDefaultDBusConnection,
+			int checkMsec = 10000,
+			int retryMsec = 1000,
+			QObject* parent = nullptr);
+		~DBusManager();
+
+		/* if there is no connection this is just null.
+		 * don't keep the pointer! - just copy the content. */
+		QDBusConnection* connection() { return m_connection.get(); }
+
+	public slots:
+		void checkConnection();
+
+	signals:
+		void connected(QDBusConnection const& connection);
+		void disconnected(QDBusConnection const& connection);
+
+		/* only emitted once after each connection loss */
+		void waiting();
+
+	private:
+		void reconnect();
+		void timerEvent(QTimerEvent* event) override;
+
 	private:
 		std::unique_ptr<QDBusConnection> m_connection;
 		std::function<QDBusConnection()> m_createConnection;
@@ -54,27 +80,6 @@ namespace libnutcommon {
 		bool m_hadConnection = true;
 		int m_checkTimerId = -1;
 		int m_reconnectTimerId = -1;
-
-		void reconnect();
-		void timerEvent(QTimerEvent* event) override;
-
-	public:
-		explicit DBusManager(std::function<QDBusConnection()> createConnection = createDefaultDBusConnection, int checkMsec = 10000, int retryMsec = 1000, QObject* parent = nullptr);
-		~DBusManager();
-
-		/* if there is no connection this is just null.
-		 * don't keep the pointer! - just copy the content. */
-		QDBusConnection* connection() { return m_connection.get(); }
-
-	public slots:
-		void checkConnection();
-
-	signals:
-		void connected(QDBusConnection const& connection);
-		void disconnected(QDBusConnection const& connection);
-
-		/* only emitted once after each connection loss */
-		void waiting();
 	};
 
 	class DBusAbstractAdapaterConnectionEmitter : public QObject {

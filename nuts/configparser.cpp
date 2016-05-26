@@ -592,16 +592,16 @@ namespace {
 
 		bool parseDevice() {
 			if (!eat(DEVICE)) return false;
-			DeviceNamePattern::PatternType pt = DeviceNamePattern::Plain;
+			DeviceNamePatternType pt = DeviceNamePatternType::Plain;
 			if (REGEXP == peek()) {
-				pt = DeviceNamePattern::RegExp;
+				pt = DeviceNamePatternType::RegExp;
 				pop();
 			}
 			if (!eat(STRING)) return false;
 			auto name = tv.str;
-			if (DeviceNamePattern::RegExp != pt
+			if (DeviceNamePatternType::RegExp != pt
 				&& (name.contains("?") || name.contains("[") || name.contains("]") || name.contains("*"))) {
-				pt = DeviceNamePattern::Wildcard;
+				pt = DeviceNamePatternType::Wildcard;
 			}
 			DeviceNamePattern dnp { name, pt };
 			auto duplicate = (m_config.namedDeviceConfigs.find(dnp) != m_config.namedDeviceConfigs.end());
