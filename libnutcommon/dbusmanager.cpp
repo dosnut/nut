@@ -112,16 +112,16 @@ namespace libnutcommon {
 		}
 	}
 
-	DBusAbstractAdapater::DBusAbstractAdapater(QDBusObjectPath path, QObject* parent)
+	DBusAbstractAdaptor::DBusAbstractAdaptor(QDBusObjectPath path, QObject* parent)
 	: QDBusAbstractAdaptor(parent), m_path(std::move(path)) {
 	}
 
-	DBusAbstractAdapater::~DBusAbstractAdapater() {
+	DBusAbstractAdaptor::~DBusAbstractAdaptor() {
 		unregisterAll();
 	}
 
-	void DBusAbstractAdapater::removeConnections(std::list<QDBusConnection>&& l) {
-		for (auto& c: l) {
+	void DBusAbstractAdaptor::removeConnections(std::list<QDBusConnection>&& l) {
+		for (QDBusConnection& c: l) {
 			for (auto si = begin(m_services), se = end(m_services); si != se; ++si) {
 				for (auto sci = begin(si->second), sce = end(si->second); sci != sce; ++sci) {
 					if (c.interface() == sci->interface()) {
@@ -135,14 +135,14 @@ namespace libnutcommon {
 			}
 		}
 
-		for (auto& c: l) {
+		for (QDBusConnection& c: l) {
 			c.unregisterObject(m_path.path());
-			onDbusDisconnected(c);
-			m_dbusDisconnected(c);
+			onDBusDisconnected(c);
+			emit dbusDisconnected(c, QPrivateSignal{});
 		}
 	}
 
-	void DBusAbstractAdapater::_onDbusConnected(QDBusConnection const& connection) {
+	void DBusAbstractAdaptor::handleDBusConnected(QDBusConnection const& connection) {
 		// remove dead connections
 		bool found = false;
 		auto const ci = connection.interface();
@@ -167,11 +167,11 @@ namespace libnutcommon {
 			if (c.registerService(s.first)) s.second.push_back(c);
 		}
 
-		onDbusConnected(c);
-		m_dbusConnected(connection);
+		onDBusConnected(c);
+		emit dbusConnected(connection, QPrivateSignal{});
 	}
 
-	void DBusAbstractAdapater::_onDbusDisconnected(QDBusConnection const& connection) {
+	void DBusAbstractAdaptor::handleDBusDisconnected(QDBusConnection const& connection) {
 		// remove all matching and dead connections
 		auto ci = connection.interface();
 		std::list<QDBusConnection> removeCons;
@@ -184,21 +184,21 @@ namespace libnutcommon {
 		removeConnections(std::move(removeCons));
 	}
 
-	void DBusAbstractAdapater::onDbusConnected(QDBusConnection& connection) {
+	void DBusAbstractAdaptor::onDBusConnected(QDBusConnection& connection) {
 	}
 
-	void DBusAbstractAdapater::onDbusDisconnected(QDBusConnection& connection) {
+	void DBusAbstractAdaptor::onDBusDisconnected(QDBusConnection& connection) {
 	}
 
-	void DBusAbstractAdapater::registerAdaptor(DBusAbstractAdapater* child) {
-		connect(&m_dbusConnected, &DBusAbstractAdapaterConnectionEmitter::notify, child, &DBusAbstractAdapater::_onDbusConnected);
-		connect(&m_dbusDisconnected, &DBusAbstractAdapaterConnectionEmitter::notify, child, &DBusAbstractAdapater::_onDbusDisconnected);
-		for (auto &c: m_connections) {
-			child->_onDbusConnected(c);
+	void DBusAbstractAdaptor::registerAdaptor(DBusAbstractAdaptor* child) {
+		connect(this, &DBusAbstractAdaptor::dbusConnected, child, &DBusAbstractAdaptor::handleDBusConnected);
+		connect(this, &DBusAbstractAdaptor::dbusDisconnected, child, &DBusAbstractAdaptor::handleDBusDisconnected);
+		for (auto& c: m_connections) {
+			child->handleDBusConnected(c);
 		}
 	}
 
-	void DBusAbstractAdapater::unregisterAll() {
+	void DBusAbstractAdaptor::unregisterAll() {
 		using std::swap;
 		{
 			decltype(m_connections) tmp;
@@ -218,7 +218,7 @@ namespace libnutcommon {
 		}
 	}
 
-	void DBusAbstractAdapater::registerService(QString const& serviceName) {
+	void DBusAbstractAdaptor::registerService(QString const& serviceName) {
 		/* if service name was already registered, c.registerService() will
 		 * fail for connections it already succeeded, so we don't get any
 		 * duplicates in the m_services[] connection list.
@@ -229,7 +229,7 @@ namespace libnutcommon {
 		}
 	}
 
-	void DBusAbstractAdapater::unregisterService(QString const& serviceName) {
+	void DBusAbstractAdaptor::unregisterService(QString const& serviceName) {
 		auto i = m_services.find(serviceName);
 		if (m_services.end() == i) return;
 		for (auto& c: i->second) {
@@ -238,13 +238,8 @@ namespace libnutcommon {
 		m_services.erase(i);
 	}
 
-	void DBusAbstractAdapater::connectManager(DBusManager* manager) {
-		connect(manager, &DBusManager::connected, this, &DBusAbstractAdapater::_onDbusConnected);
-		connect(manager, &DBusManager::disconnected, this, &DBusAbstractAdapater::_onDbusDisconnected);
-	}
-
-	void DBusAbstractAdapaterConnectionEmitter::operator()(const QDBusConnection& connection)
-	{
-		emit notify(connection);
+	void DBusAbstractAdaptor::connectManager(DBusManager* manager) {
+		connect(manager, &DBusManager::connected, this, &DBusAbstractAdaptor::handleDBusConnected);
+		connect(manager, &DBusManager::disconnected, this, &DBusAbstractAdaptor::handleDBusDisconnected);
 	}
 }

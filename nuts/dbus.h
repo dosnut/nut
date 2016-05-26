@@ -23,7 +23,7 @@ namespace nuts {
 #include "device.h"
 
 namespace nuts {
-	class DBusDeviceManager final: public libnutcommon::DBusAbstractAdapater {
+	class DBusDeviceManager final: public libnutcommon::DBusAbstractAdaptor {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".DeviceManager")
 		Q_PROPERTY(QList<QDBusObjectPath> deviceList READ getDeviceList)
@@ -63,7 +63,7 @@ namespace nuts {
 		static const QDBusObjectPath m_dbusPath, m_dbusDevicesPath;
 	};
 
-	class DBusDevice final: public libnutcommon::DBusAbstractAdapater {
+	class DBusDevice final: public libnutcommon::DBusAbstractAdaptor {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Device")
 		Q_PROPERTY(libnutcommon::DeviceProperties properties READ getProperties NOTIFY propertiesChanged)
@@ -127,7 +127,7 @@ namespace nuts {
 		int m_activeEnvironment;
 	};
 
-	class DBusEnvironment final: public libnutcommon::DBusAbstractAdapater {
+	class DBusEnvironment final: public libnutcommon::DBusAbstractAdaptor {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Environment")
 		Q_PROPERTY(libnutcommon::EnvironmentProperties properties READ getProperties)
@@ -179,7 +179,7 @@ namespace nuts {
 		libnutcommon::EnvironmentProperties m_properties, m_last_notified_properties;
 	};
 
-	class DBusInterface_IPv4 final: public libnutcommon::DBusAbstractAdapater {
+	class DBusInterface_IPv4 final: public libnutcommon::DBusAbstractAdaptor {
 		Q_OBJECT
 		Q_CLASSINFO("D-Bus Interface", "de.unistuttgart.nut" ".Interface_IPv4")
 		Q_PROPERTY(libnutcommon::InterfaceProperties properties READ getProperties NOTIFY propertiesChanged)

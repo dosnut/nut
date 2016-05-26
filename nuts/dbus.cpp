@@ -9,7 +9,7 @@ namespace nuts {
 	const QDBusObjectPath DBusDeviceManager::m_dbusDevicesPath("/devices");
 
 	DBusDeviceManager::DBusDeviceManager(DeviceManager* devmgr)
-	: DBusAbstractAdapater(m_dbusPath, devmgr), m_devmgr(devmgr) {
+	: DBusAbstractAdaptor(m_dbusPath, devmgr), m_devmgr(devmgr) {
 		registerService(NUT_DBUS_URL);
 
 		for (auto i: m_devmgr->getDevices()) {
@@ -74,7 +74,7 @@ namespace nuts {
 	}
 
 	DBusDevice::DBusDevice(Device* dev, const QString& path)
-	: DBusAbstractAdapater(makeDevicePath(path, dev->getName()), dev), m_device(dev) {
+	: DBusAbstractAdaptor(makeDevicePath(path, dev->getName()), dev), m_device(dev) {
 		m_properties = dev->getProperties();
 		// remember active environment
 		m_activeEnvironment = m_device->getEnvironment();
@@ -224,7 +224,7 @@ namespace nuts {
 	}
 
 	DBusEnvironment::DBusEnvironment(Environment* env, const QDBusObjectPath& path)
-	: DBusAbstractAdapater(makeEnvironmentPath(path, env->getID()), env), m_environment(env) {
+	: DBusAbstractAdaptor(makeEnvironmentPath(path, env->getID()), env), m_environment(env) {
 		//Set dbus path an register object
 		m_last_notified_properties = m_properties = m_environment->getProperties();
 
@@ -320,7 +320,7 @@ namespace nuts {
 	}
 
 	DBusInterface_IPv4::DBusInterface_IPv4(Interface_IPv4* iface, const QDBusObjectPath& path)
-	: DBusAbstractAdapater(makeInterfacePath(path, iface->getIndex()), iface), m_interface(iface) {
+	: DBusAbstractAdaptor(makeInterfacePath(path, iface->getIndex()), iface), m_interface(iface) {
 		m_last_notified_properties = m_properties = m_interface->getProperties();
 		m_last_notified_userConfig = m_userConfig = m_interface->getUserConfig();
 
