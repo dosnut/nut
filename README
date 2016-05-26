@@ -4,7 +4,7 @@ Support for wpa_assistant is included in the client.
 
 Requires:
 
-* Qt 4
+* Qt5
 * resolvconf / openresolv
 * libnl (server) >= 1.1
 * libiw (client)
