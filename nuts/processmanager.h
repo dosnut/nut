@@ -3,11 +3,10 @@
 
 #pragma once
 
-#include "qobject_timer.h"
-
 #include <memory>
 
 #include <QObject>
+#include <QBasicTimer>
 #include <QProcess>
 #include <QList>
 #include <QPointer>
@@ -54,8 +53,8 @@ namespace nuts {
 		int m_waitBeforeShutdownMsecs;
 		int m_killTimeoutMsecs;
 
-		QObjectTimer m_normal_timer;
-		QObjectTimer m_shutdown_timer;
+		QBasicTimer m_normal_timer;
+		QBasicTimer m_shutdown_timer;
 	};
 
 	class ProcessManager : public QObject

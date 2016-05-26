@@ -4,6 +4,7 @@
 #pragma once
 
 #include <QObject>
+#include <QBasicTimer>
 #include <QString>
 #include <QList>
 #include <QHostAddress>
@@ -34,7 +35,6 @@ namespace nuts {
 #include "hardware.h"
 #include "arp.h"
 #include "events.h"
-#include "qobject_timer.h"
 
 namespace nuts {
 	/** @brief The DeviceManager keeps track of all hardware devices.
@@ -400,9 +400,9 @@ namespace nuts {
 		friend class Environment;
 		friend class Device;
 
-		QObjectTimer m_dhcp_timer;
+		QBasicTimer m_dhcp_timer;
 		int m_dhcp_retry = -1; // count retries
-		QObjectTimer m_fallback_timer;
+		QBasicTimer m_fallback_timer;
 
 		enum class dhcp_state {
 			OFF,

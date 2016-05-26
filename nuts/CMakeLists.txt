@@ -28,8 +28,6 @@ add_executable(${PROJECT_NAME}
 	main.cpp
 	processmanager.cpp
 	processmanager.h
-	qobject_timer.cpp
-	qobject_timer.h
 	random.cpp
 	random.h
 	sighandler.cpp

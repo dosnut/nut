@@ -12,7 +12,7 @@ namespace nuts {
 		, m_killTimeoutMsecs(killTimeoutMsecs)
 	{
 		if (m_killTimeoutMsecs > 0) {
-			m_normal_timer.set_timeout(this, m_killTimeoutMsecs);
+			m_normal_timer.start(m_killTimeoutMsecs, this);
 		}
 		parent->addProcess(this);
 		connect(m_process, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this, &Process::finished);
@@ -27,11 +27,11 @@ namespace nuts {
 	void Process::timerEvent(QTimerEvent* event) {
 		if (!m_process) return;
 
-		if (m_normal_timer.match(event)) {
-			m_normal_timer.kill(this);
+		if (event->timerId() == m_normal_timer.timerId()) {
+			m_normal_timer.stop();
 			m_process->terminate();
-		} else if (m_shutdown_timer.match(event)) {
-			m_shutdown_timer.kill(this);
+		} else if (event->timerId() == m_shutdown_timer.timerId()) {
+			m_shutdown_timer.stop();
 			switch (m_handling) {
 			case ShutdownProcessHandling::KillAndDetach:
 				m_process->terminate();
@@ -102,7 +102,7 @@ namespace nuts {
 	}
 
 	void Process::shutdown() {
-		m_shutdown_timer.set_timeout(this, m_waitBeforeShutdownMsecs);
+		m_shutdown_timer.start(m_waitBeforeShutdownMsecs, this);
 	}
 
 	void ProcessManager::startProgram(const QProcessEnvironment& env, const QString& program, const QStringList& args)

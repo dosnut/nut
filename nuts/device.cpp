@@ -702,7 +702,6 @@ namespace nuts {
 	}
 
 	Interface_IPv4::~Interface_IPv4() {
-		m_dhcp_timer.kill(this);
 		releaseXID();
 	}
 
@@ -769,7 +768,7 @@ namespace nuts {
 
 	void Interface_IPv4::dhcp_setup_interface(DHCPPacket *ack, bool renewing) {
 		//stop fallback
-		m_fallback_timer.kill(this);
+		m_fallback_timer.stop();
 		if (renewing) {
 			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(dhcp_option::LEASE_TIME, 0xffffffffu));
 		} else {
@@ -940,7 +939,7 @@ namespace nuts {
 			case dhcp_state::SELECTING:
 				if (source) {
 					if (source->getMessageType() == dhcp_message_type::OFFER)  {
-						m_dhcp_timer.kill(this);
+						m_dhcp_timer.stop();
 						dhcp_send_request(source);
 						m_dhcpstate = dhcp_state::REQUESTING;
 					}
@@ -949,10 +948,10 @@ namespace nuts {
 						m_dhcp_retry++;
 						// send 6 packets with short interval
 						// 0, 500, 2500, 4500, 6500, 8500 [ms]
-						m_dhcp_timer.set_timeout(this, 500 + (m_dhcp_retry-1) * 2000);
+						m_dhcp_timer.start(500 + (m_dhcp_retry-1) * 2000, this);
 					} else {
 						// 1 min
-						m_dhcp_timer.set_timeout(this, 1 * 60 * 1000);
+						m_dhcp_timer.start(1 * 60 * 1000, this);
 					}
 					return;
 				}
@@ -960,12 +959,12 @@ namespace nuts {
 				if (source) {
 					switch (source->getMessageType()) {
 					case dhcp_message_type::ACK:
-						m_dhcp_timer.kill(this);
+						m_dhcp_timer.stop();
 						dhcp_setup_interface(source);
 						m_dhcpstate = dhcp_state::BOUND;
 						break;
 					case dhcp_message_type::NAK:
-						m_dhcp_timer.kill(this);
+						m_dhcp_timer.stop();
 						m_dhcpstate = dhcp_state::INIT;
 						break;
 					default:
@@ -973,24 +972,24 @@ namespace nuts {
 					}
 					break;
 				} else {
-					m_dhcp_timer.set_timeout(this, 4000);
+					m_dhcp_timer.start(4000, this);
 					return;
 				}
 			case dhcp_state::BOUND:
 				releaseXID();
 				// 0.5 * 1000 (msecs)
-				m_dhcp_timer.set_timeout(this, 500 * m_dhcp_lease_time);
+				m_dhcp_timer.start(500 * m_dhcp_lease_time, this);
 				return;
 			case dhcp_state::RENEWING:
 				if (source) {
 					switch (source->getMessageType()) {
 					case dhcp_message_type::ACK:
-						m_dhcp_timer.kill(this);
+						m_dhcp_timer.stop();
 						dhcp_setup_interface(source, true);
 						m_dhcpstate = dhcp_state::BOUND;
 						break;
 					case dhcp_message_type::NAK:
-						m_dhcp_timer.kill(this);
+						m_dhcp_timer.stop();
 						m_dhcpstate = dhcp_state::INIT_START;
 						break;
 					default:
@@ -1000,19 +999,19 @@ namespace nuts {
 				} else {
 					dhcp_send_renew();
 					// T2 - T1 * 1000 (msecs) = (7 / 8 - 1 / 2) * 1000 = 3 / 8 * 1000 = 375
-					m_dhcp_timer.set_timeout(this, 375 * m_dhcp_lease_time);
+					m_dhcp_timer.start(375 * m_dhcp_lease_time, this);
 					return;
 				}
 			case dhcp_state::REBINDING:
 				if (source) {
 					switch (source->getMessageType()) {
 					case dhcp_message_type::ACK:
-						m_dhcp_timer.kill(this);
+						m_dhcp_timer.stop();
 						dhcp_setup_interface(source, true);
 						m_dhcpstate = dhcp_state::BOUND;
 						break;
 					case dhcp_message_type::NAK:
-						m_dhcp_timer.kill(this);
+						m_dhcp_timer.stop();
 						m_dhcpstate = dhcp_state::INIT_START;
 						break;
 					default:
@@ -1022,7 +1021,7 @@ namespace nuts {
 				} else {
 					dhcp_send_rebind();
 					// T - (T2) = 1/8 -> 125
-					m_dhcp_timer.set_timeout(this, 125 * m_dhcp_lease_time);
+					m_dhcp_timer.start(125 * m_dhcp_lease_time, this);
 					return;
 				}
 			default:
@@ -1034,11 +1033,11 @@ namespace nuts {
 	}
 
 	void Interface_IPv4::timerEvent(QTimerEvent *tevt) {
-		if (m_fallback_timer.match(tevt)) {
+		if (tevt->timerId() == m_fallback_timer.timerId()) {
 			startFallback();
 		}
-		else if (m_dhcp_timer.match(tevt)) {
-			m_dhcp_timer.kill(this);
+		else if (tevt->timerId() == m_dhcp_timer.timerId()) {
+			m_dhcp_timer.stop();
 			switch (m_dhcpstate) {
 			case dhcp_state::SELECTING:
 				m_dhcpstate = dhcp_state::INIT;
@@ -1072,7 +1071,7 @@ namespace nuts {
 		dhcpAction();
 	}
 	void Interface_IPv4::stopDHCP() {
-		m_fallback_timer.kill(this);
+		m_fallback_timer.stop();
 		switch (m_dhcpstate) {
 		case dhcp_state::INITREBOOT:  // nothing to do ??
 		case dhcp_state::REBOOTING:  // nothing to do ??
@@ -1089,7 +1088,7 @@ namespace nuts {
 			dhcp_send_release();
 		}
 		releaseXID();
-		m_dhcp_timer.kill(this);
+		m_dhcp_timer.stop();
 	}
 
 	void Interface_IPv4::startZeroconf() {
@@ -1128,10 +1127,10 @@ namespace nuts {
 
 
 	void Interface_IPv4::checkFallbackRunning() {
-		if ((!m_fallback_timer.active() && m_config->timeout > 0) && (
+		if ((!m_fallback_timer.isActive() && m_config->timeout > 0) && (
 			( m_config->flags == (IPv4ConfigFlag::DHCP | IPv4ConfigFlag::ZEROCONF)) ||
 			( m_config->flags == (IPv4ConfigFlag::DHCP | IPv4ConfigFlag::STATIC)) ) ) {
-			m_fallback_timer.set_timeout(this, m_config->timeout*1000);
+			m_fallback_timer.start(m_config->timeout*1000, this);
 		}
 	}
 
