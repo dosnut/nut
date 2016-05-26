@@ -795,18 +795,11 @@ namespace nuts {
 		systemUp(InterfaceState::ZEROCONF);
 	}
 
-	quint16 hashMac(const MacAddress &addr) {
-		auto w0 = qFromBigEndian<quint16>(addr.data.bytes);
-		auto w1 = qFromBigEndian<quint16>(addr.data.bytes + 2);
-		auto w2 = qFromBigEndian<quint16>(addr.data.bytes + 4);
-		return w0 ^ w1 ^ w2;
-	}
-
 	void Interface_IPv4::zeroconfProbe() {   // select new ip and start probe it
 		quint32 lastip = m_zc_probe_ip.toIPv4Address();
 		const quint32 baseip = 0xA9FE0000; // 169.254.0.0
 		const quint32 mask = 0xFFFF;
-		quint32 ip = baseip | hashMac(m_env->m_device->getMacAddress());
+		quint32 ip = baseip | (quint16) qHash(m_env->m_device->getMacAddress());
 		while (ip == lastip) {
 			quint32 rnd;
 			do {

@@ -254,7 +254,7 @@ cleanup:
 			err << QString("Couldn't get hardware address of '%1'").arg(ifName) << endl;
 			return libnutcommon::MacAddress();
 		}
-		return libnutcommon::MacAddress((quint8*) ifr.ifr_hwaddr.sa_data);
+		return libnutcommon::MacAddress::fromBuffer(ifr.ifr_hwaddr.sa_data);
 	}
 
 	bool HardwareManager::ifreq_init(struct ifreq& ifr, QString const& ifname) {

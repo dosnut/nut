@@ -66,7 +66,7 @@ namespace {
 
 	void arp_ipv4_request(arp_packet_ipv4& packet, libnutcommon::MacAddress const& sender_mac, QHostAddress const& sender_ip, QHostAddress const& target_ip) {
 		arp_base_request(packet, 4, nuts::ArpOperation::REQUEST);
-		memcpy(packet.sender_hw_addr, sender_mac.data.bytes, ETH_ALEN);
+		memcpy(packet.sender_hw_addr, &sender_mac.data, ETH_ALEN);
 		packet.sender_p_addr = htonl(sender_ip.toIPv4Address());
 		packet.target_p_addr = htonl(target_ip.toIPv4Address());
 	}

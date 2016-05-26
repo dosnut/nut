@@ -13,14 +13,21 @@ struct ether_addr;
 }
 
 namespace libnutcommon {
-	class MacAddress {
-	public:
-		static MacAddress const Zero;
+	struct MacAddressData {
+		quint8 octet[6];
+	} __attribute__ ((__packed__));
 
-		explicit MacAddress() { clear(); }
+	struct MacAddress {
+		explicit constexpr MacAddress() = default;
 		explicit MacAddress(QString const& str);
-		explicit MacAddress(quint8 const* d);
+		explicit MacAddress(quint8 const (&d)[6]);
 		explicit MacAddress(ether_addr const* eth);
+
+		template<typename T, size_t N>
+		static MacAddress fromBuffer(T const (&d)[N]) {
+			static_assert(sizeof(d) >= 6, "buffer not large enough for MAC address");
+			return MacAddress(reinterpret_cast<ether_addr const*>(d));
+		}
 
 		bool operator==(MacAddress const& b) const;
 		bool operator!=(MacAddress const& b) const;
@@ -31,9 +38,7 @@ namespace libnutcommon {
 		bool valid() const;
 		void clear();
 
-		struct {
-			quint8 bytes[6];
-		} data;
+		MacAddressData data{{0,0,0,0,0,0}};
 	};
 
 	uint qHash(libnutcommon::MacAddress const& key);

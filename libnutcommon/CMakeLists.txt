@@ -32,6 +32,7 @@ add_library(nutcommon SHARED
 	dbusmanager.h
 	device.cpp
 	device.h
+	device_dbus.cpp
 	enum.h
 	flags.h
 	macaddress.cpp

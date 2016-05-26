@@ -28,7 +28,7 @@ namespace libnutcommon {
 		QDBusObjectPath objectPath() const {
 			return QDBusObjectPath(m_path);
 		}
-		operator bool() const { return !m_path.isEmpty(); }
+		explicit operator bool() const { return !m_path.isEmpty(); }
 
 	private:
 		QString m_path;
@@ -124,7 +124,7 @@ namespace libnutcommon {
 
 		/** @brief A very basic check if the configuration is valid.
 		 */
-		bool valid() {
+		bool valid() const {
 			return !ip.isNull();
 		}
 	};

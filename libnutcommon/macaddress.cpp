@@ -46,15 +46,13 @@ namespace libnutcommon {
 		return msg;
 	}
 
-	MacAddress const MacAddress::Zero { };
-
 	MacAddress::MacAddress(QString const& str) {
-		data = Zero.data;
 		if (str == QLatin1String("any") || str.isEmpty()) {
 			return;
 		}
 		auto buf = str.toUtf8();
 		auto s = buf.data();
+		MacAddressData addr;
 //		qDebug(s);
 		for (int i = 0; i < 6; i++) {
 			if (!*s) {
@@ -72,20 +70,17 @@ namespace libnutcommon {
 //				qDebug() << QString("Unexpected char in mac: '%1'").arg(*s);
 				return;
 			}
-			data.bytes[i] = val;
+			addr.octet[i] = val;
 		}
+		data = addr;
 //		qDebug() << QString("-> %1").arg(toString());
 	}
 
-	MacAddress::MacAddress(quint8 const* d) {
-		if (d == 0) {
-			MacAddress();
-		} else {
-			memcpy(data.bytes, d, sizeof(data.bytes));
-		}
+	MacAddress::MacAddress(quint8 const (&d)[6]) {
+		memcpy(&data, d, sizeof(data));
 	}
 	MacAddress::MacAddress(ether_addr const* eth) {
-		memcpy(data.bytes, eth->ether_addr_octet, sizeof(data));
+		memcpy(data.octet, eth->ether_addr_octet, sizeof(data));
 	}
 
 	bool MacAddress::operator==(MacAddress const& b) const {
@@ -102,24 +97,29 @@ namespace libnutcommon {
 	QString MacAddress::toString() const {
 		char buf[sizeof("00:00:00:00:00:00")];
 		sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X",
-			data.bytes[0],data.bytes[1],data.bytes[2],data.bytes[3],data.bytes[4],data.bytes[5]);
+			data.octet[0],
+			data.octet[1],
+			data.octet[2],
+			data.octet[3],
+			data.octet[4],
+			data.octet[5]);
 		return QString(buf);
 	}
 
 	bool MacAddress::zero() const {
-		return Zero == *this;
+		return MacAddress() == *this;
 	}
 
 	bool MacAddress::valid() const {
-		return Zero != *this;
+		return MacAddress() != *this;
 	}
 
 	void MacAddress::clear() {
-		data = Zero.data;
+		*this = MacAddress();
 	}
 
 	uint qHash(MacAddress const& key) {
-		auto n = qFromBigEndian<quint64>(key.data.bytes);
+		auto n = qFromBigEndian<quint64>(key.data.octet);
 		return ::qHash(n);
 	}
 }

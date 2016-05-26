@@ -248,13 +248,13 @@ namespace nuts {
 	}
 
 	libnutcommon::MacAddress DHCPPacket::getClientMac() {
-		return libnutcommon::MacAddress(msg.chaddr);
+		return libnutcommon::MacAddress::fromBuffer(msg.chaddr);
 	}
 
 	void DHCPPacket::setClientMac(libnutcommon::MacAddress const& chaddr) {
-		memcpy(msg.chaddr, chaddr.data.bytes, 6);
+		memcpy(msg.chaddr, &chaddr.data, 6);
 		quint8 clid[7];
-		memcpy(&clid[1], chaddr.data.bytes, 6);
+		memcpy(&clid[1], &chaddr.data, 6);
 		clid[0] = ARPHRD_ETHER;
 		setOption(dhcp_option::CLIENT_ID, clid, sizeof(clid));
 	}
