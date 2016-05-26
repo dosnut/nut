@@ -2,7 +2,7 @@
 #include "enum.h"
 
 namespace libnutcommon {
-	QDBusArgument& operator<<(QDBusArgument& argument, const OptionalQDBusObjectPath& optionalObjPath) {
+	QDBusArgument& operator<<(QDBusArgument& argument, OptionalQDBusObjectPath const& optionalObjPath) {
 		// send as string; can't send empty QDBusObjectPath
 		argument.beginStructure();
 		argument << static_cast<QString>(optionalObjPath.path());
@@ -10,7 +10,7 @@ namespace libnutcommon {
 		return argument;
 	}
 
-	const QDBusArgument& operator>>(const QDBusArgument& argument, OptionalQDBusObjectPath& optionalObjPath) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, OptionalQDBusObjectPath& optionalObjPath) {
 		argument.beginStructure();
 		QString tmp;
 		argument >> tmp;
@@ -25,7 +25,7 @@ namespace libnutcommon {
 	QDBusArgument& operator<<(QDBusArgument& argument, DeviceState devstate) {
 		return dbusSerializeEnum(argument, devstate);
 	}
-	const QDBusArgument& operator>>(const QDBusArgument& argument, DeviceState& devstate) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, DeviceState& devstate) {
 		return dbusUnserializeEnum(argument, devstate);
 	}
 
@@ -35,7 +35,7 @@ namespace libnutcommon {
 	QDBusArgument& operator<<(QDBusArgument& argument, DeviceType type) {
 		return dbusSerializeEnum(argument, type);
 	}
-	const QDBusArgument& operator>>(const QDBusArgument& argument, DeviceType& type) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, DeviceType& type) {
 		return dbusUnserializeEnum(argument, type);
 	}
 
@@ -45,7 +45,7 @@ namespace libnutcommon {
 	QDBusArgument& operator<<(QDBusArgument& argument, InterfaceState state) {
 		return dbusSerializeEnum(argument, state);
 	}
-	const QDBusArgument& operator>>(const QDBusArgument& argument, InterfaceState& state) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, InterfaceState& state) {
 		return dbusUnserializeEnum(argument, state);
 	}
 
@@ -61,7 +61,7 @@ namespace libnutcommon {
 		return !(a == b);
 	}
 
-	QDBusArgument &operator<<(QDBusArgument &argument, const DeviceProperties & devprop) {
+	QDBusArgument& operator<<(QDBusArgument& argument, const DeviceProperties& devprop) {
 		argument.beginStructure();
 		argument
 			<< devprop.name
@@ -73,7 +73,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>>(const QDBusArgument &argument, DeviceProperties &devprop) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, DeviceProperties& devprop) {
 		argument.beginStructure();
 		argument
 			>> devprop.name
@@ -97,7 +97,7 @@ namespace libnutcommon {
 		return !(a == b);
 	}
 
-	QDBusArgument &operator<<(QDBusArgument &argument, const EnvironmentProperties &envprop) {
+	QDBusArgument& operator<<(QDBusArgument& argument, const EnvironmentProperties& envprop) {
 		argument.beginStructure();
 		argument
 			<< envprop.name
@@ -109,7 +109,7 @@ namespace libnutcommon {
 		return argument;
 	}
 
-	const QDBusArgument &operator>>(const QDBusArgument &argument, EnvironmentProperties &envprop) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, EnvironmentProperties& envprop) {
 		argument.beginStructure();
 		argument
 			>> envprop.name
@@ -133,7 +133,7 @@ namespace libnutcommon {
 		return !(a == b);
 	}
 
-	QDBusArgument &operator<<(QDBusArgument &argument, const InterfaceProperties &ifprop) {
+	QDBusArgument& operator<<(QDBusArgument& argument, const InterfaceProperties& ifprop) {
 		argument.beginStructure();
 		argument
 			<< ifprop.state
@@ -146,7 +146,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>>(const QDBusArgument &argument, InterfaceProperties &ifprop) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, InterfaceProperties& ifprop) {
 		argument.beginStructure();
 		argument
 			>> ifprop.state
@@ -170,7 +170,7 @@ namespace libnutcommon {
 		return !(a == b);
 	}
 
-	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4UserConfig &data) {
+	QDBusArgument& operator<<(QDBusArgument& argument, const IPv4UserConfig& data) {
 		argument.beginStructure();
 		argument
 			<< data.ip
@@ -180,7 +180,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4UserConfig &data) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, IPv4UserConfig& data) {
 		argument.beginStructure();
 		argument
 			>> data.ip

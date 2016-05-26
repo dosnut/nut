@@ -2,7 +2,7 @@
 #include "enum.h"
 
 namespace libnutcommon {
-	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data) {
+	QDBusArgument& operator<<(QDBusArgument& argument, DeviceConfig const& data) {
 		argument.beginStructure();
 		argument
 			<< data.noAutoStart
@@ -17,7 +17,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, DeviceConfig& data) {
 		argument.beginStructure();
 		argument
 			>> data.noAutoStart
@@ -35,21 +35,21 @@ namespace libnutcommon {
 		return argument;
 	}
 
-	QDBusArgument& operator<< (QDBusArgument& argument, SelectResult selectResult) {
+	QDBusArgument& operator<<(QDBusArgument& argument, SelectResult selectResult) {
 		return dbusSerializeEnum(argument, selectResult);
 	}
-	const QDBusArgument& operator>> (const QDBusArgument& argument, SelectResult& selectResult) {
+	const QDBusArgument& operator>>(const QDBusArgument& argument, SelectResult& selectResult) {
 		return dbusUnserializeEnum(argument, selectResult);
 	}
 
-	QDBusArgument& operator<< (QDBusArgument& argument, SelectType selectType) {
+	QDBusArgument& operator<<(QDBusArgument& argument, SelectType selectType) {
 		return dbusSerializeEnum(argument, selectType);
 	}
-	const QDBusArgument& operator>> (const QDBusArgument& argument, SelectType& selectType) {
+	const QDBusArgument& operator>>(const QDBusArgument& argument, SelectType& selectType) {
 		return dbusUnserializeEnum(argument, selectType);
 	}
 
-	QDBusArgument &operator<< (QDBusArgument &argument, const SelectRule &data) {
+	QDBusArgument& operator<<(QDBusArgument& argument, SelectRule const& data) {
 		argument.beginStructure();
 		argument
 			<< data.invert
@@ -61,7 +61,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectRule &data) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, SelectRule& data) {
 		argument.beginStructure();
 		argument
 			>> data.invert
@@ -74,7 +74,7 @@ namespace libnutcommon {
 		return argument;
 	}
 
-	QDBusArgument &operator<< (QDBusArgument &argument, const SelectConfig &data) {
+	QDBusArgument& operator<<(QDBusArgument& argument, SelectConfig const& data) {
 		argument.beginStructure();
 		argument
 			<< data.filters
@@ -82,7 +82,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectConfig &data) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, SelectConfig& data) {
 		argument.beginStructure();
 		argument
 			>> data.filters
@@ -91,7 +91,7 @@ namespace libnutcommon {
 		return argument;
 	}
 
-	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentConfig &data) {
+	QDBusArgument& operator<<(QDBusArgument& argument, EnvironmentConfig const& data) {
 		argument.beginStructure();
 		argument
 			<< data.name
@@ -104,7 +104,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentConfig &data) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, EnvironmentConfig& data) {
 		argument.beginStructure();
 		argument
 			>> data.name
@@ -120,14 +120,14 @@ namespace libnutcommon {
 		return argument;
 	}
 
-	QDBusArgument &operator<< (QDBusArgument &argument, IPv4ConfigFlags flags) {
+	QDBusArgument& operator<<(QDBusArgument& argument, IPv4ConfigFlags flags) {
 		return dbusSerializeFlags(argument, flags);
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4ConfigFlags &flags) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, IPv4ConfigFlags& flags) {
 		return dbusUnserializeFlags(argument, flags);
 	}
 
-	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4Config &data) {
+	QDBusArgument& operator<<(QDBusArgument& argument, IPv4Config const& data) {
 		argument.beginStructure();
 		argument
 			<< data.flags
@@ -139,7 +139,7 @@ namespace libnutcommon {
 		argument.endStructure();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4Config &data) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, IPv4Config& data) {
 		argument.beginStructure();
 		argument
 			>> data.flags
@@ -152,13 +152,13 @@ namespace libnutcommon {
 		return argument;
 	}
 
-	bool DeviceNamePattern::operator<(const DeviceNamePattern &other) const {
+	bool DeviceNamePattern::operator<(const DeviceNamePattern& other) const {
 		return type < other.type || (type == other.type &&
 			pattern < other.pattern
 			);
 	}
 
-	bool DeviceNamePattern::match(QString name) const {
+	bool DeviceNamePattern::match(QString const& name) const {
 		switch (type) {
 		case Plain:
 			return pattern == name;
@@ -182,11 +182,11 @@ namespace libnutcommon {
 		return { "" };
 	}
 
-	std::shared_ptr<DeviceConfig> Config::create(const DeviceNamePattern& pattern) {
+	std::shared_ptr<DeviceConfig> Config::create(DeviceNamePattern const& pattern) {
 		return namedDeviceConfigs.emplace(pattern, std::make_shared<DeviceConfig>()).first->second;
 	}
 
-	std::shared_ptr<DeviceConfig> Config::lookup(QString deviceName) {
+	std::shared_ptr<DeviceConfig> Config::lookup(QString const& deviceName) {
 		for (auto const& ndc: namedDeviceConfigs) {
 			if (ndc.first.match(deviceName)) return ndc.second;
 		}
@@ -244,24 +244,24 @@ namespace libnutcommon {
 
 	// called by common.cpp: init()
 	void config_init() {
-		qRegisterMetaType< DeviceConfig >("libnutcommon::DeviceConfig");
-		qRegisterMetaType< SelectResult >("libnutcommon::SelectResult");
-		qRegisterMetaType< QVector< SelectResult > >("QVector<libnutcommon::SelectRule>");
-		qRegisterMetaType< SelectType >("libnutcommon::SelectType");
-		qRegisterMetaType< SelectRule >("libnutcommon::SelectRule");
-		qRegisterMetaType< SelectConfig >("libnutcommon::SelectConfig");
-		qRegisterMetaType< EnvironmentConfig >("libnutcommon::EnvironmentConfig");
-		qRegisterMetaType< IPv4ConfigFlags >("libnutcommon::IPv4ConfigFlags");
-		qRegisterMetaType< IPv4Config >("libnutcommon::IPv4Config");
+		qRegisterMetaType<DeviceConfig>("libnutcommon::DeviceConfig");
+		qRegisterMetaType<SelectResult>("libnutcommon::SelectResult");
+		qRegisterMetaType<QVector<SelectResult>>("QVector<libnutcommon::SelectRule>");
+		qRegisterMetaType<SelectType>("libnutcommon::SelectType");
+		qRegisterMetaType<SelectRule>("libnutcommon::SelectRule");
+		qRegisterMetaType<SelectConfig>("libnutcommon::SelectConfig");
+		qRegisterMetaType<EnvironmentConfig>("libnutcommon::EnvironmentConfig");
+		qRegisterMetaType<IPv4ConfigFlags>("libnutcommon::IPv4ConfigFlags");
+		qRegisterMetaType<IPv4Config>("libnutcommon::IPv4Config");
 
-		qDBusRegisterMetaType< DeviceConfig >();
-		qDBusRegisterMetaType< SelectResult >();
-		qDBusRegisterMetaType< QVector< SelectResult > >();
-		qDBusRegisterMetaType< SelectType >();
-		qDBusRegisterMetaType< SelectRule >();
-		qDBusRegisterMetaType< SelectConfig >();
-		qDBusRegisterMetaType< EnvironmentConfig >();
-		qDBusRegisterMetaType< IPv4ConfigFlags >();
-		qDBusRegisterMetaType< IPv4Config >();
+		qDBusRegisterMetaType<DeviceConfig>();
+		qDBusRegisterMetaType<SelectResult>();
+		qDBusRegisterMetaType<QVector<SelectResult>>();
+		qDBusRegisterMetaType<SelectType>();
+		qDBusRegisterMetaType<SelectRule>();
+		qDBusRegisterMetaType<SelectConfig>();
+		qDBusRegisterMetaType<EnvironmentConfig>();
+		qDBusRegisterMetaType<IPv4ConfigFlags>();
+		qDBusRegisterMetaType<IPv4Config>();
 	}
 }

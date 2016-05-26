@@ -9,11 +9,11 @@ extern "C" {
 #include <QtEndian>
 
 namespace libnutcommon {
-	QDBusArgument &operator<< (QDBusArgument &argument, const MacAddress &data) {
+	QDBusArgument& operator<<(QDBusArgument& argument, MacAddress const& data) {
 		argument << data.toString();
 		return argument;
 	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, MacAddress &data) {
+	QDBusArgument const& operator>>(QDBusArgument const& argument, MacAddress& data) {
 		QString addr;
 		argument >> addr;
 		data = MacAddress(addr);
@@ -30,7 +30,7 @@ namespace libnutcommon {
 		return -1;
 	}
 
-	static char* hex2quint8(char* msg, quint8 &val) {
+	static char* hex2quint8(char* msg, quint8& val) {
 		int i;
 		val = 0;
 		if (!msg || !*msg) return msg;
@@ -48,7 +48,7 @@ namespace libnutcommon {
 
 	MacAddress const MacAddress::Zero { };
 
-	MacAddress::MacAddress(const QString &str) {
+	MacAddress::MacAddress(QString const& str) {
 		data = Zero.data;
 		if (str == QLatin1String("any") || str.isEmpty()) {
 			return;
@@ -77,26 +77,26 @@ namespace libnutcommon {
 //		qDebug() << QString("-> %1").arg(toString());
 	}
 
-	MacAddress::MacAddress(const quint8 *d) {
+	MacAddress::MacAddress(quint8 const* d) {
 		if (d == 0) {
 			MacAddress();
 		} else {
 			memcpy(data.bytes, d, sizeof(data.bytes));
 		}
 	}
-	MacAddress::MacAddress(const ether_addr* eth) {
+	MacAddress::MacAddress(ether_addr const* eth) {
 		memcpy(data.bytes, eth->ether_addr_octet, sizeof(data));
 	}
 
-	bool MacAddress::operator==(const MacAddress &b) const {
+	bool MacAddress::operator==(MacAddress const& b) const {
 		return 0 == std::memcmp(&data, &b.data, sizeof(data));
 	}
 
-	bool MacAddress::operator!=(const MacAddress &b) const {
+	bool MacAddress::operator!=(MacAddress const& b) const {
 		return 0 != std::memcmp(&data, &b.data, sizeof(data));
 	}
 
-	bool MacAddress::operator<(const MacAddress &b) const {
+	bool MacAddress::operator<(MacAddress const& b) const {
 		return 0 < std::memcmp(&data, &b.data, sizeof(data));
 	}
 	QString MacAddress::toString() const {
@@ -118,7 +118,7 @@ namespace libnutcommon {
 		data = Zero.data;
 	}
 
-	uint qHash(const MacAddress& key) {
+	uint qHash(MacAddress const& key) {
 		auto n = qFromBigEndian<quint64>(key.data.bytes);
 		return ::qHash(n);
 	}

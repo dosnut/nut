@@ -1,5 +1,5 @@
-#ifndef NUTSTIMECLS_H
-#define NUTSTIMECLS_H
+#ifndef _NUTS_TIMECLS_H
+#define _NUTS_TIMECLS_H
 
 #pragma once
 
@@ -70,4 +70,4 @@ namespace nuts {
 	};
 }
 
-#endif
+#endif /* _NUTS_TIMECLS_H */

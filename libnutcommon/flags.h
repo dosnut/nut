@@ -6,6 +6,8 @@
 #ifndef NUT_COMMON_FLAGS_H
 #define NUT_COMMON_FLAGS_H
 
+#pragma once
+
 #include <type_traits>
 
 namespace libnutcommon {

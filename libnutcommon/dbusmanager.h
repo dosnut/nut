@@ -1,6 +1,8 @@
 #ifndef NUT_COMMON_DBUSMANAGER_H
 #define NUT_COMMON_DBUSMANAGER_H
 
+#pragma once
+
 #include <QObject>
 #include <QDBusConnection>
 #include <QDBusAbstractAdaptor>
@@ -34,7 +36,7 @@ namespace libnutcommon {
 	 * various init systems don't have a pid file anymore, also there is no
 	 * longer a standard location.
 	 */
-	class DBusManager: public QObject {
+	class DBusManager final : public QObject {
 		Q_OBJECT
 	private:
 		std::unique_ptr<QDBusConnection> m_connection;
@@ -57,7 +59,7 @@ namespace libnutcommon {
 		void timerEvent(QTimerEvent* event) override;
 
 	public:
-		DBusManager(std::function<QDBusConnection()> createConnection = createDefaultDBusConnection, int checkMsec = 10000, int retryMsec = 1000, QObject* parent = nullptr);
+		explicit DBusManager(std::function<QDBusConnection()> createConnection = createDefaultDBusConnection, int checkMsec = 10000, int retryMsec = 1000, QObject* parent = nullptr);
 		~DBusManager();
 
 		/* if there is no connection this is just null.
@@ -126,7 +128,7 @@ namespace libnutcommon {
 		void unregisterAll();
 
 	public:
-		DBusAbstractAdapater(QDBusObjectPath path, QObject* parent);
+		explicit DBusAbstractAdapater(QDBusObjectPath path, QObject* parent);
 		~DBusAbstractAdapater();
 
 		QDBusObjectPath const& getPath() const { return m_path; }

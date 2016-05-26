@@ -6,6 +6,8 @@
 #ifndef NUT_COMMON_COMMON_H
 #define NUT_COMMON_COMMON_H
 
+#pragma once
+
 // If you change this, change it in nuts/dbus.h too (as moc does not expand macros).
 #define NUT_DBUS_URL "de.unistuttgart.nut"
 
@@ -25,23 +27,23 @@ namespace libnutcommon {
 }
 
 #if QT_VERSION < 0x040500
-static inline bool operator== (const QDBusObjectPath &p1, const QDBusObjectPath &p2){
+static inline bool operator==(QDBusObjectPath const& p1, QDBusObjectPath const& p2){
 	return (p1.path() == p2.path());
 }
 
-static inline uint qHash(const QDBusObjectPath &key) {
+static inline uint qHash(QDBusObjectPath const& key) {
 	return qHash(key.path());
 }
 #endif
 
-QDBusArgument &operator<< (QDBusArgument &argument, const QHostAddress &data);
-const QDBusArgument &operator>> (const QDBusArgument &argument, QHostAddress &data);
+QDBusArgument& operator<<(QDBusArgument& argument, QHostAddress const& data);
+QDBusArgument const& operator>>(QDBusArgument const& argument, QHostAddress& data);
 
 Q_DECLARE_METATYPE(QHostAddress)
 Q_DECLARE_METATYPE(QList<QHostAddress>)
 
 Q_DECLARE_METATYPE(QVector<quint32>)
-Q_DECLARE_METATYPE(QVector< QVector<quint32> >)
+Q_DECLARE_METATYPE(QVector<QVector<quint32>>)
 
 Q_DECLARE_METATYPE(QList<qint32>)
 

@@ -1,14 +1,3 @@
-//
-// C++ Implementation: random
-//
-// Description:
-//
-//
-// Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #include "random.h"
 #include <stdlib.h>
 #include <unistd.h>

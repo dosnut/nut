@@ -1,14 +1,3 @@
-//
-// C++ Implementation: qobject_timer
-//
-// Description:
-//
-//
-// Author: Stefan Bühler <stbuehler@web.de>, (C) 2015
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #include "qobject_timer.h"
 
 #include <QTimerEvent>

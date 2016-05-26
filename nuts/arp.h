@@ -1,16 +1,5 @@
-//
-// C++ Interface: arp
-//
-// Description:
-//
-//
-// Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
-#ifndef NUTSARP_H
-#define NUTSARP_H
+#ifndef _NUTS_ARP_H
+#define _NUTS_ARP_H
 
 #pragma once
 
@@ -41,23 +30,23 @@ namespace nuts {
 
 namespace nuts {
 	// same values as in protocol itself
-	typedef enum ArpOperation {
-		ARP_REQUEST = 1,
-		ARP_REPLY = 2
-	} ArpOperation;
+	enum class ArpOperation : quint16 {
+		REQUEST = 1,
+		REPLY = 2,
+	};
 
 	namespace ARPConst {
 		// Zeroconf consts, RFC 3927, section 9.
-		const int PROBE_WAIT = 1;
-		const int PROBE_NUM  = 3;
-		const int PROBE_MIN  = 1;
-		const int PROBE_MAX  = 3;
-		const int ANNOUNCE_WAIT = 2;
-		const int ANNOUNCE_NUM  = 2;
-		const int ANNOUNCE_INTERVAL = 2;
-		const int MAX_CONFLICTS = 10;
-		const int RATE_LIMIT_INTERVAL = 60;
-		const int DEFEND_INTERVAL = 10;
+		int const PROBE_WAIT = 1;
+		int const PROBE_NUM  = 3;
+		int const PROBE_MIN  = 1;
+		int const PROBE_MAX  = 3;
+		int const ANNOUNCE_WAIT = 2;
+		int const ANNOUNCE_NUM  = 2;
+		int const ANNOUNCE_INTERVAL = 2;
+		int const MAX_CONFLICTS = 10;
+		int const RATE_LIMIT_INTERVAL = 60;
+		int const DEFEND_INTERVAL = 10;
 	}
 
 	/**
@@ -71,179 +60,191 @@ namespace nuts {
 		 - call start
 		 - probe ips
 	*/
-	class ARP : public QObject {
+	class ARP final : public QObject {
 		Q_OBJECT
-		private:
-			Device *m_device;
-			int m_arp_socket;
-			QSocketNotifier *m_arp_read_nf, *m_arp_write_nf;
-			QLinkedList< QByteArray > m_arp_write_buf;
+	public:
+		explicit ARP(Device* device);
+		~ARP();
 
-			int m_timer_id;
-			QLinkedList<ARPTimer*> m_arp_timers;
+		/**
+			Prepare a request for an IPv4 address.
+			source_mac is set to the device mac, target_mac = 0.
+		*/
+		ARPRequest* requestIPv4(QHostAddress const& source_addr, QHostAddress const& target_addr);
 
-			QHash<QHostAddress, ARPProbe*> m_probes;
-			QHash<QHostAddress, ARPRequest*> m_requests;
-			QHash<QHostAddress, ARPWatch*> m_watches;
+		/**
+			Prepare a probe for an IPv4 address. (Needed for zeroconf)
+		*/
+		ARPProbe* probeIPv4(QHostAddress const& addr);
 
-		public:
-			ARP(Device* device);
-			virtual ~ARP();
+		ARPAnnounce* announceIPv4(QHostAddress const& addr);
 
-			/**
-				Prepare a request for an IPv4 address.
-				source_mac is set to the device mac, target_mac = 0.
-			*/
-			ARPRequest* requestIPv4(const QHostAddress &source_addr, const QHostAddress &target_addr);
+		ARPWatch* watchIPv4(QHostAddress const& addr);
 
-			/**
-				Prepare a probe for an IPv4 address. (Needed for zeroconf)
-			*/
-			ARPProbe* probeIPv4(const QHostAddress &addr);
+	private slots:
+		void arpReadNF();
+		void arpWriteNF();
 
-			ARPAnnounce* announceIPv4(const QHostAddress &addr);
+	private:
+		friend class ARPRequest;
+		friend class ARPProbe;
+		friend class ARPAnnounce;
+		friend class ARPWatch;
 
-			ARPWatch* watchIPv4(const QHostAddress &addr);
+		void arpWrite(QByteArray const& buf);
 
-		private slots:
-			void arpReadNF();
-			void arpWriteNF();
+		void recalcTimer();
+		void arpTimerAdd(ARPTimer* t);
+		void arpTimerDelete(ARPTimer* t);
 
-		private:
-			friend class ARPRequest;
-			friend class ARPProbe;
-			friend class ARPAnnounce;
-			friend class ARPWatch;
+		void timerEvent(QTimerEvent* event) override;
 
-			void arpWrite(const QByteArray &buf);
+		friend class Device;
+		bool start();
+		void stop();
 
-			void recalcTimer();
-			void arpTimerAdd(ARPTimer *t);
-			void arpTimerDelete(ARPTimer *t);
+	private: /* vars */
+		Device* m_device = nullptr;
+		int m_arp_socket = -1;
+		QSocketNotifier* m_arp_read_nf = nullptr;
+		QSocketNotifier* m_arp_write_nf = nullptr;
+		QLinkedList<QByteArray> m_arp_write_buf;
 
-			void timerEvent(QTimerEvent *event) override;
+		int m_timer_id = 0;
+		QLinkedList<ARPTimer*> m_arp_timers;
 
-			friend class Device;
-			bool start();
-			void stop();
+		QHash<QHostAddress, ARPProbe*> m_probes;
+		QHash<QHostAddress, ARPRequest*> m_requests;
+		QHash<QHostAddress, ARPWatch*> m_watches;
 	};
 
-	class ARPWatch : public QObject {
+	class ARPWatch final : public QObject {
 		Q_OBJECT
-		protected:
-			friend class ARP;
+	protected:
+		friend class ARP;
 
-			ARPWatch(ARP *arp, const QHostAddress &ip) : m_arp(arp), m_ip(ip) { }
+		explicit ARPWatch(ARP* arp, QHostAddress const& ip)
+		: m_arp(arp), m_ip(ip) { }
 
-			ARP *m_arp;
-			QHostAddress m_ip;
+		// got ARP Packet which resolves watched ip to mac
+		void gotPacket(libnutcommon::MacAddress const& mac);
 
-			// got ARP Packet which resolves watched ip to mac
-			void gotPacket(const libnutcommon::MacAddress &mac);
+	public:
+		~ARPWatch();
 
-		public:
-			virtual ~ARPWatch();
+	signals:
+		void conflict(QHostAddress ip, libnutcommon::MacAddress mac);
 
-		signals:
-			void conflict(QHostAddress ip, libnutcommon::MacAddress mac);
+	protected: /* vars */
+		ARP* m_arp = nullptr;
+		QHostAddress m_ip;
 	};
 
 	class ARPTimer : public QObject {
 		Q_OBJECT
-		protected:
-			friend class ARP;
+	protected:
+		friend class ARP;
 
-			ARPTimer(ARP *arp);
-			ARPTimer(ARP *arp, const Time &firstTimeout);
+		explicit ARPTimer(ARP* arp);
+		explicit ARPTimer(ARP* arp, Time const& firstTimeout);
 
-			ARP *m_arp;
-			Time m_nextTimeout;
+		virtual bool timeEvent() = 0;
 
-			virtual bool timeEvent() = 0;
+		bool operator<(ARPTimer const& t) const {
+			return m_nextTimeout < t.m_nextTimeout;
+		}
 
-			bool operator <(const ARPTimer &t) const {
-				return m_nextTimeout < t.m_nextTimeout;
-			}
+	protected: /* vars */
+		ARP* m_arp = nullptr;
+		Time m_nextTimeout;
 	};
 
-	class ARPRequest : public ARPTimer {
+	class ARPRequest final : public ARPTimer {
 		Q_OBJECT
-		public:
-			virtual ~ARPRequest();
-		protected:
-			friend class ARP;
+	public:
+		~ARPRequest();
 
-			QHostAddress m_sourceip, m_targetip;
-			int m_remaining_trys;
-			bool m_finished;
+	private:
+		friend class ARP;
 
-			ARPRequest(ARP *arp, const QHostAddress &sourceip, const QHostAddress &targetip);
+		explicit ARPRequest(ARP* arp, QHostAddress const& sourceip, QHostAddress const& targetip);
 
-			virtual bool timeEvent();
-			// got ARP Packet which resolves m_targetip to mac
-			void gotPacket(const libnutcommon::MacAddress &mac);
+		bool timeEvent() override;
 
-		private:
-			void finish();
+		// got ARP Packet which resolves m_targetip to mac
+		void gotPacket(libnutcommon::MacAddress const& mac);
 
-		signals:
-			void foundMac(libnutcommon::MacAddress mac, QHostAddress ip);
-			void timeout(QHostAddress ip);
+		void finish();
+
+	signals:
+		void foundMac(libnutcommon::MacAddress mac, QHostAddress ip);
+		void timeout(QHostAddress ip);
+
+	private: /* vars */
+		QHostAddress m_sourceip, m_targetip;
+		int m_remaining_trys = ARPConst::PROBE_NUM;
+		bool m_finished = false;
 	};
 
-	class ARPProbe : public ARPTimer {
-		Q_OBJECT
-		public:
-			typedef enum ARPProbeState { PROBING, RESERVING, CONFLICT } ARPProbeState;
-
-			virtual ~ARPProbe();
-			void setReserve(bool reserve);
-			bool getReserve() { return m_reserve; }
-			ARPProbeState getState() { return m_state; }
-
-		protected:
-			friend class ARP;
-
-			QHostAddress m_ip;
-			int m_remaining_trys;
-			bool m_finished, m_reserve;
-			ARPProbeState m_state;
-
-			ARPProbe(ARP *arp, const QHostAddress &ip);
-
-			// got ARP Packet which resolves m_ip to mac
-			void gotPacket(const libnutcommon::MacAddress &mac);
-			// got ARP Probe from mac which probes for m_ip
-			void gotProbe(const libnutcommon::MacAddress &mac);
-
-			virtual bool timeEvent();
-
-		private:
-			void finish();
-
-		signals:
-			void conflict(QHostAddress ip, libnutcommon::MacAddress mac);
-			void ready(QHostAddress ip);
+	enum class ARPProbeState {
+		PROBING,
+		RESERVING,
+		CONFLICT,
 	};
 
-	class ARPAnnounce : public ARPTimer {
+	class ARPProbe final : public ARPTimer {
 		Q_OBJECT
-		public:
-			virtual ~ARPAnnounce();
+	public:
+		~ARPProbe();
+		void setReserve(bool reserve);
+		bool getReserve() { return m_reserve; }
+		ARPProbeState getState() { return m_state; }
 
-		protected:
-			friend class ARP;
+	private:
+		friend class ARP;
 
-			QHostAddress m_ip;
-			int m_remaining_announces;
+		explicit ARPProbe(ARP *arp, QHostAddress const& ip);
 
-			ARPAnnounce(ARP *arp, const QHostAddress &ip);
+		// got ARP Packet which resolves m_ip to mac
+		void gotPacket(libnutcommon::MacAddress const& mac);
+		// got ARP Probe from mac which probes for m_ip
+		void gotProbe(libnutcommon::MacAddress const& mac);
 
-			virtual bool timeEvent();
+		bool timeEvent() override;
 
-		signals:
-			void ready(QHostAddress ip);
+		void finish();
+
+	signals:
+		void conflict(QHostAddress ip, libnutcommon::MacAddress mac);
+		void ready(QHostAddress ip);
+
+	private: /* vars */
+		QHostAddress m_ip;
+		int m_remaining_trys = ARPConst::PROBE_NUM;
+		bool m_finished = false;
+		bool m_reserve = false;
+		ARPProbeState m_state = ARPProbeState::PROBING;
+	};
+
+	class ARPAnnounce final : public ARPTimer {
+		Q_OBJECT
+	public:
+		~ARPAnnounce();
+
+	private:
+		friend class ARP;
+
+		explicit ARPAnnounce(ARP* arp, QHostAddress const& ip);
+
+		bool timeEvent() override;
+
+	signals:
+		void ready(QHostAddress ip);
+
+	private: /* vars */
+		QHostAddress m_ip;
+		int m_remaining_announces = ARPConst::ANNOUNCE_NUM;
 	};
 }
 
-#endif
+#endif /* _NUTS_ARP_H */

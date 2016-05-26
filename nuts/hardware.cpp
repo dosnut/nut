@@ -1,15 +1,3 @@
-//
-// C++ Implementation: hardware
-//
-// Description:
-//
-//
-// Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
-
 #include "hardware.h"
 #include "exception.h"
 #include "log.h"
@@ -55,7 +43,7 @@ namespace nuts {
 		}
 		fcntl(netlink_fd, F_SETFD, FD_CLOEXEC);
 		fcntl(ethtool_fd, F_SETFD, FD_CLOEXEC);
-		QSocketNotifier *nln = new QSocketNotifier(netlink_fd, QSocketNotifier::Read, this);
+		QSocketNotifier* nln = new QSocketNotifier(netlink_fd, QSocketNotifier::Read, this);
 		connect(nln, &QSocketNotifier::activated, this, &HardwareManager::read_netlinkmsgs);
 	}
 
@@ -81,7 +69,7 @@ namespace nuts {
 		}
 		return true;
 	}
-	bool HardwareManager::controlOn(const QString &ifName, bool force) {
+	bool HardwareManager::controlOn(QString const& ifName, bool force) {
 		int ifIndex = ifName2Index(ifName);
 		if (ifIndex < 0) return false;
 		if (!ifup(ifName, force))
@@ -92,7 +80,7 @@ namespace nuts {
 //		log << "activated interface " << ifIndex << endl;
 		return true;
 	}
-	bool HardwareManager::controlOff(const QString &ifName) {
+	bool HardwareManager::controlOff(QString const& ifName) {
 		int ifIndex = ifName2Index(ifName);
 		if (ifIndex < 0) return false;
 		if (ifIndex < ifStates.size() && ifStates[ifIndex].active) {
@@ -145,12 +133,12 @@ cleanup:
 		close(ethtool_fd);
 	}
 
-	bool HardwareManager::ifup(const QString &ifname, bool force) {
+	bool HardwareManager::ifup(QString const& ifname, bool force) {
 /*		nl_cache_update(nlh, nlcache);
-		struct rtnl_link *request = rtnl_link_alloc();
+		struct rtnl_link* request = rtnl_link_alloc();
 		rtnl_link_set_flags(request, rtnl_link_str2flags("up"));
 		QByteArray buf = ifname.toUtf8();
-		struct rtnl_link *old = rtnl_link_get_by_name(nlcache, buf.constData());
+		struct rtnl_link* old = rtnl_link_get_by_name(nlcache, buf.constData());
 		rtnl_link_change(nlh, old, request, 0);
 		rtnl_link_put(old);
 		rtnl_link_put(request);
@@ -166,7 +154,7 @@ cleanup:
 		}
 		if (ifr.ifr_flags & IFF_UP) {
 			if (!force) return false;
-	        // "restart" interface to get carrier event
+			// "restart" interface to get carrier event
 			ifr.ifr_flags &= ~IFF_UP;
 			if (ioctl(ethtool_fd, SIOCSIFFLAGS, &ifr) < 0) {
 				err << QString("Couldn't set flags for interface '%1'").arg(ifname) << endl;
@@ -180,7 +168,7 @@ cleanup:
 		}
 		return true;
 	}
-	bool HardwareManager::ifdown(const QString &ifname) {
+	bool HardwareManager::ifdown(QString const& ifname) {
 		struct ifreq ifr;
 		if (!ifreq_init(ifr, ifname)) {
 			err << QString("Interface name too long") << endl;
@@ -239,7 +227,7 @@ cleanup:
 		return ifNames;
 	}
 
-	int HardwareManager::ifName2Index(const QString &ifName) {
+	int HardwareManager::ifName2Index(QString const& ifName) {
 		struct ifreq ifr;
 		if (!ifreq_init(ifr, ifName)) {
 			err << QString("Interface name too long") << endl;
@@ -252,11 +240,11 @@ cleanup:
 		return ifr.ifr_ifindex;
 	}
 
-	struct nl_sock *HardwareManager::getNLHandle() {
+	struct nl_sock* HardwareManager::getNLHandle() {
 		return nlh;
 	}
 
-	libnutcommon::MacAddress HardwareManager::getMacAddress(const QString &ifName) {
+	libnutcommon::MacAddress HardwareManager::getMacAddress(QString const& ifName) {
 		struct ifreq ifr;
 		if (!ifreq_init(ifr, ifName)) {
 			err << QString("Interface name too long") << endl;
@@ -269,30 +257,30 @@ cleanup:
 		return libnutcommon::MacAddress((quint8*) ifr.ifr_hwaddr.sa_data);
 	}
 
-	bool HardwareManager::ifreq_init(struct ifreq &ifr, const QString &ifname) {
+	bool HardwareManager::ifreq_init(struct ifreq& ifr, QString const& ifname) {
 		QByteArray buf = ifname.toUtf8();
 		if (buf.size() >= IFNAMSIZ) return false;
 		ifreq_init(ifr);
 		strncpy (ifr.ifr_name, buf.constData(), buf.size());
 		return true;
 	}
-	void HardwareManager::ifreq_init(struct ifreq &ifr) {
-		memset((char*) &ifr, 0, sizeof(ifr));
+	void HardwareManager::ifreq_init(struct ifreq& ifr) {
+		memset(reinterpret_cast<char*>(&ifr), 0, sizeof(ifr));
 	}
 
 	void HardwareManager::read_netlinkmsgs() {
 		struct sockaddr_nl peer;
-		unsigned char *msg;
+		unsigned char* msg;
 		int n, msgsize;
-		struct nlmsghdr *hdr;
+		struct nlmsghdr* hdr;
 
 		msgsize = n = nl_recv(nlh, &peer, &msg, 0);
 		for (hdr = (struct nlmsghdr*) msg; nlmsg_ok(hdr, n); hdr = (struct nlmsghdr*) nlmsg_next(hdr, &n)) {
 //			log << QString("Message type 0x%1").arg(hdr->nlmsg_type, 0, 16) << endl;
 			switch (hdr->nlmsg_type) {
 				case RTM_NEWLINK: {
-					struct ifinfomsg *ifm = (struct ifinfomsg*) nlmsg_data(hdr);
-					struct nlattr *tb[IFLA_MAX+1];
+					struct ifinfomsg* ifm = (struct ifinfomsg*) nlmsg_data(hdr);
+					struct nlattr* tb[IFLA_MAX+1];
 					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
 						break;
 					}
@@ -320,13 +308,13 @@ cleanup:
 					}
 					} break;
 				case RTM_DELLINK: {
-					struct ifinfomsg *ifm = (struct ifinfomsg*) nlmsg_data(hdr);
-					struct nlattr *tb[IFLA_MAX+1];
+					struct ifinfomsg* ifm = (struct ifinfomsg*) nlmsg_data(hdr);
+					struct nlattr* tb[IFLA_MAX+1];
 					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
 						break;
 					}
 					int ifindex = ifm->ifi_index;
-					struct nlattr *nla_ifname = tb[IFLA_IFNAME];
+					struct nlattr* nla_ifname = tb[IFLA_IFNAME];
 					QString ifname;
 					if (nla_ifname)
 						ifname = QString::fromUtf8((char*) nla_data(nla_ifname), nla_len(nla_ifname)-1);
@@ -353,11 +341,11 @@ cleanup:
 		return ifStates[ifIndex].active;
 	}
 
-	static void iwreq_init(struct iwreq &iwr) {
-		memset((char*) &iwr, 0, sizeof(iwr));
+	static void iwreq_init(struct iwreq& iwr) {
+		memset(reinterpret_cast<char*>(&iwr), 0, sizeof(iwr));
 	}
 
-	static bool iwreq_init(struct iwreq &iwr, const QString &ifname) {
+	static bool iwreq_init(struct iwreq& iwr, QString const& ifname) {
 		QByteArray buf = ifname.toUtf8();
 		if (buf.size() >= IFNAMSIZ) return false;
 		iwreq_init(iwr);
@@ -365,7 +353,7 @@ cleanup:
 		return true;
 	}
 
-	bool HardwareManager::ifExists(const QString &ifName) {
+	bool HardwareManager::ifExists(QString const& ifName) {
 		struct ifreq ifr;
 		if (!ifreq_init(ifr, ifName)) {
 			err << QString("Interface name too long") << endl;
@@ -381,14 +369,14 @@ cleanup:
 		return true;
 	}
 
-	bool HardwareManager::hasWLAN(const QString &ifName) {
+	bool HardwareManager::hasWLAN(QString const& ifName) {
 		struct iwreq iwr;
 		iwreq_init(iwr, ifName);
 		if (ioctl(ethtool_fd, SIOCGIWNAME, &iwr) < 0) return false;
 		return true;
 	}
 
-	bool HardwareManager::getEssid(const QString &ifName, QString &essid) {
+	bool HardwareManager::getEssid(QString const& ifName, QString& essid) {
 		essid = "";
 		struct iwreq iwr;
 		iwreq_init(iwr, ifName);

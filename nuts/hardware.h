@@ -1,6 +1,7 @@
-
 #ifndef _NUTS_HARDWARE_H
 #define _NUTS_HARDWARE_H
+
+#pragma once
 
 #include <QObject>
 #include <QString>
@@ -16,67 +17,67 @@ extern "C" {
 }
 
 namespace nuts {
-	class HardwareManager;
-}
-
-namespace nuts {
-	class HardwareManager : public QObject {
+	class HardwareManager final : public QObject {
 		Q_OBJECT
-		private:
-			int netlink_fd{-1};
-			int ethtool_fd{-1};
-			struct ::nl_sock *nlh{nullptr};
-			struct ::nl_cache *nlcache{nullptr};
-			struct ifstate {
-				bool active, carrier, exists;
-				ifstate() : active(false), carrier(false), exists(false) { }
-				ifstate(bool active) : active(active), carrier(false), exists(true) { }
-			};
-			QVector<struct ifstate> ifStates;
+	public:
+		explicit HardwareManager();
+		~HardwareManager();
 
-			bool init_netlink();
-			void free_netlink();
-			bool init_ethtool();
-			void free_ethtool();
+		bool controlOn(int ifIndex, bool force = false);
+		bool controlOff(int ifIndex);
+		bool controlOn(QString const& ifName, bool force = false);
+		bool controlOff(QString const& ifName);
 
-			bool ifup(const QString &ifname, bool force = false);
-			bool ifdown(const QString &ifname);
+		QString ifIndex2Name(int ifIndex);
+		QList<QString> get_ifNames();
+		int ifName2Index(QString const& ifName);
 
-			bool isControlled(int ifIndex);
+		struct ::nl_sock* getNLHandle();
 
-			bool ifreq_init(struct ifreq &ifr, const QString &ifname);
-			void ifreq_init(struct ifreq &ifr);
+		libnutcommon::MacAddress getMacAddress(QString const& ifName);
 
-		private slots:
-			void read_netlinkmsgs();
-		public:
-			HardwareManager();
-			virtual ~HardwareManager();
+		bool ifExists(QString const& ifName);
+		bool hasWLAN(QString const& ifName);
+		bool getEssid(QString const& ifName, QString& essid);
 
-			bool controlOn(int ifIndex, bool force = false);
-			bool controlOff(int ifIndex);
-			bool controlOn(const QString &ifName, bool force = false);
-			bool controlOff(const QString &ifName);
+	signals:
+		void gotCarrier(QString const& ifName, int ifIndex, QString const& essid);
+		void lostCarrier(QString const& ifName);
 
-			QString ifIndex2Name(int ifIndex);
-			QList<QString> get_ifNames();
-			int ifName2Index(const QString &ifName);
+		void newDevice(QString const& ifName, int ifIndex);
+		void delDevice(QString const& ifName);
 
-			struct ::nl_sock *getNLHandle();
+	private slots:
+		void read_netlinkmsgs();
 
-			libnutcommon::MacAddress getMacAddress(const QString &ifName);
+	private:
+		bool init_netlink();
+		void free_netlink();
+		bool init_ethtool();
+		void free_ethtool();
 
-			bool ifExists(const QString &ifName);
-			bool hasWLAN(const QString &ifName);
-			bool getEssid(const QString &ifName, QString &essid);
+		bool ifup(QString const& ifname, bool force = false);
+		bool ifdown(QString const& ifname);
 
-		signals:
-			void gotCarrier(const QString &ifName, int ifIndex, const QString &essid);
-			void lostCarrier(const QString &ifName);
+		bool isControlled(int ifIndex);
 
-			void newDevice(const QString &ifName, int ifIndex);
-			void delDevice(const QString &ifName);
+		bool ifreq_init(struct ifreq& ifr, QString const& ifname);
+		void ifreq_init(struct ifreq& ifr);
+
+	private: /* vars */
+		int netlink_fd{-1};
+		int ethtool_fd{-1};
+		struct ::nl_sock* nlh{nullptr};
+		struct ::nl_cache* nlcache{nullptr};
+		struct ifstate {
+			bool active{false};
+			bool carrier{false};
+			bool exists{false};
+			explicit ifstate() = default;
+			explicit ifstate(bool active) : active(active), exists(true) { }
+		};
+		QVector<struct ifstate> ifStates;
 	};
 }
 
-#endif
+#endif /* _NUTS_HARDWARE_H */

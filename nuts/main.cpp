@@ -23,7 +23,6 @@ namespace nuts {
 // TODO: log when dbus connection got lost
 //	log << "dbus has been stopped, please restart it";
 
-
 		try {
 			dbusManager.reset(new libnutcommon::DBusManager(libnutcommon::createDefaultDBusConnection));
 			sighandler.reset(new SigHandler(/* quitOnSignal = */ false));
@@ -40,14 +39,14 @@ namespace nuts {
 				QCoreApplication::exit();
 			});
 
-		} catch (Exception &e) {
+		} catch (Exception& e) {
 			err << "Initialize failed:" << endl
 				<< "    " << e.msg() << endl;
 			return -1;
 		}
 		try {
 			app.exec();
-		} catch (Exception &e) {
+		} catch (Exception& e) {
 			err << e.msg() << endl;
 			return -2;
 		}
@@ -56,7 +55,7 @@ namespace nuts {
 			devManager.reset();
 			sighandler.reset();
 			dbusManager.reset();
-		} catch (Exception &e) {
+		} catch (Exception& e) {
 			err << "Cleanup failed:" << endl
 					<< "    " << e.msg() << endl;
 			return -3;

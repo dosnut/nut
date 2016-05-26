@@ -1,14 +1,3 @@
-//
-// C++ Implementation: events
-//
-// Description:
-//
-//
-// Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
 #include "events.h"
 
 #include "processmanager.h"
@@ -21,9 +10,6 @@ namespace nuts {
 	: m_processManager(processManager) {
 	}
 
-	Events::~Events() {
-	}
-
 	void Events::start(QProcessEnvironment const& environment, QString const& event, QString const& device, QString const& env, int iface) {
 		QStringList args;
 		args << event << device;
@@ -34,22 +20,22 @@ namespace nuts {
 	}
 
 	namespace {
-		void setupEnvironment(QProcessEnvironment &environment) {
+		void setupEnvironment(QProcessEnvironment& environment) {
 			environment = QProcessEnvironment::systemEnvironment();
 		}
 
-		void setupEnvironment(QProcessEnvironment &environment, Device *dev) {
+		void setupEnvironment(QProcessEnvironment& environment, Device* dev) {
 			environment.insert("NUT_DEVICE", dev->getName());
 			environment.insert("NUT_HAS_WLAN", QString::number(dev->isAir()));
 			environment.insert("NUT_ESSID", dev->getEssid());
 		}
 
-		void setupEnvironment(QProcessEnvironment &environment, Environment *env) {
+		void setupEnvironment(QProcessEnvironment& environment, Environment* env) {
 			environment.insert("NUT_ENVIRONMENT",env->getName());
 			environment.insert("NUT_ENVIRONMENT_INDEX", QString::number(env->getID()));
 		}
 
-		void setupEnvironment(QProcessEnvironment &environment, Interface_IPv4* iface) {
+		void setupEnvironment(QProcessEnvironment& environment, Interface_IPv4* iface) {
 			environment.insert("NUT_IP", iface->getIP().toString());
 			environment.insert("NUT_NETMASK", iface->getNetmask().toString());
 			environment.insert("NUT_LOCALDOMAIN", iface->getLocalDomain());
@@ -63,13 +49,13 @@ namespace nuts {
 		}
 	}
 
-	void Events::deviceAdded(QString devName, Device *dev) {
+	void Events::deviceAdded(QString devName, Device* dev) {
 		QProcessEnvironment e;
 		setupEnvironment(e);
 		setupEnvironment(e, dev);
 		start(e, "deviceAdd", devName);
 	}
-	void Events::deviceRemoved(QString devName, Device *dev) {
+	void Events::deviceRemoved(QString devName, Device* dev) {
 		QProcessEnvironment e;
 		setupEnvironment(e);
 		setupEnvironment(e, dev);
@@ -86,7 +72,7 @@ namespace nuts {
 		QString envName;
 		int e_idx = dev->getEnvironment();
 		if (e_idx >= 0) {
-			Environment *env = dev->getEnvironments()[e_idx];
+			Environment* env = dev->getEnvironments()[e_idx];
 			setupEnvironment(e, env);
 			envName = env->getName();
 		}
@@ -110,8 +96,8 @@ namespace nuts {
 				return;
 		}
 		QProcessEnvironment e;
-		Environment *env = iface->getEnvironment();
-		Device *dev = env->getDevice();
+		Environment* env = iface->getEnvironment();
+		Device* dev = env->getDevice();
 		setupEnvironment(e);
 		setupEnvironment(e, dev);
 		setupEnvironment(e, env);

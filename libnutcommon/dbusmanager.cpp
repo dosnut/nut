@@ -231,7 +231,7 @@ namespace libnutcommon {
 		 * duplicates in the m_services[] connection list.
 		 */
 		auto& cons = m_services[serviceName];
-		for (auto &c: m_connections) {
+		for (auto& c: m_connections) {
 			if (c.registerService(serviceName)) cons.push_back(c);
 		}
 	}
@@ -239,7 +239,7 @@ namespace libnutcommon {
 	void DBusAbstractAdapater::unregisterService(QString const& serviceName) {
 		auto i = m_services.find(serviceName);
 		if (m_services.end() == i) return;
-		for (auto &c: i->second) {
+		for (auto& c: i->second) {
 			c.unregisterService(i->first);
 		}
 		m_services.erase(i);

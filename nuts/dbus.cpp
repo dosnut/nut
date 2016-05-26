@@ -8,7 +8,7 @@ namespace nuts {
 	const QDBusObjectPath DBusDeviceManager::m_dbusPath("/manager");
 	const QDBusObjectPath DBusDeviceManager::m_dbusDevicesPath("/devices");
 
-	DBusDeviceManager::DBusDeviceManager(DeviceManager *devmgr)
+	DBusDeviceManager::DBusDeviceManager(DeviceManager* devmgr)
 	: DBusAbstractAdapater(m_dbusPath, devmgr), m_devmgr(devmgr) {
 		registerService(NUT_DBUS_URL);
 
@@ -21,7 +21,7 @@ namespace nuts {
 	}
 
 	//SLOT: Inserts device into device hash
-	void DBusDeviceManager::devAdded(QString devName, Device *dev) {
+	void DBusDeviceManager::devAdded(QString devName, Device* dev) {
 		if (m_dbusDevices.contains(devName)) return;
 
 		auto dbus_device = new DBusDevice(dev, m_dbusDevicesPath.path());
@@ -45,7 +45,7 @@ namespace nuts {
 
 	QList<QDBusObjectPath> DBusDeviceManager::getDeviceList() {
 		QList<QDBusObjectPath> paths;
-		foreach (DBusDevice *dbus_device, m_dbusDevices) {
+		for (DBusDevice* dbus_device: m_dbusDevices) {
 			paths.append(dbus_device->getPath());
 		}
 		return paths;
@@ -53,7 +53,7 @@ namespace nuts {
 
 	QStringList DBusDeviceManager::getDeviceNames() {
 		QStringList names;
-		foreach (nuts::Device* dev, m_devmgr->getDevices()) {
+		for (nuts::Device* dev: m_devmgr->getDevices()) {
 			names.append(dev->getName());
 		}
 		return names;
@@ -80,8 +80,8 @@ namespace nuts {
 		m_activeEnvironment = m_device->getEnvironment();
 
 		//Add Environments
-		foreach (Environment *env, m_device->getEnvironments()) {
-			DBusEnvironment *dbus_env = new DBusEnvironment(env, m_path);
+		for (Environment* env: m_device->getEnvironments()) {
+			DBusEnvironment* dbus_env = new DBusEnvironment(env, m_path);
 			m_dbusEnvironments.append(dbus_env);
 			registerAdaptor(dbus_env);
 		}
@@ -229,16 +229,16 @@ namespace nuts {
 		m_last_notified_properties = m_properties = m_environment->getProperties();
 
 		//Insert interfaces
-		foreach (Interface *interface, m_environment->getInterfaces()) {
+		for (Interface* interface: m_environment->getInterfaces()) {
 			//Check if interface is IPv4 or IPv6
 			if (auto ifv4 = dynamic_cast<Interface_IPv4*>(interface)) {
-				DBusInterface_IPv4 *dbus_interface = new DBusInterface_IPv4(ifv4, m_path);
+				DBusInterface_IPv4* dbus_interface = new DBusInterface_IPv4(ifv4, m_path);
 				m_dbusInterfacesIPv4.append(dbus_interface);
 				registerAdaptor(dbus_interface);
 			}
 #ifdef IPv6
 			else if (auto if6 = dynamic_cast<Interface_IPv6*>(interface)) {
-				DBusInterface_IPv6 *dbus_interface = new DBusInterface_IPv6(ifv6, m_path);
+				DBusInterface_IPv6* dbus_interface = new DBusInterface_IPv6(ifv6, m_path);
 				m_dbusInterfacesIPv6.append(dbus_interface);
 				registerAdaptor(dbus_interface);
 			}
@@ -319,7 +319,7 @@ namespace nuts {
 		return QDBusObjectPath(path.path() + "/" + QString::number(ndx));
 	}
 
-	DBusInterface_IPv4::DBusInterface_IPv4(Interface_IPv4 *iface, const QDBusObjectPath& path)
+	DBusInterface_IPv4::DBusInterface_IPv4(Interface_IPv4* iface, const QDBusObjectPath& path)
 	: DBusAbstractAdapater(makeInterfacePath(path, iface->getIndex()), iface), m_interface(iface) {
 		m_last_notified_properties = m_properties = m_interface->getProperties();
 		m_last_notified_userConfig = m_userConfig = m_interface->getUserConfig();

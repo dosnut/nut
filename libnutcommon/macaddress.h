@@ -1,6 +1,8 @@
 #ifndef NUT_COMMON_MACADDRESS_H
 #define NUT_COMMON_MACADDRESS_H
 
+#pragma once
+
 #include <QString>
 #include <QDBusArgument>
 #include <QHash>
@@ -11,35 +13,33 @@ struct ether_addr;
 }
 
 namespace libnutcommon {
-	/**
-		@author Stefan Bühler <stbuehler@web.de>
-	*/
 	class MacAddress {
 	public:
 		static MacAddress const Zero;
 
-		MacAddress() { clear(); }
-		MacAddress(const QString &str);
-		MacAddress(const quint8 *d);
-		MacAddress(const ether_addr * eth);
-		struct {
-			quint8 bytes[6];
-		} data;
+		explicit MacAddress() { clear(); }
+		explicit MacAddress(QString const& str);
+		explicit MacAddress(quint8 const* d);
+		explicit MacAddress(ether_addr const* eth);
 
-		bool operator==(const MacAddress &b) const;
-		bool operator!=(const MacAddress &b) const;
-		bool operator<(const MacAddress &b) const;
+		bool operator==(MacAddress const& b) const;
+		bool operator!=(MacAddress const& b) const;
+		bool operator<(MacAddress const& b) const;
 		QString toString() const;
 
 		bool zero() const;
 		bool valid() const;
 		void clear();
+
+		struct {
+			quint8 bytes[6];
+		} data;
 	};
 
-	uint qHash(const libnutcommon::MacAddress &key);
+	uint qHash(libnutcommon::MacAddress const& key);
 
-	QDBusArgument &operator<< (QDBusArgument &argument, const MacAddress &data);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, MacAddress &data);
+	QDBusArgument& operator<<(QDBusArgument& argument, MacAddress const& data);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, MacAddress& data);
 }
 
 Q_DECLARE_METATYPE(libnutcommon::MacAddress)

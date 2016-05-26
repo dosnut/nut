@@ -1,6 +1,8 @@
 #ifndef NUT_COMMON_DEVICE_H
 #define NUT_COMMON_DEVICE_H
 
+#pragma once
+
 #include <QString>
 #include <QDBusArgument>
 #include <QDBusObjectPath>
@@ -14,25 +16,25 @@
 
 namespace libnutcommon {
 	class OptionalQDBusObjectPath {
-	private:
-		QString m_path;
-
 	public:
-		inline OptionalQDBusObjectPath() : m_path() { }
-		inline OptionalQDBusObjectPath(QDBusObjectPath path) : m_path(path.path()) { }
-		explicit inline OptionalQDBusObjectPath(QString path) : m_path(path) { }
+		OptionalQDBusObjectPath() : m_path() { }
+		OptionalQDBusObjectPath(QDBusObjectPath const& path) : m_path(path.path()) { }
+		explicit OptionalQDBusObjectPath(QString const& path) : m_path(path) { }
 
-		inline friend bool operator==(const OptionalQDBusObjectPath& a, const OptionalQDBusObjectPath& b) { return a.m_path == b.m_path; }
-		inline friend bool operator!=(const OptionalQDBusObjectPath& a, const OptionalQDBusObjectPath& b) { return a.m_path != b.m_path; }
+		friend bool operator==(OptionalQDBusObjectPath const& a, OptionalQDBusObjectPath const& b) { return a.m_path == b.m_path; }
+		friend bool operator!=(OptionalQDBusObjectPath const& a, OptionalQDBusObjectPath const& b) { return a.m_path != b.m_path; }
 
-		inline const QString& path() const { return m_path; }
-		inline QDBusObjectPath objectPath() const {
+		QString path() const { return m_path; }
+		QDBusObjectPath objectPath() const {
 			return QDBusObjectPath(m_path);
 		}
-		inline operator bool() const { return !m_path.isEmpty(); }
+		operator bool() const { return !m_path.isEmpty(); }
+
+	private:
+		QString m_path;
 	};
-	QDBusArgument &operator<< (QDBusArgument &argument, const OptionalQDBusObjectPath &optionalObjPath);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, OptionalQDBusObjectPath &optionalObjPath);
+	QDBusArgument& operator<<(QDBusArgument& argument, OptionalQDBusObjectPath const& optionalObjPath);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, OptionalQDBusObjectPath& optionalObjPath);
 
 	enum class DeviceState : quint32 {
 		DEACTIVATED = 0,
@@ -42,8 +44,8 @@ namespace libnutcommon {
 		UP,
 	};
 	QString toString(DeviceState state);
-	QDBusArgument &operator<< (QDBusArgument &argument, DeviceState state);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceState &state);
+	QDBusArgument& operator<<(QDBusArgument& argument, DeviceState state);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, DeviceState& state);
 
 	enum class DeviceType : quint32 {
 		ETH = 0,
@@ -52,8 +54,8 @@ namespace libnutcommon {
 		BRIDGE,
 	};
 	QString toString(DeviceType type);
-	QDBusArgument &operator<< (QDBusArgument &argument, DeviceType type);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceType &type);
+	QDBusArgument& operator<<(QDBusArgument& argument, DeviceType type);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, DeviceType& type);
 
 	enum class InterfaceState : quint32 {
 		OFF = 0,
@@ -63,8 +65,8 @@ namespace libnutcommon {
 		WAITFORCONFIG,
 	};
 	QString toString(InterfaceState state);
-	QDBusArgument &operator<< (QDBusArgument &argument, InterfaceState state);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceState &state);
+	QDBusArgument& operator<<(QDBusArgument& argument, InterfaceState state);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, InterfaceState& state);
 
 	struct DeviceProperties {
 		/* constant */
@@ -78,8 +80,8 @@ namespace libnutcommon {
 	};
 	bool operator==(DeviceProperties const& a, DeviceProperties const& b);
 	bool operator!=(DeviceProperties const& a, DeviceProperties const& b);
-	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceProperties &devprop);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceProperties &devprop);
+	QDBusArgument& operator<<(QDBusArgument& argument, DeviceProperties const& devprop);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, DeviceProperties& devprop);
 
 	struct EnvironmentProperties {
 		/* constant */
@@ -92,8 +94,8 @@ namespace libnutcommon {
 	};
 	bool operator==(EnvironmentProperties const& a, EnvironmentProperties const& b);
 	bool operator!=(EnvironmentProperties const& a, EnvironmentProperties const& b);
-	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentProperties &envprop);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentProperties &envprop);
+	QDBusArgument& operator<<(QDBusArgument& argument, const EnvironmentProperties& envprop);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, EnvironmentProperties& envprop);
 
 	struct InterfaceProperties {
 		/* variable */
@@ -107,8 +109,8 @@ namespace libnutcommon {
 	};
 	bool operator==(InterfaceProperties const& a, InterfaceProperties const& b);
 	bool operator!=(InterfaceProperties const& a, InterfaceProperties const& b);
-	QDBusArgument &operator<< (QDBusArgument &argument, const InterfaceProperties &ifprop);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, InterfaceProperties &ifprop);
+	QDBusArgument& operator<<(QDBusArgument& argument, const InterfaceProperties& ifprop);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, InterfaceProperties& ifprop);
 
 	/** @brief If an interface has to be configured by the user (IPv4ConfigFlag::USERSTATIC), he/she has to
 	 *         set that information with this class.
@@ -128,8 +130,8 @@ namespace libnutcommon {
 	};
 	bool operator==(IPv4UserConfig const& a, IPv4UserConfig const& b);
 	bool operator!=(IPv4UserConfig const& a, IPv4UserConfig const& b);
-	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4UserConfig &data);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4UserConfig &data);
+	QDBusArgument& operator<< (QDBusArgument& argument, const IPv4UserConfig& data);
+	QDBusArgument const& operator>> (QDBusArgument const& argument, IPv4UserConfig& data);
 }
 
 Q_DECLARE_METATYPE(libnutcommon::OptionalQDBusObjectPath)
