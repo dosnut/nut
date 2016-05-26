@@ -41,7 +41,7 @@ namespace libnutcommon {
 
 	DBusManager::DBusManager(std::function<QDBusConnection()> createConnection, int checkMsec, int retryMsec, QObject* parent)
 	: QObject(parent), m_createConnection(std::move(createConnection)), m_checkMsec(checkMsec), m_retryMsec(retryMsec) {
-		m_reconnectTimerId = startTimer(0);
+		m_reconnectTimer.start(0, this);
 	}
 
 	DBusManager::~DBusManager() {
@@ -56,15 +56,8 @@ namespace libnutcommon {
 		if (m_reconnecting) return;
 		m_reconnecting = true;
 
-		if (-1 != m_checkTimerId) {
-			killTimer(m_checkTimerId);
-			m_checkTimerId = -1;
-		}
-
-		if (-1 != m_reconnectTimerId) {
-			killTimer(m_reconnectTimerId);
-			m_reconnectTimerId = -1;
-		}
+		m_checkTimer.stop();
+		m_reconnectTimer.stop();
 
 		if (m_connection) {
 			auto c = std::move(m_connection);
@@ -81,7 +74,7 @@ namespace libnutcommon {
 			c.reset();
 
 			// QTextStream(stderr) << "connect failed\n";
-			m_reconnectTimerId = startTimer(m_retryMsec);
+			m_reconnectTimer.start(m_retryMsec, this);
 			if (m_hadConnection) {
 				m_hadConnection = false;
 				// QTextStream(stderr) << "emit waiting\n";
@@ -91,7 +84,7 @@ namespace libnutcommon {
 			return;
 		}
 
-		m_checkTimerId = startTimer(m_checkMsec);
+		m_checkTimer.start(m_checkMsec, this);
 
 		m_connection = std::move(c);
 		// QTextStream(stderr) << "emit connected\n";
@@ -108,10 +101,10 @@ namespace libnutcommon {
 	}
 
 	void DBusManager::timerEvent(QTimerEvent* event) {
-		if (event->timerId() == m_reconnectTimerId) {
+		if (event->timerId() == m_reconnectTimer.timerId()) {
 			reconnect();
 		}
-		else if (event->timerId() == m_checkTimerId) {
+		else if (event->timerId() == m_checkTimer.timerId()) {
 			checkConnection();
 		}
 		else {

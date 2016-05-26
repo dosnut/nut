@@ -4,6 +4,7 @@
 #pragma once
 
 #include <QObject>
+#include <QBasicTimer>
 #include <QDBusConnection>
 #include <QDBusAbstractAdaptor>
 #include <QDBusObjectPath>
@@ -78,8 +79,8 @@ namespace libnutcommon {
 
 		/* emit waiting() at beginning too if necessary */
 		bool m_hadConnection = true;
-		int m_checkTimerId = -1;
-		int m_reconnectTimerId = -1;
+		QBasicTimer m_checkTimer;
+		QBasicTimer m_reconnectTimer;
 	};
 
 	class DBusAbstractAdapaterConnectionEmitter : public QObject {
