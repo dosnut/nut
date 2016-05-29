@@ -2,29 +2,49 @@
 
 #include "random.h"
 
-#include <sys/time.h>
+#include <limits>
+
+// #include <sys/time.h>
 
 namespace nuts {
+	namespace internal {
+		time_value time_value::fromMsecs(qint64 msecs) {
+			time_t secs = static_cast<time_t>(msecs / 1000);
+			suseconds_t usec = static_cast<suseconds_t>((msecs % 1000) * 1000);
+			return time_value(secs, usec);
+		}
+
+		time_value time_value::randomMsecs(qint64 min, qint64 max) {
+			std::uniform_int_distribution<qint64> d(min, max);
+			return fromMsecs(d(randomGenerator));
+		}
+
+		time_value time_value::randomSecs(int min, int max) {
+			return randomMsecs(qint64(1000) * min, qint64(1000) * max);
+		}
+	}
+
+	Duration Duration::randomSecs(int min, int max) {
+		return Duration(internal::time_value::randomSecs(min, max));
+	}
+
+	Duration Duration::randomMsecs(qint64 min, qint64 max) {
+		return Duration(internal::time_value::randomMsecs(min, max));
+	}
+
+#if 0
 	Time Time::current() {
 		struct timeval tv = { 0, 0 };
 		gettimeofday(&tv, 0);
 		return Time(tv.tv_sec, tv.tv_usec);
 	}
 
-	Time Time::random(int min, int max) {
-		float range = (max - min);
-		float r = min + range * ((float) getRandomUInt32()) / ((float) (quint32) -1);
-		int sec = (int) r;
-		r -= sec; r *= 1000000;
-		int usec = (int) r;
-		return Time(sec, usec);
-	}
-
 	Time Time::waitRandom(int min, int max) {
-		return random(min, max) + current();
+		return current() + Duration::randomSecs(min, max);
 	}
 
 	Time Time::wait(time_t sec, suseconds_t usec) {
-		return current() + Time(sec, usec);
+		return current() + Duration(sec, usec);
 	}
+#endif
 }

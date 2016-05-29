@@ -3,9 +3,12 @@
 
 #pragma once
 
-#include <QObject>
+#include <QtGlobal>
+#include <random>
 
 namespace nuts {
+	extern std::mt19937 randomGenerator;
+
 	quint32 getRandomUInt32();
 }
 

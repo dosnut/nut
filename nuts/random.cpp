@@ -1,35 +1,12 @@
 #include "random.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <fcntl.h>
+
+#include <random>
 
 namespace nuts {
-	static void randInit() {
-		quint32 seed;
-		int fd = open("/dev/urandom", O_RDONLY);
-		if (fd >= 0 && read(fd, &seed, sizeof(seed)) == sizeof(seed)) {
-			srand(seed);
-		} else {
-			srand(time(0));
-		}
-		if (fd >= 0)
-			close(fd);
-	}
-
-	inline static void checkRandInit() {
-		static bool initialized = false;
-		if (!initialized) {
-			randInit();
-			initialized = true;
-		}
-	}
+	std::mt19937 randomGenerator{std::random_device{}()};
 
 	quint32 getRandomUInt32() {
-		checkRandInit();
-		if (RAND_MAX < (unsigned int) -1)
-			return (rand() << 16) ^ rand();
-		else
-			return rand();
+		std::uniform_int_distribution<quint32> d;
+		return d(randomGenerator);
 	}
 }

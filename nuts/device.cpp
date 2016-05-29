@@ -578,8 +578,6 @@ namespace nuts {
 	bool Environment::startSelect() {
 		m_selArpWaiting = 0;
 
-		ARPRequest *r;
-
 		const QVector<SelectRule> &filters = m_config->select.filters;
 		int c = filters.size();
 		for (int i = 0; i < c; i++) {
@@ -588,11 +586,12 @@ namespace nuts {
 				m_properties.selectResults[i] = SelectResult::User;
 				break;
 			case SelectType::ARP:
-				r = m_device->m_arp.requestIPv4(QHostAddress((quint32) 0), filters[i].ipAddr);
-				if (!r) return false;
-				r->disconnect(this);
-				connect(r, &ARPRequest::timeout, this, &Environment::selectArpRequestTimeout);
-				connect(r, &ARPRequest::foundMac, this, &Environment::selectArpRequestFoundMac);
+				{
+					// TODO: manage r object (deletes itself right now)
+					ARPRequest* r = new ARPRequest(&m_device->m_arp, QHostAddress((quint32) 0), filters[i].ipAddr, this);
+					connect(r, &ARPRequest::timeout, this, &Environment::selectArpRequestTimeout);
+					connect(r, &ARPRequest::foundMac, this, &Environment::selectArpRequestFoundMac);
+				}
 				m_selArpWaiting++;
 				break;
 			case SelectType::ESSID:
@@ -808,39 +807,23 @@ namespace nuts {
 			ip = baseip | rnd;
 		}
 		m_zc_probe_ip = QHostAddress(ip);
-		m_zc_arp_probe = m_env->m_device->m_arp.probeIPv4(m_zc_probe_ip);
-		if (!m_zc_arp_probe || m_zc_arp_probe->getState() != ARPProbeState::PROBING) {
-			err << "ARPProbe failed" << endl;
-			m_zc_state =zeroconf_state::OFF;
-			return;
-		}
-		// This did lead to segfaults... ;_)
-		// m_zc_arp_probe->setReserve(m_config->flags & IPv4ConfigFlag::DHCP);
-		connect(m_zc_arp_probe, &ARPProbe::conflict, this, &Interface_IPv4::zc_probe_conflict);
-		connect(m_zc_arp_probe, &ARPProbe::ready, this, &Interface_IPv4::zc_probe_ready);
+		m_zc_arp_probe.reset(new ARPProbe(&m_env->m_device->m_arp, m_zc_probe_ip, this));
+		connect(m_zc_arp_probe.get(), &ARPProbe::conflict, this, &Interface_IPv4::zc_probe_conflict);
+		connect(m_zc_arp_probe.get(), &ARPProbe::ready, this, &Interface_IPv4::zc_probe_ready);
 	}
 	void Interface_IPv4::zeroconfWatch() {
-		m_zc_arp_watch = m_env->m_device->m_arp.watchIPv4(m_zc_probe_ip);
-		connect(m_zc_arp_watch, &ARPWatch::conflict, this, &Interface_IPv4::zc_watch_conflict);
+		m_zc_arp_watch.reset(new ARPWatch(&m_env->m_device->m_arp, m_zc_probe_ip, this));
+		connect(m_zc_arp_watch.get(), &ARPWatch::conflict, this, &Interface_IPv4::zc_watch_conflict);
 	}
 	void Interface_IPv4::zeroconfAnnounce() {
-		m_zc_arp_announce = m_env->m_device->m_arp.announceIPv4(m_zc_probe_ip);
-		connect(m_zc_arp_announce, &ARPAnnounce::ready, this, &Interface_IPv4::zc_announce_ready);
+		m_zc_arp_announce.reset(new ARPAnnounce(&m_env->m_device->m_arp, m_zc_probe_ip, this));
+		connect(m_zc_arp_announce.get(), &ARPAnnounce::ready, this, &Interface_IPv4::zc_announce_ready);
 	}
 
 	void Interface_IPv4::zeroconfFree() {    // free ARPProbe and ARPWatch
-		if (m_zc_arp_probe) {
-			delete m_zc_arp_probe;
-			m_zc_arp_probe = 0;
-		}
-		if (m_zc_arp_announce) {
-			delete m_zc_arp_announce;
-			m_zc_arp_announce = 0;
-		}
-		if (m_zc_arp_watch) {
-			delete m_zc_arp_watch;
-			m_zc_arp_watch = 0;
-		}
+		m_zc_arp_probe.reset();
+		m_zc_arp_announce.reset();
+		m_zc_arp_watch.reset();
 	}
 
 	void Interface_IPv4::zeroconfAction() {
@@ -864,21 +847,14 @@ namespace nuts {
 				return;
 			case zeroconf_state::RESERVING:
 				if (!hasDHCP || m_dhcp_retry > 3) {
-					if (m_zc_arp_probe != 0){
-						delete m_zc_arp_probe;
-						m_zc_arp_probe = 0;
-					}
-					m_zc_state = zeroconf_state::ANNOUNCE;
+					m_zc_arp_probe.reset();
+					m_zc_state = zeroconf_state::BIND;
 				} else {
 					return;
 				}
-			case zeroconf_state::ANNOUNCE:
+			case zeroconf_state::BIND:
 				zeroconfWatch();
 				zeroconfAnnounce();
-				m_zc_state = zeroconf_state::ANNOUNCING;
-			case zeroconf_state::ANNOUNCING:
-				return;
-			case zeroconf_state::BIND:
 				zeroconf_setup_interface();
 				m_zc_state = zeroconf_state::BOUND;
 			case zeroconf_state::BOUND:
@@ -892,23 +868,19 @@ namespace nuts {
 	}
 
 	void Interface_IPv4::zc_probe_conflict() {
-		m_zc_arp_probe = 0; // Deletes itself
+		m_zc_arp_probe.reset();
 		m_zc_state = zeroconf_state::CONFLICT;
 		zeroconfAction();
 	}
 	void Interface_IPv4::zc_probe_ready() {
-		if (!m_zc_arp_probe->getReserve())
-			m_zc_arp_probe = 0; // Deletes itself
 		m_zc_state = zeroconf_state::RESERVING;
 		zeroconfAction();
 	}
 	void Interface_IPv4::zc_announce_ready() {
-		m_zc_arp_announce = 0; // Deletes itself
-		m_zc_state = zeroconf_state::BIND;
-		zeroconfAction();
+		m_zc_arp_announce.reset();
 	}
 	void Interface_IPv4::zc_watch_conflict() {
-		m_zc_arp_watch = 0; // Deletes itself
+		m_zc_arp_watch.reset();
 		if (m_properties.state == InterfaceState::ZEROCONF) systemDown(InterfaceState::OFF);
 		m_zc_state = zeroconf_state::CONFLICT;
 		zeroconfAction();

@@ -41,19 +41,6 @@ namespace {
 		quint32 target_p_addr;
 	} __attribute__ ((__packed__));
 
-	bool arp_parse(QByteArray const& data, quint8& proto_len, nuts::ArpOperation& operation) {
-		if (data.size() < (int) sizeof(arp_packet_base))
-			return false;
-		arp_packet_base const* packet = reinterpret_cast<arp_packet_base const*>(data.data());
-		if (   (packet->hwtype != htons(ARPHRD_ETHER))
-			|| (packet->ptype != htons(ETH_P_IP))
-			|| (packet->hlen != ETH_ALEN))
-			return false;
-		proto_len = packet->plen;
-		operation = static_cast<nuts::ArpOperation>(ntohs(packet->operation));
-		return true;
-	}
-
 	template<typename Packet>
 	void arp_base_request(Packet& packet, quint8 proto_len, nuts::ArpOperation operation) {
 		memset(&packet, 0, sizeof(packet));
@@ -71,19 +58,20 @@ namespace {
 		packet.target_p_addr = htonl(target_ip.toIPv4Address());
 	}
 
-	bool arp_ipv4_parse(QByteArray const& data, libnutcommon::MacAddress& sender_mac, QHostAddress& sender_ip, libnutcommon::MacAddress& target_mac, QHostAddress& target_ip) {
-		if (data.size() < (int) sizeof(arp_packet_ipv4))
+	bool arp_ipv4_parse(QByteArray const& data, nuts::ARPPacket* packet) {
+		if (data.size() < (int) sizeof(arp_packet_ipv4)) return false;
+		arp_packet_ipv4 const* raw_packet = reinterpret_cast<arp_packet_ipv4 const*>(data.data());
+		if (   (raw_packet->hwtype != htons(ARPHRD_ETHER))
+			|| (raw_packet->ptype != htons(ETH_P_IP))
+			|| (raw_packet->hlen != ETH_ALEN)
+			|| (raw_packet->plen != 4)) {
 			return false;
-		arp_packet_ipv4 const* packet = reinterpret_cast<arp_packet_ipv4 const*>(data.data());
-		if (   (packet->hwtype != htons(ARPHRD_ETHER))
-			|| (packet->ptype != htons(ETH_P_IP))
-			|| (packet->hlen != ETH_ALEN)
-			|| (packet->plen != 4))
-			return false;
-		sender_mac = libnutcommon::MacAddress(packet->sender_hw_addr);
-		sender_ip = QHostAddress(ntohl(packet->sender_p_addr));
-		target_mac = libnutcommon::MacAddress(packet->target_hw_addr);
-		target_ip = QHostAddress(ntohl(packet->target_p_addr));
+		}
+		packet->op = static_cast<nuts::ArpOperation>(ntohs(raw_packet->operation));
+		packet->sender_mac = libnutcommon::MacAddress(raw_packet->sender_hw_addr);
+		packet->sender_ip = QHostAddress(ntohl(raw_packet->sender_p_addr));
+		packet->target_mac = libnutcommon::MacAddress(raw_packet->target_hw_addr);
+		packet->target_ip = QHostAddress(ntohl(raw_packet->target_p_addr));
 		return true;
 	}
 
@@ -120,12 +108,52 @@ namespace {
 }
 
 namespace nuts {
+	ARPNotifier::ARPNotifier(ARP* arp, QHostAddress const& addr)
+	: m_arp(arp), m_addr(addr) {
+	}
+
+	ARPNotifier::~ARPNotifier() {
+		if (m_arp) m_arp->removeNotifier(this);
+	}
+
+	QHostAddress ARPNotifier::address() const {
+		return m_addr;
+	}
+
 	ARP::ARP(Device* device)
 	: QObject(device), m_device(device) {
 	}
 
 	ARP::~ARP() {
 		stop();
+	}
+
+	ARPNotifierPointer ARP::watchForPacketsFrom(QHostAddress const& addr) {
+		auto it = m_notifiers_from.find(addr);
+		if (it != m_notifiers_from.end()) {
+			return ARPNotifierPointer(it.value());
+		} else {
+			ARPNotifierPointer n{new ARPNotifier(this, addr)};
+			m_notifiers_from.insert(addr, n.data());
+			return n;
+		}
+	}
+
+	ARPNotifierPointer ARP::watchForPacketsTo(QHostAddress const& addr) {
+		auto it = m_notifiers_to.find(addr);
+		if (it != m_notifiers_to.end()) {
+			return ARPNotifierPointer(it.value());
+		} else {
+			ARPNotifierPointer n{new ARPNotifier(this, addr)};
+			m_notifiers_to.insert(addr, n.data());
+			return n;
+		}
+	}
+
+	void ARP::sendRequest(const QHostAddress& sender_ip, const QHostAddress& target_ip) {
+		arp_packet_ipv4 packet;
+		arp_ipv4_request(packet, m_device->getMacAddress(), sender_ip, target_ip);
+		arpWrite(QByteArray(reinterpret_cast<char const*>(&packet), sizeof(packet)));
 	}
 
 	bool ARP::start() {
@@ -155,107 +183,37 @@ namespace nuts {
 			return false;
 		}
 
-		m_arp_read_nf = new QSocketNotifier(m_arp_socket, QSocketNotifier::Read);
-		m_arp_write_nf = new QSocketNotifier(m_arp_socket, QSocketNotifier::Write);
+		m_arp_read_nf.reset(new QSocketNotifier(m_arp_socket, QSocketNotifier::Read));
+		m_arp_write_nf.reset(new QSocketNotifier(m_arp_socket, QSocketNotifier::Write));
 		m_arp_write_nf->setEnabled(!m_arp_write_buf.empty());
-		connect(m_arp_read_nf, &QSocketNotifier::activated, this, &ARP::arpReadNF);
-		connect(m_arp_write_nf, &QSocketNotifier::activated, this, &ARP::arpWriteNF);
+		connect(m_arp_read_nf.get(), &QSocketNotifier::activated, this, &ARP::arpReadNF);
+		connect(m_arp_write_nf.get(), &QSocketNotifier::activated, this, &ARP::arpWriteNF);
 		return true;
 	}
 
 	void ARP::stop() {
-		if (m_arp_socket != -1) {
-			if (m_arp_read_nf) {
-				delete m_arp_read_nf;
-				m_arp_read_nf = nullptr;
-			}
-			if (m_arp_write_nf) {
-				delete m_arp_write_nf;
-				m_arp_write_nf = nullptr;
-			}
+		m_arp_read_nf.reset();
+		m_arp_write_nf.reset();
+
+		if (-1 != m_arp_socket) {
 			close(m_arp_socket);
 			m_arp_socket = -1;
 		}
-		if (m_timer_id) {
-			killTimer(m_timer_id);
-			m_timer_id = 0;
-		}
-		m_probes.clear(); m_requests.clear();
-		QLinkedList<ARPTimer*> arp_timers(m_arp_timers);
-		m_arp_timers.clear();
-		for (ARPTimer* t: arp_timers) {
-			t->m_arp = nullptr;
-			delete t;
-		}
-	}
-
-	ARPRequest* ARP::requestIPv4(QHostAddress const& source_addr, QHostAddress const& target_addr) {
-		if (m_arp_socket == -1) return nullptr;
-		ARPRequest* r;
-		if (nullptr != (r = m_requests.value(target_addr, nullptr))) return r;
-		r  = new ARPRequest(this, source_addr, target_addr);
-		arpTimerAdd(r);
-		m_requests.insert(target_addr, r);
-		return r;
-	}
-
-	ARPProbe* ARP::probeIPv4(QHostAddress const& addr) {
-		if (m_arp_socket == -1) return nullptr;
-		ARPProbe* p;
-		if (nullptr != (p = m_probes.value(addr, nullptr))) return p;
-		p = new ARPProbe(this, addr);
-		arpTimerAdd(p);
-		m_probes.insert(addr, p);
-		return p;
-	}
-
-	ARPAnnounce* ARP::announceIPv4(QHostAddress const& addr) {
-		if (m_arp_socket == -1) return nullptr;
-		ARPAnnounce* a;
-		a = new ARPAnnounce(this, addr);
-		arpTimerAdd(a);
-		return a;
-	}
-
-	ARPWatch* ARP::watchIPv4(QHostAddress const& addr) {
-		if (m_arp_socket == -1) return nullptr;
-		ARPWatch* w;
-		w = new ARPWatch(this, addr);
-		m_watches.insert(addr, w);
-		return w;
 	}
 
 	void ARP::arpReadNF() {
 		QByteArray data = readARPPacket(m_arp_socket);
-		quint8 proto_len;
-		ArpOperation op;
-		if (!arp_parse(data, proto_len, op))
+		ARPPacket packet;
+		if (!arp_ipv4_parse(data, &packet))
 			return;
-		switch (proto_len) {
-			case 4: { // IPv4:
-				libnutcommon::MacAddress sender_mac, target_mac;
-				QHostAddress sender_ip, target_ip;
-				if (!arp_ipv4_parse(data, sender_mac, sender_ip, target_mac, target_ip))
-					return;
-				ARPRequest* r;
-				ARPProbe* p;
-				ARPWatch* w;
-				if (nullptr != (r = m_requests.value(sender_ip, nullptr)))
-					r->gotPacket(sender_mac);
-				if (nullptr != (p = m_probes.value(sender_ip, nullptr)))
-					p->gotPacket(sender_mac);
-				if (nullptr != (w = m_watches.value(sender_ip, nullptr)))
-					w->gotPacket(sender_mac);
-				switch (op) {
-					case ArpOperation::REQUEST:
-						if ((sender_ip.toIPv4Address() == 0) && (sender_mac != m_device->getMacAddress())
-							&& (nullptr != (p = m_probes.value(target_ip, nullptr))))
-							p->gotProbe(sender_mac);
-						break;
-					case ArpOperation::REPLY:
-						break;
-				}
-				} break;
+
+		if (packet.sender_mac != m_device->getMacAddress()) {
+			if (ARPNotifier* n = m_notifiers_from.value(packet.sender_ip, nullptr)) {
+				n->receivedPacket(packet);
+			}
+			if (ARPNotifier* n = m_notifiers_to.value(packet.target_ip, nullptr)) {
+				n->receivedPacket(packet);
+			}
 		}
 	}
 
@@ -268,204 +226,194 @@ namespace nuts {
 		m_arp_write_nf->setEnabled(!m_arp_write_buf.empty());
 	}
 
+	void ARP::removeNotifier(ARPNotifier* notifier) {
+		{
+			auto it = m_notifiers_from.find(notifier->m_addr);
+			if (it != m_notifiers_from.end() && it.value() == notifier) {
+				m_notifiers_from.erase(it);
+			}
+		}
+		{
+			auto it = m_notifiers_to.find(notifier->m_addr);
+			if (it != m_notifiers_to.end() && it.value() == notifier) {
+				m_notifiers_to.erase(it);
+			}
+		}
+	}
+
 	void ARP::arpWrite(QByteArray const& buf) {
 		if (m_arp_write_buf.empty() && m_arp_write_nf)
 			m_arp_write_nf->setEnabled(true);
 		m_arp_write_buf.append(buf);
 	}
 
-	void ARP::recalcTimer() {
-		if (m_timer_id) {
-			killTimer(m_timer_id);
-			m_timer_id = 0;
-		}
-		if (!m_arp_timers.isEmpty()) {
-			Time dt = m_arp_timers.first()->m_nextTimeout - Time::current();
-			int interval = qMax(250, dt.msecs());	// wait at least 250ms
-//			qDebug() << QString("recalc Timer: %1 (%2) ms").arg(interval).arg(dt.toString()) << endl;
-			m_timer_id = startTimer(interval);
+	ARPWatch::ARPWatch(ARP* arp, QHostAddress const& ip, QObject* parent)
+	: QObject(parent)
+	, m_notifier_from(arp->watchForPacketsFrom(ip)) {
+		connect(m_notifier_from.data(), &ARPNotifier::receivedPacket, this, &ARPWatch::receivedPacket);
+	}
+
+	void ARPWatch::receivedPacket(ARPPacket const& packet) {
+		QHostAddress ip = m_notifier_from->address();
+		emit conflict(ip, packet.sender_mac);
+	}
+
+	ARPRequest::ARPRequest(ARP* arp, QHostAddress const& senderip, QHostAddress const& ip, QObject* parent)
+	: QObject(parent)
+	, m_arp(arp)
+	, m_notifier_from(arp->watchForPacketsFrom(ip))
+	, m_senderip(senderip)
+	, m_ip(ip)
+	{
+		connect(m_notifier_from.data(), &ARPNotifier::receivedPacket, this, &ARPRequest::receivedPacket);
+		sendRequest();
+	}
+
+	void ARPRequest::timerEvent(QTimerEvent* event) {
+		if (event->timerId() == m_timer.timerId()) {
+			m_timer.stop();
+			sendRequest();
 		}
 	}
 
-	void ARP::arpTimerAdd(ARPTimer* t) {
-		if (m_arp_timers.isEmpty() || t->m_nextTimeout < m_arp_timers.first()->m_nextTimeout) {
-			m_arp_timers.push_front(t);
-			recalcTimer();
-		} else {
-			QLinkedList<ARPTimer*>::iterator i = m_arp_timers.begin();
-			while (i != m_arp_timers.end()) {
-				if ((*i)->m_nextTimeout > t->m_nextTimeout) {
-					m_arp_timers.insert(i, t);
-					return;
-				}
-				++i;
-			}
-			m_arp_timers.push_back(t);
-		}
+	void ARPRequest::receivedPacket(ARPPacket const& packet) {
+		if (m_finished) return;
+		if (packet.sender_mac.zero()) return;
+
+		release();
+		emit foundMac(packet.sender_mac, m_ip);
 	}
 
-	void ARP::arpTimerDelete(ARPTimer* t) {
-		bool recalc = !m_arp_timers.isEmpty() && (t == m_arp_timers.first());
-		m_arp_timers.removeAll(t);
-		if (recalc) recalcTimer();
-	}
+	void ARPRequest::sendRequest() {
+		if (m_finished) return;
 
-	void ARP::timerEvent(QTimerEvent*) {
-		Time now(Time::current());
-		if (m_arp_timers.isEmpty()) {
-			recalcTimer();
+		if (m_remaining_trys <= 0) {
+			release();
+			emit timeout(m_ip);
 			return;
 		}
-		ARPTimer* t;
-		while ( (!m_arp_timers.isEmpty()) && (t = m_arp_timers.first()) && (now >= t->m_nextTimeout) ) {
-			if (t->timeEvent()) {
-				m_arp_timers.pop_front();
-				arpTimerAdd(t);
-			}
-		}
+
+		--m_remaining_trys;
+		m_timer.start(Duration::randomSecs(ARPConst::PROBE_MIN, ARPConst::PROBE_MAX).msecs(), this);
+		m_arp->sendRequest(m_senderip, m_ip);
 	}
 
-	ARPWatch::~ARPWatch() {
-		if (m_arp) m_arp->m_watches.remove(m_ip);
-	}
-
-	void ARPWatch::gotPacket(libnutcommon::MacAddress const& mac) {
-		if (m_arp) m_arp->m_watches.remove(m_ip);
-		m_arp = nullptr;
-		emit conflict(m_ip, mac);
-		deleteLater();
-	}
-
-	ARPTimer::ARPTimer(ARP* arp)
-	: QObject(arp), m_arp(arp), m_nextTimeout(Time::current()) { }
-
-	ARPTimer::ARPTimer(ARP* arp, Time const& firstTimeout)
-	: QObject(arp), m_arp(arp), m_nextTimeout(firstTimeout) { }
-
-	ARPRequest::ARPRequest(ARP* arp, QHostAddress const& sourceip, QHostAddress const& targetip)
-	: ARPTimer(arp, Time()), m_sourceip(sourceip), m_targetip(targetip) {
-		timeEvent();
-	}
-
-	ARPRequest::~ARPRequest() {
-		if (!m_arp || m_finished) return;
-		finish();
-	}
-
-	bool ARPRequest::timeEvent() {
-		if (m_finished) return false;
-		if (m_remaining_trys <= 0) {
-			finish();
-			emit timeout(m_targetip);
-			return false;
-		} else {
-			--m_remaining_trys;
-			m_nextTimeout = Time::waitRandom(ARPConst::PROBE_MIN, ARPConst::PROBE_MAX);
-
-			arp_packet_ipv4 packet;
-			arp_ipv4_request(packet, m_arp->m_device->getMacAddress(), m_sourceip, m_targetip);
-			m_arp->arpWrite(QByteArray(reinterpret_cast<char const*>(&packet), sizeof(packet)));
-
-			return true;
-		}
-	}
-
-	void ARPRequest::gotPacket(libnutcommon::MacAddress const& mac) {
-		if (mac.zero()) return;
-		finish();
-		emit foundMac(mac, m_targetip);
-	}
-
-	void ARPRequest::finish() {
+	void ARPRequest::release() {
 		m_finished = true;
-		m_arp->m_requests.remove(m_targetip);
-		m_arp->arpTimerDelete(this);
+		disconnect(m_notifier_from.data(), &ARPNotifier::receivedPacket, this, &ARPRequest::receivedPacket);
+		m_notifier_from.reset();
+		m_timer.stop();
 		deleteLater();
 	}
 
-	ARPProbe::ARPProbe(ARP* arp, QHostAddress const& ip)
-	: ARPTimer(arp, Time::waitRandom(0, ARPConst::PROBE_WAIT)), m_ip(ip) {
+	ARPProbe::ARPProbe(ARP* arp, QHostAddress const& ip, QObject* parent)
+	: QObject(parent)
+	, m_arp(arp)
+	, m_ip(ip)
+	, m_notifier_from(arp->watchForPacketsFrom(ip))
+	, m_notifier_to(arp->watchForPacketsTo(ip)) {
+		m_timer.start(Duration::randomSecs(0, ARPConst::PROBE_WAIT).msecs(), this);
+		connect(m_notifier_from.data(), &ARPNotifier::receivedPacket, this, &ARPProbe::receivedPacketFrom);
+		connect(m_notifier_to.data(), &ARPNotifier::receivedPacket, this, &ARPProbe::receivedPacketTo);
 	}
 
-	ARPProbe::~ARPProbe() {
-		if (!m_arp || m_finished) return;
-		finish();
+	void ARPProbe::timerEvent(QTimerEvent* event) {
+		if (event->timerId() == m_timer.timerId()) {
+			m_timer.stop();
+			sendProbe();
+		}
 	}
 
-	void ARPProbe::setReserve(bool reserve) {
-		m_reserve = reserve;
-	}
+	void ARPProbe::sendProbe() {
+		if (ARPProbeState::CONFLICT == m_state) return;
 
-	bool ARPProbe::timeEvent() {
-		if (m_state == ARPProbeState::CONFLICT) return false;
-		if (m_remaining_trys <= 0 && !m_reserve) {
+		if (ARPProbeState::RESERVING == m_state) {
+			/* the address is already successfully claimed, but we're not using it yet.
+			 * send more probes to keep our claim.
+			 */
+			m_timer.start(Duration::randomSecs(ARPConst::PROBE_MIN, ARPConst::PROBE_MAX).msecs(), this);
+			m_arp->sendRequest(QHostAddress((quint32) 0), m_ip);
+			return;
+		}
+
+		/* the last probe didn't lead to any conflicts - successfully claimed the address */
+		if (0 >= m_remaining_trys) {
+			/* start reserving (sending more probes) unless this gets deleted before.
+			 * might still emit conflict() later.
+			 *
+			 * This is needed if we'd like to wait for DHCP timeout before actually using
+			 * the zeroconf address.
+			 */
 			m_state = ARPProbeState::RESERVING;
-			finish();
+			m_timer.start(0, this); // delay it a little bit.
 			emit ready(m_ip);
-			return false;
+			return;
+		}
+
+		--m_remaining_trys;
+		if (0 >= m_remaining_trys) {
+			/* after the last probe we need to wait ANNOUNCE_WAIT seconds */
+			m_timer.start(1000 * ARPConst::ANNOUNCE_WAIT, this);
 		} else {
-			if (m_remaining_trys <= 0) {
-				if (m_state != ARPProbeState::RESERVING) {
-					m_state = ARPProbeState::RESERVING;
-					emit ready(m_ip);
-				}
-			} else {
-				--m_remaining_trys;
-			}
-			m_nextTimeout = Time::waitRandom(ARPConst::PROBE_MIN, ARPConst::PROBE_MAX);
+			/* wait PROBE_MIN - PROBE_MAX seconds between probes */
+			m_timer.start(Duration::randomSecs(ARPConst::PROBE_MIN, ARPConst::PROBE_MAX).msecs(), this);
+		}
+		// send probe packet
+		m_arp->sendRequest(QHostAddress((quint32) 0), m_ip);
+	}
 
-			arp_packet_ipv4 packet;
-			arp_ipv4_request(packet, m_arp->m_device->getMacAddress(), QHostAddress((quint32) 0), m_ip);
-			m_arp->arpWrite(QByteArray(reinterpret_cast<char const*>(&packet), sizeof(packet)));
+	void ARPProbe::receivedPacketFrom(ARPPacket const& packet) {
+		if (ARPProbeState::CONFLICT == m_state) return;
+		handleConflict(packet.sender_mac);
+	}
 
-			return true;
+	void ARPProbe::receivedPacketTo(ARPPacket const& packet) {
+		if (ARPProbeState::CONFLICT == m_state) return;
+		// only probes lead to conflict, i.e. requests where sender ip must be 0
+		if (packet.op != ArpOperation::REQUEST) return;
+		if (0 != packet.sender_ip.toIPv4Address()) return;
+
+		handleConflict(packet.target_mac);
+	}
+
+	void ARPProbe::handleConflict(libnutcommon::MacAddress const& mac) {
+		disconnect(m_notifier_from.data(), &ARPNotifier::receivedPacket, this, &ARPProbe::receivedPacketFrom);
+		disconnect(m_notifier_to.data(), &ARPNotifier::receivedPacket, this, &ARPProbe::receivedPacketTo);
+
+		m_state = ARPProbeState::CONFLICT;
+		m_timer.stop();
+
+		m_notifier_from.reset();
+		m_notifier_to.reset();
+
+		emit conflict(m_ip, mac);
+	}
+
+	ARPAnnounce::ARPAnnounce(ARP* arp, QHostAddress const& ip, QObject* parent)
+	: QObject(parent), m_arp(arp), m_ip(ip) {
+		m_timer.start(1000 * ARPConst::ANNOUNCE_INTERVAL, this);
+		sendAnnounce();
+	}
+
+	void ARPAnnounce::timerEvent(QTimerEvent* event) {
+		if (event->timerId() == m_timer.timerId()) {
+			sendAnnounce();
 		}
 	}
 
-	void ARPProbe::gotPacket(libnutcommon::MacAddress const& mac) {
-		if (mac.zero()) return;
-		m_state = ARPProbeState::CONFLICT;
-		finish();
-		emit conflict(m_ip, mac);
-	}
-
-	void ARPProbe::gotProbe(libnutcommon::MacAddress const& mac) {
-		if (mac.zero()) return;
-		m_state = ARPProbeState::CONFLICT;
-		finish();
-		emit conflict(m_ip, mac);
-	}
-
-	void ARPProbe::finish() {
-		m_finished = true;
-		m_arp->m_probes.remove(m_ip);
-		m_arp->arpTimerDelete(this);
-		deleteLater();
-	}
-
-	ARPAnnounce::ARPAnnounce(ARP* arp, QHostAddress const& ip)
-	: ARPTimer(arp), m_ip(ip) {
-		timeEvent();
-	}
-	ARPAnnounce::~ARPAnnounce() {
-		if (m_arp)
-			m_arp->arpTimerDelete(this);
-	}
-	bool ARPAnnounce::timeEvent() {
-		if (m_remaining_announces == 0) {
-			m_arp->arpTimerDelete(this);
-			m_arp = nullptr;
+	void ARPAnnounce::sendAnnounce() {
+		if (!m_arp) {
+			m_timer.stop();
+			return;
+		}
+		if (0 <= m_remaining_announces) {
+			m_timer.stop();
 			emit ready(m_ip);
-			deleteLater();
-			return false;
+			return;
 		}
-		m_remaining_announces--;
+		--m_remaining_announces;
 
-		arp_packet_ipv4 packet;
-		arp_ipv4_request(packet, m_arp->m_device->getMacAddress(), m_ip, m_ip);
-		m_arp->arpWrite(QByteArray(reinterpret_cast<char const*>(&packet), sizeof(packet)));
-
-		m_nextTimeout = Time::wait(ARPConst::ANNOUNCE_INTERVAL);
-		return true;
+		// send gratitous ARP "request" telling everyone our own IP
+		m_arp->sendRequest(m_ip, m_ip);
 	}
 }

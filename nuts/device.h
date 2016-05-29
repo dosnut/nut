@@ -423,9 +423,7 @@ namespace nuts {
 			PROBING,       // Startet ARPProbes
 			RESERVING,     // Probing was successful, now reserve address (more Probes) until
 			               // we really want to use it (wait for DHCP e.g.)
-			ANNOUNCE,      // Announce Address (and start watching for conflicts, as probe is deleted)
-			ANNOUNCING,    // Announced Address
-			BIND,          // Announce was successful, bind address.
+			BIND,          // Bind address and announce it.
 			BOUND,         // Listen for conflicting ARP Packets.
 			CONFLICT,      // Conflict detected, select new address and restart Probing.
 		};
@@ -443,9 +441,9 @@ namespace nuts {
 
 		zeroconf_state m_zc_state = zeroconf_state::OFF;
 		QHostAddress m_zc_probe_ip;
-		ARPProbe* m_zc_arp_probe = nullptr;
-		ARPWatch* m_zc_arp_watch = nullptr;
-		ARPAnnounce* m_zc_arp_announce = nullptr;
+		std::unique_ptr<ARPProbe> m_zc_arp_probe;
+		std::unique_ptr<ARPWatch> m_zc_arp_watch;
+		std::unique_ptr<ARPAnnounce> m_zc_arp_announce;
 
 		std::shared_ptr<libnutcommon::IPv4Config> const m_config;
 		libnutcommon::InterfaceProperties m_properties, m_last_notified_properties;
