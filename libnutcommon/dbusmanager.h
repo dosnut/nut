@@ -83,6 +83,18 @@ namespace libnutcommon {
 		QBasicTimer m_reconnectTimer;
 	};
 
+	namespace internal {
+		/* need to hide signals from "auto-relay" in DBus */
+		class DBusAbstractAdaptorInnerSignals : public QObject {
+			Q_OBJECT
+		signals:
+			/* to notify child adaptors */
+			void dbusConnected(QDBusConnection const& connection);
+			void dbusDisconnected(QDBusConnection const& connection);
+		};
+
+	}
+
 	class DBusAbstractAdaptor: public QDBusAbstractAdaptor {
 		Q_OBJECT
 	public:
@@ -125,19 +137,17 @@ namespace libnutcommon {
 		void handleDBusConnected(QDBusConnection const& connection);
 		void handleDBusDisconnected(QDBusConnection const& connection);
 
-	protected:
+	private:
+		void removeConnections(std::list<QDBusConnection>&& l);
+
+	protected: /* vars */
 		QDBusObjectPath const m_path;
 
-	signals:
-		/* to notify child adaptors */
-		void dbusConnected(QDBusConnection const& connection, QPrivateSignal);
-		void dbusDisconnected(QDBusConnection const& connection, QPrivateSignal);
-
-	private:
+	private: /* vars */
 		std::list<QDBusConnection> m_connections;
 		std::map<QString, std::list<QDBusConnection>> m_services;
 
-		void removeConnections(std::list<QDBusConnection>&& l);
+		internal::DBusAbstractAdaptorInnerSignals m_signals;
 	};
 }
 

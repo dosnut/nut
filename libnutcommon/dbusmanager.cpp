@@ -138,7 +138,7 @@ namespace libnutcommon {
 		for (QDBusConnection& c: l) {
 			c.unregisterObject(m_path.path());
 			onDBusDisconnected(c);
-			emit dbusDisconnected(c, QPrivateSignal{});
+			emit m_signals.dbusDisconnected(c);
 		}
 	}
 
@@ -168,7 +168,7 @@ namespace libnutcommon {
 		}
 
 		onDBusConnected(c);
-		emit dbusConnected(connection, QPrivateSignal{});
+		emit m_signals.dbusConnected(connection);
 	}
 
 	void DBusAbstractAdaptor::handleDBusDisconnected(QDBusConnection const& connection) {
@@ -191,8 +191,8 @@ namespace libnutcommon {
 	}
 
 	void DBusAbstractAdaptor::registerAdaptor(DBusAbstractAdaptor* child) {
-		connect(this, &DBusAbstractAdaptor::dbusConnected, child, &DBusAbstractAdaptor::handleDBusConnected);
-		connect(this, &DBusAbstractAdaptor::dbusDisconnected, child, &DBusAbstractAdaptor::handleDBusDisconnected);
+		connect(&this->m_signals, &internal::DBusAbstractAdaptorInnerSignals::dbusConnected, child, &DBusAbstractAdaptor::handleDBusConnected);
+		connect(&this->m_signals, &internal::DBusAbstractAdaptorInnerSignals::dbusDisconnected, child, &DBusAbstractAdaptor::handleDBusDisconnected);
 		for (auto& c: m_connections) {
 			child->handleDBusConnected(c);
 		}
