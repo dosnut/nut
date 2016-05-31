@@ -7,15 +7,20 @@ extern "C" {
 #include <cstring>
 
 #include <QtEndian>
+#include <QDBusMetaType>
 
 namespace libnutcommon {
 	QDBusArgument& operator<<(QDBusArgument& argument, MacAddress const& data) {
+		argument.beginStructure();
 		argument << data.toString();
+		argument.endStructure();
 		return argument;
 	}
 	QDBusArgument const& operator>>(QDBusArgument const& argument, MacAddress& data) {
 		QString addr;
+		argument.beginStructure();
 		argument >> addr;
+		argument.endStructure();
 		data = MacAddress(addr);
 		return argument;
 	}
@@ -121,5 +126,12 @@ namespace libnutcommon {
 	uint qHash(MacAddress const& key) {
 		auto n = qFromBigEndian<quint64>(key.data.octet);
 		return ::qHash(n);
+	}
+
+	// called by common.cpp: init()
+	void macaddress_init() {
+		qRegisterMetaType<MacAddress>("libnutcommon::MacAddress");
+
+		qDBusRegisterMetaType<MacAddress>();
 	}
 }
