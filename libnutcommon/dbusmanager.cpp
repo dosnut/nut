@@ -4,6 +4,7 @@
 #include <QDBusConnectionInterface>
 #include <QTextStream>
 #include <QTimerEvent>
+#include <QtDebug>
 
 namespace libnutcommon {
 
@@ -156,16 +157,26 @@ namespace libnutcommon {
 		}
 		removeConnections(std::move(removeCons));
 
-		if (found) return;
+		if (found) {
+			qWarning() << "Adaptor " << m_path.path() << " already registered on dbus connection";
+			return;
+		}
 		m_connections.push_back(connection);
 
 		auto c = connection; // registerService() doesn't work on const& -.-
 
 		/* only add connection if we could register our own object */
-		if (!c.registerObject(m_path.path(), parent())) return;
+		if (!c.registerObject(m_path.path(), parent())) {
+			qWarning() << "registerObject(" << m_path.path() << ") failed";
+			return;
+		}
 
 		for (auto s: m_services) {
-			if (c.registerService(s.first)) s.second.push_back(c);
+			if (c.registerService(s.first)) {
+				s.second.push_back(c);
+			} else {
+				qWarning() << "registerService(" << s.first << ") failed";
+			}
 		}
 
 		onDBusConnected(c);
