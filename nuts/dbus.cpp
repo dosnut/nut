@@ -53,8 +53,8 @@ namespace nuts {
 
 	QStringList DBusDeviceManager::getDeviceNames() {
 		QStringList names;
-		for (nuts::Device* dev: m_devmgr->getDevices()) {
-			names.append(dev->getName());
+		for (DBusDevice* dbus_device: m_dbusDevices) {
+			names.append(dbus_device->getName());
 		}
 		return names;
 	}
