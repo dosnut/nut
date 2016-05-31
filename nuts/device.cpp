@@ -63,16 +63,7 @@ namespace nuts {
 		*/
 		m_carrier_timer.setInterval(400);
 		connect(&m_carrier_timer, &QTimer::timeout, this, &DeviceManager::ca_timer);
-		addDevices();
-	}
-
-	void DeviceManager::addDevices() {
-		foreach(QString real_dev, m_hwman.get_ifNames()) {
-			auto devConfig = m_config.lookup(real_dev);
-			if (devConfig) {
-				addDevice(real_dev, devConfig);
-			}
-		}
+		m_hwman.discover();
 	}
 
 	void DeviceManager::addDevice(const QString &ifName, std::shared_ptr<DeviceConfig> dc) {

@@ -109,8 +109,6 @@ namespace nuts {
 		friend class Interface_IPv4;
 
 		HardwareManager m_hwman;
-
-		void addDevices();
 	};
 
 	/** @brief A Device manages the state of a hardware device from the kernel.

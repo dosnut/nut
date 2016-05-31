@@ -28,15 +28,16 @@ namespace nuts {
 		bool controlOn(QString const& ifName, bool force = false);
 		bool controlOff(QString const& ifName);
 
+		/* initial scan for interfaces */
+		void discover();
+
 		QString ifIndex2Name(int ifIndex);
-		QList<QString> get_ifNames();
 		int ifName2Index(QString const& ifName);
 
 		struct ::nl_sock* getNLHandle();
 
 		libnutcommon::MacAddress getMacAddress(QString const& ifName);
 
-		bool ifExists(QString const& ifName);
 		bool hasWLAN(QString const& ifName);
 		bool getEssid(QString const& ifName, QString& essid);
 
@@ -51,6 +52,9 @@ namespace nuts {
 		void read_netlinkmsgs();
 
 	private:
+		bool controlOn(int ifIndex, QString const& ifName, bool force);
+		bool controlOff(int ifIndex, QString const& ifName);
+
 		bool init_netlink();
 		void free_netlink();
 		bool init_ethtool();
@@ -70,11 +74,15 @@ namespace nuts {
 		struct ::nl_sock* nlh{nullptr};
 		struct ::nl_cache* nlcache{nullptr};
 		struct ifstate {
+			explicit ifstate() = default;
+
+			void on();
+			void off();
+
 			bool active{false};
 			bool carrier{false};
 			bool exists{false};
-			explicit ifstate() = default;
-			explicit ifstate(bool active) : active(active), exists(true) { }
+			QString name;
 		};
 		QVector<struct ifstate> ifStates;
 	};
