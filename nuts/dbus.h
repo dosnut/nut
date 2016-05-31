@@ -48,10 +48,10 @@ namespace nuts {
 #endif
 
 	signals:
-		void deviceAdded(QDBusObjectPath const& objectpath);
-		void deviceRemoved(QDBusObjectPath const& objectpath);
-		void deviceAdded(QString const& devname);
-		void deviceRemoved(QString const& devname);
+		void deviceAddedPath(QDBusObjectPath const& objectpath);
+		void deviceRemovedPath(QDBusObjectPath const& objectpath);
+		void deviceAddedName(QString const& devname);
+		void deviceRemovedName(QString const& devname);
 
 	private slots:
 		void devAdded(QString devName, Device* dev);

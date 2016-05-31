@@ -28,8 +28,8 @@ namespace nuts {
 		m_dbusDevices.insert(devName, dbus_device);
 		registerAdaptor(dbus_device);
 
-		emit deviceAdded(dbus_device->getPath());
-		emit deviceAdded(devName);
+		emit deviceAddedPath(dbus_device->getPath());
+		emit deviceAddedName(devName);
 	}
 
 
@@ -39,8 +39,8 @@ namespace nuts {
 		auto dbus_device = m_dbusDevices[devName];
 		m_dbusDevices.remove(devName);
 
-		emit deviceRemoved(dbus_device->getPath());
-		emit deviceRemoved(devName);
+		emit deviceRemovedPath(dbus_device->getPath());
+		emit deviceRemovedName(devName);
 	}
 
 	QList<QDBusObjectPath> DBusDeviceManager::getDeviceList() {
