@@ -1,3 +1,29 @@
+network-utilities (0.6.2-1) unstable; urgency=medium
+
+  * [nuts] fix endless loop on failure in config parser
+  * workaround for pre Qt5.4 QTimer::singleShot API
+  * fix init script, provide systemd service
+  * [nuts] use process manager to keep track of running child processes before terminating
+  * [nuts] split time wrapper class into separate header
+  * cleanup: whitespace, style, explicit constructors, ...
+  * update README requirements to Qt5
+  * [libnutcommon] more cleanups, split config DBus serialization code, enum class
+  * [nuts] replace local QObjectTimer with official QBasicTimer
+  * [libnutcommon] use QBasicTimer in DBus
+  * [libnutcommon] cleanup dbus manager: use QPrivateSignal, fix class name
+  * [libnutcommon] split DBus functions from device.cpp, cleanup MacAddress
+  * [libnutcommon] can't have signals in dbus abstractor, as they'd get relayed to DBus
+  * [nuts] refactor time classes, ARP and zeroconf handling
+  * [nuts] detect device renames, refactor initial discovery
+  * [nuts] use same list for device paths and names
+  * [libnutcommon] fix DBus connection handling: store known connections for later registrations
+  * [libnutcommon] add some DBus logging on failures
+  * [nuts] synchronize signal names from common code, fixing adding and removing of devices on the fly
+  * [libnutcommon] fix DBus serialization of MacAddress (needs to be wrapped in struct), sadly breaking compatibility
+  * Release 0.6.2
+
+ -- Stefan Bühler <buehler@cert.uni-stuttgart.de>  Tue, 31 May 2016 21:22:26 +0200
+
 network-utilities (0.6.1-1) unstable; urgency=medium
 
   * [cmake] use CMAKE_C[XX]_STANDARD[_REQUIRED] if available
