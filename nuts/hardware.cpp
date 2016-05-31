@@ -1,15 +1,3 @@
-//
-// C++ Implementation: hardware
-//
-// Description:
-//
-//
-// Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
-
 #include "hardware.h"
 #include "exception.h"
 #include "log.h"
@@ -43,6 +31,14 @@ extern struct nla_policy ifa_ipv4_policy[IFA_MAX+1];
 #include <QSocketNotifier>
 #include <QFile>
 
+namespace {
+	QString read_IFLA_IFNAME(struct nlattr* (&tb)[IFLA_MAX+1]) {
+		struct nlattr* nla_ifname = tb[IFLA_IFNAME];
+		if (nullptr == nla_ifname) return QString();
+		return QString::fromUtf8((char*) nla_data(nla_ifname), nla_len(nla_ifname)-1);
+	}
+}
+
 namespace nuts {
 	HardwareManager::HardwareManager()
 	: netlink_fd(-1), ethtool_fd(-1) {
@@ -55,7 +51,7 @@ namespace nuts {
 		}
 		fcntl(netlink_fd, F_SETFD, FD_CLOEXEC);
 		fcntl(ethtool_fd, F_SETFD, FD_CLOEXEC);
-		QSocketNotifier *nln = new QSocketNotifier(netlink_fd, QSocketNotifier::Read, this);
+		QSocketNotifier* nln = new QSocketNotifier(netlink_fd, QSocketNotifier::Read, this);
 		connect(nln, &QSocketNotifier::activated, this, &HardwareManager::read_netlinkmsgs);
 	}
 
@@ -65,42 +61,36 @@ namespace nuts {
 	}
 
 	bool HardwareManager::controlOn(int ifIndex, bool force) {
-		if (ifIndex < 0) return false;
-		if (!ifup(ifIndex2Name(ifIndex), force))
-			return false;
-		if (ifIndex >= ifStates.size())
-			ifStates.resize(ifIndex+1);
-		ifStates[ifIndex] = ifstate(true);
-		return true;
+		return controlOn(ifIndex, ifIndex2Name(ifIndex), force);
 	}
 	bool HardwareManager::controlOff(int ifIndex) {
-		if (ifIndex < 0) return false;
-		if (ifIndex < ifStates.size() && ifStates[ifIndex].active) {
-			ifStates[ifIndex].active = false;
-			ifdown(ifIndex2Name(ifIndex));
-		}
-		return true;
+		return controlOff(ifIndex, ifIndex2Name(ifIndex));
 	}
-	bool HardwareManager::controlOn(const QString &ifName, bool force) {
-		int ifIndex = ifName2Index(ifName);
-		if (ifIndex < 0) return false;
-		if (!ifup(ifName, force))
-			return false;
-		if (ifIndex >= ifStates.size())
-			ifStates.resize(ifIndex+1);
-		ifStates[ifIndex] = ifstate(true);
+	bool HardwareManager::controlOn(QString const& ifName, bool force) {
+		return controlOn(ifName2Index(ifName), ifName, force);
+	}
+	bool HardwareManager::controlOff(QString const& ifName) {
+		return controlOff(ifName2Index(ifName), ifName);
+	}
+
+	bool HardwareManager::controlOn(int ifIndex, QString const& ifName, bool force) {
+		if (ifIndex < 0 || ifIndex >= ifStates.size()) return false;
+		if (!ifup(ifName, force)) return false;
+
+		ifStates[ifIndex].on();
 //		log << "activated interface " << ifIndex << endl;
 		return true;
 	}
-	bool HardwareManager::controlOff(const QString &ifName) {
-		int ifIndex = ifName2Index(ifName);
+
+	bool HardwareManager::controlOff(int ifIndex, QString const& ifName) {
 		if (ifIndex < 0) return false;
 		if (ifIndex < ifStates.size() && ifStates[ifIndex].active) {
-			ifStates[ifIndex].active = false;
+			ifStates[ifIndex].off();
 			ifdown(ifName);
 		}
 		return true;
 	}
+
 
 	bool HardwareManager::init_netlink() {
 		nlh = nl_socket_alloc();
@@ -145,12 +135,12 @@ cleanup:
 		close(ethtool_fd);
 	}
 
-	bool HardwareManager::ifup(const QString &ifname, bool force) {
+	bool HardwareManager::ifup(QString const& ifname, bool force) {
 /*		nl_cache_update(nlh, nlcache);
-		struct rtnl_link *request = rtnl_link_alloc();
+		struct rtnl_link* request = rtnl_link_alloc();
 		rtnl_link_set_flags(request, rtnl_link_str2flags("up"));
 		QByteArray buf = ifname.toUtf8();
-		struct rtnl_link *old = rtnl_link_get_by_name(nlcache, buf.constData());
+		struct rtnl_link* old = rtnl_link_get_by_name(nlcache, buf.constData());
 		rtnl_link_change(nlh, old, request, 0);
 		rtnl_link_put(old);
 		rtnl_link_put(request);
@@ -166,7 +156,7 @@ cleanup:
 		}
 		if (ifr.ifr_flags & IFF_UP) {
 			if (!force) return false;
-	        // "restart" interface to get carrier event
+			// "restart" interface to get carrier event
 			ifr.ifr_flags &= ~IFF_UP;
 			if (ioctl(ethtool_fd, SIOCSIFFLAGS, &ifr) < 0) {
 				err << QString("Couldn't set flags for interface '%1'").arg(ifname) << endl;
@@ -180,7 +170,7 @@ cleanup:
 		}
 		return true;
 	}
-	bool HardwareManager::ifdown(const QString &ifname) {
+	bool HardwareManager::ifdown(QString const& ifname) {
 		struct ifreq ifr;
 		if (!ifreq_init(ifr, ifname)) {
 			err << QString("Interface name too long") << endl;
@@ -211,8 +201,19 @@ cleanup:
 		}
 		return QString::fromUtf8(ifr.ifr_name, qstrnlen(ifr.ifr_name, IFNAMSIZ));
 	}
-	QList<QString> HardwareManager::get_ifNames() {
-		QList<QString> ifNames;
+
+	void HardwareManager::discover() {
+		auto discovered = [this](QString const& ifName, int ifIndex) {
+			if (ifIndex < 0) return;
+			if (ifIndex >= ifStates.size()) ifStates.resize(ifIndex+1);
+			if (!ifStates[ifIndex].exists) {
+				ifStates[ifIndex].exists = true;
+				ifStates[ifIndex].name = ifName;
+				log << QString("discovered interface: %1 [index %2]").arg(ifName).arg(ifIndex) << endl;
+				emit newDevice(ifName, ifIndex);
+			}
+		};
+
 		QFile file("/proc/net/dev");
 		if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 			QTextStream in(&file);
@@ -221,25 +222,28 @@ cleanup:
 			ifs = in.readLine();
 			while (!ifs.isEmpty())  {
 				ifs.truncate(ifs.indexOf(":"));
-				ifNames.append(ifs.mid(ifs.lastIndexOf(" ")+1,ifs.size()));
+				QString ifName(ifs.mid(ifs.lastIndexOf(" ")+1,ifs.size()));
+				int ifIndex = ifName2Index(ifName);
+				discovered(ifName, ifIndex);
 				ifs = in.readLine();
 			}
 		}
 		else {
 			struct ifreq ifr;
-			for (int i=0; i<32;i++) { //using nuts on a pc with more than 32 interfaces is insane
+			// using nuts on a pc with more than 32 interfaces is insane
+			for (int i=0; i<32;i++) {
 				ifreq_init(ifr);
 				ifr.ifr_ifindex = i;
 				if (ioctl(ethtool_fd, SIOCGIFNAME, &ifr) < 0) {
 					continue;
 				}
-				ifNames.append(QString::fromUtf8(ifr.ifr_name, qstrnlen(ifr.ifr_name, IFNAMSIZ)));
+				QString ifName(QString::fromUtf8(ifr.ifr_name, qstrnlen(ifr.ifr_name, IFNAMSIZ)));
+				discovered(ifName, i);
 			}
 		}
-		return ifNames;
 	}
 
-	int HardwareManager::ifName2Index(const QString &ifName) {
+	int HardwareManager::ifName2Index(QString const& ifName) {
 		struct ifreq ifr;
 		if (!ifreq_init(ifr, ifName)) {
 			err << QString("Interface name too long") << endl;
@@ -252,11 +256,11 @@ cleanup:
 		return ifr.ifr_ifindex;
 	}
 
-	struct nl_sock *HardwareManager::getNLHandle() {
+	struct nl_sock* HardwareManager::getNLHandle() {
 		return nlh;
 	}
 
-	libnutcommon::MacAddress HardwareManager::getMacAddress(const QString &ifName) {
+	libnutcommon::MacAddress HardwareManager::getMacAddress(QString const& ifName) {
 		struct ifreq ifr;
 		if (!ifreq_init(ifr, ifName)) {
 			err << QString("Interface name too long") << endl;
@@ -266,43 +270,59 @@ cleanup:
 			err << QString("Couldn't get hardware address of '%1'").arg(ifName) << endl;
 			return libnutcommon::MacAddress();
 		}
-		return libnutcommon::MacAddress((quint8*) ifr.ifr_hwaddr.sa_data);
+		return libnutcommon::MacAddress::fromBuffer(ifr.ifr_hwaddr.sa_data);
 	}
 
-	bool HardwareManager::ifreq_init(struct ifreq &ifr, const QString &ifname) {
+	bool HardwareManager::ifreq_init(struct ifreq& ifr, QString const& ifname) {
 		QByteArray buf = ifname.toUtf8();
 		if (buf.size() >= IFNAMSIZ) return false;
 		ifreq_init(ifr);
 		strncpy (ifr.ifr_name, buf.constData(), buf.size());
 		return true;
 	}
-	void HardwareManager::ifreq_init(struct ifreq &ifr) {
-		memset((char*) &ifr, 0, sizeof(ifr));
+	void HardwareManager::ifreq_init(struct ifreq& ifr) {
+		memset(reinterpret_cast<char*>(&ifr), 0, sizeof(ifr));
 	}
 
 	void HardwareManager::read_netlinkmsgs() {
 		struct sockaddr_nl peer;
-		unsigned char *msg;
+		unsigned char* msg;
 		int n, msgsize;
-		struct nlmsghdr *hdr;
+		struct nlmsghdr* hdr;
 
 		msgsize = n = nl_recv(nlh, &peer, &msg, 0);
 		for (hdr = (struct nlmsghdr*) msg; nlmsg_ok(hdr, n); hdr = (struct nlmsghdr*) nlmsg_next(hdr, &n)) {
 //			log << QString("Message type 0x%1").arg(hdr->nlmsg_type, 0, 16) << endl;
 			switch (hdr->nlmsg_type) {
-				case RTM_NEWLINK: {
-					struct ifinfomsg *ifm = (struct ifinfomsg*) nlmsg_data(hdr);
-					struct nlattr *tb[IFLA_MAX+1];
+			case RTM_NEWLINK:
+				/* new or modified link */
+				{
+					struct ifinfomsg* ifm = (struct ifinfomsg*) nlmsg_data(hdr);
+					struct nlattr* tb[IFLA_MAX+1];
 					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
 						break;
 					}
 					int ifindex = ifm->ifi_index;
 					if (ifindex >= ifStates.size())
 						ifStates.resize(ifindex+1);
+					QString ifname = read_IFLA_IFNAME(tb);
+					if (ifname.isNull()) {
+						if (ifStates[ifindex].exists) {
+							ifname = ifStates[ifindex].name;
+						} else {
+							ifname = ifIndex2Name(ifindex);
+						}
+					}
 					if (!ifStates[ifindex].exists) {
 						ifStates[ifindex].exists = true;
-						QString ifname = ifIndex2Name(ifindex);
-//						log << QString("RTM_NEWLINK(%1/%2)").arg(ifindex).arg(ifname) << endl;
+						ifStates[ifindex].name = ifname;
+						log << QString("new interface detected: %1 [index %2]").arg(ifname).arg(ifindex) << endl;
+						emit newDevice(ifname, ifindex);
+					} else if (ifStates[ifindex].name != ifname) {
+						QString oldName = ifStates[ifindex].name;
+						ifStates[ifindex].name = ifname;
+						log << QString("interface rename detected: %1 -> %2 [index %3]").arg(oldName).arg(ifname).arg(ifindex) << endl;
+						emit delDevice(oldName);
 						emit newDevice(ifname, ifindex);
 					}
 					bool carrier = (ifm->ifi_flags & IFF_LOWER_UP) > 0;
@@ -318,20 +338,19 @@ cleanup:
 						} else
 							emit lostCarrier(ifname);
 					}
-					} break;
-				case RTM_DELLINK: {
-					struct ifinfomsg *ifm = (struct ifinfomsg*) nlmsg_data(hdr);
-					struct nlattr *tb[IFLA_MAX+1];
+				}
+				break;
+			case RTM_DELLINK:
+				{
+					struct ifinfomsg* ifm = (struct ifinfomsg*) nlmsg_data(hdr);
+					struct nlattr* tb[IFLA_MAX+1];
 					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
 						break;
 					}
 					int ifindex = ifm->ifi_index;
-					struct nlattr *nla_ifname = tb[IFLA_IFNAME];
-					QString ifname;
-					if (nla_ifname)
-						ifname = QString::fromUtf8((char*) nla_data(nla_ifname), nla_len(nla_ifname)-1);
+					QString ifname = read_IFLA_IFNAME(tb);
 					if (ifname.isNull()) break;
-//					log << QString("RTM_DELLINK(%1/%2)").arg(ifindex).arg(ifname) << endl;
+					log << QString("lost interface: %1 [index %2]").arg(ifname).arg(ifindex) << endl;
 					if (ifindex < ifStates.size()) {
 						if (ifStates[ifindex].exists) {
 							if (ifStates[ifindex].carrier)
@@ -339,10 +358,11 @@ cleanup:
 							ifStates[ifindex].exists = false;
 							ifStates[ifindex].carrier = false;
 							ifStates[ifindex].active = false;
+							ifStates[ifindex].name.clear();
 						}
 					}
 					emit delDevice(ifname);
-					} break;
+				} break;
 			}
 		}
 		if (msgsize > 0) free(msg);
@@ -353,11 +373,11 @@ cleanup:
 		return ifStates[ifIndex].active;
 	}
 
-	static void iwreq_init(struct iwreq &iwr) {
-		memset((char*) &iwr, 0, sizeof(iwr));
+	static void iwreq_init(struct iwreq& iwr) {
+		memset(reinterpret_cast<char*>(&iwr), 0, sizeof(iwr));
 	}
 
-	static bool iwreq_init(struct iwreq &iwr, const QString &ifname) {
+	static bool iwreq_init(struct iwreq& iwr, QString const& ifname) {
 		QByteArray buf = ifname.toUtf8();
 		if (buf.size() >= IFNAMSIZ) return false;
 		iwreq_init(iwr);
@@ -365,30 +385,14 @@ cleanup:
 		return true;
 	}
 
-	bool HardwareManager::ifExists(const QString &ifName) {
-		struct ifreq ifr;
-		if (!ifreq_init(ifr, ifName)) {
-			err << QString("Interface name too long") << endl;
-			return false;
-		}
-		if (ioctl(ethtool_fd, SIOCGIFFLAGS, &ifr) < 0) {
-			return false;
-		}
-		int ifIndex = ifName2Index(ifName);
-		if (ifIndex >= ifStates.size())
-			ifStates.resize(ifIndex+1);
-		ifStates[ifIndex] = ifstate(false);
-		return true;
-	}
-
-	bool HardwareManager::hasWLAN(const QString &ifName) {
+	bool HardwareManager::hasWLAN(QString const& ifName) {
 		struct iwreq iwr;
 		iwreq_init(iwr, ifName);
 		if (ioctl(ethtool_fd, SIOCGIWNAME, &iwr) < 0) return false;
 		return true;
 	}
 
-	bool HardwareManager::getEssid(const QString &ifName, QString &essid) {
+	bool HardwareManager::getEssid(QString const& ifName, QString& essid) {
 		essid = "";
 		struct iwreq iwr;
 		iwreq_init(iwr, ifName);
@@ -400,4 +404,15 @@ cleanup:
 		essid = QString::fromUtf8(buf, qstrnlen(buf, iwr.u.essid.length));
 		return true;
 	}
+
+	void HardwareManager::ifstate::on() {
+		active = true;
+		exists = true;
+		carrier = false;
+	}
+
+	void HardwareManager::ifstate::off() {
+		active = false;
+	}
+
 }

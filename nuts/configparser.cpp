@@ -92,7 +92,7 @@ namespace {
 		/* had an explicit no-dhcp option */
 		bool no_def_dhcp = false;
 
-		local_env_config(QString name = "")
+		explicit local_env_config(QString const& name = "")
 		: real(std::make_shared<EnvironmentConfig>(name)) {
 		}
 
@@ -111,7 +111,7 @@ namespace {
 	struct state {
 		Config& m_config;
 		QString m_configFile;
-		FILE *m_strm = nullptr;
+		FILE* m_strm = nullptr;
 		config_tokenctx m_ctx = nullptr;
 
 		config_lloc lloc;
@@ -120,7 +120,7 @@ namespace {
 
 		bool failed = false;
 
-		state(Config &config, const QString &configFile) : m_config(config), m_configFile(configFile) {
+		explicit state(Config& config, QString const& configFile) : m_config(config), m_configFile(configFile) {
 			m_strm = fopen(m_configFile.toUtf8().constData(), "r");
 			if (!m_strm)
 				throw Exception(QString("Couldn't open config file '%1'").arg(m_configFile));
@@ -139,12 +139,12 @@ namespace {
 			}
 		}
 
-		void error(QString msg) {
+		void error(QString const& msg) {
 			err << QString("%1:%2: %3\n").arg(m_configFile).arg(lloc.lineNum).arg(msg);
 			failed = true;
 		}
 
-		void error_expected(QString msg) {
+		void error_expected(QString const& msg) {
 			error("expected " + msg + ", got " + toString(peek(), tv));
 			pop();
 		}
@@ -161,11 +161,6 @@ namespace {
 			prev_token = last_token;
 			// stop at EOF, otherwise consume it
 			if (ENDOFFILE != last_token) last_token = -1;
-		}
-
-		int get() {
-			auto r = peek();
-			return r;
 		}
 
 		bool eat(int t) {
@@ -240,15 +235,17 @@ namespace {
 				pop();
 				for (;;) {
 					while (';' == peek()) pop();
-					searchOptionEnd(option());
 					if ('}' == peek()) {
 						pop();
 						while (';' == peek()) pop();
 						return true;
 					}
+					searchOptionEnd(option());
 				}
 			case ';':
 				pop();
+				return true;
+			case ENDOFFILE:
 				return true;
 			default:
 				searchOptionEnd(option());
@@ -595,16 +592,16 @@ namespace {
 
 		bool parseDevice() {
 			if (!eat(DEVICE)) return false;
-			DeviceNamePattern::PatternType pt = DeviceNamePattern::Plain;
+			DeviceNamePatternType pt = DeviceNamePatternType::Plain;
 			if (REGEXP == peek()) {
-				pt = DeviceNamePattern::RegExp;
+				pt = DeviceNamePatternType::RegExp;
 				pop();
 			}
 			if (!eat(STRING)) return false;
 			auto name = tv.str;
-			if (DeviceNamePattern::RegExp != pt
+			if (DeviceNamePatternType::RegExp != pt
 				&& (name.contains("?") || name.contains("[") || name.contains("]") || name.contains("*"))) {
-				pt = DeviceNamePattern::Wildcard;
+				pt = DeviceNamePatternType::Wildcard;
 			}
 			DeviceNamePattern dnp { name, pt };
 			auto duplicate = (m_config.namedDeviceConfigs.find(dnp) != m_config.namedDeviceConfigs.end());

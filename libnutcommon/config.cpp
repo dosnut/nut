@@ -2,191 +2,29 @@
 #include "enum.h"
 
 namespace libnutcommon {
-	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data) {
-		argument.beginStructure();
-		argument
-			<< data.noAutoStart
-			<< data.wpaConfigFile
-			<< data.wpaDriver
-			<< data.gatewayMetric;
-		argument.beginArray(qMetaTypeId<EnvironmentConfig>());
-		for(auto const& ec: data.environments) {
-			argument << *ec;
-		}
-		argument.endArray();
-		argument.endStructure();
-		return argument;
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data) {
-		argument.beginStructure();
-		argument
-			>> data.noAutoStart
-			>> data.wpaConfigFile
-			>> data.wpaDriver
-			>> data.gatewayMetric;
-		argument.beginArray();
-		while (!argument.atEnd()) {
-			auto ec = std::make_shared<EnvironmentConfig>();
-			argument >> *ec;
-			data.environments.push_back(std::move(ec));
-		}
-		argument.endArray();
-		argument.endStructure();
-		return argument;
-	}
-
-	QDBusArgument& operator<< (QDBusArgument& argument, SelectResult selectResult) {
-		return dbusSerializeEnum(argument, selectResult);
-	}
-	const QDBusArgument& operator>> (const QDBusArgument& argument, SelectResult& selectResult) {
-		return dbusUnserializeEnum(argument, selectResult);
-	}
-
-	QDBusArgument& operator<< (QDBusArgument& argument, SelectType selectType) {
-		return dbusSerializeEnum(argument, selectType);
-	}
-	const QDBusArgument& operator>> (const QDBusArgument& argument, SelectType& selectType) {
-		return dbusUnserializeEnum(argument, selectType);
-	}
-
-	QDBusArgument &operator<< (QDBusArgument &argument, const SelectRule &data) {
-		argument.beginStructure();
-		argument
-			<< data.invert
-			<< data.selType
-			<< data.block
-			<< data.essid
-			<< data.ipAddr
-			<< data.macAddr;
-		argument.endStructure();
-		return argument;
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectRule &data) {
-		argument.beginStructure();
-		argument
-			>> data.invert
-			>> data.selType
-			>> data.block
-			>> data.essid
-			>> data.ipAddr
-			>> data.macAddr;
-		argument.endStructure();
-		return argument;
-	}
-
-	QDBusArgument &operator<< (QDBusArgument &argument, const SelectConfig &data) {
-		argument.beginStructure();
-		argument
-			<< data.filters
-			<< data.blocks;
-		argument.endStructure();
-		return argument;
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectConfig &data) {
-		argument.beginStructure();
-		argument
-			>> data.filters
-			>> data.blocks;
-		argument.endStructure();
-		return argument;
-	}
-
-	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentConfig &data) {
-		argument.beginStructure();
-		argument
-			<< data.name
-			<< data.select;
-		argument.beginArray( qMetaTypeId<IPv4Config>() );
-		for(auto const& ic: data.ipv4Interfaces) {
-			argument << *ic;
-		}
-		argument.endArray();
-		argument.endStructure();
-		return argument;
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentConfig &data) {
-		argument.beginStructure();
-		argument
-			>> data.name
-			>> data.select;
-		argument.beginArray();
-		while (!argument.atEnd()) {
-			auto ic = std::make_shared<IPv4Config>();
-			argument >> *ic;
-			data.ipv4Interfaces.push_back(std::move(ic));
-		}
-		argument.endArray();
-		argument.endStructure();
-		return argument;
-	}
-
-	QDBusArgument &operator<< (QDBusArgument &argument, IPv4ConfigFlags flags) {
-		return dbusSerializeFlags(argument, flags);
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4ConfigFlags &flags) {
-		return dbusUnserializeFlags(argument, flags);
-	}
-
-	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4Config &data) {
-		argument.beginStructure();
-		argument
-			<< data.flags
-			<< data.static_ip
-			<< data.static_netmask
-			<< data.static_gateway
-			<< data.static_dnsservers
-			<< data.gatewayMetric;
-		argument.endStructure();
-		return argument;
-	}
-	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4Config &data) {
-		argument.beginStructure();
-		argument
-			>> data.flags
-			>> data.static_ip
-			>> data.static_netmask
-			>> data.static_gateway
-			>> data.static_dnsservers
-			>> data.gatewayMetric;
-		argument.endStructure();
-		return argument;
-	}
-
-	bool DeviceNamePattern::operator<(const DeviceNamePattern &other) const {
-		return type < other.type || (type == other.type &&
-			pattern < other.pattern
+	bool DeviceNamePattern::operator<(const DeviceNamePattern& other) const {
+		return m_type < other.m_type || (m_type == other.m_type &&
+			m_pattern < other.m_pattern
 			);
 	}
 
-	bool DeviceNamePattern::match(QString name) const {
-		switch (type) {
-		case Plain:
-			return pattern == name;
-		case RegExp:
-			return QRegExp{ pattern, Qt::CaseSensitive, QRegExp::RegExp }.exactMatch(name);
-		case Wildcard:
-			return QRegExp{ pattern, Qt::CaseSensitive, QRegExp::Wildcard }.exactMatch(name);
+	bool DeviceNamePattern::match(QString const& name) const {
+		switch (m_type) {
+		case DeviceNamePatternType::Plain:
+			return m_pattern == name;
+		case DeviceNamePatternType::RegExp:
+			return QRegExp{ m_pattern, Qt::CaseSensitive, QRegExp::RegExp }.exactMatch(name);
+		case DeviceNamePatternType::Wildcard:
+			return QRegExp{ m_pattern, Qt::CaseSensitive, QRegExp::Wildcard }.exactMatch(name);
 		}
 		return false;
 	}
 
-	QString DeviceNamePattern::typeString() const {
-		switch (type) {
-		case Plain:
-			return { "Plain" };
-		case RegExp:
-			return { "RegExp" };
-		case Wildcard:
-			return { "Wildcard" };
-		}
-		return { "" };
-	}
-
-	std::shared_ptr<DeviceConfig> Config::create(const DeviceNamePattern& pattern) {
+	std::shared_ptr<DeviceConfig> Config::create(DeviceNamePattern const& pattern) {
 		return namedDeviceConfigs.emplace(pattern, std::make_shared<DeviceConfig>()).first->second;
 	}
 
-	std::shared_ptr<DeviceConfig> Config::lookup(QString deviceName) {
+	std::shared_ptr<DeviceConfig> Config::lookup(QString const& deviceName) {
 		for (auto const& ndc: namedDeviceConfigs) {
 			if (ndc.first.match(deviceName)) return ndc.second;
 		}
@@ -244,24 +82,24 @@ namespace libnutcommon {
 
 	// called by common.cpp: init()
 	void config_init() {
-		qRegisterMetaType< DeviceConfig >("libnutcommon::DeviceConfig");
-		qRegisterMetaType< SelectResult >("libnutcommon::SelectResult");
-		qRegisterMetaType< QVector< SelectResult > >("QVector<libnutcommon::SelectRule>");
-		qRegisterMetaType< SelectType >("libnutcommon::SelectType");
-		qRegisterMetaType< SelectRule >("libnutcommon::SelectRule");
-		qRegisterMetaType< SelectConfig >("libnutcommon::SelectConfig");
-		qRegisterMetaType< EnvironmentConfig >("libnutcommon::EnvironmentConfig");
-		qRegisterMetaType< IPv4ConfigFlags >("libnutcommon::IPv4ConfigFlags");
-		qRegisterMetaType< IPv4Config >("libnutcommon::IPv4Config");
+		qRegisterMetaType<DeviceConfig>("libnutcommon::DeviceConfig");
+		qRegisterMetaType<SelectResult>("libnutcommon::SelectResult");
+		qRegisterMetaType<QVector<SelectResult>>("QVector<libnutcommon::SelectRule>");
+		qRegisterMetaType<SelectType>("libnutcommon::SelectType");
+		qRegisterMetaType<SelectRule>("libnutcommon::SelectRule");
+		qRegisterMetaType<SelectConfig>("libnutcommon::SelectConfig");
+		qRegisterMetaType<EnvironmentConfig>("libnutcommon::EnvironmentConfig");
+		qRegisterMetaType<IPv4ConfigFlags>("libnutcommon::IPv4ConfigFlags");
+		qRegisterMetaType<IPv4Config>("libnutcommon::IPv4Config");
 
-		qDBusRegisterMetaType< DeviceConfig >();
-		qDBusRegisterMetaType< SelectResult >();
-		qDBusRegisterMetaType< QVector< SelectResult > >();
-		qDBusRegisterMetaType< SelectType >();
-		qDBusRegisterMetaType< SelectRule >();
-		qDBusRegisterMetaType< SelectConfig >();
-		qDBusRegisterMetaType< EnvironmentConfig >();
-		qDBusRegisterMetaType< IPv4ConfigFlags >();
-		qDBusRegisterMetaType< IPv4Config >();
+		qDBusRegisterMetaType<DeviceConfig>();
+		qDBusRegisterMetaType<SelectResult>();
+		qDBusRegisterMetaType<QVector<SelectResult>>();
+		qDBusRegisterMetaType<SelectType>();
+		qDBusRegisterMetaType<SelectRule>();
+		qDBusRegisterMetaType<SelectConfig>();
+		qDBusRegisterMetaType<EnvironmentConfig>();
+		qDBusRegisterMetaType<IPv4ConfigFlags>();
+		qDBusRegisterMetaType<IPv4Config>();
 	}
 }

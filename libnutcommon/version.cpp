@@ -6,9 +6,9 @@
 
 namespace libnutcommon {
 	namespace {
-		QString v{ NUT_VERSION };
+		QString const v{ NUT_VERSION };
 	}
-	QString const& version() { 
+	QString version() { 
 		return v;
 	}
 }

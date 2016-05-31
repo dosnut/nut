@@ -1,11 +1,3 @@
-/*
-// C++ Implementation: hardware_ext.c
-//
-// Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
-//
-// Copyright: See COPYING file that comes with this distribution
-*/
-
 #include <asm/types.h>
 /* socket, AF_INET, SOCK_RAW */
 #include <sys/socket.h>
@@ -29,8 +21,8 @@ struct nla_policy ifla_policy[IFLA_MAX+1] = {
 	[IFLA_MTU]              = { .type = NLA_U32 },
 	[IFLA_TXQLEN]           = { .type = NLA_U32 },
 	[IFLA_WEIGHT]           = { .type = NLA_U32 },
-/*    [IFLA_OPERSTATE]        = { .type = NLA_U8 },*/
-/*    [IFLA_LINKMODE]         = { .type = NLA_U8 },*/
+/*	[IFLA_OPERSTATE]        = { .type = NLA_U8 },*/
+/*	[IFLA_LINKMODE]         = { .type = NLA_U8 },*/
 };
 
 struct nla_policy ifa_ipv4_policy[IFA_MAX+1] = {

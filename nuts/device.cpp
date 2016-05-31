@@ -1,4 +1,3 @@
-
 #include "configparser.h"
 #include "device.h"
 #include "log.h"
@@ -45,8 +44,8 @@ static inline void setSockaddrIPv4(struct sockaddr &s, quint32 host = 0, quint16
 namespace nuts {
 	using namespace libnutcommon;
 
-	DeviceManager::DeviceManager(const QString &configFile)
-	: m_config(parseConfig(configFile)) {
+	DeviceManager::DeviceManager(const QString &configFile, ProcessManager* processManager)
+	: m_events(processManager), m_config(parseConfig(configFile)) {
 		connect(&m_hwman, &HardwareManager::gotCarrier, this, &DeviceManager::gotCarrier);
 		connect(&m_hwman, &HardwareManager::lostCarrier, this, &DeviceManager::lostCarrier);
 		connect(&m_hwman, &HardwareManager::newDevice, this, &DeviceManager::newDevice);
@@ -64,16 +63,7 @@ namespace nuts {
 		*/
 		m_carrier_timer.setInterval(400);
 		connect(&m_carrier_timer, &QTimer::timeout, this, &DeviceManager::ca_timer);
-		addDevices();
-	}
-
-	void DeviceManager::addDevices() {
-		foreach(QString real_dev, m_hwman.get_ifNames()) {
-			auto devConfig = m_config.lookup(real_dev);
-			if (devConfig) {
-				addDevice(real_dev, devConfig);
-			}
-		}
+		m_hwman.discover();
 	}
 
 	void DeviceManager::addDevice(const QString &ifName, std::shared_ptr<DeviceConfig> dc) {
@@ -84,11 +74,24 @@ namespace nuts {
 	}
 
 	DeviceManager::~DeviceManager() {
+		// shutdown() should be used to cleanup before
+
 		// manually deleting devices so HardwareManager is available for their destruction;
 		// in ~QObject  (deleteChildren) it is too late for them.
 		foreach (Device* device, m_devices)
 			delete device;
 		m_devices.clear();
+	}
+
+	void DeviceManager::shutdown()
+	{
+		// no new hardware anymore
+		disconnect(&m_hwman, &HardwareManager::newDevice, 0, 0);
+
+		for (QString const& ifName: m_devices.keys()) {
+			Device* device = m_devices.value(ifName, nullptr);
+			if (device) delete device;
+		}
 	}
 
 	void DeviceManager::ca_timer() {
@@ -177,7 +180,7 @@ namespace nuts {
 
 	//Initialize with default values, add environments, connect to dm-events
 	Device::Device(DeviceManager* dm, const QString &name, std::shared_ptr<DeviceConfig> config, bool hasWLAN)
-	: QObject(dm), m_arp(this), m_dm(dm), m_interfaceIndex(-1), m_config(config), m_activeEnv(-1), m_nextEnv(-1), m_userEnv(-1), m_waitForEnvSelects(0), m_dhcp_client_socket(-1), m_wpa_supplicant(0) {
+	: QObject(dm), m_arp(this), m_dm(dm), m_config(config) {
 		m_properties.name = name;
 		m_properties.type = hasWLAN ? DeviceType::AIR : DeviceType::ETH;
 		m_properties.state = DeviceState::DEACTIVATED;
@@ -493,7 +496,7 @@ namespace nuts {
 
 
 	Environment::Environment(Device *device, std::shared_ptr<EnvironmentConfig> config, int id)
-	: QObject{device}, m_device{device}, m_config{config}, m_envIsUp{false}, m_selArpWaiting{0}, m_needUserSetup{false} {
+	: QObject{device}, m_device{device}, m_config{config} {
 		m_properties.name = m_config->name;
 		m_properties.id = id;
 		m_properties.active = false;
@@ -566,8 +569,6 @@ namespace nuts {
 	bool Environment::startSelect() {
 		m_selArpWaiting = 0;
 
-		ARPRequest *r;
-
 		const QVector<SelectRule> &filters = m_config->select.filters;
 		int c = filters.size();
 		for (int i = 0; i < c; i++) {
@@ -576,11 +577,12 @@ namespace nuts {
 				m_properties.selectResults[i] = SelectResult::User;
 				break;
 			case SelectType::ARP:
-				r = m_device->m_arp.requestIPv4(QHostAddress((quint32) 0), filters[i].ipAddr);
-				if (!r) return false;
-				r->disconnect(this);
-				connect(r, &ARPRequest::timeout, this, &Environment::selectArpRequestTimeout);
-				connect(r, &ARPRequest::foundMac, this, &Environment::selectArpRequestFoundMac);
+				{
+					// TODO: manage r object (deletes itself right now)
+					ARPRequest* r = new ARPRequest(&m_device->m_arp, QHostAddress((quint32) 0), filters[i].ipAddr, this);
+					connect(r, &ARPRequest::timeout, this, &Environment::selectArpRequestTimeout);
+					connect(r, &ARPRequest::foundMac, this, &Environment::selectArpRequestFoundMac);
+				}
 				m_selArpWaiting++;
 				break;
 			case SelectType::ESSID:
@@ -690,7 +692,6 @@ namespace nuts {
 	}
 
 	Interface_IPv4::~Interface_IPv4() {
-		m_dhcp_timer.kill(this);
 		releaseXID();
 	}
 
@@ -757,18 +758,18 @@ namespace nuts {
 
 	void Interface_IPv4::dhcp_setup_interface(DHCPPacket *ack, bool renewing) {
 		//stop fallback
-		m_fallback_timer.kill(this);
+		m_fallback_timer.stop();
 		if (renewing) {
-			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, 0xffffffffu));
+			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(dhcp_option::LEASE_TIME, 0xffffffffu));
 		} else {
 			m_properties.ip = ack->getYourIP();
-			m_properties.netmask = ack->getOptionAddress(DHCP_SUBNET);
-			m_properties.gateway = ack->getOptionAddress(DHCP_ROUTER);
-			m_properties.dnsServers = ack->getOptionAddresses(DHCP_DNS_SERVER);
-			m_localdomain = ack->getOptionString(DHCP_DOMAIN_NAME);
-			m_dhcp_server_identifier = ack->getOption(DHCP_SERVER_ID);
+			m_properties.netmask = ack->getOptionAddress(dhcp_option::SUBNET);
+			m_properties.gateway = ack->getOptionAddress(dhcp_option::ROUTER);
+			m_properties.dnsServers = ack->getOptionAddresses(dhcp_option::DNS_SERVER);
+			m_localdomain = ack->getOptionString(dhcp_option::DOMAIN_NAME);
+			m_dhcp_server_identifier = ack->getOption(dhcp_option::SERVER_ID);
 			m_dhcp_server_ip = QHostAddress(ntohl(ack->headers.ip.saddr));
-			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(DHCP_LEASE_TIME, 0xffffffffu));
+			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(dhcp_option::LEASE_TIME, 0xffffffffu));
 				// T1: 0.5 * dhcp_lease_time
 				// T2: 0.875 * dhcp_lease_time ( 7/8 )
 			systemUp(InterfaceState::DHCP);
@@ -784,18 +785,11 @@ namespace nuts {
 		systemUp(InterfaceState::ZEROCONF);
 	}
 
-	quint16 hashMac(const MacAddress &addr) {
-		auto w0 = qFromBigEndian<quint16>(addr.data.bytes);
-		auto w1 = qFromBigEndian<quint16>(addr.data.bytes + 2);
-		auto w2 = qFromBigEndian<quint16>(addr.data.bytes + 4);
-		return w0 ^ w1 ^ w2;
-	}
-
 	void Interface_IPv4::zeroconfProbe() {   // select new ip and start probe it
 		quint32 lastip = m_zc_probe_ip.toIPv4Address();
 		const quint32 baseip = 0xA9FE0000; // 169.254.0.0
 		const quint32 mask = 0xFFFF;
-		quint32 ip = baseip | hashMac(m_env->m_device->getMacAddress());
+		quint32 ip = baseip | (quint16) qHash(m_env->m_device->getMacAddress());
 		while (ip == lastip) {
 			quint32 rnd;
 			do {
@@ -804,39 +798,23 @@ namespace nuts {
 			ip = baseip | rnd;
 		}
 		m_zc_probe_ip = QHostAddress(ip);
-		m_zc_arp_probe = m_env->m_device->m_arp.probeIPv4(m_zc_probe_ip);
-		if (!m_zc_arp_probe || m_zc_arp_probe->getState() != ARPProbe::PROBING) {
-			err << "ARPProbe failed" << endl;
-			m_zc_state =ZCS_OFF;
-			return;
-		}
-		// This did lead to segfaults... ;_)
-		// m_zc_arp_probe->setReserve(m_config->flags & IPv4ConfigFlag::DHCP);
-		connect(m_zc_arp_probe, &ARPProbe::conflict, this, &Interface_IPv4::zc_probe_conflict);
-		connect(m_zc_arp_probe, &ARPProbe::ready, this, &Interface_IPv4::zc_probe_ready);
+		m_zc_arp_probe.reset(new ARPProbe(&m_env->m_device->m_arp, m_zc_probe_ip, this));
+		connect(m_zc_arp_probe.get(), &ARPProbe::conflict, this, &Interface_IPv4::zc_probe_conflict);
+		connect(m_zc_arp_probe.get(), &ARPProbe::ready, this, &Interface_IPv4::zc_probe_ready);
 	}
 	void Interface_IPv4::zeroconfWatch() {
-		m_zc_arp_watch = m_env->m_device->m_arp.watchIPv4(m_zc_probe_ip);
-		connect(m_zc_arp_watch, &ARPWatch::conflict, this, &Interface_IPv4::zc_watch_conflict);
+		m_zc_arp_watch.reset(new ARPWatch(&m_env->m_device->m_arp, m_zc_probe_ip, this));
+		connect(m_zc_arp_watch.get(), &ARPWatch::conflict, this, &Interface_IPv4::zc_watch_conflict);
 	}
 	void Interface_IPv4::zeroconfAnnounce() {
-		m_zc_arp_announce = m_env->m_device->m_arp.announceIPv4(m_zc_probe_ip);
-		connect(m_zc_arp_announce, &ARPAnnounce::ready, this, &Interface_IPv4::zc_announce_ready);
+		m_zc_arp_announce.reset(new ARPAnnounce(&m_env->m_device->m_arp, m_zc_probe_ip, this));
+		connect(m_zc_arp_announce.get(), &ARPAnnounce::ready, this, &Interface_IPv4::zc_announce_ready);
 	}
 
 	void Interface_IPv4::zeroconfFree() {    // free ARPProbe and ARPWatch
-		if (m_zc_arp_probe) {
-			delete m_zc_arp_probe;
-			m_zc_arp_probe = 0;
-		}
-		if (m_zc_arp_announce) {
-			delete m_zc_arp_announce;
-			m_zc_arp_announce = 0;
-		}
-		if (m_zc_arp_watch) {
-			delete m_zc_arp_watch;
-			m_zc_arp_watch = 0;
-		}
+		m_zc_arp_probe.reset();
+		m_zc_arp_announce.reset();
+		m_zc_arp_watch.reset();
 	}
 
 	void Interface_IPv4::zeroconfAction() {
@@ -844,142 +822,131 @@ namespace nuts {
 			return;
 		bool hasDHCP = (m_config->flags & IPv4ConfigFlag::DHCP);
 		if (m_properties.state == InterfaceState::DHCP)
-			m_zc_state = ZCS_OFF;
+			m_zc_state = zeroconf_state::OFF;
 		for (;;) {
 			switch (m_zc_state) {
-			case ZCS_OFF:
+			case zeroconf_state::OFF:
 				zeroconfFree();
 				return;
-			case ZCS_START:
+			case zeroconf_state::START:
 				m_zc_probe_ip = QHostAddress((quint32) 0);
-				m_zc_state = ZCS_PROBE;
-			case ZCS_PROBE:
+				m_zc_state = zeroconf_state::PROBE;
+			case zeroconf_state::PROBE:
 				zeroconfProbe();
-				m_zc_state = ZCS_PROBING;
-			case ZCS_PROBING:
+				m_zc_state = zeroconf_state::PROBING;
+			case zeroconf_state::PROBING:
 				return;
-			case ZCS_RESERVING:
+			case zeroconf_state::RESERVING:
 				if (!hasDHCP || m_dhcp_retry > 3) {
-					if (m_zc_arp_probe != 0){
-						delete m_zc_arp_probe;
-						m_zc_arp_probe = 0;
-					}
-					m_zc_state = ZCS_ANNOUNCE;
+					m_zc_arp_probe.reset();
+					m_zc_state = zeroconf_state::BIND;
 				} else {
 					return;
 				}
-			case ZCS_ANNOUNCE:
+			case zeroconf_state::BIND:
 				zeroconfWatch();
 				zeroconfAnnounce();
-				m_zc_state = ZCS_ANNOUNCING;
-			case ZCS_ANNOUNCING:
-				return;
-			case ZCS_BIND:
 				zeroconf_setup_interface();
-				m_zc_state = ZCS_BOUND;
-			case ZCS_BOUND:
+				m_zc_state = zeroconf_state::BOUND;
+			case zeroconf_state::BOUND:
 				return;
-			case ZCS_CONFLICT:
+			case zeroconf_state::CONFLICT:
 				zeroconfFree();
-				m_zc_state = ZCS_PROBE;
+				m_zc_state = zeroconf_state::PROBE;
 				break;
 			}
 		}
 	}
 
 	void Interface_IPv4::zc_probe_conflict() {
-		m_zc_arp_probe = 0; // Deletes itself
-		m_zc_state = ZCS_CONFLICT;
+		m_zc_arp_probe.reset();
+		m_zc_state = zeroconf_state::CONFLICT;
 		zeroconfAction();
 	}
 	void Interface_IPv4::zc_probe_ready() {
-		if (!m_zc_arp_probe->getReserve())
-			m_zc_arp_probe = 0; // Deletes itself
-		m_zc_state = ZCS_RESERVING;
+		m_zc_state = zeroconf_state::RESERVING;
 		zeroconfAction();
 	}
 	void Interface_IPv4::zc_announce_ready() {
-		m_zc_arp_announce = 0; // Deletes itself
-		m_zc_state = ZCS_BIND;
-		zeroconfAction();
+		m_zc_arp_announce.reset();
 	}
 	void Interface_IPv4::zc_watch_conflict() {
-		m_zc_arp_watch = 0; // Deletes itself
+		m_zc_arp_watch.reset();
 		if (m_properties.state == InterfaceState::ZEROCONF) systemDown(InterfaceState::OFF);
-		m_zc_state = ZCS_CONFLICT;
+		m_zc_state = zeroconf_state::CONFLICT;
 		zeroconfAction();
 	}
 
 	void Interface_IPv4::dhcpAction(DHCPPacket *source) {
 		for (;;) {
 			switch (m_dhcpstate) {
-			case DHCPS_OFF:
+			case dhcp_state::OFF:
 				releaseXID();
 				return;
-			case DHCPS_INIT_START:
+			case dhcp_state::INIT_START:
 				m_dhcp_retry = 0;
 				// fall through:
-				// dhcpstate = DHCPS_INIT;
-			case DHCPS_INIT:
+				// dhcpstate = dhcp_state::INIT;
+			case dhcp_state::INIT:
 				checkFallbackRunning();
 				dhcp_send_discover();
-				m_dhcpstate = DHCPS_SELECTING;
+				m_dhcpstate = dhcp_state::SELECTING;
 				break;
-			case DHCPS_SELECTING:
+			case dhcp_state::SELECTING:
 				if (source) {
-					if (source->getMessageType() == DHCP_OFFER)  {
-						m_dhcp_timer.kill(this);
+					if (source->getMessageType() == dhcp_message_type::OFFER)  {
+						m_dhcp_timer.stop();
 						dhcp_send_request(source);
-						m_dhcpstate = DHCPS_REQUESTING;
+						m_dhcpstate = dhcp_state::REQUESTING;
 					}
 				} else {
 					if (m_dhcp_retry < 5) {
 						m_dhcp_retry++;
 						// send 6 packets with short interval
 						// 0, 500, 2500, 4500, 6500, 8500 [ms]
-						m_dhcp_timer.set_timeout(this, 500 + (m_dhcp_retry-1) * 2000);
+						m_dhcp_timer.start(500 + (m_dhcp_retry-1) * 2000, this);
 					} else {
 						// 1 min
-						m_dhcp_timer.set_timeout(this, 1 * 60 * 1000);
+						m_dhcp_timer.start(1 * 60 * 1000, this);
 					}
 					return;
 				}
-			case DHCPS_REQUESTING:
+			case dhcp_state::REQUESTING:
 				if (source) {
 					switch (source->getMessageType()) {
-					case DHCP_ACK:
-						m_dhcp_timer.kill(this);
+					case dhcp_message_type::ACK:
+						m_dhcp_timer.stop();
 						dhcp_setup_interface(source);
-						m_dhcpstate = DHCPS_BOUND;
+						m_dhcpstate = dhcp_state::BOUND;
 						break;
-					case DHCP_NAK:
-						m_dhcp_timer.kill(this);
-						m_dhcpstate = DHCPS_INIT;
+					case dhcp_message_type::NAK:
+						m_dhcp_timer.stop();
+						m_dhcpstate = dhcp_state::INIT;
 						break;
 					default:
 						break;
 					}
 					break;
 				} else {
-					m_dhcp_timer.set_timeout(this, 4000);
+					m_dhcp_timer.start(4000, this);
 					return;
 				}
-			case DHCPS_BOUND:
+			case dhcp_state::BOUND:
 				releaseXID();
 				// 0.5 * 1000 (msecs)
-				m_dhcp_timer.set_timeout(this, 500 * m_dhcp_lease_time);
+				m_dhcp_timer.start(500 * m_dhcp_lease_time, this);
 				return;
-			case DHCPS_RENEWING:
+			case dhcp_state::RENEWING:
 				if (source) {
 					switch (source->getMessageType()) {
-					case DHCP_ACK:
-						m_dhcp_timer.kill(this);
+					case dhcp_message_type::ACK:
+						m_dhcp_timer.stop();
 						dhcp_setup_interface(source, true);
-						m_dhcpstate = DHCPS_BOUND;
+						m_dhcpstate = dhcp_state::BOUND;
 						break;
-					case DHCP_NAK:
-						m_dhcp_timer.kill(this);
-						m_dhcpstate = DHCPS_INIT_START;
+					case dhcp_message_type::NAK:
+						m_dhcp_timer.stop();
+						m_dhcpstate = dhcp_state::INIT_START;
 						break;
 					default:
 						break;
@@ -988,20 +955,20 @@ namespace nuts {
 				} else {
 					dhcp_send_renew();
 					// T2 - T1 * 1000 (msecs) = (7 / 8 - 1 / 2) * 1000 = 3 / 8 * 1000 = 375
-					m_dhcp_timer.set_timeout(this, 375 * m_dhcp_lease_time);
+					m_dhcp_timer.start(375 * m_dhcp_lease_time, this);
 					return;
 				}
-			case DHCPS_REBINDING:
+			case dhcp_state::REBINDING:
 				if (source) {
 					switch (source->getMessageType()) {
-					case DHCP_ACK:
-						m_dhcp_timer.kill(this);
+					case dhcp_message_type::ACK:
+						m_dhcp_timer.stop();
 						dhcp_setup_interface(source, true);
-						m_dhcpstate = DHCPS_BOUND;
+						m_dhcpstate = dhcp_state::BOUND;
 						break;
-					case DHCP_NAK:
-						m_dhcp_timer.kill(this);
-						m_dhcpstate = DHCPS_INIT_START;
+					case dhcp_message_type::NAK:
+						m_dhcp_timer.stop();
+						m_dhcpstate = dhcp_state::INIT_START;
 						break;
 					default:
 						break;
@@ -1010,7 +977,7 @@ namespace nuts {
 				} else {
 					dhcp_send_rebind();
 					// T - (T2) = 1/8 -> 125
-					m_dhcp_timer.set_timeout(this, 125 * m_dhcp_lease_time);
+					m_dhcp_timer.start(125 * m_dhcp_lease_time, this);
 					return;
 				}
 			default:
@@ -1022,26 +989,26 @@ namespace nuts {
 	}
 
 	void Interface_IPv4::timerEvent(QTimerEvent *tevt) {
-		if (m_fallback_timer.match(tevt)) {
+		if (tevt->timerId() == m_fallback_timer.timerId()) {
 			startFallback();
 		}
-		else if (m_dhcp_timer.match(tevt)) {
-			m_dhcp_timer.kill(this);
+		else if (tevt->timerId() == m_dhcp_timer.timerId()) {
+			m_dhcp_timer.stop();
 			switch (m_dhcpstate) {
-			case DHCPS_SELECTING:
-				m_dhcpstate = DHCPS_INIT;
+			case dhcp_state::SELECTING:
+				m_dhcpstate = dhcp_state::INIT;
 				break;
-			case DHCPS_REQUESTING:
-				m_dhcpstate = DHCPS_INIT;
+			case dhcp_state::REQUESTING:
+				m_dhcpstate = dhcp_state::INIT;
 				break;
-			case DHCPS_BOUND:
-				m_dhcpstate = DHCPS_RENEWING;
+			case dhcp_state::BOUND:
+				m_dhcpstate = dhcp_state::RENEWING;
 				break;
-			case DHCPS_RENEWING:
-				m_dhcpstate = DHCPS_REBINDING;
+			case dhcp_state::RENEWING:
+				m_dhcpstate = dhcp_state::REBINDING;
 				break;
-			case DHCPS_REBINDING:
-				m_dhcpstate = DHCPS_INIT_START;
+			case dhcp_state::REBINDING:
+				m_dhcpstate = dhcp_state::INIT_START;
 				break;
 			default:
 				break;
@@ -1056,32 +1023,32 @@ namespace nuts {
 	void Interface_IPv4::startDHCP() {
 		//Start timer for fallback timeout:
 		checkFallbackRunning();
-		m_dhcpstate = DHCPS_INIT_START;
+		m_dhcpstate = dhcp_state::INIT_START;
 		dhcpAction();
 	}
 	void Interface_IPv4::stopDHCP() {
-		m_fallback_timer.kill(this);
+		m_fallback_timer.stop();
 		switch (m_dhcpstate) {
-		case DHCPS_INITREBOOT:  // nothing to do ??
-		case DHCPS_REBOOTING:  // nothing to do ??
+		case dhcp_state::INITREBOOT:  // nothing to do ??
+		case dhcp_state::REBOOTING:  // nothing to do ??
 
-		case DHCPS_OFF: // should not happen
-		case DHCPS_INIT_START: // should not happen
-		case DHCPS_INIT: // should not happen
-		case DHCPS_SELECTING: // normal cleanup
+		case dhcp_state::OFF: // should not happen
+		case dhcp_state::INIT_START: // should not happen
+		case dhcp_state::INIT: // should not happen
+		case dhcp_state::SELECTING: // normal cleanup
 			break;
-		case DHCPS_REQUESTING: // release
-		case DHCPS_BOUND: // release
-		case DHCPS_RENEWING: // release
-		case DHCPS_REBINDING: // release
+		case dhcp_state::REQUESTING: // release
+		case dhcp_state::BOUND: // release
+		case dhcp_state::RENEWING: // release
+		case dhcp_state::REBINDING: // release
 			dhcp_send_release();
 		}
 		releaseXID();
-		m_dhcp_timer.kill(this);
+		m_dhcp_timer.stop();
 	}
 
 	void Interface_IPv4::startZeroconf() {
-		m_zc_state = ZCS_START;
+		m_zc_state = zeroconf_state::START;
 		zeroconfAction();
 	}
 	void Interface_IPv4::startStatic() {
@@ -1116,10 +1083,10 @@ namespace nuts {
 
 
 	void Interface_IPv4::checkFallbackRunning() {
-		if ((!m_fallback_timer.active() && m_config->timeout > 0) && (
+		if ((!m_fallback_timer.isActive() && m_config->timeout > 0) && (
 			( m_config->flags == (IPv4ConfigFlag::DHCP | IPv4ConfigFlag::ZEROCONF)) ||
 			( m_config->flags == (IPv4ConfigFlag::DHCP | IPv4ConfigFlag::STATIC)) ) ) {
-			m_fallback_timer.set_timeout(this, m_config->timeout*1000);
+			m_fallback_timer.start(m_config->timeout*1000, this);
 		}
 	}
 
@@ -1146,10 +1113,10 @@ namespace nuts {
 
 	void Interface_IPv4::stop() {
 		log << "Interface_IPv4::stop" << endl;
-		if (m_dhcpstate != DHCPS_OFF)
+		if (m_dhcpstate != dhcp_state::OFF)
 			stopDHCP();
-		if (m_zc_state != ZCS_OFF) {
-			m_zc_state = ZCS_OFF;
+		if (m_zc_state != zeroconf_state::OFF) {
+			m_zc_state = zeroconf_state::OFF;
 			zeroconfAction();
 		}
 		systemDown(InterfaceState::OFF);

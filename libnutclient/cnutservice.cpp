@@ -88,7 +88,11 @@ namespace libnutclient {
 	: QObject(parent), m_serviceParent(serviceParent) {
 		connect(m_serviceParent, &CNutService::dbusLostService, this, &CNutServiceClient::dbusLostService);
 		connect(this, &CNutServiceClient::dbusError, m_serviceParent, &CNutService::handle_dbusError);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 		QTimer::singleShot(0, this, &CNutServiceClient::initService);
+#else
+		QTimer::singleShot(0, this, SLOT(initService()));
+#endif
 	}
 
 	CNutServiceClient::CNutServiceClient(CNutServiceClient* parent)

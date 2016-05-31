@@ -26,12 +26,14 @@ add_executable(${PROJECT_NAME}
 	log.cpp
 	log.h
 	main.cpp
-	qobject_timer.cpp
-	qobject_timer.h
+	processmanager.cpp
+	processmanager.h
 	random.cpp
 	random.h
 	sighandler.cpp
 	sighandler.h
+	timecls.cpp
+	timecls.h
 
 	configparser.l
 

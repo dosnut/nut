@@ -1,6 +1,8 @@
 #ifndef NUT_COMMON_CONFIG_H
 #define NUT_COMMON_CONFIG_H
 
+#pragma once
+
 #include <memory>
 #include <map>
 
@@ -24,44 +26,46 @@ namespace libnutcommon {
 }
 
 namespace libnutcommon {
+	enum class DeviceNamePatternType {
+		Plain,
+		RegExp,
+		Wildcard,
+	};
+
 	/** @brief Name, Wildcard or RegExp pattern for a device name
 	 * sorts plain value before regexp before wildcard, for use
 	 * as a key in std::map; first matching entry should "win".
 	 */
 	class DeviceNamePattern {
 	public:
-		enum PatternType {
-			Plain = 0,
-			RegExp = 1,
-			Wildcard = 2,
-		};
+		explicit DeviceNamePattern() = default;
+		explicit DeviceNamePattern(QString const& pattern, DeviceNamePatternType type)
+		: m_pattern(pattern), m_type(type) { }
 
-		QString pattern;
-		PatternType type;
-
-		bool operator<(const DeviceNamePattern &other) const;
-		bool operator>(const DeviceNamePattern &other) const { return other < *this; }
-		bool operator<=(const DeviceNamePattern &other) const { return !(other < *this); }
-		bool operator>=(const DeviceNamePattern &other) const { return !(*this < other); }
+		bool operator<(DeviceNamePattern const& other) const;
+		bool operator>(DeviceNamePattern const& other) const { return other < *this; }
+		bool operator<=(DeviceNamePattern const& other) const { return !(other < *this); }
+		bool operator>=(DeviceNamePattern const& other) const { return !(*this < other); }
 
 		/* whether name matches pattern */
-		bool match(QString name) const;
+		bool match(QString const& name) const;
 
-		/* human readable "type" */
-		QString typeString() const;
+	private:
+		QString m_pattern;
+		DeviceNamePatternType m_type = DeviceNamePatternType::Plain;
 	};
 
 	/** @brief Container for all \link DeviceConfig device configs\endlink.
 	 */
 	class Config {
 	public:
-		std::map< DeviceNamePattern, std::shared_ptr<DeviceConfig> > namedDeviceConfigs;
+		std::map<DeviceNamePattern, std::shared_ptr<DeviceConfig>> namedDeviceConfigs;
 
 		/* create (overwrite) mapping for pattern with a new empty config; return config reference */
-		std::shared_ptr<DeviceConfig> create(const DeviceNamePattern& pattern);
+		std::shared_ptr<DeviceConfig> create(DeviceNamePattern const& pattern);
 
 		/* lookup first matching pattern and return associated config reference */
-		std::shared_ptr<DeviceConfig> lookup(QString deviceName);
+		std::shared_ptr<DeviceConfig> lookup(QString const& deviceName);
 	};
 
 	/** @brief Each device has a list of \link EnvironmentConfig Environments\endlink and some additional config values.
@@ -75,14 +79,14 @@ namespace libnutcommon {
 	 */
 	class DeviceConfig {
 	public:
-		std::vector< std::shared_ptr<EnvironmentConfig> > environments;
+		std::vector<std::shared_ptr<EnvironmentConfig>> environments;
 		bool noAutoStart = false;
 		QString wpaConfigFile;
 		QString wpaDriver;
 		int gatewayMetric = -1;
 	};
-	QDBusArgument &operator<< (QDBusArgument &argument, const DeviceConfig &data);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, DeviceConfig &data);
+	QDBusArgument& operator<<(QDBusArgument& argument, DeviceConfig const& data);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, DeviceConfig& data);
 
 	/** @brief Result type of a select test.
 	 * (formally a boolean expression with one variable "User")
@@ -98,8 +102,8 @@ namespace libnutcommon {
 	SelectResult operator&&(SelectResult a, SelectResult b);
 	SelectResult operator^(SelectResult a, SelectResult b);
 	SelectResult operator!(SelectResult a);
-	QDBusArgument &operator<< (QDBusArgument &argument, SelectResult selectResult);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectResult &selectResult);
+	QDBusArgument& operator<<(QDBusArgument& argument, SelectResult selectResult);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, SelectResult& selectResult);
 
 	enum class SelectType : quint8 {
 		USER = 0,   //!< Select if user does want it (=> return SelectResult::User)
@@ -108,18 +112,18 @@ namespace libnutcommon {
 		AND_BLOCK,  //!< Select a list of \link SelectRule SelectRules\endlink, results combined with AND
 		OR_BLOCK,   //!< Select a list of \link SelectRule SelectRules\endlink, results combined with OR
 	};
-	QDBusArgument &operator<< (QDBusArgument &argument, SelectType selectType);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectType &selectType);
+	QDBusArgument& operator<<(QDBusArgument& argument, SelectType selectType);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, SelectType& selectType);
 
 	/** @brief A select operation.
 	 */
 	class SelectRule {
 	public:
-		SelectRule() : invert(false), selType(SelectType::USER) { }
-		SelectRule(const QHostAddress &ipAddr, bool invert = false) : invert(invert), selType(SelectType::ARP), ipAddr(ipAddr) { }
-		SelectRule(const QHostAddress &ipAddr, const libnutcommon::MacAddress &macAddr, bool invert = false) : invert(invert), selType(SelectType::ARP), ipAddr(ipAddr), macAddr(macAddr) { }
-		SelectRule(const QString &essid, bool invert = false) : invert(invert), selType(SelectType::ESSID), essid(essid) { }
-		SelectRule(quint32 block, SelectType blockType, bool invert = false) : invert(invert), selType(blockType), block(block) { }
+		explicit SelectRule() = default;
+		explicit SelectRule(QHostAddress const& ipAddr, bool invert = false) : invert(invert), selType(SelectType::ARP), ipAddr(ipAddr) { }
+		explicit SelectRule(QHostAddress const& ipAddr, libnutcommon::MacAddress const& macAddr, bool invert = false) : invert(invert), selType(SelectType::ARP), ipAddr(ipAddr), macAddr(macAddr) { }
+		explicit SelectRule(QString const& essid, bool invert = false) : invert(invert), selType(SelectType::ESSID), essid(essid) { }
+		explicit SelectRule(quint32 block, SelectType blockType, bool invert = false) : invert(invert), selType(blockType), block(block) { }
 
 		bool invert = false;        //!< Invert result; unused for now.
 		SelectType selType = SelectType::USER;
@@ -128,8 +132,8 @@ namespace libnutcommon {
 		QHostAddress ipAddr;
 		libnutcommon::MacAddress macAddr;
 	};
-	QDBusArgument &operator<< (QDBusArgument &argument, const SelectRule &data);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectRule &data);
+	QDBusArgument& operator<<(QDBusArgument& argument, SelectRule const& data);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, SelectRule& data);
 
 	/** @brief SelectConfig for an environment.
 	 *
@@ -137,15 +141,15 @@ namespace libnutcommon {
 	 */
 	class SelectConfig {
 	public:
-		SelectConfig() { }
+		explicit SelectConfig() = default;
 
 		QVector<SelectRule> filters;         //!< List of \link SelectRule SelectRules\endlink
 		//! List of blocks; each block is a list of filter ids.
 		//! The type of the block (AND/OR) is specified in the rule for the block
 		QVector< QVector<quint32> > blocks;
 	};
-	QDBusArgument &operator<< (QDBusArgument &argument, const SelectConfig &data);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, SelectConfig &data);
+	QDBusArgument& operator<<(QDBusArgument& argument, SelectConfig const& data);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, SelectConfig& data);
 
 	/** @brief Each EnvironmentConfig of a \link DeviceConfig device\endlink has a list
 	 *         of \link IPv4Config interfaces\endlink, which configure the ips.
@@ -158,10 +162,10 @@ namespace libnutcommon {
 		std::vector<std::shared_ptr<IPv4Config>> ipv4Interfaces;
 		SelectConfig select;
 
-		EnvironmentConfig(const QString &name = "") : name(name) { }
+		explicit EnvironmentConfig(QString const& name = "") : name(name) { }
 	};
-	QDBusArgument &operator<< (QDBusArgument &argument, const EnvironmentConfig &data);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, EnvironmentConfig &data);
+	QDBusArgument& operator<<(QDBusArgument& argument, EnvironmentConfig const& data);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, EnvironmentConfig& data);
 
 
 	/** @brief Selects which method is used to determine the ip address.
@@ -177,8 +181,8 @@ namespace libnutcommon {
 	};
 	using IPv4ConfigFlags = Flags<IPv4ConfigFlag>;
 	NUTCOMMON_DECLARE_FLAG_OPERATORS(IPv4ConfigFlags)
-	QDBusArgument &operator<< (QDBusArgument &argument, IPv4ConfigFlags flags);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4ConfigFlags &flags);
+	QDBusArgument& operator<<(QDBusArgument& argument, IPv4ConfigFlags flags);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, IPv4ConfigFlags& flags);
 
 	/** @brief Each IPv4Config stands for one ip of an interface.
 	 *
@@ -201,11 +205,11 @@ namespace libnutcommon {
 		int timeout = 0;
 		bool continue_dhcp = false;
 
-		IPv4Config() { }
-		IPv4Config(IPv4ConfigFlags flags) : flags(flags) { }
+		explicit IPv4Config() { }
+		explicit IPv4Config(IPv4ConfigFlags flags) : flags(flags) { }
 	};
-	QDBusArgument &operator<< (QDBusArgument &argument, const IPv4Config &data);
-	const QDBusArgument &operator>> (const QDBusArgument &argument, IPv4Config &data);
+	QDBusArgument& operator<<(QDBusArgument& argument, IPv4Config const& data);
+	QDBusArgument const& operator>>(QDBusArgument const& argument, IPv4Config& data);
 }
 
 Q_DECLARE_METATYPE(libnutcommon::DeviceConfig)

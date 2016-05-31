@@ -4,6 +4,7 @@
 #include <QDBusConnectionInterface>
 #include <QTextStream>
 #include <QTimerEvent>
+#include <QtDebug>
 
 namespace libnutcommon {
 
@@ -40,8 +41,8 @@ namespace libnutcommon {
 	}
 
 	DBusManager::DBusManager(std::function<QDBusConnection()> createConnection, int checkMsec, int retryMsec, QObject* parent)
-	: QObject(parent), m_createConnection(createConnection), m_checkMsec(checkMsec), m_retryMsec(retryMsec) {
-		m_reconnectTimerId = startTimer(0);
+	: QObject(parent), m_createConnection(std::move(createConnection)), m_checkMsec(checkMsec), m_retryMsec(retryMsec) {
+		m_reconnectTimer.start(0, this);
 	}
 
 	DBusManager::~DBusManager() {
@@ -56,15 +57,8 @@ namespace libnutcommon {
 		if (m_reconnecting) return;
 		m_reconnecting = true;
 
-		if (-1 != m_checkTimerId) {
-			killTimer(m_checkTimerId);
-			m_checkTimerId = -1;
-		}
-
-		if (-1 != m_reconnectTimerId) {
-			killTimer(m_reconnectTimerId);
-			m_reconnectTimerId = -1;
-		}
+		m_checkTimer.stop();
+		m_reconnectTimer.stop();
 
 		if (m_connection) {
 			auto c = std::move(m_connection);
@@ -81,7 +75,7 @@ namespace libnutcommon {
 			c.reset();
 
 			// QTextStream(stderr) << "connect failed\n";
-			m_reconnectTimerId = startTimer(m_retryMsec);
+			m_reconnectTimer.start(m_retryMsec, this);
 			if (m_hadConnection) {
 				m_hadConnection = false;
 				// QTextStream(stderr) << "emit waiting\n";
@@ -91,7 +85,7 @@ namespace libnutcommon {
 			return;
 		}
 
-		m_checkTimerId = startTimer(m_checkMsec);
+		m_checkTimer.start(m_checkMsec, this);
 
 		m_connection = std::move(c);
 		// QTextStream(stderr) << "emit connected\n";
@@ -108,10 +102,10 @@ namespace libnutcommon {
 	}
 
 	void DBusManager::timerEvent(QTimerEvent* event) {
-		if (event->timerId() == m_reconnectTimerId) {
+		if (event->timerId() == m_reconnectTimer.timerId()) {
 			reconnect();
 		}
-		else if (event->timerId() == m_checkTimerId) {
+		else if (event->timerId() == m_checkTimer.timerId()) {
 			checkConnection();
 		}
 		else {
@@ -119,16 +113,16 @@ namespace libnutcommon {
 		}
 	}
 
-	DBusAbstractAdapater::DBusAbstractAdapater(QDBusObjectPath path, QObject* parent)
+	DBusAbstractAdaptor::DBusAbstractAdaptor(QDBusObjectPath path, QObject* parent)
 	: QDBusAbstractAdaptor(parent), m_path(std::move(path)) {
 	}
 
-	DBusAbstractAdapater::~DBusAbstractAdapater() {
+	DBusAbstractAdaptor::~DBusAbstractAdaptor() {
 		unregisterAll();
 	}
 
-	void DBusAbstractAdapater::removeConnections(std::list<QDBusConnection>&& l) {
-		for (auto& c: l) {
+	void DBusAbstractAdaptor::removeConnections(std::list<QDBusConnection>&& l) {
+		for (QDBusConnection& c: l) {
 			for (auto si = begin(m_services), se = end(m_services); si != se; ++si) {
 				for (auto sci = begin(si->second), sce = end(si->second); sci != sce; ++sci) {
 					if (c.interface() == sci->interface()) {
@@ -142,14 +136,14 @@ namespace libnutcommon {
 			}
 		}
 
-		for (auto& c: l) {
+		for (QDBusConnection& c: l) {
 			c.unregisterObject(m_path.path());
-			onDbusDisconnected(c);
-			m_dbusDisconnected(c);
+			onDBusDisconnected(c);
+			emit m_signals.dbusDisconnected(c);
 		}
 	}
 
-	void DBusAbstractAdapater::_onDbusConnected(QDBusConnection const& connection) {
+	void DBusAbstractAdaptor::handleDBusConnected(QDBusConnection const& connection) {
 		// remove dead connections
 		bool found = false;
 		auto const ci = connection.interface();
@@ -163,22 +157,33 @@ namespace libnutcommon {
 		}
 		removeConnections(std::move(removeCons));
 
-		if (found) return;
+		if (found) {
+			qWarning() << "Adaptor " << m_path.path() << " already registered on dbus connection";
+			return;
+		}
+		m_connections.push_back(connection);
 
 		auto c = connection; // registerService() doesn't work on const& -.-
 
 		/* only add connection if we could register our own object */
-		if (!c.registerObject(m_path.path(), parent())) return;
-
-		for (auto s: m_services) {
-			if (c.registerService(s.first)) s.second.push_back(c);
+		if (!c.registerObject(m_path.path(), parent())) {
+			qWarning() << "registerObject(" << m_path.path() << ") failed";
+			return;
 		}
 
-		onDbusConnected(c);
-		m_dbusConnected(connection);
+		for (auto s: m_services) {
+			if (c.registerService(s.first)) {
+				s.second.push_back(c);
+			} else {
+				qWarning() << "registerService(" << s.first << ") failed";
+			}
+		}
+
+		onDBusConnected(c);
+		emit m_signals.dbusConnected(connection);
 	}
 
-	void DBusAbstractAdapater::_onDbusDisconnected(QDBusConnection const& connection) {
+	void DBusAbstractAdaptor::handleDBusDisconnected(QDBusConnection const& connection) {
 		// remove all matching and dead connections
 		auto ci = connection.interface();
 		std::list<QDBusConnection> removeCons;
@@ -191,21 +196,21 @@ namespace libnutcommon {
 		removeConnections(std::move(removeCons));
 	}
 
-	void DBusAbstractAdapater::onDbusConnected(QDBusConnection& connection) {
+	void DBusAbstractAdaptor::onDBusConnected(QDBusConnection& connection) {
 	}
 
-	void DBusAbstractAdapater::onDbusDisconnected(QDBusConnection& connection) {
+	void DBusAbstractAdaptor::onDBusDisconnected(QDBusConnection& connection) {
 	}
 
-	void DBusAbstractAdapater::registerAdaptor(DBusAbstractAdapater* child) {
-		connect(&m_dbusConnected, &DBusAbstractAdapaterConnectionEmitter::notify, child, &DBusAbstractAdapater::_onDbusConnected);
-		connect(&m_dbusDisconnected, &DBusAbstractAdapaterConnectionEmitter::notify, child, &DBusAbstractAdapater::_onDbusDisconnected);
-		for (auto &c: m_connections) {
-			child->_onDbusConnected(c);
+	void DBusAbstractAdaptor::registerAdaptor(DBusAbstractAdaptor* child) {
+		connect(&this->m_signals, &internal::DBusAbstractAdaptorInnerSignals::dbusConnected, child, &DBusAbstractAdaptor::handleDBusConnected);
+		connect(&this->m_signals, &internal::DBusAbstractAdaptorInnerSignals::dbusDisconnected, child, &DBusAbstractAdaptor::handleDBusDisconnected);
+		for (auto& c: m_connections) {
+			child->handleDBusConnected(c);
 		}
 	}
 
-	void DBusAbstractAdapater::unregisterAll() {
+	void DBusAbstractAdaptor::unregisterAll() {
 		using std::swap;
 		{
 			decltype(m_connections) tmp;
@@ -225,33 +230,28 @@ namespace libnutcommon {
 		}
 	}
 
-	void DBusAbstractAdapater::registerService(QString const& serviceName) {
+	void DBusAbstractAdaptor::registerService(QString const& serviceName) {
 		/* if service name was already registered, c.registerService() will
 		 * fail for connections it already succeeded, so we don't get any
 		 * duplicates in the m_services[] connection list.
 		 */
 		auto& cons = m_services[serviceName];
-		for (auto &c: m_connections) {
+		for (auto& c: m_connections) {
 			if (c.registerService(serviceName)) cons.push_back(c);
 		}
 	}
 
-	void DBusAbstractAdapater::unregisterService(QString const& serviceName) {
+	void DBusAbstractAdaptor::unregisterService(QString const& serviceName) {
 		auto i = m_services.find(serviceName);
 		if (m_services.end() == i) return;
-		for (auto &c: i->second) {
+		for (auto& c: i->second) {
 			c.unregisterService(i->first);
 		}
 		m_services.erase(i);
 	}
 
-	void DBusAbstractAdapater::connectManager(DBusManager* manager) {
-		connect(manager, &DBusManager::connected, this, &DBusAbstractAdapater::_onDbusConnected);
-		connect(manager, &DBusManager::disconnected, this, &DBusAbstractAdapater::_onDbusDisconnected);
-	}
-
-	void DBusAbstractAdapaterConnectionEmitter::operator()(const QDBusConnection& connection)
-	{
-		emit notify(connection);
+	void DBusAbstractAdaptor::connectManager(DBusManager* manager) {
+		connect(manager, &DBusManager::connected, this, &DBusAbstractAdaptor::handleDBusConnected);
+		connect(manager, &DBusManager::disconnected, this, &DBusAbstractAdaptor::handleDBusDisconnected);
 	}
 }

@@ -1,7 +1,10 @@
 #ifndef NUT_COMMON_DBUSMANAGER_H
 #define NUT_COMMON_DBUSMANAGER_H
 
+#pragma once
+
 #include <QObject>
+#include <QBasicTimer>
 #include <QDBusConnection>
 #include <QDBusAbstractAdaptor>
 #include <QDBusObjectPath>
@@ -34,8 +37,34 @@ namespace libnutcommon {
 	 * various init systems don't have a pid file anymore, also there is no
 	 * longer a standard location.
 	 */
-	class DBusManager: public QObject {
+	class DBusManager final : public QObject {
 		Q_OBJECT
+	public:
+		explicit DBusManager(
+			std::function<QDBusConnection()> createConnection = createDefaultDBusConnection,
+			int checkMsec = 10000,
+			int retryMsec = 1000,
+			QObject* parent = nullptr);
+		~DBusManager();
+
+		/* if there is no connection this is just null.
+		 * don't keep the pointer! - just copy the content */
+		QDBusConnection* connection() { return m_connection.get(); }
+
+	public slots:
+		void checkConnection();
+
+	signals:
+		void connected(QDBusConnection const& connection);
+		void disconnected(QDBusConnection const& connection);
+
+		/* only emitted once after each connection loss */
+		void waiting();
+
+	private:
+		void reconnect();
+		void timerEvent(QTimerEvent* event) override;
+
 	private:
 		std::unique_ptr<QDBusConnection> m_connection;
 		std::function<QDBusConnection()> m_createConnection;
@@ -50,64 +79,43 @@ namespace libnutcommon {
 
 		/* emit waiting() at beginning too if necessary */
 		bool m_hadConnection = true;
-		int m_checkTimerId = -1;
-		int m_reconnectTimerId = -1;
-
-		void reconnect();
-		void timerEvent(QTimerEvent* event) override;
-
-	public:
-		DBusManager(std::function<QDBusConnection()> createConnection = createDefaultDBusConnection, int checkMsec = 10000, int retryMsec = 1000, QObject* parent = nullptr);
-		~DBusManager();
-
-		/* if there is no connection this is just null.
-		 * don't keep the pointer! - just copy the content. */
-		QDBusConnection* connection() { return m_connection.get(); }
-
-	public slots:
-		void checkConnection();
-
-	signals:
-		void connected(QDBusConnection const& connection);
-		void disconnected(QDBusConnection const& connection);
-
-		/* only emitted once after each connection loss */
-		void waiting();
+		QBasicTimer m_checkTimer;
+		QBasicTimer m_reconnectTimer;
 	};
 
-	class DBusAbstractAdapaterConnectionEmitter : public QObject {
+	namespace internal {
+		/* need to hide signals from "auto-relay" in DBus */
+		class DBusAbstractAdaptorInnerSignals : public QObject {
+			Q_OBJECT
+		signals:
+			/* to notify child adaptors */
+			void dbusConnected(QDBusConnection const& connection);
+			void dbusDisconnected(QDBusConnection const& connection);
+		};
+
+	}
+
+	class DBusAbstractAdaptor: public QDBusAbstractAdaptor {
 		Q_OBJECT
 	public:
-		void operator()(QDBusConnection const& connection);
+		explicit DBusAbstractAdaptor(QDBusObjectPath path, QObject* parent);
+		~DBusAbstractAdaptor();
 
-	signals:
-		void notify(QDBusConnection const& connection);
-	};
+		QDBusObjectPath getPath() const { return m_path; }
 
-	class DBusAbstractAdapater: public QDBusAbstractAdaptor {
-		Q_OBJECT
-	private:
-		std::list<QDBusConnection> m_connections;
-		std::map<QString, std::list<QDBusConnection>> m_services;
-
-		DBusAbstractAdapaterConnectionEmitter m_dbusConnected;
-		DBusAbstractAdapaterConnectionEmitter m_dbusDisconnected;
-
-		void removeConnections(std::list<QDBusConnection>&& l);
-
-	private slots:
-		void _onDbusConnected(QDBusConnection const& connection);
-		void _onDbusDisconnected(QDBusConnection const& connection);
+		/* you can connect adapters to many dbus managers; usually you only
+		 * connect the top-level adaptor to a manager, and use registerAdaptor
+		 * for child objects
+		 */
+		void connectManager(DBusManager* manager);
 
 	protected:
-		QDBusObjectPath const m_path;
-
 		/* usually not needed - parent() is registered at m_path automatically
 		 * call unregister() in destructor to receive final onDbusDisconnected()
 		 * in your class
 		 */
-		virtual void onDbusConnected(QDBusConnection& connection);
-		virtual void onDbusDisconnected(QDBusConnection& connection);
+		virtual void onDBusConnected(QDBusConnection& connection);
+		virtual void onDBusDisconnected(QDBusConnection& connection);
 
 		/* register your service names in the constructor */
 		void registerService(QString const& serviceName);
@@ -120,22 +128,26 @@ namespace libnutcommon {
 		 * children registered with this don't need to be connected with
 		 * connectManager() on their own.
 		 */
-		void registerAdaptor(DBusAbstractAdapater* child);
+		void registerAdaptor(DBusAbstractAdaptor* child);
 
 		/* see onDbusDisconnected; usually you don't need to call this */
 		void unregisterAll();
 
-	public:
-		DBusAbstractAdapater(QDBusObjectPath path, QObject* parent);
-		~DBusAbstractAdapater();
+	private slots:
+		void handleDBusConnected(QDBusConnection const& connection);
+		void handleDBusDisconnected(QDBusConnection const& connection);
 
-		QDBusObjectPath const& getPath() const { return m_path; }
+	private:
+		void removeConnections(std::list<QDBusConnection>&& l);
 
-		/* you can connect adapters to many dbus managers; usually you only
-		 * connect the top-level adaptor to a manager, and use registerAdaptor
-		 * for child objects
-		 */
-		void connectManager(DBusManager* manager);
+	protected: /* vars */
+		QDBusObjectPath const m_path;
+
+	private: /* vars */
+		std::list<QDBusConnection> m_connections;
+		std::map<QString, std::list<QDBusConnection>> m_services;
+
+		internal::DBusAbstractAdaptorInnerSignals m_signals;
 	};
 }
 

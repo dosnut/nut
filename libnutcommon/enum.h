@@ -6,6 +6,8 @@
 #ifndef NUT_COMMON_ENUM_H
 #define NUT_COMMON_ENUM_H
 
+#pragma once
+
 #include <QDBusArgument>
 #include <type_traits>
 

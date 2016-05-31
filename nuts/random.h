@@ -1,21 +1,15 @@
-//
-// C++ Interface: random
-//
-// Description:
-//
-//
-// Author: Stefan Bühler <stbuehler@web.de>, (C) 2007
-//
-// Copyright: See COPYING file that comes with this distribution
-//
-//
-#ifndef NUTSRANDOM_H
-#define NUTSRANDOM_H
+#ifndef _NUTS_RANDOM_H
+#define _NUTS_RANDOM_H
 
-#include <QObject>
+#pragma once
+
+#include <QtGlobal>
+#include <random>
 
 namespace nuts {
+	extern std::mt19937 randomGenerator;
+
 	quint32 getRandomUInt32();
 }
 
-#endif
+#endif /* _NUTS_RANDOM_H */

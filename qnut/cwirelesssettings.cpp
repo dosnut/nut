@@ -452,7 +452,7 @@ namespace qnut {
 	}
 
 	void CWirelessSettings::handleBSSIDSwitchRequest(const QString & data) {
-		libnutcommon::MacAddress bssid = data;
+		libnutcommon::MacAddress bssid(data);
 		if (bssid.valid()) {
 			m_Device->getWireless()->getWpaSupplicant()->setBssid(m_ManagedAPModel->currentID(), bssid);
 			m_ManagedAPModel->updateNetworks();
