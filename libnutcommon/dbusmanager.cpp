@@ -157,6 +157,7 @@ namespace libnutcommon {
 		removeConnections(std::move(removeCons));
 
 		if (found) return;
+		m_connections.push_back(connection);
 
 		auto c = connection; // registerService() doesn't work on const& -.-
 
