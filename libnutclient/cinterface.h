@@ -53,7 +53,7 @@ namespace libnutclient {
 		void dbusUserConfigUpdate(libnutcommon::IPv4UserConfig userConfig);
 
 	public:
-		CInterface(CEnvironment* parent, QDBusObjectPath dbusPath, int index);
+		explicit CInterface(CEnvironment* parent, QDBusObjectPath dbusPath, int index);
 		~CInterface();
 
 		int getIndex() const { return m_index; }

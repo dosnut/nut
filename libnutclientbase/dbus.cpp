@@ -148,7 +148,7 @@ namespace libnutclientbase {
 			ResultHandler<Result...> returnMethod;
 			DBusErrorHandler errorMethod;
 
-			DBusCallbackWatcher(QObject *parent, QDBusPendingCallWatcher *watcher, ResultHandler<Result...> returnMethod, DBusErrorHandler errorMethod)
+			explicit DBusCallbackWatcher(QObject *parent, QDBusPendingCallWatcher *watcher, ResultHandler<Result...> returnMethod, DBusErrorHandler errorMethod)
 			: DBusCallbackWatcherBase(parent, watcher), returnMethod(std::move(returnMethod)), errorMethod(std::move(errorMethod)) {
 			}
 

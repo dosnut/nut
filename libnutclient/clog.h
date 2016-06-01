@@ -19,20 +19,27 @@ namespace libnutclient {
 		QFile m_file;
 		QTextStream m_outStream;
 		bool m_fileLoggingEnabled;
+
 	public:
-		CLog(QObject * parent, QString fileName);
-		inline QFile::FileError error() const {
+		explicit CLog(QObject * parent, QString fileName);
+
+		QFile::FileError error() const {
 			return m_file.error();
 		}
-		inline bool getFileLoggingEnabled() const {
+
+		bool getFileLoggingEnabled() const {
 			return m_fileLoggingEnabled;
 		}
-		inline void setFileLoggingEnabled(bool isEnabled) {
+
+		void setFileLoggingEnabled(bool isEnabled) {
 			m_fileLoggingEnabled = isEnabled && (m_file.error() == QFile::NoError);
 		}
+
 		void operator<<(QString text);
+
 	public slots:
 		void log(QString text) { operator<<(text); }
+
 	signals:
 		void printed(const QString & line);
 	};

@@ -110,9 +110,11 @@ namespace libnutclientbase {
 		class DBusCallbackWatcherBase : public QObject {
 			Q_OBJECT
 		protected:
-			DBusCallbackWatcherBase(QObject* parent, QDBusPendingCallWatcher* watcher);
+			explicit DBusCallbackWatcherBase(QObject* parent, QDBusPendingCallWatcher* watcher);
+
 		private slots:
 			void slot_finished(QDBusPendingCallWatcher* watcher);
+
 		protected:
 			virtual void finished(QDBusPendingCallWatcher* watcher) = 0;
 		};
@@ -121,9 +123,10 @@ namespace libnutclientbase {
 		class DBusPendingWatcher : public QObject {
 			Q_OBJECT
 		public:
-			DBusPendingWatcher(QObject* parent = nullptr);
+			explicit DBusPendingWatcher(QObject* parent = nullptr);
 
 			std::unique_ptr<QDBusPendingCallWatcher> pending;
+
 		public slots:
 			void finished();
 		};
@@ -139,11 +142,11 @@ namespace libnutclientbase {
 	public:
 		static QDBusObjectPath makePath();
 
-		DBusDeviceManager(QString service, QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
+		explicit DBusDeviceManager(QString service, QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
 		/** use connection and default service/path */
-		DBusDeviceManager(QDBusConnection connection, QObject* parent = 0);
+		explicit DBusDeviceManager(QDBusConnection connection, QObject* parent = 0);
 		/** use default path, and connection and service from `from` */
-		DBusDeviceManager(QDBusAbstractInterface* from, QObject* parent = 0);
+		explicit DBusDeviceManager(QDBusAbstractInterface* from, QObject* parent = 0);
 
 		DBUS_ACTION_0(QList<QDBusObjectPath>, getDeviceList)
 		DBUS_ACTION_0(QStringList, getDeviceNames)
@@ -165,9 +168,9 @@ namespace libnutclientbase {
 	public:
 		static QDBusObjectPath makePath(QString devName);
 
-		DBusDevice(QString service, QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
-		DBusDevice(QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
-		DBusDevice(QDBusObjectPath path, QDBusAbstractInterface* from, QObject* parent = 0);
+		explicit DBusDevice(QString service, QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
+		explicit DBusDevice(QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
+		explicit DBusDevice(QDBusObjectPath path, QDBusAbstractInterface* from, QObject* parent = 0);
 
 		DBUS_ACTION_0(libnutcommon::DeviceProperties, getProperties)
 		/* single properties */
@@ -212,9 +215,9 @@ namespace libnutclientbase {
 		static QDBusObjectPath makePath(QString devName, qint32 envNdx);
 		static QDBusObjectPath makePath(QDBusObjectPath devPath, qint32 envNdx);
 
-		DBusEnvironment(QString service, QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
-		DBusEnvironment(QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
-		DBusEnvironment(QDBusObjectPath path, QDBusAbstractInterface* from, QObject* parent = 0);
+		explicit DBusEnvironment(QString service, QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
+		explicit DBusEnvironment(QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
+		explicit DBusEnvironment(QDBusObjectPath path, QDBusAbstractInterface* from, QObject* parent = 0);
 
 		DBUS_ACTION_0(libnutcommon::EnvironmentProperties, getProperties)
 		/* single properties */
@@ -248,9 +251,9 @@ namespace libnutclientbase {
 		static QDBusObjectPath makePath(QDBusObjectPath devPath, qint32 envNdx, qint32 ifNdx);
 		static QDBusObjectPath makePath(QDBusObjectPath envPath, qint32 ifNdx);
 
-		DBusInterface_IPv4(QString service, QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
-		DBusInterface_IPv4(QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
-		DBusInterface_IPv4(QDBusObjectPath path, QDBusAbstractInterface* from, QObject* parent = 0);
+		explicit DBusInterface_IPv4(QString service, QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
+		explicit DBusInterface_IPv4(QDBusObjectPath path, QDBusConnection connection, QObject* parent = 0);
+		explicit DBusInterface_IPv4(QDBusObjectPath path, QDBusAbstractInterface* from, QObject* parent = 0);
 
 		DBUS_ACTION_0(libnutcommon::InterfaceProperties, getProperties)
 		/* single properties */
