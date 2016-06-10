@@ -178,7 +178,7 @@ namespace libnutclientbase {
 		DBUS_CACHEABLE_METHOD(QString, getName)
 		/* variable properties */
 		DBUS_ACTION_0(libnutcommon::DeviceType, getType)
-		DBUS_ACTION_0(libnutcommon::OptionalQDBusObjectPath, getActiveEnvironment)
+		DBUS_ACTION_0(libnutcommon::OptionalQDBusObjectPath, getActiveEnvironmentPath)
 		DBUS_ACTION_0(qint32, getActiveEnvironmentIndex)
 		DBUS_ACTION_0(libnutcommon::DeviceState, getState)
 		DBUS_ACTION_0(QString, getEssid)
@@ -200,8 +200,12 @@ namespace libnutclientbase {
 	signals:
 		void propertiesChanged(libnutcommon::DeviceProperties properties);
 		void stateChanged(libnutcommon::DeviceState state);
-		void activeEnvironmentChanged(libnutcommon::OptionalQDBusObjectPath objectpath);
-		void activeEnvironmentChanged(qint32 envId);
+		void activeEnvironmentChangedPath(libnutcommon::OptionalQDBusObjectPath objectpath);
+		void activeEnvironmentChangedIndex(qint32 envId);
+		void nextEnvironmentChangedPath(libnutcommon::OptionalQDBusObjectPath objectpath);
+		void nextEnvironmentChangedIndex(qint32 envId);
+		void userPreferredEnvironmentChangedPath(libnutcommon::OptionalQDBusObjectPath objectpath);
+		void userPreferredEnvironmentChangedIndex(qint32 envId);
 		void newWirelessNetworkFound();
 	};
 

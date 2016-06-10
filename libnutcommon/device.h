@@ -74,6 +74,8 @@ namespace libnutcommon {
 		DeviceType type = DeviceType::ETH;
 		/* variable */
 		OptionalQDBusObjectPath activeEnvironment;
+		OptionalQDBusObjectPath nextEnvironment;
+		OptionalQDBusObjectPath userPreferredEnvironment;
 		DeviceState state = DeviceState::DEACTIVATED;
 		QString essid;
 		MacAddress macAddress;

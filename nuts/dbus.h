@@ -69,8 +69,8 @@ namespace nuts {
 		Q_PROPERTY(libnutcommon::DeviceProperties properties READ getProperties NOTIFY propertiesChanged)
 		Q_PROPERTY(QString name READ getName CONSTANT)
 		Q_PROPERTY(libnutcommon::DeviceType type READ getType)
-		Q_PROPERTY(libnutcommon::OptionalQDBusObjectPath activeEnvironment READ getActiveEnvironment NOTIFY activeEnvironmentChanged)
-		Q_PROPERTY(qint32 activeEnvironmentIndex READ getActiveEnvironmentIndex NOTIFY activeEnvironmentChanged)
+		Q_PROPERTY(libnutcommon::OptionalQDBusObjectPath activeEnvironmentPath READ getActiveEnvironmentPath NOTIFY activeEnvironmentChangedPath)
+		Q_PROPERTY(qint32 activeEnvironmentIndex READ getActiveEnvironmentIndex NOTIFY activeEnvironmentChangedIndex)
 		Q_PROPERTY(libnutcommon::DeviceState state READ getState NOTIFY stateChanged)
 		Q_PROPERTY(QString essid READ getEssid)
 		Q_PROPERTY(libnutcommon::MacAddress macAddress READ getMacAddress)
@@ -88,8 +88,12 @@ namespace nuts {
 		QString getName();
 		/* variable properties */
 		libnutcommon::DeviceType getType();
-		libnutcommon::OptionalQDBusObjectPath getActiveEnvironment();
+		libnutcommon::OptionalQDBusObjectPath getActiveEnvironmentPath();
 		qint32 getActiveEnvironmentIndex();
+		libnutcommon::OptionalQDBusObjectPath getNextEnvironmentPath();
+		qint32 getNextEnvironmentIndex();
+		libnutcommon::OptionalQDBusObjectPath getUserPreferredEnvironmentPath();
+		qint32 getUserPreferredEnvironmentIndex();
 		libnutcommon::DeviceState getState();
 		QString getEssid();
 		libnutcommon::MacAddress getMacAddress();
@@ -110,21 +114,23 @@ namespace nuts {
 	signals:
 		void propertiesChanged(libnutcommon::DeviceProperties properties);
 		void stateChanged(libnutcommon::DeviceState state);
-		void activeEnvironmentChanged(libnutcommon::OptionalQDBusObjectPath objectpath);
-		void activeEnvironmentChanged(qint32 envId);
+		void activeEnvironmentChangedPath(libnutcommon::OptionalQDBusObjectPath objectpath);
+		void activeEnvironmentChangedIndex(qint32 envId);
+		void nextEnvironmentChangedPath(libnutcommon::OptionalQDBusObjectPath objectpath);
+		void nextEnvironmentChangedIndex(qint32 envId);
+		void userPreferredEnvironmentChangedPath(libnutcommon::OptionalQDBusObjectPath objectpath);
+		void userPreferredEnvironmentChangedIndex(qint32 envId);
 		void newWirelessNetworkFound();
 
 	private slots:
 		void checkPropertiesUpdate();
-		void devPropertiesChanged(libnutcommon::DeviceProperties properties);
-		void devActiveEnvironmentChanged(int environment);
+		void devPropertiesChanged();
 
 	private:
 		Device* const m_device;
 		QList<DBusEnvironment*> m_dbusEnvironments;
 
-		libnutcommon::DeviceProperties m_properties, m_last_notified_properties;
-		int m_activeEnvironment;
+		libnutcommon::DeviceProperties m_last_notified_properties;
 	};
 
 	class DBusEnvironment final: public libnutcommon::DBusAbstractAdaptor {

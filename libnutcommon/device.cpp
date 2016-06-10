@@ -18,6 +18,8 @@ namespace libnutcommon {
 		return a.name              == b.name
 			&& a.type              == b.type
 			&& a.activeEnvironment == b.activeEnvironment
+			&& a.nextEnvironment   == b.nextEnvironment
+			&& a.userPreferredEnvironment == b.userPreferredEnvironment
 			&& a.state             == b.state
 			&& a.essid             == b.essid
 			&& a.macAddress        == b.macAddress;

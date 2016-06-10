@@ -230,7 +230,7 @@ namespace libnutclientbase {
 		DBUS_CACHEABLE_METHOD(QString, getName)
 		/* variable properties */
 		DBUS_ACTION_0(libnutcommon::DeviceType, getType)
-		DBUS_ACTION_0(libnutcommon::OptionalQDBusObjectPath, getActiveEnvironment)
+		DBUS_ACTION_0(libnutcommon::OptionalQDBusObjectPath, getActiveEnvironmentPath)
 		DBUS_ACTION_0(qint32, getActiveEnvironmentIndex)
 		DBUS_ACTION_0(libnutcommon::DeviceState, getState)
 		DBUS_ACTION_0(QString, getEssid)

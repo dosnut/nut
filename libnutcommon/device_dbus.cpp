@@ -47,6 +47,8 @@ namespace libnutcommon {
 			<< devprop.name
 			<< devprop.type
 			<< devprop.activeEnvironment
+			<< devprop.nextEnvironment
+			<< devprop.userPreferredEnvironment
 			<< devprop.state
 			<< devprop.essid
 			<< devprop.macAddress;
@@ -59,6 +61,8 @@ namespace libnutcommon {
 			>> devprop.name
 			>> devprop.type
 			>> devprop.activeEnvironment
+			>> devprop.nextEnvironment
+			>> devprop.userPreferredEnvironment
 			>> devprop.state
 			>> devprop.essid
 			>> devprop.macAddress;

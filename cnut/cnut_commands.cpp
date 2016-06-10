@@ -83,7 +83,7 @@ namespace cnut {
 	}
 	QString getActiveEnvironment(QDBusConnection& connection, QDBusObjectPath const& devPath) {
 		DBusDevice dbusDev(devPath, connection);
-		auto activeEnv = filterDbusResult(dbusDev.sync_getActiveEnvironment());
+		auto activeEnv = filterDbusResult(dbusDev.sync_getActiveEnvironmentPath());
 		if (activeEnv) {
 			DBusEnvironment dbusEnv(activeEnv.objectPath(), connection);
 			return filterDbusResult(dbusEnv.sync_getName());
