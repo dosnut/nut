@@ -10,12 +10,13 @@ namespace nuts {
 	: m_processManager(processManager) {
 	}
 
-	void Events::start(QProcessEnvironment const& environment, QString const& event, QString const& device, QString const& env, int iface) {
+	void Events::start(QProcessEnvironment&& environment, QString const& event, QString const& device, QString const& env, int iface) {
 		QStringList args;
 		args << event << device;
 		if (!env.isNull()) args << env;
 		if (iface != -1) args << QString("%1").arg(iface);
 
+		environment.insert("NUT_EVENT", event);
 		m_processManager->startProgram(environment, "/etc/nuts/dispatch", args);
 	}
 
@@ -53,13 +54,13 @@ namespace nuts {
 		QProcessEnvironment e;
 		setupEnvironment(e);
 		setupEnvironment(e, dev);
-		start(e, "deviceAdd", devName);
+		start(std::move(e), "deviceAdd", devName);
 	}
 	void Events::deviceRemoved(QString devName, Device* dev) {
 		QProcessEnvironment e;
 		setupEnvironment(e);
 		setupEnvironment(e, dev);
-		start(e, "deviceRemove", devName);
+		start(std::move(e), "deviceRemove", devName);
 	}
 	void Events::stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState, Device* dev) {
 		QProcessEnvironment e;
@@ -76,7 +77,7 @@ namespace nuts {
 			setupEnvironment(e, env);
 			envName = env->getName();
 		}
-		start(e, nState, dev->getName(), envName);
+		start(std::move(e), nState, dev->getName(), envName);
 	}
 	void Events::interfaceStatusChanged(libnutcommon::InterfaceState state, Interface_IPv4* iface) {
 		QString event;
@@ -102,6 +103,6 @@ namespace nuts {
 		setupEnvironment(e, dev);
 		setupEnvironment(e, env);
 		setupEnvironment(e, iface);
-		start(e, "ifup", dev->getName(), env->getName(), iface->getIndex());
+		start(std::move(e), "ifup", dev->getName(), env->getName(), iface->getIndex());
 	}
 }

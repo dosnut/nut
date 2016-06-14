@@ -22,7 +22,7 @@ namespace nuts {
 		explicit Events(ProcessManager* processManager);
 
 	private:
-		void start(QProcessEnvironment const& environment, QString const& event, QString const& device, QString const& env = QString(), int iface = -1);
+		void start(QProcessEnvironment&& environment, QString const& event, QString const& device, QString const& env = QString(), int iface = -1);
 
 	public:
 		void stateChanged(libnutcommon::DeviceState newState, libnutcommon::DeviceState oldState, Device* device);
