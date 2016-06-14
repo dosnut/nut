@@ -234,9 +234,14 @@ namespace nuts {
 		log << "Device(" << m_properties.name << ") is down!" << endl;
 		m_activeEnv = m_nextEnv;
 		m_nextEnv = -1;
-		if (m_activeEnv != -1)
+		if (m_activeEnv != -1) {
 			m_envs[m_activeEnv]->start();
+		}
 		emit activeEnvironmentChanged(m_activeEnv);
+		if (m_activeEnv != -1) {
+			/* m_nextEnv became -1 and wasn't before */
+			emit nextEnvironmentChanged(m_nextEnv);
+		}
 	}
 	void Device::envNeedUserSetup(Environment* env) {
 		if (m_envs[m_activeEnv] != env) return;
@@ -259,6 +264,7 @@ namespace nuts {
 	void Device::lostCarrier() {
 		log << "Device(" << m_properties.name << ") lostCarrier" << endl;
 		m_nextEnv = -1;
+		emit nextEnvironmentChanged(m_nextEnv);
 		if (m_activeEnv != -1) {
 			m_envs[m_activeEnv]->stop();
 			m_activeEnv = -1;
@@ -390,6 +396,7 @@ namespace nuts {
 		log << QString("Set next environment %1").arg(env) << endl;
 		if (env < 0 || env >= m_envs.size()) {
 			m_nextEnv = -1;
+			emit nextEnvironmentChanged(m_nextEnv);
 			if (m_activeEnv != -1) {
 				m_envs[m_activeEnv]->stop();
 			}
@@ -399,9 +406,11 @@ namespace nuts {
 			emit activeEnvironmentChanged(m_activeEnv);
 		} else if (m_nextEnv == -1) {
 			m_nextEnv = env;
+			emit nextEnvironmentChanged(m_nextEnv);
 			m_envs[m_activeEnv]->stop();
 		} else {
 			m_nextEnv = env;
+			emit nextEnvironmentChanged(m_nextEnv);
 		}
 	}
 
@@ -434,11 +443,10 @@ namespace nuts {
 	}
 
 	void Device::setUserPreferredEnvironment(int env) {
-		if (env < 0 || env >= m_envs.size()) {
-			m_userEnv = -1;
-		} else {
-			m_userEnv = env;
-		}
+		if (env < 0 || env >= m_envs.size()) env = -1;
+		if (env == m_userEnv) return; /* no changes */
+		m_userEnv = env;
+		emit userPreferredEnvironmentChanged(m_userEnv);
 		checkEnvironment();
 	}
 
@@ -455,6 +463,7 @@ namespace nuts {
 	void Device::disable() {
 		if (DeviceState::DEACTIVATED != m_properties.state) {
 			m_nextEnv = -1;
+			emit nextEnvironmentChanged(m_nextEnv);
 			if (m_activeEnv != -1) {
 				m_envs[m_activeEnv]->stop();
 				m_activeEnv = -1;

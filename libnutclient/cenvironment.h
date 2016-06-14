@@ -63,7 +63,7 @@ namespace libnutclient {
 		void dbusPropertiesChanged(libnutcommon::EnvironmentProperties properties);
 
 	public:
-		CEnvironment(CDevice* parent, QDBusObjectPath dbusPath, int index);
+		explicit CEnvironment(CDevice* parent, QDBusObjectPath dbusPath, int index);
 		~CEnvironment();
 
 		/* local index - might be the same as getID() */

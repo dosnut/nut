@@ -28,8 +28,8 @@ namespace libnutclient {
 		friend class CNutServiceClient;
 
 	public:
-		CNutService(QString service, QObject* parent = nullptr);
-		CNutService(QObject* parent = nullptr);
+		explicit CNutService(QString service, QObject* parent = nullptr);
+		explicit CNutService(QObject* parent = nullptr);
 
 		bool isConnected();
 
@@ -58,8 +58,8 @@ namespace libnutclient {
 
 		CNutServiceClient(CNutService* serviceParent, QObject* parent);
 	public:
-		CNutServiceClient(CNutServiceClient* parent);
-		CNutServiceClient(CNutService* service);
+		explicit CNutServiceClient(CNutServiceClient* parent);
+		explicit CNutServiceClient(CNutService* service);
 
 	protected:
 		QString m_logPrefix;

@@ -75,10 +75,6 @@ namespace nuts {
 
 	DBusDevice::DBusDevice(Device* dev, const QString& path)
 	: DBusAbstractAdaptor(makeDevicePath(path, dev->getName()), dev), m_device(dev) {
-		m_properties = dev->getProperties();
-		// remember active environment
-		m_activeEnvironment = m_device->getEnvironment();
-
 		//Add Environments
 		for (Environment* env: m_device->getEnvironments()) {
 			DBusEnvironment* dbus_env = new DBusEnvironment(env, m_path);
@@ -86,59 +82,56 @@ namespace nuts {
 			registerAdaptor(dbus_env);
 		}
 
-		m_properties.activeEnvironment = m_activeEnvironment >= 0
-			? m_dbusEnvironments[m_activeEnvironment]->getPath()
-			: OptionalQDBusObjectPath { };
+		m_last_notified_properties = getProperties();
 
-		m_last_notified_properties = m_properties;
-
-		connect(m_device, &Device::activeEnvironmentChanged, this, &DBusDevice::devActiveEnvironmentChanged);
 		connect(m_device, &Device::propertiesChanged, this, &DBusDevice::devPropertiesChanged);
+		connect(m_device, &Device::activeEnvironmentChanged, this, &DBusDevice::devPropertiesChanged);
+		connect(m_device, &Device::nextEnvironmentChanged, this, &DBusDevice::devPropertiesChanged);
+		connect(m_device, &Device::userPreferredEnvironmentChanged, this, &DBusDevice::devPropertiesChanged);
 	}
 
 	void DBusDevice::checkPropertiesUpdate() {
-		auto &l = m_last_notified_properties;
-		auto &c = m_properties;
+		auto& l = m_last_notified_properties;
+		auto const current = getProperties();
+
 		auto changed = false;
 
-		if (l.activeEnvironment != c.activeEnvironment) {
+		if (l.activeEnvironment != current.activeEnvironment) {
 			changed = true;
-			l.activeEnvironment = c.activeEnvironment;
-			emit activeEnvironmentChanged(c.activeEnvironment);
-			emit activeEnvironmentChanged(m_activeEnvironment);
+			l.activeEnvironment = current.activeEnvironment;
+			emit activeEnvironmentChangedPath(current.activeEnvironment);
+			emit activeEnvironmentChangedIndex(getActiveEnvironmentIndex());
 		}
 
-		if (l.state != c.state) {
+		if (l.nextEnvironment != current.nextEnvironment) {
 			changed = true;
-			l.state = c.state;
-			emit stateChanged(c.state);
+			l.nextEnvironment = current.nextEnvironment;
+			emit nextEnvironmentChangedPath(current.nextEnvironment);
+			emit nextEnvironmentChangedIndex(getNextEnvironmentIndex());
 		}
 
-		if (l != c) {
+		if (l.userPreferredEnvironment != current.userPreferredEnvironment) {
 			changed = true;
-			l = c;
+			l.userPreferredEnvironment = current.userPreferredEnvironment;
+			emit userPreferredEnvironmentChangedPath(current.userPreferredEnvironment);
+			emit userPreferredEnvironmentChangedIndex(getUserPreferredEnvironmentIndex());
 		}
 
-		if (changed) emit propertiesChanged(c);
+		if (l.state != current.state) {
+			changed = true;
+			l.state = current.state;
+			emit stateChanged(current.state);
+		}
+
+		if (l != current) {
+			changed = true;
+			l = current;
+		}
+
+		if (changed) emit propertiesChanged(current);
 	}
 
-	void DBusDevice::devPropertiesChanged(libnutcommon::DeviceProperties properties) {
-		m_properties = properties;
-		m_properties.activeEnvironment = m_activeEnvironment >= 0
-			? m_dbusEnvironments[m_activeEnvironment]->getPath()
-			: OptionalQDBusObjectPath { };
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
-		QTimer::singleShot(10, this, &DBusDevice::checkPropertiesUpdate);
-#else
-		QTimer::singleShot(10, this, SLOT(checkPropertiesUpdate()));
-#endif
-	}
-
-	void DBusDevice::devActiveEnvironmentChanged(int newEnvironment) {
-		m_activeEnvironment = newEnvironment;
-		m_properties.activeEnvironment = m_activeEnvironment >= 0
-			? m_dbusEnvironments[m_activeEnvironment]->getPath()
-			: OptionalQDBusObjectPath { };
+	void DBusDevice::devPropertiesChanged() {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 		QTimer::singleShot(10, this, &DBusDevice::checkPropertiesUpdate);
 #else
@@ -147,35 +140,59 @@ namespace nuts {
 	}
 
 	DeviceProperties DBusDevice::getProperties() {
-		return m_properties;
+		auto current = m_device->getProperties();
+		current.activeEnvironment = getActiveEnvironmentPath();
+		current.nextEnvironment = getNextEnvironmentPath();
+		current.userPreferredEnvironment = getUserPreferredEnvironmentPath();
+		return current;
 	}
 
 	QString DBusDevice::getName() {
-		return m_properties.name;
+		return m_device->getName();
 	}
 
 	DeviceType DBusDevice::getType() {
-		return m_properties.type;
+		return m_device->getType();
 	}
 
-	OptionalQDBusObjectPath DBusDevice::getActiveEnvironment() {
-		return m_properties.activeEnvironment;
+	static OptionalQDBusObjectPath getEnvironmentPath(DBusEnvironment const* env) {
+		return env ? env->getPath() : OptionalQDBusObjectPath{};
+	}
+
+	OptionalQDBusObjectPath DBusDevice::getActiveEnvironmentPath() {
+		return getEnvironmentPath(m_dbusEnvironments.value(getActiveEnvironmentIndex(), nullptr));
 	}
 
 	qint32 DBusDevice::getActiveEnvironmentIndex() {
-		return m_activeEnvironment;
+		return m_device->getActiveEnvironment();
+	}
+
+	libnutcommon::OptionalQDBusObjectPath DBusDevice::getNextEnvironmentPath() {
+		return getEnvironmentPath(m_dbusEnvironments.value(getNextEnvironmentIndex(), nullptr));
+	}
+
+	qint32 DBusDevice::getNextEnvironmentIndex() {
+		return m_device->getNextEnvironment();
+	}
+
+	libnutcommon::OptionalQDBusObjectPath DBusDevice::getUserPreferredEnvironmentPath() {
+		return getEnvironmentPath(m_dbusEnvironments.value(getUserPreferredEnvironmentIndex(), nullptr));
+	}
+
+	qint32 DBusDevice::getUserPreferredEnvironmentIndex() {
+		return m_device->getUserPreferredEnvironment();
 	}
 
 	DeviceState DBusDevice::getState() {
-		return m_properties.state;
+		return m_device->getState();
 	}
 
 	QString DBusDevice::getEssid() {
-		return m_properties.essid;
+		return m_device->getEssid();
 	}
 
 	MacAddress DBusDevice::getMacAddress() {
-		return m_properties.macAddress;
+		return m_device->getMacAddress();
 	}
 
 	DeviceConfig DBusDevice::getConfig() {

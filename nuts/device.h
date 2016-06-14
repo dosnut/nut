@@ -127,7 +127,7 @@ namespace nuts {
 		~Device();
 
 	public slots:
-		/* Properties (activeEnvironment not used here) */
+		/* Properties (DBus paths not set as they are unknown in this context) */
 		const libnutcommon::DeviceProperties& getProperties() const { return m_properties; }
 		QString getName() const { return m_properties.name; } //!< Name of the device in the kernel, e.g. "eth0"
 		libnutcommon::DeviceType getType() const { return m_properties.type; } //!< Name of the device in the kernel, e.g. "eth0"
@@ -142,8 +142,11 @@ namespace nuts {
 
 		const QList<Environment*>& getEnvironments() { return m_envs; }
 
-		int getUserPreferredEnvironment() { return m_userEnv; }
+		int getUserPreferredEnvironment() const { return m_userEnv; }
 		void setUserPreferredEnvironment(int env);
+
+		int getActiveEnvironment() const { return m_activeEnv; }
+		int getNextEnvironment() const { return m_nextEnv; }
 
 		/**
 		 * Enable device.
@@ -155,9 +158,12 @@ namespace nuts {
 		void disable(); //!< Disable device
 
 	signals:
-		/* activeEnvironment not maintained in properties, separate signal below */
+		/* DBus paths not maintained in properties, separate signals below */
 		void propertiesChanged(libnutcommon::DeviceProperties properties);
+
 		void activeEnvironmentChanged(int environment);
+		void nextEnvironmentChanged(int environment);
+		void userPreferredEnvironmentChanged(int environment);
 
 	private:
 		void setState(libnutcommon::DeviceState state);

@@ -55,7 +55,7 @@ namespace libnutclient {
 		void dbusConnectService(QString service, QDBusConnection connection) override;
 
 	public:
-		CDeviceManager(CNutService* parent);
+		explicit CDeviceManager(CNutService* parent);
 		~CDeviceManager();
 
 		const CDeviceList& getDevices() const { return m_devices; }

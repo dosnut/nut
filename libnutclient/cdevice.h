@@ -79,7 +79,7 @@ namespace libnutclient {
 		void dbusPropertiesChanged(libnutcommon::DeviceProperties properties);
 
 	public:
-		CDevice(CDeviceManager* parent, QDBusObjectPath dbuspath);
+		explicit CDevice(CDeviceManager* parent, QDBusObjectPath dbuspath);
 		~CDevice();
 
 		int getIndex() const { return m_index; }
