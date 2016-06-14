@@ -1,3 +1,13 @@
+network-utilities (0.6.3-1) unstable; urgency=medium
+
+  * [libnutclient*] use explicit constructors
+  * [dbus API] extend device (properties) by "next" and "userPreferred"
+    environments
+  * [nuts] fix missing NUT_EVENT variable in dispatch script
+  * Release 0.6.3
+
+ -- Stefan Bühler <stbuehler@web.de>  Tue, 14 Jun 2016 15:48:00 +0200
+
 network-utilities (0.6.2-1) unstable; urgency=medium
 
   * [nuts] fix endless loop on failure in config parser

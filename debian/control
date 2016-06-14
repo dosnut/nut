@@ -10,7 +10,7 @@ Build-Depends: cdbs (>= 0.4.123), debhelper (>= 9), dh-systemd (>= 1.5),
  libiw-dev,
  cmake (>= 3),
  pkg-config,
-Standards-Version: 3.9.6
+Standards-Version: 3.9.8
 
 Package: nuts
 Architecture: any
@@ -74,7 +74,7 @@ Description: Network UTility command line client debug symbols
  .
  This package contains the debug symbols for the command line client.
 
-Package: libnutclient0.6.2
+Package: libnutclient0.6.3
 Section: libs
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
@@ -85,10 +85,10 @@ Description: Network UTility client library debug symbols
  .
  This package contains the client library.
 
-Package: libnutclient0.6.2-dbg
+Package: libnutclient0.6.3-dbg
 Section: debug
 Architecture: any
-Depends: ${misc:Depends}, libnutclient0.6.2 (= ${binary:Version})
+Depends: ${misc:Depends}, libnutclient0.6.3 (= ${binary:Version})
 Priority: extra
 Description: Network UTility client library
  Manages your network cards; the server has an DBus Interface,
@@ -96,10 +96,10 @@ Description: Network UTility client library
  .
  This package contains the debug symbols for the client library.
 
-Package: libnutclient0.6.2-dev
+Package: libnutclient0.6.3-dev
 Section: libdevel
 Architecture: any
-Depends: ${misc:Depends}, libnutclient0.6.2 (= ${binary:Version})
+Depends: ${misc:Depends}, libnutclient0.6.3 (= ${binary:Version})
 Priority: extra
 Description: Network UTility client library development files
  Manages your network cards; the server has an DBus Interface,
@@ -107,7 +107,7 @@ Description: Network UTility client library development files
  .
  This package contains the development files for the client library.
 
-Package: libnutcommon0.6.2
+Package: libnutcommon0.6.3
 Section: libs
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
@@ -118,10 +118,10 @@ Description: Network UTility common library
  .
  This package contains the common library.
 
-Package: libnutcommon0.6.2-dbg
+Package: libnutcommon0.6.3-dbg
 Section: debug
 Architecture: any
-Depends: ${misc:Depends}, libnutcommon0.6.2 (= ${binary:Version})
+Depends: ${misc:Depends}, libnutcommon0.6.3 (= ${binary:Version})
 Priority: extra
 Description: Network UTility common library debug symbols
  Manages your network cards; the server has an DBus Interface,
