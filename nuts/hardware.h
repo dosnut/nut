@@ -19,6 +19,7 @@ extern "C" {
 	struct nl_cache;
 	struct nl_sock;
 	struct rtnl_addr;
+	struct rtnl_link;
 	struct rtnl_nexthop;
 	struct rtnl_route;
 
@@ -35,9 +36,17 @@ namespace nuts {
 			void operator()(::rtnl_route *route);
 			void operator()(::rtnl_nexthop *nh);
 		};
+
+		template<typename ObjectType>
+		struct free_nl_cache {
+			void operator()(::nl_cache* cache) {
+				free_nl_data{}(cache);
+			}
+		};
 	}
 	using nl_addr_ptr = std::unique_ptr<::nl_addr, internal::free_nl_data>;
-	using nl_cache_ptr = std::unique_ptr<::nl_cache, internal::free_nl_data>;
+	template<typename ObjectType>
+	using nl_cache_ptr = std::unique_ptr<::nl_cache, internal::free_nl_cache<ObjectType>>;
 	using nl_sock_ptr = std::unique_ptr<::nl_sock, internal::free_nl_data>;
 	using rtnl_addr_ptr = std::unique_ptr<::rtnl_addr, internal::free_nl_data>;
 	using rtnl_route_ptr = std::unique_ptr<::rtnl_route, internal::free_nl_data>;
@@ -78,6 +87,9 @@ namespace nuts {
 			QHostAddress const& gateway,
 			int metric);
 
+		/* NOT READY FOR USE YET */
+		void cleanupIPv6AutoAssigned(int ifIndex);
+
 	signals:
 		void gotCarrier(QString const& ifName, int ifIndex, QString const& essid);
 		void lostCarrier(QString const& ifName);
@@ -112,7 +124,7 @@ namespace nuts {
 
 		nl_sock_ptr m_nlh_watcher;
 		std::unique_ptr<QSocketNotifier> m_nlh_watcher_notifier;
-		nl_cache_ptr m_nlcache;
+		nl_cache_ptr<::rtnl_link> m_nlcache;
 		struct ifstate {
 			explicit ifstate() = default;
 
