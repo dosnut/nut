@@ -7,16 +7,42 @@
 #include <QString>
 #include <QList>
 #include <QVector>
+#include <QHostAddress>
+#include <QSocketNotifier>
+
+#include <memory>
 
 #include <libnutcommon/macaddress.h>
 
 extern "C" {
-	struct nl_sock;
+	struct nl_addr;
 	struct nl_cache;
+	struct nl_sock;
+	struct rtnl_addr;
+	struct rtnl_nexthop;
+	struct rtnl_route;
+
 	struct ifreq;
 }
 
 namespace nuts {
+	namespace internal {
+		struct free_nl_data {
+			void operator()(::nl_addr* addr);
+			void operator()(::nl_cache* cache);
+			void operator()(::nl_sock* sock);
+			void operator()(::rtnl_addr *addr);
+			void operator()(::rtnl_route *route);
+			void operator()(::rtnl_nexthop *nh);
+		};
+	}
+	using nl_addr_ptr = std::unique_ptr<::nl_addr, internal::free_nl_data>;
+	using nl_cache_ptr = std::unique_ptr<::nl_cache, internal::free_nl_data>;
+	using nl_sock_ptr = std::unique_ptr<::nl_sock, internal::free_nl_data>;
+	using rtnl_addr_ptr = std::unique_ptr<::rtnl_addr, internal::free_nl_data>;
+	using rtnl_route_ptr = std::unique_ptr<::rtnl_route, internal::free_nl_data>;
+	using rtnl_nexthop_ptr = std::unique_ptr<::rtnl_nexthop, internal::free_nl_data>;
+
 	class HardwareManager final : public QObject {
 		Q_OBJECT
 	public:
@@ -34,12 +60,23 @@ namespace nuts {
 		QString ifIndex2Name(int ifIndex);
 		int ifName2Index(QString const& ifName);
 
-		struct ::nl_sock* getNLHandle();
-
 		libnutcommon::MacAddress getMacAddress(QString const& ifName);
 
 		bool hasWLAN(QString const& ifName);
 		bool getEssid(QString const& ifName, QString& essid);
+
+		void ipv4AddressAdd(
+			int ifIndex,
+			QHostAddress const& ip,
+			QHostAddress const& netmask,
+			QHostAddress const& gateway,
+			int metric);
+		void ipv4AddressDelete(
+			int ifIndex,
+			QHostAddress const& ip,
+			QHostAddress const& netmask,
+			QHostAddress const& gateway,
+			int metric);
 
 	signals:
 		void gotCarrier(QString const& ifName, int ifIndex, QString const& essid);
@@ -69,10 +106,13 @@ namespace nuts {
 		void ifreq_init(struct ifreq& ifr);
 
 	private: /* vars */
-		int netlink_fd{-1};
 		int ethtool_fd{-1};
-		struct ::nl_sock* nlh{nullptr};
-		struct ::nl_cache* nlcache{nullptr};
+
+		nl_sock_ptr m_nlh_control;
+
+		nl_sock_ptr m_nlh_watcher;
+		std::unique_ptr<QSocketNotifier> m_nlh_watcher_notifier;
+		nl_cache_ptr m_nlcache;
 		struct ifstate {
 			explicit ifstate() = default;
 

@@ -15,7 +15,9 @@ extern "C" {
 
 #include <netlink/netlink.h>
 #include <netlink/msg.h>
+#include <netlink/route/addr.h>
 #include <netlink/route/link.h>
+#include <netlink/route/route.h>
 #include <arpa/inet.h>
 #include <linux/if.h>
 #include <linux/ethtool.h>
@@ -37,11 +39,110 @@ namespace {
 		if (nullptr == nla_ifname) return QString();
 		return QString::fromUtf8((char*) nla_data(nla_ifname), nla_len(nla_ifname)-1);
 	}
+
+	int getPrefixLenIPv4(const QHostAddress &netmask) {
+		quint32 val = netmask.toIPv4Address();
+		int i = 32;
+		while (val && !(val & 0x1)) {
+			i--;
+			val >>= 1;
+		}
+		return i;
+	}
+
+	nuts::nl_addr_ptr NLAddrDefaultIPv4() {
+		quint32 i = 0;
+		nuts::nl_addr_ptr a{nl_addr_build(AF_INET, &i, sizeof(i))};
+		nl_addr_set_prefixlen(a.get(), 0);
+		return a;
+	}
+
+	nuts::nl_addr_ptr toNLAddrIPv4(QHostAddress const& addr, QHostAddress const& netmask = QHostAddress()) {
+		quint32 i = htonl(addr.toIPv4Address());
+		nuts::nl_addr_ptr a{nl_addr_build(AF_INET, &i, sizeof(i))};
+		if (!netmask.isNull()) {
+			nl_addr_set_prefixlen(a.get(), getPrefixLenIPv4(netmask));
+		}
+		return a;
+	}
+
+	nuts::nl_addr_ptr toNLBroadcastIPv4(const QHostAddress &addr, const QHostAddress &netmask) {
+		quint32 nm = 0;
+		if (!netmask.isNull()) nm = htonl(netmask.toIPv4Address());
+		quint32 i = htonl(addr.toIPv4Address());
+		quint32 bcast = (i & nm) | (~nm);
+		nuts::nl_addr_ptr a{nl_addr_build(AF_INET, &bcast, sizeof(bcast))};
+		return a;
+	}
+
+	nuts::rtnl_addr_ptr makeRTNLAddrIPv4(int ifIndex, QHostAddress const& ip, QHostAddress const& netmask) {
+		// zeroconf: in 169.254.0.0/16
+		bool const isZeroconf = (netmask.toIPv4Address() == 0xFFFF0000u)
+			&& ((ip.toIPv4Address() & 0xFFFF0000u) == 0xA9FE0000);
+
+		nuts::rtnl_addr_ptr addr{rtnl_addr_alloc()};
+		rtnl_addr_set_ifindex(addr.get(), ifIndex);
+		rtnl_addr_set_family(addr.get(), AF_INET);
+		rtnl_addr_set_local(addr.get(), toNLAddrIPv4(ip, netmask).get());
+		rtnl_addr_set_broadcast(addr.get(), toNLBroadcastIPv4(ip, netmask).get());
+		if (isZeroconf) {
+			rtnl_addr_set_scope(addr.get(), RT_SCOPE_LINK);
+			rtnl_addr_set_flags(addr.get(), IFA_F_PERMANENT);
+		}
+
+		return addr;
+	}
+
+	nuts::rtnl_route_ptr makeRTNLRouteIPv4(int ifIndex, QHostAddress const& gateway, int metric) {
+		nuts::rtnl_nexthop_ptr nh{rtnl_route_nh_alloc()};
+		rtnl_route_nh_set_ifindex(nh.get(), ifIndex);
+		rtnl_route_nh_set_gateway(nh.get(), toNLAddrIPv4(gateway).get());
+
+		nuts::rtnl_route_ptr route{rtnl_route_alloc()};
+		rtnl_route_set_family(route.get(), AF_INET);
+		rtnl_route_set_dst(route.get(), NLAddrDefaultIPv4().get());
+		rtnl_route_set_protocol(route.get(), RTPROT_BOOT);
+		rtnl_route_set_scope(route.get(), RT_SCOPE_UNIVERSE);
+
+		if (-1 != metric) {
+			rtnl_route_set_priority(route.get(), metric);
+		}
+		// route owns added nexthops, nexthop doesn't have ref count
+		rtnl_route_add_nexthop(route.get(), nh.release());
+
+		return route;
+	}
 }
 
 namespace nuts {
-	HardwareManager::HardwareManager()
-	: netlink_fd(-1), ethtool_fd(-1) {
+	namespace internal {
+		void free_nl_data::operator()(nl_addr* addr) {
+			nl_addr_put(addr);
+		}
+
+		void free_nl_data::operator()(nl_cache* cache) {
+			nl_cache_free(cache);
+		}
+
+		void free_nl_data::operator()(nl_sock* sock) {
+			nl_close(sock);
+			nl_socket_free(sock);
+		}
+
+		void free_nl_data::operator()(rtnl_addr* addr) {
+			rtnl_addr_put(addr);
+		}
+
+		void free_nl_data::operator()(rtnl_route* route) {
+			rtnl_route_put(route);
+		}
+
+		void free_nl_data::operator()(rtnl_nexthop* nh) {
+			rtnl_route_nh_free(nh);
+		}
+	}
+
+	HardwareManager::HardwareManager() {
 		if (!init_netlink()) {
 			throw NetlinkInitException("HardwareManager: Couldn't init netlink");
 		}
@@ -49,10 +150,6 @@ namespace nuts {
 			free_netlink();
 			throw EthtoolInitException("HardwareManager: Couldn't init ethtool");
 		}
-		fcntl(netlink_fd, F_SETFD, FD_CLOEXEC);
-		fcntl(ethtool_fd, F_SETFD, FD_CLOEXEC);
-		QSocketNotifier* nln = new QSocketNotifier(netlink_fd, QSocketNotifier::Read, this);
-		connect(nln, &QSocketNotifier::activated, this, &HardwareManager::read_netlinkmsgs);
 	}
 
 	HardwareManager::~HardwareManager() {
@@ -91,19 +188,37 @@ namespace nuts {
 		return true;
 	}
 
-
 	bool HardwareManager::init_netlink() {
-		nlh = nl_socket_alloc();
-		if (!nlh) return false;
-		nl_socket_set_peer_port(nlh, 0);
+		m_nlh_control.reset(nl_socket_alloc());
+		m_nlh_watcher.reset(nl_socket_alloc());
+		if (!m_nlh_watcher || !m_nlh_control) goto cleanup;
+		nl_socket_set_peer_port(m_nlh_watcher.get(), 0);
 
-		if (nl_connect(nlh, NETLINK_ROUTE) != 0) goto cleanup;
-		if (nl_socket_add_membership(nlh, RTNLGRP_LINK) != 0) goto cleanup;
-		if (nl_socket_add_membership(nlh, RTNLGRP_IPV4_IFADDR) != 0) goto cleanup;
+		if (nl_connect(m_nlh_control.get(), NETLINK_ROUTE) != 0) goto cleanup;
 
-		netlink_fd = nl_socket_get_fd(nlh);
-		if (0 != rtnl_link_alloc_cache(nlh, AF_UNSPEC, &nlcache)) {
+		if (nl_connect(m_nlh_watcher.get(), NETLINK_ROUTE) != 0) goto cleanup;
+		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_LINK) != 0) goto cleanup;
+		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_IPV4_IFADDR) != 0) goto cleanup;
+
+		{
+			struct ::nl_cache* cache_ptr{nullptr};
+			if (0 == rtnl_link_alloc_cache(m_nlh_watcher.get(), AF_UNSPEC, &cache_ptr)) {
+				m_nlcache.reset(cache_ptr);
+			}
+		}
+		if (!m_nlcache) {
 			goto cleanup;
+		}
+
+		{
+			int netlink_fd = nl_socket_get_fd(m_nlh_control.get());
+			fcntl(netlink_fd, F_SETFD, FD_CLOEXEC);
+		}
+		{
+			int netlink_fd = nl_socket_get_fd(m_nlh_watcher.get());
+			fcntl(netlink_fd, F_SETFD, FD_CLOEXEC);
+			m_nlh_watcher_notifier.reset(new QSocketNotifier(netlink_fd, QSocketNotifier::Read));
+			connect(m_nlh_watcher_notifier.get(), &QSocketNotifier::activated, this, &HardwareManager::read_netlinkmsgs);
 		}
 
 		return true;
@@ -112,23 +227,20 @@ cleanup:
 		free_netlink();
 		return false;
 	}
+
 	void HardwareManager::free_netlink() {
-		nl_cache_free(nlcache);
-		nl_close(nlh);
-		nl_socket_free(nlh);
+		m_nlh_watcher_notifier.reset();
+		m_nlcache.reset();
+		m_nlh_watcher.reset();
+		m_nlh_control.reset();
 	}
+
 	bool HardwareManager::init_ethtool() {
 		ethtool_fd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
-		//ethtool_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
-		if (ethtool_fd >= 0) return true;
-/*
-		ethtool_fd = socket(PF_INET, SOCK_DGRAM, 0);
-		if (ethtool_fd >= 0) return true;
-		ethtool_fd = socket(PF_PACKET, SOCK_DGRAM, 0);
-		if (ethtool_fd >= 0) return true;
-		ethtool_fd = socket(PF_INET6, SOCK_DGRAM, 0);
-		if (ethtool_fd >= 0) return true;
-*/
+		if (ethtool_fd >= 0) {
+			fcntl(ethtool_fd, F_SETFD, FD_CLOEXEC);
+			return true;
+		}
 		return false;
 	}
 	void HardwareManager::free_ethtool() {
@@ -256,10 +368,6 @@ cleanup:
 		return ifr.ifr_ifindex;
 	}
 
-	struct nl_sock* HardwareManager::getNLHandle() {
-		return nlh;
-	}
-
 	libnutcommon::MacAddress HardwareManager::getMacAddress(QString const& ifName) {
 		struct ifreq ifr;
 		if (!ifreq_init(ifr, ifName)) {
@@ -290,7 +398,7 @@ cleanup:
 		int n, msgsize;
 		struct nlmsghdr* hdr;
 
-		msgsize = n = nl_recv(nlh, &peer, &msg, 0);
+		msgsize = n = nl_recv(m_nlh_watcher.get(), &peer, &msg, 0);
 		for (hdr = (struct nlmsghdr*) msg; nlmsg_ok(hdr, n); hdr = (struct nlmsghdr*) nlmsg_next(hdr, &n)) {
 //			log << QString("Message type 0x%1").arg(hdr->nlmsg_type, 0, 16) << endl;
 			switch (hdr->nlmsg_type) {
@@ -405,6 +513,55 @@ cleanup:
 		return true;
 	}
 
+	void HardwareManager::ipv4AddressAdd(
+			int ifIndex,
+			const QHostAddress& ip,
+			const QHostAddress& netmask,
+			const QHostAddress& gateway,
+			int metric)
+	{
+		int res;
+
+		res = rtnl_addr_add(m_nlh_control.get(), makeRTNLAddrIPv4(ifIndex, ip, netmask).get(), 0);
+		if (0 > res) {
+			log << "Adding address failed[ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		}
+
+		if (!gateway.isNull()) {
+			/* NLM_F_EXCL would fail if there is already a route with the
+			 * same target,tos,priority
+			 *
+			 * For now overwrite existing routes.
+			 */
+			res = rtnl_route_add(m_nlh_control.get(), makeRTNLRouteIPv4(ifIndex, gateway, metric).get(), 0 /* NLM_F_EXCL */);
+			if (0 > res) {
+				log << "Adding default gateway failed[ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+			}
+		}
+	}
+
+	void HardwareManager::ipv4AddressDelete(
+			int ifIndex,
+			const QHostAddress& ip,
+			const QHostAddress& netmask,
+			const QHostAddress& gateway,
+			int metric)
+	{
+		int res;
+
+		if (!gateway.isNull()) {
+			res = rtnl_route_delete(m_nlh_control.get(), makeRTNLRouteIPv4(ifIndex, gateway, metric).get(), 0);
+			if (0 > res) {
+				log << "Deleting default gateway failed[ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+			}
+		}
+
+		res = rtnl_addr_delete(m_nlh_control.get(), makeRTNLAddrIPv4(ifIndex, ip, netmask).get(), 0);
+		if (0 > res) {
+			log << "Deleting address failed[ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		}
+	}
+
 	void HardwareManager::ifstate::on() {
 		active = true;
 		exists = true;
@@ -414,5 +571,4 @@ cleanup:
 	void HardwareManager::ifstate::off() {
 		active = false;
 	}
-
 }

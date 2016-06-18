@@ -12,33 +12,12 @@ extern "C" {
 #include <asm/types.h>
 // socket, AF_INET, SOCK_RAW
 #include <sys/socket.h>
-// IPPROTO_RAW
-#include <arpa/inet.h>
-// fcntl, F_SETFD, FD_CLOEXEC
-#include <fcntl.h>
-#include <sys/ioctl.h>
 
-#include <netlink/netlink.h>
-#include <netlink/msg.h>
-#include <netlink/route/addr.h>
 #include <arpa/inet.h>
 #include <linux/if.h>
 #include <linux/if_packet.h>
-#include <linux/if_ether.h>
-#include <linux/ethtool.h>
 #include <linux/sysctl.h>
-#include <linux/route.h>
 #include <unistd.h>
-
-void perror(const char *s);
-}
-
-static inline void setSockaddrIPv4(struct sockaddr &s, quint32 host = 0, quint16 port = 0) {
-	struct sockaddr_in sa;
-	sa.sin_family = AF_INET;
-	sa.sin_port = htons(port);
-	sa.sin_addr.s_addr = htonl(host);
-	memcpy(&s, &sa, sizeof(struct sockaddr_in));
 }
 
 namespace nuts {
@@ -90,7 +69,10 @@ namespace nuts {
 
 		for (QString const& ifName: m_devices.keys()) {
 			Device* device = m_devices.value(ifName, nullptr);
-			if (device) delete device;
+			if (device) {
+				delete device;
+				m_devices.remove(ifName);
+			}
 		}
 	}
 
@@ -1131,136 +1113,54 @@ namespace nuts {
 		systemDown(InterfaceState::OFF);
 	}
 
-	inline int getPrefixLen(const QHostAddress &netmask) {
-		quint32 val = netmask.toIPv4Address();
-		int i = 32;
-		while (val && !(val & 0x1)) {
-			i--;
-			val >>= 1;
-		}
-		return i;
-	}
-
-	inline struct nl_addr* getNLAddr(const QHostAddress &addr) {
-		quint32 i = htonl(addr.toIPv4Address());
-		return nl_addr_build(AF_INET, &i, sizeof(i));
-	}
-
-	inline struct nl_addr* getNLBroadcast(const QHostAddress &addr, const QHostAddress &netmask) {
-		quint32 nm = 0;
-		if (!netmask.isNull()) nm = htonl(netmask.toIPv4Address());
-		quint32 i = htonl(addr.toIPv4Address());
-		quint32 bcast = (i & nm) | (~nm);
-		struct nl_addr* a = nl_addr_build(AF_INET, &bcast, sizeof(bcast));
-		return a;
-	}
-
-	inline struct nl_addr* getNLAddr(const QHostAddress &addr, const QHostAddress &netmask) {
-		quint32 i = htonl(addr.toIPv4Address());
-		struct nl_addr* a = nl_addr_build(AF_INET, &i, sizeof(i));
-		if (!netmask.isNull())
-			nl_addr_set_prefixlen(a, getPrefixLen(netmask));
-		return a;
-	}
-
 	void Interface_IPv4::systemUp(InterfaceState new_state) {
-		auto local = getNLAddr(m_properties.ip, m_properties.netmask);
-		auto bcast = getNLBroadcast(m_properties.ip, m_properties.netmask);
-//		char buf[32];
-//		log << nl_addr2str (local, buf, 32) << endl;
-		struct rtnl_addr *addr = rtnl_addr_alloc();
-		rtnl_addr_set_ifindex(addr, m_env->m_device->m_interfaceIndex);
-		rtnl_addr_set_family(addr, AF_INET);
-		rtnl_addr_set_local(addr, local);
-		rtnl_addr_set_broadcast(addr, bcast);
-		if (m_properties.state == InterfaceState::ZEROCONF) {
-			rtnl_addr_set_scope(addr, RT_SCOPE_LINK);
-			rtnl_addr_set_flags(addr, IFA_F_PERMANENT);
-		}
-#if 0
-		log << "systemUp: addr_add = " << rtnl_addr_add(dm->hwman.getNLHandle(), addr, 0) << endl;
-#else
-		rtnl_addr_add(m_dm->m_hwman.getNLHandle(), addr, 0);
-#endif
-		rtnl_addr_put(addr);
-		nl_addr_put(local);
-		nl_addr_put(bcast);
-		// Gateway
-		if (!m_properties.gateway.isNull()) {
-//			log << "Try setting gateway" << endl;
-			struct rtentry rt;
-			memset(&rt, 0, sizeof(rt));
-			rt.rt_flags = RTF_UP | RTF_GATEWAY;
-			setSockaddrIPv4(rt.rt_dst);
-			setSockaddrIPv4(rt.rt_gateway, m_properties.gateway.toIPv4Address());
-			setSockaddrIPv4(rt.rt_genmask);
-			if (-1 != m_properties.gatewayMetric) {
-				rt.rt_metric = m_properties.gatewayMetric + 1;
-			}
+		m_dm->m_hwman.ipv4AddressAdd(
+			m_env->m_device->m_interfaceIndex,
+			m_properties.ip,
+			m_properties.netmask,
+			m_properties.gateway,
+			m_properties.gatewayMetric);
 
-			QByteArray buf = m_env->m_device->getName().toUtf8();
-			rt.rt_dev = buf.data();
-			int skfd = socket(AF_INET, SOCK_DGRAM, 0);
-			write(3, &rt, sizeof(rt));
-			ioctl(skfd, SIOCADDRT, &rt);
-			close(skfd);
-		}
 		// Resolvconf
 		if (!m_properties.dnsServers.empty()) {
-			QProcess *proc = new QProcess();
+			std::unique_ptr<QProcess> proc{new QProcess()};
 			QStringList arguments;
 			arguments << "-a" << QString("%1_%2").arg(m_env->m_device->getName()).arg(m_index);
 			proc->start("/sbin/resolvconf", arguments);
-			QTextStream ts(proc);
-			if (!m_localdomain.isEmpty())
+			QTextStream ts(proc.get());
+			if (!m_localdomain.isEmpty()) {
 				ts << "domain " << m_localdomain << endl;
-			foreach(QHostAddress ha, m_properties.dnsServers) {
+			}
+			foreach(QHostAddress const& ha, m_properties.dnsServers) {
 				ts << "nameserver " << ha.toString() << endl;
 			}
 			proc->closeWriteChannel();
 			proc->waitForFinished(-1);
-			delete proc; // waits for process
+			proc.reset(); // waits for process
 		}
 		setState(new_state);
 		m_env->ifUp(this);
 	}
+
 	void Interface_IPv4::systemDown(InterfaceState new_state) {
 		// Resolvconf
-		QProcess *proc = new QProcess();
-		QStringList arguments;
-		arguments << "-d" << QString("%1_%2").arg(m_env->m_device->getName()).arg(m_index);
-		proc->start("/sbin/resolvconf", arguments);
-		proc->closeWriteChannel();
-		proc->waitForFinished(-1);
-		delete proc; // waits for process
-		// Gateway
-		if (!m_properties.gateway.isNull()) {
-			struct rtentry rt;
-			memset(&rt, 0, sizeof(rt));
-			rt.rt_flags = RTF_UP | RTF_GATEWAY;
-			setSockaddrIPv4(rt.rt_dst);
-			setSockaddrIPv4(rt.rt_gateway, m_properties.gateway.toIPv4Address());
-			setSockaddrIPv4(rt.rt_genmask);
-			QByteArray buf = m_env->m_device->getName().toUtf8();
-			rt.rt_dev = buf.data();
-			int skfd = socket(AF_INET, SOCK_DGRAM, 0);
-			ioctl(skfd, SIOCDELRT, &rt);
-			close(skfd);
+		{
+			std::unique_ptr<QProcess> proc{new QProcess()};
+			QStringList arguments;
+			arguments << "-d" << QString("%1_%2").arg(m_env->m_device->getName()).arg(m_index);
+			proc->start("/sbin/resolvconf", arguments);
+			proc->closeWriteChannel();
+			proc->waitForFinished(-1);
+			proc.reset(); // waits for process
 		}
-		auto local = getNLAddr(m_properties.ip, m_properties.netmask);
-//		char buf[32];
-//		log << nl_addr2str (local, buf, 32) << endl;
-		struct rtnl_addr *addr = rtnl_addr_alloc();
-		rtnl_addr_set_ifindex(addr, m_env->m_device->m_interfaceIndex);
-		rtnl_addr_set_family(addr, AF_INET);
-		rtnl_addr_set_local(addr, local);
-#if 0
-		log << "systemDown: addr_delete = " << rtnl_addr_delete(dm->hwman.getNLHandle(), addr, 0) << endl;
-#else
-		rtnl_addr_delete(m_dm->m_hwman.getNLHandle(), addr, 0);
-#endif
-		rtnl_addr_put(addr);
-		nl_addr_put(local);
+
+		m_dm->m_hwman.ipv4AddressDelete(
+			m_env->m_device->m_interfaceIndex,
+			m_properties.ip,
+			m_properties.netmask,
+			m_properties.gateway,
+			m_properties.gatewayMetric);
+
 		setState(new_state);
 		m_env->ifDown(this);
 	}
