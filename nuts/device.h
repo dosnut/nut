@@ -52,7 +52,7 @@ namespace nuts {
 		 * @brief Constructs the DeviceManager
 		 * @param configFile Path to the configfile.
 		 */
-		explicit DeviceManager(const QString &configFile, ProcessManager* processManager);
+		explicit DeviceManager(QString const& configFile, ProcessManager* processManager);
 		~DeviceManager();
 
 		void shutdown();
@@ -82,28 +82,37 @@ namespace nuts {
 		 */
 		void deviceRemoved(QString devName, Device *dev);
 
+	protected:
+		void timerEvent(QTimerEvent* event) override;
+
 	private slots:
-		void ca_timer();
-		void gotCarrier(const QString &ifName, int ifIndex, const QString &essid);
-		void lostCarrier(const QString &ifName);
-		void newDevice(const QString &ifName, int ifIndex);
-		void delDevice(const QString &ifname);
+		void gotCarrier(QString const& ifName, int ifIndex, QString const& essid);
+		void lostCarrier(QString const& ifName);
+		void newDevice(QString const& ifName, int ifIndex);
+		void delDevice(QString const& ifname);
 
 	private:
+		void carrierUpTimer();
+		bool removeCarrierUpEvent(QString const& ifName);
+		void addDevice(QString const& ifname, std::shared_ptr<libnutcommon::DeviceConfig> dc);
+
+	private: /* variables */
 		Events m_events;
 		libnutcommon::Config m_config;
-		QTimer m_carrier_timer;
+
+		QBasicTimer m_carrier_timer;
 		/// Internal structure for delaying carrier events.
-		struct ca_evt {
+		struct carrier_up_evt {
 			QString ifName;
+			QString essid;
 			int ifIndex;
-			bool up;
 		};
-		QLinkedList<struct ca_evt> m_ca_evts;
+		// events for next timer run
+		std::list<carrier_up_evt> m_carrier_up_events;
+		// events for timer run after the next timer run
+		std::list<carrier_up_evt> m_carrier_up_events_next;
 
 		QHash<QString, Device*> m_devices;
-
-		void addDevice(const QString &ifname, std::shared_ptr<libnutcommon::DeviceConfig> dc);
 
 		friend class Device;
 		friend class Interface_IPv4;
@@ -182,7 +191,7 @@ namespace nuts {
 		void checkEnvironment();
 		void startEnvSelect();
 
-		void gotCarrier(int ifIndex, const QString &essid = "");
+		void gotCarrier(int ifIndex, QString const& essid);
 		void lostCarrier();
 
 		// DHCP

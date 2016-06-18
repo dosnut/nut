@@ -21,6 +21,16 @@ extern "C" {
 }
 
 namespace nuts {
+	namespace {
+		/* Wait for 400 ms before deliver carrier events due to a kernel bug:
+		 *
+		 * dhcp messages cannot be sent immediately
+		 * after carrier event, 100 ms wait was not enough. (they simply
+		 * don't reach the hardware, local packet sniffers get them).
+		 */
+		const int DELAY_CARRIER_UP_MSEC = 400;
+	}
+
 	using namespace libnutcommon;
 
 	DeviceManager::DeviceManager(const QString &configFile, ProcessManager* processManager)
@@ -33,15 +43,6 @@ namespace nuts {
 		connect(this, &DeviceManager::deviceAdded, &m_events, &Events::deviceAdded);
 		connect(this, &DeviceManager::deviceRemoved, &m_events, &Events::deviceRemoved);
 
-		 /* Wait for 400 ms before deliver carrier events
-		   There are 2 reasons:
-		    - a kernel bug: dhcp messages cannot be sent immediately
-		      after carrier event, 100 ms wait was not enough. (they simply
-		      don't reach the hardware, local packet sniffers get them).
-		    - in the case of lostCarrier, we want ignore short breaks.
-		*/
-		m_carrier_timer.setInterval(400);
-		connect(&m_carrier_timer, &QTimer::timeout, this, &DeviceManager::ca_timer);
 		m_hwman.discover();
 	}
 
@@ -76,68 +77,73 @@ namespace nuts {
 		}
 	}
 
-	void DeviceManager::ca_timer() {
-		if (!m_ca_evts.empty()) {
-			struct ca_evt e = m_ca_evts.takeFirst();
+	void DeviceManager::carrierUpTimer() {
+		auto up_evts = std::move(m_carrier_up_events);
+		m_carrier_up_events = std::move(m_carrier_up_events_next);
+		for (carrier_up_evt const& e: up_evts) {
 			Device * dev = m_devices.value(e.ifName,0);
 			if (dev) {
-				if (e.up)
-					dev->gotCarrier(e.ifIndex);
-				else
-					dev->lostCarrier();
+				dev->gotCarrier(e.ifIndex, e.essid);
 			}
 		}
-		if (m_ca_evts.empty())
+		if (m_carrier_up_events.empty()) {
 			m_carrier_timer.stop();
+		}
 	}
 
-	void DeviceManager::gotCarrier(const QString &ifName, int ifIndex, const QString &essid) {
-		if (!essid.isEmpty()) {
-			m_devices[ifName]->gotCarrier(ifIndex, essid);
-			return;
-		}
-		QMutableLinkedListIterator<struct ca_evt> i(m_ca_evts);
-		while(i.hasNext()) {
-			if (i.next().ifName == ifName) {
-				i.remove();
-				if (m_ca_evts.empty())
+	bool DeviceManager::removeCarrierUpEvent(QString const& ifName) {
+		for (auto it = m_carrier_up_events.begin(), e = m_carrier_up_events.end(); it != e; ++it) {
+			if (it->ifName == ifName) {
+				m_carrier_up_events.erase(it);
+				if (m_carrier_up_events.empty()) {
+					/* stop current run */
 					m_carrier_timer.stop();
-				return;
+
+					if (!m_carrier_up_events_next.empty()) {
+						/* start following run */
+						m_carrier_up_events = std::move(m_carrier_up_events_next);
+						m_carrier_timer.start(DELAY_CARRIER_UP_MSEC, this);
+					}
+				}
+				return true;
 			}
 		}
-		struct ca_evt e;
+
+		for (auto it = m_carrier_up_events_next.begin(), e = m_carrier_up_events_next.end(); it != e; ++it) {
+			if (it->ifName == ifName) {
+				m_carrier_up_events_next.erase(it);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	void DeviceManager::timerEvent(QTimerEvent* event) {
+		if (event->timerId() == m_carrier_timer.timerId()) {
+			carrierUpTimer();
+		}
+	}
+
+	void DeviceManager::gotCarrier(QString const& ifName, int ifIndex, QString const& essid) {
+		carrier_up_evt e;
 		e.ifName = ifName;
 		e.ifIndex = ifIndex;
-		e.up = true;
-		m_ca_evts.push_back(e);
-		// do not restart the timer if a item is already in the queue
-		if (!m_carrier_timer.isActive())
-			m_carrier_timer.start();
+		e.essid = essid;
+		if (m_carrier_timer.isActive()) {
+			m_carrier_up_events_next.push_back(std::move(e));
+		} else {
+			m_carrier_up_events.push_back(std::move(e));
+			m_carrier_timer.start(DELAY_CARRIER_UP_MSEC, this);
+		}
 	}
+
 	void DeviceManager::lostCarrier(const QString &ifName) {
-		Device *dev = m_devices.value(ifName, 0);
-		if (!dev) return;
-		if (dev->isAir()) {
+		if (!removeCarrierUpEvent(ifName)) {
+			Device *dev = m_devices.value(ifName, 0);
+			if (!dev) return;
 			dev->lostCarrier();
-			return;
 		}
-		QMutableLinkedListIterator<struct ca_evt> i(m_ca_evts);
-		while(i.hasNext()) {
-			if (i.next().ifName == ifName) {
-				i.remove();
-				if (m_ca_evts.empty())
-					m_carrier_timer.stop();
-				return;
-			}
-		}
-		struct ca_evt e;
-		e.ifName = ifName;
-		e.ifIndex = 0;
-		e.up = false;
-		m_ca_evts.push_back(e);
-		// do not restart the timer if a item is already in the queue
-		if (!m_carrier_timer.isActive())
-			m_carrier_timer.start();
 	}
 
 	void DeviceManager::newDevice(const QString &ifName, int) {
@@ -151,6 +157,8 @@ namespace nuts {
 	}
 
 	void DeviceManager::delDevice(const QString &ifName) {
+		removeCarrierUpEvent(ifName);
+
 		Device *d = m_devices.value(ifName, 0);
 		if (!d) return;
 //		log << QString("delDevice(%1)").arg(ifName) << endl;
