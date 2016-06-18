@@ -260,6 +260,10 @@ namespace nuts {
 			m_activeEnv = -1;
 			emit activeEnvironmentChanged(m_activeEnv);
 		}
+
+		// restart interface to kick IPv6 state
+		m_dm->m_hwman.controlOn(m_interfaceIndex, /* force = */ true);
+
 		m_interfaceIndex = -1;
 		setState(DeviceState::ACTIVATED);
 	}
