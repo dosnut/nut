@@ -293,8 +293,21 @@ namespace {
 			return true;
 		}
 
+		bool parseIpv4Metric(IPv4Config& ipv4) {
+			if (METRIC != peek()) return true;
+			pop();
+			if (!eat(INTEGER)) return false;
+			if (-1 != ipv4.gatewayMetric) {
+				error("metric already set for interface");
+				return false;
+			}
+			ipv4.gatewayMetric = tv.i;
+			return true;
+		}
+
 		bool parseStatic(IPv4Config& ipv4) {
 			if (!eat(STATIC)) return false;
+			if (!parseIpv4Metric(ipv4)) return false;
 			switch (peek()) {
 			case USER:
 				pop();
@@ -327,6 +340,7 @@ namespace {
 			}
 			ipv4.flags |= IPv4ConfigFlag::ZEROCONF;
 			env.has_zeroconf = true;
+			if (!parseIpv4Metric(ipv4)) return false;
 			return true;
 		}
 
@@ -334,40 +348,64 @@ namespace {
 			if (!eat(FALLBACK)) return false;
 			switch (peek()) {
 			case '{':
-				return parseBlock([&]() {
-					switch (peek()) {
-					case TIMEOUT:
-						// TODO: check for duplicate option?
-						pop();
-						if (!eat(INTEGER)) return false;
-						ipv4.timeout = tv.i;
-						return true;
-					case CONTINUEDHCP:
-						// TODO: check for duplicate option?
-						pop();
-						if (!eat(BOOL)) return false;
-						ipv4.continue_dhcp = tv.b;
-						return true;
-					case ZEROCONF:
-						if (ipv4.flags != IPv4ConfigFlag::DHCP) {
-							error("already have a fallback interface");
+				{
+					bool has_timeout{false}, has_continue_dhcp{false};
+					bool result = parseBlock([&]() {
+						switch (peek()) {
+						case TIMEOUT:
+							if (has_timeout) {
+								error("already have 'timeout' in this fallback");
+								return false;
+							}
+							has_timeout = true;
 							pop();
-							return false;
-						}
-						return parseZeroconf(env, ipv4);
-					case STATIC:
-						if (ipv4.flags != IPv4ConfigFlag::DHCP) {
-							error("already have a fallback interface");
+							if (!eat(INTEGER)) return false;
+							ipv4.timeout = tv.i;
+							return true;
+						case CONTINUEDHCP:
+							if (has_continue_dhcp) {
+								error("already have 'continue-dhcp' in this fallback");
+								return false;
+							}
+							has_continue_dhcp = true;
 							pop();
-							return false;
+							if (!eat(BOOL)) return false;
+							ipv4.continue_dhcp = tv.b;
+							return true;
+						case ZEROCONF:
+							if (ipv4.flags != IPv4ConfigFlag::DHCP) {
+								error("already have a fallback interface");
+								pop();
+								return false;
+							}
+							return parseZeroconf(env, ipv4);
+						case STATIC:
+							if (ipv4.flags != IPv4ConfigFlag::DHCP) {
+								error("already have a fallback interface");
+								pop();
+								return false;
+							}
+							return parseStatic(ipv4);
 						}
-						return parseStatic(ipv4);
+						return false;
+					});
+					if (ipv4.flags == IPv4ConfigFlag::DHCP) {
+						error("No fallback address configured");
+						return false;
 					}
-					return false;
-				});
+					if (0 >= ipv4.timeout) {
+						if (!has_continue_dhcp && !ipv4.continue_dhcp) {
+							error("Need timeout if continue-dhcp is disabled");
+							return false;
+						}
+						ipv4.continue_dhcp = true;
+					}
+					return result;
+				}
 			case INTEGER:
 				pop();
 				ipv4.timeout = tv.i;
+				ipv4.continue_dhcp = (0 >= ipv4.timeout);
 				switch (peek()) {
 				case ZEROCONF:
 					return parseZeroconf(env, ipv4);
@@ -376,9 +414,14 @@ namespace {
 				}
 				return true;
 			case ZEROCONF:
+				ipv4.continue_dhcp = true;
 				return parseZeroconf(env, ipv4);
 			case STATIC:
+				ipv4.continue_dhcp = true;
 				return parseStatic(ipv4);
+			default:
+				error("expected '{', integer (timeout value), 'zeroconf' or 'static'");
+				return false;
 			}
 			return true;
 		}
@@ -389,9 +432,10 @@ namespace {
 				error("already have 'dhcp' in this environment");
 				return false;
 			}
-			ipv4.flags |= IPv4ConfigFlag::DHCP;
-			if (FALLBACK == peek() && !parseDHCPFallback(env, ipv4)) return false;
 			env.has_dhcp = true;
+			ipv4.flags |= IPv4ConfigFlag::DHCP;
+			if (!parseIpv4Metric(ipv4)) return false;
+			if (FALLBACK == peek() && !parseDHCPFallback(env, ipv4)) return false;
 			return true;
 		}
 
@@ -569,6 +613,10 @@ namespace {
 			case METRIC:
 				pop();
 				if (!eat(INTEGER)) return false;
+				if (-1 != dev.gatewayMetric) {
+					error("metric already set for device");
+					return false;
+				}
 				dev.gatewayMetric = tv.i;
 				return true;
 			case DHCP:

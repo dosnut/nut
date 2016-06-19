@@ -12,36 +12,25 @@ extern "C" {
 #include <asm/types.h>
 // socket, AF_INET, SOCK_RAW
 #include <sys/socket.h>
-// IPPROTO_RAW
-#include <arpa/inet.h>
-// fcntl, F_SETFD, FD_CLOEXEC
-#include <fcntl.h>
-#include <sys/ioctl.h>
 
-#include <netlink/netlink.h>
-#include <netlink/msg.h>
-#include <netlink/route/addr.h>
 #include <arpa/inet.h>
 #include <linux/if.h>
 #include <linux/if_packet.h>
-#include <linux/if_ether.h>
-#include <linux/ethtool.h>
 #include <linux/sysctl.h>
-#include <linux/route.h>
 #include <unistd.h>
-
-void perror(const char *s);
-}
-
-static inline void setSockaddrIPv4(struct sockaddr &s, quint32 host = 0, quint16 port = 0) {
-	struct sockaddr_in sa;
-	sa.sin_family = AF_INET;
-	sa.sin_port = htons(port);
-	sa.sin_addr.s_addr = htonl(host);
-	memcpy(&s, &sa, sizeof(struct sockaddr_in));
 }
 
 namespace nuts {
+	namespace {
+		/* Wait for 400 ms before deliver carrier events due to a kernel bug:
+		 *
+		 * dhcp messages cannot be sent immediately
+		 * after carrier event, 100 ms wait was not enough. (they simply
+		 * don't reach the hardware, local packet sniffers get them).
+		 */
+		const int DELAY_CARRIER_UP_MSEC = 400;
+	}
+
 	using namespace libnutcommon;
 
 	DeviceManager::DeviceManager(const QString &configFile, ProcessManager* processManager)
@@ -54,20 +43,11 @@ namespace nuts {
 		connect(this, &DeviceManager::deviceAdded, &m_events, &Events::deviceAdded);
 		connect(this, &DeviceManager::deviceRemoved, &m_events, &Events::deviceRemoved);
 
-		 /* Wait for 400 ms before deliver carrier events
-		   There are 2 reasons:
-		    - a kernel bug: dhcp messages cannot be sent immediately
-		      after carrier event, 100 ms wait was not enough. (they simply
-		      don't reach the hardware, local packet sniffers get them).
-		    - in the case of lostCarrier, we want ignore short breaks.
-		*/
-		m_carrier_timer.setInterval(400);
-		connect(&m_carrier_timer, &QTimer::timeout, this, &DeviceManager::ca_timer);
 		m_hwman.discover();
 	}
 
-	void DeviceManager::addDevice(const QString &ifName, std::shared_ptr<DeviceConfig> dc) {
-		Device *d = new Device(this, ifName, dc, m_hwman.hasWLAN(ifName));
+	void DeviceManager::addDevice(const QString &ifName, int ifIndex, std::shared_ptr<DeviceConfig> dc) {
+		Device *d = new Device(this, ifName, ifIndex, dc, m_hwman.hasWLAN(ifName));
 		m_devices.insert(ifName, d);
 		emit deviceAdded(ifName, d);
 		if (!dc->noAutoStart) d->enable(true);
@@ -90,85 +70,95 @@ namespace nuts {
 
 		for (QString const& ifName: m_devices.keys()) {
 			Device* device = m_devices.value(ifName, nullptr);
-			if (device) delete device;
+			if (device) {
+				delete device;
+				m_devices.remove(ifName);
+			}
 		}
 	}
 
-	void DeviceManager::ca_timer() {
-		if (!m_ca_evts.empty()) {
-			struct ca_evt e = m_ca_evts.takeFirst();
+	void DeviceManager::carrierUpTimer() {
+		auto up_evts = std::move(m_carrier_up_events);
+		m_carrier_up_events = std::move(m_carrier_up_events_next);
+		for (carrier_up_evt const& e: up_evts) {
 			Device * dev = m_devices.value(e.ifName,0);
 			if (dev) {
-				if (e.up)
-					dev->gotCarrier(e.ifIndex);
-				else
-					dev->lostCarrier();
+				dev->gotCarrier(e.ifIndex, e.essid);
 			}
 		}
-		if (m_ca_evts.empty())
+		if (m_carrier_up_events.empty()) {
 			m_carrier_timer.stop();
+		}
 	}
 
-	void DeviceManager::gotCarrier(const QString &ifName, int ifIndex, const QString &essid) {
-		if (!essid.isEmpty()) {
-			m_devices[ifName]->gotCarrier(ifIndex, essid);
-			return;
-		}
-		QMutableLinkedListIterator<struct ca_evt> i(m_ca_evts);
-		while(i.hasNext()) {
-			if (i.next().ifName == ifName) {
-				i.remove();
-				if (m_ca_evts.empty())
+	bool DeviceManager::removeCarrierUpEvent(QString const& ifName) {
+		for (auto it = m_carrier_up_events.begin(), e = m_carrier_up_events.end(); it != e; ++it) {
+			if (it->ifName == ifName) {
+				m_carrier_up_events.erase(it);
+				if (m_carrier_up_events.empty()) {
+					/* stop current run */
 					m_carrier_timer.stop();
-				return;
+
+					if (!m_carrier_up_events_next.empty()) {
+						/* start following run */
+						m_carrier_up_events = std::move(m_carrier_up_events_next);
+						m_carrier_timer.start(DELAY_CARRIER_UP_MSEC, this);
+					}
+				}
+				return true;
 			}
 		}
-		struct ca_evt e;
+
+		for (auto it = m_carrier_up_events_next.begin(), e = m_carrier_up_events_next.end(); it != e; ++it) {
+			if (it->ifName == ifName) {
+				m_carrier_up_events_next.erase(it);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	void DeviceManager::timerEvent(QTimerEvent* event) {
+		if (event->timerId() == m_carrier_timer.timerId()) {
+			carrierUpTimer();
+		}
+	}
+
+	void DeviceManager::gotCarrier(QString const& ifName, int ifIndex, QString const& essid) {
+		carrier_up_evt e;
 		e.ifName = ifName;
 		e.ifIndex = ifIndex;
-		e.up = true;
-		m_ca_evts.push_back(e);
-		// do not restart the timer if a item is already in the queue
-		if (!m_carrier_timer.isActive())
-			m_carrier_timer.start();
-	}
-	void DeviceManager::lostCarrier(const QString &ifName) {
-		Device *dev = m_devices.value(ifName, 0);
-		if (!dev) return;
-		if (dev->isAir()) {
-			dev->lostCarrier();
-			return;
+		e.essid = essid;
+		if (m_carrier_timer.isActive()) {
+			m_carrier_up_events_next.push_back(std::move(e));
+		} else {
+			m_carrier_up_events.push_back(std::move(e));
+			m_carrier_timer.start(DELAY_CARRIER_UP_MSEC, this);
 		}
-		QMutableLinkedListIterator<struct ca_evt> i(m_ca_evts);
-		while(i.hasNext()) {
-			if (i.next().ifName == ifName) {
-				i.remove();
-				if (m_ca_evts.empty())
-					m_carrier_timer.stop();
-				return;
-			}
-		}
-		struct ca_evt e;
-		e.ifName = ifName;
-		e.ifIndex = 0;
-		e.up = false;
-		m_ca_evts.push_back(e);
-		// do not restart the timer if a item is already in the queue
-		if (!m_carrier_timer.isActive())
-			m_carrier_timer.start();
 	}
 
-	void DeviceManager::newDevice(const QString &ifName, int) {
+	void DeviceManager::lostCarrier(const QString &ifName) {
+		if (!removeCarrierUpEvent(ifName)) {
+			Device *dev = m_devices.value(ifName, 0);
+			if (!dev) return;
+			dev->lostCarrier();
+		}
+	}
+
+	void DeviceManager::newDevice(const QString &ifName, int ifIndex) {
 		Device *d = m_devices.value(ifName, 0);
 		if (d) return;
 
 		auto devConfig = m_config.lookup(ifName);
 		if (devConfig) {
-			addDevice(ifName, devConfig);
+			addDevice(ifName, ifIndex, devConfig);
 		}
 	}
 
 	void DeviceManager::delDevice(const QString &ifName) {
+		removeCarrierUpEvent(ifName);
+
 		Device *d = m_devices.value(ifName, 0);
 		if (!d) return;
 //		log << QString("delDevice(%1)").arg(ifName) << endl;
@@ -179,8 +169,8 @@ namespace nuts {
 	}
 
 	//Initialize with default values, add environments, connect to dm-events
-	Device::Device(DeviceManager* dm, const QString &name, std::shared_ptr<DeviceConfig> config, bool hasWLAN)
-	: QObject(dm), m_arp(this), m_dm(dm), m_config(config) {
+	Device::Device(DeviceManager* dm, const QString &name, int ifIndex, std::shared_ptr<DeviceConfig> config, bool hasWLAN)
+	: QObject(dm), m_arp(this), m_dm(dm), m_interfaceIndex(ifIndex), m_config(config) {
 		m_properties.name = name;
 		m_properties.type = hasWLAN ? DeviceType::AIR : DeviceType::ETH;
 		m_properties.state = DeviceState::DEACTIVATED;
@@ -249,8 +239,7 @@ namespace nuts {
 		log << "Device(" << m_properties.name << ") needs user configuration!" << endl;
 	}
 
-	void Device::gotCarrier(int ifIndex, const QString &essid) {
-		m_interfaceIndex = ifIndex;
+	void Device::gotCarrier(int, const QString &essid) {
 		m_properties.essid = essid;
 		auto hasWLAN = (QFile::exists(QString("/sys/class/net/%1/wireless").arg(m_properties.name))) || !essid.isEmpty();
 		m_properties.type = hasWLAN ? DeviceType::AIR : DeviceType::ETH;
@@ -270,7 +259,10 @@ namespace nuts {
 			m_activeEnv = -1;
 			emit activeEnvironmentChanged(m_activeEnv);
 		}
-		m_interfaceIndex = -1;
+
+		// restart interface to kick IPv6 state
+		m_dm->m_hwman.controlOn(m_interfaceIndex, /* force = */ true);
+
 		setState(DeviceState::ACTIVATED);
 	}
 	bool Device::registerXID(quint32 xid, Interface_IPv4 *iface) {
@@ -452,7 +444,7 @@ namespace nuts {
 
 	bool Device::enable(bool force) {
 		if (DeviceState::DEACTIVATED == m_properties.state) {
-			if (!m_dm->m_hwman.controlOn(m_properties.name, force))
+			if (!m_dm->m_hwman.controlOn(m_interfaceIndex, force))
 				return false;
 			if (!startWPASupplicant())
 				return false;
@@ -469,9 +461,8 @@ namespace nuts {
 				m_activeEnv = -1;
 				emit activeEnvironmentChanged(m_activeEnv);
 			}
-			m_interfaceIndex = -1;
 			stopWPASupplicant();
-			m_dm->m_hwman.controlOff(m_properties.name);
+			m_dm->m_hwman.controlOff(m_interfaceIndex);
 			setState(DeviceState::DEACTIVATED);
 		}
 	}
@@ -767,7 +758,10 @@ namespace nuts {
 
 	void Interface_IPv4::dhcp_setup_interface(DHCPPacket *ack, bool renewing) {
 		//stop fallback
+		m_fallback_active = false;
 		m_fallback_timer.stop();
+		stopZeroconf();
+
 		if (renewing) {
 			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(dhcp_option::LEASE_TIME, 0xffffffffu));
 		} else {
@@ -789,7 +783,7 @@ namespace nuts {
 		if (m_properties.state != InterfaceState::OFF) return;
 		m_properties.ip = m_zc_probe_ip;
 		m_properties.netmask = QHostAddress((quint32) 0xFFFF0000);
-		m_properties.gateway = QHostAddress((quint32) 0);
+		m_properties.gateway.clear();
 		m_properties.dnsServers.clear();
 		systemUp(InterfaceState::ZEROCONF);
 	}
@@ -820,7 +814,7 @@ namespace nuts {
 		connect(m_zc_arp_announce.get(), &ARPAnnounce::ready, this, &Interface_IPv4::zc_announce_ready);
 	}
 
-	void Interface_IPv4::zeroconfFree() {    // free ARPProbe and ARPWatch
+	void Interface_IPv4::zeroconfFree() {
 		m_zc_arp_probe.reset();
 		m_zc_arp_announce.reset();
 		m_zc_arp_watch.reset();
@@ -840,23 +834,27 @@ namespace nuts {
 			case zeroconf_state::START:
 				m_zc_probe_ip = QHostAddress((quint32) 0);
 				m_zc_state = zeroconf_state::PROBE;
+				break;
 			case zeroconf_state::PROBE:
 				zeroconfProbe();
 				m_zc_state = zeroconf_state::PROBING;
+				break;
 			case zeroconf_state::PROBING:
 				return;
 			case zeroconf_state::RESERVING:
-				if (!hasDHCP || m_dhcp_retry > 3) {
+				if (!hasDHCP || m_fallback_active) {
 					m_zc_arp_probe.reset();
 					m_zc_state = zeroconf_state::BIND;
 				} else {
 					return;
 				}
+				break;
 			case zeroconf_state::BIND:
 				zeroconfWatch();
 				zeroconfAnnounce();
 				zeroconf_setup_interface();
 				m_zc_state = zeroconf_state::BOUND;
+				break;
 			case zeroconf_state::BOUND:
 				return;
 			case zeroconf_state::CONFLICT:
@@ -915,8 +913,8 @@ namespace nuts {
 						// 0, 500, 2500, 4500, 6500, 8500 [ms]
 						m_dhcp_timer.start(500 + (m_dhcp_retry-1) * 2000, this);
 					} else {
-						// 1 min
-						m_dhcp_timer.start(1 * 60 * 1000, this);
+						// 15 secs
+						m_dhcp_timer.start(15 * 1000, this);
 					}
 					return;
 				}
@@ -1035,6 +1033,7 @@ namespace nuts {
 		m_dhcpstate = dhcp_state::INIT_START;
 		dhcpAction();
 	}
+
 	void Interface_IPv4::stopDHCP() {
 		m_fallback_timer.stop();
 		switch (m_dhcpstate) {
@@ -1054,12 +1053,28 @@ namespace nuts {
 		}
 		releaseXID();
 		m_dhcp_timer.stop();
+		if (InterfaceState::DHCP == m_properties.state) {
+			systemDown(InterfaceState::OFF);
+		}
 	}
 
 	void Interface_IPv4::startZeroconf() {
-		m_zc_state = zeroconf_state::START;
+		if (zeroconf_state::OFF == m_zc_state) {
+			m_zc_state = zeroconf_state::START;
+		}
 		zeroconfAction();
 	}
+
+	void Interface_IPv4::stopZeroconf() {
+		if (zeroconf_state::OFF != m_zc_state) {
+			m_zc_state = zeroconf_state::OFF;
+			zeroconfFree();
+		}
+		if (InterfaceState::ZEROCONF == m_properties.state) {
+			systemDown(InterfaceState::OFF);
+		}
+	}
+
 	void Interface_IPv4::startStatic() {
 		m_properties.ip = m_config->static_ip;
 		m_properties.netmask = m_config->static_netmask;
@@ -1067,6 +1082,7 @@ namespace nuts {
 		m_properties.dnsServers = m_config->static_dnsservers;
 		systemUp(InterfaceState::STATIC);
 	}
+
 	void Interface_IPv4::startUserStatic() {
 		m_properties.ip = m_userConfig.ip;
 		m_properties.netmask = m_userConfig.netmask;
@@ -1079,23 +1095,37 @@ namespace nuts {
 		auto is_up = m_env->m_ifUpStatus.at(m_index);
 		/* we should never get here if the interface is up or DHCP was successful; check anyway. */
 		if (InterfaceState::DHCP != m_properties.state && !is_up) {
-			if (m_config->flags == (IPv4ConfigFlag::DHCP | IPv4ConfigFlag::ZEROCONF)) {
-				stopDHCP();
+			if (IPv4ConfigFlag::ZEROCONF & m_config->flags) {
+				m_fallback_active = true;
 				startZeroconf();
-			}
-			else if (m_config->flags == (IPv4ConfigFlag::DHCP | IPv4ConfigFlag::STATIC)) {
-				stopDHCP();
+			} else if (IPv4ConfigFlag::STATIC & m_config->flags) {
+				m_fallback_active = true;
 				startStatic();
+			}
+			if (m_fallback_active && !m_config->continue_dhcp) {
+				stopDHCP();
 			}
 		}
 	}
 
-
 	void Interface_IPv4::checkFallbackRunning() {
-		if ((!m_fallback_timer.isActive() && m_config->timeout > 0) && (
-			( m_config->flags == (IPv4ConfigFlag::DHCP | IPv4ConfigFlag::ZEROCONF)) ||
-			( m_config->flags == (IPv4ConfigFlag::DHCP | IPv4ConfigFlag::STATIC)) ) ) {
-			m_fallback_timer.start(m_config->timeout*1000, this);
+		/* fallback only valid if DHCP is on */
+		if (!(IPv4ConfigFlag::DHCP & m_config->flags)) return;
+		/* fallback (timer) already activated? */
+		if (m_fallback_timer.isActive() || m_fallback_active) return;
+		/* "no timeout" only valid if DHCP is continued when fallback gets activated */
+		if (m_config->timeout <= 0 && !m_config->continue_dhcp) return;
+		/* any fallback configuration active? */
+		if (!((IPv4ConfigFlag::ZEROCONF | IPv4ConfigFlag::STATIC) & m_config->flags)) return;
+		if (m_config->timeout <= 0) {
+			/* continue DHCP, but set fallback now */
+			startFallback();
+			return;
+		}
+		m_fallback_timer.start(m_config->timeout*1000, this);
+		if (IPv4ConfigFlag::ZEROCONF & m_config->flags) {
+			/* start probing (+ reserving) now */
+			startZeroconf();
 		}
 	}
 
@@ -1122,145 +1152,73 @@ namespace nuts {
 
 	void Interface_IPv4::stop() {
 		log << "Interface_IPv4::stop" << endl;
-		if (m_dhcpstate != dhcp_state::OFF)
-			stopDHCP();
-		if (m_zc_state != zeroconf_state::OFF) {
-			m_zc_state = zeroconf_state::OFF;
-			zeroconfAction();
-		}
+		m_fallback_active = false;
+		stopDHCP();
+		stopZeroconf();
 		systemDown(InterfaceState::OFF);
 	}
 
-	inline int getPrefixLen(const QHostAddress &netmask) {
-		quint32 val = netmask.toIPv4Address();
-		int i = 32;
-		while (val && !(val & 0x1)) {
-			i--;
-			val >>= 1;
-		}
-		return i;
-	}
-
-	inline struct nl_addr* getNLAddr(const QHostAddress &addr) {
-		quint32 i = htonl(addr.toIPv4Address());
-		return nl_addr_build(AF_INET, &i, sizeof(i));
-	}
-
-	inline struct nl_addr* getNLBroadcast(const QHostAddress &addr, const QHostAddress &netmask) {
-		quint32 nm = 0;
-		if (!netmask.isNull()) nm = htonl(netmask.toIPv4Address());
-		quint32 i = htonl(addr.toIPv4Address());
-		quint32 bcast = (i & nm) | (~nm);
-		struct nl_addr* a = nl_addr_build(AF_INET, &bcast, sizeof(bcast));
-		return a;
-	}
-
-	inline struct nl_addr* getNLAddr(const QHostAddress &addr, const QHostAddress &netmask) {
-		quint32 i = htonl(addr.toIPv4Address());
-		struct nl_addr* a = nl_addr_build(AF_INET, &i, sizeof(i));
-		if (!netmask.isNull())
-			nl_addr_set_prefixlen(a, getPrefixLen(netmask));
-		return a;
-	}
-
 	void Interface_IPv4::systemUp(InterfaceState new_state) {
-		auto local = getNLAddr(m_properties.ip, m_properties.netmask);
-		auto bcast = getNLBroadcast(m_properties.ip, m_properties.netmask);
-//		char buf[32];
-//		log << nl_addr2str (local, buf, 32) << endl;
-		struct rtnl_addr *addr = rtnl_addr_alloc();
-		rtnl_addr_set_ifindex(addr, m_env->m_device->m_interfaceIndex);
-		rtnl_addr_set_family(addr, AF_INET);
-		rtnl_addr_set_local(addr, local);
-		rtnl_addr_set_broadcast(addr, bcast);
-		if (m_properties.state == InterfaceState::ZEROCONF) {
-			rtnl_addr_set_scope(addr, RT_SCOPE_LINK);
-			rtnl_addr_set_flags(addr, IFA_F_PERMANENT);
+		switch (m_properties.state) {
+		case InterfaceState::OFF:
+		case InterfaceState::WAITFORCONFIG:
+			break;
+		case InterfaceState::STATIC:
+		case InterfaceState::DHCP:
+		case InterfaceState::ZEROCONF:
+			systemDown(InterfaceState::OFF);
+			break;
 		}
-#if 0
-		log << "systemUp: addr_add = " << rtnl_addr_add(dm->hwman.getNLHandle(), addr, 0) << endl;
-#else
-		rtnl_addr_add(m_dm->m_hwman.getNLHandle(), addr, 0);
-#endif
-		rtnl_addr_put(addr);
-		nl_addr_put(local);
-		nl_addr_put(bcast);
-		// Gateway
-		if (!m_properties.gateway.isNull()) {
-//			log << "Try setting gateway" << endl;
-			struct rtentry rt;
-			memset(&rt, 0, sizeof(rt));
-			rt.rt_flags = RTF_UP | RTF_GATEWAY;
-			setSockaddrIPv4(rt.rt_dst);
-			setSockaddrIPv4(rt.rt_gateway, m_properties.gateway.toIPv4Address());
-			setSockaddrIPv4(rt.rt_genmask);
-			if (-1 != m_properties.gatewayMetric) {
-				rt.rt_metric = m_properties.gatewayMetric + 1;
-			}
 
-			QByteArray buf = m_env->m_device->getName().toUtf8();
-			rt.rt_dev = buf.data();
-			int skfd = socket(AF_INET, SOCK_DGRAM, 0);
-			write(3, &rt, sizeof(rt));
-			ioctl(skfd, SIOCADDRT, &rt);
-			close(skfd);
-		}
+		m_dm->m_hwman.ipv4AddressAdd(
+			m_env->m_device->m_interfaceIndex,
+			m_properties.ip,
+			m_properties.netmask,
+			m_properties.gateway,
+			m_properties.gatewayMetric);
+
 		// Resolvconf
 		if (!m_properties.dnsServers.empty()) {
-			QProcess *proc = new QProcess();
+			std::unique_ptr<QProcess> proc{new QProcess()};
 			QStringList arguments;
 			arguments << "-a" << QString("%1_%2").arg(m_env->m_device->getName()).arg(m_index);
 			proc->start("/sbin/resolvconf", arguments);
-			QTextStream ts(proc);
-			if (!m_localdomain.isEmpty())
+			QTextStream ts(proc.get());
+			if (!m_localdomain.isEmpty()) {
 				ts << "domain " << m_localdomain << endl;
-			foreach(QHostAddress ha, m_properties.dnsServers) {
+			}
+			foreach(QHostAddress const& ha, m_properties.dnsServers) {
 				ts << "nameserver " << ha.toString() << endl;
 			}
 			proc->closeWriteChannel();
 			proc->waitForFinished(-1);
-			delete proc; // waits for process
+			proc.reset(); // waits for process
 		}
 		setState(new_state);
 		m_env->ifUp(this);
 	}
+
 	void Interface_IPv4::systemDown(InterfaceState new_state) {
+		if (m_properties.state == new_state) return;
+
 		// Resolvconf
-		QProcess *proc = new QProcess();
-		QStringList arguments;
-		arguments << "-d" << QString("%1_%2").arg(m_env->m_device->getName()).arg(m_index);
-		proc->start("/sbin/resolvconf", arguments);
-		proc->closeWriteChannel();
-		proc->waitForFinished(-1);
-		delete proc; // waits for process
-		// Gateway
-		if (!m_properties.gateway.isNull()) {
-			struct rtentry rt;
-			memset(&rt, 0, sizeof(rt));
-			rt.rt_flags = RTF_UP | RTF_GATEWAY;
-			setSockaddrIPv4(rt.rt_dst);
-			setSockaddrIPv4(rt.rt_gateway, m_properties.gateway.toIPv4Address());
-			setSockaddrIPv4(rt.rt_genmask);
-			QByteArray buf = m_env->m_device->getName().toUtf8();
-			rt.rt_dev = buf.data();
-			int skfd = socket(AF_INET, SOCK_DGRAM, 0);
-			ioctl(skfd, SIOCDELRT, &rt);
-			close(skfd);
+		{
+			std::unique_ptr<QProcess> proc{new QProcess()};
+			QStringList arguments;
+			arguments << "-d" << QString("%1_%2").arg(m_env->m_device->getName()).arg(m_index);
+			proc->start("/sbin/resolvconf", arguments);
+			proc->closeWriteChannel();
+			proc->waitForFinished(-1);
+			proc.reset(); // waits for process
 		}
-		auto local = getNLAddr(m_properties.ip, m_properties.netmask);
-//		char buf[32];
-//		log << nl_addr2str (local, buf, 32) << endl;
-		struct rtnl_addr *addr = rtnl_addr_alloc();
-		rtnl_addr_set_ifindex(addr, m_env->m_device->m_interfaceIndex);
-		rtnl_addr_set_family(addr, AF_INET);
-		rtnl_addr_set_local(addr, local);
-#if 0
-		log << "systemDown: addr_delete = " << rtnl_addr_delete(dm->hwman.getNLHandle(), addr, 0) << endl;
-#else
-		rtnl_addr_delete(m_dm->m_hwman.getNLHandle(), addr, 0);
-#endif
-		rtnl_addr_put(addr);
-		nl_addr_put(local);
+
+		m_dm->m_hwman.ipv4AddressDelete(
+			m_env->m_device->m_interfaceIndex,
+			m_properties.ip,
+			m_properties.netmask,
+			m_properties.gateway,
+			m_properties.gatewayMetric);
+
 		setState(new_state);
 		m_env->ifDown(this);
 	}

@@ -59,10 +59,10 @@ driver      return DRIVER;
 
 
 
-(1|true|TRUE|True) {
+(true|TRUE|True) {
             yylval->b = true; return BOOL; }
 
-(0|false|FALSE|False) {
+(false|FALSE|False) {
             yylval->b = false; return BOOL; }
 
 ([[:digit:]]{1,3}\.){3}[[:digit:]]{1,3} {
@@ -71,7 +71,7 @@ driver      return DRIVER;
 ([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2} {
             yylval->macAddr = libnutcommon::MacAddress(QString(yytext)); return MACADDR; }
 
-(-[[:blank:]]*)?[[:digit:]]+ {
+-?[[:digit:]]+ {
             yylval->i = atoi(yytext); return INTEGER; }
 
 \"          yylval->str.clear(); BEGIN(String);

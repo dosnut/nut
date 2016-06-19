@@ -200,10 +200,10 @@ namespace libnutcommon {
 		QHostAddress static_gateway;
 		QList<QHostAddress> static_dnsservers;
 
-		IPv4ConfigFlags flags = IPv4ConfigFlag::DHCP | IPv4ConfigFlag::ZEROCONF;
-		int gatewayMetric = -1;
-		int timeout = 0;
-		bool continue_dhcp = false;
+		IPv4ConfigFlags flags {0};
+		int gatewayMetric{-1};
+		int timeout{0};
+		bool continue_dhcp{false};
 
 		explicit IPv4Config() { }
 		explicit IPv4Config(IPv4ConfigFlags flags) : flags(flags) { }

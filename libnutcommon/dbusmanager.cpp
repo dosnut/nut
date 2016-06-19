@@ -123,7 +123,7 @@ namespace libnutcommon {
 
 	void DBusAbstractAdaptor::removeConnections(std::list<QDBusConnection>&& l) {
 		for (QDBusConnection& c: l) {
-			for (auto si = begin(m_services), se = end(m_services); si != se; ++si) {
+			for (auto si = begin(m_services); si != end(m_services); ) {
 				for (auto sci = begin(si->second), sce = end(si->second); sci != sce; ++sci) {
 					if (c.interface() == sci->interface()) {
 						c.unregisterService(si->first);
@@ -132,6 +132,8 @@ namespace libnutcommon {
 				}
 				if (si->second.empty()) {
 					si = m_services.erase(si);
+				} else {
+					++si;
 				}
 			}
 		}

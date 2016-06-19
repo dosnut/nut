@@ -286,7 +286,7 @@ namespace nuts {
 	private: /* vars */
 		QPointer<ARP> m_arp;
 		QHostAddress m_ip;
-		int m_remaining_announces = ARPConst::ANNOUNCE_NUM;
+		int m_remaining_announces{ARPConst::ANNOUNCE_NUM};
 
 		QBasicTimer m_timer;
 	};

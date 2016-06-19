@@ -24,11 +24,3 @@ struct nla_policy ifla_policy[IFLA_MAX+1] = {
 /*	[IFLA_OPERSTATE]        = { .type = NLA_U8 },*/
 /*	[IFLA_LINKMODE]         = { .type = NLA_U8 },*/
 };
-
-struct nla_policy ifa_ipv4_policy[IFA_MAX+1] = {
-	[IFA_LOCAL]             = { .type = NLA_U32 },
-	[IFA_ADDRESS]           = { .type = NLA_U32 },
-	[IFA_BROADCAST]         = { .type = NLA_U32 },
-	[IFA_ANYCAST]           = { .type = NLA_U32 },
-	[IFA_LABEL]             = { .type = NLA_STRING, .maxlen = IFNAMSIZ - 1 },
-};
