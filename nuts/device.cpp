@@ -783,7 +783,7 @@ namespace nuts {
 		if (m_properties.state != InterfaceState::OFF) return;
 		m_properties.ip = m_zc_probe_ip;
 		m_properties.netmask = QHostAddress((quint32) 0xFFFF0000);
-		m_properties.gateway = QHostAddress((quint32) 0);
+		m_properties.gateway.clear();
 		m_properties.dnsServers.clear();
 		systemUp(InterfaceState::ZEROCONF);
 	}
