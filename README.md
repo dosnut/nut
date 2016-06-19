@@ -210,24 +210,22 @@ Syntax:
 * `dhcp fallback { <<fallback context>> }`
 
 `static` and `zeroconf` are parsed like they normally would be in
-environment context (but `static user` is not allowed). The timeout
-defaults to 0 seconds (might change in the future).
+environment context (but `static user` is not allowed).
 
 In the fallback context one of the `static` or `zeroconf` statements can
 be given (otherwise fallback isn't used), also there are two special
 statements:
 
 * `timeout <timeout in seconds>;`
-* `continue-dhcp true;` or `continue-dhcp false;` (no effect right now)
+* `continue-dhcp true;` or `continue-dhcp false;`
 
-If the timeout is 0 (the default value), the fallback isn't used.
+If the timeout is 0 or not specified, `continue-dhcp` is activated by
+default and cannot be turned off. For other timeout values `continue-
+dhcp` is not enabled by default.
 
-This might change in the future when `continue-dhcp` is used (could also
-become the default), in which case DHCP would continue to run after the
-timeout, and when a DHCP address is found it would change the address.
-
-For now DHCP gets simply disabled after the timeout, and the fallback
-configuration gets activated instead.
+If `continue-dhcp` is enabled, DHCP continues to search for an address
+after the timeout has been reached and switches to the DHCP address if it
+finds one, otherwise it disables DHCP after reaching the timeout.
 
 ### `no-dhcp`
 

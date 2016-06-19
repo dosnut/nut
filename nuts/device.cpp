@@ -761,7 +761,10 @@ namespace nuts {
 
 	void Interface_IPv4::dhcp_setup_interface(DHCPPacket *ack, bool renewing) {
 		//stop fallback
+		m_fallback_active = false;
 		m_fallback_timer.stop();
+		stopZeroconf();
+
 		if (renewing) {
 			m_dhcp_lease_time = ntohl(ack->getOptionData<quint32>(dhcp_option::LEASE_TIME, 0xffffffffu));
 		} else {
@@ -840,7 +843,7 @@ namespace nuts {
 			case zeroconf_state::PROBING:
 				return;
 			case zeroconf_state::RESERVING:
-				if (!hasDHCP || m_dhcp_retry > 3) {
+				if (!hasDHCP || m_fallback_active) {
 					m_zc_arp_probe.reset();
 					m_zc_state = zeroconf_state::BIND;
 				} else {
@@ -909,8 +912,8 @@ namespace nuts {
 						// 0, 500, 2500, 4500, 6500, 8500 [ms]
 						m_dhcp_timer.start(500 + (m_dhcp_retry-1) * 2000, this);
 					} else {
-						// 1 min
-						m_dhcp_timer.start(1 * 60 * 1000, this);
+						// 15 secs
+						m_dhcp_timer.start(15 * 1000, this);
 					}
 					return;
 				}
@@ -1029,6 +1032,7 @@ namespace nuts {
 		m_dhcpstate = dhcp_state::INIT_START;
 		dhcpAction();
 	}
+
 	void Interface_IPv4::stopDHCP() {
 		m_fallback_timer.stop();
 		switch (m_dhcpstate) {
@@ -1048,12 +1052,28 @@ namespace nuts {
 		}
 		releaseXID();
 		m_dhcp_timer.stop();
+		if (InterfaceState::DHCP == m_properties.state) {
+			systemDown(InterfaceState::OFF);
+		}
 	}
 
 	void Interface_IPv4::startZeroconf() {
-		m_zc_state = zeroconf_state::START;
+		if (zeroconf_state::OFF == m_zc_state) {
+			m_zc_state = zeroconf_state::START;
+		}
 		zeroconfAction();
 	}
+
+	void Interface_IPv4::stopZeroconf() {
+		if (zeroconf_state::OFF != m_zc_state) {
+			m_zc_state = zeroconf_state::OFF;
+			zeroconfFree();
+		}
+		if (InterfaceState::ZEROCONF == m_properties.state) {
+			systemDown(InterfaceState::OFF);
+		}
+	}
+
 	void Interface_IPv4::startStatic() {
 		m_properties.ip = m_config->static_ip;
 		m_properties.netmask = m_config->static_netmask;
@@ -1061,6 +1081,7 @@ namespace nuts {
 		m_properties.dnsServers = m_config->static_dnsservers;
 		systemUp(InterfaceState::STATIC);
 	}
+
 	void Interface_IPv4::startUserStatic() {
 		m_properties.ip = m_userConfig.ip;
 		m_properties.netmask = m_userConfig.netmask;
@@ -1073,23 +1094,37 @@ namespace nuts {
 		auto is_up = m_env->m_ifUpStatus.at(m_index);
 		/* we should never get here if the interface is up or DHCP was successful; check anyway. */
 		if (InterfaceState::DHCP != m_properties.state && !is_up) {
-			if (m_config->flags == (IPv4ConfigFlag::DHCP | IPv4ConfigFlag::ZEROCONF)) {
-				stopDHCP();
+			if (IPv4ConfigFlag::ZEROCONF & m_config->flags) {
+				m_fallback_active = true;
 				startZeroconf();
-			}
-			else if (m_config->flags == (IPv4ConfigFlag::DHCP | IPv4ConfigFlag::STATIC)) {
-				stopDHCP();
+			} else if (IPv4ConfigFlag::STATIC & m_config->flags) {
+				m_fallback_active = true;
 				startStatic();
+			}
+			if (m_fallback_active && !m_config->continue_dhcp) {
+				stopDHCP();
 			}
 		}
 	}
 
-
 	void Interface_IPv4::checkFallbackRunning() {
-		if ((!m_fallback_timer.isActive() && m_config->timeout > 0) && (
-			( m_config->flags == (IPv4ConfigFlag::DHCP | IPv4ConfigFlag::ZEROCONF)) ||
-			( m_config->flags == (IPv4ConfigFlag::DHCP | IPv4ConfigFlag::STATIC)) ) ) {
-			m_fallback_timer.start(m_config->timeout*1000, this);
+		/* fallback only valid if DHCP is on */
+		if (!(IPv4ConfigFlag::DHCP & m_config->flags)) return;
+		/* fallback (timer) already activated? */
+		if (m_fallback_timer.isActive() || m_fallback_active) return;
+		/* "no timeout" only valid if DHCP is continued when fallback gets activated */
+		if (m_config->timeout <= 0 && !m_config->continue_dhcp) return;
+		/* any fallback configuration active? */
+		if (!((IPv4ConfigFlag::ZEROCONF | IPv4ConfigFlag::STATIC) & m_config->flags)) return;
+		if (m_config->timeout <= 0) {
+			/* continue DHCP, but set fallback now */
+			startFallback();
+			return;
+		}
+		m_fallback_timer.start(m_config->timeout*1000, this);
+		if (IPv4ConfigFlag::ZEROCONF & m_config->flags) {
+			/* start probing (+ reserving) now */
+			startZeroconf();
 		}
 	}
 
@@ -1116,16 +1151,24 @@ namespace nuts {
 
 	void Interface_IPv4::stop() {
 		log << "Interface_IPv4::stop" << endl;
-		if (m_dhcpstate != dhcp_state::OFF)
-			stopDHCP();
-		if (m_zc_state != zeroconf_state::OFF) {
-			m_zc_state = zeroconf_state::OFF;
-			zeroconfAction();
-		}
+		m_fallback_active = false;
+		stopDHCP();
+		stopZeroconf();
 		systemDown(InterfaceState::OFF);
 	}
 
 	void Interface_IPv4::systemUp(InterfaceState new_state) {
+		switch (m_properties.state) {
+		case InterfaceState::OFF:
+		case InterfaceState::WAITFORCONFIG:
+			break;
+		case InterfaceState::STATIC:
+		case InterfaceState::DHCP:
+		case InterfaceState::ZEROCONF:
+			systemDown(InterfaceState::OFF);
+			break;
+		}
+
 		m_dm->m_hwman.ipv4AddressAdd(
 			m_env->m_device->m_interfaceIndex,
 			m_properties.ip,
@@ -1155,6 +1198,8 @@ namespace nuts {
 	}
 
 	void Interface_IPv4::systemDown(InterfaceState new_state) {
+		if (m_properties.state == new_state) return;
+
 		// Resolvconf
 		{
 			std::unique_ptr<QProcess> proc{new QProcess()};

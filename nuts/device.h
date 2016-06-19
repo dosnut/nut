@@ -376,6 +376,7 @@ namespace nuts {
 		void stopDHCP();
 		void startZeroconf();
 		void startStatic();
+		void stopZeroconf();
 		void startUserStatic();
 
 		void startFallback();
@@ -442,6 +443,8 @@ namespace nuts {
 		};
 
 		DeviceManager* const m_dm;
+
+		bool m_fallback_active{false};
 
 		quint32 m_dhcp_xid = 0;
 		bool m_dhcp_xid_unicast = false;
