@@ -100,7 +100,10 @@ The default metric is `-1`, i.e. no metric is set on the routes; these
 routes are always preferred over any other metric. Otherwise routes with
 a lower metric are preferred.
 
-The `metric` statement can only occur in device context.
+The `metric` statement can only occur in device context, but it might
+also occur as option after `static`, `dhcp` and `zeroconf` (see those
+statements for the syntax), overwriting the environment metric for a
+specific address configuration.
 
 Syntax:
 * `metric <metric>;`
@@ -114,6 +117,9 @@ device "eno1" {
 
 device "wlp3s0" {
 	metric 20;
+	environment "superfast" {
+		dhcp metric 5;
+	}
 }
 ```
 
@@ -204,10 +210,10 @@ Explicitly enables DHCP in an environment context; can only be given
 once per environment.
 
 Syntax:
-* `dhcp;`
-* `dhcp fallback [<timeout in seconds>] static ...`
-* `dhcp fallback [<timeout in seconds>] zeroconf ...`
-* `dhcp fallback { <<fallback context>> }`
+* `dhcp [metric <metric>];`
+* `dhcp [metric <metric>] fallback [<timeout in seconds>] static ...`
+* `dhcp [metric <metric>] fallback [<timeout in seconds>] zeroconf ...`
+* `dhcp [metric <metric>] fallback { <<fallback context>> }`
 
 `static` and `zeroconf` are parsed like they normally would be in
 environment context (but `static user` is not allowed).
@@ -241,8 +247,8 @@ Syntax:
 Configures a static IP address in an environment context.
 
 Syntax:
-* `static user;`
-* `static { <<static context>> }`
+* `static [metric <metric>] user;`
+* `static [metric <metric>] { <<static context>> }`
 
 `static user` requires the configuration to be entered at runtime by the
 user.
@@ -263,7 +269,7 @@ Configures an IP address in an environment context using using zeroconf
 (RFC 3927); can only be given once per environment.
 
 Syntax:
-* `zeroconf;`
+* `zeroconf [metric <metric>];`
 
 ### `select`
 

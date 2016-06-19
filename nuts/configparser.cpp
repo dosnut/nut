@@ -293,8 +293,21 @@ namespace {
 			return true;
 		}
 
+		bool parseIpv4Metric(IPv4Config& ipv4) {
+			if (METRIC != peek()) return true;
+			pop();
+			if (!eat(INTEGER)) return false;
+			if (-1 != ipv4.gatewayMetric) {
+				error("metric already set for interface");
+				return false;
+			}
+			ipv4.gatewayMetric = tv.i;
+			return true;
+		}
+
 		bool parseStatic(IPv4Config& ipv4) {
 			if (!eat(STATIC)) return false;
+			if (!parseIpv4Metric(ipv4)) return false;
 			switch (peek()) {
 			case USER:
 				pop();
@@ -327,6 +340,7 @@ namespace {
 			}
 			ipv4.flags |= IPv4ConfigFlag::ZEROCONF;
 			env.has_zeroconf = true;
+			if (!parseIpv4Metric(ipv4)) return false;
 			return true;
 		}
 
@@ -418,9 +432,10 @@ namespace {
 				error("already have 'dhcp' in this environment");
 				return false;
 			}
-			ipv4.flags |= IPv4ConfigFlag::DHCP;
-			if (FALLBACK == peek() && !parseDHCPFallback(env, ipv4)) return false;
 			env.has_dhcp = true;
+			ipv4.flags |= IPv4ConfigFlag::DHCP;
+			if (!parseIpv4Metric(ipv4)) return false;
+			if (FALLBACK == peek() && !parseDHCPFallback(env, ipv4)) return false;
 			return true;
 		}
 
@@ -598,6 +613,10 @@ namespace {
 			case METRIC:
 				pop();
 				if (!eat(INTEGER)) return false;
+				if (-1 != dev.gatewayMetric) {
+					error("metric already set for device");
+					return false;
+				}
 				dev.gatewayMetric = tv.i;
 				return true;
 			case DHCP:
