@@ -1,3 +1,23 @@
+network-utilities (0.6.4-1) unstable; urgency=medium
+
+  * [nuts] move address+route management to hardware.cpp
+  * [common] fix endless loop in DBusAbstractAdaptor::removeConnections
+  * [nuts] only delay carrier up event
+  * [nuts] restart interface on carrier loss to kick IPv6 state
+  * [nuts] start working on a "clear IPv6 state" method. work in progress.
+  * [nuts] make default config really small, example is in docs/config.example
+  * [nuts] don't allow 0 and 1 as boolean values, no blanks between '-' and digits for numbers
+  * [nuts] document config syntax in README.md
+  * [nuts] fix fallback handling, especially zeroconf (fixes #1)
+  * [nuts] allow metric configuration per interface
+  * [nuts] fix ARP announces
+  * [nuts] try handling lost device a bit better
+  * [nuts] prefer interface index over name, use netlink to discover interfaces
+  * [nuts] don't set default route with zeroconf
+  * Release 0.6.4
+
+ -- Stefan Bühler <stbuehler@web.de>  Sun, 19 Jun 2016 16:41:42 +0200
+
 network-utilities (0.6.3-1) unstable; urgency=medium
 
   * [libnutclient*] use explicit constructors
