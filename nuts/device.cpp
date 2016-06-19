@@ -46,8 +46,8 @@ namespace nuts {
 		m_hwman.discover();
 	}
 
-	void DeviceManager::addDevice(const QString &ifName, std::shared_ptr<DeviceConfig> dc) {
-		Device *d = new Device(this, ifName, dc, m_hwman.hasWLAN(ifName));
+	void DeviceManager::addDevice(const QString &ifName, int ifIndex, std::shared_ptr<DeviceConfig> dc) {
+		Device *d = new Device(this, ifName, ifIndex, dc, m_hwman.hasWLAN(ifName));
 		m_devices.insert(ifName, d);
 		emit deviceAdded(ifName, d);
 		if (!dc->noAutoStart) d->enable(true);
@@ -146,13 +146,13 @@ namespace nuts {
 		}
 	}
 
-	void DeviceManager::newDevice(const QString &ifName, int) {
+	void DeviceManager::newDevice(const QString &ifName, int ifIndex) {
 		Device *d = m_devices.value(ifName, 0);
 		if (d) return;
 
 		auto devConfig = m_config.lookup(ifName);
 		if (devConfig) {
-			addDevice(ifName, devConfig);
+			addDevice(ifName, ifIndex, devConfig);
 		}
 	}
 
@@ -169,8 +169,8 @@ namespace nuts {
 	}
 
 	//Initialize with default values, add environments, connect to dm-events
-	Device::Device(DeviceManager* dm, const QString &name, std::shared_ptr<DeviceConfig> config, bool hasWLAN)
-	: QObject(dm), m_arp(this), m_dm(dm), m_config(config) {
+	Device::Device(DeviceManager* dm, const QString &name, int ifIndex, std::shared_ptr<DeviceConfig> config, bool hasWLAN)
+	: QObject(dm), m_arp(this), m_dm(dm), m_interfaceIndex(ifIndex), m_config(config) {
 		m_properties.name = name;
 		m_properties.type = hasWLAN ? DeviceType::AIR : DeviceType::ETH;
 		m_properties.state = DeviceState::DEACTIVATED;
@@ -239,8 +239,7 @@ namespace nuts {
 		log << "Device(" << m_properties.name << ") needs user configuration!" << endl;
 	}
 
-	void Device::gotCarrier(int ifIndex, const QString &essid) {
-		m_interfaceIndex = ifIndex;
+	void Device::gotCarrier(int, const QString &essid) {
 		m_properties.essid = essid;
 		auto hasWLAN = (QFile::exists(QString("/sys/class/net/%1/wireless").arg(m_properties.name))) || !essid.isEmpty();
 		m_properties.type = hasWLAN ? DeviceType::AIR : DeviceType::ETH;
@@ -264,7 +263,6 @@ namespace nuts {
 		// restart interface to kick IPv6 state
 		m_dm->m_hwman.controlOn(m_interfaceIndex, /* force = */ true);
 
-		m_interfaceIndex = -1;
 		setState(DeviceState::ACTIVATED);
 	}
 	bool Device::registerXID(quint32 xid, Interface_IPv4 *iface) {
@@ -446,7 +444,7 @@ namespace nuts {
 
 	bool Device::enable(bool force) {
 		if (DeviceState::DEACTIVATED == m_properties.state) {
-			if (!m_dm->m_hwman.controlOn(m_properties.name, force))
+			if (!m_dm->m_hwman.controlOn(m_interfaceIndex, force))
 				return false;
 			if (!startWPASupplicant())
 				return false;
@@ -463,9 +461,8 @@ namespace nuts {
 				m_activeEnv = -1;
 				emit activeEnvironmentChanged(m_activeEnv);
 			}
-			m_interfaceIndex = -1;
 			stopWPASupplicant();
-			m_dm->m_hwman.controlOff(m_properties.name);
+			m_dm->m_hwman.controlOff(m_interfaceIndex);
 			setState(DeviceState::DEACTIVATED);
 		}
 	}

@@ -94,7 +94,7 @@ namespace nuts {
 	private:
 		void carrierUpTimer();
 		bool removeCarrierUpEvent(QString const& ifName);
-		void addDevice(QString const& ifname, std::shared_ptr<libnutcommon::DeviceConfig> dc);
+		void addDevice(QString const& ifname, int ifIndex, std::shared_ptr<libnutcommon::DeviceConfig> dc);
 
 	private: /* variables */
 		Events m_events;
@@ -132,7 +132,7 @@ namespace nuts {
 	class Device : public QObject {
 		Q_OBJECT
 	private:
-		explicit Device(DeviceManager* dm, const QString &name, std::shared_ptr<libnutcommon::DeviceConfig> config, bool hasWLAN);
+		explicit Device(DeviceManager* dm, const QString &name, int ifIndex, std::shared_ptr<libnutcommon::DeviceConfig> config, bool hasWLAN);
 		~Device();
 
 	public slots:
@@ -215,7 +215,7 @@ namespace nuts {
 
 		ARP m_arp;
 		DeviceManager *m_dm = nullptr;
-		int m_interfaceIndex = -1;
+		int const m_interfaceIndex = -1;
 		std::shared_ptr<libnutcommon::DeviceConfig> m_config;
 
 		int m_activeEnv = -1;
