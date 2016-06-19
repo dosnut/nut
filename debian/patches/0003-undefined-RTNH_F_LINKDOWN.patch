@@ -1,0 +1,13 @@
+--- a/nuts/hardware.cpp
++++ b/nuts/hardware.cpp
+@@ -671,6 +671,10 @@
+ 				::rtnl_nexthop* nh = rtnl_route_nexthop_n(route.get(), 0);
+ 				if (ifIndex != rtnl_route_nh_get_ifindex(nh)) continue;
+ 
++#if !defined(RTNH_F_LINKDOWN)
++#define RTNH_F_LINKDOWN         16      /* carrier-down on nexthop */
++#endif
++
+ 				/* remove "linkdown" and "proto ra" routes */
+ 				if ((RTPROT_RA != rtnl_route_get_protocol(route.get())
+ 					&& 0 == (RTNH_F_LINKDOWN & rtnl_route_nh_get_flags(nh)))) continue;

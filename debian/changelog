@@ -1,3 +1,9 @@
+network-utilities (0.6.4-2) unstable; urgency=medium
+
+  * workaround missing RTNH_F_LINKDOWN
+
+ -- Stefan Bühler <stbuehler@web.de>  Sun, 19 Jun 2016 21:22:00 +0200
+
 network-utilities (0.6.4-1) unstable; urgency=medium
 
   * [nuts] move address+route management to hardware.cpp
