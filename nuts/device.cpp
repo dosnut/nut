@@ -817,7 +817,7 @@ namespace nuts {
 		connect(m_zc_arp_announce.get(), &ARPAnnounce::ready, this, &Interface_IPv4::zc_announce_ready);
 	}
 
-	void Interface_IPv4::zeroconfFree() {    // free ARPProbe and ARPWatch
+	void Interface_IPv4::zeroconfFree() {
 		m_zc_arp_probe.reset();
 		m_zc_arp_announce.reset();
 		m_zc_arp_watch.reset();
@@ -837,9 +837,11 @@ namespace nuts {
 			case zeroconf_state::START:
 				m_zc_probe_ip = QHostAddress((quint32) 0);
 				m_zc_state = zeroconf_state::PROBE;
+				break;
 			case zeroconf_state::PROBE:
 				zeroconfProbe();
 				m_zc_state = zeroconf_state::PROBING;
+				break;
 			case zeroconf_state::PROBING:
 				return;
 			case zeroconf_state::RESERVING:
@@ -849,11 +851,13 @@ namespace nuts {
 				} else {
 					return;
 				}
+				break;
 			case zeroconf_state::BIND:
 				zeroconfWatch();
 				zeroconfAnnounce();
 				zeroconf_setup_interface();
 				m_zc_state = zeroconf_state::BOUND;
+				break;
 			case zeroconf_state::BOUND:
 				return;
 			case zeroconf_state::CONFLICT:

@@ -406,7 +406,7 @@ namespace nuts {
 			m_timer.stop();
 			return;
 		}
-		if (0 <= m_remaining_announces) {
+		if (0 >= m_remaining_announces) {
 			m_timer.stop();
 			emit ready(m_ip);
 			return;
