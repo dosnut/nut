@@ -273,16 +273,25 @@ namespace nuts {
 	}
 
 	bool HardwareManager::controlOn(int ifIndex, bool force) {
-		return controlOn(ifIndex, ifIndex2Name(ifIndex), force);
+		QString ifName = ifIndex2Name(ifIndex);
+		if (ifName.isEmpty()) return false;
+		return controlOn(ifIndex, ifName, force);
 	}
 	bool HardwareManager::controlOff(int ifIndex) {
-		return controlOff(ifIndex, ifIndex2Name(ifIndex));
+		if (!isControlled(ifIndex)) return true; /* probably got deleted, skip cleanup */
+		QString ifName = ifIndex2Name(ifIndex);
+		if (ifName.isEmpty()) return false;
+		return controlOff(ifIndex, ifName);
 	}
 	bool HardwareManager::controlOn(QString const& ifName, bool force) {
-		return controlOn(ifName2Index(ifName), ifName, force);
+		int ifIndex = ifName2Index(ifName);
+		if (-1 == ifIndex) return false;
+		return controlOn(ifIndex, ifName, force);
 	}
 	bool HardwareManager::controlOff(QString const& ifName) {
-		return controlOff(ifName2Index(ifName), ifName);
+		int ifIndex = ifName2Index(ifName);
+		if (-1 == ifIndex) return false;
+		return controlOff(ifIndex, ifName);
 	}
 
 	bool HardwareManager::controlOn(int ifIndex, QString const& ifName, bool force) {
@@ -546,7 +555,6 @@ cleanup:
 						ifStates[ifindex].carrier = carrier;
 						if (!isControlled(ifindex))
 							break;
-						QString ifname = ifIndex2Name(ifindex);
 						if (carrier) {
 							QString essid;
 							getEssid(ifname, essid);
@@ -655,6 +663,8 @@ cleanup:
 			const QHostAddress& gateway,
 			int metric)
 	{
+		if (!isControlled(ifIndex)) return; /* probably got deleted, skip cleanup */
+
 		int res;
 
 		if (!gateway.isNull()) {
