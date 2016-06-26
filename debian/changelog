@@ -1,3 +1,14 @@
+network-utilities (0.6.5-1) unstable; urgency=medium
+
+  * [nuts] fix IPv6 auto configuration handling without restarting interface
+  * [nuts] use nl_msg_parse instead of parsing netlink message manually
+  * [nuts] apply metric to all IPv4 and IPv6 routes
+  * [nuts] forward stdout/stderr from (backend) processes
+  * Release 0.6.5
+  * remove patch for: workaround missing RTNH_F_LINKDOWN
+
+ -- Stefan Bühler <stbuehler@web.de>  Sun, 26 Jun 2016 21:54:48 +0200
+
 network-utilities (0.6.4-2) unstable; urgency=medium
 
   * workaround missing RTNH_F_LINKDOWN
