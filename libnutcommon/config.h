@@ -83,7 +83,7 @@ namespace libnutcommon {
 		bool noAutoStart = false;
 		QString wpaConfigFile;
 		QString wpaDriver;
-		int gatewayMetric = -1;
+		int metric = -1;
 	};
 	QDBusArgument& operator<<(QDBusArgument& argument, DeviceConfig const& data);
 	QDBusArgument const& operator>>(QDBusArgument const& argument, DeviceConfig& data);
@@ -161,6 +161,7 @@ namespace libnutcommon {
 		QString name; //!< A description for that environment. It does not have to be unique.
 		std::vector<std::shared_ptr<IPv4Config>> ipv4Interfaces;
 		SelectConfig select;
+		int metric = -1;
 
 		explicit EnvironmentConfig(QString const& name = "") : name(name) { }
 	};

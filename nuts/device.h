@@ -115,6 +115,7 @@ namespace nuts {
 		QHash<QString, Device*> m_devices;
 
 		friend class Device;
+		friend class Environment;
 		friend class Interface_IPv4;
 
 		HardwareManager m_hwman;
@@ -255,6 +256,10 @@ namespace nuts {
 		libnutcommon::SelectResult getSelectResult() const { return m_properties.selectResult; }
 		QVector<libnutcommon::SelectResult> const& getSelectResults() const { return m_properties.selectResults; }
 
+		int getActualMetric() const {
+			return -1 != m_config->metric ? m_config->metric : m_device->m_config->metric;
+		}
+
 		bool selectionDone() const { return (m_selArpWaiting == -1); }
 
 		libnutcommon::EnvironmentConfig const& getConfig() const { return *m_config; }
@@ -349,6 +354,10 @@ namespace nuts {
 
 		bool setUserConfig(const libnutcommon::IPv4UserConfig &userConfig);
 		libnutcommon::IPv4UserConfig const& getUserConfig() const { return m_userConfig; }
+
+		int getActualMetric() const {
+			return -1 != m_config->gatewayMetric ? m_config->gatewayMetric : m_env->getActualMetric();
+		}
 
 	signals:
 		void propertiesChanged(libnutcommon::InterfaceProperties properties);

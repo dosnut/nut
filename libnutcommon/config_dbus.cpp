@@ -10,7 +10,7 @@ namespace libnutcommon {
 			<< data.noAutoStart
 			<< data.wpaConfigFile
 			<< data.wpaDriver
-			<< data.gatewayMetric;
+			<< data.metric;
 		argument.beginArray(qMetaTypeId<EnvironmentConfig>());
 		for(auto const& ec: data.environments) {
 			argument << *ec;
@@ -25,7 +25,7 @@ namespace libnutcommon {
 			>> data.noAutoStart
 			>> data.wpaConfigFile
 			>> data.wpaDriver
-			>> data.gatewayMetric;
+			>> data.metric;
 		argument.beginArray();
 		while (!argument.atEnd()) {
 			auto ec = std::make_shared<EnvironmentConfig>();
@@ -97,7 +97,8 @@ namespace libnutcommon {
 		argument.beginStructure();
 		argument
 			<< data.name
-			<< data.select;
+			<< data.select
+			<< data.metric;
 		argument.beginArray( qMetaTypeId<IPv4Config>() );
 		for(auto const& ic: data.ipv4Interfaces) {
 			argument << *ic;
@@ -110,7 +111,8 @@ namespace libnutcommon {
 		argument.beginStructure();
 		argument
 			>> data.name
-			>> data.select;
+			>> data.select
+			>> data.metric;
 		argument.beginArray();
 		while (!argument.atEnd()) {
 			auto ic = std::make_shared<IPv4Config>();

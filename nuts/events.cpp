@@ -103,6 +103,6 @@ namespace nuts {
 		setupEnvironment(e, dev);
 		setupEnvironment(e, env);
 		setupEnvironment(e, iface);
-		start(std::move(e), "ifup", dev->getName(), env->getName(), iface->getIndex());
+		start(std::move(e), event, dev->getName(), env->getName(), iface->getIndex());
 	}
 }

@@ -24,9 +24,6 @@ extern "C" {
 #include <linux/sysctl.h>
 #include <linux/wireless.h>
 #include <unistd.h>
-
-// hardware_ext.c
-extern struct nla_policy ifla_policy[IFLA_MAX+1];
 }
 
 #include <QSocketNotifier>
@@ -34,11 +31,105 @@ extern struct nla_policy ifla_policy[IFLA_MAX+1];
 
 namespace nuts {
 	namespace {
-		QString read_IFLA_IFNAME(struct nlattr* (&tb)[IFLA_MAX+1]) {
-			struct nlattr* nla_ifname = tb[IFLA_IFNAME];
-			if (nullptr == nla_ifname) return QString();
-			return QString::fromUtf8((char*) nla_data(nla_ifname), nla_len(nla_ifname)-1);
+		/* netlink types handling */
+
+		template<typename Object>
+		struct nl_object_traits {
+			static constexpr char const* type = nullptr;
+		};
+
+		template<>
+		struct nl_object_traits<::rtnl_route> {
+			static constexpr char const* type = "route/route";
+		};
+
+		template<>
+		struct nl_object_traits<::rtnl_link> {
+			static constexpr char const* type = "route/link";
+		};
+
+		template<>
+		struct nl_object_traits<::rtnl_addr> {
+			static constexpr char const* type = "route/addr";
+		};
+
+		template<typename Object>
+		Object* nl_safe_object_cast(::nl_object* obj) {
+			static_assert(nl_object_traits<Object>::type, "type not an nl_object or not supported");
+			if (obj && 0 == strcmp(nl_object_traits<Object>::type, nl_object_get_type(obj))) {
+				return reinterpret_cast<Object*>(obj);
+			}
+			return nullptr;
 		}
+
+		template<typename Object>
+		::nl_object* nl_safe_to_object(Object* obj) {
+			static_assert(nl_object_traits<Object>::type, "type not an nl_object or not supported");
+			return reinterpret_cast<::nl_object*>(obj);
+		}
+
+		template<typename Object>
+		std::unique_ptr<Object, internal::free_nl_data> nlCopyObjectPtr(Object* ptr) {
+			static_assert(nl_object_traits<Object>::type, "type not an nl_object or not supported");
+			if (ptr) nl_object_get(reinterpret_cast<nl_object*>(ptr));
+			return std::unique_ptr<Object, internal::free_nl_data>(ptr);
+		}
+
+		template<typename Object>
+		std::unique_ptr<Object, internal::free_nl_data> nlCopyObjectPtr(std::unique_ptr<Object, internal::free_nl_data> const& ptr) {
+			return nlCopyObjectPtr(ptr.get());
+		}
+
+		/* helpers to deal with netlink callbacks */
+
+		template<typename Object>
+		void internal_call_msg_type_cb_function(::nl_object* obj, void *arg) {
+			auto o = nl_safe_object_cast<Object>(obj);
+			if (!o) {
+				log
+					<< "Unexpected object type: '" << nl_object_get_type(obj)
+					<< "', wanted '" << nl_object_traits<Object>::type << "'\n";
+				return;
+			}
+			auto const cb = reinterpret_cast<std::function<void(Object*)> const*>(arg);
+			(*cb)(o);
+		}
+		template<typename Object>
+		int nlMsgParseType(::nl_msg* msg, std::function<void(Object*)> const& func) {
+			return nl_msg_parse(msg, internal_call_msg_type_cb_function<Object>, const_cast<void*>(reinterpret_cast<void const*>(&func)));
+		}
+
+		template<typename Object>
+		int internal_call_nl_cb_msg_parse_function(::nl_msg *msg, void *arg) {
+			auto const cb = reinterpret_cast<std::function<void(Object*)> const*>(arg);
+			return nlMsgParseType(msg, *cb);
+		}
+		template<typename Object>
+		int nlSetMsgParseCallback(::nl_cb* cb, ::nl_cb_type type, std::function<void(Object*)> const& func) {
+			return ::nl_cb_set(cb, type, NL_CB_CUSTOM, internal_call_nl_cb_msg_parse_function<Object>, const_cast<void*>(reinterpret_cast<void const*>(&func)));
+		}
+
+		template<typename ObjectType>
+		void internal_cacheForeach(::nl_object* obj, void *cb_ptr) {
+			std::function<void(ObjectType*)> const& cb = *reinterpret_cast<std::function<void(ObjectType*)> const*>(cb_ptr);
+			cb(reinterpret_cast<ObjectType*>(obj));
+		}
+
+		template<typename ObjectType>
+		void cacheForeach(nl_cache_ptr<ObjectType>const& cache, std::function<void(ObjectType*)> const& cb) {
+			if (!cache) return;
+			void *cb_ptr = const_cast<void*>(reinterpret_cast<void const*>(&cb));
+			nl_cache_foreach(cache.get(), &internal_cacheForeach<ObjectType>, cb_ptr);
+		}
+
+		template<typename ObjectType>
+		void cacheForeachFilter(nl_cache_ptr<ObjectType>const& cache, ObjectType const* filter, std::function<void(ObjectType*)> const& cb) {
+			if (!cache) return;
+			void *cb_ptr = const_cast<void*>(reinterpret_cast<void const*>(&cb));
+			nl_cache_foreach_filter(cache.get(), const_cast<nl_object*>(reinterpret_cast<nl_object const*>(filter)), &internal_cacheForeach<ObjectType>, cb_ptr);
+		}
+
+		/* various */
 
 		int getPrefixLenIPv4(const QHostAddress &netmask) {
 			quint32 val = netmask.toIPv4Address();
@@ -105,7 +196,7 @@ namespace nuts {
 			rtnl_route_set_scope(route.get(), RT_SCOPE_UNIVERSE);
 
 			if (-1 != metric) {
-				rtnl_route_set_priority(route.get(), metric);
+				rtnl_route_set_priority(route.get(), static_cast<uint32_t>(metric));
 			}
 			// route owns added nexthops, nexthop doesn't have ref count
 			rtnl_route_add_nexthop(route.get(), nh.release());
@@ -125,12 +216,11 @@ namespace nuts {
 			return rtnl_link_ptr{rtnl_link_alloc()};
 		}
 
-		nl_cache_ptr<::rtnl_addr> makeRTNLAddrCache(::nl_sock* sock) {
+		int makeRTNLAddrCache(nl_cache_ptr<::rtnl_addr> &cacheResult, ::nl_sock* sock) {
 			::nl_cache* cache{nullptr};
-			if (0 == rtnl_addr_alloc_cache(sock, &cache)) {
-				return nl_cache_ptr<::rtnl_addr>{cache};
-			}
-			return nl_cache_ptr<::rtnl_addr>{};
+			int res = rtnl_addr_alloc_cache(sock, &cache);
+			cacheResult.reset(cache);
+			return res;
 		}
 
 #if 0
@@ -159,63 +249,12 @@ namespace nuts {
 				err = nl_send_simple(sock, RTM_GETROUTE, NLM_F_DUMP, &rhdr, sizeof(rhdr));
 			} while (-NLE_DUMP_INTR == err);
 
-			{
-				struct sockaddr_nl peer;
-				unsigned char* buf{nullptr};
-				int n = nl_recv(sock, &peer, &buf, nullptr);
-				if (n <= 0) return n;
+			nl_cb_ptr local_cb{nl_cb_clone(nl_socket_get_cb(sock))};
+			nlSetMsgParseCallback<::rtnl_route>(local_cb.get(), NL_CB_VALID, [&list](::rtnl_route *route) {
+				list.push_back(nlCopyObjectPtr(route));
+			});
 
-				for (nlmsghdr* hdr = reinterpret_cast<nlmsghdr*>(buf); nlmsg_ok(hdr, n); hdr = nlmsg_next(hdr, &n)) {
-					switch (hdr->nlmsg_type) {
-					case NLMSG_DONE: /* terminates multipart messages */
-						return 0;
-					case NLMSG_NOOP: /* ignore */
-						break;
-					case NLMSG_OVERRUN:
-						return -NLE_MSG_OVERFLOW;
-					case NLMSG_ERROR:
-						{
-							nlmsgerr* e = reinterpret_cast<nlmsgerr*>(nlmsg_data(hdr));
-							if (hdr->nlmsg_len < (unsigned int)nlmsg_size(sizeof(*e))) {
-								return -NLE_MSG_TRUNC;
-							} else if (e->error) {
-								return -nl_syserr2nlerr(e->error);
-							}
-						}
-						break;
-					case RTM_NEWROUTE:
-						{
-							::rtnl_route* route{nullptr};
-							err = rtnl_route_parse(hdr, &route);
-							if (0 > err) return err;
-							list.push_back(rtnl_route_ptr{route});
-						}
-						break;
-					default:
-						return -NLE_MSGTYPE_NOSUPPORT;
-					}
-				}
-				free(buf);
-			}
-			return 0;
-		}
-
-		template<typename ObjectType>
-		void internal_cacheForeach(::nl_object* obj, void *cb_ptr) {
-			std::function<void(ObjectType*)> const& cb = *reinterpret_cast<std::function<void(ObjectType*)> const*>(cb_ptr);
-			cb(reinterpret_cast<ObjectType*>(obj));
-		}
-
-		template<typename ObjectType>
-		void cacheForeach(nl_cache_ptr<ObjectType>const& cache, std::function<void(ObjectType*)> const& cb) {
-			void *cb_ptr = const_cast<void*>(reinterpret_cast<void const*>(&cb));
-			nl_cache_foreach(cache.get(), &internal_cacheForeach<ObjectType>, cb_ptr);
-		}
-
-		template<typename ObjectType>
-		void cacheForeachFilter(nl_cache_ptr<ObjectType>const& cache, ObjectType const* filter, std::function<void(ObjectType*)> const& cb) {
-			void *cb_ptr = const_cast<void*>(reinterpret_cast<void const*>(&cb));
-			nl_cache_foreach_filter(cache.get(), const_cast<nl_object*>(reinterpret_cast<nl_object const*>(filter)), &internal_cacheForeach<ObjectType>, cb_ptr);
+			return nl_recvmsgs(sock, local_cb.get());
 		}
 
 		QString toString(nl_addr* addr) {
@@ -240,6 +279,10 @@ namespace nuts {
 
 		void free_nl_data::operator()(nl_cache* cache) {
 			nl_cache_free(cache);
+		}
+
+		void free_nl_data::operator()(::nl_cb* cb) {
+			nl_cb_put(cb);
 		}
 
 		void free_nl_data::operator()(nl_sock* sock) {
@@ -280,7 +323,7 @@ namespace nuts {
 	}
 
 	bool HardwareManager::controlOn(int ifIndex, bool force) {
-		if (ifIndex < 0 || ifIndex >= ifStates.size()) return false;
+		if (ifIndex < 0 || (size_t)ifIndex >= ifStates.size()) return false;
 
 		rtnl_link_ptr change = RTNLLinkAlloc();
 		rtnl_link_set_ifindex(change.get(), ifIndex);
@@ -306,7 +349,8 @@ namespace nuts {
 
 	bool HardwareManager::controlOff(int ifIndex) {
 		if (ifIndex < 0) return false;
-		if (ifIndex < ifStates.size() && ifStates[ifIndex].active) {
+		if ((size_t)ifIndex >= ifStates.size()) return true;
+		if (ifStates[ifIndex].active) {
 			ifStates[ifIndex].off();
 
 			rtnl_link_ptr change = RTNLLinkAlloc();
@@ -325,13 +369,18 @@ namespace nuts {
 		m_nlh_control.reset(nl_socket_alloc());
 		m_nlh_watcher.reset(nl_socket_alloc());
 		if (!m_nlh_watcher || !m_nlh_control) goto cleanup;
-		nl_socket_set_peer_port(m_nlh_watcher.get(), 0);
+		::nl_socket_disable_seq_check(m_nlh_watcher.get());
+		::nl_socket_modify_cb(
+			m_nlh_watcher.get(), NL_CB_VALID, NL_CB_CUSTOM,
+			&HardwareManager::wrap_handle_netlinkmsg,
+			reinterpret_cast<void*>(this));
 
 		if (nl_connect(m_nlh_control.get(), NETLINK_ROUTE) != 0) goto cleanup;
 
 		if (nl_connect(m_nlh_watcher.get(), NETLINK_ROUTE) != 0) goto cleanup;
 		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_LINK) != 0) goto cleanup;
-		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_IPV4_IFADDR) != 0) goto cleanup;
+		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_IPV4_ROUTE) != 0) goto cleanup;
+		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_IPV6_ROUTE) != 0) goto cleanup;
 
 		{
 			int netlink_fd = nl_socket_get_fd(m_nlh_control.get());
@@ -340,6 +389,7 @@ namespace nuts {
 		{
 			int netlink_fd = nl_socket_get_fd(m_nlh_watcher.get());
 			fcntl(netlink_fd, F_SETFD, FD_CLOEXEC);
+			// QSocketNotifier constructor makes netlink_fd non-blocking
 			m_nlh_watcher_notifier.reset(new QSocketNotifier(netlink_fd, QSocketNotifier::Read));
 			connect(m_nlh_watcher_notifier.get(), &QSocketNotifier::activated, this, &HardwareManager::read_netlinkmsgs);
 		}
@@ -375,7 +425,7 @@ cleanup:
 			int const ifIndex{rtnl_link_get_ifindex(link)};
 			QString const ifName = QString::fromUtf8(rtnl_link_get_name(link));
 			if (ifIndex <= 0) return;
-			if (ifIndex >= ifStates.size()) ifStates.resize(ifIndex+1);
+			if ((size_t)ifIndex >= ifStates.size()) ifStates.resize(ifIndex+1);
 			if (!ifStates[ifIndex].exists) {
 				ifStates[ifIndex].exists = true;
 				ifStates[ifIndex].name = ifName;
@@ -410,92 +460,167 @@ cleanup:
 	}
 
 	void HardwareManager::read_netlinkmsgs() {
-		struct sockaddr_nl peer;
-		unsigned char* msg{nullptr};
-		int n, msgsize;
-		struct nlmsghdr* hdr;
+		int res = nl_recvmsgs_default(m_nlh_watcher.get());
+		if (0 > res) {
+			log << "nl_recvmsgs failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		}
+		return;
+	}
 
-		msgsize = n = nl_recv(m_nlh_watcher.get(), &peer, &msg, 0);
-		for (hdr = (struct nlmsghdr*) msg; nlmsg_ok(hdr, n); hdr = (struct nlmsghdr*) nlmsg_next(hdr, &n)) {
-//			log << QString("Message type 0x%1").arg(hdr->nlmsg_type, 0, 16) << endl;
-			switch (hdr->nlmsg_type) {
-			case RTM_NEWLINK:
-				/* new or modified link */
-				{
-					struct ifinfomsg* ifm = (struct ifinfomsg*) nlmsg_data(hdr);
-					struct nlattr* tb[IFLA_MAX+1];
-					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
-						break;
-					}
-					int ifIndex = ifm->ifi_index;
-					if (ifIndex >= ifStates.size())
-						ifStates.resize(ifIndex+1);
-					QString ifName = read_IFLA_IFNAME(tb);
-					if (ifName.isEmpty()) {
-						if (ifStates[ifIndex].exists) {
-							ifName = ifStates[ifIndex].name;
-						}
-					}
-					if (ifName.isEmpty()) {
-						err << QString("couldn't find name for (new) interface %1").arg(ifIndex) << endl;
-						break;
-					}
-					if (!ifStates[ifIndex].exists) {
-						ifStates[ifIndex].exists = true;
-						ifStates[ifIndex].name = ifName;
-						log << QString("new interface detected: %1 [index %2]").arg(ifName).arg(ifIndex) << endl;
-						emit newDevice(ifName, ifIndex);
-					} else if (ifStates[ifIndex].name != ifName) {
-						QString oldName = ifStates[ifIndex].name;
-						ifStates[ifIndex].name = ifName;
-						log << QString("interface rename detected: %1 -> %2 [index %3]").arg(oldName).arg(ifName).arg(ifIndex) << endl;
-						emit delDevice(oldName);
-						emit newDevice(ifName, ifIndex);
-					}
-					bool carrier = (ifm->ifi_flags & IFF_LOWER_UP) > 0;
-					if (carrier != ifStates[ifIndex].carrier) {
-						ifStates[ifIndex].carrier = carrier;
-						if (!isControlled(ifIndex))
-							break;
-						if (carrier) {
-							QString essid;
-							getEssid(ifName, essid);
-							emit gotCarrier(ifName, ifIndex, essid);
-						} else
-							emit lostCarrier(ifName);
+	int HardwareManager::wrap_handle_netlinkmsg(::nl_msg *msg, void* arg) {
+		return reinterpret_cast<HardwareManager*>(arg)->handle_netlinkmsg(msg);
+	}
+
+	int HardwareManager::handle_netlinkmsg(::nl_msg *msg) {
+		switch (nlmsg_hdr(msg)->nlmsg_type) {
+		case RTM_NEWLINK:
+			nlMsgParseType<::rtnl_link>(msg, [this](::rtnl_link* link) {
+				int const ifIndex = rtnl_link_get_ifindex(link);
+				if (ifIndex <= 0) {
+					err << QString("invalid interface index %1").arg(ifIndex) << endl;
+					return;
+				}
+				if ((size_t) ifIndex >= ifStates.size()) ifStates.resize(ifIndex+1);
+				QString ifName = QString::fromUtf8(rtnl_link_get_name(link));
+				if (ifName.isEmpty()) {
+					if (ifStates[ifIndex].exists) {
+						ifName = ifStates[ifIndex].name;
 					}
 				}
-				break;
-			case RTM_DELLINK:
+				if (ifName.isEmpty()) {
+					err << QString("couldn't find name for (new) interface %1").arg(ifIndex) << endl;
+					return;
+				}
+				if (!ifStates[ifIndex].exists) {
+					ifStates[ifIndex].exists = true;
+					ifStates[ifIndex].name = ifName;
+					log << QString("new interface detected: %1 [index %2]").arg(ifName).arg(ifIndex) << endl;
+					emit newDevice(ifName, ifIndex);
+				} else if (ifStates[ifIndex].name != ifName) {
+					QString oldName = ifStates[ifIndex].name;
+					ifStates[ifIndex].name = ifName;
+					log << QString("interface rename detected: %1 -> %2 [index %3]").arg(oldName).arg(ifName).arg(ifIndex) << endl;
+					emit delDevice(oldName);
+					emit newDevice(ifName, ifIndex);
+				}
+				bool carrier = (rtnl_link_get_flags(link) & IFF_LOWER_UP) > 0;
+				if (carrier != ifStates[ifIndex].carrier) {
+					ifStates[ifIndex].carrier = carrier;
+					if (!isControlled(ifIndex))
+						return;
+					if (carrier) {
+						reenableIPv6(ifIndex);
+						QString essid;
+						getEssid(ifName, essid);
+						emit gotCarrier(ifName, ifIndex, essid);
+					} else {
+						emit lostCarrier(ifName);
+						cleanupIPv6AutoAssigned(ifIndex);
+					}
+				}
+
+			});
+			break;
+		case RTM_DELLINK:
+			nlMsgParseType<::rtnl_link>(msg, [this](::rtnl_link* link) {
+				int const ifIndex = rtnl_link_get_ifindex(link);
+				if (ifIndex <= 0) {
+					err << QString("invalid interface index %1").arg(ifIndex) << endl;
+					return;
+				}
+				QString const ifName = QString::fromUtf8(rtnl_link_get_name(link));
+				if (ifName.isNull()) return;
+				log << QString("lost interface: %1 [index %2]").arg(ifName).arg(ifIndex) << endl;
+				if ((size_t) ifIndex < ifStates.size()) {
+					if (ifStates[ifIndex].exists) {
+						if (ifStates[ifIndex].carrier)
+							emit lostCarrier(ifName);
+						ifStates[ifIndex].exists = false;
+						ifStates[ifIndex].carrier = false;
+						ifStates[ifIndex].active = false;
+						ifStates[ifIndex].name.clear();
+					}
+				}
+				emit delDevice(ifName);
+			});
+			break;
+		case RTM_NEWROUTE:
+			bool const replacedRoute = 0 != (NLM_F_REPLACE & nlmsg_hdr(msg)->nlmsg_flags);
+			nlMsgParseType<::rtnl_route>(msg, [this,replacedRoute](::rtnl_route* route) {
+#if 0
 				{
-					struct ifinfomsg* ifm = (struct ifinfomsg*) nlmsg_data(hdr);
-					struct nlattr* tb[IFLA_MAX+1];
-					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
-						break;
-					}
-					int ifindex = ifm->ifi_index;
-					QString ifname = read_IFLA_IFNAME(tb);
-					if (ifname.isNull()) break;
-					log << QString("lost interface: %1 [index %2]").arg(ifname).arg(ifindex) << endl;
-					if (ifindex < ifStates.size()) {
-						if (ifStates[ifindex].exists) {
-							if (ifStates[ifindex].carrier)
-								emit lostCarrier(ifname);
-							ifStates[ifindex].exists = false;
-							ifStates[ifindex].carrier = false;
-							ifStates[ifindex].active = false;
-							ifStates[ifindex].name.clear();
-						}
-					}
-					emit delDevice(ifname);
-				} break;
-			}
+					char buf[512];
+					nl_object_dump_buf(nl_safe_to_object(route), buf, sizeof(buf));
+					log << (replacedRoute ? "Replaced " : "New ") << "route with metric " << rtnl_route_get_priority(route) << ": " << buf;
+				}
+#endif
+				checkRouteMetric(route);
+			});
+			break;
 		}
-		if (msgsize > 0) free(msg);
+
+		return 0;
 	}
+
+	void HardwareManager::checkRouteMetric(::rtnl_route* route) {
+		switch (rtnl_route_get_family(route)) {
+		case AF_INET6:
+			{
+				/* don't touch IPv6 link-local fe80::/64 */
+				static const uint8_t link_local_prefix[8] =
+					{ 0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
+				nl_addr* dst = rtnl_route_get_dst(route);
+				if (64 == nl_addr_get_prefixlen(dst) && 0 == memcmp(link_local_prefix, nl_addr_get_binary_addr(dst), 8)) return;
+			}
+			break;
+		case AF_INET:
+			/* don't touch default routes: the metric for those is
+			 * set explicitly
+			 */
+			{
+				nl_addr* dst = rtnl_route_get_dst(route);
+				if (0 == nl_addr_get_prefixlen(dst)) return;
+			}
+			break;
+		default:
+			return;
+		}
+
+		if (RT_TABLE_MAIN != rtnl_route_get_table(route)) return;
+		if (RTN_UNICAST != rtnl_route_get_type(route)) return;
+
+		if (1 != rtnl_route_get_nnexthops(route)) return;
+		::rtnl_nexthop* nh = rtnl_route_nexthop_n(route, 0);
+		int const ifIndex = rtnl_route_nh_get_ifindex(nh);
+
+		if (!isControlled(ifIndex)) return;
+
+		int const metric = ifStates[ifIndex].metric;
+		if (-1 == metric || static_cast<uint32_t>(metric) == rtnl_route_get_priority(route)) return;
+
+		char route_str[512];
+		nl_object_dump_buf(nl_safe_to_object(route), route_str, sizeof(route_str));
+
+		log << "Replacing route with updated metric " << metric << ": " << route_str;
+		log.flush();
+
+		int err;
+		err = rtnl_route_delete(m_nlh_control.get(), route, NLM_F_REPLACE);
+		if (0 > err && -ENOENT != err) {
+			log << "Removing route failed: " << nl_geterror(err) << " (" <<  err << ")" << endl;
+			return;
+		}
+
+		rtnl_route_set_priority(route, metric);
+
+		err = rtnl_route_add(m_nlh_control.get(), route, NLM_F_REPLACE);
+		if (0 > err && -ENOENT != err) {
+			log << "Adding route with updated metric failed: " << nl_geterror(err) << " (" <<  err << ")" << endl;
+		}
+	}
+
 	bool HardwareManager::isControlled(int ifIndex) {
-		if (ifIndex < 0) return false;
-		if (ifIndex >= ifStates.size()) return false;
+		if (ifIndex < 0 || (size_t)ifIndex >= ifStates.size()) return false;
 		return ifStates[ifIndex].active;
 	}
 
@@ -582,60 +707,118 @@ cleanup:
 		}
 	}
 
+	void HardwareManager::setMetric(int ifIndex, int metric) {
+		if (!isControlled(ifIndex)) return;
+		if (metric == ifStates[ifIndex].metric) return;
+		ifStates[ifIndex].metric = metric;
 
-	/* NOT READY FOR USE YET
+		/* update "all" routes */
+		std::list<rtnl_route_ptr> routes;
+		int res;
+		res = appendRoutes(m_nlh_control.get(), AF_INET, routes);
+		if (0 > res) {
+			log << "appendRoutes failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		}
+		res = appendRoutes(m_nlh_control.get(), AF_INET6, routes);
+		if (0 > res) {
+			log << "appendRoutes failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		}
+		for (auto const& route: routes) {
+			checkRouteMetric(route.get());
+		}
+	}
+
+	/* Linux IPv6 (auto) address configuration:
 	 *
-	 * Touching the IPv6 configuration breaks auto configuration;
-	 * it won't start again in a sane way.
-	 * (When the previous auto configured address would get
-	 * refreshed it probably would heal itself, but so far
-	 * I couldn't see a way to restart that timer)
+	 * When the interface comes up the kernel assigns a link-local
+	 * address and runs DAD (duplicate address detection). When DAD
+	 * completes successfully, the kernel sends 3 (sysctl
+	 * router_solicitations) router solicitations, waiting for 4
+	 * seconds (sysctl router_solicitation_interval) between them.
+	 *
+	 * Usually the only way to restart this process is to take the
+	 * interface down completely (ip link set dev $DEV down) and up
+	 * again.
+	 *
+	 * As long as the device stays on the same link this is not a
+	 * problem as the router is supposed to broadcast router advertisments
+	 * in regular intervals, and the kernel will always use them
+	 * and update the local configuration.
+	 *
+	 * But if you lost the carrier you actually want to drop all
+	 * (automatically) configured addresses and routes for that
+	 * interface, and restart sending solicitations when the carrier
+	 * comes back.
+	 *
+	 * (While the carrier is down the routes are not actually used
+	 * but they are still present with the "linkdown" flag).
+	 *
+	 * So we kill all IPv6 addresses and routes for an interface,
+	 * remember the link-local IPv6 address, and if the carrier comes
+	 * back, we add the remembered link-local IPv6 address again,
+	 * which magically triggers sending new router solicitations (after
+	 * DAD finishes).
+	 *
+	 * Yay.
 	 */
 	void HardwareManager::cleanupIPv6AutoAssigned(int ifIndex) {
+		if (!isControlled(ifIndex)) return;
+
 		{
-			auto removeIPv6AddressWithFlag = [this, ifIndex](::rtnl_addr* addr) {
+			bool removeTemporaries{false};
+
+			auto removeIPv6AddressWithFlag = [this, ifIndex, &removeTemporaries](::rtnl_addr* addr) {
 #if 0
 				{
 					char buf[512];
-					nl_object_dump_buf(reinterpret_cast<::nl_object*>(addr), buf, sizeof(buf));
+					nl_object_dump_buf(nl_safe_to_object(addr), buf, sizeof(buf));
 					log << "Found address: " << buf;
 				}
 #endif
 
-				/* looking for temporary global IPv6 addresses on the interface with limited life time */
+				/* remove all IPv6 addresses on interface (we "own" it) */
 				if (rtnl_addr_get_ifindex(addr) != ifIndex) return;
 				if (rtnl_addr_get_family(addr) != AF_INET6) return;
+
 				switch (rtnl_addr_get_scope(addr)) {
+				case RT_SCOPE_LINK:
+					/* remember link-local address to restart router solicitation */
+					ifStates[ifIndex].link_local_ipv6_reenable = nlCopyObjectPtr(addr);
+					break;
 				case RT_SCOPE_UNIVERSE:
-					/* IFA_F_TEMPORARY (from privacy extension) gets removed automatically after is IFA_F_MANAGETEMPADDR is deleted */
-					if (0 == (rtnl_addr_get_flags(addr) & IFA_F_MANAGETEMPADDR)) return;
-					if (0xFFFFFFFFU == rtnl_addr_get_valid_lifetime(addr)) return; /* forever valid */
+					/* IFA_F_TEMPORARY (from privacy extension) should get removed automatically after its IFA_F_MANAGETEMPADDR is deleted */
+					if (!removeTemporaries && 0 == (rtnl_addr_get_flags(addr) & IFA_F_MANAGETEMPADDR)) return;
 					break;
 				default:
-					return;
+					break;
 				}
 
-				log << "Removing temporary IPv6 address "
+				log << "Removing IPv6 address "
 					<< toString(rtnl_addr_get_local(addr))
 					<< " [ndx=" << ifIndex << "]"
 					<< endl;
 
-#if 0
-				/* reducing lifetime didn't fix the kernel timer either */
-				rtnl_addr_set_preferred_lifetime(addr, 1);
-				rtnl_addr_set_valid_lifetime(addr, 1);
-				int res = rtnl_addr_add(m_nlh_control.get(), addr, NLM_F_REPLACE);
-#else
 				int res = rtnl_addr_delete(m_nlh_control.get(), addr, 0);
-#endif
 				if (0 > res) {
-					log << "Removing temporary IPv6 address "
+					log << "Removing IPv6 address "
 						<< toString(rtnl_addr_get_local(addr))
 						<< " failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
 				}
 			};
 
-			cacheForeach<::rtnl_addr>(makeRTNLAddrCache(m_nlh_control.get()), removeIPv6AddressWithFlag);
+			nl_cache_ptr<::rtnl_addr> cache;
+			if (int res = makeRTNLAddrCache(cache, m_nlh_control.get())) {
+				log << "Getting addresses failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+			}
+			cacheForeach<::rtnl_addr>(cache, removeIPv6AddressWithFlag);
+
+			cache.reset();
+			removeTemporaries = true;
+
+			if (int res = makeRTNLAddrCache(cache, m_nlh_control.get())) {
+				log << "Getting addresses failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+			}
+			cacheForeach<::rtnl_addr>(cache, removeIPv6AddressWithFlag);
 		}
 
 		{
@@ -645,37 +828,22 @@ cleanup:
 				log << "appendRoutes failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
 			}
 			for (auto const& route: routes) {
-#if 1
+#if 0
 				{
 					char buf[512];
-					nl_object_dump_buf(reinterpret_cast<::nl_object*>(route.get()), buf, sizeof(buf));
+					nl_object_dump_buf(nl_safe_to_object(route.get()), buf, sizeof(buf));
 					log << "Found IPv6 route: " << buf;
 				}
 #endif
 
-				//if (RT_TABLE_MAIN != rtnl_route_get_table(route.get())) continue;
 				::nl_addr* dst = rtnl_route_get_dst(route.get());
 
-				// ignore link local routes; it seems the kernel doesn't like messing with "deep" stuff
-				// and won't do auto IPv6 anymore
-				if (64 == nl_addr_get_prefixlen(dst)) {
-					const quint8 link_local_prefix[8] = { 0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-					if (0 == memcmp(link_local_prefix, nl_addr_get_binary_addr(dst), 8)) continue;
-				}
-
 				if (1 != rtnl_route_get_nnexthops(route.get())) continue;
-				/* libnl doesn't expose cacheinfo yet, otherwise we would ignore the route if 0 == expire;
-				 * the cacheinfo expire value is in jiffies, but is zero if the route doesn't expire
-				 */
 
 				::rtnl_nexthop* nh = rtnl_route_nexthop_n(route.get(), 0);
 				if (ifIndex != rtnl_route_nh_get_ifindex(nh)) continue;
 
-				/* remove "linkdown" and "proto ra" routes */
-				if ((RTPROT_RA != rtnl_route_get_protocol(route.get())
-					&& 0 == (RTNH_F_LINKDOWN & rtnl_route_nh_get_flags(nh)))) continue;
-
-				log << "Removing temporary IPv6 route to "
+				log << "Removing IPv6 route to "
 					<< routeTargetToString(dst)
 					<< " via "
 					<< toString(rtnl_route_nh_get_gateway(nh))
@@ -684,13 +852,32 @@ cleanup:
 
 				int res = rtnl_route_delete(m_nlh_control.get(), route.get(), 0);
 				if (0 > res) {
-					log << "Removing temporary IPv6 route to "
+					log << "Removing IPv6 route to "
 						<< routeTargetToString(dst)
 						<< " via "
 						<< toString(rtnl_route_nh_get_gateway(nh))
 						<< " failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
 				}
 			}
+		}
+	}
+
+	void HardwareManager::reenableIPv6(int ifIndex) {
+		if (!isControlled(ifIndex)) return;
+
+		rtnl_addr_ptr addr = std::move(ifStates[ifIndex].link_local_ipv6_reenable);
+		if (!addr) return;
+
+		log << "Readding IPv6 link-local address "
+			<< toString(rtnl_addr_get_local(addr.get()))
+			<< " [ndx=" << ifIndex << "]"
+			<< endl;
+
+		int res = rtnl_addr_add(m_nlh_control.get(), addr.get(), 0);
+		if (0 > res) {
+			log << "Readding IPv6 link-local address "
+				<< toString(rtnl_addr_get_local(addr.get()))
+				<< " failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
 		}
 	}
 
@@ -702,5 +889,6 @@ cleanup:
 
 	void HardwareManager::ifstate::off() {
 		active = false;
+		metric = -1;
 	}
 }

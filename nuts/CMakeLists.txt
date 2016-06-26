@@ -22,7 +22,6 @@ add_executable(${PROJECT_NAME}
 	exception.h
 	hardware.cpp
 	hardware.h
-	hardware_ext.c
 	log.cpp
 	log.h
 	main.cpp
