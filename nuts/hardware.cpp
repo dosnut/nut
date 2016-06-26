@@ -125,12 +125,11 @@ namespace nuts {
 			return rtnl_link_ptr{rtnl_link_alloc()};
 		}
 
-		nl_cache_ptr<::rtnl_addr> makeRTNLAddrCache(::nl_sock* sock) {
+		int makeRTNLAddrCache(nl_cache_ptr<::rtnl_addr> &cacheResult, ::nl_sock* sock) {
 			::nl_cache* cache{nullptr};
-			if (0 == rtnl_addr_alloc_cache(sock, &cache)) {
-				return nl_cache_ptr<::rtnl_addr>{cache};
-			}
-			return nl_cache_ptr<::rtnl_addr>{};
+			int res = rtnl_addr_alloc_cache(sock, &cache);
+			cacheResult.reset(cache);
+			return res;
 		}
 
 #if 0
@@ -149,6 +148,30 @@ namespace nuts {
 		}
 #endif
 
+		int internal_call_nl_cb_function(::nl_msg *msg, void *arg) {
+			auto const cb = reinterpret_cast<std::function<int(::nl_msg*)> const*>(arg);
+			return (*cb)(msg);
+		}
+		int nlSetCallback(::nl_cb* cb, ::nl_cb_type type, std::function<int(::nl_msg*)> const& func) {
+			return ::nl_cb_set(cb, type, NL_CB_CUSTOM, internal_call_nl_cb_function, const_cast<void*>(reinterpret_cast<void const*>(&func)));
+		}
+
+		void internal_call_msg_cb_function(::nl_object* obj, void *arg) {
+			auto const cb = reinterpret_cast<std::function<void(::nl_object*)> const*>(arg);
+			(*cb)(obj);
+		}
+		int nlMsgParse(::nl_msg* msg, std::function<void(::nl_object*)> const& func) {
+			return nl_msg_parse(msg, internal_call_msg_cb_function, const_cast<void*>(reinterpret_cast<void const*>(&func)));
+		}
+
+		int internal_call_nl_cb_msg_parse_function(::nl_msg *msg, void *arg) {
+			auto const cb = reinterpret_cast<std::function<void(::nl_object*)> const*>(arg);
+			return nlMsgParse(msg, *cb);
+		}
+		int nlSetMsgParseCallback(::nl_cb* cb, ::nl_cb_type type, std::function<void(::nl_object*)> const& func) {
+			return ::nl_cb_set(cb, type, NL_CB_CUSTOM, internal_call_nl_cb_msg_parse_function, const_cast<void*>(reinterpret_cast<void const*>(&func)));
+		}
+
 		int appendRoutes(::nl_sock* sock, int family, std::list<rtnl_route_ptr>& list) {
 			struct rtmsg rhdr;
 			memset(&rhdr, 0, sizeof(rhdr));
@@ -159,45 +182,17 @@ namespace nuts {
 				err = nl_send_simple(sock, RTM_GETROUTE, NLM_F_DUMP, &rhdr, sizeof(rhdr));
 			} while (-NLE_DUMP_INTR == err);
 
-			{
-				struct sockaddr_nl peer;
-				unsigned char* buf{nullptr};
-				int n = nl_recv(sock, &peer, &buf, nullptr);
-				if (n <= 0) return n;
-
-				for (nlmsghdr* hdr = reinterpret_cast<nlmsghdr*>(buf); nlmsg_ok(hdr, n); hdr = nlmsg_next(hdr, &n)) {
-					switch (hdr->nlmsg_type) {
-					case NLMSG_DONE: /* terminates multipart messages */
-						return 0;
-					case NLMSG_NOOP: /* ignore */
-						break;
-					case NLMSG_OVERRUN:
-						return -NLE_MSG_OVERFLOW;
-					case NLMSG_ERROR:
-						{
-							nlmsgerr* e = reinterpret_cast<nlmsgerr*>(nlmsg_data(hdr));
-							if (hdr->nlmsg_len < (unsigned int)nlmsg_size(sizeof(*e))) {
-								return -NLE_MSG_TRUNC;
-							} else if (e->error) {
-								return -nl_syserr2nlerr(e->error);
-							}
-						}
-						break;
-					case RTM_NEWROUTE:
-						{
-							::rtnl_route* route{nullptr};
-							err = rtnl_route_parse(hdr, &route);
-							if (0 > err) return err;
-							list.push_back(rtnl_route_ptr{route});
-						}
-						break;
-					default:
-						return -NLE_MSGTYPE_NOSUPPORT;
-					}
+			nl_cb_ptr local_cb{nl_cb_clone(nl_socket_get_cb(sock))};
+			nlSetMsgParseCallback(local_cb.get(), NL_CB_VALID, [&list](::nl_object *obj) {
+				if (0 == strcmp("route/route", nl_object_get_type(obj))) {
+					nl_object_get(obj);
+					list.push_back(rtnl_route_ptr{reinterpret_cast<rtnl_route*>(obj)});
+				} else {
+					log << "Unepxected object type: '" << nl_object_get_type(obj) << "', wanted 'route/route'\n";
 				}
-				free(buf);
-			}
-			return 0;
+			});
+
+			return nl_recvmsgs(sock, local_cb.get());
 		}
 
 		template<typename ObjectType>
@@ -208,12 +203,14 @@ namespace nuts {
 
 		template<typename ObjectType>
 		void cacheForeach(nl_cache_ptr<ObjectType>const& cache, std::function<void(ObjectType*)> const& cb) {
+			if (!cache) return;
 			void *cb_ptr = const_cast<void*>(reinterpret_cast<void const*>(&cb));
 			nl_cache_foreach(cache.get(), &internal_cacheForeach<ObjectType>, cb_ptr);
 		}
 
 		template<typename ObjectType>
 		void cacheForeachFilter(nl_cache_ptr<ObjectType>const& cache, ObjectType const* filter, std::function<void(ObjectType*)> const& cb) {
+			if (!cache) return;
 			void *cb_ptr = const_cast<void*>(reinterpret_cast<void const*>(&cb));
 			nl_cache_foreach_filter(cache.get(), const_cast<nl_object*>(reinterpret_cast<nl_object const*>(filter)), &internal_cacheForeach<ObjectType>, cb_ptr);
 		}
@@ -240,6 +237,10 @@ namespace nuts {
 
 		void free_nl_data::operator()(nl_cache* cache) {
 			nl_cache_free(cache);
+		}
+
+		void free_nl_data::operator()(::nl_cb* cb) {
+			nl_cb_put(cb);
 		}
 
 		void free_nl_data::operator()(nl_sock* sock) {
@@ -280,7 +281,7 @@ namespace nuts {
 	}
 
 	bool HardwareManager::controlOn(int ifIndex, bool force) {
-		if (ifIndex < 0 || ifIndex >= ifStates.size()) return false;
+		if (ifIndex < 0 || (size_t)ifIndex >= ifStates.size()) return false;
 
 		rtnl_link_ptr change = RTNLLinkAlloc();
 		rtnl_link_set_ifindex(change.get(), ifIndex);
@@ -306,7 +307,8 @@ namespace nuts {
 
 	bool HardwareManager::controlOff(int ifIndex) {
 		if (ifIndex < 0) return false;
-		if (ifIndex < ifStates.size() && ifStates[ifIndex].active) {
+		if ((size_t)ifIndex >= ifStates.size()) return true;
+		if (ifStates[ifIndex].active) {
 			ifStates[ifIndex].off();
 
 			rtnl_link_ptr change = RTNLLinkAlloc();
@@ -375,7 +377,7 @@ cleanup:
 			int const ifIndex{rtnl_link_get_ifindex(link)};
 			QString const ifName = QString::fromUtf8(rtnl_link_get_name(link));
 			if (ifIndex <= 0) return;
-			if (ifIndex >= ifStates.size()) ifStates.resize(ifIndex+1);
+			if ((size_t)ifIndex >= ifStates.size()) ifStates.resize(ifIndex+1);
 			if (!ifStates[ifIndex].exists) {
 				ifStates[ifIndex].exists = true;
 				ifStates[ifIndex].name = ifName;
@@ -427,9 +429,12 @@ cleanup:
 					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
 						break;
 					}
-					int ifIndex = ifm->ifi_index;
-					if (ifIndex >= ifStates.size())
-						ifStates.resize(ifIndex+1);
+					int const ifIndex = ifm->ifi_index;
+					if (ifIndex <= 0) {
+						err << QString("invalid interface index %1").arg(ifIndex) << endl;
+						break;
+					}
+					if ((size_t) ifIndex >= ifStates.size()) ifStates.resize(ifIndex+1);
 					QString ifName = read_IFLA_IFNAME(tb);
 					if (ifName.isEmpty()) {
 						if (ifStates[ifIndex].exists) {
@@ -458,11 +463,14 @@ cleanup:
 						if (!isControlled(ifIndex))
 							break;
 						if (carrier) {
+							reenableIPv6(ifIndex);
 							QString essid;
 							getEssid(ifName, essid);
 							emit gotCarrier(ifName, ifIndex, essid);
-						} else
+						} else {
 							emit lostCarrier(ifName);
+							cleanupIPv6AutoAssigned(ifIndex);
+						}
 					}
 				}
 				break;
@@ -473,18 +481,22 @@ cleanup:
 					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
 						break;
 					}
-					int ifindex = ifm->ifi_index;
+					int const ifIndex = ifm->ifi_index;
+					if (ifIndex <= 0) {
+						err << QString("invalid interface index %1").arg(ifIndex) << endl;
+						break;
+					}
 					QString ifname = read_IFLA_IFNAME(tb);
 					if (ifname.isNull()) break;
-					log << QString("lost interface: %1 [index %2]").arg(ifname).arg(ifindex) << endl;
-					if (ifindex < ifStates.size()) {
-						if (ifStates[ifindex].exists) {
-							if (ifStates[ifindex].carrier)
+					log << QString("lost interface: %1 [index %2]").arg(ifname).arg(ifIndex) << endl;
+					if ((size_t) ifIndex < ifStates.size()) {
+						if (ifStates[ifIndex].exists) {
+							if (ifStates[ifIndex].carrier)
 								emit lostCarrier(ifname);
-							ifStates[ifindex].exists = false;
-							ifStates[ifindex].carrier = false;
-							ifStates[ifindex].active = false;
-							ifStates[ifindex].name.clear();
+							ifStates[ifIndex].exists = false;
+							ifStates[ifIndex].carrier = false;
+							ifStates[ifIndex].active = false;
+							ifStates[ifIndex].name.clear();
 						}
 					}
 					emit delDevice(ifname);
@@ -494,8 +506,7 @@ cleanup:
 		if (msgsize > 0) free(msg);
 	}
 	bool HardwareManager::isControlled(int ifIndex) {
-		if (ifIndex < 0) return false;
-		if (ifIndex >= ifStates.size()) return false;
+		if (ifIndex < 0 || (size_t)ifIndex >= ifStates.size()) return false;
 		return ifStates[ifIndex].active;
 	}
 
@@ -582,18 +593,46 @@ cleanup:
 		}
 	}
 
-
-	/* NOT READY FOR USE YET
+	/* Linux IPv6 (auto) address configuration:
 	 *
-	 * Touching the IPv6 configuration breaks auto configuration;
-	 * it won't start again in a sane way.
-	 * (When the previous auto configured address would get
-	 * refreshed it probably would heal itself, but so far
-	 * I couldn't see a way to restart that timer)
+	 * When the interface comes up the kernel assigns a link-local
+	 * address and runs DAD (duplicate address detection). When DAD
+	 * completes successfully, the kernel sends 3 (sysctl
+	 * router_solicitations) router solicitations, waiting for 4
+	 * seconds (sysctl router_solicitation_interval) between them.
+	 *
+	 * Usually the only way to restart this process is to take the
+	 * interface down completely (ip link set dev $DEV down) and up
+	 * again.
+	 *
+	 * As long as the device stays on the same link this is not a
+	 * problem as the router is supposed to broadcast router advertisments
+	 * in regular intervals, and the kernel will always use them
+	 * and update the local configuration.
+	 *
+	 * But if you lost the carrier you actually want to drop all
+	 * (automatically) configured addresses and routes for that
+	 * interface, and restart sending solicitations when the carrier
+	 * comes back.
+	 *
+	 * (While the carrier is down the routes are not actually used
+	 * but they are still present with the "linkdown" flag).
+	 *
+	 * So we kill all IPv6 addresses and routes for an interface,
+	 * remember the link-local IPv6 address, and if the carrier comes
+	 * back, we add the remembered link-local IPv6 address again,
+	 * which magically triggers sending new router solicitations (after
+	 * DAD finishes).
+	 *
+	 * Yay.
 	 */
 	void HardwareManager::cleanupIPv6AutoAssigned(int ifIndex) {
+		if (!isControlled(ifIndex)) return;
+
 		{
-			auto removeIPv6AddressWithFlag = [this, ifIndex](::rtnl_addr* addr) {
+			bool removeTemporaries{false};
+
+			auto removeIPv6AddressWithFlag = [this, ifIndex, &removeTemporaries](::rtnl_addr* addr) {
 #if 0
 				{
 					char buf[512];
@@ -602,40 +641,50 @@ cleanup:
 				}
 #endif
 
-				/* looking for temporary global IPv6 addresses on the interface with limited life time */
+				/* remove all IPv6 addresses on interface (we "own" it) */
 				if (rtnl_addr_get_ifindex(addr) != ifIndex) return;
 				if (rtnl_addr_get_family(addr) != AF_INET6) return;
+
 				switch (rtnl_addr_get_scope(addr)) {
+				case RT_SCOPE_LINK:
+					/* remember link-local address to restart router solicitation */
+					nl_object_get(reinterpret_cast<nl_object*>(addr));
+					ifStates[ifIndex].link_local_ipv6_reenable.reset(addr);
+					break;
 				case RT_SCOPE_UNIVERSE:
-					/* IFA_F_TEMPORARY (from privacy extension) gets removed automatically after is IFA_F_MANAGETEMPADDR is deleted */
-					if (0 == (rtnl_addr_get_flags(addr) & IFA_F_MANAGETEMPADDR)) return;
-					if (0xFFFFFFFFU == rtnl_addr_get_valid_lifetime(addr)) return; /* forever valid */
+					/* IFA_F_TEMPORARY (from privacy extension) should get removed automatically after its IFA_F_MANAGETEMPADDR is deleted */
+					if (!removeTemporaries && 0 == (rtnl_addr_get_flags(addr) & IFA_F_MANAGETEMPADDR)) return;
 					break;
 				default:
-					return;
+					break;
 				}
 
-				log << "Removing temporary IPv6 address "
+				log << "Removing IPv6 address "
 					<< toString(rtnl_addr_get_local(addr))
 					<< " [ndx=" << ifIndex << "]"
 					<< endl;
 
-#if 0
-				/* reducing lifetime didn't fix the kernel timer either */
-				rtnl_addr_set_preferred_lifetime(addr, 1);
-				rtnl_addr_set_valid_lifetime(addr, 1);
-				int res = rtnl_addr_add(m_nlh_control.get(), addr, NLM_F_REPLACE);
-#else
 				int res = rtnl_addr_delete(m_nlh_control.get(), addr, 0);
-#endif
 				if (0 > res) {
-					log << "Removing temporary IPv6 address "
+					log << "Removing IPv6 address "
 						<< toString(rtnl_addr_get_local(addr))
 						<< " failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
 				}
 			};
 
-			cacheForeach<::rtnl_addr>(makeRTNLAddrCache(m_nlh_control.get()), removeIPv6AddressWithFlag);
+			nl_cache_ptr<::rtnl_addr> cache;
+			if (int res = makeRTNLAddrCache(cache, m_nlh_control.get())) {
+				log << "Getting addresses failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+			}
+			cacheForeach<::rtnl_addr>(cache, removeIPv6AddressWithFlag);
+
+			cache.reset();
+			removeTemporaries = true;
+
+			if (int res = makeRTNLAddrCache(cache, m_nlh_control.get())) {
+				log << "Getting addresses failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+			}
+			cacheForeach<::rtnl_addr>(cache, removeIPv6AddressWithFlag);
 		}
 
 		{
@@ -645,7 +694,7 @@ cleanup:
 				log << "appendRoutes failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
 			}
 			for (auto const& route: routes) {
-#if 1
+#if 0
 				{
 					char buf[512];
 					nl_object_dump_buf(reinterpret_cast<::nl_object*>(route.get()), buf, sizeof(buf));
@@ -653,29 +702,14 @@ cleanup:
 				}
 #endif
 
-				//if (RT_TABLE_MAIN != rtnl_route_get_table(route.get())) continue;
 				::nl_addr* dst = rtnl_route_get_dst(route.get());
 
-				// ignore link local routes; it seems the kernel doesn't like messing with "deep" stuff
-				// and won't do auto IPv6 anymore
-				if (64 == nl_addr_get_prefixlen(dst)) {
-					const quint8 link_local_prefix[8] = { 0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-					if (0 == memcmp(link_local_prefix, nl_addr_get_binary_addr(dst), 8)) continue;
-				}
-
 				if (1 != rtnl_route_get_nnexthops(route.get())) continue;
-				/* libnl doesn't expose cacheinfo yet, otherwise we would ignore the route if 0 == expire;
-				 * the cacheinfo expire value is in jiffies, but is zero if the route doesn't expire
-				 */
 
 				::rtnl_nexthop* nh = rtnl_route_nexthop_n(route.get(), 0);
 				if (ifIndex != rtnl_route_nh_get_ifindex(nh)) continue;
 
-				/* remove "linkdown" and "proto ra" routes */
-				if ((RTPROT_RA != rtnl_route_get_protocol(route.get())
-					&& 0 == (RTNH_F_LINKDOWN & rtnl_route_nh_get_flags(nh)))) continue;
-
-				log << "Removing temporary IPv6 route to "
+				log << "Removing IPv6 route to "
 					<< routeTargetToString(dst)
 					<< " via "
 					<< toString(rtnl_route_nh_get_gateway(nh))
@@ -684,13 +718,32 @@ cleanup:
 
 				int res = rtnl_route_delete(m_nlh_control.get(), route.get(), 0);
 				if (0 > res) {
-					log << "Removing temporary IPv6 route to "
+					log << "Removing IPv6 route to "
 						<< routeTargetToString(dst)
 						<< " via "
 						<< toString(rtnl_route_nh_get_gateway(nh))
 						<< " failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
 				}
 			}
+		}
+	}
+
+	void HardwareManager::reenableIPv6(int ifIndex) {
+		if (!isControlled(ifIndex)) return;
+
+		rtnl_addr_ptr addr = std::move(ifStates[ifIndex].link_local_ipv6_reenable);
+		if (!addr) return;
+
+		log << "Readding IPv6 link-local address "
+			<< toString(rtnl_addr_get_local(addr.get()))
+			<< " [ndx=" << ifIndex << "]"
+			<< endl;
+
+		int res = rtnl_addr_add(m_nlh_control.get(), addr.get(), 0);
+		if (0 > res) {
+			log << "Readding IPv6 link-local address "
+				<< toString(rtnl_addr_get_local(addr.get()))
+				<< " failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
 		}
 	}
 

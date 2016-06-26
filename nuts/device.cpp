@@ -260,9 +260,6 @@ namespace nuts {
 			emit activeEnvironmentChanged(m_activeEnv);
 		}
 
-		// restart interface to kick IPv6 state
-		m_dm->m_hwman.controlOn(m_interfaceIndex, /* force = */ true);
-
 		setState(DeviceState::ACTIVATED);
 	}
 	bool Device::registerXID(quint32 xid, Interface_IPv4 *iface) {

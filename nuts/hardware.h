@@ -17,6 +17,7 @@
 extern "C" {
 	struct nl_addr;
 	struct nl_cache;
+	struct nl_cb;
 	struct nl_sock;
 	struct rtnl_addr;
 	struct rtnl_link;
@@ -31,6 +32,7 @@ namespace nuts {
 		struct free_nl_data {
 			void operator()(::nl_addr* addr);
 			void operator()(::nl_cache* cache);
+			void operator()(::nl_cb* cb);
 			void operator()(::nl_sock* sock);
 			void operator()(::rtnl_addr *addr);
 			void operator()(::rtnl_link *link);
@@ -48,6 +50,7 @@ namespace nuts {
 	using nl_addr_ptr = std::unique_ptr<::nl_addr, internal::free_nl_data>;
 	template<typename ObjectType>
 	using nl_cache_ptr = std::unique_ptr<::nl_cache, internal::free_nl_cache<ObjectType>>;
+	using nl_cb_ptr = std::unique_ptr<::nl_cb, internal::free_nl_data>;
 	using nl_sock_ptr = std::unique_ptr<::nl_sock, internal::free_nl_data>;
 	using rtnl_addr_ptr = std::unique_ptr<::rtnl_addr, internal::free_nl_data>;
 	using rtnl_link_ptr = std::unique_ptr<::rtnl_link, internal::free_nl_data>;
@@ -84,8 +87,8 @@ namespace nuts {
 			QHostAddress const& gateway,
 			int metric);
 
-		/* NOT READY FOR USE YET */
 		void cleanupIPv6AutoAssigned(int ifIndex);
+		void reenableIPv6(int ifIndex);
 
 	signals:
 		void gotCarrier(QString const& ifName, int ifIndex, QString const& essid);
@@ -125,8 +128,10 @@ namespace nuts {
 			bool carrier{false};
 			bool exists{false};
 			QString name;
+
+			rtnl_addr_ptr link_local_ipv6_reenable;
 		};
-		QVector<struct ifstate> ifStates;
+		std::vector<struct ifstate> ifStates;
 	};
 }
 
