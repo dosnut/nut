@@ -18,6 +18,7 @@ extern "C" {
 	struct nl_addr;
 	struct nl_cache;
 	struct nl_cb;
+	struct nl_msg;
 	struct nl_sock;
 	struct rtnl_addr;
 	struct rtnl_link;
@@ -101,6 +102,9 @@ namespace nuts {
 		void read_netlinkmsgs();
 
 	private:
+		static int wrap_handle_netlinkmsg(::nl_msg *msg, void* arg);
+		int handle_netlinkmsg(::nl_msg *msg);
+
 		bool init_netlink();
 		void free_netlink();
 		bool init_ethtool();

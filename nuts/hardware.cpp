@@ -24,9 +24,6 @@ extern "C" {
 #include <linux/sysctl.h>
 #include <linux/wireless.h>
 #include <unistd.h>
-
-// hardware_ext.c
-extern struct nla_policy ifla_policy[IFLA_MAX+1];
 }
 
 #include <QSocketNotifier>
@@ -34,11 +31,105 @@ extern struct nla_policy ifla_policy[IFLA_MAX+1];
 
 namespace nuts {
 	namespace {
-		QString read_IFLA_IFNAME(struct nlattr* (&tb)[IFLA_MAX+1]) {
-			struct nlattr* nla_ifname = tb[IFLA_IFNAME];
-			if (nullptr == nla_ifname) return QString();
-			return QString::fromUtf8((char*) nla_data(nla_ifname), nla_len(nla_ifname)-1);
+		/* netlink types handling */
+
+		template<typename Object>
+		struct nl_object_traits {
+			static constexpr char const* type = nullptr;
+		};
+
+		template<>
+		struct nl_object_traits<::rtnl_route> {
+			static constexpr char const* type = "route/route";
+		};
+
+		template<>
+		struct nl_object_traits<::rtnl_link> {
+			static constexpr char const* type = "route/link";
+		};
+
+		template<>
+		struct nl_object_traits<::rtnl_addr> {
+			static constexpr char const* type = "route/addr";
+		};
+
+		template<typename Object>
+		Object* nl_safe_object_cast(::nl_object* obj) {
+			static_assert(nl_object_traits<Object>::type, "type not an nl_object or not supported");
+			if (obj && 0 == strcmp(nl_object_traits<Object>::type, nl_object_get_type(obj))) {
+				return reinterpret_cast<Object*>(obj);
+			}
+			return nullptr;
 		}
+
+		template<typename Object>
+		::nl_object* nl_safe_to_object(Object* obj) {
+			static_assert(nl_object_traits<Object>::type, "type not an nl_object or not supported");
+			return reinterpret_cast<::nl_object*>(obj);
+		}
+
+		template<typename Object>
+		std::unique_ptr<Object, internal::free_nl_data> nlCopyObjectPtr(Object* ptr) {
+			static_assert(nl_object_traits<Object>::type, "type not an nl_object or not supported");
+			if (ptr) nl_object_get(reinterpret_cast<nl_object*>(ptr));
+			return std::unique_ptr<Object, internal::free_nl_data>(ptr);
+		}
+
+		template<typename Object>
+		std::unique_ptr<Object, internal::free_nl_data> nlCopyObjectPtr(std::unique_ptr<Object, internal::free_nl_data> const& ptr) {
+			return nlCopyObjectPtr(ptr.get());
+		}
+
+		/* helpers to deal with netlink callbacks */
+
+		template<typename Object>
+		void internal_call_msg_type_cb_function(::nl_object* obj, void *arg) {
+			auto o = nl_safe_object_cast<Object>(obj);
+			if (!o) {
+				log
+					<< "Unexpected object type: '" << nl_object_get_type(obj)
+					<< "', wanted '" << nl_object_traits<Object>::type << "'\n";
+				return;
+			}
+			auto const cb = reinterpret_cast<std::function<void(Object*)> const*>(arg);
+			(*cb)(o);
+		}
+		template<typename Object>
+		int nlMsgParseType(::nl_msg* msg, std::function<void(Object*)> const& func) {
+			return nl_msg_parse(msg, internal_call_msg_type_cb_function<Object>, const_cast<void*>(reinterpret_cast<void const*>(&func)));
+		}
+
+		template<typename Object>
+		int internal_call_nl_cb_msg_parse_function(::nl_msg *msg, void *arg) {
+			auto const cb = reinterpret_cast<std::function<void(Object*)> const*>(arg);
+			return nlMsgParseType(msg, *cb);
+		}
+		template<typename Object>
+		int nlSetMsgParseCallback(::nl_cb* cb, ::nl_cb_type type, std::function<void(Object*)> const& func) {
+			return ::nl_cb_set(cb, type, NL_CB_CUSTOM, internal_call_nl_cb_msg_parse_function<Object>, const_cast<void*>(reinterpret_cast<void const*>(&func)));
+		}
+
+		template<typename ObjectType>
+		void internal_cacheForeach(::nl_object* obj, void *cb_ptr) {
+			std::function<void(ObjectType*)> const& cb = *reinterpret_cast<std::function<void(ObjectType*)> const*>(cb_ptr);
+			cb(reinterpret_cast<ObjectType*>(obj));
+		}
+
+		template<typename ObjectType>
+		void cacheForeach(nl_cache_ptr<ObjectType>const& cache, std::function<void(ObjectType*)> const& cb) {
+			if (!cache) return;
+			void *cb_ptr = const_cast<void*>(reinterpret_cast<void const*>(&cb));
+			nl_cache_foreach(cache.get(), &internal_cacheForeach<ObjectType>, cb_ptr);
+		}
+
+		template<typename ObjectType>
+		void cacheForeachFilter(nl_cache_ptr<ObjectType>const& cache, ObjectType const* filter, std::function<void(ObjectType*)> const& cb) {
+			if (!cache) return;
+			void *cb_ptr = const_cast<void*>(reinterpret_cast<void const*>(&cb));
+			nl_cache_foreach_filter(cache.get(), const_cast<nl_object*>(reinterpret_cast<nl_object const*>(filter)), &internal_cacheForeach<ObjectType>, cb_ptr);
+		}
+
+		/* various */
 
 		int getPrefixLenIPv4(const QHostAddress &netmask) {
 			quint32 val = netmask.toIPv4Address();
@@ -148,30 +239,6 @@ namespace nuts {
 		}
 #endif
 
-		int internal_call_nl_cb_function(::nl_msg *msg, void *arg) {
-			auto const cb = reinterpret_cast<std::function<int(::nl_msg*)> const*>(arg);
-			return (*cb)(msg);
-		}
-		int nlSetCallback(::nl_cb* cb, ::nl_cb_type type, std::function<int(::nl_msg*)> const& func) {
-			return ::nl_cb_set(cb, type, NL_CB_CUSTOM, internal_call_nl_cb_function, const_cast<void*>(reinterpret_cast<void const*>(&func)));
-		}
-
-		void internal_call_msg_cb_function(::nl_object* obj, void *arg) {
-			auto const cb = reinterpret_cast<std::function<void(::nl_object*)> const*>(arg);
-			(*cb)(obj);
-		}
-		int nlMsgParse(::nl_msg* msg, std::function<void(::nl_object*)> const& func) {
-			return nl_msg_parse(msg, internal_call_msg_cb_function, const_cast<void*>(reinterpret_cast<void const*>(&func)));
-		}
-
-		int internal_call_nl_cb_msg_parse_function(::nl_msg *msg, void *arg) {
-			auto const cb = reinterpret_cast<std::function<void(::nl_object*)> const*>(arg);
-			return nlMsgParse(msg, *cb);
-		}
-		int nlSetMsgParseCallback(::nl_cb* cb, ::nl_cb_type type, std::function<void(::nl_object*)> const& func) {
-			return ::nl_cb_set(cb, type, NL_CB_CUSTOM, internal_call_nl_cb_msg_parse_function, const_cast<void*>(reinterpret_cast<void const*>(&func)));
-		}
-
 		int appendRoutes(::nl_sock* sock, int family, std::list<rtnl_route_ptr>& list) {
 			struct rtmsg rhdr;
 			memset(&rhdr, 0, sizeof(rhdr));
@@ -183,36 +250,11 @@ namespace nuts {
 			} while (-NLE_DUMP_INTR == err);
 
 			nl_cb_ptr local_cb{nl_cb_clone(nl_socket_get_cb(sock))};
-			nlSetMsgParseCallback(local_cb.get(), NL_CB_VALID, [&list](::nl_object *obj) {
-				if (0 == strcmp("route/route", nl_object_get_type(obj))) {
-					nl_object_get(obj);
-					list.push_back(rtnl_route_ptr{reinterpret_cast<rtnl_route*>(obj)});
-				} else {
-					log << "Unepxected object type: '" << nl_object_get_type(obj) << "', wanted 'route/route'\n";
-				}
+			nlSetMsgParseCallback<::rtnl_route>(local_cb.get(), NL_CB_VALID, [&list](::rtnl_route *route) {
+				list.push_back(nlCopyObjectPtr(route));
 			});
 
 			return nl_recvmsgs(sock, local_cb.get());
-		}
-
-		template<typename ObjectType>
-		void internal_cacheForeach(::nl_object* obj, void *cb_ptr) {
-			std::function<void(ObjectType*)> const& cb = *reinterpret_cast<std::function<void(ObjectType*)> const*>(cb_ptr);
-			cb(reinterpret_cast<ObjectType*>(obj));
-		}
-
-		template<typename ObjectType>
-		void cacheForeach(nl_cache_ptr<ObjectType>const& cache, std::function<void(ObjectType*)> const& cb) {
-			if (!cache) return;
-			void *cb_ptr = const_cast<void*>(reinterpret_cast<void const*>(&cb));
-			nl_cache_foreach(cache.get(), &internal_cacheForeach<ObjectType>, cb_ptr);
-		}
-
-		template<typename ObjectType>
-		void cacheForeachFilter(nl_cache_ptr<ObjectType>const& cache, ObjectType const* filter, std::function<void(ObjectType*)> const& cb) {
-			if (!cache) return;
-			void *cb_ptr = const_cast<void*>(reinterpret_cast<void const*>(&cb));
-			nl_cache_foreach_filter(cache.get(), const_cast<nl_object*>(reinterpret_cast<nl_object const*>(filter)), &internal_cacheForeach<ObjectType>, cb_ptr);
 		}
 
 		QString toString(nl_addr* addr) {
@@ -327,13 +369,16 @@ namespace nuts {
 		m_nlh_control.reset(nl_socket_alloc());
 		m_nlh_watcher.reset(nl_socket_alloc());
 		if (!m_nlh_watcher || !m_nlh_control) goto cleanup;
-		nl_socket_set_peer_port(m_nlh_watcher.get(), 0);
+		::nl_socket_disable_seq_check(m_nlh_watcher.get());
+		::nl_socket_modify_cb(
+			m_nlh_watcher.get(), NL_CB_VALID, NL_CB_CUSTOM,
+			&HardwareManager::wrap_handle_netlinkmsg,
+			reinterpret_cast<void*>(this));
 
 		if (nl_connect(m_nlh_control.get(), NETLINK_ROUTE) != 0) goto cleanup;
 
 		if (nl_connect(m_nlh_watcher.get(), NETLINK_ROUTE) != 0) goto cleanup;
 		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_LINK) != 0) goto cleanup;
-		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_IPV4_IFADDR) != 0) goto cleanup;
 
 		{
 			int netlink_fd = nl_socket_get_fd(m_nlh_control.get());
@@ -342,6 +387,7 @@ namespace nuts {
 		{
 			int netlink_fd = nl_socket_get_fd(m_nlh_watcher.get());
 			fcntl(netlink_fd, F_SETFD, FD_CLOEXEC);
+			// QSocketNotifier constructor makes netlink_fd non-blocking
 			m_nlh_watcher_notifier.reset(new QSocketNotifier(netlink_fd, QSocketNotifier::Read));
 			connect(m_nlh_watcher_notifier.get(), &QSocketNotifier::activated, this, &HardwareManager::read_netlinkmsgs);
 		}
@@ -412,99 +458,95 @@ cleanup:
 	}
 
 	void HardwareManager::read_netlinkmsgs() {
-		struct sockaddr_nl peer;
-		unsigned char* msg{nullptr};
-		int n, msgsize;
-		struct nlmsghdr* hdr;
+		int res = nl_recvmsgs_default(m_nlh_watcher.get());
+		if (0 > res) {
+			log << "nl_recvmsgs failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		}
+		return;
+	}
 
-		msgsize = n = nl_recv(m_nlh_watcher.get(), &peer, &msg, 0);
-		for (hdr = (struct nlmsghdr*) msg; nlmsg_ok(hdr, n); hdr = (struct nlmsghdr*) nlmsg_next(hdr, &n)) {
-//			log << QString("Message type 0x%1").arg(hdr->nlmsg_type, 0, 16) << endl;
-			switch (hdr->nlmsg_type) {
-			case RTM_NEWLINK:
-				/* new or modified link */
-				{
-					struct ifinfomsg* ifm = (struct ifinfomsg*) nlmsg_data(hdr);
-					struct nlattr* tb[IFLA_MAX+1];
-					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
-						break;
-					}
-					int const ifIndex = ifm->ifi_index;
-					if (ifIndex <= 0) {
-						err << QString("invalid interface index %1").arg(ifIndex) << endl;
-						break;
-					}
-					if ((size_t) ifIndex >= ifStates.size()) ifStates.resize(ifIndex+1);
-					QString ifName = read_IFLA_IFNAME(tb);
-					if (ifName.isEmpty()) {
-						if (ifStates[ifIndex].exists) {
-							ifName = ifStates[ifIndex].name;
-						}
-					}
-					if (ifName.isEmpty()) {
-						err << QString("couldn't find name for (new) interface %1").arg(ifIndex) << endl;
-						break;
-					}
-					if (!ifStates[ifIndex].exists) {
-						ifStates[ifIndex].exists = true;
-						ifStates[ifIndex].name = ifName;
-						log << QString("new interface detected: %1 [index %2]").arg(ifName).arg(ifIndex) << endl;
-						emit newDevice(ifName, ifIndex);
-					} else if (ifStates[ifIndex].name != ifName) {
-						QString oldName = ifStates[ifIndex].name;
-						ifStates[ifIndex].name = ifName;
-						log << QString("interface rename detected: %1 -> %2 [index %3]").arg(oldName).arg(ifName).arg(ifIndex) << endl;
-						emit delDevice(oldName);
-						emit newDevice(ifName, ifIndex);
-					}
-					bool carrier = (ifm->ifi_flags & IFF_LOWER_UP) > 0;
-					if (carrier != ifStates[ifIndex].carrier) {
-						ifStates[ifIndex].carrier = carrier;
-						if (!isControlled(ifIndex))
-							break;
-						if (carrier) {
-							reenableIPv6(ifIndex);
-							QString essid;
-							getEssid(ifName, essid);
-							emit gotCarrier(ifName, ifIndex, essid);
-						} else {
-							emit lostCarrier(ifName);
-							cleanupIPv6AutoAssigned(ifIndex);
-						}
+	int HardwareManager::wrap_handle_netlinkmsg(::nl_msg *msg, void* arg) {
+		return reinterpret_cast<HardwareManager*>(arg)->handle_netlinkmsg(msg);
+	}
+
+	int HardwareManager::handle_netlinkmsg(::nl_msg *msg) {
+		switch (nlmsg_hdr(msg)->nlmsg_type) {
+		case RTM_NEWLINK:
+			nlMsgParseType<::rtnl_link>(msg, [this](::rtnl_link* link) {
+				int const ifIndex = rtnl_link_get_ifindex(link);
+				if (ifIndex <= 0) {
+					err << QString("invalid interface index %1").arg(ifIndex) << endl;
+					return;
+				}
+				if ((size_t) ifIndex >= ifStates.size()) ifStates.resize(ifIndex+1);
+				QString ifName = QString::fromUtf8(rtnl_link_get_name(link));
+				if (ifName.isEmpty()) {
+					if (ifStates[ifIndex].exists) {
+						ifName = ifStates[ifIndex].name;
 					}
 				}
-				break;
-			case RTM_DELLINK:
-				{
-					struct ifinfomsg* ifm = (struct ifinfomsg*) nlmsg_data(hdr);
-					struct nlattr* tb[IFLA_MAX+1];
-					if (nlmsg_parse(hdr, sizeof(*ifm), tb, IFLA_MAX, ifla_policy) < 0) {
-						break;
+				if (ifName.isEmpty()) {
+					err << QString("couldn't find name for (new) interface %1").arg(ifIndex) << endl;
+					return;
+				}
+				if (!ifStates[ifIndex].exists) {
+					ifStates[ifIndex].exists = true;
+					ifStates[ifIndex].name = ifName;
+					log << QString("new interface detected: %1 [index %2]").arg(ifName).arg(ifIndex) << endl;
+					emit newDevice(ifName, ifIndex);
+				} else if (ifStates[ifIndex].name != ifName) {
+					QString oldName = ifStates[ifIndex].name;
+					ifStates[ifIndex].name = ifName;
+					log << QString("interface rename detected: %1 -> %2 [index %3]").arg(oldName).arg(ifName).arg(ifIndex) << endl;
+					emit delDevice(oldName);
+					emit newDevice(ifName, ifIndex);
+				}
+				bool carrier = (rtnl_link_get_flags(link) & IFF_LOWER_UP) > 0;
+				if (carrier != ifStates[ifIndex].carrier) {
+					ifStates[ifIndex].carrier = carrier;
+					if (!isControlled(ifIndex))
+						return;
+					if (carrier) {
+						reenableIPv6(ifIndex);
+						QString essid;
+						getEssid(ifName, essid);
+						emit gotCarrier(ifName, ifIndex, essid);
+					} else {
+						emit lostCarrier(ifName);
+						cleanupIPv6AutoAssigned(ifIndex);
 					}
-					int const ifIndex = ifm->ifi_index;
-					if (ifIndex <= 0) {
-						err << QString("invalid interface index %1").arg(ifIndex) << endl;
-						break;
+				}
+
+			});
+			break;
+		case RTM_DELLINK:
+			nlMsgParseType<::rtnl_link>(msg, [this](::rtnl_link* link) {
+				int const ifIndex = rtnl_link_get_ifindex(link);
+				if (ifIndex <= 0) {
+					err << QString("invalid interface index %1").arg(ifIndex) << endl;
+					return;
+				}
+				QString const ifName = QString::fromUtf8(rtnl_link_get_name(link));
+				if (ifName.isNull()) return;
+				log << QString("lost interface: %1 [index %2]").arg(ifName).arg(ifIndex) << endl;
+				if ((size_t) ifIndex < ifStates.size()) {
+					if (ifStates[ifIndex].exists) {
+						if (ifStates[ifIndex].carrier)
+							emit lostCarrier(ifName);
+						ifStates[ifIndex].exists = false;
+						ifStates[ifIndex].carrier = false;
+						ifStates[ifIndex].active = false;
+						ifStates[ifIndex].name.clear();
 					}
-					QString ifname = read_IFLA_IFNAME(tb);
-					if (ifname.isNull()) break;
-					log << QString("lost interface: %1 [index %2]").arg(ifname).arg(ifIndex) << endl;
-					if ((size_t) ifIndex < ifStates.size()) {
-						if (ifStates[ifIndex].exists) {
-							if (ifStates[ifIndex].carrier)
-								emit lostCarrier(ifname);
-							ifStates[ifIndex].exists = false;
-							ifStates[ifIndex].carrier = false;
-							ifStates[ifIndex].active = false;
-							ifStates[ifIndex].name.clear();
-						}
-					}
-					emit delDevice(ifname);
-				} break;
-			}
+				}
+				emit delDevice(ifName);
+			});
+			break;
 		}
-		if (msgsize > 0) free(msg);
+
+		return 0;
 	}
+
 	bool HardwareManager::isControlled(int ifIndex) {
 		if (ifIndex < 0 || (size_t)ifIndex >= ifStates.size()) return false;
 		return ifStates[ifIndex].active;
@@ -636,7 +678,7 @@ cleanup:
 #if 0
 				{
 					char buf[512];
-					nl_object_dump_buf(reinterpret_cast<::nl_object*>(addr), buf, sizeof(buf));
+					nl_object_dump_buf(nl_safe_to_object(addr), buf, sizeof(buf));
 					log << "Found address: " << buf;
 				}
 #endif
@@ -648,8 +690,7 @@ cleanup:
 				switch (rtnl_addr_get_scope(addr)) {
 				case RT_SCOPE_LINK:
 					/* remember link-local address to restart router solicitation */
-					nl_object_get(reinterpret_cast<nl_object*>(addr));
-					ifStates[ifIndex].link_local_ipv6_reenable.reset(addr);
+					ifStates[ifIndex].link_local_ipv6_reenable = nlCopyObjectPtr(addr);
 					break;
 				case RT_SCOPE_UNIVERSE:
 					/* IFA_F_TEMPORARY (from privacy extension) should get removed automatically after its IFA_F_MANAGETEMPADDR is deleted */
@@ -697,7 +738,7 @@ cleanup:
 #if 0
 				{
 					char buf[512];
-					nl_object_dump_buf(reinterpret_cast<::nl_object*>(route.get()), buf, sizeof(buf));
+					nl_object_dump_buf(nl_safe_to_object(route.get()), buf, sizeof(buf));
 					log << "Found IPv6 route: " << buf;
 				}
 #endif
