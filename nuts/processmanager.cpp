@@ -108,6 +108,7 @@ namespace nuts {
 	void ProcessManager::startProgram(const QProcessEnvironment& env, const QString& program, const QStringList& args)
 	{
 		QProcess* process = new QProcess();
+		process->setProcessChannelMode(QProcess::ForwardedChannels);
 		process->setProcessEnvironment(env);
 		process->start(program, args);
 		new Process(this, process);
