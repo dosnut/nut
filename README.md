@@ -89,21 +89,25 @@ device "wlp3s0" {
 }
 ```
 
-### `metric`
+### `metric` (aka priority)
 
 The `metric` option specifies which device should be preferred when
 there are multiple routes for the same target address. For example
 you might want to prefer your wired device over the wireless device if
 both have a default gateway.
 
-The default metric is `-1`, i.e. no metric is set on the routes; these
-routes are always preferred over any other metric. Otherwise routes with
-a lower metric are preferred.
+The environment metric (by default the device metric) is used to set the
+metric on all (IPv4 + IPv6) routes (unless the metric is `-1`, the
+default device metric). IPv4 routes use metric 0 by kernel default, IPv6
+have (different) non-zero metrics by default.
 
-The `metric` statement can only occur in device context, but it might
-also occur as option after `static`, `dhcp` and `zeroconf` (see those
-statements for the syntax), overwriting the environment metric for a
-specific address configuration.
+If multiple routes with the same destination exist, the route with the
+lowest metric is preferred.
+
+The `metric` statement can only occur in device or environment context,
+but it might also occur as option after `static`, `dhcp` and `zeroconf`
+(see those statements for the syntax), overwriting the environment
+metric for the *default route* of a specific address configuration.
 
 Syntax:
 * `metric <metric>;`

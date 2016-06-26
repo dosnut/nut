@@ -196,7 +196,7 @@ namespace nuts {
 			rtnl_route_set_scope(route.get(), RT_SCOPE_UNIVERSE);
 
 			if (-1 != metric) {
-				rtnl_route_set_priority(route.get(), metric);
+				rtnl_route_set_priority(route.get(), static_cast<uint32_t>(metric));
 			}
 			// route owns added nexthops, nexthop doesn't have ref count
 			rtnl_route_add_nexthop(route.get(), nh.release());
@@ -379,6 +379,8 @@ namespace nuts {
 
 		if (nl_connect(m_nlh_watcher.get(), NETLINK_ROUTE) != 0) goto cleanup;
 		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_LINK) != 0) goto cleanup;
+		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_IPV4_ROUTE) != 0) goto cleanup;
+		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_IPV6_ROUTE) != 0) goto cleanup;
 
 		{
 			int netlink_fd = nl_socket_get_fd(m_nlh_control.get());
@@ -542,9 +544,79 @@ cleanup:
 				emit delDevice(ifName);
 			});
 			break;
+		case RTM_NEWROUTE:
+			bool const replacedRoute = 0 != (NLM_F_REPLACE & nlmsg_hdr(msg)->nlmsg_flags);
+			nlMsgParseType<::rtnl_route>(msg, [this,replacedRoute](::rtnl_route* route) {
+#if 0
+				{
+					char buf[512];
+					nl_object_dump_buf(nl_safe_to_object(route), buf, sizeof(buf));
+					log << (replacedRoute ? "Replaced " : "New ") << "route with metric " << rtnl_route_get_priority(route) << ": " << buf;
+				}
+#endif
+				checkRouteMetric(route);
+			});
+			break;
 		}
 
 		return 0;
+	}
+
+	void HardwareManager::checkRouteMetric(::rtnl_route* route) {
+		switch (rtnl_route_get_family(route)) {
+		case AF_INET6:
+			{
+				/* don't touch IPv6 link-local fe80::/64 */
+				static const uint8_t link_local_prefix[8] =
+					{ 0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
+				nl_addr* dst = rtnl_route_get_dst(route);
+				if (64 == nl_addr_get_prefixlen(dst) && 0 == memcmp(link_local_prefix, nl_addr_get_binary_addr(dst), 8)) return;
+			}
+			break;
+		case AF_INET:
+			/* don't touch default routes: the metric for those is
+			 * set explicitly
+			 */
+			{
+				nl_addr* dst = rtnl_route_get_dst(route);
+				if (0 == nl_addr_get_prefixlen(dst)) return;
+			}
+			break;
+		default:
+			return;
+		}
+
+		if (RT_TABLE_MAIN != rtnl_route_get_table(route)) return;
+		if (RTN_UNICAST != rtnl_route_get_type(route)) return;
+
+		if (1 != rtnl_route_get_nnexthops(route)) return;
+		::rtnl_nexthop* nh = rtnl_route_nexthop_n(route, 0);
+		int const ifIndex = rtnl_route_nh_get_ifindex(nh);
+
+		if (!isControlled(ifIndex)) return;
+
+		int const metric = ifStates[ifIndex].metric;
+		if (-1 == metric || static_cast<uint32_t>(metric) == rtnl_route_get_priority(route)) return;
+
+		char route_str[512];
+		nl_object_dump_buf(nl_safe_to_object(route), route_str, sizeof(route_str));
+
+		log << "Replacing route with updated metric " << metric << ": " << route_str;
+		log.flush();
+
+		int err;
+		err = rtnl_route_delete(m_nlh_control.get(), route, NLM_F_REPLACE);
+		if (0 > err && -ENOENT != err) {
+			log << "Removing route failed: " << nl_geterror(err) << " (" <<  err << ")" << endl;
+			return;
+		}
+
+		rtnl_route_set_priority(route, metric);
+
+		err = rtnl_route_add(m_nlh_control.get(), route, NLM_F_REPLACE);
+		if (0 > err && -ENOENT != err) {
+			log << "Adding route with updated metric failed: " << nl_geterror(err) << " (" <<  err << ")" << endl;
+		}
 	}
 
 	bool HardwareManager::isControlled(int ifIndex) {
@@ -632,6 +704,27 @@ cleanup:
 		res = rtnl_addr_delete(m_nlh_control.get(), makeRTNLAddrIPv4(ifIndex, ip, netmask).get(), 0);
 		if (0 > res) {
 			log << "Removing address failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		}
+	}
+
+	void HardwareManager::setMetric(int ifIndex, int metric) {
+		if (!isControlled(ifIndex)) return;
+		if (metric == ifStates[ifIndex].metric) return;
+		ifStates[ifIndex].metric = metric;
+
+		/* update "all" routes */
+		std::list<rtnl_route_ptr> routes;
+		int res;
+		res = appendRoutes(m_nlh_control.get(), AF_INET, routes);
+		if (0 > res) {
+			log << "appendRoutes failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		}
+		res = appendRoutes(m_nlh_control.get(), AF_INET6, routes);
+		if (0 > res) {
+			log << "appendRoutes failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		}
+		for (auto const& route: routes) {
+			checkRouteMetric(route.get());
 		}
 	}
 
@@ -796,5 +889,6 @@ cleanup:
 
 	void HardwareManager::ifstate::off() {
 		active = false;
+		metric = -1;
 	}
 }

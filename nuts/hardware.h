@@ -88,8 +88,7 @@ namespace nuts {
 			QHostAddress const& gateway,
 			int metric);
 
-		void cleanupIPv6AutoAssigned(int ifIndex);
-		void reenableIPv6(int ifIndex);
+		void setMetric(int ifIndex, int metric);
 
 	signals:
 		void gotCarrier(QString const& ifName, int ifIndex, QString const& essid);
@@ -104,6 +103,10 @@ namespace nuts {
 	private:
 		static int wrap_handle_netlinkmsg(::nl_msg *msg, void* arg);
 		int handle_netlinkmsg(::nl_msg *msg);
+		void checkRouteMetric(::rtnl_route* route);
+
+		void cleanupIPv6AutoAssigned(int ifIndex);
+		void reenableIPv6(int ifIndex);
 
 		bool init_netlink();
 		void free_netlink();
@@ -131,6 +134,7 @@ namespace nuts {
 			bool active{false};
 			bool carrier{false};
 			bool exists{false};
+			int metric{-1};
 			QString name;
 
 			rtnl_addr_ptr link_local_ipv6_reenable;

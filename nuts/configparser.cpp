@@ -536,6 +536,15 @@ namespace {
 			case NODHCP:
 				env.no_def_dhcp = true;
 				return true;
+			case METRIC:
+				pop();
+				if (!eat(INTEGER)) return false;
+				if (-1 != env.real->metric) {
+					error("metric already set for environment");
+					return false;
+				}
+				env.real->metric = tv.i;
+				return true;
 			default:
 				error_expected("environment option");
 				return false;
@@ -598,6 +607,7 @@ namespace {
 				case STATIC:
 				case SELECT:
 				case NODHCP:
+				case METRIC:
 				case '{':
 					return parseEnvironmentBlock(dev, defEnv);
 				default:
@@ -613,11 +623,11 @@ namespace {
 			case METRIC:
 				pop();
 				if (!eat(INTEGER)) return false;
-				if (-1 != dev.gatewayMetric) {
+				if (-1 != dev.metric) {
 					error("metric already set for device");
 					return false;
 				}
-				dev.gatewayMetric = tv.i;
+				dev.metric = tv.i;
 				return true;
 			case DHCP:
 			case ZEROCONF:

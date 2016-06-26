@@ -528,6 +528,7 @@ namespace nuts {
 
 	void Environment::start() {
 		if (m_properties.active) return;
+		m_device->m_dm->m_hwman.setMetric(m_device->m_interfaceIndex, getActualMetric());
 		m_properties.active = true;
 		m_envIsUp = false;
 		m_needUserSetup = false;
@@ -684,7 +685,7 @@ namespace nuts {
 	: Interface(env, index), m_dm(env->m_device->m_dm), m_config(config) {
 		m_properties.state = InterfaceState::OFF;
 		m_properties.needUserSetup = m_config->flags & IPv4ConfigFlag::USERSTATIC;
-		m_properties.gatewayMetric = (-1 != m_config->gatewayMetric) ? m_config->gatewayMetric : m_env->getDevice()->getConfig().gatewayMetric;
+		m_properties.gatewayMetric = getActualMetric();
 		m_last_notified_properties = m_properties;
 	}
 
