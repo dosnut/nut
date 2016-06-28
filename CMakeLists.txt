@@ -57,7 +57,10 @@ function(build_subdir)
 	endforeach()
 endfunction()
 
-build_subdir(libnutcommon)
+build_subdir(
+	libnutcommon
+	libnutnetlink
+)
 
 if(USE_WIRELESS)
 	build_subdir(libnutwireless)
