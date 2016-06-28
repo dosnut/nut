@@ -1,2 +1,3 @@
 0001-cmake-mark-parser-files-as-header-files.patch
 0002-cmake-add-cmake-3.0-compat-back.patch
+0003_fix_segfault.patch

@@ -1,0 +1,16 @@
+[nuts] fix use (std::function<>) after free
+--- a/nuts/hardware.cpp
++++ b/nuts/hardware.cpp
+@@ -250,9 +250,10 @@
+ 			} while (-NLE_DUMP_INTR == err);
+ 
+ 			nl_cb_ptr local_cb{nl_cb_clone(nl_socket_get_cb(sock))};
+-			nlSetMsgParseCallback<::rtnl_route>(local_cb.get(), NL_CB_VALID, [&list](::rtnl_route *route) {
++			std::function<void(::rtnl_route*)> append_cb = [&list](::rtnl_route *route) {
+ 				list.push_back(nlCopyObjectPtr(route));
+-			});
++			};
++			nlSetMsgParseCallback<::rtnl_route>(local_cb.get(), NL_CB_VALID, append_cb);
+ 
+ 			return nl_recvmsgs(sock, local_cb.get());
+ 		}

@@ -1,3 +1,9 @@
+network-utilities (0.6.5-2) released; urgency=medium
+
+  * [nuts] fix use (std::function<>) after free
+
+ -- Stefan Bühler <stbuehler@web.de>  Tue, 28 Jun 2016 22:07:51 +0200
+
 network-utilities (0.6.5-1) unstable; urgency=medium
 
   * [nuts] fix IPv6 auto configuration handling without restarting interface
