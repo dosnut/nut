@@ -5,8 +5,8 @@ namespace libnutwireless {
 CWireless::CWireless(QObject * parent, QString ifname) :
 	QObject(parent), m_ifname(ifname), m_wpa_supplicant(0), m_wireless_hw(0) {
 	m_wpa_supplicant = new CWpaSupplicant(this, ifname);
-	m_wireless_hw = new CWextHW(this,ifname);
-// 	m_wireless_hw = new libnutwireless::CNL80211(this, m_ifname);
+//	m_wireless_hw = new CWextHW(this,ifname);
+	m_wireless_hw = new libnutwireless::CNL80211(this, m_ifname);
 	connect(m_wpa_supplicant, &CWpaSupplicant::message, this, &CWireless::message);
 	connect(m_wireless_hw, &CWirelessHW::message, this, &CWireless::message);
 }
@@ -29,8 +29,8 @@ void CWireless::open() {
 	m_wpa_supplicant->open();
 	if (!m_wireless_hw) {
 		//TODO:Add code to switch between wext and new wlan stack as soon as new wlan stack is implemented
-		m_wireless_hw = new libnutwireless::CWextHW(this, m_ifname);
-// 		m_wireless_hw = new libnutwireless::CNL80211(this, m_ifname);
+//		m_wireless_hw = new libnutwireless::CWextHW(this, m_ifname);
+		m_wireless_hw = new libnutwireless::CNL80211(this, m_ifname);
 	}
 	m_wireless_hw->open();
 }
