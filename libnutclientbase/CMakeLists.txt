@@ -13,4 +13,4 @@ object_link_libraries(nutclientbase PUBLIC
 
 file(GLOB NUTCLIENT_BASE_H ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 
-install(FILES ${NUTCLIENT_H} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libnutclientbase)
+install(FILES ${NUTCLIENT_BASE_H} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libnutclientbase)
