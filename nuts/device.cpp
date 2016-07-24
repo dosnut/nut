@@ -46,13 +46,6 @@ namespace nuts {
 		m_hwman.discover();
 	}
 
-	void DeviceManager::addDevice(const QString &ifName, int ifIndex, std::shared_ptr<DeviceConfig> dc) {
-		Device *d = new Device(this, ifName, ifIndex, dc, m_hwman.hasWLAN(ifName));
-		m_devices.insert(ifName, d);
-		emit deviceAdded(ifName, d);
-		if (!dc->noAutoStart) d->enable(true);
-	}
-
 	DeviceManager::~DeviceManager() {
 		// shutdown() should be used to cleanup before
 
@@ -138,7 +131,7 @@ namespace nuts {
 		}
 	}
 
-	void DeviceManager::lostCarrier(const QString &ifName) {
+	void DeviceManager::lostCarrier(QString const& ifName) {
 		if (!removeCarrierUpEvent(ifName)) {
 			Device *dev = m_devices.value(ifName, 0);
 			if (!dev) return;
@@ -146,17 +139,20 @@ namespace nuts {
 		}
 	}
 
-	void DeviceManager::newDevice(const QString &ifName, int ifIndex) {
+	void DeviceManager::newDevice(QString const& ifName, int ifIndex, libnutcommon::MacAddress const& addr) {
 		Device *d = m_devices.value(ifName, 0);
 		if (d) return;
 
 		auto devConfig = m_config.lookup(ifName);
 		if (devConfig) {
-			addDevice(ifName, ifIndex, devConfig);
+			Device *d = new Device(this, ifName, ifIndex, addr, devConfig, m_hwman.hasWLAN(ifName));
+			m_devices.insert(ifName, d);
+			emit deviceAdded(ifName, d);
+			if (!devConfig->noAutoStart) d->enable(true);
 		}
 	}
 
-	void DeviceManager::delDevice(const QString &ifName) {
+	void DeviceManager::delDevice(QString const& ifName) {
 		removeCarrierUpEvent(ifName);
 
 		Device *d = m_devices.value(ifName, 0);
@@ -168,10 +164,17 @@ namespace nuts {
 		m_devices.remove(ifName);
 	}
 
+	void DeviceManager::changedMacAddress(QString const& ifName, libnutcommon::MacAddress const& addr) {
+		Device *dev = m_devices.value(ifName, 0);
+		if (!dev) return;
+		dev->changedMacAddress(addr);
+	}
+
 	//Initialize with default values, add environments, connect to dm-events
-	Device::Device(DeviceManager* dm, const QString &name, int ifIndex, std::shared_ptr<DeviceConfig> config, bool hasWLAN)
+	Device::Device(DeviceManager* dm, QString const& name, int ifIndex, libnutcommon::MacAddress const& addr, std::shared_ptr<DeviceConfig> config, bool hasWLAN)
 	: QObject(dm), m_arp(this), m_dm(dm), m_interfaceIndex(ifIndex), m_config(config) {
 		m_properties.name = name;
+		m_properties.macAddress = addr;
 		m_properties.type = hasWLAN ? DeviceType::AIR : DeviceType::ETH;
 		m_properties.state = DeviceState::DEACTIVATED;
 
@@ -243,7 +246,6 @@ namespace nuts {
 		m_properties.essid = essid;
 		auto hasWLAN = (QFile::exists(QString("/sys/class/net/%1/wireless").arg(m_properties.name))) || !essid.isEmpty();
 		m_properties.type = hasWLAN ? DeviceType::AIR : DeviceType::ETH;
-		m_properties.macAddress = m_dm->m_hwman.getMacAddress(m_properties.name);
 		if (m_properties.macAddress.zero()) log << "Device(" << m_properties.name << "): couldn't get MacAddress" << endl;
 		log << "Device(" << m_properties.name << ") gotCarrier" << endl;
 		if (hasWLAN) log << "ESSID: " << essid << endl;
@@ -261,6 +263,9 @@ namespace nuts {
 		}
 
 		setState(DeviceState::ACTIVATED);
+	}
+	void Device::changedMacAddress(libnutcommon::MacAddress const& addr) {
+		m_properties.macAddress = addr;
 	}
 	bool Device::registerXID(quint32 xid, Interface_IPv4 *iface) {
 		if (!xid) return false;

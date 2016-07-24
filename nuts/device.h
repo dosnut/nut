@@ -88,13 +88,13 @@ namespace nuts {
 	private slots:
 		void gotCarrier(QString const& ifName, int ifIndex, QString const& essid);
 		void lostCarrier(QString const& ifName);
-		void newDevice(QString const& ifName, int ifIndex);
+		void newDevice(QString const& ifName, int ifIndex, libnutcommon::MacAddress const& addr);
 		void delDevice(QString const& ifname);
+		void changedMacAddress(QString const& ifName, libnutcommon::MacAddress const& addr);
 
 	private:
 		void carrierUpTimer();
 		bool removeCarrierUpEvent(QString const& ifName);
-		void addDevice(QString const& ifname, int ifIndex, std::shared_ptr<libnutcommon::DeviceConfig> dc);
 
 	private: /* variables */
 		Events m_events;
@@ -133,7 +133,7 @@ namespace nuts {
 	class Device : public QObject {
 		Q_OBJECT
 	private:
-		explicit Device(DeviceManager* dm, const QString &name, int ifIndex, std::shared_ptr<libnutcommon::DeviceConfig> config, bool hasWLAN);
+		explicit Device(DeviceManager* dm, const QString &name, int ifIndex, libnutcommon::MacAddress const& addr, std::shared_ptr<libnutcommon::DeviceConfig> config, bool hasWLAN);
 		~Device();
 
 	public slots:
@@ -194,6 +194,7 @@ namespace nuts {
 
 		void gotCarrier(int ifIndex, QString const& essid);
 		void lostCarrier();
+		void changedMacAddress(libnutcommon::MacAddress const& addr);
 
 		// DHCP
 		bool registerXID(quint32 xid, Interface_IPv4 *iface);

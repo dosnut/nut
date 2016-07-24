@@ -14,50 +14,14 @@
 
 #include <libnutcommon/macaddress.h>
 
-extern "C" {
-	struct nl_addr;
-	struct nl_cache;
-	struct nl_cb;
-	struct nl_msg;
-	struct nl_sock;
-	struct rtnl_addr;
-	struct rtnl_link;
-	struct rtnl_nexthop;
-	struct rtnl_route;
+#include <libnutnetlink/netlink_sock.h>
+#include <libnutnetlink/netlink_rtnl_addr.h>
 
+extern "C" {
 	struct ifreq;
 }
 
 namespace nuts {
-	namespace internal {
-		struct free_nl_data {
-			void operator()(::nl_addr* addr);
-			void operator()(::nl_cache* cache);
-			void operator()(::nl_cb* cb);
-			void operator()(::nl_sock* sock);
-			void operator()(::rtnl_addr *addr);
-			void operator()(::rtnl_link *link);
-			void operator()(::rtnl_route *route);
-			void operator()(::rtnl_nexthop *nh);
-		};
-
-		template<typename ObjectType>
-		struct free_nl_cache {
-			void operator()(::nl_cache* cache) {
-				free_nl_data{}(cache);
-			}
-		};
-	}
-	using nl_addr_ptr = std::unique_ptr<::nl_addr, internal::free_nl_data>;
-	template<typename ObjectType>
-	using nl_cache_ptr = std::unique_ptr<::nl_cache, internal::free_nl_cache<ObjectType>>;
-	using nl_cb_ptr = std::unique_ptr<::nl_cb, internal::free_nl_data>;
-	using nl_sock_ptr = std::unique_ptr<::nl_sock, internal::free_nl_data>;
-	using rtnl_addr_ptr = std::unique_ptr<::rtnl_addr, internal::free_nl_data>;
-	using rtnl_link_ptr = std::unique_ptr<::rtnl_link, internal::free_nl_data>;
-	using rtnl_route_ptr = std::unique_ptr<::rtnl_route, internal::free_nl_data>;
-	using rtnl_nexthop_ptr = std::unique_ptr<::rtnl_nexthop, internal::free_nl_data>;
-
 	class HardwareManager final : public QObject {
 		Q_OBJECT
 	public:
@@ -69,8 +33,6 @@ namespace nuts {
 
 		/* initial scan for interfaces */
 		void discover();
-
-		libnutcommon::MacAddress getMacAddress(QString const& ifName);
 
 		bool hasWLAN(QString const& ifName);
 		bool getEssid(QString const& ifName, QString& essid);
@@ -94,8 +56,10 @@ namespace nuts {
 		void gotCarrier(QString const& ifName, int ifIndex, QString const& essid);
 		void lostCarrier(QString const& ifName);
 
-		void newDevice(QString const& ifName, int ifIndex);
+		void newDevice(QString const& ifName, int ifIndex, libnutcommon::MacAddress const& addr);
 		void delDevice(QString const& ifName);
+
+		void changedMacAddress(QString const& ifName, libnutcommon::MacAddress const& addr);
 
 	private slots:
 		void read_netlinkmsgs();
@@ -103,7 +67,7 @@ namespace nuts {
 	private:
 		static int wrap_handle_netlinkmsg(::nl_msg *msg, void* arg);
 		int handle_netlinkmsg(::nl_msg *msg);
-		void checkRouteMetric(::rtnl_route* route);
+		void checkRouteMetric(const netlink::rtnl_route_ref& route);
 
 		void cleanupIPv6AutoAssigned(int ifIndex);
 		void reenableIPv6(int ifIndex);
@@ -121,9 +85,9 @@ namespace nuts {
 	private: /* vars */
 		int ethtool_fd{-1};
 
-		nl_sock_ptr m_nlh_control;
+		netlink::nl_socket_ptr m_nlh_control;
+		netlink::nl_socket_ptr m_nlh_watcher;
 
-		nl_sock_ptr m_nlh_watcher;
 		std::unique_ptr<QSocketNotifier> m_nlh_watcher_notifier;
 		struct ifstate {
 			explicit ifstate() = default;
@@ -135,9 +99,10 @@ namespace nuts {
 			bool carrier{false};
 			bool exists{false};
 			int metric{-1};
+			libnutcommon::MacAddress linkAddress;
 			QString name;
 
-			rtnl_addr_ptr link_local_ipv6_reenable;
+			netlink::rtnl_addr_ref link_local_ipv6_reenable;
 		};
 		std::vector<struct ifstate> ifStates;
 	};

@@ -3,6 +3,12 @@
 #include "log.h"
 #include "device.h"
 
+#include <libnutnetlink/netlink_addr.h>
+#include <libnutnetlink/netlink_cache.h>
+#include <libnutnetlink/netlink_rtnl_addr.h>
+#include <libnutnetlink/netlink_rtnl_link.h>
+#include <libnutnetlink/netlink_rtnl_route.h>
+
 extern "C" {
 #include <asm/types.h>
 // socket, AF_INET, SOCK_RAW
@@ -13,11 +19,6 @@ extern "C" {
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#include <netlink/netlink.h>
-#include <netlink/msg.h>
-#include <netlink/route/addr.h>
-#include <netlink/route/link.h>
-#include <netlink/route/route.h>
 #include <arpa/inet.h>
 #include <linux/if.h>
 #include <linux/ethtool.h>
@@ -31,104 +32,6 @@ extern "C" {
 
 namespace nuts {
 	namespace {
-		/* netlink types handling */
-
-		template<typename Object>
-		struct nl_object_traits {
-			static constexpr char const* type = nullptr;
-		};
-
-		template<>
-		struct nl_object_traits<::rtnl_route> {
-			static constexpr char const* type = "route/route";
-		};
-
-		template<>
-		struct nl_object_traits<::rtnl_link> {
-			static constexpr char const* type = "route/link";
-		};
-
-		template<>
-		struct nl_object_traits<::rtnl_addr> {
-			static constexpr char const* type = "route/addr";
-		};
-
-		template<typename Object>
-		Object* nl_safe_object_cast(::nl_object* obj) {
-			static_assert(nl_object_traits<Object>::type, "type not an nl_object or not supported");
-			if (obj && 0 == strcmp(nl_object_traits<Object>::type, nl_object_get_type(obj))) {
-				return reinterpret_cast<Object*>(obj);
-			}
-			return nullptr;
-		}
-
-		template<typename Object>
-		::nl_object* nl_safe_to_object(Object* obj) {
-			static_assert(nl_object_traits<Object>::type, "type not an nl_object or not supported");
-			return reinterpret_cast<::nl_object*>(obj);
-		}
-
-		template<typename Object>
-		std::unique_ptr<Object, internal::free_nl_data> nlCopyObjectPtr(Object* ptr) {
-			static_assert(nl_object_traits<Object>::type, "type not an nl_object or not supported");
-			if (ptr) nl_object_get(reinterpret_cast<nl_object*>(ptr));
-			return std::unique_ptr<Object, internal::free_nl_data>(ptr);
-		}
-
-		template<typename Object>
-		std::unique_ptr<Object, internal::free_nl_data> nlCopyObjectPtr(std::unique_ptr<Object, internal::free_nl_data> const& ptr) {
-			return nlCopyObjectPtr(ptr.get());
-		}
-
-		/* helpers to deal with netlink callbacks */
-
-		template<typename Object>
-		void internal_call_msg_type_cb_function(::nl_object* obj, void *arg) {
-			auto o = nl_safe_object_cast<Object>(obj);
-			if (!o) {
-				log
-					<< "Unexpected object type: '" << nl_object_get_type(obj)
-					<< "', wanted '" << nl_object_traits<Object>::type << "'\n";
-				return;
-			}
-			auto const cb = reinterpret_cast<std::function<void(Object*)> const*>(arg);
-			(*cb)(o);
-		}
-		template<typename Object>
-		int nlMsgParseType(::nl_msg* msg, std::function<void(Object*)> const& func) {
-			return nl_msg_parse(msg, internal_call_msg_type_cb_function<Object>, const_cast<void*>(reinterpret_cast<void const*>(&func)));
-		}
-
-		template<typename Object>
-		int internal_call_nl_cb_msg_parse_function(::nl_msg *msg, void *arg) {
-			auto const cb = reinterpret_cast<std::function<void(Object*)> const*>(arg);
-			return nlMsgParseType(msg, *cb);
-		}
-		template<typename Object>
-		int nlSetMsgParseCallback(::nl_cb* cb, ::nl_cb_type type, std::function<void(Object*)> const& func) {
-			return ::nl_cb_set(cb, type, NL_CB_CUSTOM, internal_call_nl_cb_msg_parse_function<Object>, const_cast<void*>(reinterpret_cast<void const*>(&func)));
-		}
-
-		template<typename ObjectType>
-		void internal_cacheForeach(::nl_object* obj, void *cb_ptr) {
-			std::function<void(ObjectType*)> const& cb = *reinterpret_cast<std::function<void(ObjectType*)> const*>(cb_ptr);
-			cb(reinterpret_cast<ObjectType*>(obj));
-		}
-
-		template<typename ObjectType>
-		void cacheForeach(nl_cache_ptr<ObjectType>const& cache, std::function<void(ObjectType*)> const& cb) {
-			if (!cache) return;
-			void *cb_ptr = const_cast<void*>(reinterpret_cast<void const*>(&cb));
-			nl_cache_foreach(cache.get(), &internal_cacheForeach<ObjectType>, cb_ptr);
-		}
-
-		template<typename ObjectType>
-		void cacheForeachFilter(nl_cache_ptr<ObjectType>const& cache, ObjectType const* filter, std::function<void(ObjectType*)> const& cb) {
-			if (!cache) return;
-			void *cb_ptr = const_cast<void*>(reinterpret_cast<void const*>(&cb));
-			nl_cache_foreach_filter(cache.get(), const_cast<nl_object*>(reinterpret_cast<nl_object const*>(filter)), &internal_cacheForeach<ObjectType>, cb_ptr);
-		}
-
 		/* various */
 
 		int getPrefixLenIPv4(const QHostAddress &netmask) {
@@ -141,172 +44,97 @@ namespace nuts {
 			return i;
 		}
 
-		nl_addr_ptr NLAddrDefaultIPv4() {
+		netlink::nl_addr_ref NLAddrDefaultIPv4() {
 			quint32 i = 0;
-			nl_addr_ptr a{nl_addr_build(AF_INET, &i, sizeof(i))};
-			nl_addr_set_prefixlen(a.get(), 0);
+			auto a = netlink::nl_addr_ref::create(AF_INET, &i, sizeof(i));
+			a.set_prefixlen(0);
 			return a;
 		}
 
-		nl_addr_ptr toNLAddrIPv4(QHostAddress const& addr, QHostAddress const& netmask = QHostAddress()) {
-			quint32 i = htonl(addr.toIPv4Address());
-			nl_addr_ptr a{nl_addr_build(AF_INET, &i, sizeof(i))};
+		netlink::nl_addr_ref toNLAddrIPv4(QHostAddress const& addr, QHostAddress const& netmask = QHostAddress()) {
+			auto a = netlink::nl_addr_ref::create(addr);
 			if (!netmask.isNull()) {
-				nl_addr_set_prefixlen(a.get(), getPrefixLenIPv4(netmask));
+				a.set_prefixlen(getPrefixLenIPv4(netmask));
 			}
 			return a;
 		}
 
-		nl_addr_ptr toNLBroadcastIPv4(const QHostAddress &addr, const QHostAddress &netmask) {
+		netlink::nl_addr_ref toNLBroadcastIPv4(const QHostAddress &addr, const QHostAddress &netmask) {
 			quint32 nm = 0;
 			if (!netmask.isNull()) nm = htonl(netmask.toIPv4Address());
 			quint32 i = htonl(addr.toIPv4Address());
 			quint32 bcast = (i & nm) | (~nm);
-			nl_addr_ptr a{nl_addr_build(AF_INET, &bcast, sizeof(bcast))};
-			return a;
+			return netlink::nl_addr_ref::create(AF_INET, &bcast, sizeof(bcast));
 		}
 
-		rtnl_addr_ptr makeRTNLAddrIPv4(int ifIndex, QHostAddress const& ip, QHostAddress const& netmask) {
+		netlink::rtnl_addr_ref makeRTNLAddrIPv4(int ifIndex, QHostAddress const& ip, QHostAddress const& netmask) {
 			// zeroconf: in 169.254.0.0/16
 			bool const isZeroconf = (netmask.toIPv4Address() == 0xFFFF0000u)
 				&& ((ip.toIPv4Address() & 0xFFFF0000u) == 0xA9FE0000);
 
-			rtnl_addr_ptr addr{rtnl_addr_alloc()};
-			rtnl_addr_set_ifindex(addr.get(), ifIndex);
-			rtnl_addr_set_family(addr.get(), AF_INET);
-			rtnl_addr_set_local(addr.get(), toNLAddrIPv4(ip, netmask).get());
-			rtnl_addr_set_broadcast(addr.get(), toNLBroadcastIPv4(ip, netmask).get());
+			auto addr = netlink::rtnl_addr_ref::alloc();
+			addr.set_ifindex(ifIndex);
+			addr.set_family(AF_INET);
+			addr.set_local(toNLAddrIPv4(ip, netmask));
+			addr.set_broadcast(toNLBroadcastIPv4(ip, netmask));
 			if (isZeroconf) {
-				rtnl_addr_set_scope(addr.get(), RT_SCOPE_LINK);
-				rtnl_addr_set_flags(addr.get(), IFA_F_PERMANENT);
+				addr.set_scope(RT_SCOPE_LINK);
+				addr.set_flags(netlink::rtnl_addr_flag::permanent);
 			}
 
 			return addr;
 		}
 
-		rtnl_route_ptr makeRTNLRouteIPv4(int ifIndex, QHostAddress const& gateway, int metric) {
-			rtnl_nexthop_ptr nh{rtnl_route_nh_alloc()};
-			rtnl_route_nh_set_ifindex(nh.get(), ifIndex);
-			rtnl_route_nh_set_gateway(nh.get(), toNLAddrIPv4(gateway).get());
+		netlink::rtnl_route_ref makeRTNLRouteIPv4(int ifIndex, QHostAddress const& gateway, int metric) {
+			auto nh = netlink::rtnl_nexthop::alloc();
+			nh.set_ifindex(ifIndex);
+			nh.set_gateway(toNLAddrIPv4(gateway));
 
-			rtnl_route_ptr route{rtnl_route_alloc()};
-			rtnl_route_set_family(route.get(), AF_INET);
-			rtnl_route_set_dst(route.get(), NLAddrDefaultIPv4().get());
-			rtnl_route_set_protocol(route.get(), RTPROT_BOOT);
-			rtnl_route_set_scope(route.get(), RT_SCOPE_UNIVERSE);
+			auto route = netlink::rtnl_route_ref::alloc();
+			route.set_family(AF_INET);
+			route.set_dst(NLAddrDefaultIPv4());
+			route.set_protocol(RTPROT_BOOT);
+			route.set_scope(RT_SCOPE_UNIVERSE);
 
 			if (-1 != metric) {
-				rtnl_route_set_priority(route.get(), static_cast<uint32_t>(metric));
+				route.set_priority(static_cast<uint32_t>(metric));
 			}
-			// route owns added nexthops, nexthop doesn't have ref count
-			rtnl_route_add_nexthop(route.get(), nh.release());
+			route.add_nexthop(std::move(nh));
 
 			return route;
 		}
 
-		nl_cache_ptr<::rtnl_link> makeRTNLLinkCache(::nl_sock* sock, int family = AF_UNSPEC) {
-			::nl_cache* cache{nullptr};
-			if (0 == rtnl_link_alloc_cache(sock, family, &cache)) {
-				return nl_cache_ptr<::rtnl_link>{cache};
-			}
-			return nl_cache_ptr<::rtnl_link>{};
-		}
-
-		rtnl_link_ptr RTNLLinkAlloc() {
-			return rtnl_link_ptr{rtnl_link_alloc()};
-		}
-
-		int makeRTNLAddrCache(nl_cache_ptr<::rtnl_addr> &cacheResult, ::nl_sock* sock) {
-			::nl_cache* cache{nullptr};
-			int res = rtnl_addr_alloc_cache(sock, &cache);
-			cacheResult.reset(cache);
-			return res;
-		}
-
-#if 0
-		/* the libnl route cache has a serious bug: it only lists one route per
-		 * [addr,tos,table,prio] tuple, but the kernel may have more than one.
-		 *
-		 * for example if you have a wired and a wireless connection to the same
-		 * router you are often in the same network with two interfaces.
-		 */
-		nl_cache_ptr<::rtnl_route> makeRTNLRouteCache(::nl_sock* sock, int family = AF_UNSPEC, int flags = 0) {
-			::nl_cache* cache{nullptr};
-			if (0 == rtnl_route_alloc_cache(sock, family, flags, &cache)) {
-				return nl_cache_ptr<::rtnl_route>{cache};
-			}
-			return nl_cache_ptr<::rtnl_route>{};
-		}
-#endif
-
-		int appendRoutes(::nl_sock* sock, int family, std::list<rtnl_route_ptr>& list) {
+		std::error_code appendRoutes(netlink::nl_socket_ptr const& sock, int family, std::list<netlink::rtnl_route_ref>& list) {
 			struct rtmsg rhdr;
 			memset(&rhdr, 0, sizeof(rhdr));
 			rhdr.rtm_family = family;
 
-			int err;
+			std::error_code err;
 			do {
-				err = nl_send_simple(sock, RTM_GETROUTE, NLM_F_DUMP, &rhdr, sizeof(rhdr));
-			} while (-NLE_DUMP_INTR == err);
+				err = sock.send_simple(RTM_GETROUTE, NLM_F_DUMP, &rhdr, sizeof(rhdr));
+			} while (netlink::errc::intr == err);
 
-			nl_cb_ptr local_cb{nl_cb_clone(nl_socket_get_cb(sock))};
-			std::function<void(::rtnl_route*)> append_cb = [&list](::rtnl_route *route) {
-				list.push_back(nlCopyObjectPtr(route));
-			};
-			nlSetMsgParseCallback<::rtnl_route>(local_cb.get(), NL_CB_VALID, append_cb);
+			auto local_cb = sock.get_cb().clone();
+			local_cb.set(netlink::callback_type::valid, [&list](::nl_msg* msg) -> int {
+				auto route = netlink::rtnl_route_ref::parse_msg(msg);
+				list.push_back(route);
+				return 0;
+			});
 
-			return nl_recvmsgs(sock, local_cb.get());
+			return sock.recvmsgs(local_cb);
 		}
 
-		QString toString(nl_addr* addr) {
-			char addrStringBuf[128];
-			nl_addr2str(addr, addrStringBuf, sizeof(addrStringBuf));
-			return QString(addrStringBuf);
+		QString routeTargetToString(netlink::nl_addr_ref const& addr) {
+			if (0 == addr.get_prefixlen()) return QString("default");
+			return addr.toString();
 		}
 
-		QString routeTargetToString(nl_addr* addr) {
-			if (0 == nl_addr_get_prefixlen(addr)) return QString("default");
-			char addrStringBuf[128];
-			nl_addr2str(addr, addrStringBuf, sizeof(addrStringBuf));
-			return QString(addrStringBuf);
+		libnutcommon::MacAddress linkAddress(netlink::rtnl_link_ref const& link) {
+			auto addr = link.get_addr();
+			if (!addr || 6 != addr.get_len()) return libnutcommon::MacAddress();
+			return libnutcommon::MacAddress(reinterpret_cast<::ether_addr*>(addr.get_binary_addr()));
 		}
-
 	} /* anonymous namespace */
-
-	namespace internal {
-		void free_nl_data::operator()(nl_addr* addr) {
-			nl_addr_put(addr);
-		}
-
-		void free_nl_data::operator()(nl_cache* cache) {
-			nl_cache_free(cache);
-		}
-
-		void free_nl_data::operator()(::nl_cb* cb) {
-			nl_cb_put(cb);
-		}
-
-		void free_nl_data::operator()(nl_sock* sock) {
-			nl_close(sock);
-			nl_socket_free(sock);
-		}
-
-		void free_nl_data::operator()(rtnl_addr* addr) {
-			rtnl_addr_put(addr);
-		}
-
-		void free_nl_data::operator()(rtnl_link* link) {
-			rtnl_link_put(link);
-		}
-
-		void free_nl_data::operator()(rtnl_route* route) {
-			rtnl_route_put(route);
-		}
-
-		void free_nl_data::operator()(rtnl_nexthop* nh) {
-			rtnl_route_nh_free(nh);
-		}
-	}
 
 	HardwareManager::HardwareManager() {
 		if (!init_netlink()) {
@@ -326,20 +154,20 @@ namespace nuts {
 	bool HardwareManager::controlOn(int ifIndex, bool force) {
 		if (ifIndex < 0 || (size_t)ifIndex >= ifStates.size()) return false;
 
-		rtnl_link_ptr change = RTNLLinkAlloc();
-		rtnl_link_set_ifindex(change.get(), ifIndex);
+		auto change = netlink::rtnl_link_ref::alloc();
+		change.set_ifindex(ifIndex);
 
 		if (force) {
-			rtnl_link_unset_flags(change.get(), IFF_UP);
-			if (int err = rtnl_link_change(m_nlh_control.get(), change.get(), change.get(), 0)) {
-				log << "Couldn't turn device off (forcing restart): " << nl_geterror(err) << " (" <<  err << ")" << endl;
+			change.unset_flags(netlink::link_flag_t::up);
+			if (auto ec = netlink::rtnl_link_ref::change(m_nlh_control, change, change)) {
+				log << "Couldn't turn device off (forcing restart): " << ec.message().data() << endl;
 				return false;
 			}
 		}
 
-		rtnl_link_set_flags(change.get(), IFF_UP);
-		if (int err = rtnl_link_change(m_nlh_control.get(), change.get(), change.get(), 0)) {
-			log << "Couldn't turn device on: " << nl_geterror(err) << " (" <<  err << ")" << endl;
+		change.set_flags(netlink::link_flag_t::up);
+		if (auto ec = netlink::rtnl_link_ref::change(m_nlh_control, change, change)) {
+			log << "Couldn't turn device on: " << ec.message().data() << endl;
 			return false;
 		}
 
@@ -354,12 +182,12 @@ namespace nuts {
 		if (ifStates[ifIndex].active) {
 			ifStates[ifIndex].off();
 
-			rtnl_link_ptr change = RTNLLinkAlloc();
-			rtnl_link_set_ifindex(change.get(), ifIndex);
+			auto change = netlink::rtnl_link_ref::alloc();
+			change.set_ifindex(ifIndex);
 
-			rtnl_link_unset_flags(change.get(), IFF_UP);
-			if (int err = rtnl_link_change(m_nlh_control.get(), change.get(), change.get(), 0)) {
-				log << "Couldn't turn device off: " << nl_geterror(err) << " (" <<  err << ")" << endl;
+			change.unset_flags(netlink::link_flag_t::up);
+			if (auto ec = netlink::rtnl_link_ref::change(m_nlh_control, change, change)) {
+				log << "Couldn't turn device off: " << ec.message().data() << endl;
 				return false;
 			}
 		}
@@ -367,28 +195,31 @@ namespace nuts {
 	}
 
 	bool HardwareManager::init_netlink() {
-		m_nlh_control.reset(nl_socket_alloc());
-		m_nlh_watcher.reset(nl_socket_alloc());
+		m_nlh_control = netlink::nl_socket_ptr::alloc();
+		m_nlh_watcher = netlink::nl_socket_ptr::alloc();
+
 		if (!m_nlh_watcher || !m_nlh_control) goto cleanup;
-		::nl_socket_disable_seq_check(m_nlh_watcher.get());
-		::nl_socket_modify_cb(
-			m_nlh_watcher.get(), NL_CB_VALID, NL_CB_CUSTOM,
+		m_nlh_watcher.disable_seq_check();
+		m_nlh_watcher.get_cb().set(netlink::callback_type::valid,
 			&HardwareManager::wrap_handle_netlinkmsg,
 			reinterpret_cast<void*>(this));
 
-		if (nl_connect(m_nlh_control.get(), NETLINK_ROUTE) != 0) goto cleanup;
+		if (auto ec = m_nlh_control.connect(netlink::protocol::route)) {
+			log << "Failed to connect netlink control" << ec.message().data() << endl;
+			goto cleanup;
+		}
 
-		if (nl_connect(m_nlh_watcher.get(), NETLINK_ROUTE) != 0) goto cleanup;
-		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_LINK) != 0) goto cleanup;
-		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_IPV4_ROUTE) != 0) goto cleanup;
-		if (nl_socket_add_membership(m_nlh_watcher.get(), RTNLGRP_IPV6_ROUTE) != 0) goto cleanup;
+		if (auto ec = m_nlh_watcher.connect_groups({netlink::rtnetlink_group::link, netlink::rtnetlink_group::ipv4_route, netlink::rtnetlink_group::ipv6_route})) {
+			log << "Failed to connect netlink watcher / add group memberships" << ec.message().data() << endl;
+			goto cleanup;
+
+		}
 
 		{
-			int netlink_fd = nl_socket_get_fd(m_nlh_control.get());
-			fcntl(netlink_fd, F_SETFD, FD_CLOEXEC);
+			fcntl(m_nlh_control.get_fd(), F_SETFD, FD_CLOEXEC);
 		}
 		{
-			int netlink_fd = nl_socket_get_fd(m_nlh_watcher.get());
+			int netlink_fd = m_nlh_watcher.get_fd();
 			fcntl(netlink_fd, F_SETFD, FD_CLOEXEC);
 			// QSocketNotifier constructor makes netlink_fd non-blocking
 			m_nlh_watcher_notifier.reset(new QSocketNotifier(netlink_fd, QSocketNotifier::Read));
@@ -421,39 +252,32 @@ cleanup:
 	}
 
 	void HardwareManager::discover() {
-		nl_cache_ptr<::rtnl_link> linkCache = makeRTNLLinkCache(m_nlh_control.get(), AF_UNSPEC);
-		cacheForeach<::rtnl_link>(linkCache, [this](::rtnl_link* link) {
-			int const ifIndex{rtnl_link_get_ifindex(link)};
-			QString const ifName = QString::fromUtf8(rtnl_link_get_name(link));
+		auto linkCache = netlink::rtnl_link_cache_ref::alloc();
+		if (auto ec = linkCache.refill(m_nlh_control)) {
+			log << "Failed to list links: " << ec.message().data() << endl;
+			return;
+		}
+		for (netlink::rtnl_link_ref const& link: linkCache) {
+			int const ifIndex{link.get_ifindex()};
+			QString const ifName = link.get_name();
+			libnutcommon::MacAddress const linkAddr = linkAddress(link);
 			if (ifIndex <= 0) return;
 			if ((size_t)ifIndex >= ifStates.size()) ifStates.resize(ifIndex+1);
 			if (!ifStates[ifIndex].exists) {
 				ifStates[ifIndex].exists = true;
 				ifStates[ifIndex].name = ifName;
+				ifStates[ifIndex].linkAddress = linkAddr;
 				log << QString("discovered interface: %1 [index %2]").arg(ifName).arg(ifIndex) << endl;
-				emit newDevice(ifName, ifIndex);
+				emit newDevice(ifName, ifIndex, linkAddr);
 			}
-		});
-	}
-
-	libnutcommon::MacAddress HardwareManager::getMacAddress(QString const& ifName) {
-		struct ifreq ifr;
-		if (!ifreq_init(ifr, ifName)) {
-			err << QString("Interface name too long") << endl;
-			return libnutcommon::MacAddress();
 		}
-		if (ioctl(ethtool_fd, SIOCGIFHWADDR, &ifr) < 0) {
-			err << QString("Couldn't get hardware address of '%1'").arg(ifName) << endl;
-			return libnutcommon::MacAddress();
-		}
-		return libnutcommon::MacAddress::fromBuffer(ifr.ifr_hwaddr.sa_data);
 	}
 
 	bool HardwareManager::ifreq_init(struct ifreq& ifr, QString const& ifname) {
 		QByteArray buf = ifname.toUtf8();
 		if (buf.size() >= IFNAMSIZ) return false;
 		ifreq_init(ifr);
-		strncpy (ifr.ifr_name, buf.constData(), buf.size());
+		strncpy(ifr.ifr_name, buf.constData(), buf.size());
 		return true;
 	}
 	void HardwareManager::ifreq_init(struct ifreq& ifr) {
@@ -461,11 +285,9 @@ cleanup:
 	}
 
 	void HardwareManager::read_netlinkmsgs() {
-		int res = nl_recvmsgs_default(m_nlh_watcher.get());
-		if (0 > res) {
-			log << "nl_recvmsgs failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		if (auto ec = m_nlh_watcher.recvmsgs()) {
+			log << "nl_recvmsgs failed: " << ec.message().data() << endl;
 		}
-		return;
 	}
 
 	int HardwareManager::wrap_handle_netlinkmsg(::nl_msg *msg, void* arg) {
@@ -475,40 +297,44 @@ cleanup:
 	int HardwareManager::handle_netlinkmsg(::nl_msg *msg) {
 		switch (nlmsg_hdr(msg)->nlmsg_type) {
 		case RTM_NEWLINK:
-			nlMsgParseType<::rtnl_link>(msg, [this](::rtnl_link* link) {
-				int const ifIndex = rtnl_link_get_ifindex(link);
+			{
+				auto link = netlink::rtnl_link_ref::parse_msg(msg);
+				int const ifIndex = link.get_ifindex();
 				if (ifIndex <= 0) {
 					err << QString("invalid interface index %1").arg(ifIndex) << endl;
-					return;
+					return 0;
 				}
 				if ((size_t) ifIndex >= ifStates.size()) ifStates.resize(ifIndex+1);
-				QString ifName = QString::fromUtf8(rtnl_link_get_name(link));
+				QString const ifName = link.get_name();
 				if (ifName.isEmpty()) {
-					if (ifStates[ifIndex].exists) {
-						ifName = ifStates[ifIndex].name;
-					}
+					err << QString("couldn't find name for interface %1").arg(ifIndex) << endl;
+					return 0;
 				}
-				if (ifName.isEmpty()) {
-					err << QString("couldn't find name for (new) interface %1").arg(ifIndex) << endl;
-					return;
-				}
+				libnutcommon::MacAddress const linkAddr = linkAddress(link);
+
 				if (!ifStates[ifIndex].exists) {
 					ifStates[ifIndex].exists = true;
+					ifStates[ifIndex].linkAddress = linkAddr;
 					ifStates[ifIndex].name = ifName;
 					log << QString("new interface detected: %1 [index %2]").arg(ifName).arg(ifIndex) << endl;
-					emit newDevice(ifName, ifIndex);
+					emit newDevice(ifName, ifIndex, linkAddr);
 				} else if (ifStates[ifIndex].name != ifName) {
 					QString oldName = ifStates[ifIndex].name;
 					ifStates[ifIndex].name = ifName;
 					log << QString("interface rename detected: %1 -> %2 [index %3]").arg(oldName).arg(ifName).arg(ifIndex) << endl;
 					emit delDevice(oldName);
-					emit newDevice(ifName, ifIndex);
+					// in case the address changed update it here without notification - it is a "new" device anyway
+					ifStates[ifIndex].linkAddress = linkAddr;
+					emit newDevice(ifName, ifIndex, linkAddr);
+				} else if (ifStates[ifIndex].linkAddress != linkAddr) {
+					ifStates[ifIndex].linkAddress = linkAddr;
+					emit changedMacAddress(ifName, linkAddr);
 				}
-				bool carrier = (rtnl_link_get_flags(link) & IFF_LOWER_UP) > 0;
+				bool const carrier = (link.get_flags() & netlink::link_flag_t::lower_up);
 				if (carrier != ifStates[ifIndex].carrier) {
 					ifStates[ifIndex].carrier = carrier;
 					if (!isControlled(ifIndex))
-						return;
+						return 0;
 					if (carrier) {
 						reenableIPv6(ifIndex);
 						QString essid;
@@ -519,18 +345,18 @@ cleanup:
 						cleanupIPv6AutoAssigned(ifIndex);
 					}
 				}
-
-			});
+			};
 			break;
 		case RTM_DELLINK:
-			nlMsgParseType<::rtnl_link>(msg, [this](::rtnl_link* link) {
-				int const ifIndex = rtnl_link_get_ifindex(link);
+			{
+				auto link = netlink::rtnl_link_ref::parse_msg(msg);
+				int const ifIndex = link.get_ifindex();
 				if (ifIndex <= 0) {
 					err << QString("invalid interface index %1").arg(ifIndex) << endl;
-					return;
+					return 0;
 				}
-				QString const ifName = QString::fromUtf8(rtnl_link_get_name(link));
-				if (ifName.isNull()) return;
+				QString const ifName = link.get_name();
+				if (ifName.isNull()) return 0;
 				log << QString("lost interface: %1 [index %2]").arg(ifName).arg(ifIndex) << endl;
 				if ((size_t) ifIndex < ifStates.size()) {
 					if (ifStates[ifIndex].exists) {
@@ -539,39 +365,37 @@ cleanup:
 						ifStates[ifIndex].exists = false;
 						ifStates[ifIndex].carrier = false;
 						ifStates[ifIndex].active = false;
+						ifStates[ifIndex].linkAddress.clear();
 						ifStates[ifIndex].name.clear();
 					}
 				}
 				emit delDevice(ifName);
-			});
+			};
 			break;
 		case RTM_NEWROUTE:
-			bool const replacedRoute = 0 != (NLM_F_REPLACE & nlmsg_hdr(msg)->nlmsg_flags);
-			nlMsgParseType<::rtnl_route>(msg, [this,replacedRoute](::rtnl_route* route) {
+			{
+				auto route = netlink::rtnl_route_ref::parse_msg(msg);
 #if 0
-				{
-					char buf[512];
-					nl_object_dump_buf(nl_safe_to_object(route), buf, sizeof(buf));
-					log << (replacedRoute ? "Replaced " : "New ") << "route with metric " << rtnl_route_get_priority(route) << ": " << buf;
-				}
+				bool const replacedRoute = 0 != (NLM_F_REPLACE & nlmsg_hdr(msg)->nlmsg_flags);
+				log << (replacedRoute ? "Replaced " : "New ") << "route with metric " << route.get_priority() << ": " << route.toString() << endl;
 #endif
 				checkRouteMetric(route);
-			});
+			}
 			break;
 		}
 
 		return 0;
 	}
 
-	void HardwareManager::checkRouteMetric(::rtnl_route* route) {
-		switch (rtnl_route_get_family(route)) {
+	void HardwareManager::checkRouteMetric(netlink::rtnl_route_ref const& route) {
+		switch (route.get_family()) {
 		case AF_INET6:
 			{
 				/* don't touch IPv6 link-local fe80::/64 */
 				static const uint8_t link_local_prefix[8] =
 					{ 0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
-				nl_addr* dst = rtnl_route_get_dst(route);
-				if (64 == nl_addr_get_prefixlen(dst) && 0 == memcmp(link_local_prefix, nl_addr_get_binary_addr(dst), 8)) return;
+				auto dst = route.get_dst();
+				if (64 == dst.get_prefixlen() && 0 == memcmp(link_local_prefix, dst.get_binary_addr(), 8)) return;
 			}
 			break;
 		case AF_INET:
@@ -579,44 +403,42 @@ cleanup:
 			 * set explicitly
 			 */
 			{
-				nl_addr* dst = rtnl_route_get_dst(route);
-				if (0 == nl_addr_get_prefixlen(dst)) return;
+				auto dst = route.get_dst();
+				if (0 == dst.get_prefixlen()) return;
 			}
 			break;
 		default:
 			return;
 		}
 
-		if (RT_TABLE_MAIN != rtnl_route_get_table(route)) return;
-		if (RTN_UNICAST != rtnl_route_get_type(route)) return;
+		if (RT_TABLE_MAIN != route.get_table()) return;
+		if (RTN_UNICAST != route.get_type()) return;
 
-		if (1 != rtnl_route_get_nnexthops(route)) return;
-		::rtnl_nexthop* nh = rtnl_route_nexthop_n(route, 0);
-		int const ifIndex = rtnl_route_nh_get_ifindex(nh);
+		if (1 != route.get_nnexthops()) return;
+		auto nh = route.nexthop_n(0);
+		int const ifIndex = nh.get_ifindex();
 
 		if (!isControlled(ifIndex)) return;
 
 		int const metric = ifStates[ifIndex].metric;
-		if (-1 == metric || static_cast<uint32_t>(metric) == rtnl_route_get_priority(route)) return;
+		if (-1 == metric || static_cast<uint32_t>(metric) == route.get_priority()) return;
 
-		char route_str[512];
-		nl_object_dump_buf(nl_safe_to_object(route), route_str, sizeof(route_str));
-
-		log << "Replacing route with updated metric " << metric << ": " << route_str;
+		log << "Replacing route with updated metric " << metric << ": " << route.toString() << endl;
 		log.flush();
 
-		int err;
-		err = rtnl_route_delete(m_nlh_control.get(), route, NLM_F_REPLACE);
-		if (0 > err && -ENOENT != err) {
-			log << "Removing route failed: " << nl_geterror(err) << " (" <<  err << ")" << endl;
+		if (auto ec = route.remove(m_nlh_control)) {
+			if (netlink::errc::obj_notfound != ec) {
+				log << "Removing route failed: " << ec.message().data() << endl;
+			}
 			return;
 		}
 
-		rtnl_route_set_priority(route, metric);
+		route.set_priority(metric);
 
-		err = rtnl_route_add(m_nlh_control.get(), route, NLM_F_REPLACE);
-		if (0 > err && -ENOENT != err) {
-			log << "Adding route with updated metric failed: " << nl_geterror(err) << " (" <<  err << ")" << endl;
+		if (auto ec = route.add(m_nlh_control, netlink::new_flag::replace)) {
+			if (netlink::errc::obj_notfound != ec) {
+				log << "Adding route with updated metric failed: " << ec.message().data() << endl;
+			}
 		}
 	}
 
@@ -633,14 +455,15 @@ cleanup:
 		QByteArray buf = ifname.toUtf8();
 		if (buf.size() >= IFNAMSIZ) return false;
 		iwreq_init(iwr);
-		strncpy (iwr.ifr_ifrn.ifrn_name, buf.constData(), buf.size());
+		strncpy(iwr.ifr_ifrn.ifrn_name, buf.constData(), buf.size());
 		return true;
 	}
 
 	bool HardwareManager::hasWLAN(QString const& ifName) {
+		// NL80211_ATTR_SSID
 		struct iwreq iwr;
 		iwreq_init(iwr, ifName);
-		if (ioctl(ethtool_fd, SIOCGIWNAME, &iwr) < 0) return false;
+		if (ioctl(ethtool_fd, SIOCGIWNAME, &iwr) < 0) return false; // cfg80211_wext_giwname
 		return true;
 	}
 
@@ -652,7 +475,7 @@ cleanup:
 		memset(buf, 0, sizeof(buf));
 		iwr.u.essid.pointer = buf;
 		iwr.u.essid.length = sizeof(buf);
-		if (ioctl(ethtool_fd, SIOCGIWESSID, &iwr) < 0) return false;
+		if (ioctl(ethtool_fd, SIOCGIWESSID, &iwr) < 0) return false; // cfg80211_wext_giwessid
 		essid = QString::fromUtf8(buf, qstrnlen(buf, iwr.u.essid.length));
 		return true;
 	}
@@ -664,11 +487,8 @@ cleanup:
 			const QHostAddress& gateway,
 			int metric)
 	{
-		int res;
-
-		res = rtnl_addr_add(m_nlh_control.get(), makeRTNLAddrIPv4(ifIndex, ip, netmask).get(), 0);
-		if (0 > res) {
-			log << "Adding address failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		if (auto ec = makeRTNLAddrIPv4(ifIndex, ip, netmask).add(m_nlh_control)) {
+			log << "Adding address failed [ndx=" << ifIndex << "]: " << ec.message().data() << endl;
 		}
 
 		if (!gateway.isNull()) {
@@ -677,9 +497,8 @@ cleanup:
 			 *
 			 * For now overwrite existing routes.
 			 */
-			res = rtnl_route_add(m_nlh_control.get(), makeRTNLRouteIPv4(ifIndex, gateway, metric).get(), 0 /* NLM_F_EXCL */);
-			if (0 > res) {
-				log << "Adding default gateway failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+			if (auto ec = makeRTNLRouteIPv4(ifIndex, gateway, metric).add(m_nlh_control)) {
+				log << "Adding default gateway failed [ndx=" << ifIndex << "]: " << ec.message().data() << endl;
 			}
 		}
 	}
@@ -693,18 +512,14 @@ cleanup:
 	{
 		if (!isControlled(ifIndex)) return; /* probably got deleted, skip cleanup */
 
-		int res;
-
-		if (!gateway.isNull()) {
-			res = rtnl_route_delete(m_nlh_control.get(), makeRTNLRouteIPv4(ifIndex, gateway, metric).get(), 0);
-			if (0 > res) {
-				log << "Removing default gateway failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+				if (!gateway.isNull()) {
+			if (auto ec = makeRTNLRouteIPv4(ifIndex, gateway, metric).remove(m_nlh_control)) {
+				log << "Removing default gateway failed [ndx=" << ifIndex << "]: " << ec.message().data() << endl;
 			}
 		}
 
-		res = rtnl_addr_delete(m_nlh_control.get(), makeRTNLAddrIPv4(ifIndex, ip, netmask).get(), 0);
-		if (0 > res) {
-			log << "Removing address failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		if (auto ec = makeRTNLAddrIPv4(ifIndex, ip, netmask).remove(m_nlh_control)) {
+			log << "Removing address failed [ndx=" << ifIndex << "]: " << ec.message().data() << endl;
 		}
 	}
 
@@ -714,18 +529,15 @@ cleanup:
 		ifStates[ifIndex].metric = metric;
 
 		/* update "all" routes */
-		std::list<rtnl_route_ptr> routes;
-		int res;
-		res = appendRoutes(m_nlh_control.get(), AF_INET, routes);
-		if (0 > res) {
-			log << "appendRoutes failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		std::list<netlink::rtnl_route_ref> routes;
+		if (auto ec = appendRoutes(m_nlh_control, AF_INET, routes)) {
+			log << "appendRoutes failed: " << ec.message().data() << endl;
 		}
-		res = appendRoutes(m_nlh_control.get(), AF_INET6, routes);
-		if (0 > res) {
-			log << "appendRoutes failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+		if (auto ec = appendRoutes(m_nlh_control, AF_INET6, routes)) {
+			log << "appendRoutes failed: " << ec.message().data() << endl;
 		}
 		for (auto const& route: routes) {
-			checkRouteMetric(route.get());
+			checkRouteMetric(route);
 		}
 	}
 
@@ -766,98 +578,88 @@ cleanup:
 		if (!isControlled(ifIndex)) return;
 
 		{
-			bool removeTemporaries{false};
-
-			auto removeIPv6AddressWithFlag = [this, ifIndex, &removeTemporaries](::rtnl_addr* addr) {
+			auto removeIPv6AddressWithFlag = [this, ifIndex](netlink::rtnl_addr_ref const& addr, bool removeTemporaries) {
 #if 0
-				{
-					char buf[512];
-					nl_object_dump_buf(nl_safe_to_object(addr), buf, sizeof(buf));
-					log << "Found address: " << buf;
-				}
+				log << "Found address: " << addr.toString() << endl;
 #endif
 
 				/* remove all IPv6 addresses on interface (we "own" it) */
-				if (rtnl_addr_get_ifindex(addr) != ifIndex) return;
-				if (rtnl_addr_get_family(addr) != AF_INET6) return;
+				if (addr.get_ifindex() != ifIndex) return;
+				if (addr.get_family() != AF_INET6) return;
 
-				switch (rtnl_addr_get_scope(addr)) {
+				switch (addr.get_scope()) {
 				case RT_SCOPE_LINK:
 					/* remember link-local address to restart router solicitation */
-					ifStates[ifIndex].link_local_ipv6_reenable = nlCopyObjectPtr(addr);
+					ifStates[ifIndex].link_local_ipv6_reenable = addr;
 					break;
 				case RT_SCOPE_UNIVERSE:
 					/* IFA_F_TEMPORARY (from privacy extension) should get removed automatically after its IFA_F_MANAGETEMPADDR is deleted */
-					if (!removeTemporaries && 0 == (rtnl_addr_get_flags(addr) & IFA_F_MANAGETEMPADDR)) return;
+					if (!removeTemporaries && 0 == (addr.get_flags() & netlink::rtnl_addr_flag::managetempaddr)) return;
 					break;
 				default:
 					break;
 				}
 
 				log << "Removing IPv6 address "
-					<< toString(rtnl_addr_get_local(addr))
+					<< addr.get_local().toString()
 					<< " [ndx=" << ifIndex << "]"
 					<< endl;
 
-				int res = rtnl_addr_delete(m_nlh_control.get(), addr, 0);
-				if (0 > res) {
+				if (auto ec = addr.remove(m_nlh_control)) {
 					log << "Removing IPv6 address "
-						<< toString(rtnl_addr_get_local(addr))
-						<< " failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+						<< addr.get_local().toString()
+						<< " failed [ndx=" << ifIndex << "]: " << ec.message().data() << endl;
 				}
 			};
 
-			nl_cache_ptr<::rtnl_addr> cache;
-			if (int res = makeRTNLAddrCache(cache, m_nlh_control.get())) {
-				log << "Getting addresses failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+			auto cache = netlink::rtnl_addr_cache_ref::alloc();
+			if (auto ec = cache.refill(m_nlh_control)) {
+				log << "Getting addresses failed: " << ec.message().data() << endl;
 			}
-			cacheForeach<::rtnl_addr>(cache, removeIPv6AddressWithFlag);
+			for (netlink::rtnl_addr_ref const& route: cache) {
+				removeIPv6AddressWithFlag(route, /* removeTemporaries */ false);
+			}
 
 			cache.reset();
-			removeTemporaries = true;
 
-			if (int res = makeRTNLAddrCache(cache, m_nlh_control.get())) {
-				log << "Getting addresses failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+			if (auto ec = cache.refill(m_nlh_control)) {
+				log << "Getting addresses failed: " << ec.message().data() << endl;
 			}
-			cacheForeach<::rtnl_addr>(cache, removeIPv6AddressWithFlag);
+			for (netlink::rtnl_addr_ref const& route: cache) {
+				removeIPv6AddressWithFlag(route, /* removeTemporaries */ true);
+			}
 		}
 
 		{
-			std::list<rtnl_route_ptr> routes;
-			int res = appendRoutes(m_nlh_control.get(), AF_INET6, routes);
-			if (0 > res) {
-				log << "appendRoutes failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+			std::list<netlink::rtnl_route_ref> routes;
+			if (auto ec = appendRoutes(m_nlh_control, AF_INET6, routes)) {
+				log << "appendRoutes failed: " << ec.message().data() << endl;
 			}
-			for (auto const& route: routes) {
-#if 0
-				{
-					char buf[512];
-					nl_object_dump_buf(nl_safe_to_object(route.get()), buf, sizeof(buf));
-					log << "Found IPv6 route: " << buf;
-				}
+			for (netlink::rtnl_route_ref const& route: routes) {
+#if 1
+				log << "Found IPv6 route: " << route.toString() << endl;
 #endif
 
-				::nl_addr* dst = rtnl_route_get_dst(route.get());
+				auto dst = route.get_dst();
 
-				if (1 != rtnl_route_get_nnexthops(route.get())) continue;
+				if (1 != route.get_nnexthops()) continue;
 
-				::rtnl_nexthop* nh = rtnl_route_nexthop_n(route.get(), 0);
-				if (ifIndex != rtnl_route_nh_get_ifindex(nh)) continue;
+				netlink::rtnl_nexthop_ptr nh = route.nexthop_n(0);
+				if (ifIndex != nh.get_ifindex()) continue;
 
 				log << "Removing IPv6 route to "
 					<< routeTargetToString(dst)
 					<< " via "
-					<< toString(rtnl_route_nh_get_gateway(nh))
+					<< nh.get_gateway().toString()
 					<< " [ndx=" << ifIndex << "]"
 					<< endl;
 
-				int res = rtnl_route_delete(m_nlh_control.get(), route.get(), 0);
-				if (0 > res) {
+				if (auto ec = route.remove(m_nlh_control)) {
 					log << "Removing IPv6 route to "
 						<< routeTargetToString(dst)
 						<< " via "
-						<< toString(rtnl_route_nh_get_gateway(nh))
-						<< " failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+						<< nh.get_gateway().toString()
+						<< " failed [ndx=" << ifIndex << "]: " << ec.message().data() << endl;
 				}
 			}
 		}
@@ -866,19 +668,18 @@ cleanup:
 	void HardwareManager::reenableIPv6(int ifIndex) {
 		if (!isControlled(ifIndex)) return;
 
-		rtnl_addr_ptr addr = std::move(ifStates[ifIndex].link_local_ipv6_reenable);
+		netlink::rtnl_addr_ref addr = std::move(ifStates[ifIndex].link_local_ipv6_reenable);
 		if (!addr) return;
 
-		log << "Readding IPv6 link-local address "
-			<< toString(rtnl_addr_get_local(addr.get()))
+		log << "Re-adding IPv6 link-local address "
+			<< addr.get_local().toString()
 			<< " [ndx=" << ifIndex << "]"
 			<< endl;
 
-		int res = rtnl_addr_add(m_nlh_control.get(), addr.get(), 0);
-		if (0 > res) {
+		if (auto ec = addr.add(m_nlh_control)) {
 			log << "Readding IPv6 link-local address "
-				<< toString(rtnl_addr_get_local(addr.get()))
-				<< " failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+				<< addr.get_local().toString()
+				<< " failed [ndx=" << ifIndex << "]: " << ec.message().data() << endl;
 		}
 	}
 
