@@ -102,13 +102,19 @@ namespace qnut {
 				SignalQuality signal = device->getWireless()->getHardware()->getSignalQuality();
 				QString result = signal.ssid.autoQuoteHexString();
 
-				if (result.isEmpty())
-					result = QObject::tr("unknown Network");
+				if (result.isEmpty()) {
+					result = device->getEssid();
+				}
 
-				if (appendQuality && !signal.ssid.data().isEmpty())
+				if (result.isEmpty()) {
+					result = QObject::tr("unknown Network");
+				}
+
+				if (appendQuality && !signal.ssid.data().isEmpty()) {
 					result += " (" +
 						QString::number(signal.quality.value) + '/'+
 						QString::number(signal.quality.maximum) + ')';
+				}
 
 				return result;
 			}

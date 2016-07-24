@@ -50,9 +50,7 @@ add_library(nutwireless OBJECT
 )
 
 object_link_libraries(nutwireless PUBLIC
-	nutcommon
-	libnl
-	libnl-genl
+	nutnetlink
 	Qt5::Network
 	Qt5::Core
 )

@@ -262,7 +262,11 @@ namespace qnut {
 			tr("Channel") + ' ' + QString::number(frequencyToChannel(signal.frequency)) + ')');
 		ui.bssidLabel->setText(signal.bssid.toString());
 		ui.qualityLabel->setText(tr("Quality") + ": " + quality);
-		ui.rateLabel->setText(tr("Bitrate") + ": " + QString::number(signal.bitrates[0] / 1000000) + "Mb/s");
+		if (signal.bitrates.length() > 0) {
+			ui.rateLabel->setText(tr("Bitrate") + ": " + QString::number(signal.bitrates[0] / 1000000) + "Mb/s");
+		} else {
+			ui.rateLabel->setText(tr("Bitrate") + ": unknown");
+		}
 
 		ui.qualityLevelLine->setVisible(showLevelNoise);
 		ui.levelLabel->setVisible(showLevelNoise);
