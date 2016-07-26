@@ -22,8 +22,7 @@ namespace qnut {
 	class CNotificationManager : public QObject {
 		Q_OBJECT
 	public:
-		CNotificationManager(QWidget * mainWindow = NULL, QObject * parent = NULL);
-		~CNotificationManager();
+		explicit CNotificationManager(QWidget * mainWindow = NULL, QObject * parent = NULL);
 
 		bool notificationsEnabled() const { return m_NotificationsEnabled; }
 

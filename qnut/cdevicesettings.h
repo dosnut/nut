@@ -13,6 +13,8 @@
 #include "common.h"
 #include "ui_devicesettings.h"
 
+#include "modelview/ccommandlistmodel.h"
+
 namespace qnut {
 	class CDeviceDetails;
 
@@ -30,14 +32,11 @@ namespace qnut {
 	class CDeviceSettings : public QDialog {
 		Q_OBJECT
 	public:
-		/// @brief returns the edited command lists
-		inline QList<ToggleableCommand> * commandListsResult() { return m_CommandLists; }
-		/// @brief returns the resulting enabled setting for commands in general
-		inline bool commandsEnabledResult() const { return ui.scriptBox->isChecked(); }
-		/// @brief returns the resulting visibility setting for the tray icon
-		inline bool trayIconVisibleResult() const { return ui.trayiconCheckBox->isChecked(); }
-		/// @brief returns the resulting enabled state for notifications
-		inline bool notificationEnabledResult() const { return !ui.disableNotificationsCheck->isChecked(); }
+		/**
+		 * @brief Creates the object and initializes its user interface.
+		 * @param parent parent widget
+		 */
+		explicit CDeviceSettings(QWidget* parent = nullptr);
 
 		/**
 		 * @brief Opens the dialog and returns true if changes are made.
@@ -47,20 +46,17 @@ namespace qnut {
 		 * @param notificationEnabled initial enabled state of notifications
 		 * @param globalNotifications enabled state of notifications in gerenal
 		 */
-		bool execute(QList<ToggleableCommand> * commandLists, bool commandsEnabled, bool trayIconVisibility, bool notificationEnabled, bool globalNotifications);
-		/**
-		 * @brief Creates the object and initializes its user interface.
-		 * @param parent parent widget
-		 */
-		CDeviceSettings(QWidget * parent = 0);
+		bool execute(std::array<QList<ToggleableCommand>, 5> &commandLists, bool& commandsEnabled, bool& trayIconVisibility, bool& notificationEnabled, bool globalNotifications);
+
 	private:
-		static int m_LastIndex;
+		CCommandListModel m_CommandListModel;
 
 		Ui::devset ui;
-		int m_LastList;
-		QList<ToggleableCommand> m_CommandLists[5];
+		int m_LastList{-1};
+		std::array<QList<ToggleableCommand>, 5> m_CommandLists;
+
 	private slots:
-		void updateCommandList(int state);
+		void updateCommandList(int list);
 		void enableAllCommands();
 		void disableAllCommands();
 		void addCommand();

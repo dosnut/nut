@@ -85,7 +85,7 @@ namespace qnut {
 		 * @param wireless CDevice with wireless support
 		 * @param parent parent widget
 		 */
-		CWirelessSettings(libnutclient::CDevice * wireless, QWidget * parent = 0);
+		explicit CWirelessSettings(libnutclient::CDevice * wireless, QWidget * parent = 0);
 
 		void readSettings(QSettings * settings);
 		void writeSettings(QSettings * settings);

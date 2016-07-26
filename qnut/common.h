@@ -23,10 +23,10 @@ namespace libnutclient {
 namespace qnut {
 	/// @brief Simple structure for a command string and it's enabled state
 	struct ToggleableCommand {
-		bool enabled;
+		bool enabled{false};
 		QString path;
 
-		ToggleableCommand() : enabled(false) {}
+		explicit ToggleableCommand() = default;
 	};
 
 	/**

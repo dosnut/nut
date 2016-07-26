@@ -26,7 +26,7 @@ namespace qnut {
 	 *
 	 * By accepting the settings made in the UI they are verified (on error the dialog stays open).
 	 */
-	class CAccessPointConfig : public CAbstractWifiNetConfigDialog {
+	class CAccessPointConfig final : public CAbstractWifiNetConfigDialog {
 		Q_OBJECT
 	public:
 		static QString lastFileOpenDir() { return m_LastFileOpenDir; }
@@ -36,7 +36,7 @@ namespace qnut {
 		 * @brief Creates the object and initializes the basic user interface.
 		 * @param parent parent widget
 		 */
-		CAccessPointConfig(libnutwireless::CWireless * interface, QWidget * parent = 0);
+		explicit CAccessPointConfig(libnutwireless::CWireless* interface, QWidget* parent = nullptr);
 		virtual ~CAccessPointConfig();
 	protected:
 		Ui::apconf ui;
@@ -61,7 +61,7 @@ namespace qnut {
 		void setAuthConfig(int type);
 		void handleRSNModeChanged(int value);
 
-		virtual bool applyConfiguration();
+		bool applyConfiguration() override;
 
 		void countPskChars(QString psk);
 		void togglePlainPSK(bool show);
@@ -70,7 +70,7 @@ namespace qnut {
 
 		void setUiEAPPhase(int phase);
 
-		virtual void populateUi();
+		void populateUi() override;
 	private:
 		CErrorCodeEvaluator * m_EapErrorCodeEvaluator;
 		inline void populateErrorCodeEvaluator();

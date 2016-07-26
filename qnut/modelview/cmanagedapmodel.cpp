@@ -20,19 +20,9 @@ namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutwireless;
 
-	CManagedAPModel::CManagedAPModel(CWpaSupplicant * wpaSupplicant, QObject * parent) : QAbstractItemModel(parent) {
-		setWpaSupplicant(wpaSupplicant);
-	}
-
-	CManagedAPModel::~CManagedAPModel() {
-		m_Supplicant = NULL;
-	}
-
-	void CManagedAPModel::setWpaSupplicant(CWpaSupplicant * wpaSupplicant) {
-		if (m_Supplicant == wpaSupplicant)
-			return;
-
-		m_Supplicant = wpaSupplicant;
+	CManagedAPModel::CManagedAPModel(CWpaSupplicant * wpaSupplicant, QObject * parent)
+	: QAbstractItemModel(parent)
+	, m_Supplicant(wpaSupplicant) {
 		if (m_Supplicant) {
 			updateNetworks();
 			connect(m_Supplicant, &CWpaSupplicant::networkListUpdated, this, &CManagedAPModel::updateNetworks);
@@ -40,13 +30,23 @@ namespace qnut {
 		}
 	}
 
+	libnutwireless::ShortNetworkInfo const* CManagedAPModel::networkInfoByModelIndex(QModelIndex const& index) const {
+		if (!index.isValid()) return nullptr;
+		quintptr const id = index.internalId();
+		if (id >= static_cast<unsigned int>(m_Networks.size())) return nullptr;
+		return &m_Networks.at(id);
+	}
+
 	void CManagedAPModel::updateNetworks() {
 		emit layoutAboutToBeChanged();
+		m_CurrentNetwork = nullptr;
 		m_Networks = m_Supplicant->listNetworks();
-		m_CurrentID = -1;
-		foreach (libnutwireless::ShortNetworkInfo i, m_Networks)
-			if (i.flags == NF_CURRENT)
-				m_CurrentID = i.id;
+		for (libnutwireless::ShortNetworkInfo& network: m_Networks) {
+			if (network.flags == NF_CURRENT) {
+				m_CurrentNetwork = &network;
+				break;
+			}
+		}
 		emit layoutChanged();
 	}
 
@@ -170,23 +170,23 @@ namespace qnut {
 		setDynamicSortFilter(true);
 	}
 
-	bool CManagedAPProxyModel::lessThan(const QModelIndex & left, const QModelIndex & right) {
+	bool CManagedAPProxyModel::lessThan(const QModelIndex & left, const QModelIndex & right) const {
 		CManagedAPModel * source = qobject_cast<CManagedAPModel *>(sourceModel());
 		if (!source)
 			return true;
 
-		int leftID  = left.internalId();
-		int rightID = right.internalId();
+		auto leftNetwork = source->networkInfoByModelIndex(left);
+		auto rightNetwork = source->networkInfoByModelIndex(right);
 
 		switch (left.column()) {
 			case UI_MANAP_ID:
-				return lessThanID(source->cachedNetworks()[leftID], source->cachedNetworks()[rightID]);
+				return lessThanID(*leftNetwork, *rightNetwork);
 			case UI_MANAP_SSID:
-				return lessThanSSID(source->cachedNetworks()[leftID], source->cachedNetworks()[rightID]);
+				return lessThanSSID(*leftNetwork, *rightNetwork);
 			case UI_MANAP_BSSID:
-				return lessThanBSSID(source->cachedNetworks()[leftID], source->cachedNetworks()[rightID]);
+				return lessThanBSSID(*leftNetwork, *rightNetwork);
 			case UI_MANAP_STATUS:
-				return lessThanFlags(source->cachedNetworks()[leftID], source->cachedNetworks()[rightID]);
+				return lessThanFlags(*leftNetwork, *rightNetwork);
 		default:
 			return true;
 		}

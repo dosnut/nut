@@ -10,6 +10,7 @@ namespace libnutclient {
 
 namespace qnut {
 	class CUIDevice;
+	class CDeviceSettings;
 
 	/**
 	 * @brief CUIDeviceModel provides an item model to manage the ui representation of devicess.
@@ -32,28 +33,32 @@ namespace qnut {
 		 * @brief Creates the object and initializes the model.
 		 * @param parent parent object
 		 */
-		CUIDeviceModel(QObject * parent = 0);
+		explicit CUIDeviceModel(QWidget* parent = nullptr);
+
 		/// @brief Destroyes the object.
 		~CUIDeviceModel();
 
-		CUIDevice * addUIDevice(libnutclient::CDevice * device);
-		void removeUIDevice(CUIDevice * target);
+		CUIDevice* addUIDevice(libnutclient::CDevice* device);
+		void removeUIDevice(CUIDevice* target);
 		void removeUIDevice(int index);
 
-		int findUIDevice(libnutclient::CDevice * device);
+		int findUIDevice(libnutclient::CDevice* device);
 
-		const QList<CUIDevice *> & uiDevices() const { return m_UIDevices; }
+		const QList<CUIDevice*>& uiDevices() const { return m_UIDevices; }
 
-		QVariant data(const QModelIndex & index, int role) const;
-		Qt::ItemFlags flags(const QModelIndex & index) const;
-		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-		QModelIndex index(int row, int column , const QModelIndex & parent = QModelIndex()) const;
-		QModelIndex parent(const QModelIndex & index) const;
-		bool hasChildren(const QModelIndex & parent = QModelIndex()) const;
-		int rowCount(const QModelIndex & parent = QModelIndex()) const;
-		int columnCount(const QModelIndex & parent = QModelIndex()) const;
+		QVariant data(const QModelIndex & index, int role) const override;
+		Qt::ItemFlags flags(const QModelIndex & index) const override;
+		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+		QModelIndex index(int row, int column , const QModelIndex & parent = QModelIndex()) const override;
+		QModelIndex parent(const QModelIndex & index) const override;
+		bool hasChildren(const QModelIndex & parent = QModelIndex()) const override;
+		int rowCount(const QModelIndex & parent = QModelIndex()) const override;
+		int columnCount(const QModelIndex & parent = QModelIndex()) const override;
+
 	private:
-		QList<CUIDevice *> m_UIDevices;
+		QList<CUIDevice*> m_UIDevices;
+		std::unique_ptr<CDeviceSettings> m_DeviceSettings;
+
 	private slots:
 		void updateDeviceState();
 		void updateSignalQuality();

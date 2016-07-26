@@ -26,18 +26,16 @@ namespace qnut {
 		 * @brief Creates the object and initializes the model with an empty list of commands.
 		 * @param parent parent object
 		 */
-		CCommandListModel(QObject * parent = 0);
-//		/// @brief Destroys the object.
-//		~CommandListModel();
+		explicit CCommandListModel(QObject* parent = nullptr);
 
 		/**
 		 * @brief Caches the provided list
 		 * @param list list of commands to cache
 		 */
-		void setList(QList<ToggleableCommand> & list);
+		void setList(QList<ToggleableCommand> const& list);
 
 		/// @brief returns the cached command list
-		QList<ToggleableCommand> & cachedList() { return m_Data; }
+		QList<ToggleableCommand>& cachedList() { return m_Data; }
 
 		/**
 		 * @brief sets enabled value for all commands in the cached list
@@ -45,12 +43,13 @@ namespace qnut {
 		 */
 		void setAllEnabled(bool value);
 
-		int rowCount(const QModelIndex & parent = QModelIndex()) const;
-		QVariant data(const QModelIndex & index, int role) const;
-		Qt::ItemFlags flags(const QModelIndex & index) const;
-		bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
+		int rowCount(const QModelIndex & parent = QModelIndex()) const override;
+		QVariant data(const QModelIndex & index, int role) const override;
+		Qt::ItemFlags flags(const QModelIndex & index) const override;
+		bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
+		bool removeRows(int position, int rows, const QModelIndex & parent = QModelIndex()) override;
+
 		QModelIndex appendRow(ToggleableCommand command = ToggleableCommand());
-		bool removeRows(int position, int rows, const QModelIndex & parent = QModelIndex());
 	private:
 		QList<ToggleableCommand> m_Data;
 	};

@@ -26,12 +26,12 @@ namespace qnut {
 		 * @brief Creates the object and initializes the delegate.
 		 * @param parent parent object
 		 */
-		CIPEditDelegate(QObject * parent = 0);
+		explicit CIPEditDelegate(QObject* parent = nullptr);
 
-		QWidget * createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const;
+		QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
-		void setEditorData(QWidget * editor, const QModelIndex & index) const;
-		void setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index) const;
+		void setEditorData(QWidget* editor, const QModelIndex& index) const override;
+		void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
 	};
 }
 

@@ -34,17 +34,15 @@ namespace qnut {
 		 * @param data pointer to an environment (if NULL nothing is displayed)
 		 * @param parent parent object
 		 */
-		CEnvironmentDetailsModel(libnutclient::CEnvironment * data = NULL, QObject * parent = 0);
-		/// @brief Destroyes the object.
-		~CEnvironmentDetailsModel();
+		explicit CEnvironmentDetailsModel(libnutclient::CEnvironment* data = nullptr, QObject* parent = nullptr);
 
-		QVariant data(const QModelIndex & index, int role) const;
-		Qt::ItemFlags flags(const QModelIndex & index) const;
-		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-		QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const;
-		QModelIndex parent(const QModelIndex & index) const;
-		int rowCount(const QModelIndex & parent = QModelIndex()) const;
-		int columnCount(const QModelIndex & parent = QModelIndex()) const;
+		QVariant data(const QModelIndex & index, int role) const override;
+		Qt::ItemFlags flags(const QModelIndex & index) const override;
+		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+		QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const override;
+		QModelIndex parent(const QModelIndex & index) const override;
+		int rowCount(const QModelIndex & parent = QModelIndex()) const override;
+		int columnCount(const QModelIndex & parent = QModelIndex()) const override;
 
 	private slots:
 		void layoutChangedDefault();
@@ -52,7 +50,7 @@ namespace qnut {
 	private:
 		void fillParentRules(quint32 start = 0);
 
-		libnutclient::CEnvironment * m_Environment;
+		libnutclient::CEnvironment* const m_Environment{nullptr};
 		libnutcommon::SelectConfig m_SelectConfig;
 		QVector<quint32> m_ParentRules;
 	};

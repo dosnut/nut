@@ -10,7 +10,7 @@
 namespace qnut {
 	CCommandListModel::CCommandListModel(QObject * parent) : QAbstractListModel(parent) {}
 
-	void CCommandListModel::setList(QList<ToggleableCommand> & list) {
+	void CCommandListModel::setList(QList<ToggleableCommand> const& list) {
 #if QT_VERSION >= 0x040600
 		beginResetModel();
 		m_Data = list;
@@ -81,15 +81,6 @@ namespace qnut {
 		return false;
 	}
 
-	QModelIndex CCommandListModel::appendRow(ToggleableCommand command) {
-		beginInsertRows(QModelIndex(), m_Data.size(), m_Data.size());
-
-		m_Data << command;
-
-		endInsertRows();
-		return index(m_Data.size()-1);
-	}
-
 	bool CCommandListModel::removeRows(int position, int rows, const QModelIndex & parent) {
 		beginRemoveRows(parent, position, position+rows-1);
 
@@ -98,5 +89,14 @@ namespace qnut {
 
 		endRemoveRows();
 		return true;
+	}
+
+	QModelIndex CCommandListModel::appendRow(ToggleableCommand command) {
+		beginInsertRows(QModelIndex(), m_Data.size(), m_Data.size());
+
+		m_Data << command;
+
+		endInsertRows();
+		return index(m_Data.size()-1);
 	}
 }

@@ -45,8 +45,6 @@ namespace qnut {
 			qApp->setQuitOnLastWindowClosed(false);
 	}
 
-	CNotificationManager::~CNotificationManager() {}
-
 	bool CNotificationManager::isIconVisible(CUIDevice * uiDevice) {
 		if (uiDevice && m_UIDeviceIcons.contains(uiDevice))
 			return m_UIDeviceIcons[uiDevice]->isVisible();

@@ -333,80 +333,96 @@ namespace qnut {
 			CAccessPointConfig dialog(m_Device->getWireless(), this);
 			accepted = dialog.execute();
 		}
-		if (accepted && m_AutoSaveNetworksAction->isChecked())
+		if (accepted && m_AutoSaveNetworksAction->isChecked()) {
 			m_SaveNetworksAction->trigger();
+		}
 	}
 
 	void CWirelessSettings::addAdhoc() {
 		CAdhocConfig dialog(m_Device->getWireless(), this);
-		if (dialog.execute() && m_AutoSaveNetworksAction->isChecked())
+		if (dialog.execute() && m_AutoSaveNetworksAction->isChecked()) {
 			m_SaveNetworksAction->trigger();
+		}
 	}
 
 	void CWirelessSettings::switchToSelectedNetwork() {
-		int id = m_ManagedAPModel->cachedNetworks()[selectedIndex(ui.managedView).internalId()].id;
+		ShortNetworkInfo const* const network = m_ManagedAPModel->networkInfoByModelIndex(selectedIndex(ui.managedView));
+		if (!network) return;
 
-		m_Device->getWireless()->getWpaSupplicant()->selectNetwork(id);
-		if (m_AutoSaveNetworksAction->isChecked())
+		m_Device->getWireless()->getWpaSupplicant()->selectNetwork(network->id);
+		if (m_AutoSaveNetworksAction->isChecked()) {
 			m_SaveNetworksAction->trigger();
+		}
 	}
 
 	void CWirelessSettings::removeSelectedNetwork() {
-		ShortNetworkInfo network = m_ManagedAPModel->cachedNetworks()[selectedIndex(ui.managedView).internalId()];
+		ShortNetworkInfo const* const network = m_ManagedAPModel->networkInfoByModelIndex(selectedIndex(ui.managedView));
+		if (!network) return;
 
-		QString message = tr("Are you sure to remove \"%1\"?").arg(network.ssid);
-		if (m_AutoSaveNetworksAction->isChecked())
+		QString message = tr("Are you sure to remove \"%1\"?").arg(network->ssid);
+		if (m_AutoSaveNetworksAction->isChecked()) {
 			message += '\n' + tr("This action is not reversible.");
+		}
 
 		if (QMessageBox::question(this, tr("Removing a managed network"), message,
-			QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
-			m_Device->getWireless()->getWpaSupplicant()->removeNetwork(network.id);
-			if (m_AutoSaveNetworksAction->isChecked())
+			QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes) {
+			m_Device->getWireless()->getWpaSupplicant()->removeNetwork(network->id);
+			if (m_AutoSaveNetworksAction->isChecked()) {
 				m_SaveNetworksAction->trigger();
+			}
+		}
 	}
 
 	void CWirelessSettings::configureSelectedNetwork() {
-		ShortNetworkInfo network = m_ManagedAPModel->cachedNetworks()[selectedIndex(ui.managedView).internalId()];
+		ShortNetworkInfo const* const network = m_ManagedAPModel->networkInfoByModelIndex(selectedIndex(ui.managedView));
+		if (!network) return;
 
 		CAbstractWifiNetConfigDialog * dialog;
 
-		if (network.adhoc)
+		if (network->adhoc) {
 			dialog = new CAdhocConfig(m_Device->getWireless(), this);
-		else
+		}
+		else {
 			dialog = new CAccessPointConfig(m_Device->getWireless(), this);
+		}
 
-		if (dialog->execute(network.id) && m_AutoSaveNetworksAction->isChecked())
+		if (dialog->execute(network->id) && m_AutoSaveNetworksAction->isChecked()) {
 			m_SaveNetworksAction->trigger();
+		}
 
 		delete dialog;
 	}
 
 	void CWirelessSettings::enableSelectedNetwork() {
-		int id = m_ManagedAPModel->cachedNetworks()[selectedIndex(ui.managedView).internalId()].id;
+		ShortNetworkInfo const* const network = m_ManagedAPModel->networkInfoByModelIndex(selectedIndex(ui.managedView));
+		if (!network) return;
 
-		m_Device->getWireless()->getWpaSupplicant()->enableNetwork(id);
+		m_Device->getWireless()->getWpaSupplicant()->enableNetwork(network->id);
 
-		if (m_AutoSaveNetworksAction->isChecked())
+		if (m_AutoSaveNetworksAction->isChecked()) {
 			m_SaveNetworksAction->trigger();
+		}
 	}
 
 	void CWirelessSettings::disableSelectedNetwork() {
-		int id = m_ManagedAPModel->cachedNetworks()[selectedIndex(ui.managedView).internalId()].id;
+		ShortNetworkInfo const* const network = m_ManagedAPModel->networkInfoByModelIndex(selectedIndex(ui.managedView));
+		if (!network) return;
 
-		m_Device->getWireless()->getWpaSupplicant()->disableNetwork(id);
+		m_Device->getWireless()->getWpaSupplicant()->disableNetwork(network->id);
 
-		if (m_AutoSaveNetworksAction->isChecked())
+		if (m_AutoSaveNetworksAction->isChecked()) {
 			m_SaveNetworksAction->trigger();
+		}
 	}
 
 	void CWirelessSettings::enableNetworks() {
-		QList<ShortNetworkInfo> networks = m_ManagedAPModel->cachedNetworks();
-		foreach (ShortNetworkInfo i, networks) {
-			m_Device->getWireless()->getWpaSupplicant()->enableNetwork(i.id);
+		for (ShortNetworkInfo const& network: m_ManagedAPModel->cachedNetworks()) {
+			m_Device->getWireless()->getWpaSupplicant()->enableNetwork(network.id);
 		}
 
-		if (m_AutoSaveNetworksAction->isChecked())
+		if (m_AutoSaveNetworksAction->isChecked()) {
 			m_SaveNetworksAction->trigger();
+		}
 	}
 
 	void CWirelessSettings::handleRescanRequest() {
@@ -428,14 +444,16 @@ namespace qnut {
 	}
 
 	void CWirelessSettings::exportSelectedNetwork() {
+		ShortNetworkInfo const* const network = m_ManagedAPModel->networkInfoByModelIndex(selectedIndex(ui.managedView));
+		if (!network) return;
+
 		QString fileName = QFileDialog::getSaveFileName(this, tr("Export network configuration"), QDir::currentPath(), tr("Configuration files (*.apconf *.conf)"));
 		if (!fileName.isEmpty()) {
 			QFile file(fileName);
 			file.open(QFile::WriteOnly);
 			QTextStream outStream(&file);
 
-			int id = m_ManagedAPModel->cachedNetworks()[selectedIndex(ui.managedView).internalId()].id;
-			m_Device->getWireless()->getWpaSupplicant()->getNetworkConfig(id).writeTo(outStream);
+			m_Device->getWireless()->getWpaSupplicant()->getNetworkConfig(network->id).writeTo(outStream);
 		}
 	}
 
@@ -446,18 +464,25 @@ namespace qnut {
 			file.open(QFile::WriteOnly);
 			QTextStream outStream(&file);
 
-			foreach (libnutwireless::ShortNetworkInfo i, m_ManagedAPModel->cachedNetworks())
-				m_Device->getWireless()->getWpaSupplicant()->getNetworkConfig(i.id).writeTo(outStream);
+			for (ShortNetworkInfo const& network: m_ManagedAPModel->cachedNetworks()) {
+				m_Device->getWireless()->getWpaSupplicant()->getNetworkConfig(network.id).writeTo(outStream);
+			}
 		}
 	}
 
 	void CWirelessSettings::handleBSSIDSwitchRequest(const QString & data) {
+		auto network = m_ManagedAPModel->currentNetworkInfo();
+		if (!network) return;
+
 		libnutcommon::MacAddress bssid(data);
 		if (bssid.valid()) {
-			m_Device->getWireless()->getWpaSupplicant()->setBssid(m_ManagedAPModel->currentID(), bssid);
-			m_ManagedAPModel->updateNetworks();
+			m_Device->getWireless()->getWpaSupplicant()->setBssid(network->id, bssid);
 
-			m_Device->getWireless()->getWpaSupplicant()->selectNetwork(m_ManagedAPModel->currentID());
+			m_ManagedAPModel->updateNetworks();
+			network = m_ManagedAPModel->currentNetworkInfo();
+			if (!network) return;
+
+			m_Device->getWireless()->getWpaSupplicant()->selectNetwork(network->id);
 
 // 			m_Device->getWireless()->getWpaSupplicant()->reassociate();
 		}
@@ -469,13 +494,15 @@ namespace qnut {
 	}
 
 	void CWirelessSettings::updateBSSIDMenu() {
-		foreach (QAction * i, m_SetBSSIDMenu->actions())
+		for (QAction* i: m_SetBSSIDMenu->actions()) {
 			m_SetBSSIDMapper->removeMappings(i);
-
+		}
 		m_SetBSSIDMenu->clear();
 
-		if (m_Device->getState() > DeviceState::ACTIVATED && m_ManagedAPModel->currentID() != -1) {
-			QString ssid = m_ManagedAPModel->cachedNetworks().at(m_ManagedAPModel->currentID()).ssid;
+		auto network = m_ManagedAPModel->currentNetworkInfo();
+
+		if (m_Device->getState() > DeviceState::ACTIVATED && network) {
+			QString ssid = network->ssid;
 			for (auto const scanResult: m_AvailableAPModel->scanResultListBySSID(ssid)) {
 				QString bssidString = scanResult->bssid.toString();
 				QAction* currentAction = m_SetBSSIDMenu->addAction(

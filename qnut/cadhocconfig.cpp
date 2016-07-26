@@ -17,7 +17,8 @@
 namespace qnut {
 	using namespace libnutwireless;
 
-	CAdhocConfig::CAdhocConfig(CWireless * supplicant, QWidget * parent) : CAbstractWifiNetConfigDialog(supplicant, parent) {
+	CAdhocConfig::CAdhocConfig(CWireless* supplicant, QWidget* parent)
+	: CAbstractWifiNetConfigDialog(supplicant, parent) {
 		ui.setupUi(this);
 
 		quint32 chan;
@@ -240,7 +241,7 @@ namespace qnut {
 		// register general error codes
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_SSID, "SSID");
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_KEYMGMT, tr("Key Management"));
-		m_ErrorCodeEvaluator->registerErrorCode(NCF_GROUP, ui.grpCipGroup->title());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_GROUP, tr("General algorithm (group cipher)"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_PSK, tr("Pre Shared Key"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY0, tr("WEP key 0"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY1, tr("WEP key 1"));

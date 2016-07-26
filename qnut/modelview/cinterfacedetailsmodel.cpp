@@ -18,52 +18,43 @@ namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutclient;
 
-	CInterfaceDetailsModel::CInterfaceDetailsModel(CInterface * data, QObject * parent) : QAbstractItemModel(parent) {
-		m_Interface = data;
+	CInterfaceDetailsModel::CInterfaceDetailsModel(CInterface * data, QObject * parent)
+	: QAbstractItemModel(parent)
+	, m_Interface(data) {
 		if (m_Interface) {
 			connect(m_Interface, &CInterface::stateChanged, this, &CInterfaceDetailsModel::layoutChangedDefault);
 			//connect(m_Interface, &CInterface::userConfigApplied, this, &CInterfaceDetailsModel::layoutChangedDefault);
 		}
 	}
 
-	CInterfaceDetailsModel::~CInterfaceDetailsModel() {
-		m_Interface = NULL;
-	}
-
 	int CInterfaceDetailsModel::columnCount(const QModelIndex &) const {
-		if (m_Interface == NULL)
-			return 0;
-		else
-			return 2;
+		return m_Interface ? 2 : 0;
 	}
 
 	int CInterfaceDetailsModel::rowCount(const QModelIndex & parent) const {
-		if (m_Interface == NULL)
-			return 0;
+		if (!m_Interface) return 0;
 
-		if (!parent.isValid())
-			if (m_Interface->getState() == InterfaceState::WAITFORCONFIG)
+		if (!parent.isValid()) {
+			if (m_Interface->getState() == InterfaceState::WAITFORCONFIG) {
 				return 4 + m_Interface->getUserConfig().dnsServers.size();
-			else if (m_Interface->getState() != InterfaceState::OFF)
+			}
+			else if (m_Interface->getState() != InterfaceState::OFF) {
 				return 4 + m_Interface->getDnsServers().size();
-			else if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
+			}
+			else if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC) {
 				return 4 + m_Interface->getConfig().static_dnsservers.size();
-			else
+			}
+			else {
 				return 4;
+			}
+		}
 		else {
 			return 0;
 		}
 	}
 
 	QVariant CInterfaceDetailsModel::data(const QModelIndex & index, int role) const {
-		if (m_Interface == NULL)
-			return QVariant();
-
-		if (!index.isValid())
-			return QVariant();
-
-		if (role != Qt::DisplayRole)
-			return QVariant();
+		if (!m_Interface || !index.isValid() || role != Qt::DisplayRole) return QVariant();
 
 		switch (index.column()) {
 		case IFDET_MOD_ITEM:
@@ -85,81 +76,103 @@ namespace qnut {
 			case 0:
 				switch (m_Interface->getState()) {
 				case InterfaceState::OFF:
-					if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC)
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC) {
 						return tr("user defined static");
+					}
 					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::DHCP) {
 						QString fallback;
-						if (m_Interface->getConfig().flags & IPv4ConfigFlag::ZEROCONF)
+						if (m_Interface->getConfig().flags & IPv4ConfigFlag::ZEROCONF) {
 							fallback = ' ' + tr("fallback: zeroconf");
-						else if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
+						}
+						else if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC) {
 							fallback = ' ' + tr("fallback: static");
+						}
 						return tr("dynamic (DHCP)") + fallback;
 					}
-					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::ZEROCONF)
+					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::ZEROCONF) {
 						return tr("zeroconf");
-					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
+					}
+					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC) {
 						return tr("static");
+					}
 					break;
 				case InterfaceState::STATIC:
-					if (m_Interface->getConfig().flags & IPv4ConfigFlag::DHCP)
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::DHCP) {
 						return tr("static (fallback)");
-					else
+					}
+					else {
 						return tr("static");
+					}
 				case InterfaceState::DHCP:
 					return tr("dynamic");
 				case InterfaceState::ZEROCONF:
-					if (m_Interface->getConfig().flags & IPv4ConfigFlag::DHCP)
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::DHCP) {
 						return tr("zeroconf (fallback)");
-					else
+					}
+					else {
 						return tr("zeroconf");
+					}
 				default:
 					break;
 				}
 				return tr("unknown");
 			case 1:
 				if ((m_Interface->getState() == InterfaceState::OFF) || (m_Interface->getState() == InterfaceState::WAITFORCONFIG)) {
-					if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC) {
 						return toStringDefault(m_Interface->getConfig().static_ip);
-					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC)
+					}
+					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC) {
 						return toStringDefault(m_Interface->getUserConfig().ip);
-					else
+					}
+					else {
 						return tr("none");
+					}
 				}
 				else
 					return toStringDefault(m_Interface->getIp());
 			case 2:
 				if ((m_Interface->getState() == InterfaceState::OFF) || (m_Interface->getState() == InterfaceState::WAITFORCONFIG)) {
-					if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC) {
 						return toStringDefault(m_Interface->getConfig().static_netmask);
-					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC)
+					}
+					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC) {
 						return toStringDefault(m_Interface->getUserConfig().netmask);
-					else
+					}
+					else {
 						return tr("none");
+					}
 				}
 				else
 					return toStringDefault(m_Interface->getNetmask());
 			case 3:
 				if ((m_Interface->getState() == InterfaceState::OFF) || (m_Interface->getState() == InterfaceState::WAITFORCONFIG)) {
-					if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC) {
 						return toStringDefault(m_Interface->getConfig().static_gateway);
-					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC)
+					}
+					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC) {
 						return toStringDefault(m_Interface->getUserConfig().gateway);
-					else
+					}
+					else {
 						return tr("none");
+					}
 				}
 				else
 					return toStringDefault(m_Interface->getGateway());
 			default:
 				if ((m_Interface->getState() == InterfaceState::OFF) || (m_Interface->getState() == InterfaceState::WAITFORCONFIG)) {
-					if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC)
+					if (m_Interface->getConfig().flags & IPv4ConfigFlag::STATIC) {
 						return m_Interface->getConfig().static_dnsservers[index.row()-4].toString();
-					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC)
+					}
+					else if (m_Interface->getConfig().flags & IPv4ConfigFlag::USERSTATIC) {
 						return m_Interface->getUserConfig().dnsServers[index.row()-4].toString();
-					else
+					}
+					else {
 						break;
+					}
 				}
-				else
+				else {
 					return m_Interface->getDnsServers()[index.row()-4].toString();
+				}
 			}
 			break;
 		default:
@@ -170,21 +183,13 @@ namespace qnut {
 	}
 
 	Qt::ItemFlags CInterfaceDetailsModel::flags(const QModelIndex & index) const {
-		if (m_Interface == NULL)
-			return 0;
-
-		if (!index.isValid())
-			return 0;
+		if (!m_Interface  || !index.isValid()) return 0;
 
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	}
 
 	QVariant CInterfaceDetailsModel::headerData(int section, Qt::Orientation orientation, int role) const {
-		if (m_Interface == NULL)
-			return QVariant();
-
-		if (role != Qt::DisplayRole)
-			return QVariant();
+		if (!m_Interface || role != Qt::DisplayRole) return QVariant();
 
 		if (orientation == Qt::Horizontal) {
 			switch (section) {
@@ -200,11 +205,7 @@ namespace qnut {
 	}
 
 	QModelIndex CInterfaceDetailsModel::index(int row, int column, const QModelIndex & parent) const {
-		if (m_Interface == NULL)
-			return QModelIndex();
-
-		if (!hasIndex(row, column, parent))
-			return QModelIndex();
+		if (!m_Interface || !hasIndex(row, column, parent)) return QModelIndex();
 
 		if (!parent.isValid()) {
 			//if (row < 4 + m_Interface->dnsserver.size())
@@ -218,8 +219,7 @@ namespace qnut {
 		return QModelIndex();
 	}
 
-	void CInterfaceDetailsModel::layoutChangedDefault()
-	{
+	void CInterfaceDetailsModel::layoutChangedDefault() {
 		layoutChanged();
 	}
 }

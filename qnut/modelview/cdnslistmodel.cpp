@@ -8,29 +8,23 @@
 #include "modelview/cdnslistmodel.h"
 
 namespace qnut {
-	CDNSListModel::CDNSListModel(QList<QHostAddress> * dnsList, QObject * parent) : QAbstractListModel(parent), m_DNSList(dnsList) {
-	}
-
-	CDNSListModel::~CDNSListModel() {
-		m_DNSList = NULL;
+	CDNSListModel::CDNSListModel(QList<QHostAddress> const& dnsList, QObject * parent)
+	: QAbstractListModel(parent), m_DNSList(dnsList) {
 	}
 
 	int CDNSListModel::rowCount(const QModelIndex &) const {
-		if (m_DNSList)
-			return m_DNSList->size();
-		else
-			return 0;
+		return m_DNSList.size();
 	}
 
 	QVariant CDNSListModel::data(const QModelIndex & index, int role) const {
 		if (!index.isValid())
 			return QVariant();
 
-		if (index.row() >= m_DNSList->size())
+		if (index.row() >= m_DNSList.size())
 			return QVariant();
 
 		if (role == Qt::DisplayRole)
-			return m_DNSList->at(index.row()).toString();
+			return m_DNSList.at(index.row()).toString();
 		else
 			return QVariant();
 	}
@@ -47,7 +41,7 @@ namespace qnut {
 			QHostAddress address = QHostAddress(value.toString());
 			if (address.isNull())
 				return false;
-			m_DNSList->replace(index.row(), QHostAddress(value.toString()));
+			m_DNSList.replace(index.row(), QHostAddress(value.toString()));
 			emit dataChanged(index, index);
 			return true;
 		}
@@ -55,19 +49,19 @@ namespace qnut {
 	}
 
 	QModelIndex CDNSListModel::appendRow(QHostAddress address) {
-		beginInsertRows(QModelIndex(), m_DNSList->size(), m_DNSList->size());
+		beginInsertRows(QModelIndex(), m_DNSList.size(), m_DNSList.size());
 
-		*m_DNSList << address;
+		m_DNSList << address;
 
 		endInsertRows();
-		return index(m_DNSList->size()-1);
+		return index(m_DNSList.size()-1);
 	}
 
 	bool CDNSListModel::removeRows(int position, int rows, const QModelIndex & parent) {
 		beginRemoveRows(parent, position, position+rows-1);
 
 		for (int i = position; i < position+rows; ++i)
-			m_DNSList->removeAt(i);
+			m_DNSList.removeAt(i);
 
 		endRemoveRows();
 		return true;

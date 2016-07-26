@@ -549,14 +549,14 @@ namespace qnut {
 		// register general error codes
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_SSID, "SSID");
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_BSSID, "BSSID");
-		m_ErrorCodeEvaluator->registerErrorCode(NCF_DISABLED, ui.autoEnableCheck->text());
-		m_ErrorCodeEvaluator->registerErrorCode(NCF_SCAN_SSID, ui.scanCheck->text());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_DISABLED, tr("Enable automatic selection"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_SCAN_SSID, tr("Enable SSID scanning (slower but needed if SSID is hidden)"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_PROTO, tr("WPA2 mode"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_KEYMGMT, tr("Key Management"));
-		m_ErrorCodeEvaluator->registerErrorCode(NCF_PAIRWISE, ui.prwCipGroup->title());
-		m_ErrorCodeEvaluator->registerErrorCode(NCF_GROUP, ui.grpCipGroup->title());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_PAIRWISE, tr("Pairwise algorithm (pairwise cipher)"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_GROUP, tr("General algorithm (group cipher)"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_PSK, tr("Pre Shared Key"));
-		m_ErrorCodeEvaluator->registerErrorCode(NCF_PROA_KEY_CACHING, ui.proativeCheck->text());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_PROA_KEY_CACHING, tr("Proactive Key Caching (for PMKSA)"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY0, tr("WEP key 0"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY1, tr("WEP key 1"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY2, tr("WEP key 2"));
@@ -566,7 +566,7 @@ namespace qnut {
 		// not needed : NCF_FREQ NCF_MODE
 
 		// register eap error codes
-		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_EAP, ui.eapMethodGroup->title());
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_EAP, tr("EAP method"));
 		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_IDENTITY, tr("Identity"));
 		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_ANON_IDENTITY, tr("Anonymous Identity"));
 		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_PASSWD, tr("Password"));
