@@ -13,14 +13,6 @@
 #include <QSortFilterProxyModel>
 #include <libnutwireless/hwtypes.h>
 
-#define UI_AVLAP_SSID    0
-#define UI_AVLAP_KEYMGMT 1
-#define UI_AVLAP_ENC     2
-#define UI_AVLAP_BSSID   3
-#define UI_AVLAP_CHANNEL 4
-#define UI_AVLAP_QUALITY 5
-#define UI_AVLAP_LEVEL   6
-
 namespace libnutwireless {
 	class CWirelessHW;
 }
@@ -88,8 +80,10 @@ namespace qnut {
 	class CAvailableAPProxyModel : public QSortFilterProxyModel {
 		Q_OBJECT
 	public:
-		CAvailableAPProxyModel(QObject * parent = 0);
-		bool lessThan(const QModelIndex & left, const QModelIndex & right);
+		explicit CAvailableAPProxyModel(QObject* parent = 0);
+
+	protected:
+		bool lessThan(const QModelIndex & left, const QModelIndex & right) const override;
 	};
 }
 #endif

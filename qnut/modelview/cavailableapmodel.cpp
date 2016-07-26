@@ -14,6 +14,18 @@
 #include "common.h"
 #include "constants.h"
 
+namespace {
+	enum {
+		UI_AVLAP_SSID    = 0,
+		UI_AVLAP_KEYMGMT = 1,
+		UI_AVLAP_ENC     = 2,
+		UI_AVLAP_BSSID   = 3,
+		UI_AVLAP_CHANNEL = 4,
+		UI_AVLAP_QUALITY = 5,
+		UI_AVLAP_LEVEL   = 6,
+	};
+}
+
 namespace qnut {
 	using namespace libnutcommon;
 	using namespace libnutwireless;
@@ -290,7 +302,7 @@ namespace qnut {
 		setFilterCaseSensitivity(Qt::CaseInsensitive);
 	}
 
-	bool CAvailableAPProxyModel::lessThan(const QModelIndex & left, const QModelIndex & right) {
+	bool CAvailableAPProxyModel::lessThan(const QModelIndex & left, const QModelIndex & right) const {
 		CAvailableAPModel * source = qobject_cast<CAvailableAPModel *>(sourceModel());
 		if (!source)
 			return true;
