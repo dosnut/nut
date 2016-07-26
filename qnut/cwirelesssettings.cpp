@@ -315,18 +315,18 @@ namespace qnut {
 	}
 
 	void CWirelessSettings::addNetwork() {
-		QModelIndex index = selectedIndex(ui.availableView);
+		QModelIndex const index = selectedIndex(ui.availableView);
+		ScanResult const* const scan = m_AvailableAPModel->scanResultByModelIndex(index);
 
 		bool accepted = false;
-		if (index.isValid()) {
-			ScanResult scan = m_AvailableAPModel->cachedScans()[m_AvailableAPModel->scanResultIdByModelIndex(index)];
-			if (scan.opmode == OPM_ADHOC) {
+		if (scan) {
+			if (scan->opmode == OPM_ADHOC) {
 				CAdhocConfig dialog(m_Device->getWireless(), this);
-				accepted = dialog.execute(scan);
+				accepted = dialog.execute(*scan);
 			}
 			else {
 				CAccessPointConfig dialog(m_Device->getWireless(), this);
-				accepted = dialog.execute(scan);
+				accepted = dialog.execute(*scan);
 			}
 		}
 		else {
@@ -474,25 +474,20 @@ namespace qnut {
 
 		m_SetBSSIDMenu->clear();
 
-		QAction * currentAction;
-
 		if (m_Device->getState() > DeviceState::ACTIVATED && m_ManagedAPModel->currentID() != -1) {
 			QString ssid = m_ManagedAPModel->cachedNetworks().at(m_ManagedAPModel->currentID()).ssid;
-			CAvailableAPModel::IndexList * scanList = m_AvailableAPModel->scanResultIdListBySSID(ssid);
-			if (scanList) {
-				QString bssidString;
-				for (int i = 0; i < scanList->count(); i++) {
-					bssidString = m_AvailableAPModel->cachedScans().at(scanList->at(i)).bssid.toString();
-					currentAction = m_SetBSSIDMenu->addAction(tr("%1 (Quality: %2)")
-						.arg(bssidString, signalQualityToString(m_AvailableAPModel->cachedScans().at(scanList->at(i)).signal)));
-					m_SetBSSIDMapper->setMapping(currentAction, bssidString);
-					connect(currentAction, &QAction::triggered, m_SetBSSIDMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
-				}
+			for (auto const scanResult: m_AvailableAPModel->scanResultListBySSID(ssid)) {
+				QString bssidString = scanResult->bssid.toString();
+				QAction* currentAction = m_SetBSSIDMenu->addAction(
+							tr("%1 (Quality: %2)")
+							.arg(bssidString, signalQualityToString(scanResult->signal)));
+				m_SetBSSIDMapper->setMapping(currentAction, bssidString);
+				connect(currentAction, &QAction::triggered, m_SetBSSIDMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
 			}
 		}
 
 		if (m_SetBSSIDMenu->actions().isEmpty()) {
-			currentAction = m_SetBSSIDMenu->addAction(tr("< no matching scan results >"));
+			QAction* currentAction = m_SetBSSIDMenu->addAction(tr("< no matching scan results >"));
 			currentAction->setEnabled(false);
 		}
 	}

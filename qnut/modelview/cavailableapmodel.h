@@ -45,47 +45,44 @@ namespace qnut {
 	class CAvailableAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		/// @brief Type definition for a list of ids
-		typedef QList<int> IndexList;
-
 		/**
 		 * @brief Creates the object and initializes the model according to the given wpa_supplicant object.
 		 * @param wpaSupplicant pointer to a wpa_supplicant (if NULL nothing is displayed)
 		 * @param parent parent object
 		 */
-		CAvailableAPModel(libnutwireless::CWirelessHW * data = NULL, QObject * parent = 0);
-		/// @brief Destroyes the object.
-		~CAvailableAPModel();
+		explicit CAvailableAPModel(libnutwireless::CWirelessHW* data, QObject* parent = nullptr);
 
-		/// @brief Returns the cached list of scan results.
-		const QList<libnutwireless::ScanResult> & cachedScans() const { return m_Scans; }
+		/// @brief Returns a cached scan result by a given model index (or nullptr if index is not valid)
+		libnutwireless::ScanResult const* scanResultByModelIndex(const QModelIndex& index) const;
 
+		/// @brief Returns a list of pointers to scan results that match the provided SSID
+		QList<libnutwireless::ScanResult const*> scanResultListBySSID(QString ssid) const;
+
+		QVariant data(const QModelIndex & index, int role) const override;
+		Qt::ItemFlags flags(const QModelIndex & index) const override;
+		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+		QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const override;
+		QModelIndex parent(const QModelIndex & index) const override;
+		bool hasChildren(const QModelIndex & parent = QModelIndex()) const override;
+		int rowCount(const QModelIndex & parent = QModelIndex()) const override;
+		int columnCount(const QModelIndex & parent = QModelIndex()) const override;
+
+	signals:
+		void cachedScansUpdated();
+
+	private slots:
+		void updateScans();
+
+	private:
 		/// @brief Returns a cached scan result id by a given model index
 		int scanResultIdByModelIndex(const QModelIndex & index) const;
 
-		/// @brief Returns a pointer to a list of scan result ids that match the provided SSID
-		IndexList * scanResultIdListBySSID(QString ssid) const { return m_GroupedScans.value(ssid, NULL); }
-
-		QVariant data(const QModelIndex & index, int role) const;
-		Qt::ItemFlags flags(const QModelIndex & index) const;
-		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-		QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const;
-		QModelIndex parent(const QModelIndex & index) const;
-		bool hasChildren(const QModelIndex & parent = QModelIndex()) const;
-		int rowCount(const QModelIndex & parent = QModelIndex()) const;
-		int columnCount(const QModelIndex & parent = QModelIndex()) const;
-	signals:
-		void cachedScansUpdated();
-	private slots:
-		void updateScans();
 	private:
-		void setWpaSupplicant(libnutwireless::CWirelessHW * m_WirelessAcces);
-		libnutwireless::CWirelessHW * m_WirelessAcces = nullptr;
+		libnutwireless::CWirelessHW* const m_WirelessAccess = nullptr;
 
-		QHash<QString, IndexList *> m_GroupedScans;
-
-		QList<QString> m_SSIDs;
 		QList<libnutwireless::ScanResult> m_Scans;
+		QHash<QString, QList<int>> m_GroupedScans;
+		QList<QString> m_SSIDs;
 	};
 
 	class CAvailableAPProxyModel : public QSortFilterProxyModel {
