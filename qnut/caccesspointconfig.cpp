@@ -89,12 +89,12 @@ namespace qnut {
 		m_FileSelectStringMap.insert(ui.dhFileEdit, newFileEditStrings);
 		connect(ui.dhFileBrowse, &QToolButton::pressed, m_FileEditMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
 
-		m_HexEditMap.insert(ui.ssidHexCheck, ui.ssidEdit);
+		connect(ui.ssidHexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::toggleSSIDHex);
+
 		m_HexEditMap.insert(ui.wep0HexCheck, ui.wep0Edit);
 		m_HexEditMap.insert(ui.wep1HexCheck, ui.wep1Edit);
 		m_HexEditMap.insert(ui.wep2HexCheck, ui.wep2Edit);
 		m_HexEditMap.insert(ui.wep3HexCheck, ui.wep3Edit);
-		connect(ui.ssidHexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::convertLineEditTextToggle);
 		connect(ui.wep0HexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::convertLineEditTextToggle);
 		connect(ui.wep1HexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::convertLineEditTextToggle);
 		connect(ui.wep2HexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::convertLineEditTextToggle);
@@ -130,6 +130,14 @@ namespace qnut {
 		updateWEPState(ui.keyManagementCombo->currentIndex(), value);
 	}
 
+	void CAccessPointConfig::toggleSSIDHex(bool checked) {
+		if (checked) {
+			ui.ssidEdit->setText(libnutcommon::SSID::fromQuotedString(ui.ssidEdit->text()).hexString());
+		} else {
+			ui.ssidEdit->setText(libnutcommon::SSID::fromHexString(ui.ssidEdit->text()).quotedString());
+		}
+	}
+
 	inline void CAccessPointConfig::updateWEPState(int keyMode, int rsnMode) {
 		bool wepDisabled = (keyMode == 1) || ((keyMode > 0) && (keyMode < 3) && (rsnMode > 0));
 
@@ -144,8 +152,12 @@ namespace qnut {
 
 		m_Config.set_mode(false);
 
-		if (!ui.ssidEdit->text().isEmpty())
-			m_Config.set_ssid(ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"');
+		if (!ui.ssidEdit->text().isEmpty()) {
+			m_Config.set_ssid(
+						ui.ssidHexCheck->isChecked()
+						? libnutcommon::SSID::fromHexString(ui.ssidEdit->text())
+						: libnutcommon::SSID::fromQuotedString(ui.ssidEdit->text()));
+		}
 
 		m_Config.set_scan_ssid(toQOOL(ui.scanCheck->isChecked()));
 
@@ -463,7 +475,14 @@ namespace qnut {
 	}
 
 	void CAccessPointConfig::populateUi() {
-		ui.ssidHexCheck->setChecked(setTextAutoHex(ui.ssidEdit, m_Config.get_ssid()));
+		ui.ssidEdit->setText(QString());
+		if (m_Config.get_ssid().needsQuoting()) {
+			ui.ssidHexCheck->setChecked(true);
+			ui.ssidEdit->setText(m_Config.get_ssid().hexString());
+		} else {
+			ui.ssidHexCheck->setChecked(false);
+			ui.ssidEdit->setText(m_Config.get_ssid().quotedString());
+		}
 		ui.scanCheck->setChecked(m_Config.get_scan_ssid());
 
 		ui.anyBSSIDCheck->setChecked(m_Config.get_bssid().zero());

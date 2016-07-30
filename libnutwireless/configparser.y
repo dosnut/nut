@@ -1,5 +1,6 @@
 %{
 	#include "cconfigparser.h"
+	#include "wpa_supplicant.h"
 
 
 	extern int configparserlex (void);
@@ -102,8 +103,8 @@ network: networkoption
 ;
 
 networkoption: '\n'
-	| SSID STRVAL {CHECK(set_ssid(*$2)); delete $2;}
-	| SSID VALUE {CHECK(set_ssid(*$2)); delete $2;}
+	| SSID STRVAL {CHECK(set_ssid(libnutcommon::SSID::fromRaw(CWpaSupplicant::parseConfigString(*$2)))); delete $2;}
+	| SSID VALUE {CHECK(set_ssid(libnutcommon::SSID::fromRaw(CWpaSupplicant::parseConfigString(*$2)))); delete $2;}
 	| BSSID MACADDR {CHECK(set_bssid(*$2)); delete $2;}
 	| DISABLED  BOOL {CHECK(set_disabled($2));}
 	| ID_STR STRVAL {CHECK(set_id_str(*$2)); delete $2;}

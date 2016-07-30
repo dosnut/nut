@@ -1,6 +1,8 @@
 #ifndef LIBNUTWIRELESS_CHWTYPES_H
 #define LIBNUTWIRELESS_CHWTYPES_H
 
+#include <libnutcommon/ssid.h>
+
 #include "types.h"
 
 namespace libnutwireless {
@@ -21,7 +23,7 @@ namespace libnutwireless {
 		int frequency;
 		SignalQualityType type;
 		QList<qint32> bitrates; //Current bitrate
-		QString ssid;
+		libnutcommon::SSID ssid;
 		libnutcommon::MacAddress bssid;
 		struct {
 			quint8 value;
@@ -54,7 +56,7 @@ namespace libnutwireless {
 			opmode = OPM_AUTO;
 		}
 		libnutcommon::MacAddress bssid;
-		QString ssid;
+		libnutcommon::SSID ssid;
 		int freq;
 		SignalQuality signal;
 		GroupCiphers group;

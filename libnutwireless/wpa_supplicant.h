@@ -120,37 +120,39 @@ namespace libnutwireless {
 			inline QString wpaCtrlCmd_AP_SCAN(int val) { return wpaCtrlCommand(QString("AP_SCAN %1").arg(QString::number(val))); }
 			inline QString wpaCtrlCmd_INTERFACES() { return wpaCtrlCommand("INTERFACES"); }
 
+		public:
+			static QByteArray parseConfigString(QString const& str);
 		private: //Parser functions
 
 			///Splits a message at newlines
-			QStringList sliceMessage(QString str);
+			static QStringList sliceMessage(QString str);
 
 			//Parse MIB Variables
-			MIBVariables parseMIB(QStringList list);
-			MIBVariable::MIBVariable_type parseMIBType(QString str);
+			static MIBVariables parseMIB(QStringList list);
+			static MIBVariable::MIBVariable_type parseMIBType(QString str);
 
 			//parse list network
-			QList<ShortNetworkInfo> parseListNetwork(QStringList list);
-			NetworkFlags parseNetworkFlags(QString str);
+			static QList<ShortNetworkInfo> parseListNetwork(QStringList list);
+			static NetworkFlags parseNetworkFlags(QString str);
 
 			//parse Status with helper functionss
-			Status parseStatus(QStringList list);
-			Status::WPA_STATE parseWpaState(QString str);
-			Status::PAE_STATE parsePaeState(QString str);
-			Status::PORT_STATUS parsePortStatus(QString str);
-			Status::PORT_CONTROL parsePortControl(QString str);
-			Status::BACKEND_STATE parseBackendState(QString str);
-			Status::EAP_STATE parseEapState(QString str);
-			Status::METHOD_STATE parseMethodState(QString str);
-			Status::DECISION parseDecision(QString str);
+			static Status parseStatus(QStringList list);
+			static Status::WPA_STATE parseWpaState(QString str);
+			static Status::PAE_STATE parsePaeState(QString str);
+			static Status::PORT_STATUS parsePortStatus(QString str);
+			static Status::PORT_CONTROL parsePortControl(QString str);
+			static Status::BACKEND_STATE parseBackendState(QString str);
+			static Status::EAP_STATE parseEapState(QString str);
+			static Status::METHOD_STATE parseMethodState(QString str);
+			static Status::DECISION parseDecision(QString str);
 
 
 			//parse Event
-			EventType parseEvent(QString str);
-			Request parseReq(QString str);
-			RequestType parseReqType(QString str);
-			InteractiveType parseInteract(QString str);
-			int parseEventNetworkId(QString str);
+			static EventType parseEvent(QString str);
+			static Request parseReq(QString str);
+			static RequestType parseReqType(QString str);
+			static InteractiveType parseInteract(QString str);
+			static int parseEventNetworkId(QString str);
 
 		private slots:
 			void readFromWpa(int socket);

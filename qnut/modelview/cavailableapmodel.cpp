@@ -54,7 +54,7 @@ namespace qnut {
 		return &m_Scans.at(id);
 	}
 
-	QList<libnutwireless::ScanResult const*> CAvailableAPModel::scanResultListBySSID(QString ssid) const {
+	QList<libnutwireless::ScanResult const*> CAvailableAPModel::scanResultListBySSID(libnutcommon::SSID const& ssid) const {
 		QList<libnutwireless::ScanResult const*> scanResults;
 		for (auto id: m_GroupedScans.value(ssid)) {
 			scanResults.append(&m_Scans[id]);
@@ -126,7 +126,7 @@ namespace qnut {
 		switch (index.column()) {
 		case UI_AVLAP_SSID:
 			{
-				QString result = index.parent().isValid() ? '#' + QString::number(index.row() + 1) : scanResult->ssid;
+				QString result = index.parent().isValid() ? '#' + QString::number(index.row() + 1) : scanResult->ssid.autoQuoteHexString();
 				if (scanResult->opmode == OPM_ADHOC)
 					return result + " <" + tr("ad-hoc") + '>';
 				else
@@ -287,7 +287,7 @@ namespace qnut {
 
 		if (index.internalId() >= static_cast<unsigned int>(m_Scans.size())) return QModelIndex();
 
-		QString const ssid = m_Scans.at(index.internalId()).ssid;
+		auto const ssid = m_Scans.at(index.internalId()).ssid;
 		auto const& groupIndices = m_GroupedScans[ssid];
 		if (groupIndices.size() > 1) {
 			return createIndex(m_SSIDs.indexOf(ssid), 0, quintptr(-1));

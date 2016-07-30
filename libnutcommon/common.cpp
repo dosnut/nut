@@ -19,6 +19,7 @@ namespace libnutcommon {
 	void config_init();
 	void device_init();
 	void macaddress_init();
+	void ssid_init();
 
 	void init() {
 		static int done = 0;
@@ -28,6 +29,7 @@ namespace libnutcommon {
 		config_init();
 		device_init();
 		macaddress_init();
+		ssid_init();
 
 		qRegisterMetaType<QHostAddress>("QHostAddress");
 		qRegisterMetaType<QList<QHostAddress>>("QList<QHostAddress>");

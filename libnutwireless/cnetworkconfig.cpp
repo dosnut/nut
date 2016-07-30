@@ -144,8 +144,13 @@ CNetworkConfig::NetworkId CNetworkConfig::toNetworkId(QString str) {
 
 void CNetworkConfig::writeTo(QTextStream &stream) {
 	stream << QString("network {\n");
-	if (!ssid.isEmpty())
-		stream << QString("ssid=%1\n").arg(ssid);
+	if (!ssid.data().isEmpty()) {
+		if (ssid.needsQuoting()) {
+			stream << QString("ssid=%1\n").arg(ssid.hexString());
+		} else {
+			stream << QString("ssid=\"%1\"\n").arg(ssid.quotedString());
+		}
+	}
 	if (!bssid.valid() && !bssid.zero())
 		stream << QString("bssid=%1\n").arg( bssid.toString());
 	if (QOOL_UNDEFINED != disabled)
@@ -255,7 +260,7 @@ void CNetworkConfig::writeTo(QTextStream &stream) {
 #define SET_EQUAL_TO(a, b, c) a = (a == b) ? c : a
 
 void CNetworkConfig::setEqualsToUndefinded(CNetworkConfig & other) {
-	SET_EQUAL_TO(ssid, other.ssid, QString());
+	SET_EQUAL_TO(ssid, other.ssid, libnutcommon::SSID());
 	SET_EQUAL_TO(bssid, other.bssid, libnutcommon::MacAddress());
 	SET_EQUAL_TO(disabled, other.disabled, QOOL_UNDEFINED);
 	SET_EQUAL_TO(id_str, other.id_str, QString());
@@ -317,8 +322,8 @@ void CNetworkConfig::setEqualsToUndefinded(CNetworkConfig & other) {
 #define DEP_QUOTED(a, b) (b ? QUOTED(a) : a)
 
 //parser stuff
-bool CNetworkConfig::set_ssid(QString value, bool addQuotes) {
-	ssid = DEP_QUOTED(value, addQuotes);
+bool CNetworkConfig::set_ssid(libnutcommon::SSID const& value) {
+	ssid = value;
 	return true;
 }
 bool CNetworkConfig::set_bssid(libnutcommon::MacAddress value) {

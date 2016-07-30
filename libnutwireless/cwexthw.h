@@ -44,7 +44,7 @@ class CWextHW: public CWirelessHW {
 			It's converted to WextScan.
 		*/
 		struct WextRawScan {
-			QString ssid;
+			libnutcommon::SSID ssid;
 			libnutcommon::MacAddress bssid;
 			WextRawSignal quality;
 			WextRawSignal maxquality;

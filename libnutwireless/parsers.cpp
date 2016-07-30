@@ -72,22 +72,32 @@ namespace libnutwireless {
 	QList<ShortNetworkInfo> CWpaSupplicant::parseListNetwork(QStringList list) {
 		list.removeFirst();
 		QList<ShortNetworkInfo> networks;
-		QStringList line;
-		ShortNetworkInfo net;
-		bool worked = true;
-		foreach(QString str, list) {
-			line = str.split('\t',QString::KeepEmptyParts);
+		for (QString str: list) {
+			QStringList line = str.split('\t',QString::KeepEmptyParts);
+			ShortNetworkInfo net;
+
+			bool worked = true;
 			net.id = line[0].toInt(&worked);
-			if (!worked) {
-				worked = true;
-				continue;
-			}
-			net.ssid = line[1];
+			if (!worked) continue;
+
+			// always "printf"-quoted data, but without P"..." wrapping
+			net.ssid = libnutcommon::SSID::fromQuotedString(line[1]);
+
 			net.bssid = libnutcommon::MacAddress(line[2]);
 			net.flags = parseNetworkFlags(line[3]);
 			networks.append(net);
 		}
 		return networks;
+	}
+
+	QByteArray CWpaSupplicant::parseConfigString(const QString& str) {
+		if (str.length() >= 2 && str.startsWith('\"') && str.endsWith('"')) {
+			// although data is wrapped in "..." it is not printf-quoted
+			// -> need to find end of value some other way, but this isn't our problem here.
+			return str.mid(1, str.length() - 2).toUtf8();
+		} else {
+			return QByteArray::fromHex(str.toUtf8());
+		}
 	}
 
 

@@ -1,6 +1,8 @@
 #ifndef LIBNUTWIRELESS_CWSTYPES_H
 #define LIBNUTWIRELESS_CWSTYPES_H
 
+#include <libnutcommon/ssid.h>
+
 #include "types.h"
 
 namespace libnutwireless {
@@ -141,7 +143,7 @@ namespace libnutwireless {
 	/** Information about a configured network (see listNetworks) */
 	struct ShortNetworkInfo {
 		int id;
-		QString ssid;
+		libnutcommon::SSID ssid;
 		libnutcommon::MacAddress bssid;
 		NetworkFlags flags;
 		bool adhoc;
@@ -155,7 +157,7 @@ namespace libnutwireless {
 	}
 	/** Compare ShortNetworkinfo by SSID*/
 	inline bool lessThanSSID(ShortNetworkInfo a, ShortNetworkInfo b) {
-		return QString::localeAwareCompare(a.ssid, b.ssid) < 0;
+		return QString::localeAwareCompare(a.ssid.quotedString(), b.ssid.quotedString()) < 0;
 	}
 	/** Compare ShortNetworkinfo by BSSID*/
 	inline bool lessThanBSSID(ShortNetworkInfo a, ShortNetworkInfo b) {

@@ -81,7 +81,7 @@ void CWextHW::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * sc
 	}
 	else {
 		//Set GroupCiphers
-		qDebug() << "GroupCiphers for " << scan->ssid << scan->bssid.toString() << iebuf[offset+3];
+		qDebug() << "GroupCiphers for " << scan->ssid.autoQuoteHexString() << " " << scan->bssid.toString() << ": " << iebuf[offset+3];
 		switch (iebuf[offset+3]) {
 			case 0:
 				scan->group = GCI_NONE;
@@ -127,7 +127,7 @@ void CWextHW::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * sc
 // 				printf(" Proprietary");
 		}
 		else { //Set PairwiseCiphers
-			qDebug() << "PairwiseCiphers for " << scan->ssid << scan->bssid.toString() << iebuf[offset+3];
+			qDebug() << "PairwiseCiphers for " << scan->ssid.autoQuoteHexString() << " " << scan->bssid.toString() << ": " << iebuf[offset+3];
 			switch (iebuf[offset+3]) {
 				case 0: scan->pairwise = PCI_NONE; break;
 				case 2: scan->pairwise = (PairwiseCiphers) (scan->pairwise | PCI_TKIP); break;
@@ -157,7 +157,7 @@ void CWextHW::parseWextIeWpa(unsigned char * iebuf, int buflen, WextRawScan * sc
 // 				printf(" Proprietary");
 		}
 		else { //Set the authsuites
-			qDebug() << "Setting AUTHSUITES of" << scan->ssid << scan->bssid.toString();
+			qDebug() << "Setting AUTHSUITES of" << scan->ssid.autoQuoteHexString() << " " << scan->bssid.toString();
 			if (KM_NONE == scan->keyManagement) {
 				qDebug() << "Resetting keymanagement";
 				scan->keyManagement = KM_UNDEFINED;
@@ -337,19 +337,14 @@ void CWextHW::readSignalQuality() {
 			wrq.u.essid.length = IW_ESSID_MAX_SIZE;
 		if (wrq.u.essid.flags) {
 			/* Does it have an ESSID index ? */
-			if ( wrq.u.essid.pointer && wrq.u.essid.length ) {
-				if ( (wrq.u.essid.flags & IW_ENCODE_INDEX) > 1) {
-					res.ssid = QString("%1 [%2]").arg(QString::fromLatin1((char*) wrq.u.essid.pointer, wrq.u.essid.length), QString::number(wrq.u.essid.flags & IW_ENCODE_INDEX));
-				}
-				else {
-					res.ssid = QString::fromLatin1((char*) wrq.u.essid.pointer, wrq.u.essid.length);
-				}
+			if (wrq.u.essid.pointer && wrq.u.essid.length) {
+				res.ssid = libnutcommon::SSID::fromRaw(reinterpret_cast<quint8 const*>(wrq.u.essid.pointer), wrq.u.essid.length);
 			}
 			else {
-				res.ssid = "N/A";
+				res.ssid = libnutcommon::SSID{};
 			}
 		}
-		qDebug() << "Got ssid: " << res.ssid;
+		qDebug() << "Got ssid: " << res.ssid.autoQuoteHexString();
 	}
 	delete[] buffer;
 
@@ -666,7 +661,7 @@ void CWextHW::readScanResults() {
 							res.append(singleres);
 							qDebug() << "End parsing one network" << singleres.bssid.toString();
 							//reset singleres
-							singleres.ssid = QString();
+							singleres.ssid = libnutcommon::SSID{};
 							singleres.bssid.clear();
 							singleres.quality = WextRawSignal();
 							singleres.freq = -1;
@@ -695,7 +690,7 @@ void CWextHW::readScanResults() {
 							freq = iw_freq2float(&(iwe.u.freq)); //Hopefully in hz
 							if ( ( (freq/1e9) < 10.0 ) && ( (freq/1e9) > 0.0 ) ) {
 								singleres.freq = (int) (freq/1e6);
-								qDebug() << "Channel for" << singleres.ssid << "is " << freq << singleres.freq;
+								qDebug() << "Channel for " << singleres.ssid.autoQuoteHexString() << " is " << freq << singleres.freq;
 							}
 							else {
 								singleres.freq = -1;
@@ -712,22 +707,12 @@ void CWextHW::readScanResults() {
 						break;
 					case SIOCGIWESSID:
 						qDebug() << "ESSID:" << singleres.bssid.toString();
+						singleres.ssid = libnutcommon::SSID{};
 						if (iwe.u.essid.flags) {
 							/* Does it have an ESSID index ? */
 							if ( iwe.u.essid.pointer && iwe.u.essid.length ) {
-								if ( (iwe.u.essid.flags & IW_ENCODE_INDEX) > 1) {
-									singleres.ssid = QString("%1 [%2]").arg(QString::fromLatin1((char*) iwe.u.essid.pointer,iwe.u.essid.length), QString::number(iwe.u.essid.flags & IW_ENCODE_INDEX));
-								}
-								else {
-									singleres.ssid = QString("%1").arg(QString::fromLatin1((char*) iwe.u.essid.pointer,iwe.u.essid.length));
-								}
+								singleres.ssid = libnutcommon::SSID::fromRaw(reinterpret_cast<quint8 const*>(iwe.u.essid.pointer), iwe.u.essid.length);
 							}
-							else {
-								singleres.ssid = QString("N/A");
-							}
-						}
-						else { //Hidden essid or broken driver
-							singleres.ssid = QString();
 						}
 						break;
 
@@ -774,7 +759,7 @@ void CWextHW::readScanResults() {
 								if (0xdd == ((uchar *) iwe.u.data.pointer)[offset] || (0x30 == ((uchar *) iwe.u.data.pointer)[offset]) ) { // WPA1/2
 									parseWextIeWpa(((uchar *) iwe.u.data.pointer) + offset, iwe.u.data.length, &singleres);
 
-								qDebug() << "Parsed IE-Information of " << singleres.ssid << singleres.bssid.toString();
+								qDebug() << "Parsed IE-Information of " << singleres.ssid.autoQuoteHexString() << " " << singleres.bssid.toString();
 								qDebug() << toString(singleres.group) << toString(singleres.pairwise) << toString(singleres.keyManagement);
 								}
 								/* Skip over this IE to the next one in the list. */

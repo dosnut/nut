@@ -12,7 +12,7 @@ namespace libnutwireless {
 	*/
 	class CNetworkConfig { //All without linebreak
 		private:
-			QString ssid;
+			libnutcommon::SSID ssid;
 			libnutcommon::MacAddress bssid;
 			QOOL disabled;
 			QString id_str; // Network identifier string for external scripts
@@ -81,7 +81,7 @@ namespace libnutwireless {
 			void setEqualsToUndefinded(CNetworkConfig & other);
 
 			//Access functions
-			inline QString get_ssid() { return ssid;}
+			inline libnutcommon::SSID get_ssid() { return ssid;}
 			inline libnutcommon::MacAddress get_bssid() { return bssid; }
 			inline QOOL get_disabled() { return disabled; }
 			inline QString get_id_str() { return id_str; }
@@ -146,7 +146,7 @@ namespace libnutwireless {
 			inline void setNetworkId(NetworkId id) { netId = id; id_str = QString("\"nut:%1:%2\"").arg(id.pid).arg(id.id); };
 
 			//Set Parse functions:
-			bool set_ssid(QString value, bool addQuotes = false);
+			bool set_ssid(libnutcommon::SSID const& value);
 			bool set_bssid(libnutcommon::MacAddress value);
 			bool set_disabled(bool value);
 			bool set_id_str(QString value);

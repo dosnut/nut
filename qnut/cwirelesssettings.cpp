@@ -258,7 +258,7 @@ namespace qnut {
 			break;
 		}
 
-		ui.signalLabel->setText(signal.ssid + " (" +
+		ui.signalLabel->setText(signal.ssid.autoQuoteHexString() + " (" +
 			tr("Channel") + ' ' + QString::number(frequencyToChannel(signal.frequency)) + ')');
 		ui.bssidLabel->setText(signal.bssid.toString());
 		ui.qualityLabel->setText(tr("Quality") + ": " + quality);
@@ -359,7 +359,7 @@ namespace qnut {
 		ShortNetworkInfo const* const network = m_ManagedAPModel->networkInfoByModelIndex(selectedIndex(ui.managedView));
 		if (!network) return;
 
-		QString message = tr("Are you sure to remove \"%1\"?").arg(network->ssid);
+		QString message = tr("Are you sure to remove %1?").arg(network->ssid.autoQuoteHexString());
 		if (m_AutoSaveNetworksAction->isChecked()) {
 			message += '\n' + tr("This action is not reversible.");
 		}
@@ -502,7 +502,7 @@ namespace qnut {
 		auto network = m_ManagedAPModel->currentNetworkInfo();
 
 		if (m_Device->getState() > DeviceState::ACTIVATED && network) {
-			QString ssid = network->ssid;
+			auto ssid = network->ssid;
 			for (auto const scanResult: m_AvailableAPModel->scanResultListBySSID(ssid)) {
 				QString bssidString = scanResult->bssid.toString();
 				QAction* currentAction = m_SetBSSIDMenu->addAction(

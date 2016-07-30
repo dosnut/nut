@@ -22,7 +22,7 @@ NetconfigStatus CWpaSupplicant::checkAdHocNetwork(CNetworkConfig &config) {
 	if (config.get_frequency() == -1) {
 		failures.failures = (NetconfigFailures) (failures.failures | NCF_FREQ);
 	}
-	if (config.get_ssid().isEmpty()) {
+	if (config.get_ssid().data().isEmpty()) {
 		failures.failures = (NetconfigFailures) (failures.failures | NCF_SSID);
 	}
 
@@ -105,8 +105,12 @@ NetconfigStatus CWpaSupplicant::editNetwork(int netid, CNetworkConfig config) {
 	failStatus.id = netid;
 
 	//Set the network
-	if (!config.get_ssid().isEmpty()) {
-		if (!setNetworkVariable(netid,"ssid",config.get_ssid()) ) {
+	if (!config.get_ssid().data().isEmpty()) {
+		auto ssid = config.get_ssid();
+		auto ssidQuoted = ssid.needsQuoting()
+				? ssid.hexString()
+				: ('"' + ssid.quotedString() + '"');
+		if (!setNetworkVariable(netid,"ssid",ssidQuoted)) {
 			failStatus.failures = (NetconfigFailures) (failStatus.failures | NCF_SSID);
 		}
 	}
@@ -385,7 +389,7 @@ CNetworkConfig CWpaSupplicant::getNetworkConfig(int id) {
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"ssid");
 	if ("FAIL\n" != response) {
-		config.set_ssid(response);
+		config.set_ssid(libnutcommon::SSID::fromRaw(parseConfigString(response)));
 	}
 
 	response = wpaCtrlCmd_GET_NETWORK(id,"bssid");

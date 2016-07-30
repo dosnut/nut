@@ -37,6 +37,8 @@ add_library(nutcommon SHARED
 	flags.h
 	macaddress.cpp
 	macaddress.h
+	ssid.cpp
+	ssid.h
 
 	${nutcommon_MOC_SOURCE}
 

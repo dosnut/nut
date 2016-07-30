@@ -100,12 +100,12 @@ namespace qnut {
 #else
 			if (device->getWireless()) {
 				SignalQuality signal = device->getWireless()->getHardware()->getSignalQuality();
-				QString result = signal.ssid;
+				QString result = signal.ssid.autoQuoteHexString();
 
 				if (result.isEmpty())
 					result = QObject::tr("unknown Network");
 
-				if (appendQuality)
+				if (appendQuality && !signal.ssid.data().isEmpty())
 					result += " (" +
 						QString::number(signal.quality.value) + '/'+
 						QString::number(signal.quality.maximum) + ')';

@@ -61,6 +61,8 @@ namespace qnut {
 		void setAuthConfig(int type);
 		void handleRSNModeChanged(int value);
 
+		void toggleSSIDHex(bool checked);
+
 		bool applyConfiguration() override;
 
 		void countPskChars(QString psk);

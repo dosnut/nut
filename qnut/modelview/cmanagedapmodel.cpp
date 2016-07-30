@@ -115,7 +115,7 @@ namespace qnut {
 		case UI_MANAP_ID:
 			return QString::number(index.row());
 		case UI_MANAP_SSID:
-			return m_Networks[index.row()].ssid;
+			return m_Networks[index.row()].ssid.autoQuoteHexString();
 		case UI_MANAP_BSSID:
 			return toStringTr(m_Networks[index.row()].bssid);
 		case UI_MANAP_STATUS:

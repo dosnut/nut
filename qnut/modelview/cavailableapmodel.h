@@ -48,7 +48,7 @@ namespace qnut {
 		libnutwireless::ScanResult const* scanResultByModelIndex(const QModelIndex& index) const;
 
 		/// @brief Returns a list of pointers to scan results that match the provided SSID
-		QList<libnutwireless::ScanResult const*> scanResultListBySSID(QString ssid) const;
+		QList<libnutwireless::ScanResult const*> scanResultListBySSID(libnutcommon::SSID const& ssid) const;
 
 		QVariant data(const QModelIndex & index, int role) const override;
 		Qt::ItemFlags flags(const QModelIndex & index) const override;
@@ -73,8 +73,8 @@ namespace qnut {
 		libnutwireless::CWirelessHW* const m_WirelessAccess = nullptr;
 
 		QList<libnutwireless::ScanResult> m_Scans;
-		QHash<QString, QList<int>> m_GroupedScans;
-		QList<QString> m_SSIDs;
+		QHash<libnutcommon::SSID, QList<int>> m_GroupedScans;
+		QList<libnutcommon::SSID> m_SSIDs;
 	};
 
 	class CAvailableAPProxyModel : public QSortFilterProxyModel {
