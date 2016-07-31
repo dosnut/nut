@@ -31,9 +31,7 @@ namespace qnut {
 		trayMenu->addAction(tr("Open Connection &Manager"), m_MainWindow, SLOT(show()));
 		trayMenu->addSeparator();
 		m_InsertMarker = trayMenu->addSeparator();
-#if 0 /* kde shows quit itself.. couldn't find a workaround yet */
 		trayMenu->addAction(tr("&Quit"), qApp, SLOT(quit()));
-#endif
 
 		m_MainIcon->setContextMenu(trayMenu);
 		m_MainIcon->show();
