@@ -2,6 +2,7 @@
 #define LIBNUTWIRELESS_CHWTYPES_H
 
 #include <libnutcommon/ssid.h>
+#include <libnutcommon/macaddress.h>
 
 #include "types.h"
 

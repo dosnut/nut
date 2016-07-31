@@ -10,7 +10,10 @@
 
 #include <QMessageBox>
 #include <libnutwireless/cwireless.h>
+#include <libnutwireless/cwirelesshw.h>
 #include <libnutwireless/conversion.h>
+#include <libnutwireless/wpa_supplicant.h>
+#include <libnutwireless/wstypes.h>
 
 #include "utils/cerrorcodeevaluator.h"
 

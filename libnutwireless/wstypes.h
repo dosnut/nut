@@ -1,44 +1,101 @@
 #ifndef LIBNUTWIRELESS_CWSTYPES_H
 #define LIBNUTWIRELESS_CWSTYPES_H
 
+#pragma once
+
 #include <libnutcommon/ssid.h>
+#include <libnutcommon/macaddress.h>
 
 #include "types.h"
 
-namespace libnutwireless {
+#include <QHostAddress>
 
+namespace libnutwireless {
 	/** Enum of possible NetworkFlags */
-	typedef enum {NF_NONE, NF_CURRENT, NF_DISABLED} NetworkFlags;
+	enum NetworkFlags {
+		NF_NONE,
+		NF_CURRENT,
+		NF_DISABLED,
+	};
 
 	/** Enum of possible interaction types **/
-	typedef enum {INTERACT_MSG, INTERACT_REQ,INTERACT_EVENT} InteractiveType;
+	enum InteractiveType {
+		INTERACT_MSG,
+		INTERACT_REQ,
+		INTERACT_EVENT,
+	};
 
 	/** RequestType contains all possible requests from wpa_supplicant. */
-	typedef enum {REQ_FAIL, REQ_PASSWORD, REQ_IDENTITY, REQ_NEW_PASSWORD, REQ_PIN, REQ_OTP, REQ_PASSPHRASE} RequestType;
+	enum RequestType {
+		REQ_FAIL,
+		REQ_PASSWORD,
+		REQ_IDENTITY,
+		REQ_NEW_PASSWORD,
+		REQ_PIN,
+		REQ_OTP,
+		REQ_PASSPHRASE,
+	};
 
 	/** Enum of possible config failures.  */
-	typedef enum {
-	NCF_NONE=0x0000000000, NCF_SSID=0x0000000001,NCF_BSSID=0x0000000002,NCF_DISABLED=0x0000000004,
-	NCF_ID_STR=0x0000000008, NCF_SCAN_SSID=0x0000000010, NCF_PRIORITY=0x0000000020,
-	NCF_MODE=0x0000000040, NCF_FREQ=0x0000000080, NCF_PROTO=0x00000000100, NCF_KEYMGMT=0x00000000200,
-	NCF_AUTH_ALG=0x00000000400, NCF_PAIRWISE=0x00000000800, NCF_GROUP=0x0000001000,
-	NCF_PSK=0x0000002000, NCF_EAPOL_FLAGS=0x0000004000, NCF_MIXED_CELL=0x0000008000,
-	NCF_PROA_KEY_CACHING=0x00000010000, NCF_WEP_KEY0=0x0000020000, NCF_WEP_KEY1=0x0000040000,
-	NCF_WEP_KEY2=0x0000080000, NCF_WEP_KEY3=0x0000100000, NCF_WEP_KEY_IDX=0x0000200000,
-	NCF_PEERKEY=0x0000400000, NCF_ALL=0x00007FFFFF
-	}NetconfigFailures;
+	enum NetconfigFailures {
+		NCF_NONE = 0x0000000000,
+		NCF_SSID = 0x0000000001,
+		NCF_BSSID = 0x0000000002,
+		NCF_DISABLED = 0x0000000004,
+		NCF_ID_STR = 0x0000000008,
+		NCF_SCAN_SSID = 0x0000000010,
+		NCF_PRIORITY = 0x0000000020,
+		NCF_MODE = 0x0000000040,
+		NCF_FREQ = 0x0000000080,
+		NCF_PROTO = 0x00000000100,
+		NCF_KEYMGMT = 0x00000000200,
+		NCF_AUTH_ALG = 0x00000000400,
+		NCF_PAIRWISE = 0x00000000800,
+		NCF_GROUP = 0x0000001000,
+		NCF_PSK = 0x0000002000,
+		NCF_EAPOL_FLAGS = 0x0000004000,
+		NCF_MIXED_CELL = 0x0000008000,
+		NCF_PROA_KEY_CACHING = 0x00000010000,
+		NCF_WEP_KEY0 = 0x0000020000,
+		NCF_WEP_KEY1 = 0x0000040000,
+		NCF_WEP_KEY2 = 0x0000080000,
+		NCF_WEP_KEY3 = 0x0000100000,
+		NCF_WEP_KEY_IDX = 0x0000200000,
+		NCF_PEERKEY = 0x0000400000,
+		NCF_ALL = 0x00007FFFFF,
+	};
 
 	/** Enum of possible eap config failures */
-	typedef enum {
-	ENCF_NONE=0x0000000000, ENCF_EAP=0x0000000001,ENCF_IDENTITY=0x0000000002,ENCF_ANON_IDENTITY=0x0000000004, ENCF_PASSWD=0x0000000008,
-	ENCF_CA_CERT=0x0000000010, ENCF_CA_PATH=0x0000000020, ENCF_CLIENT_CERT=0x0000000040, ENCF_PRIVATE_KEY=0x0000000080,
-	ENCF_PRIVATE_KEY_PASSWD=0x0000000100, ENCF_DH_FILE=0x0000000200, ENCF_SUBJECT_MATCH=0x0000000400, ENCF_ALTSUBJECT_MATCH=0x0000000800,
-	ENCF_PHASE1=0x0000001000, ENCF_PHASE2=0x0000002000, ENCF_CA_CERT2=0x0000004000, ENCF_CA_PATH2=0x0000008000,
-	ENCF_CLIENT_CERT2=0x00000010000, ENCF_PRIVATE_KEY2=0x0000020000,
-	ENCF_PRIVATE_KEY2_PASSWD=0x0000040000, ENCF_DH_FILE2=0x0000080000, ENCF_SUBJECT_MATCH2=0x0000100000,
-	ENCF_ALTSUBJECT_MATCH2=0x0000200000, ENCF_FRAGMENT_SIZE=0x0000400000, ENCF_EAPPSK=0x0000800000,
-	ENCF_NAI=0x00001000000, ENCF_PAC_FILE=0x00002000000, ENCF_ALL=0x00003FFFFFF
-	} EapNetconfigFailures;
+	enum EapNetconfigFailures {
+		ENCF_NONE = 0x0000000000,
+		ENCF_EAP = 0x0000000001,
+		ENCF_IDENTITY = 0x0000000002,
+		ENCF_ANON_IDENTITY = 0x0000000004,
+		ENCF_PASSWD = 0x0000000008,
+		ENCF_CA_CERT = 0x0000000010,
+		ENCF_CA_PATH = 0x0000000020,
+		ENCF_CLIENT_CERT = 0x0000000040,
+		ENCF_PRIVATE_KEY = 0x0000000080,
+		ENCF_PRIVATE_KEY_PASSWD = 0x0000000100,
+		ENCF_DH_FILE = 0x0000000200,
+		ENCF_SUBJECT_MATCH = 0x0000000400,
+		ENCF_ALTSUBJECT_MATCH = 0x0000000800,
+		ENCF_PHASE1 = 0x0000001000,
+		ENCF_PHASE2 = 0x0000002000,
+		ENCF_CA_CERT2 = 0x0000004000,
+		ENCF_CA_PATH2 = 0x0000008000,
+		ENCF_CLIENT_CERT2 = 0x00000010000,
+		ENCF_PRIVATE_KEY2 = 0x0000020000,
+		ENCF_PRIVATE_KEY2_PASSWD = 0x0000040000,
+		ENCF_DH_FILE2 = 0x0000080000,
+		ENCF_SUBJECT_MATCH2 = 0x0000100000,
+		ENCF_ALTSUBJECT_MATCH2 = 0x0000200000,
+		ENCF_FRAGMENT_SIZE = 0x0000400000,
+		ENCF_EAPPSK = 0x0000800000,
+		ENCF_NAI = 0x00001000000,
+		ENCF_PAC_FILE = 0x00002000000,
+		ENCF_ALL = 0x00003FFFFFF,
+	};
 
 	/**
 		NetconfigStatus contains error information when configuring a network
@@ -47,11 +104,14 @@ namespace libnutwireless {
 		@param id on failures, id is -1, else it's the network id which was configured
 	*/
 	struct NetconfigStatus {
-		NetconfigStatus(int id=-1) : failures(NCF_NONE), eap_failures(ENCF_NONE), id(id) {}
-		NetconfigStatus(NetconfigFailures failures, EapNetconfigFailures eap_failures, int id=-1) : failures(failures), eap_failures(eap_failures), id(id) {}
-		NetconfigFailures failures;
-		EapNetconfigFailures eap_failures;
-		int id;
+		explicit NetconfigStatus() { }
+		explicit NetconfigStatus(int id) : id(id) {}
+		explicit NetconfigStatus(NetconfigFailures failures, EapNetconfigFailures eap_failures, int id=-1)
+		: failures(failures), eap_failures(eap_failures), id(id) {}
+
+		NetconfigFailures failures{NCF_NONE};
+		EapNetconfigFailures eap_failures{ENCF_NONE};
+		int id{-1};
 	};
 
 	/** wpa_supplicant's capabilities */
@@ -113,13 +173,19 @@ namespace libnutwireless {
 
 	/** one wpa_Supplicant MIB variable */
 	struct MIBVariable {
-		typedef enum {PLAIN=1,STRING=2,NUMBER=4,LOGIC=8} MIBVariable_type;
+		enum MIBVariable_type {
+			PLAIN = 1,
+			STRING = 2,
+			NUMBER = 4,
+			LOGIC = 8,
+		};
+
 		MIBVariable_type type;
 		QString name;
 		union {
-			qint32 * num;
-			QString * str;
-			bool * logic;
+			qint32* num;
+			QString* str;
+			bool* logic;
 		} value;
 	};
 
@@ -171,7 +237,6 @@ namespace libnutwireless {
 	inline bool lessThanAdhoc(ShortNetworkInfo a, ShortNetworkInfo b) {
 		return (!a.adhoc && b.adhoc);
 	}
-
 
 	//Conversion functions:
 

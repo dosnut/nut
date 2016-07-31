@@ -1,21 +1,18 @@
 #include "wpa_supplicant.h"
-#include <QDebug>
 
 extern "C" {
-#include <linux/wireless.h>
 #include "wpa_ctrl/wpa_ctrl.h"
+
+#include <iwlib.h>
+
 #include <sys/time.h>
 #include <string.h>
 #include <stdlib.h>
 }
 
 namespace libnutwireless {
-
-	//CWpa_supplicant
-
-
 	//Wpa_supplicant control commands:
-	QString CWpaSupplicant::wpaCtrlCommand(QString cmd = "PING") {
+	QString CWpaSupplicant::wpaCtrlCommand(QString const& cmd) {
 		//int wpa_ctrl_request(struct wpa_ctrl *ctrl, const char *cmd, size_t cmd_len,
 		//	     char *reply, size_t *reply_len,
 		//	     void (*msg_cb)(char *msg, size_t len));
@@ -62,18 +59,6 @@ namespace libnutwireless {
 			return QString::fromUtf8(reply, reply_len);
 		}
 	}
-
-
-
-
-
-
-// 	void CWpaSupplicant::printMessage(QString msg) {
-// 		if (m_logEnabled) {
-// 			emit(message(msg));
-// 		}
-// 	}
-
 
 	//Private slots:
 	//Reads messages from wpa_supplicant
@@ -152,17 +137,14 @@ namespace libnutwireless {
 	//Public functions:
 
 	void CWpaSupplicant::openWpa(bool) {
-		if (m_connectTimerId != -1) {
-			killTimer(m_connectTimerId);
-			m_connectTimerId = -1;
-		}
+		m_connectTimer.stop();
 		if (m_wpaConnected) return;
 		int status;
 		//Open wpa_supplicant control interface
 		if (!QFile::exists(m_wpaSupplicantPath)) {
 			qWarning() << tr("Could not open wpa_supplicant socket: %1").arg(QString::number(m_timerCount));
 			m_inConnectionPhase = true;
-			m_connectTimerId = startTimer(dynamicTimerTime(m_timerCount));
+			m_connectTimer.start(dynamicTimerTime(m_timerCount), this);
 			return;
 		}
 		cmd_ctrl = wpa_ctrl_open(m_wpaSupplicantPath.toLatin1().constData());
@@ -170,7 +152,7 @@ namespace libnutwireless {
 		if (cmd_ctrl == NULL and event_ctrl == NULL) {
 			qWarning() << tr("Could not open wpa_supplicant control interface");
 			m_inConnectionPhase = true;
-			m_connectTimerId = startTimer(dynamicTimerTime(m_timerCount));
+			m_connectTimer.start(dynamicTimerTime(m_timerCount), this);
 			return;
 		}
 		if (cmd_ctrl == NULL) {
@@ -178,7 +160,7 @@ namespace libnutwireless {
 			event_ctrl = NULL;
 			qWarning() << tr("Could not open wpa_supplicant control interface");
 			m_inConnectionPhase = true;
-			m_connectTimerId = startTimer(dynamicTimerTime(m_timerCount));
+			m_connectTimer.start(dynamicTimerTime(m_timerCount), this);
 			return;
 		}
 		if (event_ctrl == NULL) {
@@ -186,7 +168,7 @@ namespace libnutwireless {
 			cmd_ctrl = NULL;
 			qWarning() << tr("Could not open wpa_supplicant control interface");
 			m_inConnectionPhase = true;
-			m_connectTimerId = startTimer(dynamicTimerTime(m_timerCount));
+			m_connectTimer.start(dynamicTimerTime(m_timerCount), this);
 			return;
 		}
 
@@ -200,7 +182,7 @@ namespace libnutwireless {
 			cmd_ctrl = NULL;
 			qWarning() << tr("Could not attach to wpa_supplicant");
 			m_inConnectionPhase = true;
-			m_connectTimerId = startTimer(dynamicTimerTime(m_timerCount));
+			m_connectTimer.start(dynamicTimerTime(m_timerCount), this);
 			return;
 		}
 		m_inConnectionPhase = false;
@@ -226,9 +208,8 @@ namespace libnutwireless {
 	}
 
 	bool CWpaSupplicant::closeWpa(QString call_func, bool internal) {
-		if (m_connectTimerId != -1) {
-			killTimer(m_connectTimerId);
-			m_connectTimerId = -1;
+		if (m_connectTimer.isActive()) {
+			m_connectTimer.stop();
 			m_inConnectionPhase = false;
 			m_timerCount = 0;
 		}
@@ -268,7 +249,6 @@ namespace libnutwireless {
 		}
 	}
 
-
 	//Slot is executed when aplication is about to quit;
 	void CWpaSupplicant::detachWpa() {
 		if (event_ctrl != NULL) {
@@ -277,13 +257,12 @@ namespace libnutwireless {
 	}
 
 	void CWpaSupplicant::timerEvent(QTimerEvent *event) {
-		if (event->timerId() == m_connectTimerId) {
+		if (event->timerId() == m_connectTimer.timerId()) {
 			if (!m_wpaConnected) {
 				m_timerCount++;
 				openWpa(true);
 			} else {
-				killTimer(m_connectTimerId);
-				m_connectTimerId = -1;
+				m_connectTimer.stop();
 				m_timerCount = 0;
 			}
 		}
@@ -302,13 +281,9 @@ namespace libnutwireless {
 		m_logEnabled = enabled;
 	}
 
-
 	void CWpaSupplicant::scan() {
 		if (0 != wpaCtrlCmd_SCAN().indexOf("OK")) {
 			printMessage("Error while scanning");
 		}
 	}
-
-
-
 }

@@ -1,12 +1,18 @@
 #include "cnl80211.h"
+
+#include "conversion.h"
+
+#include <QSocketNotifier>
+#include <QTimerEvent>
+
+extern "C" {
+#include <linux/nl80211.h>
+#include <net/if.h>
 #include <netlink/netlink.h>
 #include <netlink/genl/genl.h>
 #include <netlink/genl/family.h>
 #include <netlink/genl/ctrl.h>
-#include <linux/nl80211.h>
-#include <QSocketNotifier>
-#include <QTimerEvent>
-#include "conversion.h"
+}
 
 namespace libnutwireless {
 
@@ -191,11 +197,11 @@ void CNL80211::scan() {
 }
 
 
-QList<ScanResult> CNL80211::getScanResults() {
+QList<ScanResult> CNL80211::getScanResults() const {
 	return m_scanResults;
 }
 
-SignalQuality CNL80211::getSignalQuality() {
+SignalQuality CNL80211::getSignalQuality() const {
 	return m_sq;
 }
 
@@ -208,11 +214,11 @@ void CNL80211::setSignalQualityPollRate(int msec) {
 	m_sqTimerId = startTimer(m_sqPollrate);
 }
 
-int CNL80211::getSignalQualityPollRate() {
+int CNL80211::getSignalQualityPollRate() const {
 	return m_sqPollrate;
 }
 
-QList<quint32> CNL80211::getSupportedChannels() {
+QList<quint32> CNL80211::getSupportedChannels() const {
 	QList<quint32> chans;
 	qint32 chan;
 	foreach(qint32 freq, m_supportedFrequencies) {
@@ -223,7 +229,7 @@ QList<quint32> CNL80211::getSupportedChannels() {
 	return  chans;
 }
 
-QList<quint32> CNL80211::getSupportedFrequencies() {
+QList<quint32> CNL80211::getSupportedFrequencies() const {
 	return m_supportedFrequencies;
 }
 }

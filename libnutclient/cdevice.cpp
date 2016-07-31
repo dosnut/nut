@@ -3,6 +3,7 @@
 #include "libnutclientbase/dbus.h"
 #ifndef NUT_NO_WIRELESS
 # include "libnutwireless/cwireless.h"
+# include "libnutwireless/cwirelesshw.h"
 #endif
 
 namespace libnutclient {

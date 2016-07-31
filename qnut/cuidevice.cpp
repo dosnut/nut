@@ -27,6 +27,7 @@
 
 #ifndef NUT_NO_WIRELESS
 #include "cwirelesssettings.h"
+#include <libnutwireless/cwirelesshw.h>
 #endif
 
 namespace qnut {

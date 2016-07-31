@@ -2,6 +2,7 @@
 	#include "cconfigparser.h"
 	#include "wpa_supplicant.h"
 
+	#include <QHostAddress>
 
 	extern int configparserlex (void);
 	extern int line_num;

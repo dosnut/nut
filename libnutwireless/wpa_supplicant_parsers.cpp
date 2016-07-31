@@ -1,10 +1,6 @@
 #include "wpa_supplicant.h"
 
-#include <QDebug>
-
 namespace libnutwireless {
-
-
 	//parser Functions:
 	QStringList CWpaSupplicant::sliceMessage(QString str) {
 		return str.split('\n',QString::SkipEmptyParts);

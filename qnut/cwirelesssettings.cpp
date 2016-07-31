@@ -21,6 +21,7 @@
 #include <libnutclient/client.h>
 
 #include <libnutwireless/cwireless.h>
+#include <libnutwireless/cwirelesshw.h>
 #include <libnutwireless/conversion.h>
 
 #include "common.h"

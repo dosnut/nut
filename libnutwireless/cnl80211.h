@@ -1,6 +1,8 @@
 #ifndef LIBNUTWIRELESS_CNL80211_H
 #define LIBNUTWIRELESS_CNL80211_H
 
+#pragma once
+
 #ifndef NUT_NO_WIRELESS
 #include "cwirelesshw.h"
 
@@ -50,12 +52,12 @@ class CNL80211: public CWirelessHW {
 		virtual bool open();
 		virtual void close();
 		virtual void scan();
-		virtual QList<ScanResult> getScanResults();
-		virtual SignalQuality getSignalQuality();
+		virtual QList<ScanResult> getScanResults() const;
+		virtual SignalQuality getSignalQuality() const;
 		virtual void setSignalQualityPollRate(int msec);
-		virtual int getSignalQualityPollRate();
-		virtual QList<quint32> getSupportedChannels();
-		virtual QList<quint32> getSupportedFrequencies();
+		virtual int getSignalQualityPollRate() const;
+		virtual QList<quint32> getSupportedChannels() const;
+		virtual QList<quint32> getSupportedFrequencies() const;
 
 		int parseNlScanResult(nl_msg * msg);
 };

@@ -11,8 +11,10 @@
 	#include "cconfigparser.h"
 	int line_num = 1;
 	unsigned char char_buff = 0;
-	libnutwireless::CConfigParser * libnutcconfigparser;
+	libnutwireless::CConfigParser* libnutcconfigparser;
 	void configparsererror (libnutwireless::CConfigParser *cp, const char* s);
+
+	#include <QHostAddress>
 	#include "configparser_yacc.hpp"
 	#define yylval configparserlval
 	#define YY_INPUT(buf,result,max_size) { result = libnutcconfigparser->readFromStream(buf,max_size); }

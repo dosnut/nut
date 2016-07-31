@@ -13,6 +13,7 @@
 #include <libnutclient/client.h>
 #include <libnutwireless/wpa_supplicant.h>
 #include <libnutwireless/cwireless.h>
+#include <libnutwireless/cwirelesshw.h>
 
 #include "constants.h"
 
