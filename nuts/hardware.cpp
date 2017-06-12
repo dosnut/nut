@@ -264,13 +264,6 @@ namespace nuts {
 			return QString(addrStringBuf);
 		}
 
-		QString routeTargetToString(nl_addr* addr) {
-			if (0 == nl_addr_get_prefixlen(addr)) return QString("default");
-			char addrStringBuf[128];
-			nl_addr2str(addr, addrStringBuf, sizeof(addrStringBuf));
-			return QString(addrStringBuf);
-		}
-
 	} /* anonymous namespace */
 
 	namespace internal {
@@ -605,17 +598,26 @@ cleanup:
 		log << "Replacing route with updated metric " << metric << ": " << route_str;
 		log.flush();
 
+		/* the protocol is sometimes calculated on the fly in the kernel when filling
+		 * the netlink message. sadly the same logic isn't used to match it, so we
+		 * need to drop it to actually match the route.
+		 */
+		uint8_t saved_proto = rtnl_route_get_protocol(route);
+		rtnl_route_set_protocol(route, 0);
+
 		int err;
-		err = rtnl_route_delete(m_nlh_control.get(), route, NLM_F_REPLACE);
-		if (0 > err && -ENOENT != err) {
+		err = rtnl_route_delete(m_nlh_control.get(), route, 0);
+		if (0 > err) { // && -ENOENT != err) {
 			log << "Removing route failed: " << nl_geterror(err) << " (" <<  err << ")" << endl;
 			return;
 		}
 
+		// restore protocol
+		rtnl_route_set_protocol(route, saved_proto);
 		rtnl_route_set_priority(route, metric);
 
 		err = rtnl_route_add(m_nlh_control.get(), route, NLM_F_REPLACE);
-		if (0 > err && -ENOENT != err) {
+		if (0 > err) { // && -ENOENT != err) {
 			log << "Adding route with updated metric failed: " << nl_geterror(err) << " (" <<  err << ")" << endl;
 		}
 	}
@@ -831,33 +833,32 @@ cleanup:
 			for (auto const& route: routes) {
 #if 0
 				{
-					char buf[512];
-					nl_object_dump_buf(nl_safe_to_object(route.get()), buf, sizeof(buf));
-					log << "Found IPv6 route: " << buf;
+					char route_str[512];
+					nl_object_dump_buf(nl_safe_to_object(route.get()), route_str, sizeof(route_str));
+					log << "Found IPv6 route: " << route_str;
 				}
 #endif
-
-				::nl_addr* dst = rtnl_route_get_dst(route.get());
 
 				if (1 != rtnl_route_get_nnexthops(route.get())) continue;
 
 				::rtnl_nexthop* nh = rtnl_route_nexthop_n(route.get(), 0);
 				if (ifIndex != rtnl_route_nh_get_ifindex(nh)) continue;
 
-				log << "Removing IPv6 route to "
-					<< routeTargetToString(dst)
-					<< " via "
-					<< toString(rtnl_route_nh_get_gateway(nh))
-					<< " [ndx=" << ifIndex << "]"
-					<< endl;
+				char route_str[512];
+				nl_object_dump_buf(nl_safe_to_object(route.get()), route_str, sizeof(route_str));
+
+				log << "Removing IPv6 route: " << route_str;
+				log.flush();
+
+				/* the protocol is sometimes calculated on the fly in the kernel when filling
+				 * the netlink message. sadly the same logic isn't used to match it, so we
+				 * need to drop it to actually match the route.
+				 */
+				rtnl_route_set_protocol(route.get(), 0);
 
 				int res = rtnl_route_delete(m_nlh_control.get(), route.get(), 0);
 				if (0 > res) {
-					log << "Removing IPv6 route to "
-						<< routeTargetToString(dst)
-						<< " via "
-						<< toString(rtnl_route_nh_get_gateway(nh))
-						<< " failed [ndx=" << ifIndex << "]: " << nl_geterror(res) << " (" <<  res << ")" << endl;
+					log << "Removing IPv6 route failed: " << nl_geterror(res) << " (" <<  res << ")" << endl;
 				}
 			}
 		}
