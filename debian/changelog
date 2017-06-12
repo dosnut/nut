@@ -1,4 +1,23 @@
-network-utilities (0.6.5-2) released; urgency=medium
+network-utilities (0.6.6-1) unstable; urgency=medium
+
+  * [nuts] fix use (std::function<>) after free
+  * [nutclientbase] fix header installation
+  * [cmake] silence "mabye" warning
+  * [qnut] fix some out-of-bound accesses (crashes in wlan list dialog)
+  * [qnut] actually use CAvailableAPProxyModel::lessThan
+  * [qnut] update code style, remove some globals, ...
+  * [common] fix SSID handling
+  * [qnut] add "quit" back to trayicon menu
+  * [libnutwireless] style cleanup
+  * [wireless] remove eappsk and nai
+  * [qnut] simplify inputMask: space is the default blank character
+  * [nuts] fix adjusting and cleanup of IPv6 routes
+  * Release 0.6.6
+  * Remove patch for "[nuts] fix use (std::function<>) after free"
+
+ -- Stefan Bühler <stbuehler@web.de>  Mon, 12 Jun 2017 17:58:28 +0200
+
+network-utilities (0.6.5-2) unstable; urgency=medium
 
   * [nuts] fix use (std::function<>) after free
 
