@@ -217,7 +217,7 @@ namespace libnutcommon {
 							break;
 						}
 					}
-					result.append(QString("\\x%1").arg(mem[pos], 2, 16, QChar('0')).toUcs4());
+					result << QString("\\x%1").arg(mem[pos], 2, 16, QChar('0')).toUcs4();
 					++pos;
 				}
 				break;
