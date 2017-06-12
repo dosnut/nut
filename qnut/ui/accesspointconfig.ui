@@ -59,7 +59,7 @@
           <bool>false</bool>
          </property>
          <property name="inputMask">
-          <string>HH:HH:HH:HH:HH:HH; </string>
+          <string>HH:HH:HH:HH:HH:HH</string>
          </property>
          <property name="text">
           <string>00:00:00:00:00:00</string>
