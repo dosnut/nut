@@ -152,10 +152,6 @@ namespace libnutwireless {
 			stream << QString("altsubject_match2=%1\n").arg( altsubject_match2);
 		if (fragment_size != -1)
 			stream << QString("fragment_size=%1\n").arg( fragment_size);
-		if (!eappsk.isEmpty())
-			stream << QString("eappsk=%1\n").arg( eappsk);
-		if (!eappsk.isEmpty())
-			stream << QString("nai=%1\n").arg( nai);
 		if (!pac_file.isEmpty())
 			stream << QString("pac_file=%1\n").arg( pac_file);
 		stream << QString("}\n");
@@ -217,8 +213,6 @@ namespace libnutwireless {
 		SET_EQUAL_TO(phase2, other.phase2, QString());
 
 		SET_EQUAL_TO(fragment_size, other.fragment_size, -1);
-		SET_EQUAL_TO(eappsk, other.eappsk, QString());
-		SET_EQUAL_TO(nai, other.nai, QString());
 		SET_EQUAL_TO(pac_file, other.pac_file, QString());
 	}
 
@@ -449,17 +443,6 @@ namespace libnutwireless {
 	}
 	bool CNetworkConfig::set_fragment_size(int value) {
 		fragment_size = value;
-		return true;
-	}
-	bool CNetworkConfig::set_eappsk(QString const& value) {
-		if (value != "*") {
-			eappsk = value;
-			return true;
-		}
-		return false;
-	}
-	bool CNetworkConfig::set_nai(QString const& value, bool addQuotes) {
-		nai = DEP_QUOTED(value, addQuotes);
 		return true;
 	}
 	bool CNetworkConfig::set_pac_file(QString const& value, bool addQuotes) {

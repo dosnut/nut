@@ -347,16 +347,6 @@ namespace libnutwireless {
 					failStatus.eap_failures = (EapNetconfigFailures) (failStatus.eap_failures | ENCF_FRAGMENT_SIZE);
 				}
 			}
-			if (!config.get_eappsk().isEmpty()) {
-				if (!setNetworkVariable(netid,"eappsk",config.get_eappsk()) ) {
-					failStatus.eap_failures = (EapNetconfigFailures) (failStatus.eap_failures | ENCF_EAPPSK);
-				}
-			}
-			if (!config.get_nai().isEmpty()) {
-				if (!setNetworkVariable(netid,"nai",config.get_nai()) ) {
-					failStatus.eap_failures = (EapNetconfigFailures) (failStatus.eap_failures | ENCF_NAI);
-				}
-			}
 			if (!config.get_pac_file().isEmpty()) {
 				if (!setNetworkVariable(netid,"pac_file",config.get_pac_file()) ) {
 					failStatus.eap_failures = (EapNetconfigFailures) (failStatus.eap_failures | ENCF_PAC_FILE);
@@ -600,14 +590,6 @@ namespace libnutwireless {
 			if (!ok) {
 				config.set_fragment_size(-1);
 			}
-		}
-		response = wpaCtrlCmd_GET_NETWORK(id,"eappsk");
-		if ("FAIL\n" != response) {
-			config.set_eappsk(response);
-		}
-		response = wpaCtrlCmd_GET_NETWORK(id,"nai");
-		if ("FAIL\n" != response) {
-			config.set_nai(response);
 		}
 		response = wpaCtrlCmd_GET_NETWORK(id,"pac_file");
 		if ("FAIL\n" != response) {

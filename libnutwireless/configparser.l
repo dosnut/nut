@@ -69,8 +69,6 @@ dh_file2     return DH_FILE2;
 subject_match2 return SUBJECT_MATCH2;
 altsubject_match2 return ALTSUBJECT_MATCH2;
 fragment_size return FRAGMENT_SIZE;
-eappsk       return EAPPSK;
-nai          return NAI;
 pac_file     return PAC_FILE;
 
 

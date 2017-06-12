@@ -723,53 +723,6 @@
         </widget>
        </item>
        <item row="5" column="0">
-        <widget class="QLabel" name="eapPSKLabel">
-         <property name="text">
-          <string>EAP Pre Shared Key (hex.):</string>
-         </property>
-         <property name="buddy">
-          <cstring>eapPSKEdit</cstring>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <layout class="QHBoxLayout" name="eapPSKLayout">
-         <item>
-          <widget class="QLineEdit" name="eapPSKEdit">
-           <property name="toolTip">
-            <string>32 digits, 128-Bit Pre Shared Key</string>
-           </property>
-           <property name="maxLength">
-            <number>32</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="eapPSKLeaveButton">
-           <property name="text">
-            <string>leave unchanged</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="naiLabel">
-         <property name="text">
-          <string>Network Access Identifier (NAI):</string>
-         </property>
-         <property name="buddy">
-          <cstring>naiEdit</cstring>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="1">
-        <widget class="QLineEdit" name="naiEdit"/>
-       </item>
-       <item row="7" column="0">
         <widget class="QLabel" name="pacLabel">
          <property name="text">
           <string>Proxy Access Control (PAC) file:</string>
@@ -779,7 +732,7 @@
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
+       <item row="5" column="1">
         <layout class="QHBoxLayout" name="pacLayout">
          <item>
           <widget class="QLineEdit" name="pacEdit"/>
@@ -793,7 +746,7 @@
          </item>
         </layout>
        </item>
-       <item row="8" column="0">
+       <item row="6" column="0">
         <widget class="QLabel" name="fragmentLabel">
          <property name="text">
           <string>Fragment size:</string>
@@ -803,7 +756,7 @@
          </property>
         </widget>
        </item>
-       <item row="8" column="1">
+       <item row="6" column="1">
         <widget class="QSpinBox" name="fragmentSpin">
          <property name="buttonSymbols">
           <enum>QAbstractSpinBox::UpDownArrows</enum>
@@ -1212,9 +1165,6 @@
   <tabstop>anonymousIdentityEdit</tabstop>
   <tabstop>eapPasswordEdit</tabstop>
   <tabstop>eapPasswordLeaveButton</tabstop>
-  <tabstop>eapPSKEdit</tabstop>
-  <tabstop>eapPSKLeaveButton</tabstop>
-  <tabstop>naiEdit</tabstop>
   <tabstop>pacEdit</tabstop>
   <tabstop>pacBrowse</tabstop>
   <tabstop>fragmentSpin</tabstop>
@@ -1439,22 +1389,6 @@
     <hint type="destinationlabel">
      <x>459</x>
      <y>324</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>eapPSKLeaveButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>eapPSKEdit</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>592</x>
-     <y>367</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>459</x>
-     <y>366</y>
     </hint>
    </hints>
   </connection>

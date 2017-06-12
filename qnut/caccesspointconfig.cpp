@@ -47,8 +47,6 @@ namespace qnut {
 
 		m_EapErrorCodeEvaluator = new CErrorCodeEvaluator();
 
-		ui.eapPSKEdit->setValidator(m_HexValidator);
-
 		m_EAPPhaseButtons = new QButtonGroup(this);
 		m_EAPPhaseButtons->addButton(ui.phase1Radio, 1);
 		m_EAPPhaseButtons->addButton(ui.phase2Radio, 2);
@@ -386,7 +384,6 @@ namespace qnut {
 
 		eap_config.set_fragment_size(ui.fragmentSpin->value());
 
-		WRITE_BACK_AUTOQUOTE(eap_config.set_nai, ui.naiEdit->text());
 		WRITE_BACK_AUTOQUOTE(eap_config.set_pac_file, ui.pacEdit->text());
 
 		writeEAPPhaseConfig(eap_config, ui.phase1Radio->isChecked() ? 1 : 2);
@@ -438,11 +435,8 @@ namespace qnut {
 
 		setTextAutoHex(ui.eapPasswordEdit, eap_config.get_password());
 
-		setTextAutoHex(ui.eapPSKEdit, eap_config.get_eappsk());
-
 		ui.fragmentSpin->setValue(eap_config.get_fragment_size());
 
-		setTextAutoHex(ui.naiEdit, eap_config.get_nai());
 		setTextAutoHex(ui.pacEdit, eap_config.get_pac_file());
 
 		readEAPPhaseConfig(eap_config, ui.phase1Radio->isChecked() ? 1 : 2);
@@ -530,7 +524,6 @@ namespace qnut {
 		ui.pskLeaveButton->setVisible(isGlobalConfigured);
 		ui.eapPasswordLeaveButton->setVisible(isGlobalConfigured);
 		ui.keyPasswordLeaveButton->setVisible(isGlobalConfigured);
-		ui.eapPSKLeaveButton->setVisible(isGlobalConfigured);
 
 		ui.wep0HexCheck->setChecked(setTextAutoHex(ui.wep0Edit, m_Config.get_wep_key0()));
 		ui.wep1HexCheck->setChecked(setTextAutoHex(ui.wep1Edit, m_Config.get_wep_key1()));
@@ -545,7 +538,6 @@ namespace qnut {
 		ui.pskLeaveButton->setChecked(isGlobalConfigured);
 		ui.eapPasswordLeaveButton->setChecked(isGlobalConfigured);
 		ui.keyPasswordLeaveButton->setChecked(isGlobalConfigured);
-		ui.eapPSKLeaveButton->setChecked(isGlobalConfigured);
 
 		ui.wep0LeaveButton->setChecked(isGlobalConfigured);
 		ui.wep1LeaveButton->setChecked(isGlobalConfigured);
@@ -589,8 +581,6 @@ namespace qnut {
 		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_IDENTITY, tr("Identity"));
 		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_ANON_IDENTITY, tr("Anonymous Identity"));
 		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_PASSWD, tr("Password"));
-		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_EAPPSK, tr("EAP Pre Shared Key"));
-		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_NAI, tr("Network Access Identifier"));
 		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_FRAGMENT_SIZE, tr("Fragment Size"));
 		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_PAC_FILE, tr("Proxy Access Control (PAC) File"));
 

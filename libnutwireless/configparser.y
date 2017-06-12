@@ -70,8 +70,6 @@
 %token SUBJECT_MATCH2
 %token ALTSUBJECT_MATCH2
 %token FRAGMENT_SIZE
-%token EAPPSK
-%token NAI
 %token PAC_FILE
 
 
@@ -155,8 +153,6 @@ networkoption: '\n'
 	| SUBJECT_MATCH2 STRVAL {CHECK(set_subject_match2(*$2)); delete $2;}
 	| ALTSUBJECT_MATCH2 STRVAL {CHECK(set_altsubject_match2(*$2)); delete $2;}
 	| FRAGMENT_SIZE INTEGER {CHECK(set_fragment_size($2));}
-	| EAPPSK VALUE {CHECK(set_eappsk(*$2)); delete $2;}
-	| NAI STRVAL {CHECK(set_nai(*$2)); delete $2;}
 	| PAC_FILE STRVAL {CHECK(set_pac_file(*$2)); delete $2;}
 ;
 

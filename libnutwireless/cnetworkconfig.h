@@ -74,8 +74,6 @@ namespace libnutwireless {
 		QString const& get_subject_match2() const { return subject_match2; }
 		QString const& get_altsubject_match2() const { return altsubject_match2; }
 		int get_fragment_size() const { return fragment_size; }
-		QString const& get_eappsk() const { return eappsk; }
-		QString const& get_nai() const { return nai; }
 		QString const& get_pac_file() const { return pac_file; }
 
 		//non config related
@@ -140,8 +138,6 @@ namespace libnutwireless {
 		bool set_subject_match2(QString const& value, bool addQuotes = false);
 		bool set_altsubject_match2(QString const& value, bool addQuotes = false);
 		bool set_fragment_size(int value);
-		bool set_eappsk(QString const& value);
-		bool set_nai(QString const& value, bool addQuotes = false);
 		bool set_pac_file(QString const& value, bool addQuotes = false);
 
 	private:
@@ -208,8 +204,6 @@ namespace libnutwireless {
 		QString subject_match2; //Substring to be matched against the subject of the authentication server certificate.
 		QString altsubject_match2; //Substring to be matched against the alternative subject name of the authentication server certificate.
 		int fragment_size{-1}; //Maximum EAP fragment size in bytes (default 1398);
-		QString eappsk; //16-byte (128-bit, 32 hex digits) pre-shared key in hex format
-		QString nai; //user NAI
 		QString pac_file; //File path for the PAC entries.
 
 		NetworkId netId;
