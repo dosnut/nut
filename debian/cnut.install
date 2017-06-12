@@ -1,1 +1,2 @@
 debian/tmp/usr/bin/cnut
+resources/cnut.1 /usr/share/man/man1/

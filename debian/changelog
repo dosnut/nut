@@ -1,3 +1,13 @@
+network-utilities (0.6.6-2) unstable; urgency=medium
+
+  * nuts: depend on 'lsb-base (>= 3.0-6)' for init script
+  * use debhelper for rules
+  * fix library package names
+  * workaround missing QVector::append in older Qt
+  * drop debug packages
+
+ -- Stefan Bühler <stbuehler@web.de>  Mon, 12 Jun 2017 18:23:12 +0200
+
 network-utilities (0.6.6-1) unstable; urgency=medium
 
   * [nuts] fix use (std::function<>) after free

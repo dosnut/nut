@@ -3,3 +3,4 @@ resources/nuts-dbus.conf /etc/dbus-1/system.d
 nuts/nuts.config /etc/nuts/
 nuts/dispatch /etc/nuts/
 nuts/events/* /etc/nuts/events/
+resources/nuts.1 /usr/share/man/man1/

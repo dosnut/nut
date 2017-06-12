@@ -3,10 +3,17 @@ Section: admin
 Priority: important
 Maintainer: Stefan Bühler <source@stbuehler.de>
 Uploaders: Oliver Groß <neokensuke@freenet.de>, Stefan Bühler <stbuehler@web.de>
-Build-Depends: cdbs (>= 0.4.123), debhelper (>= 9), dh-systemd (>= 1.5),
- qtbase5-dev-tools, qttools5-dev, qttools5-dev-tools,
- bison, flex,
- libnl-3-dev, libnl-genl-3-dev, libnl-route-3-dev,
+Build-Depends:
+ debhelper (>= 9),
+ dh-systemd (>= 1.5),
+ qtbase5-dev-tools,
+ qttools5-dev,
+ qttools5-dev-tools,
+ bison,
+ flex,
+ libnl-3-dev,
+ libnl-genl-3-dev,
+ libnl-route-3-dev,
  libiw-dev,
  cmake (>= 3),
  pkg-config,
@@ -14,7 +21,11 @@ Standards-Version: 3.9.8
 
 Package: nuts
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}, resolvconf
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+ resolvconf,
+ lsb-base (>= 3.0-6),
 Recommends: wpasupplicant
 Description: Network UTility server
  Manages your network cards; the server has an DBus Interface,
@@ -22,62 +33,34 @@ Description: Network UTility server
  .
  This package contains the server.
 
-Package: nuts-dbg
-Section: debug
-Architecture: any
-Depends: ${misc:Depends}, nuts (= ${binary:Version})
-Priority: extra
-Recommends: wpasupplicant
-Description: Network UTility server debug symbols
- Manages your network cards; the server has an DBus Interface,
- which the clients use to control the server.
- .
- This package contains the debug symbols for the server.
-
 Package: qnut
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
 Description: Network UTility Qt client
  Manages your network cards; the server has an DBus Interface,
  which the clients use to control the server.
  .
  This package contains the Qt client.
 
-Package: qnut-dbg
-Section: debug
-Architecture: any
-Depends: ${misc:Depends}, qnut (= ${binary:Version})
-Priority: extra
-Description: Network UTility Qt client debug symbols
- Manages your network cards; the server has an DBus Interface,
- which the clients use to control the server.
- .
- This package contains the debug symbols for the Qt client.
-
 Package: cnut
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
 Description: Network UTility command line client
  Manages your network cards; the server has an DBus Interface,
  which the clients use to control the server.
  .
  This package contains the command line client.
 
-Package: cnut-dbg
-Section: debug
-Architecture: any
-Depends: ${misc:Depends}, cnut (= ${binary:Version})
-Priority: extra
-Description: Network UTility command line client debug symbols
- Manages your network cards; the server has an DBus Interface,
- which the clients use to control the server.
- .
- This package contains the debug symbols for the command line client.
-
-Package: libnutclient0.6.5
+Package: libnutclient0.6.6
 Section: libs
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
 Recommends: nuts (= ${binary:Version})
 Description: Network UTility client library debug symbols
  Manages your network cards; the server has an DBus Interface,
@@ -85,21 +68,12 @@ Description: Network UTility client library debug symbols
  .
  This package contains the client library.
 
-Package: libnutclient0.6.5-dbg
-Section: debug
-Architecture: any
-Depends: ${misc:Depends}, libnutclient0.6.5 (= ${binary:Version})
-Priority: extra
-Description: Network UTility client library
- Manages your network cards; the server has an DBus Interface,
- which the clients use to control the server.
- .
- This package contains the debug symbols for the client library.
-
-Package: libnutclient0.6.5-dev
+Package: libnutclient0.6.6-dev
 Section: libdevel
 Architecture: any
-Depends: ${misc:Depends}, libnutclient0.6.5 (= ${binary:Version})
+Depends:
+ ${misc:Depends},
+ libnutclient0.6.6 (= ${binary:Version}),
 Priority: extra
 Description: Network UTility client library development files
  Manages your network cards; the server has an DBus Interface,
@@ -107,24 +81,15 @@ Description: Network UTility client library development files
  .
  This package contains the development files for the client library.
 
-Package: libnutcommon0.6.5
+Package: libnutcommon0.6.6
 Section: libs
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
 Recommends: nuts (= ${binary:Version})
 Description: Network UTility common library
  Manages your network cards; the server has an DBus Interface,
  which the clients use to control the server.
  .
  This package contains the common library.
-
-Package: libnutcommon0.6.5-dbg
-Section: debug
-Architecture: any
-Depends: ${misc:Depends}, libnutcommon0.6.5 (= ${binary:Version})
-Priority: extra
-Description: Network UTility common library debug symbols
- Manages your network cards; the server has an DBus Interface,
- which the clients use to control the server.
- .
- This package contains the debug symbols for the common library.

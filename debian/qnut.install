@@ -1,3 +1,4 @@
 debian/tmp/usr/bin/qnut
 debian/tmp/usr/share/qnut/*
 debian/tmp/usr/share/applications/qnut.desktop
+resources/qnut.1 /usr/share/man/man1/

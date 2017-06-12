@@ -1,13 +1,10 @@
 #!/usr/bin/make -f
 
-include /usr/share/cdbs/1/rules/debhelper.mk
-include /usr/share/cdbs/1/class/cmake.mk
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/buildflags.mk
 
 CXXFLAGS+=-DQT_NO_DEBUG_OUTPUT
 
-DEB_CMAKE_EXTRA_FLAGS=-DCMAKE_BUILD_TYPE="RelWithDebInfo"
-DEB_CMAKE_EXTRA_FLAGS+=-DCMAKE_SHARED_LINKER_FLAGS="$(LDFLAGS)" -DCMAKE_EXE_LINKER_FLAGS="$(LDFLAGS)"
-
-DEB_INSTALL_MANPAGES_nuts=resources/nuts.1
-DEB_INSTALL_MANPAGES_qnut=resources/qnut.1
-DEB_INSTALL_MANPAGES_cnut=resources/cnut.1
+%:
+	dh $@ --parallel
