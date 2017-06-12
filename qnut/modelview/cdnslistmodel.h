@@ -16,7 +16,7 @@ namespace qnut {
 	 * @brief CDNSListModel provides an item model for an overview of a given the dns server list.
 	 * @author Oliver Groß <z.o.gross@gmx.de>
 	 *
-	 * The class provides all functions for an editalbe model specified in the Qt 4 documentation.
+	 * The class provides all functions for an editable model specified in the Qt 4 documentation.
 	 *
 	 * The model supports displaying and editing of the listed host addresses.
 	 */
@@ -28,18 +28,18 @@ namespace qnut {
 		 * @param dnsList pointer to a list of host addresses (if NULL nothing is displayed)
 		 * @param parent parent object
 		 */
-		CDNSListModel(QList<QHostAddress> * dnsList, QObject * parent = 0);
-		/// @brief Destroyes the object.
-		~CDNSListModel();
+		explicit CDNSListModel(QList<QHostAddress> const& dnsList, QObject* parent = nullptr);
 
-		int rowCount(const QModelIndex & parent = QModelIndex()) const;
-		QVariant data(const QModelIndex & index, int role) const;
-		Qt::ItemFlags flags(const QModelIndex & index) const;
-		bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole);
+		int rowCount(const QModelIndex & parent = QModelIndex()) const override;
+		QVariant data(const QModelIndex & index, int role) const override;
+		Qt::ItemFlags flags(const QModelIndex & index) const override;
+		bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
+		bool removeRows(int position, int rows, const QModelIndex & parent = QModelIndex()) override;
+
 		QModelIndex appendRow(QHostAddress address);
-		bool removeRows(int position, int rows, const QModelIndex & parent = QModelIndex());
+		QList<QHostAddress> const& list() const { return m_DNSList; }
 	private:
-		QList<QHostAddress> * m_DNSList;
+		QList<QHostAddress> m_DNSList;
 	};
 }
 

@@ -1,42 +1,40 @@
 #ifndef LIBNUTWIRELESS_CWEXTHW_H
 #define LIBNUTWIRELESS_CWEXTHW_H
 
+#pragma once
+
 #ifndef NUT_NO_WIRELESS
 #include "cwirelesshw.h"
-#include <QTimerEvent>
-
-
+#include <QBasicTimer>
 
 namespace libnutwireless {
+	class CWextHW final: public CWirelessHW {
+		Q_OBJECT
+	public:
+		explicit CWextHW(QObject* parent, QString ifname);
+		~CWextHW();
+		virtual bool open();
+		virtual void close();
 
-class CWextHW: public CWirelessHW {
-	Q_OBJECT
-	protected:
-		QString m_ifname;
-		int m_wextFd;
+		virtual void scan();
+		virtual QList<ScanResult> getScanResults() const;
+		virtual SignalQuality getSignalQuality() const;
+		virtual void setSignalQualityPollRate(int msec);
+		virtual int getSignalQualityPollRate() const;
 
-		QList<quint32> m_supportedFrequencies;
+		void setScanPollRate(int msec);
+		int getScanPollRate() const;
+		virtual QList<quint32> getSupportedChannels() const;
+		virtual QList<quint32> getSupportedFrequencies() const;
 
-		//Signal Quality Stuff
-		qint32 m_sqPollrate;
-		qint32 m_sqTimeOutCount;
-		qint32 m_sqTimerId;
-		SignalQuality m_sq;
-
-		//Scanning Stuff
-		qint32 m_scPollrate;
-		qint32 m_scTimeOutCount;
-		qint32 m_scTimerId;
-		QList<ScanResult> m_scanResults;
-
-
+	private:
 		/** Raw signal is contains the data from the kernel.
 			For human readable format, it has to be converted to SignalQuality */
-		struct	WextRawSignal {
-			quint8 qual;	/* link quality (%retries, SNR, %missed beacons or better...) */
-			quint8 level;		/* signal level (dBm) */
-			quint8 noise;		/* noise level (dBm) */
-			quint8 updated;	/* Flags to know if updated */
+		struct WextRawSignal {
+			quint8 qual{0};    /* link quality (%retries, SNR, %missed beacons or better...) */
+			quint8 level{0};   /* signal level (dBm) */
+			quint8 noise{0};   /* noise level (dBm) */
+			quint8 updated{0}; /* Flags to know if updated */
 		};
 
 		/**
@@ -44,24 +42,21 @@ class CWextHW: public CWirelessHW {
 			It's converted to WextScan.
 		*/
 		struct WextRawScan {
-			QString ssid;
+			libnutcommon::SSID ssid;
 			libnutcommon::MacAddress bssid;
 			WextRawSignal quality;
 			WextRawSignal maxquality;
 			WextRawSignal avgquality;
-			int hasRange;
-			int we_version_compiled;
-			int freq;
-			GroupCiphers group;
-			PairwiseCiphers pairwise;
-			KeyManagement keyManagement;
-			Protocols protocols;
-			OPMODE opmode;
+			bool hasRange{false};
+			int freq{-1};
+			GroupCiphers group{GCI_UNDEFINED};
+			PairwiseCiphers pairwise{PCI_UNDEFINED};
+			KeyManagement keyManagement{KM_UNDEFINED};
+			Protocols protocols{PROTO_UNDEFINED};
+			OPMODE opmode{OPM_AUTO};
 			QList<qint32> bitrates;
 			//Further information pending...
 		};
-
-	protected:
 
 		void readSignalQuality();
 		void readScanResults();
@@ -71,23 +66,24 @@ class CWextHW: public CWirelessHW {
 
 		void timerEvent(QTimerEvent *event) override;
 
-	public:
-		CWextHW(QObject* parent, QString ifname);
-		~CWextHW();
-		virtual bool open();
-		virtual void close();
+	private:
+		QString m_ifname;
+		int m_wextFd{-1};
 
-		virtual void scan();
-		virtual QList<ScanResult> getScanResults();
-		virtual SignalQuality getSignalQuality();
-		virtual void setSignalQualityPollRate(int msec);
-		virtual int getSignalQualityPollRate();
-		void setScanPollRate(int msec);
-		int getScanPollRate();
-		virtual QList<quint32> getSupportedChannels();
-		virtual QList<quint32> getSupportedFrequencies();
-};
+		QList<quint32> m_supportedFrequencies;
 
+		//Signal Quality Stuff
+		qint32 m_sqPollrate{10000};
+		qint32 m_sqTimeOutCount{0};
+		QBasicTimer m_sqTimer;
+		SignalQuality m_sq;
+
+		//Scanning Stuff
+		qint32 m_scPollrate{1000};
+		qint32 m_scTimeOutCount{10};
+		QBasicTimer m_scTimer;
+		QList<ScanResult> m_scanResults;
+	};
 }
 #endif
-#endif
+#endif /* LIBNUTWIRELESS_CWEXTHW_H */

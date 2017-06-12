@@ -8,7 +8,6 @@ flex_target(CONFIGPARSER_L configparser.l ${CMAKE_CURRENT_BINARY_DIR}/configpars
 add_flex_bison_dependency(CONFIGPARSER_L CONFIGPARSER_Y)
 
 add_library(nutwireless OBJECT
-	base.cpp
 	cconfigparser.cpp
 	cconfigparser.h
 	cnetworkconfig.cpp
@@ -23,12 +22,13 @@ add_library(nutwireless OBJECT
 	cwireless.cpp
 	cwireless.h
 	cwirelesshw.h
-	cws_net.cpp
-	parsers.cpp
 	types.cpp
 	types.h
 	wpa_supplicant.cpp
 	wpa_supplicant.h
+	wpa_supplicant_base.cpp
+	wpa_supplicant_net.cpp
+	wpa_supplicant_parsers.cpp
 	wstypes.cpp
 	wstypes.h
 

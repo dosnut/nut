@@ -10,6 +10,7 @@
 #include <libnutclient/client.h>
 
 #include "modelview/cuidevicemodel.h"
+#include "cdevicesettings.h"
 #include "cuidevice.h"
 #include "common.h"
 
@@ -26,7 +27,9 @@ namespace qnut {
 	using namespace libnutwireless;
 	using namespace libnutcommon;
 
-	CUIDeviceModel::CUIDeviceModel(QObject * parent) : QAbstractItemModel(parent) {
+	CUIDeviceModel::CUIDeviceModel(QWidget* parent)
+	: QAbstractItemModel(parent)
+	, m_DeviceSettings(new CDeviceSettings(parent)) {
 	}
 
 	CUIDeviceModel::~CUIDeviceModel() {
@@ -34,8 +37,8 @@ namespace qnut {
 		m_UIDevices.clear();
 	}
 
-	CUIDevice * CUIDeviceModel::addUIDevice(CDevice * device) {
-		CUIDevice * newDevice = new CUIDevice(device);
+	CUIDevice* CUIDeviceModel::addUIDevice(CDevice* device) {
+		CUIDevice* newDevice = new CUIDevice(device, m_DeviceSettings.get());
 		beginInsertRows(QModelIndex(), m_UIDevices.size(), m_UIDevices.size());
 		m_UIDevices.append(newDevice);
 
@@ -51,14 +54,13 @@ namespace qnut {
 		return newDevice;
 	}
 
-	void CUIDeviceModel::removeUIDevice(CUIDevice * target) {
+	void CUIDeviceModel::removeUIDevice(CUIDevice* target) {
 		int targetPos = m_UIDevices.indexOf(target);
 		removeUIDevice(targetPos);
 	}
 
 	void CUIDeviceModel::removeUIDevice(int position) {
-		if (position < 0 || position >= m_UIDevices.size())
-			return;
+		if (position < 0 || position >= m_UIDevices.size()) return;
 
 		beginRemoveRows(QModelIndex(), position, position);
 		CUIDevice * target = m_UIDevices.takeAt(position);
@@ -74,38 +76,31 @@ namespace qnut {
 		endRemoveRows();
 	}
 
-	int CUIDeviceModel::findUIDevice(CDevice * device) {
-		int targetPos;
-		for (targetPos = 0; targetPos < m_UIDevices.size(); targetPos++) {
+	int CUIDeviceModel::findUIDevice(CDevice* device) {
+		for (int targetPos = 0; targetPos < m_UIDevices.size(); ++targetPos) {
 			if (m_UIDevices[targetPos]->device() == device) {
 				return targetPos;
 			}
 		}
-
 		return -1;
 	}
 
 	void CUIDeviceModel::updateDeviceState() {
-		int targetPos = findUIDevice(qobject_cast<CDevice *>(sender()));
-
-		if (targetPos == -1)
-			return;
+		int targetPos = findUIDevice(qobject_cast<CDevice*>(sender()));
+		if (targetPos == -1) return;
 
 		emit dataChanged(index(targetPos, 0), index(targetPos, OV_MOD_COLCOUNT-1));
 	}
 
 	void CUIDeviceModel::updateSignalQuality() {
-		int targetPos = m_UIDevices.indexOf(qobject_cast<CUIDevice *>(sender()));
-
-		if (targetPos == -1)
-			return;
+		int targetPos = m_UIDevices.indexOf(qobject_cast<CUIDevice*>(sender()));
+		if (targetPos == -1) return;
 
 		emit dataChanged(index(targetPos, OV_MOD_NETWORK), index(targetPos, OV_MOD_NETWORK));
 	}
 
 	Qt::ItemFlags CUIDeviceModel::flags(const QModelIndex & index) const {
-		if (!index.isValid())
-			return 0;
+		if (!index.isValid()) return 0;
 
 		return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 	}
@@ -119,9 +114,9 @@ namespace qnut {
 	}
 
 	QModelIndex CUIDeviceModel::index(int row, int column, const QModelIndex & /*parent*/) const {
-		return (row >= m_UIDevices.size()) ?
-			QModelIndex() :
-			createIndex(row, column, (void *)(m_UIDevices.at(row)));
+		return (row >= m_UIDevices.size())
+			? QModelIndex()
+			: createIndex(row, column, reinterpret_cast<void*>(m_UIDevices.at(row)));
 	}
 
 	bool CUIDeviceModel::hasChildren(const QModelIndex & parent) const {
@@ -133,10 +128,9 @@ namespace qnut {
 	}
 
 	QVariant CUIDeviceModel::data(const QModelIndex & index, int role) const {
-		if (!index.isValid())
-			return QVariant();
+		if (!index.isValid()) return QVariant();
 
-		CDevice * data = static_cast<CUIDevice *>(index.internalPointer())->device();
+		CDevice* data = reinterpret_cast<CUIDevice*>(index.internalPointer())->device();
 
 		if (role == Qt::DisplayRole) {
 			switch (index.column()) {
@@ -146,22 +140,27 @@ namespace qnut {
 				return toStringTr(data->getState());
 			case OV_MOD_TYPE:
 				return toStringTr(data->getType());
-			case OV_MOD_IP: {
-					if (data->getState() != DeviceState::UP)
-						return QString('-');
-					else
-						return activeIP(data);
+			case OV_MOD_IP:
+				if (data->getState() != DeviceState::UP) {
+					return QString('-');
+				}
+				else {
+					return activeIP(data);
 				}
 			case OV_MOD_ENV:
-				if (data->getState() >= DeviceState::UNCONFIGURED)
+				if (data->getState() >= DeviceState::UNCONFIGURED) {
 					return getNameDefault(data->getActiveEnvironment());
-				else
+				}
+				else {
 					return tr("none");
+				}
 			case OV_MOD_NETWORK:
-				if (data->getState() > DeviceState::ACTIVATED)
+				if (data->getState() > DeviceState::ACTIVATED) {
 					return currentNetwork(data);
-				else
+				}
+				else {
 					return QString('-');
+				}
 			default:
 				break;
 			}
@@ -175,8 +174,7 @@ namespace qnut {
 	}
 
 	QVariant CUIDeviceModel::headerData(int section, Qt::Orientation orientation, int role) const {
-		if (role != Qt::DisplayRole)
-			return QVariant();
+		if (role != Qt::DisplayRole) return QVariant();
 
 		if (orientation == Qt::Horizontal) {
 			switch (section) {

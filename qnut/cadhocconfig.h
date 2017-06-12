@@ -22,25 +22,25 @@ namespace qnut {
 	 *
 	 * By accepting the settings made in the UI they are verified (on error the dialog stays open).
 	 */
-	class CAdhocConfig : public CAbstractWifiNetConfigDialog {
+	class CAdhocConfig final : public CAbstractWifiNetConfigDialog {
 		Q_OBJECT
 	public:
 		/**
 		 * @brief Creates the object and initializes the basic user interface.
 		 * @param parent parent widget
 		 */
-		CAdhocConfig(libnutwireless::CWireless * interface, QWidget * parent = 0);
+		explicit CAdhocConfig(libnutwireless::CWireless* interface, QWidget* parent = nullptr);
 	protected:
 		Ui::ahconf ui;
 	protected slots:
 		void setAuthConfig(int type);
 
-		virtual bool applyConfiguration();
+		bool applyConfiguration() override;
 
 		void countPskChars(QString psk);
 		void togglePlainPSK(bool show);
 
-		virtual void populateUi();
+		void populateUi() override;
 	private:
 		void populateErrorCodeEvaluator();
 	};

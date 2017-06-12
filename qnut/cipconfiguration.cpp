@@ -17,7 +17,7 @@
 namespace qnut {
 	using namespace libnutcommon;
 
-	CIPConfiguration::CIPConfiguration(QWidget * parent) : QDialog(parent) {
+	CIPConfiguration::CIPConfiguration(QWidget* parent) : QDialog(parent) {
 		ui.setupUi(this);
 		connect(ui.addButton, &QPushButton::clicked, this, &CIPConfiguration::addDNS);
 		connect(ui.removeButton, &QPushButton::clicked, this, &CIPConfiguration::removeDNS);
@@ -25,33 +25,38 @@ namespace qnut {
 		connect(ui.importButton, &QPushButton::clicked, this, &CIPConfiguration::importConfig);
 		connect(ui.exportButton, &QPushButton::clicked, this, &CIPConfiguration::exportConfig);
 	}
+	CIPConfiguration::~CIPConfiguration() = default;
 
-	bool CIPConfiguration::execute(libnutcommon::IPv4UserConfig & config, bool & remember) {
+	bool CIPConfiguration::execute(libnutcommon::IPv4UserConfig& config, bool& remember) {
 		ui.rememberCheck->setChecked(remember);
 		ui.ipEdit->setText(config.ip.toString());
 		ui.netmaskEdit->setText(config.netmask.toString());
 		ui.gatewayEdit->setText(config.gateway.toString());
 
-		m_DNSList = config.dnsServers;
+		m_dnsListModel.reset(new CDNSListModel(config.dnsServers));
 
-		ui.dnsList->setModel(new CDNSListModel(&m_DNSList));
+		ui.dnsList->setModel(m_dnsListModel.get());
 		ui.dnsList->setItemDelegate(new CIPEditDelegate());
 
 		connect(ui.dnsList->selectionModel(), &QItemSelectionModel::selectionChanged,
 			this, &CIPConfiguration::handleSelectionChanged);
 
-		if (exec() == QDialog::Accepted) {
-			config.ip= QHostAddress(ui.ipEdit->text());
-			config.netmask= QHostAddress(ui.netmaskEdit->text());
-			config.gateway= QHostAddress(ui.gatewayEdit->text());
-			config.dnsServers= m_DNSList;
+		auto const result = exec();
+		ui.dnsList->setModel(nullptr);
+
+		if (result == QDialog::Accepted) {
+			config.ip = QHostAddress(ui.ipEdit->text());
+			config.netmask = QHostAddress(ui.netmaskEdit->text());
+			config.gateway = QHostAddress(ui.gatewayEdit->text());
+			config.dnsServers = m_dnsListModel->list();
 
 			remember = ui.rememberCheck->isChecked();
 
 			return true;
 		}
-		else
+		else {
 			return false;
+		}
 	}
 
 	void CIPConfiguration::addDNS() {
@@ -91,8 +96,7 @@ namespace qnut {
 			for (int k = 0; k < size; ++k) {
 				settings.setArrayIndex(k);
 				QHostAddress dnsServer(settings.value("address").toString());
-				if (!dnsServer.isNull())
-					qobject_cast<CDNSListModel *>(ui.dnsList->model())->appendRow(dnsServer);
+				if (!dnsServer.isNull()) m_dnsListModel->appendRow(dnsServer);
 			}
 			settings.endArray();
 
@@ -109,10 +113,11 @@ namespace qnut {
 			settings.setValue("ip", ui.ipEdit->text());
 			settings.setValue("netmask", ui.netmaskEdit->text());
 			settings.setValue("gateway", ui.gatewayEdit->text());
-			settings.beginWriteArray("dnsServers", m_DNSList.size());
-			for (int k = 0; k < m_DNSList.size(); ++k) {
+			auto dnsList = m_dnsListModel->list();
+			settings.beginWriteArray("dnsServers", dnsList.size());
+			for (int k = 0; k < dnsList.size(); ++k) {
 				settings.setArrayIndex(k);
-				settings.setValue("address", m_DNSList[k].toString());
+				settings.setValue("address", dnsList[k].toString());
 			}
 			settings.endArray();
 

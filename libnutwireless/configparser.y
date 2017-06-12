@@ -1,6 +1,8 @@
 %{
 	#include "cconfigparser.h"
+	#include "wpa_supplicant.h"
 
+	#include <QHostAddress>
 
 	extern int configparserlex (void);
 	extern int line_num;
@@ -68,8 +70,6 @@
 %token SUBJECT_MATCH2
 %token ALTSUBJECT_MATCH2
 %token FRAGMENT_SIZE
-%token EAPPSK
-%token NAI
 %token PAC_FILE
 
 
@@ -102,8 +102,8 @@ network: networkoption
 ;
 
 networkoption: '\n'
-	| SSID STRVAL {CHECK(set_ssid(*$2)); delete $2;}
-	| SSID VALUE {CHECK(set_ssid(*$2)); delete $2;}
+	| SSID STRVAL {CHECK(set_ssid(libnutcommon::SSID::fromRaw(CWpaSupplicant::parseConfigString(*$2)))); delete $2;}
+	| SSID VALUE {CHECK(set_ssid(libnutcommon::SSID::fromRaw(CWpaSupplicant::parseConfigString(*$2)))); delete $2;}
 	| BSSID MACADDR {CHECK(set_bssid(*$2)); delete $2;}
 	| DISABLED  BOOL {CHECK(set_disabled($2));}
 	| ID_STR STRVAL {CHECK(set_id_str(*$2)); delete $2;}
@@ -153,8 +153,6 @@ networkoption: '\n'
 	| SUBJECT_MATCH2 STRVAL {CHECK(set_subject_match2(*$2)); delete $2;}
 	| ALTSUBJECT_MATCH2 STRVAL {CHECK(set_altsubject_match2(*$2)); delete $2;}
 	| FRAGMENT_SIZE INTEGER {CHECK(set_fragment_size($2));}
-	| EAPPSK VALUE {CHECK(set_eappsk(*$2)); delete $2;}
-	| NAI STRVAL {CHECK(set_nai(*$2)); delete $2;}
 	| PAC_FILE STRVAL {CHECK(set_pac_file(*$2)); delete $2;}
 ;
 

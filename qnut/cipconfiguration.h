@@ -14,6 +14,8 @@
 #include "ui_ipconfiguration.h"
 
 namespace qnut {
+	class CDNSListModel;
+
 	/**
 	 * @brief CIPConfiguration provides a dialog to configure an user definable interface.
 	 * @author Oliver Groß <z.o.gross@gmx.de>
@@ -25,26 +27,30 @@ namespace qnut {
 		Q_OBJECT
 	private:
 		Ui::ipconf ui;
-		QList<QHostAddress> m_DNSList;
+		std::unique_ptr<CDNSListModel> m_dnsListModel;
+
 	public:
+		/**
+		 * @brief Creates the object and initializes its user interface.
+		 * @param parent parent widget
+		 */
+		explicit CIPConfiguration(QWidget* parent = nullptr);
+		~CIPConfiguration();
+
 		/**
 		 * @brief Opens the dialog and returns true if changes are made.
 		 * @param config existing user configuration
 		 * @param remember state variable if config is desired to be saved
 		 */
-		bool execute(libnutcommon::IPv4UserConfig & config, bool & remember);
-		/**
-		 * @brief Creates the object and initializes its user interface.
-		 * @param parent parent widget
-		 */
-		CIPConfiguration(QWidget * parent = 0);
+		bool execute(libnutcommon::IPv4UserConfig& config, bool& remember);
+
 	private slots:
 		void addDNS();
 		void removeDNS();
 
 		void importConfig();
 		void exportConfig();
-		void handleSelectionChanged(const QItemSelection & selected);
+		void handleSelectionChanged(const QItemSelection& selected);
 	};
 
 }

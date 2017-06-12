@@ -35,43 +35,43 @@ namespace qnut {
 	class CManagedAPModel : public QAbstractItemModel {
 		Q_OBJECT
 	public:
-		/// @brief Returns the cached list of managed networks.
-		QList<libnutwireless::ShortNetworkInfo> cachedNetworks() const { return m_Networks; }
-
-		int currentID() const { return m_CurrentID; }
-
 		/**
 		 * @brief Creates the object and initializes the model according to the given wpa_supplicant object.
 		 * @param wpaSupplicant pointer to a wpa_supplicant (if NULL nothing is displayed)
 		 * @param parent parent object
 		 */
-		CManagedAPModel(libnutwireless::CWpaSupplicant * wpaSupplicant = NULL, QObject * parent = 0);
-		/// @brief Destroyes the object.
-		~CManagedAPModel();
+		explicit CManagedAPModel(libnutwireless::CWpaSupplicant* wpaSupplicant = nullptr, QObject* parent = nullptr);
 
-		QVariant data(const QModelIndex & index, int role) const;
-		Qt::ItemFlags flags(const QModelIndex & index) const;
-		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-		QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const;
-		QModelIndex parent(const QModelIndex & index) const;
-		bool hasChildren(const QModelIndex & parent = QModelIndex()) const;
-		int rowCount(const QModelIndex & parent = QModelIndex()) const;
-		int columnCount(const QModelIndex & parent = QModelIndex()) const;
+		/// @brief Returns the cached list of managed networks.
+		QList<libnutwireless::ShortNetworkInfo> const& cachedNetworks() const { return m_Networks; }
+
+		libnutwireless::ShortNetworkInfo const* networkInfoByModelIndex(QModelIndex const& index) const;
+		libnutwireless::ShortNetworkInfo const* currentNetworkInfo() const { return m_CurrentNetwork; }
+
+		QVariant data(const QModelIndex & index, int role) const override;
+		Qt::ItemFlags flags(const QModelIndex & index) const override;
+		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+		QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const override;
+		QModelIndex parent(const QModelIndex & index) const override;
+		bool hasChildren(const QModelIndex & parent = QModelIndex()) const override;
+		int rowCount(const QModelIndex & parent = QModelIndex()) const override;
+		int columnCount(const QModelIndex & parent = QModelIndex()) const override;
+
 	public slots:
 		/// @brief Updates the cached data.
 		void updateNetworks();
+
 	private:
-		void setWpaSupplicant(libnutwireless::CWpaSupplicant * wpaSupplicant);
+		libnutwireless::CWpaSupplicant * const m_Supplicant = nullptr;
 		QList<libnutwireless::ShortNetworkInfo> m_Networks;
-		libnutwireless::CWpaSupplicant * m_Supplicant = nullptr;
-		int m_CurrentID = -1;
+		libnutwireless::ShortNetworkInfo* m_CurrentNetwork = nullptr;
 	};
 
 	class CManagedAPProxyModel : public QSortFilterProxyModel {
 		Q_OBJECT
 	public:
-		CManagedAPProxyModel(QObject * parent = 0);
-		bool lessThan(const QModelIndex & left, const QModelIndex & right);
+		explicit CManagedAPProxyModel(QObject* parent = nullptr);
+		bool lessThan(const QModelIndex & left, const QModelIndex & right) const override;
 	};
 }
 #endif

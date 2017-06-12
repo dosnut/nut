@@ -27,13 +27,14 @@
 
 #ifndef NUT_NO_WIRELESS
 #include "cwirelesssettings.h"
+#include <libnutwireless/cwirelesshw.h>
 #endif
 
 namespace qnut {
 	using namespace libnutclient;
 	using namespace libnutcommon;
 
-	QSignalMapper * CUIDevice::m_ShowRequestMapper = NULL;
+	QSignalMapper* CUIDevice::m_ShowRequestMapper = nullptr;
 
 	void CUIDevice::init() {
 		m_ShowRequestMapper = new QSignalMapper(NULL);
@@ -44,7 +45,9 @@ namespace qnut {
 			delete m_ShowRequestMapper;
 	}
 
-	CUIDevice::CUIDevice(CDevice * parentDevice, QWidget * parent) : QWidget(parent) {
+	CUIDevice::CUIDevice(CDevice* parentDevice, CDeviceSettings* deviceSettings, QWidget* parent)
+	: QWidget(parent)
+	, m_DeviceSettings(deviceSettings) {
 		m_Device = parentDevice;
 
 #ifndef NUT_NO_WIRELESS
@@ -79,7 +82,7 @@ namespace qnut {
 		delete m_DeviceMenu;
 	}
 
-	inline void CUIDevice::readCommands(QSettings * settings) {
+	inline void CUIDevice::readCommands(QSettings* settings) {
 		settings->beginGroup(UI_SETTINGS_COMMANDS);
 		m_CommandsEnabled = settings->value(UI_SETTINGS_ENABLED, false).toBool();
 
@@ -100,7 +103,7 @@ namespace qnut {
 		settings->endGroup();
 	}
 
-	inline void CUIDevice::readIPConfigs(QSettings * settings) {
+	inline void CUIDevice::readIPConfigs(QSettings* settings) {
 		settings->beginGroup(UI_SETTINGS_IPCONFIGURATIONS);
 
 		foreach (CEnvironment * i, m_Device->getEnvironments()) {
@@ -454,17 +457,18 @@ namespace qnut {
 	}
 
 	void CUIDevice::openDeviceSettings() {
-		CDeviceSettings dialog(this);
-		dialog.setWindowIcon(QIcon(UI_ICON_CONFIGURE));
-		dialog.setWindowTitle(tr("Device settings for %1").arg(m_Device->getName()));
-		if (dialog.execute(m_CommandList, m_CommandsEnabled, m_ShowTrayIcon, m_NotificationsEnabled, true)) {
-			m_ShowTrayIcon = dialog.trayIconVisibleResult();
-			emit showTrayIconRequested(m_ShowTrayIcon);
-			for (int i = 0; i < 5; i++)
-				m_CommandList[i] = dialog.commandListsResult()[i];
+		/* reuse global device settings dialog if possible to remember view state */
+		std::unique_ptr<CDeviceSettings> localSettings;
+		CDeviceSettings* deviceSettings = m_DeviceSettings;
+		if (!deviceSettings) {
+			localSettings.reset(new CDeviceSettings(this));
+			deviceSettings = localSettings.get();
+		}
 
-			m_CommandsEnabled = dialog.commandsEnabledResult();
-			m_NotificationsEnabled = dialog.notificationEnabledResult();
+		deviceSettings->setWindowIcon(QIcon(UI_ICON_CONFIGURE));
+		deviceSettings->setWindowTitle(tr("Device settings for %1").arg(m_Device->getName()));
+		if (deviceSettings->execute(m_CommandList, m_CommandsEnabled, m_ShowTrayIcon, m_NotificationsEnabled, true)) {
+			emit showTrayIconRequested(m_ShowTrayIcon);
 
 			QSettings settings(UI_STRING_ORGANIZATION, UI_STRING_APPNAME);
 

@@ -62,11 +62,11 @@ namespace qnut {
 		 * @brief Creates the object and initializes some variables.
 		 * @param parent parent widget
 		 */
-		CAbstractWifiNetConfigDialog(libnutwireless::CWireless * interface, QWidget * parent = 0);
+		explicit CAbstractWifiNetConfigDialog(libnutwireless::CWireless* interface, QWidget* parent = nullptr);
 		/// @brief Destroyes the object.
 		virtual ~CAbstractWifiNetConfigDialog();
 	public slots:
-		virtual void accept();
+		void accept() override;
 		virtual void resetUi();
 	protected:
 		static QRegExpValidator * m_HexValidator;

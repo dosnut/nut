@@ -1,31 +1,39 @@
 #ifndef LIBNUTWIRELESS_CWIRELESS_H
 #define LIBNUTWIRELESS_CWIRELESS_H
 
+#pragma once
+
+#include <memory>
+
+#include <QObject>
+
 #ifndef NUT_NO_WIRELESS
-#include "wpa_supplicant.h"
-#include "cwexthw.h"
-#include "cnl80211.h"
-
 namespace libnutwireless {
-	class CWireless: public QObject {
-		Q_OBJECT
-		private:
-			QString m_ifname;
-			CWpaSupplicant * m_wpa_supplicant;
-			CWirelessHW * m_wireless_hw;
+	class CWpaSupplicant;
+	class CWirelessHW;
 
-		public:
-			CWireless(QObject * parent, QString ifname);
-			~CWireless();
-			void open();
-			void close();
-			inline CWpaSupplicant * getWpaSupplicant() { return m_wpa_supplicant; }
-			inline CWirelessHW * getHardware() { return m_wireless_hw; }
-		public slots:
-			void scan();
-		signals:
-			void message(QString);
+	class CWireless final: public QObject {
+		Q_OBJECT
+	public:
+		explicit CWireless(QObject* parent, QString ifname);
+		~CWireless();
+
+		void open();
+		void close();
+		CWpaSupplicant* getWpaSupplicant() { return m_wpa_supplicant.get(); }
+		CWirelessHW* getHardware() { return m_wireless_hw.get(); }
+
+	public slots:
+		void scan();
+
+	signals:
+		void message(QString const& msg);
+
+	private:
+		QString m_ifname;
+		std::unique_ptr<CWpaSupplicant> m_wpa_supplicant;
+		std::unique_ptr<CWirelessHW> m_wireless_hw;
 	};
 }
 #endif
-#endif
+#endif /* LIBNUTWIRELESS_CWIRELESS_H */

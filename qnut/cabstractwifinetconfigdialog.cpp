@@ -153,8 +153,6 @@ namespace qnut {
 			FLAG_PREPARE_OUTPUT(status->failures, errormsg, ENCF_SUBJECT_MATCH2)
 			FLAG_PREPARE_OUTPUT(status->failures, errormsg, ENCF_ALTSUBJECT_MATCH2)
 			FLAG_PREPARE_OUTPUT(status->failures, errormsg, ENCF_FRAGMENT_SIZE)
-			FLAG_PREPARE_OUTPUT(status->failures, errormsg, ENCF_EAPPSK)
-			FLAG_PREPARE_OUTPUT(status->failures, errormsg, ENCF_NAI)
 			FLAG_PREPARE_OUTPUT(status->failures, errormsg, ENCF_PAC_FILE)
 		}
 	}

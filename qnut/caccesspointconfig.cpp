@@ -47,8 +47,6 @@ namespace qnut {
 
 		m_EapErrorCodeEvaluator = new CErrorCodeEvaluator();
 
-		ui.eapPSKEdit->setValidator(m_HexValidator);
-
 		m_EAPPhaseButtons = new QButtonGroup(this);
 		m_EAPPhaseButtons->addButton(ui.phase1Radio, 1);
 		m_EAPPhaseButtons->addButton(ui.phase2Radio, 2);
@@ -89,12 +87,12 @@ namespace qnut {
 		m_FileSelectStringMap.insert(ui.dhFileEdit, newFileEditStrings);
 		connect(ui.dhFileBrowse, &QToolButton::pressed, m_FileEditMapper, static_cast<void(QSignalMapper::*)()>(&QSignalMapper::map));
 
-		m_HexEditMap.insert(ui.ssidHexCheck, ui.ssidEdit);
+		connect(ui.ssidHexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::toggleSSIDHex);
+
 		m_HexEditMap.insert(ui.wep0HexCheck, ui.wep0Edit);
 		m_HexEditMap.insert(ui.wep1HexCheck, ui.wep1Edit);
 		m_HexEditMap.insert(ui.wep2HexCheck, ui.wep2Edit);
 		m_HexEditMap.insert(ui.wep3HexCheck, ui.wep3Edit);
-		connect(ui.ssidHexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::convertLineEditTextToggle);
 		connect(ui.wep0HexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::convertLineEditTextToggle);
 		connect(ui.wep1HexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::convertLineEditTextToggle);
 		connect(ui.wep2HexCheck, &QCheckBox::toggled, this, &CAccessPointConfig::convertLineEditTextToggle);
@@ -130,6 +128,14 @@ namespace qnut {
 		updateWEPState(ui.keyManagementCombo->currentIndex(), value);
 	}
 
+	void CAccessPointConfig::toggleSSIDHex(bool checked) {
+		if (checked) {
+			ui.ssidEdit->setText(libnutcommon::SSID::fromQuotedString(ui.ssidEdit->text()).hexString());
+		} else {
+			ui.ssidEdit->setText(libnutcommon::SSID::fromHexString(ui.ssidEdit->text()).quotedString());
+		}
+	}
+
 	inline void CAccessPointConfig::updateWEPState(int keyMode, int rsnMode) {
 		bool wepDisabled = (keyMode == 1) || ((keyMode > 0) && (keyMode < 3) && (rsnMode > 0));
 
@@ -144,8 +150,12 @@ namespace qnut {
 
 		m_Config.set_mode(false);
 
-		if (!ui.ssidEdit->text().isEmpty())
-			m_Config.set_ssid(ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"');
+		if (!ui.ssidEdit->text().isEmpty()) {
+			m_Config.set_ssid(
+						ui.ssidHexCheck->isChecked()
+						? libnutcommon::SSID::fromHexString(ui.ssidEdit->text())
+						: libnutcommon::SSID::fromQuotedString(ui.ssidEdit->text()));
+		}
 
 		m_Config.set_scan_ssid(toQOOL(ui.scanCheck->isChecked()));
 
@@ -374,7 +384,6 @@ namespace qnut {
 
 		eap_config.set_fragment_size(ui.fragmentSpin->value());
 
-		WRITE_BACK_AUTOQUOTE(eap_config.set_nai, ui.naiEdit->text());
 		WRITE_BACK_AUTOQUOTE(eap_config.set_pac_file, ui.pacEdit->text());
 
 		writeEAPPhaseConfig(eap_config, ui.phase1Radio->isChecked() ? 1 : 2);
@@ -426,11 +435,8 @@ namespace qnut {
 
 		setTextAutoHex(ui.eapPasswordEdit, eap_config.get_password());
 
-		setTextAutoHex(ui.eapPSKEdit, eap_config.get_eappsk());
-
 		ui.fragmentSpin->setValue(eap_config.get_fragment_size());
 
-		setTextAutoHex(ui.naiEdit, eap_config.get_nai());
 		setTextAutoHex(ui.pacEdit, eap_config.get_pac_file());
 
 		readEAPPhaseConfig(eap_config, ui.phase1Radio->isChecked() ? 1 : 2);
@@ -463,7 +469,14 @@ namespace qnut {
 	}
 
 	void CAccessPointConfig::populateUi() {
-		ui.ssidHexCheck->setChecked(setTextAutoHex(ui.ssidEdit, m_Config.get_ssid()));
+		ui.ssidEdit->setText(QString());
+		if (m_Config.get_ssid().needsQuoting()) {
+			ui.ssidHexCheck->setChecked(true);
+			ui.ssidEdit->setText(m_Config.get_ssid().hexString());
+		} else {
+			ui.ssidHexCheck->setChecked(false);
+			ui.ssidEdit->setText(m_Config.get_ssid().quotedString());
+		}
 		ui.scanCheck->setChecked(m_Config.get_scan_ssid());
 
 		ui.anyBSSIDCheck->setChecked(m_Config.get_bssid().zero());
@@ -511,7 +524,6 @@ namespace qnut {
 		ui.pskLeaveButton->setVisible(isGlobalConfigured);
 		ui.eapPasswordLeaveButton->setVisible(isGlobalConfigured);
 		ui.keyPasswordLeaveButton->setVisible(isGlobalConfigured);
-		ui.eapPSKLeaveButton->setVisible(isGlobalConfigured);
 
 		ui.wep0HexCheck->setChecked(setTextAutoHex(ui.wep0Edit, m_Config.get_wep_key0()));
 		ui.wep1HexCheck->setChecked(setTextAutoHex(ui.wep1Edit, m_Config.get_wep_key1()));
@@ -526,7 +538,6 @@ namespace qnut {
 		ui.pskLeaveButton->setChecked(isGlobalConfigured);
 		ui.eapPasswordLeaveButton->setChecked(isGlobalConfigured);
 		ui.keyPasswordLeaveButton->setChecked(isGlobalConfigured);
-		ui.eapPSKLeaveButton->setChecked(isGlobalConfigured);
 
 		ui.wep0LeaveButton->setChecked(isGlobalConfigured);
 		ui.wep1LeaveButton->setChecked(isGlobalConfigured);
@@ -549,14 +560,14 @@ namespace qnut {
 		// register general error codes
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_SSID, "SSID");
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_BSSID, "BSSID");
-		m_ErrorCodeEvaluator->registerErrorCode(NCF_DISABLED, ui.autoEnableCheck->text());
-		m_ErrorCodeEvaluator->registerErrorCode(NCF_SCAN_SSID, ui.scanCheck->text());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_DISABLED, tr("Enable automatic selection"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_SCAN_SSID, tr("Enable SSID scanning (slower but needed if SSID is hidden)"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_PROTO, tr("WPA2 mode"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_KEYMGMT, tr("Key Management"));
-		m_ErrorCodeEvaluator->registerErrorCode(NCF_PAIRWISE, ui.prwCipGroup->title());
-		m_ErrorCodeEvaluator->registerErrorCode(NCF_GROUP, ui.grpCipGroup->title());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_PAIRWISE, tr("Pairwise algorithm (pairwise cipher)"));
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_GROUP, tr("General algorithm (group cipher)"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_PSK, tr("Pre Shared Key"));
-		m_ErrorCodeEvaluator->registerErrorCode(NCF_PROA_KEY_CACHING, ui.proativeCheck->text());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_PROA_KEY_CACHING, tr("Proactive Key Caching (for PMKSA)"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY0, tr("WEP key 0"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY1, tr("WEP key 1"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY2, tr("WEP key 2"));
@@ -566,12 +577,10 @@ namespace qnut {
 		// not needed : NCF_FREQ NCF_MODE
 
 		// register eap error codes
-		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_EAP, ui.eapMethodGroup->title());
+		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_EAP, tr("EAP method"));
 		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_IDENTITY, tr("Identity"));
 		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_ANON_IDENTITY, tr("Anonymous Identity"));
 		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_PASSWD, tr("Password"));
-		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_EAPPSK, tr("EAP Pre Shared Key"));
-		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_NAI, tr("Network Access Identifier"));
 		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_FRAGMENT_SIZE, tr("Fragment Size"));
 		m_EapErrorCodeEvaluator->registerErrorCode(ENCF_PAC_FILE, tr("Proxy Access Control (PAC) File"));
 

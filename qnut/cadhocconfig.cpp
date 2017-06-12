@@ -10,14 +10,18 @@
 
 #include <QMessageBox>
 #include <libnutwireless/cwireless.h>
+#include <libnutwireless/cwirelesshw.h>
 #include <libnutwireless/conversion.h>
+#include <libnutwireless/wpa_supplicant.h>
+#include <libnutwireless/wstypes.h>
 
 #include "utils/cerrorcodeevaluator.h"
 
 namespace qnut {
 	using namespace libnutwireless;
 
-	CAdhocConfig::CAdhocConfig(CWireless * supplicant, QWidget * parent) : CAbstractWifiNetConfigDialog(supplicant, parent) {
+	CAdhocConfig::CAdhocConfig(CWireless* supplicant, QWidget* parent)
+	: CAbstractWifiNetConfigDialog(supplicant, parent) {
 		ui.setupUi(this);
 
 		quint32 chan;
@@ -59,8 +63,10 @@ namespace qnut {
 	bool CAdhocConfig::applyConfiguration() {
 		NetconfigStatus status;
 
-		if (!ui.ssidEdit->text().isEmpty())
-			m_Config.set_ssid(ui.ssidHexCheck->isChecked() ? ui.ssidEdit->text() : '\"' + ui.ssidEdit->text() + '\"');
+		m_Config.set_ssid(
+					ui.ssidHexCheck->isChecked()
+					? libnutcommon::SSID::fromHexString(ui.ssidEdit->text())
+					: libnutcommon::SSID::fromQuotedString(ui.ssidEdit->text()));
 
 		int selectedChan = ui.channelCombo->itemData(ui.channelCombo->currentIndex(), Qt::UserRole).toInt();
 		m_Config.set_frequency(channelToFrequency(selectedChan));
@@ -186,7 +192,13 @@ namespace qnut {
 	}
 
 	void CAdhocConfig::populateUi() {
-		ui.ssidHexCheck->setChecked(setTextAutoHex(ui.ssidEdit, m_Config.get_ssid()));
+		if (m_Config.get_ssid().needsQuoting()) {
+			ui.ssidHexCheck->setChecked(true);
+			ui.ssidEdit->setText(m_Config.get_ssid().hexString());
+		} else {
+			ui.ssidHexCheck->setChecked(false);
+			ui.ssidEdit->setText(m_Config.get_ssid().quotedString());
+		}
 
 		if (m_Config.get_key_mgmt() & KM_WPA_NONE)
 			ui.keyManagementCombo->setCurrentIndex(1);
@@ -240,7 +252,7 @@ namespace qnut {
 		// register general error codes
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_SSID, "SSID");
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_KEYMGMT, tr("Key Management"));
-		m_ErrorCodeEvaluator->registerErrorCode(NCF_GROUP, ui.grpCipGroup->title());
+		m_ErrorCodeEvaluator->registerErrorCode(NCF_GROUP, tr("General algorithm (group cipher)"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_PSK, tr("Pre Shared Key"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY0, tr("WEP key 0"));
 		m_ErrorCodeEvaluator->registerErrorCode(NCF_WEP_KEY1, tr("WEP key 1"));

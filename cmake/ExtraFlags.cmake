@@ -10,7 +10,7 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUA
 endif()
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	set(_default_cxx_flags "-Wall -Wno-long-long -Wextra -Wno-unused-parameter -pedantic")
+	set(_default_cxx_flags "-Wall -Wno-long-long -Wextra -Wno-unused-parameter -Wmaybe-uninitialized -pedantic")
 	set(_default_linker_flags "-Wl,--as-needed")
 endif()
 
