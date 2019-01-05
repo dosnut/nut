@@ -34,8 +34,9 @@ else()
 	add_definitions(-DNUT_NO_WIRELESS)
 endif()
 
-set(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output directory for libraries")
-set(CMAKE_INSTALL_INCLUDEDIR include CACHE PATH "Output directory for includes")
+# cmake converts relative PATHs to absolute ones, so use STRING instead
+set(CMAKE_INSTALL_LIBDIR lib CACHE STRING "Output directory for libraries")
+set(CMAKE_INSTALL_INCLUDEDIR include CACHE STRING "Output directory for includes")
 
 include_directories(${CMAKE_SOURCE_DIR})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
