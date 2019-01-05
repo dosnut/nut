@@ -8,3 +8,17 @@ CXXFLAGS+=-DQT_NO_DEBUG_OUTPUT
 
 %:
 	dh $@ --parallel
+
+clean:
+	cur_ver=`dpkg-parsechangelog -S Version | sed -e 's/-.*//'`; \
+	ctrl_ver=`sed -ne 's/Package: libnutclient//;tp;d;:p p;q' debian/control`; \
+	if [ "$${cur_ver}" != "$${ctrl_ver}" ]; then echo >&2 "You need to regenerate debian/control: debian/rules update"; exit 1; fi
+	dh clean --parallel
+
+update:
+	cur_ver=`dpkg-parsechangelog -S Version | sed -e 's/-.*//'`; \
+	sed -e "s/@VERSION@/$${cur_ver}/g" < debian/control.in > debian/control; \
+	rm -f debian/lib*.install; \
+	ln -s libnutclient.install.in debian/libnutclient$${cur_ver}.install; \
+	ln -s libnutclient-dev.install.in debian/libnutclient$${cur_ver}-dev.install; \
+	ln -s libnutcommon.install.in debian/libnutcommon$${cur_ver}.install

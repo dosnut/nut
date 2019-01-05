@@ -55,7 +55,7 @@ Description: Network UTility command line client
  .
  This package contains the command line client.
 
-Package: libnutclient0.6.7
+Package: libnutclient@VERSION@
 Section: libs
 Architecture: any
 Depends:
@@ -68,12 +68,12 @@ Description: Network UTility client library debug symbols
  .
  This package contains the client library.
 
-Package: libnutclient0.6.7-dev
+Package: libnutclient@VERSION@-dev
 Section: libdevel
 Architecture: any
 Depends:
  ${misc:Depends},
- libnutclient0.6.7 (= ${binary:Version}),
+ libnutclient@VERSION@ (= ${binary:Version}),
 Priority: extra
 Description: Network UTility client library development files
  Manages your network cards; the server has an DBus Interface,
@@ -81,7 +81,7 @@ Description: Network UTility client library development files
  .
  This package contains the development files for the client library.
 
-Package: libnutcommon0.6.7
+Package: libnutcommon@VERSION@
 Section: libs
 Architecture: any
 Depends:
