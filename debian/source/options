@@ -1,1 +1,1 @@
-extend-diff-ignore = "(^|/)(CMakeLists.txt.user)$"
+extend-diff-ignore = "(^|/)(CMakeLists.txt.user|.vscode)(/|$)"
