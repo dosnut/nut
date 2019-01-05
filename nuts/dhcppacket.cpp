@@ -173,34 +173,72 @@ namespace nuts {
 	}
 
 	DHCPPacket* DHCPPacket::parseRaw(QByteArray const& buf) {
-		// Packet big enough?
-		if (buf.size() < (int) (sizeof(struct dhcp_msg) + sizeof(struct udp_dhcp_packet)))
+		// Packet big enough for IPv4?
+		if (buf.size() < (int) (sizeof(struct iphdr))) {
+			log << "Received packet too small for IPv4 header\n";
 			return nullptr;
-		struct udp_dhcp_packet const* h = reinterpret_cast<struct udp_dhcp_packet const*>(buf.constData());
-		struct dhcp_msg const* msg = reinterpret_cast<struct dhcp_msg const*>(sizeof(struct udp_dhcp_packet) + buf.constData());
+		}
+
+		struct iphdr const* iph = reinterpret_cast<struct iphdr const*>(buf.constData());
+		size_t iphdr_len = ((size_t)iph->ihl) << 2;
 		// check ip version
-		if (h->ip.ihl != (sizeof(h->ip) >> 2) || h->ip.version != IPVERSION)
+		if (iphdr_len < (sizeof(*iph)) || iph->version != IPVERSION) {
+			log << "Received packet too small has invalid IPv4 header (wrong version/header length)\n";
 			return nullptr;
-		// udp?
-		if (h->ip.protocol != IPPROTO_UDP)
+		}
+		// udp? (silent)
+		if (iph->protocol != IPPROTO_UDP) {
 			return nullptr;
-		// correct source/dest port?
-		if (h->udp.source != htons(67) || h->udp.dest != htons(68))
+		}
+		// ip total len must not exceed buffer
+		size_t const ip_total_len = (uint16_t) ntohs(iph->tot_len);
+		if ((int)ip_total_len > buf.size()) {
+			log << "Received IPv4 packet too small (for total length)\n";
 			return nullptr;
+		}
+
+		size_t const udp_payload_offset = iphdr_len + sizeof(struct udphdr);
+
+		// Packet big enough?
+		if (udp_payload_offset > ip_total_len) {
+			log << "Received IPv4 UDP packet too small for UDP header\n";
+			return nullptr;
+		}
+
+		struct udphdr const *udph = reinterpret_cast<struct udphdr const*>(buf.constData() + iphdr_len);
+
+		// correct source/dest port? (silent)
+		if (udph->source != htons(67) || udph->dest != htons(68)) {
+			return nullptr;
+		}
+
+		size_t const udp_total_len = (uint16_t)ntohs(udph->len);
+		if (udp_total_len < sizeof(*udph)) {
+			log << "Received UDP packet has invalid length (too small for UDP header)\n";
+			return nullptr;
+		}
+
+		size_t const udp_len = udp_total_len - sizeof(*udph);
+		// udp len + ip+udp header must not exceed ip total len
+		if (udp_payload_offset + udp_len > ip_total_len) {
+			log << "Received DHCP packet has UDP payload larger then IPv4 data\n";
+			return nullptr;
+		}
+		// Packet big enough?
+		if (sizeof(struct dhcp_msg) > udp_len) {
+			log << "Received DHCP packet too small for DHCP payload\n";
+			return nullptr;
+		}
+		struct dhcp_msg const* msg = reinterpret_cast<struct dhcp_msg const*>(buf.constData() + udp_payload_offset);
 		// check "magic" header values
 		if (msg->op != bootp_op::REPLY || msg->htype != ARPHRD_ETHER
-		   || msg->hlen != ETH_ALEN || msg->cookie != htonl(DHCP_MAGIC))
+		        || msg->hlen != ETH_ALEN || msg->cookie != htonl(DHCP_MAGIC)) {
+			log << "Received DHCP packet has invalid DHCP magic values\n";
 			return nullptr;
-		// check size headers:
-		// ip total len must not exceed buffer
-		if (ntohs(h->ip.tot_len) > buf.size())
-			return nullptr;
-		// udp len + ip header must not exceed ip total len
-		if (ntohs(h->udp.len) + (h->ip.ihl << 2) > h->ip.tot_len)
-			return nullptr;
-		// ignore checksum and trailing data!
-		QDataStream in(buf.mid(h->ip.ihl << 2, ntohs(h->udp.len)));
-		return new DHCPPacket(in, h->ip.saddr);
+		}
+
+		QDataStream in(buf.mid(udp_payload_offset, udp_len));
+		return new DHCPPacket(in, iph->saddr);
 	}
 
 	DHCPPacket* DHCPPacket::parseData(QByteArray const& buf, struct sockaddr_in const& from) {
