@@ -218,6 +218,7 @@ namespace {
 						while (';' == peek()) pop(); /* optional */
 						return;
 					}
+					break;
 				case '}':
 					--nested;
 					break;

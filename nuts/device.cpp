@@ -890,8 +890,8 @@ namespace nuts {
 				return;
 			case dhcp_state::INIT_START:
 				m_dhcp_retry = 0;
-				// fall through:
-				// dhcpstate = dhcp_state::INIT;
+				m_dhcpstate = dhcp_state::INIT;
+				break;
 			case dhcp_state::INIT:
 				checkFallbackRunning();
 				dhcp_send_discover();
@@ -916,6 +916,7 @@ namespace nuts {
 					}
 					return;
 				}
+				break;
 			case dhcp_state::REQUESTING:
 				if (source) {
 					switch (source->getMessageType()) {

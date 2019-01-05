@@ -35,6 +35,7 @@ namespace qnut {
 			case DeviceState::DEACTIVATED:    return QString(UI_ICON_ETH_DEACTIVATED);
 			default:                break;
 			}
+			break;
 		case DeviceType::AIR:
 			switch (state) {
 			case DeviceState::UP:             return QString(UI_ICON_AIR_UP);
@@ -44,6 +45,7 @@ namespace qnut {
 			case DeviceState::DEACTIVATED:    return QString(UI_ICON_AIR_DEACTIVATED);
 			default:                break;
 			}
+			break;
 		case DeviceType::BRIDGE:
 			switch (state) {
 			case DeviceState::UP:             return QString(UI_ICON_BRIDGE_UP);
@@ -53,6 +55,7 @@ namespace qnut {
 			case DeviceState::DEACTIVATED:    return QString(UI_ICON_BRIDGE_DEACTIVATED);
 			default:                break;
 			}
+			break;
 		default:
 			break;
 		}
@@ -114,6 +117,7 @@ namespace qnut {
 				return result;
 			}
 #endif
+		[[gnu::fallthrough]];
 		default:
 			return QObject::tr("unknown Network");
 		}
