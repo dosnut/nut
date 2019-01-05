@@ -1,4 +1,5 @@
 debian/tmp/usr/include/libnutclient/*
 debian/tmp/usr/include/libnutcommon/*
 debian/tmp/usr/include/libnutwireless/*
-debian/tmp/usr/lib/libnutclient.so
+debian/tmp/usr/lib/*/libnutclient.so
+debian/tmp/usr/lib/*/libnutcommon.so
