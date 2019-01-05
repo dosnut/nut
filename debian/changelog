@@ -1,3 +1,20 @@
+network-utilities (0.6.7-1) UNRELEASED; urgency=medium
+
+  * [common] some compatibility with older Qt
+  * [nuts] man page is actually in section 8
+  * [libnutwireless] fix segfault when reading scan data failed
+  * [cmake] skip automoc for generated parsers
+  * fix/annotate various switch fall throughs
+  * [libnutwireless] use _DEFAULT_SOURCE instead of _BSD_SOURCE
+  * [qnut] explicitly include QButtonGroup
+  * [nuts] dhcp: ignore trailing bytes
+  * [cmake] fix broken library install paths
+  * update .gitignore file
+  * [nuts] dhcp parsing: fix again and make more robust, add logging
+  * Release 0.6.7
+
+ -- Stefan Bühler <stbuehler@web.de>  Sat, 05 Jan 2019 14:35:50 +0100
+
 network-utilities (0.6.6-2) unstable; urgency=medium
 
   * nuts: depend on 'lsb-base (>= 3.0-6)' for init script
