@@ -8,6 +8,7 @@
 #ifndef NUT_NO_WIRELESS
 #include "caccesspointconfig.h"
 
+#include <QButtonGroup>
 #include <QFileDialog>
 #include <QToolTip>
 #include <QMessageBox>
