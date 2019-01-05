@@ -175,28 +175,31 @@ namespace nuts {
 	DHCPPacket* DHCPPacket::parseRaw(QByteArray const& buf) {
 		// Packet big enough?
 		if (buf.size() < (int) (sizeof(struct dhcp_msg) + sizeof(struct udp_dhcp_packet)))
-			return 0;
+			return nullptr;
 		struct udp_dhcp_packet const* h = reinterpret_cast<struct udp_dhcp_packet const*>(buf.constData());
 		struct dhcp_msg const* msg = reinterpret_cast<struct dhcp_msg const*>(sizeof(struct udp_dhcp_packet) + buf.constData());
 		// check ip version
 		if (h->ip.ihl != (sizeof(h->ip) >> 2) || h->ip.version != IPVERSION)
-			return 0;
+			return nullptr;
 		// udp?
 		if (h->ip.protocol != IPPROTO_UDP)
-			return 0;
+			return nullptr;
 		// correct source/dest port?
 		if (h->udp.source != htons(67) || h->udp.dest != htons(68))
-			return 0;
+			return nullptr;
 		// check "magic" header values
 		if (msg->op != bootp_op::REPLY || msg->htype != ARPHRD_ETHER
 		   || msg->hlen != ETH_ALEN || msg->cookie != htonl(DHCP_MAGIC))
-			return 0;
-		// check size headers
-		if (h->ip.tot_len != htons(buf.size()) || h->udp.len != htons(buf.size() - sizeof(h->ip)))
-			return 0;
-		// ignore checksum!
-		QDataStream in(buf);
-		in.skipRawData(sizeof(*h));
+			return nullptr;
+		// check size headers:
+		// ip total len must not exceed buffer
+		if (ntohs(h->ip.tot_len) > buf.size())
+			return nullptr;
+		// udp len + ip header must not exceed ip total len
+		if (ntohs(h->udp.len) + (h->ip.ihl << 2) > h->ip.tot_len)
+			return nullptr;
+		// ignore checksum and trailing data!
+		QDataStream in(buf.mid(h->ip.ihl << 2, ntohs(h->udp.len)));
 		return new DHCPPacket(in, h->ip.saddr);
 	}
 
