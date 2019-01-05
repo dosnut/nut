@@ -5,6 +5,7 @@
 #include "types.h"
 
 #include <QObject>
+#include <QStringList>
 
 namespace libnutwireless {
 	Protocols toProtocols(QString const& str) {

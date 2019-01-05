@@ -7,6 +7,8 @@ bison_target(CONFIGPARSER_Y configparser.y ${CMAKE_CURRENT_BINARY_DIR}/configpar
 flex_target(CONFIGPARSER_L configparser.l ${CMAKE_CURRENT_BINARY_DIR}/configparser_lex.cpp COMPILE_FLAGS "-Pconfigparser")
 add_flex_bison_dependency(CONFIGPARSER_L CONFIGPARSER_Y)
 
+set_property(SOURCE ${FLEX_CONFIGPARSER_L_OUTPUTS} ${BISON_CONFIGPARSER_Y_OUTPUTS} PROPERTY SKIP_AUTOMOC ON)
+
 add_library(nutwireless OBJECT
 	cconfigparser.cpp
 	cconfigparser.h

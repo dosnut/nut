@@ -81,7 +81,7 @@ namespace qnut {
 
 		switch (index.column()) {
 			case ENVDET_MOD_STATEMENT:
-				if (m_SelectConfig.filters[index.internalId()].invert)
+				if (m_SelectConfig.filters[index.internalId()].invert) {
 					switch (m_SelectConfig.filters[index.internalId()].selType) {
 					case SelectType::USER:
 						return tr("not by user");
@@ -96,7 +96,7 @@ namespace qnut {
 					default:
 						break;
 					}
-				else
+				} else {
 					switch (m_SelectConfig.filters[index.internalId()].selType) {
 					case SelectType::USER:
 						return tr("by user");
@@ -111,6 +111,8 @@ namespace qnut {
 					default:
 						break;
 					}
+				}
+				break;
 			case ENVDET_MOD_VALUE:
 				switch (m_SelectConfig.filters[index.internalId()].selType) {
 				case SelectType::ARP:

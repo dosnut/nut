@@ -477,8 +477,6 @@ namespace libnutwireless {
 		}
 		struct iwreq wrq;
 		memset(&wrq,0,sizeof(struct iwreq));
-		unsigned char * buffer = NULL;		/* Results */
-		int buflen = IW_SCAN_MAX_DATA; /* Min for compat WE<17 */
 		struct iw_range range;
 		memset(&range,0,sizeof(struct iw_range));
 		QList<WextRawScan> res = QList<WextRawScan>();
@@ -556,24 +554,15 @@ namespace libnutwireless {
 			qWarning() << tr("Range information are not available");
 		}
 
-		unsigned char * newbuf;
-		for (int i=0; i <= 16; i++) { //realloc (don't do this forever)
-			//Allocate newbuffer
-			newbuf = (uchar*) realloc(buffer, buflen);
-			if(newbuf == NULL) {
-				if (buffer) {
-					free(buffer);
-					buffer = NULL;
-				}
-				qDebug() << "Allocating buffer for Wext failed";
-				return;
-			}
-			buffer = newbuf;
-
+		std::vector<char> buffer;
+		buffer.resize(IW_SCAN_MAX_DATA); /* Min for compat WE<17 */
+		size_t const MAX_BUF_SIZE = 65535; // length is a uint16
+		static_assert(2 == sizeof(wrq.u.data.length), "wrq length should be 16 bit");
+		while (buffer.size() < MAX_BUF_SIZE) {
 			//Set Request variables:
-			wrq.u.data.pointer = buffer;
+			wrq.u.data.pointer = buffer.data();
 			wrq.u.data.flags = 0;
-			wrq.u.data.length = buflen;
+			wrq.u.data.length = buffer.size();
 
 			//Get the data:
 			if (iw_get_ext(m_wextFd, m_ifname.toLatin1().data(), SIOCGIWSCAN, &wrq) < 0) {
@@ -581,11 +570,11 @@ namespace libnutwireless {
 				if((errno == E2BIG) && (range.we_version_compiled > 16)) {
 
 					//check if driver gives any hints about scan length:
-					if (wrq.u.data.length > buflen) {
-						buflen = wrq.u.data.length;
+					if (wrq.u.data.length > 2*buffer.size()) {
+						buffer.resize(wrq.u.data.length); // 16-bit length can't overflow MAX_BUF_SIZE
 					}
-					else { //If not, double the length
-						buflen *= 2;
+					else { //If not, double the length, but don't go larger than MAX_BUF_SIZE
+						buffer.resize(std::min(MAX_BUF_SIZE, buffer.size()*2));
 					}
 					//Start from the beginning:
 					qDebug() << "Buffer was too small";
@@ -599,19 +588,18 @@ namespace libnutwireless {
 				}
 
 				//Bad error occured
-				if (buffer) {
-					free(buffer);
-					buffer = NULL;
-				}
+				buffer.clear();
 				qWarning() << tr("(%1) Failed to read scan data : %2").arg(m_ifname, QString(strerror(errno)));
 			}
 			else { //Results are there
+				// truncate to actual results
+				buffer.resize(wrq.u.data.length);
 				break;
 			}
 		}
 
 		//Now read the data:
-		if (wrq.u.data.length) {
+		if (!buffer.empty()) {
 			WextRawScan singleres = basicres;
 
 			struct iw_event iwe;
@@ -623,7 +611,7 @@ namespace libnutwireless {
 			//Init event stream
 			// char buffer2[128];
 			libnutcommon::MacAddress tmpMac;
-			iw_init_event_stream(&stream, (char *) buffer, wrq.u.data.length);
+			iw_init_event_stream(&stream, buffer.data(), buffer.size());
 			do {
 				/* Extract an event and parse it*/
 				memset(&iwe,0,sizeof(struct iw_event)); //valgrind complains about it?
@@ -759,21 +747,12 @@ namespace libnutwireless {
 
 			} while(ret > 0);
 
-			//Delete buffer
-			if (buffer) {
-				free(buffer);
-				buffer = NULL;
-			}
 			//We have the data, now construct complete ScanResult
 			setScanResults(res);
 		}
 		else {
 			qWarning() << tr("No Scanresults available");
 			setScanResults(QList<WextRawScan>());
-		}
-		if (buffer) {
-			free(buffer);
-			buffer = NULL;
 		}
 	}
 

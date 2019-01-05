@@ -4,7 +4,7 @@ cmake_policy(SET CMP0022 NEW)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 PROJECT(network-utiltities
-	VERSION 0.6.6
+	VERSION 0.6.7
 	LANGUAGES C CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${network-utiltities_BINARY_DIR})
@@ -34,8 +34,9 @@ else()
 	add_definitions(-DNUT_NO_WIRELESS)
 endif()
 
-set(CMAKE_INSTALL_LIBDIR lib CACHE PATH "Output directory for libraries")
-set(CMAKE_INSTALL_INCLUDEDIR include CACHE PATH "Output directory for includes")
+# cmake converts relative PATHs to absolute ones, so use STRING instead
+set(CMAKE_INSTALL_LIBDIR lib CACHE STRING "Output directory for libraries")
+set(CMAKE_INSTALL_INCLUDEDIR include CACHE STRING "Output directory for includes")
 
 include_directories(${CMAKE_SOURCE_DIR})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
