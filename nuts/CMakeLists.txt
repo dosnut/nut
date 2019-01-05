@@ -1,9 +1,10 @@
 project(nuts)
 
-find_package(BISON)
 find_package(FLEX)
 
 flex_target(CONFIGPARSER_L configparser.l ${CMAKE_CURRENT_BINARY_DIR}/configparser_lex.cpp COMPILE_FLAGS "-Pconfigparser")
+
+set_property(SOURCE ${FLEX_CONFIGPARSER_L_OUTPUTS} PROPERTY SKIP_AUTOMOC ON)
 
 add_executable(${PROJECT_NAME}
 	arp.cpp
@@ -37,7 +38,6 @@ add_executable(${PROJECT_NAME}
 	configparser.l
 
 	${FLEX_CONFIGPARSER_L_OUTPUTS}
-	${BISON_CONFIGPARSER_Y_OUTPUTS}
 )
 
 target_link_libraries(${PROJECT_NAME}
