@@ -5,7 +5,7 @@ Maintainer: Stefan Bühler <source@stbuehler.de>
 Uploaders: Oliver Groß <neokensuke@freenet.de>, Stefan Bühler <stbuehler@web.de>
 Build-Depends:
  debhelper (>= 9),
- dh-systemd (>= 1.5),
+ debhelper (>= 9.20160709) | dh-systemd (>= 1.5),
  qtbase5-dev-tools,
  qttools5-dev,
  qttools5-dev-tools,
@@ -62,6 +62,7 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Recommends: nuts (= ${binary:Version})
+Priority: optional
 Description: Network UTility client library debug symbols
  Manages your network cards; the server has an DBus Interface,
  which the clients use to control the server.
@@ -74,7 +75,7 @@ Architecture: any
 Depends:
  ${misc:Depends},
  libnutclient@VERSION@ (= ${binary:Version}),
-Priority: extra
+Priority: optional
 Description: Network UTility client library development files
  Manages your network cards; the server has an DBus Interface,
  which the clients use to control the server.
@@ -88,6 +89,7 @@ Depends:
  ${misc:Depends},
  ${shlibs:Depends},
 Recommends: nuts (= ${binary:Version})
+Priority: optional
 Description: Network UTility common library
  Manages your network cards; the server has an DBus Interface,
  which the clients use to control the server.
