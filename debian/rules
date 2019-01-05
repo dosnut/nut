@@ -9,6 +9,10 @@ CXXFLAGS+=-DQT_NO_DEBUG_OUTPUT
 %:
 	dh $@ --parallel
 
+override_dh_auto_configure:
+	# use DEB_HOST_MULTIARCH with debhelper <= 10 too for reliable paths in lib*.install
+	dh_auto_configure --buildsystem=cmake -- -DCMAKE_INSTALL_LIBDIR=lib/$(DEB_HOST_MULTIARCH)
+
 clean:
 	cur_ver=`dpkg-parsechangelog -S Version | sed -e 's/-.*//'`; \
 	ctrl_ver=`sed -ne 's/Package: libnutclient//;tp;d;:p p;q' debian/control`; \

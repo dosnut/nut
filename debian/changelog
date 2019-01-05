@@ -1,4 +1,10 @@
-network-utilities (0.6.7-1) UNRELEASED; urgency=medium
+network-utilities (0.6.7-2) unstable; urgency=medium
+
+  * fix lib path in cmake configure
+
+ -- Stefan Bühler <stbuehler@web.de>  Sat, 05 Jan 2019 16:45:05 +0100
+
+network-utilities (0.6.7-1) unstable; urgency=medium
 
   * [common] some compatibility with older Qt
   * [nuts] man page is actually in section 8
