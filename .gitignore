@@ -5,3 +5,5 @@
 build
 *.kdev4
 CMakeLists.txt.user
+.pc
+.vscode
