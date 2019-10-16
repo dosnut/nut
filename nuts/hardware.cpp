@@ -190,6 +190,7 @@ namespace nuts {
 			rtnl_route_nh_set_gateway(nh.get(), toNLAddrIPv4(gateway).get());
 
 			rtnl_route_ptr route{rtnl_route_alloc()};
+			rtnl_route_set_flags(route.get(), RTNH_F_ONLINK);
 			rtnl_route_set_family(route.get(), AF_INET);
 			rtnl_route_set_dst(route.get(), NLAddrDefaultIPv4().get());
 			rtnl_route_set_protocol(route.get(), RTPROT_BOOT);
